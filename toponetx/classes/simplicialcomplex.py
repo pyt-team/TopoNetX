@@ -1,11 +1,8 @@
-# --------------------------------------------------------
-# Constructing (co)boundary matrices, Hodge Laplacians, higher order
-# (co)adjacency matrices for Simplicial Complexes
-# Normalization of these matrices are also implemented.
-#
-# Date: Dec 2021
-# --------------------------------------------------------
+"""
 
+Simplicial Complex Class
+
+"""
 import sys
 from functools import lru_cache
 from itertools import combinations

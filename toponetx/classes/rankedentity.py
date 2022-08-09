@@ -9,7 +9,7 @@ import numpy as np
 from collections import defaultdict, OrderedDict
 #from collections.abc import Iterable
 from hypernetx.classes.entity import Entity
-from hypernetx import HyperNetXError
+from toponetx import TopoNetXError
 
 
 __all__ = ["RankedEntity","RankedEntitySet"]
@@ -69,7 +69,7 @@ class RankedEntity(Entity):
             self._all_ranks=self._all_ranks.union(rankedentity._all_ranks)
         else:
             if rankedentity is not None:
-                raise HyperNetXError(
+                raise TopoNetXError(
                             "the input entity be be either an instance of RankedEntity or None"
                         )  
             else: # entity is None    
@@ -96,7 +96,7 @@ class RankedEntity(Entity):
                     self.add_element(  ent ,safe_insert = safe_insert,check_CC_condition=False)
                     self._all_ranks.add(elements[k][1])
                 else:
-                    raise HyperNetXError(
+                    raise TopoNetXError(
                             "the element dictionary must have specific shape e.g."
                             "elements = {'y1': {'elements': [1, 2], 'rank': 1}},"
                             "or elements = {'0':[[1,2],1], '2':[[1,2,3],2]}  "
@@ -120,7 +120,7 @@ class RankedEntity(Entity):
                 for k,v in self.elements.items():
                     
                     if v.rank > self._rank :
-                        raise HyperNetXError(
+                        raise TopoNetXError(
                             f"Error: rank of members must be smaller than"
                             f" the rank of the entity that contains them." 
                             f" Input entity {v} has rank {v.rank} and this entity has rank {rank}"
@@ -182,7 +182,7 @@ class RankedEntity(Entity):
             
             # if item is an Ranked Entity, descendents will be compared to avoid collisions
             if item.uid == self.uid:
-                raise HyperNetXError(
+                raise TopoNetXError(
                     f"Error: Self reference in submitted elements."
                     f" Entity {self.uid} may not contain itself. "
                 )      
@@ -203,7 +203,7 @@ class RankedEntity(Entity):
                     # perform mild safe insert
                     for k,v in self.elements.items():
                         if v.rank > item.rank :                    
-                            raise HyperNetXError(
+                            raise TopoNetXError(
                                 f"Error: rank of members must be smaller than"
                                 f" the rank of the entity that contains them." 
                                 f" Input entity {item} has rank {item.rank} and this entity has rank {v.rank}"
@@ -224,7 +224,7 @@ class RankedEntity(Entity):
             # the corresponding Entity will become an element of ranked entity.
             # Otherwise, at most it will be added as an empty rank zero RankedEntity.
             if self.uid == item:
-                raise HyperNetXError(
+                raise TopoNetXError(
                     f"Error: Self reference in submitted elements."
                     f" Entity {self.uid} may not contain itself."
                 )
@@ -233,7 +233,7 @@ class RankedEntity(Entity):
                 if isinstance(item[1],dict):
                     
                     if self.uid == item[0]:
-                        raise HyperNetXError(
+                        raise TopoNetXError(
                             f"Error: Self reference in submitted elements."
                             f" Entity {self.uid} may not contain itself."
                         )
@@ -263,7 +263,7 @@ class RankedEntity(Entity):
                             else:
                                 for k,v in self.elements.items():
                                     if v.rank > ent.rank :                    
-                                        raise HyperNetXError(
+                                        raise TopoNetXError(
                                             f"Error: rank of members must be smaller than"
                                             f" the rank of the entity that contains them." 
                                             f" Input entity {item} has rank {item.rank} and this entity has rank {v.rank}"
@@ -389,7 +389,7 @@ class RankedEntity(Entity):
         if len(newelements)>0:    
             return RankedEntity(name, elements=newelements, rank=self.rank, **self.properties)
         else:
-            raise HyperNetXError("Restriction yielded empty ranked entity.")  
+            raise TopoNetXError("Restriction yielded empty ranked entity.")  
             
 
     def clone(self, newuid):
@@ -463,7 +463,7 @@ class RankedEntity(Entity):
                     structure = 2
                     break
                 else:
-                    raise HyperNetXError(
+                    raise TopoNetXError(
                             "the element dictionary must have specific shape e.g."
                             "elements = {'y1': {'elements': [1, 2], 'rank': 1}},"
                             "or elements = {'0':[[1,2],1], '2':[[1,2,3],2]  }  "
@@ -490,19 +490,19 @@ class RankedEntity(Entity):
         for k,v in self.elements.items():
             if v.uidset== item.uidset:   # item == v and rank(v)!=rank(item) 
                 if v.rank != item.rank:   
-                    raise HyperNetXError(
+                    raise TopoNetXError(
                         f"Error: entity uidset exists within the entity with different rank."
                         f"inserted entity has rank {item.rank} and existing entity has rank {v.rank} ."
                     )
             
             elif v.uidset.issubset(item.uidset): # item => v and rank(item) < rank(v)
                 if v.rank > item.rank:
-                    raise HyperNetXError(
+                    raise TopoNetXError(
                         f"Error: Fails the CC condition for Ranked EntitySet."
                     )
             elif item.uidset.issubset(v.uidset): # item <= v and rank(item) > rank(v)   
                 if v.rank < item.rank:
-                    raise HyperNetXError(
+                    raise TopoNetXError(
                         f"Error: Fails the CC condition for Ranked EntitySet."
                     )
             return True        
@@ -648,7 +648,7 @@ class RankedEntitySet(RankedEntity):
         elif level == "lower":
             return RankedEntitySet(name, elements = [d[key] for key in d.keys() if d[key].rank <= k], safe_insert = safe_insert)
         else:
-            raise HyperNetXError(
+            raise TopoNetXError(
                             "level must be None, equal, 'upper', 'lower', 'up', or 'down' "
                         )              
 
@@ -790,7 +790,7 @@ class RankedEntitySet(RankedEntity):
                 uidset = self.skeleton(r)
                 children = self.skeleton(r-1,level="lower")
             else:
-                raise HyperNetXError("incidence_type must be 'up' or 'down' ")
+                raise TopoNetXError("incidence_type must be 'up' or 'down' ")
         else:
             assert(r!=k)  # incidence is defined between two skeletons of different ranks
             if r<k: # up incidence is defined between two skeletons of different ranks
@@ -1001,7 +1001,7 @@ class RankedEntitySet(RankedEntity):
                 if not item in self.children:
                     self.add_element( item,check_CC_condition=True)
                 else:
-                    raise HyperNetXError(
+                    raise TopoNetXError(
                         f"Error: {item} references a child of an existing Entity in the EntitySet."
                     )
         return self

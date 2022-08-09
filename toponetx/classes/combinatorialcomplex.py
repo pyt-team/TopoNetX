@@ -1,8 +1,7 @@
 
 """
 # --------------------------------------------------------
-# Constructing (co)incidence matrices, higher order
-# matrices for Combinatorial Complex
+# Class supporting basic functions and constructions methods over Combinatorial Complex
 # --------------------------------------------------------
 """
 
@@ -16,13 +15,12 @@ import pandas as pd
 from scipy.sparse import issparse, coo_matrix, dok_matrix, csr_matrix
 from collections import OrderedDict, defaultdict
 from hypernetx.classes.entity import Entity
-from hypernetx.exception import HyperNetXError
-from hypernetx.utils.decorators import not_implemented_for
+from toponetx.exception import TopoNetXError
 import numbers
 from collections.abc import Iterable
 from hypernetx.classes.entity import Entity, EntitySet
 from hypernetx import Hypergraph
-from rankedentity import RankedEntity, RankedEntitySet
+from toponetx.classes.rankedentity import RankedEntity, RankedEntitySet
 
 
 __all__ = ["CombinatorialComplex"]
@@ -120,12 +118,12 @@ class CombinatorialComplex:
         elif isinstance(cells, list) and ranks is None:
             for i in cells:
                 if not isinstance(i, RankedEntity):
-                    raise HyperNetXError("input cells elements must be ranked entities when ranks is None")
+                    raise TopoNetXError("input cells elements must be ranked entities when ranks is None")
             setsystem = RankedEntitySet("_", cells)
         elif isinstance(cells, tuple) and ranks is None:
             for i in cells:
                 if not isinstance(i, RankedEntity):
-                    raise HyperNetXError("input cells elements must be ranked entities when ranks is None")
+                    raise TopoNetXError("input cells elements must be ranked entities when ranks is None")
             setsystem = RankedEntitySet("_", cells)
         elif not isinstance(cells, RankedEntitySet):
             assert(ranks is not None ) # ranks cannot be None
@@ -318,7 +316,7 @@ class CombinatorialComplex:
         elif rank == None : 
             return len(memberships)
         else: 
-            raise HyperNetXError("Rank must be non-negative integer")
+            raise TopoNetXError("Rank must be non-negative integer")
 
 
     def size(self, cell, nodeset=None):
@@ -340,7 +338,7 @@ class CombinatorialComplex:
         assert(isinstance(cell, RankedEntity ))
         
         if cell not in self.cells:
-            raise HyperNetXError("Input cell in not in cells of the CC")
+            raise TopoNetXError("Input cell in not in cells of the CC")
         
         
         if nodeset:
@@ -547,7 +545,7 @@ class CombinatorialComplex:
     def add_node(self,node):
 
         if node in self._cells:
-            raise HyperNetXError("Node already an cell.")
+            raise TopoNetXError("Node already an cell.")
         elif node in self._nodes and isinstance(node, RankedEntity):
             self._nodes[node].__dict__.update(node.properties)
         elif node not in self._nodes:
@@ -1436,7 +1434,7 @@ class CombinatorialComplex:
 
         Raises
         ------
-        HyperNetXError
+        TopoNetXError
             If CC is not s-cell-connected
 
         Notes
@@ -1453,7 +1451,7 @@ class CombinatorialComplex:
         if nx.is_connected(G):
             return nx.diameter(G)
         else:
-            raise HyperNetXError(f"CC is not s-connected. s={s}")
+            raise TopoNetXError(f"CC is not s-connected. s={s}")
 
     def cell_diameter(self, s=1):
         """
@@ -1469,7 +1467,7 @@ class CombinatorialComplex:
 
         Raises
         ------
-        HyperNetXError
+        TopoNetXError
             If combinatorial complex is not s-cell-connected
 
         Notes
@@ -1486,7 +1484,7 @@ class CombinatorialComplex:
         if nx.is_connected(G):
             return nx.diameter(G)
         else:
-            raise HyperNetXError(f"CC is not s-connected. s={s}")
+            raise TopoNetXError(f"CC is not s-connected. s={s}")
 
     def distance(self, source, target, s=1):
         """
@@ -1671,7 +1669,7 @@ class CombinatorialComplex:
 
         M = np.array(M)
         if len(M.shape) != (2):
-            raise HyperNetXError("Input requires a 2 dimensional numpy array")
+            raise TopoNetXError("Input requires a 2 dimensional numpy array")
         # apply boolean key if available
         if key:
             M = key(M)
@@ -1679,7 +1677,7 @@ class CombinatorialComplex:
         if node_names is not None:
             nodenames = np.array(node_names)
             if len(nodenames) != M.shape[0]:
-                raise HyperNetXError(
+                raise TopoNetXError(
                     "Number of node names does not match number of rows."
                 )
         else:
@@ -1688,7 +1686,7 @@ class CombinatorialComplex:
         if cell_names is not None:
             cellnames = np.array(cell_names)
             if len(cellnames) != M.shape[1]:
-                raise HyperNetXError(
+                raise TopoNetXError(
                     "Number of cell_names does not match number of columns."
                 )
         else:
@@ -1801,7 +1799,7 @@ class CombinatorialComplex:
         """
 
         if type(df) != pd.core.frame.DataFrame:
-            raise HyperNetXError("Error: Input object must be a pandas dataframe.")
+            raise TopoNetXError("Error: Input object must be a pandas dataframe.")
 
         if columns:
             df = df[columns]

@@ -1,31 +1,26 @@
 """
-
-@author: Mustafa Hajij
+Regular 2d Cell Complex
 """
 
 
 import warnings
 import pickle
+import numbers
 import networkx as nx
 from networkx.algorithms import bipartite
 import numpy as np
 import pandas as pd
 from scipy.sparse import issparse, coo_matrix, dok_matrix, csr_matrix
 from collections import OrderedDict, defaultdict
-from itertools import zip_longest
-from hypernetx.classes.entity import Entity
-from rankedentity import RankedEntity, RankedEntitySet
-from combinatorialcomplex import CombinatorialComplex
-from hypernetx.exception import HyperNetXError
-from hypernetx.utils.decorators import not_implemented_for
-import numbers
+from collections import Counter,deque
 from collections.abc import Iterable
+from itertools import zip_longest
 from hypernetx import Hypergraph
 from networkx import Graph
-
-from collections import Counter,deque
-
-
+from hypernetx.classes.entity import Entity
+from toponetx.classes.rankedentity import RankedEntity, RankedEntitySet
+from toponetx.classes.combinatorialcomplex import CombinatorialComplex
+from toponetx.exception import TopoNetXError
 
 
 __all__ = ["Cell","CellView","CellComplex"]
@@ -1593,7 +1588,7 @@ class CellComplex:
 
         Raises
         ------
-        HyperNetXError
+        TopoNetXError
             If CC is not s-cell-connected
 
         Notes
@@ -1610,7 +1605,7 @@ class CellComplex:
         if nx.is_connected(G):
             return nx.diameter(G)
         else:
-            raise HyperNetXError(f"CC is not s-connected. s={s}")
+            raise TopoNetXError(f"CC is not s-connected. s={s}")
 
     def cell_diameter(self, s=1):
         """
@@ -1626,7 +1621,7 @@ class CellComplex:
 
         Raises
         ------
-        HyperNetXError
+        TopoNetXError
             If combinatorial complex is not s-cell-connected
 
         Notes
@@ -1643,7 +1638,7 @@ class CellComplex:
         if nx.is_connected(G):
             return nx.diameter(G)
         else:
-            raise HyperNetXError(f"CC is not s-connected. s={s}")
+            raise TopoNetXError(f"cell complex is not s-connected. s={s}")
 
     def distance(self, source, target, s=1):
         """
