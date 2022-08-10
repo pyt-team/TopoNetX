@@ -7,11 +7,11 @@ Base classes for TopoNetX exceptions
 
 
 class TopoNetXException(Exception):
-    """Base class for exceptions in HyperNetX."""
+    """Base class for exceptions in TopoNetX."""
 
 
 class TopoNetXError(TopoNetXException):
-    """Exception for a serious error in HyperNetX"""
+    """Exception for a serious error in TopoNetX"""
 
 
 class TopoNetXNotImplementedError(TopoNetXError):
