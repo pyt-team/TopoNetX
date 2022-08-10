@@ -4,6 +4,8 @@
 
 
 """
+from collections import OrderedDict, defaultdict
+from collections import Counter,deque
 
 __all__=["Cell","CellView"]
 
@@ -12,11 +14,11 @@ class Cell():
     Parameters
     ==========
     
-    elements: any iterable of hashables
+    elements: any iterable of hashables. Elements order is important and defines the 2 cell up to cyclic permutation.
     name : str
     
     Examples
-        >>> cell1 = Cell ( (1,2,3) )
+        >>> cell1 = Cell ( (1,2,3) ) 
         >>> cell2 = Cell ( (1,2,4,5) )
         >>> cell3 = Cell ( ("a","b","c") )
     """
