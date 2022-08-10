@@ -669,7 +669,7 @@ class CellComplex:
                 if sign:
                     return A.asformat("csc")
                 else:
-                    return A.asformat("csc").todense()
+                    return abs(A.asformat("csc"))
         elif d == 2 :
             edgelist = sorted(self._G.edges)
 
@@ -878,9 +878,9 @@ class CellComplex:
         weights = False ## currently weighting is not supported
         A = self._incidence_to_adjacency(MP,weights=weights)
         if index:    
-            return abs(A), row
+            return A, row
         else:
-            return abs(A)
+            return A
    
     def cell_adjacency_matrix(self,index=False, weights=False):
         """
@@ -960,6 +960,7 @@ class CellComplex:
 
 
         """
+        """
         temp = self.cells.collapse_identical_elements(
                 "_", return_equivalence_classes=return_equivalence_classes
             )
@@ -967,7 +968,8 @@ class CellComplex:
             return CombinatorialComplex(cells = temp[0], name = name), temp[1]
         else:
             return CombinatorialComplex(cells = temp, name = name)
-
+        """
+        raise NotImplementedError
 
 
     def restrict_to_cells(self, cellset, name=None):
