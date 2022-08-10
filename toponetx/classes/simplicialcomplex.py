@@ -15,8 +15,8 @@ from scipy.sparse import coo_matrix, csr_matrix, diags, dok_matrix, eye
 from sklearn.preprocessing import normalize
 from hypernetx import Hypergraph
 import networkx as nx
-from rankedentity import RankedEntity, RankedEntitySet
-from combinatorialcomplex import CombinatorialComplex
+from toponetx.classes.rankedentity import RankedEntity, RankedEntitySet
+from toponetx.classes.combinatorialcomplex import CombinatorialComplex
 
 try:
     from gudhi import SimplexTree

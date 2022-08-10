@@ -364,7 +364,7 @@ class CellComplex:
 
     def cell_neighbors(self, cell, s=1):
         """
-        The cells in Combinatorial Complex which share s nodes(s) with cells.
+        The cells in cell Complex which share s nodes(s) with cells.
 
         Parameters
         ----------
@@ -595,7 +595,7 @@ class CellComplex:
                     return False
         return True    
 
-    def boundary_matrix(self,d, sparse=True, index=False):
+    def boundary_matrix(self,d, sign=True, weights=None, index=False):
         """
         An incidence matrix for the CC indexed by nodes x cells.
 
@@ -612,7 +612,7 @@ class CellComplex:
 
         Returns
         -------
-        boundary_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        boundary_matrix : scipy.sparse.csr.csr_matrix
 
         row dictionary : dict
             Dictionary identifying rows with nodes
@@ -629,7 +629,7 @@ class CellComplex:
         >>> B1.dot(B2).todense()
         
         """
-       
+        weights =None # not supported at this version
         import scipy as sp
         import scipy.sparse        
         if d == 0:
@@ -638,16 +638,16 @@ class CellComplex:
             for i in range (0,len(self._G.nodes)):
                 A[0,i]=1
             if index:     
-                if sparse:
+                if sign:
                     return self._G.nodes, [], A.asformat("csc") 
                 else:
-                    return self._G.nodes,[], A.asformat("csc").todense()
+                    return self._G.nodes,[], abs(A.asformat("csc"))
             else:
-                if sparse:
+                if sign:
 
                     return A.asformat("csc") 
                 else:
-                    return A.asformat("csc").todense()          
+                    return abs(A.asformat("csc"))         
         
         elif d == 1 :
             nodelist = sorted(self._G.nodes) # always output boundary matrix in dictionary order
@@ -661,12 +661,12 @@ class CellComplex:
                 A[ui, ei] = -1
                 A[vi, ei] = 1
             if index:
-                if sparse :
+                if sign :
                     return nodelist,edgelist,A.asformat("csc")
                 else:
-                    return nodelist,edgelist,A.asformat("csc").todense()
+                    return nodelist,edgelist,abs(A.asformat("csc"))
             else:    
-                if sparse:
+                if sign:
                     return A.asformat("csc")
                 else:
                     return A.asformat("csc").todense()
@@ -685,15 +685,15 @@ class CellComplex:
                         A[ei, celli] = -1
             if index:     
                 cell_index = {cell: i for i, cell in enumerate(self.cells)}
-                if sparse:
+                if sign:
                     return edge_index,cell_index, A.asformat("csc") 
                 else:
-                    return edge_index,cell_index, A.asformat("csc").todense()
+                    return edge_index,cell_index, abs(A.asformat("csc"))
             else:
-                if sparse:
+                if sign:
                     return A.asformat("csc") 
                 else:
-                    return A.asformat("csc").todense()
+                    return abs(A.asformat("csc"))
         else:
             raise ValueError(f"only dimension 0,1 and 2 are supported, got {d}")
 
@@ -872,9 +872,9 @@ class CellComplex:
        
 
         if index:
-            MP, row, col = self.boundary_matrix(d, sparse = True, index=index)
+            MP, row, col = self.boundary_matrix(d, sign = False, weights=weights, index=index)
         else:
-            MP = self.boundary_matrix(d+1, sparse = True, index=index)
+            MP = self.boundary_matrix(d+1, sign = False, weights=weights, index=index)
         weights = False ## currently weighting is not supported
         A = self._incidence_to_adjacency(MP,weights=weights)
         if index:    

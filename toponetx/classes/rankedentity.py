@@ -714,7 +714,7 @@ class RankedEntitySet(RankedEntity):
 
 
         
-    def incidence_matrix(self,r,k, incidence_type = "up", sparse=True, index=False):
+    def incidence_matrix(self,r,k, incidence_type = "up", weight=None, sparse=True, index=False):
         """
         An incidence matrix for the RankedEntitySet indexed by r-ranked entities k-ranked entities
         r !=k, when k is None incidence_type will be considered
@@ -781,6 +781,7 @@ class RankedEntitySet(RankedEntity):
                 >>> E.incidence_matrix(1,2,sparse=False, index=True)
                 >>> E.incidence_matrix(0,2,sparse=False, index=True)
         """
+        weight = None # weight is not supported in this version
         assert(r!=k) # r and k must be different
         if k is None:
             if incidence_type == 'up':

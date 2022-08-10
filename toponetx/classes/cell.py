@@ -6,6 +6,7 @@
 """
 from collections import OrderedDict, defaultdict
 from collections import Counter,deque
+from itertools import zip_longest
 
 __all__=["Cell","CellView"]
 

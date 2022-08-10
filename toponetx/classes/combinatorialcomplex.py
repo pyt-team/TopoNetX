@@ -734,7 +734,7 @@ class CombinatorialComplex:
             self.remove_cell(cell)
         return self
 
-    def incidence_matrix(self,r,k,incidence_type = "up", sparse=True, index=False):
+    def incidence_matrix(self,r,k,incidence_type = "up", weight=None, sparse=True, index=False):
         """
         An incidence matrix for the CC indexed by nodes x cells.
 
@@ -760,6 +760,7 @@ class CombinatorialComplex:
             Dictionary identifying columns with cells
 
         """
+        weight = False # not implemented at this moment
         if r>0:    
             return self.cells.incidence_matrix(r,k, incidence_type=incidence_type, sparse=sparse, index=index)
         else:
