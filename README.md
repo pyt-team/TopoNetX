@@ -12,9 +12,12 @@ TNX was developed by pyt-team.
 
 Reqs
 ---------------------------
-1- HyperNetX v. *.*
-2- NetworkX v. *.*
-3- Gudhi (optional) v. *.*
+1- HyperNetX >= 1.1
+
+2- NetworkX >= 2.0 (Based Graph library)
+
+3- Gudhi (optional) 
+
 
 New Features of Version 1.0
 ---------------------------
