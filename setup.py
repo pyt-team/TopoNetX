@@ -1,38 +1,49 @@
-from setuptools import setup
-import sys
-
-__version__ = "1.0"
-
-if sys.version_info < (3, 7):
-    sys.exit("TopoNetX requires Python 3.7 or later.")
-    
-    
+from codecs import open
+from os import path
 
 from setuptools import find_packages, setup
 
 # Package meta-data.
-NAME = "stnets"
-DESCRIPTION = "Python module integrating higher order deep learning."
-URL = "https://github.com/mhajij/stnets"
-VERSION = 0.2
-REQUIRED = ["numpy", "torch>=1.9.0", "scipy", "scikit-learn"]
-
+NAME = "TopoNetX"
+DESCRIPTION = "TNX provides classes and methods for modeling simplicial, cellular, CW and combinatorial complexes."
+URL = "https://github.com/pyt-team/TopoNetX"
+VERSION = 0.1
 
 here = path.abspath(path.dirname(__file__))
-
 
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
+install_requires = ["gudhi", "networkx", "hypernetx", "numpy", "pre-commit", "scipy"]
+
+full_requires = []
+
+test_requires = [
+    "pytest",
+    "pytest-cov",
+]
+
+dev_requires = test_requires + [
+    "pre-commit",
+    "flake8",
+    "yapf",
+    "black==22.6.0",
+    "black[jupyter]",
+    # "flake8-docstrings",  # flake8-docstrings causes flake8 to change behaviour for tests; removed it
+    "isort==5.10.1",
+    "codecov",
+    "coverage",
+]
+
 setup(
     name=NAME,
     version=VERSION,
-    description="TopoNetX : Higher order networks for Python.",
-    long_description="TopoNetX is a Python package for the creation, manipulation, and study of the structure, dynamics, and functions of higher order networks.",
+    description="TNX provides classes and methods for modeling simplicial, cellular, CW and combinatorial complexes.",
+    long_description="The TNX library provides classes and methods for modeling the entities and relationships found in higher order networks such as simplicial, cellular, CW and combinatorial complexes.",
     url=URL,
     download_url=URL,
     license="MIT",
-    author="pyt-team Authors",
+    author="PyT-Team Authors",
     contact_email="mustafahajij@gmail.com",
     classifiers=[
         "Intended Audience :: Developers",
@@ -42,15 +53,17 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     keywords=[
-        "cell complexes",
         "higher order networks",
-        "simplicial complexes",
-        "hypergraphs",
-        "multiway networks",
-        "combinatorial complex",
+        "Simplicial Complexes",
         "Cellular complexes",
-        "CW complex",
+        "Combinatorial complexes",
     ],
-    python_requires=">=3.6",
-    install_requires=REQUIRED,    
-
+    python_requires=">=3.7",
+    install_requires=install_requires,
+    extras_require={
+        "full": full_requires,
+        "test": test_requires,
+        "dev": dev_requires,
+    },
+    packages=find_packages(),
+)

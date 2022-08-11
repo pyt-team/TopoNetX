@@ -1,0 +1,17 @@
+.pytest_cache/
+.eggs/
+*.egg-info/
+.ipynb_checkpoints
+.coverage
+.coverage.*
+coverage.xml
+.vscode
+.idea
+.venv
+*.out
+*.pt
+**/*.cpython-38.pyc
+**/__pycache__/**
+__pycache__/
+docs/build/
+

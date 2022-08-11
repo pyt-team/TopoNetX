@@ -1,6 +1,0 @@
-gudhi
-networkx
-hypernetx
-numpy
-pre-commit
-scipy

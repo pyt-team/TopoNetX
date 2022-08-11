@@ -3,18 +3,20 @@
 Simplicial Complex Class
 
 """
+from collections import OrderedDict
 from itertools import combinations
 from warnings import warn
-from collections import OrderedDict
+
+import networkx as nx
 import numpy as np
 import scipy.sparse.linalg as spl
+from hypernetx import Hypergraph
 from scipy.linalg import fractional_matrix_power
 from scipy.sparse import coo_matrix, csr_matrix, diags, dok_matrix, eye
 from sklearn.preprocessing import normalize
-from hypernetx import Hypergraph
-import networkx as nx
-from toponetx.classes.rankedentity import RankedEntity, RankedEntitySet
-from toponetx.classes.combinatorialcomplex import CombinatorialComplex
+
+from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.ranked_entity import RankedEntity, RankedEntitySet
 
 try:
     from gudhi import SimplexTree
@@ -40,67 +42,72 @@ class SimplicialComplex:
     simplices : list of maximal simplices that define the simplicial complex
     name : hashable, optional, default: None
         If None then a placeholder '_'  will be inserted as name
-    maxdimension: constrain the max dimension of the input inserted simplices    
-    
-    mode : computational mode, available options are "normal" or "gudhi". 
+    maxdimension: constrain the max dimension of the input inserted simplices
+
+    mode : computational mode, available options are "normal" or "gudhi".
     default is normal
     """
 
-    def __init__(self, simplices = None , name = None, maxdimension = None, mode = "normal"):
+    def __init__(self, simplices=None, name=None, maxdimension=None, mode="normal"):
         self.mode = mode
         if name is None:
             self.name = name
         else:
             self.name = "_"
         self._simplex_set = set()
-        if maxdimension!= None:
+        if maxdimension != None:
             self.constrain_dim = maxdimension
         else:
             self.constrain_dim = -1
-        
+
         if simplices is None:
             self.maxdim = -1
-            if self.mode== "normal":
+            if self.mode == "normal":
                 pass
             elif self.mode == "gudhi":
                 self.st = self.get_simplex_tree()
                 self.faces_dict = SimplicialComplex.extract_simplices(self.st)
             else:
-                raise ValueError(f" Import modes must be 'normal' and 'gudhi', got {mode}")                
-                
+                raise ValueError(
+                    f" Import modes must be 'normal' and 'gudhi', got {mode}"
+                )
+
         else:
             if not isinstance(simplices, (list, tuple)):
-                raise TypeError(f"Input simplices must be given as a list or tuple, got {type(simplices)}.")
-    
+                raise TypeError(
+                    f"Input simplices must be given as a list or tuple, got {type(simplices)}."
+                )
+
             max_simplex_size = len(max(simplices, key=lambda el: len(el)))
 
-    
             try:
                 from gudhi import SimplexTree
             except ImportError:
                 warn(
-                    "gudhi library is not installed."+
-                    "normal mode will be used for computations",
+                    "gudhi library is not installed."
+                    + "normal mode will be used for computations",
                     stacklevel=2,
                 )
                 self.mode = "normal"
             if self.mode == "normal":
-    
-                self._import_simplices(simplices = simplices)
-  
+
+                self._import_simplices(simplices=simplices)
+
                 if maxdimension is None:
                     self.maxdim = max_simplex_size - 1
                 else:
-    
+
                     if maxdimension > max_simplex_size - 1:
                         warn(
-                            f"Maximal simplex in the collection has size {max_simplex_size}."+
-                            "\n maxdimension is set to {max_simplex_size-1}",
+                            f"Maximal simplex in the collection has size {max_simplex_size}."
+                            + "\n maxdimension is set to {max_simplex_size-1}",
                             stacklevel=2,
                         )
                         self.maxdim = max_simplex_size - 1
                     elif maxdimension < 0:
-                        raise ValueError(f"maxdimension should be a positive integer, got {maxdimension}.")
+                        raise ValueError(
+                            f"maxdimension should be a positive integer, got {maxdimension}."
+                        )
                     else:
                         self.constrain_dim = maxdimension
             elif self.mode == "gudhi":
@@ -113,20 +120,25 @@ class SimplicialComplex:
                 if maxdimension is None:
                     self.maxdim = max_simplex_size - 1
                 else:
-    
+
                     if maxdimension > max_simplex_size - 1:
                         warn(
-                            f"Maximal simplex in the collection has size {max_simplex_size}."+
-                            f" \n {maxdimension} is set to {max_simplex_size-1}",
+                            f"Maximal simplex in the collection has size {max_simplex_size}."
+                            + f" \n {maxdimension} is set to {max_simplex_size-1}",
                             stacklevel=2,
                         )
                         self.maxdim = max_simplex_size - 1
                     elif maxdimension < 0:
-                        raise ValueError(f"maxdimension should be a positive integer, got {maxdimension}.")
+                        raise ValueError(
+                            f"maxdimension should be a positive integer, got {maxdimension}."
+                        )
                     else:
                         self.constrain_dim = maxdimension
             else:
-                raise ValueError(f" Import modes must be 'normal' and 'gudhi', got {mode}")
+                raise ValueError(
+                    f" Import modes must be 'normal' and 'gudhi', got {mode}"
+                )
+
     @property
     def shape(self):
         """
@@ -137,10 +149,10 @@ class SimplicialComplex:
         tuple
 
         """
-        if len(self._simplex_set)== 0:
+        if len(self._simplex_set) == 0:
             print("Simplicial Complex is empty.")
-        else:    
-            return [len(self._n_faces(i)) for i in range(self.maxdim+1) ]
+        else:
+            return [len(self._n_faces(i)) for i in range(self.maxdim + 1)]
 
     @property
     def dim(self):
@@ -148,21 +160,22 @@ class SimplicialComplex:
         dimension of the simplicial complex is the highest dimension of any simplex in the complex
         """
         return self.maxdim
+
     @property
     def simplices(self):
         """
         set of all simplices
         """
         return self._simplex_set
-   
+
     def skeleton(self, n):
         """
         Returns
         -------
         set of simplices of dimesnsion n
-        """        
+        """
         return self.dic_order_faces(n)
-    
+
     def __str__(self):
         """
         String representation of SC
@@ -172,7 +185,9 @@ class SimplicialComplex:
         str
 
         """
-        return f"simplicial Complex with shape {self.shape()} and dimension {self.maxdim}"
+        return (
+            f"simplicial Complex with shape {self.shape()} and dimension {self.maxdim}"
+        )
 
     def __repr__(self):
         """
@@ -199,7 +214,7 @@ class SimplicialComplex:
 
     def __iter__(self):
         """
-        Iterate over all faces of the simplicial complex 
+        Iterate over all faces of the simplicial complex
 
         Returns
         -------
@@ -219,48 +234,49 @@ class SimplicialComplex:
         """
         return tuple(item) in self._simplex_set
 
-
-
     @staticmethod
-    def _faces(simplices,max_dim=None):
+    def _faces(simplices, max_dim=None):
         """
         Parameters
         ----------
         simplices : list
             DESCRIPTION. list or of simplices, typically integers.
-        max_dim : constrain the max dimension of faces    
+        max_dim : constrain the max dimension of faces
         Returns
         -------
         faceset : set
             DESCRIPTION. list of tuples or all faces of the input list of simplices
         """
-        
+
         # valid in normal mode and can be used as a static method on any face
         # TODO, do for gudhi mode as well.
         if not isinstance(simplices, (list, tuple)):
-            raise TypeError(f"Input simplices must be given as a list or tuple, got {type(simplices)}.")
-  
+            raise TypeError(
+                f"Input simplices must be given as a list or tuple, got {type(simplices)}."
+            )
+
         faceset = set()
         for simplex in simplices:
             numnodes = len(simplex)
             for r in range(numnodes, 0, -1):
                 for face in combinations(simplex, r):
                     if max_dim is None:
-                        faceset.add(tuple(sorted(face))) 
-                    elif len(face)<=max_dim+1:    
+                        faceset.add(tuple(sorted(face)))
+                    elif len(face) <= max_dim + 1:
                         faceset.add(tuple(sorted(face)))
         return faceset
 
-
-    def _import_simplices(self, simplices = []):
+    def _import_simplices(self, simplices=[]):
         if self.mode == "normal":
             ordered_simplices = tuple(
                 map(lambda simplex: tuple(sorted(simplex)), simplices)
             )
-            if self.constrain_dim==-1:
+            if self.constrain_dim == -1:
                 self._simplex_set = SimplicialComplex._faces(ordered_simplices)
             else:
-                self._simplex_set = SimplicialComplex._faces(ordered_simplices,self.constrain_dim)
+                self._simplex_set = SimplicialComplex._faces(
+                    ordered_simplices, self.constrain_dim
+                )
 
         elif self.mode == "gudhi":
             lst = []
@@ -268,21 +284,20 @@ class SimplicialComplex:
                 lst = lst + list(self.faces_dict[i].keys())
             self._simplex_set = lst
 
-
-
     def _n_faces(self, n):
         if n >= 0 and n <= self.maxdim:
             if self.mode == "normal":
                 return tuple(filter(lambda face: len(face) == n + 1, self._simplex_set))
             elif self.mode == "gudhi":
-                d=self.faces_dict[n]
-                return tuple(OrderedDict(sorted(d.items(), key=lambda t: tuple(t[0]) )).keys())
+                d = self.faces_dict[n]
+                return tuple(
+                    OrderedDict(sorted(d.items(), key=lambda t: tuple(t[0]))).keys()
+                )
         else:
             raise ValueError(
                 f"dimension n should be larger than zero and not greater than {self.maxdim}\n"
                 f"(maximal simplices dimension), got {n}"
             )
-
 
     def dic_order_faces(self, n):
         return sorted(self._n_faces(n))
@@ -299,44 +314,47 @@ class SimplicialComplex:
         st = SimplexTree()
         return st
 
-    def add_simplex(self,simplex):
-        assert(isinstance(simplex,tuple) or isinstance(simplex,list) )
-        simplex= tuple(sorted(simplex)) # put the simplex in cananical order
+    def add_simplex(self, simplex):
+        assert isinstance(simplex, tuple) or isinstance(simplex, list)
+        simplex = tuple(sorted(simplex))  # put the simplex in cananical order
         if simplex is self._simplex_set:
             warn(f" simplex  {simplex} is already inserted.")
             return
         else:
-            if self.mode == "gudhi": 
-                raise NotImplementedError(" insertion is only implemented for normal mode, "+
-                                          "gudhi mode only supports defining complexes from constructors.")
+            if self.mode == "gudhi":
+                raise NotImplementedError(
+                    " insertion is only implemented for normal mode, "
+                    + "gudhi mode only supports defining complexes from constructors."
+                )
 
-            elif self.mode == 'normal':
-                    
+            elif self.mode == "normal":
+
                 if self.constrain_dim == -1:
-                    s_tree=SimplicialComplex._faces([simplex])
+                    s_tree = SimplicialComplex._faces([simplex])
                 else:
-                    s_tree=SimplicialComplex._faces([simplex],self.constrain_dim)
+                    s_tree = SimplicialComplex._faces([simplex], self.constrain_dim)
                 self._simplex_set = self._simplex_set.union(set(s_tree))
-                if len(simplex) -1> self.maxdim:  
-                    if self.constrain_dim==-1:    
-                        self.maxdim = len(simplex) -1          
+                if len(simplex) - 1 > self.maxdim:
+                    if self.constrain_dim == -1:
+                        self.maxdim = len(simplex) - 1
                     else:
                         self.maxdim = self.constrain_dim
-    def insert_simplices_from(self,simplices):
+
+    def insert_simplices_from(self, simplices):
         for s in simplices:
             self.insert_simplex(s)
-    
-    @staticmethod    
-    def extract_simplices(simplex_tree ):
+
+    @staticmethod
+    def extract_simplices(simplex_tree):
         """
         extract skeletons from gudhi simples tree
-        
+
         Remark
             faces_dict[i] = X^i where X^i is the ith skeleton of the input SC X.
-        
+
         """
         faces_dict = [OrderedDict() for _ in range(simplex_tree.dimension() + 1)]
-        for simplex, _ in simplex_tree.get_skeleton( simplex_tree.dimension() ):
+        for simplex, _ in simplex_tree.get_skeleton(simplex_tree.dimension()):
             k = len(simplex)
             faces_dict[k - 1][frozenset(simplex)] = len(faces_dict[k - 1])
         return faces_dict
@@ -354,15 +372,15 @@ class SimplicialComplex:
 
         Rational:
         -------
-         Most operaters (e.g. adjacencies/(co)boundary maps) that describe 
+         Most operaters (e.g. adjacencies/(co)boundary maps) that describe
          connectivity of the simplicial complex
-         can be described as a graph whose nodes are the simplices used to 
+         can be described as a graph whose nodes are the simplices used to
          construct the operator and whose edges correspond to the entries
          in the matrix where the operator is not zero.
-         
+
          This property implies that many computations on simplicial complexes
          can be reduced to graph computations.
-         
+
         """
         rows, cols = np.where(np.sign(np.abs(matrix)) == 1)
         edges = zip(rows.tolist(), cols.tolist())
@@ -370,11 +388,11 @@ class SimplicialComplex:
 
     # ---------- operators ---------------#
 
-    def incidence_matrix_gudhi(self, d, signed = True, index =False):
+    def incidence_matrix_gudhi(self, d, signed=True, index=False):
         """
         get the boundary map using gudhi
         """
-   
+
         if d == 0:
             boundary = dok_matrix(
                 (1, len(self.faces_dict[d].items())), dtype=np.float32
@@ -396,16 +414,16 @@ class SimplicialComplex:
         )
         if index:
             if signed:
-                return self.faces_dict[d],self.faces_dict[d-1], boundary
+                return self.faces_dict[d], self.faces_dict[d - 1], boundary
             else:
-                return self.faces_dict[d],self.faces_dict[d-1], abs(boundary)            
+                return self.faces_dict[d], self.faces_dict[d - 1], abs(boundary)
         else:
             if signed:
                 return boundary
             else:
                 return abs(boundary)
 
-    def incidence_matrix_normal(self, d, signed = True,index=False):
+    def incidence_matrix_normal(self, d, signed=True, index=False):
         source_simplices = self.dic_order_faces(d)
         target_simplices = self.dic_order_faces(d - 1)
 
@@ -437,22 +455,22 @@ class SimplicialComplex:
         else:
             return S
 
-    def incidence_matrix(self, d, signed = True,index=False):
+    def incidence_matrix(self, d, signed=True, index=False):
 
         if d >= 0 and d <= self.maxdim:
             if self.mode == "normal":
-                return self.incidence_matrix_normal(d, signed,index)
+                return self.incidence_matrix_normal(d, signed, index)
             elif self.mode == "gudhi":
-                return self.incidence_matrix_gudhi(d, signed,index)
+                return self.incidence_matrix_gudhi(d, signed, index)
         else:
             raise ValueError(
                 f"d should be larget than zero and not greater than {self.maxdim} (maximal allowed dimension for simplices), got {d}"
             )
 
-    def coincidence_matrix(self, d, signed = True,index=False):
-        return self.incidence_matrix(d, signed,index).T
+    def coincidence_matrix(self, d, signed=True, index=False):
+        return self.incidence_matrix(d, signed, index).T
 
-    def hodge_laplacian_matrix(self, d, signed = True,index=False):
+    def hodge_laplacian_matrix(self, d, signed=True, index=False):
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L = B_next @ B_next.transpose()
@@ -472,7 +490,7 @@ class SimplicialComplex:
         else:
             return abs(L)
 
-    def up_laplacian_matrix(self, d, signed = True):
+    def up_laplacian_matrix(self, d, signed=True):
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
@@ -489,7 +507,7 @@ class SimplicialComplex:
         else:
             return abs(L_up)
 
-    def down_laplacian_matrix(self, d, signed = True):
+    def down_laplacian_matrix(self, d, signed=True):
         if d <= self.maxdim and d > 0:
             B = self.incidence_matrix(d)
             L_down = B.transpose() @ B
@@ -502,7 +520,7 @@ class SimplicialComplex:
         else:
             return abs(L_down)
 
-    def adjacency_matrix(self, d, signed = False):
+    def adjacency_matrix(self, d, signed=False):
 
         L_up = self.up_laplacian_matrix(d, signed)
         L_up.setdiag(0)
@@ -512,7 +530,7 @@ class SimplicialComplex:
         else:
             return abs(L_up)
 
-    def coadjacency_matrix(self, d, signed = False):
+    def coadjacency_matrix(self, d, signed=False):
 
         L_down = self.down_laplacian_matrix(d, signed)
         L_down.setdiag(0)
@@ -520,74 +538,78 @@ class SimplicialComplex:
             return L_down
         else:
             return abs(L_down)
-        
-    def k_hop_incidence_matrix(self, d,k):
-        Bd = self.incidence_matrix(d , signed = True)
-        if d < self.maxdim and d >= 0:
-            Ad = self.adjacency_matrix(d, signed = True)
-        if d <= self.maxdim and d > 0:
-            coAd = self.coadjacency_matrix(d , signed = True)
-        if d == self.maxdim:
-            return Bd @ np.power(coAd,k)
-        elif d == 0 :
-            return Bd @ np.power(Ad,k)
-        else:            
-            return Bd @ np.power(Ad,k)+ Bd @ np.power(coAd,k) 
 
-    def k_hop_coincidence_matrix(self, d,k):
-        BTd = self.coincidence_matrix(d , signed = True)
+    def k_hop_incidence_matrix(self, d, k):
+        Bd = self.incidence_matrix(d, signed=True)
         if d < self.maxdim and d >= 0:
-            Ad = self.adjacency_matrix(d, signed = True)
+            Ad = self.adjacency_matrix(d, signed=True)
         if d <= self.maxdim and d > 0:
-            coAd = self.coadjacency_matrix(d , signed = True)
+            coAd = self.coadjacency_matrix(d, signed=True)
         if d == self.maxdim:
-            return np.power(coAd,k) @ BTd
-        elif d == 0 :
-            return np.power(Ad,k) @ BTd
+            return Bd @ np.power(coAd, k)
+        elif d == 0:
+            return Bd @ np.power(Ad, k)
         else:
-            return  np.power(Ad,k) @ BTd + np.power(coAd,k) @ BTd 
+            return Bd @ np.power(Ad, k) + Bd @ np.power(coAd, k)
+
+    def k_hop_coincidence_matrix(self, d, k):
+        BTd = self.coincidence_matrix(d, signed=True)
+        if d < self.maxdim and d >= 0:
+            Ad = self.adjacency_matrix(d, signed=True)
+        if d <= self.maxdim and d > 0:
+            coAd = self.coadjacency_matrix(d, signed=True)
+        if d == self.maxdim:
+            return np.power(coAd, k) @ BTd
+        elif d == 0:
+            return np.power(Ad, k) @ BTd
+        else:
+            return np.power(Ad, k) @ BTd + np.power(coAd, k) @ BTd
 
     def is_connected(self):
         g = nx.Graph()
         for e in self.skeleton(1):
-            g.add_edge(e[0],e[1])
+            g.add_edge(e[0], e[1])
         return nx.is_connected(g)
-    
-    def to_hypergraph(self):    
+
+    def to_hypergraph(self):
         graph = []
-        for i in range(1,self.maxdim+1):
-            edge = [ list(j) for j in  self._n_faces(i) ]
-            graph = graph+edge
-        return Hypergraph(graph, static = True)   
-        
+        for i in range(1, self.maxdim + 1):
+            edge = [list(j) for j in self._n_faces(i)]
+            graph = graph + edge
+        return Hypergraph(graph, static=True)
+
     def to_combinatorialcomplex(self):
         graph = []
-        for i in range(1,self.maxdim+1):
-            edge = [RankedEntity(uid=tuple(j),elements=list(j), rank=len(j)-1)  for j in  self._n_faces(i) ]
-            graph = graph+edge     
-        RES = RankedEntitySet("", graph) 
+        for i in range(1, self.maxdim + 1):
+            edge = [
+                RankedEntity(uid=tuple(j), elements=list(j), rank=len(j) - 1)
+                for j in self._n_faces(i)
+            ]
+            graph = graph + edge
+        RES = RankedEntitySet("", graph)
         return CombinatorialComplex(RES)
-    
 
     #  -----------normalized operators------------------#
 
-    def normalized_hodge_laplacian_matrix(self, d, signed = True):
+    def normalized_hodge_laplacian_matrix(self, d, signed=True):
 
         return SimplicialComplex.normalize_laplacian(
             self.hodge_laplacian_matrix(d=d), signed=signed
         )
 
     def normalized_down_laplacian_matrix(self, d):
-        Ld = self.hodge_laplacian_matrix(d=d) 
-        Ldown = self.down_laplacian_matrix(d=d) 
-        out = SimplicialComplex.normalize_x_laplacian(Ld,Ldown)
+        Ld = self.hodge_laplacian_matrix(d=d)
+        Ldown = self.down_laplacian_matrix(d=d)
+        out = SimplicialComplex.normalize_x_laplacian(Ld, Ldown)
         return out
+
     def normalized_up_laplacian_matrix(self, d):
-        Ld = self.hodge_laplacian_matrix(d=d) 
-        Lup = self.up_laplacian_matrix(d=d) 
-        out = SimplicialComplex.normalize_x_laplacian(Ld,Lup)
+        Ld = self.hodge_laplacian_matrix(d=d)
+        Lup = self.up_laplacian_matrix(d=d)
+        out = SimplicialComplex.normalize_x_laplacian(Ld, Lup)
         return out
-    def normalized_coboundary_operator_matrix(self, d, signed = True, normalization="xu"):
+
+    def normalized_coboundary_operator_matrix(self, d, signed=True, normalization="xu"):
 
         CoBd = self.coincidence_matrix(d, signed)
 
@@ -613,7 +635,7 @@ class SimplicialComplex:
         else:
             raise Exception("invalid normalization method entered.")
 
-    def normalized_incidence_matrix(self, d, signed = True, normalization="xu"):
+    def normalized_incidence_matrix(self, d, signed=True, normalization="xu"):
 
         Bd = self.incidence_matrix(d, signed)
         if normalization == "row":
@@ -625,9 +647,9 @@ class SimplicialComplex:
         else:
             raise Exception("invalid normalization method entered.")
 
-    def normalized_k_hop_boundary(self, d,k, normalization="xu"):
+    def normalized_k_hop_boundary(self, d, k, normalization="xu"):
 
-        Bd = self.k_hop_incidence_matrix(d,k)
+        Bd = self.k_hop_incidence_matrix(d, k)
         if normalization == "row":
             return normalize(Bd, norm="l1", axis=1)
         elif normalization == "kipf":
@@ -637,8 +659,7 @@ class SimplicialComplex:
         else:
             raise Exception("invalid normalization method entered.")
 
-
-    def normalized_adjacency(self, d, signed = False, normalization="kipf"):
+    def normalized_adjacency(self, d, signed=False, normalization="kipf"):
         """
         Args:
             d: dimenion of the higher order adjacency matrix
@@ -660,7 +681,7 @@ class SimplicialComplex:
         else:
             raise Exception("invalid normalization method entered.")
 
-    def normalized_coadjacency(self, d, signed = False, normalization="xu"):
+    def normalized_coadjacency(self, d, signed=False, normalization="xu"):
         """
         Args:
             d: dimenion of the higher order adjacency matrix
@@ -685,20 +706,21 @@ class SimplicialComplex:
     @staticmethod
     def normalize_laplacian(L, signed=True):
 
-        topeigen_val = spl.eigsh(L, k=1, which="LM", return_eigenvectors = False)[0]
+        topeigen_val = spl.eigsh(L, k=1, which="LM", return_eigenvectors=False)[0]
         out = L.copy()
         out *= 1.0 / topeigen_val
         if signed:
             return out
         else:
             return abs(out)
-    @staticmethod        
-    def normalize_x_laplacian(L,Lx): # used to normalize the up or the down Laplacians
-        assert(L.shape[0] == L.shape[1])
-        topeig = spl.eigsh(L, k=1, which="LM", return_eigenvectors = False)[0]
+
+    @staticmethod
+    def normalize_x_laplacian(L, Lx):  # used to normalize the up or the down Laplacians
+        assert L.shape[0] == L.shape[1]
+        topeig = spl.eigsh(L, k=1, which="LM", return_eigenvectors=False)[0]
         out = Lx.copy()
-        out *= 1.0/topeig
-        return out        
+        out *= 1.0 / topeig
+        return out
 
     @staticmethod
     def normalize_adjacency(A_opt):
@@ -755,8 +777,8 @@ class SimplicialComplex:
             return normalized_operator
 
         else:
-            Di = np.sum(np.abs(A_opt), axis = 1)
-            Dj = np.sum(np.abs(A_opt), axis = 0)
+            Di = np.sum(np.abs(A_opt), axis=1)
+            Dj = np.sum(np.abs(A_opt), axis=0)
             inv_Dj = np.mat(np.diag(np.power(Dj, -0.5)))
             inv_Dj[np.isinf(inv_Dj)] = 0.0
             Di2 = np.mat(np.diag(np.power(Di, -0.5)))
@@ -766,7 +788,7 @@ class SimplicialComplex:
             return G
 
     @staticmethod
-    def asymmetric_xu_normalization(A_opt, is_sparse = True):
+    def asymmetric_xu_normalization(A_opt, is_sparse=True):
         """
         This version works for asymmetric matrices such as
         the coboundary matrices, as well as symmetric ones

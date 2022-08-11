@@ -1,4 +1,3 @@
-
 """
 # --------------------------------------------------------
 # Class supporting basic functions and constructions methods over Combinatorial Complex
@@ -6,30 +5,31 @@
 """
 
 
+import numbers
 import warnings
+from collections import OrderedDict
+from collections.abc import Iterable
+
 import networkx as nx
-from networkx.algorithms import bipartite
 import numpy as np
 import pandas as pd
-from scipy.sparse import csr_matrix
-from collections import OrderedDict
-from toponetx.exception import TopoNetXError
-import numbers
-from collections.abc import Iterable
-from hypernetx.classes.entity import Entity, EntitySet
 from hypernetx import Hypergraph
-from toponetx.classes.rankedentity import RankedEntity, RankedEntitySet
+from hypernetx.classes.entity import Entity, EntitySet
+from networkx.algorithms import bipartite
+from scipy.sparse import csr_matrix
 
+from toponetx.classes.ranked_entity import RankedEntity, RankedEntitySet
+from toponetx.exception import TopoNetXError
 
 __all__ = ["CombinatorialComplex"]
 
 
 class CombinatorialComplex:
- 
+
     """
-    
-    
-    
+
+
+
     Class for Combintorial Complex
         Example 0
             >> # CombinatorialComplex can be empty
@@ -37,7 +37,7 @@ class CombinatorialComplex:
         Example 1
             >> # from the constructor pass a list of cells and a list of correponding ranks
             >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
-        Example 2    
+        Example 2
             >>> x1 = RankedEntity('x1',rank = 0)
             >>> x2 = RankedEntity('x2',rank = 0)
             >>> x3 = RankedEntity('x3',rank = 0)
@@ -47,14 +47,14 @@ class CombinatorialComplex:
             >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
             >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
             >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-            >>> y5 = RankedEntity('y5',[x4,x5], rank = 1) 
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)    
+            >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
+            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             >>> # define the Ranked Entity Set
             >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w] )
             >>> # pass the ranked entity set to the CombinatorialComplex constructor
             >>> CC = CombinatorialComplex(cells=E)
 
-        Example 2    
+        Example 2
             >>> x1 = RankedEntity('x1',rank = 0)
             >>> x2 = RankedEntity('x2',rank = 0)
             >>> x3 = RankedEntity('x3',rank = 0)
@@ -64,8 +64,8 @@ class CombinatorialComplex:
             >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
             >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
             >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-            >>> y5 = RankedEntity('y5',[x4,x5], rank = 1) 
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)    
+            >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
+            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             # define the CombinatorialComplex from a list of cells
             >>> CC = CombinatorialComplex(cells= [y1,y2,y3,y4,y5,w])
 
@@ -79,34 +79,29 @@ class CombinatorialComplex:
             >>> d["y2"] = RankedEntity('y2',[d['x2'],d['x3']], rank = 1)
             >>> d["y3"] = RankedEntity('y3',[d['x3'],d['x4']], rank = 1)
             >>> d["y4"]= RankedEntity('y4',[d['x4'],d['x1']], rank = 1)
-            >>> d["y5"] = RankedEntity('y5',[d['x4'],d['x5']], rank = 1) 
-            >>> d["w"] = RankedEntity('w',[d['x4'],d['x5'],d['x1']],rank = 2) 
+            >>> d["y5"] = RankedEntity('y5',[d['x4'],d['x5']], rank = 1)
+            >>> d["w"] = RankedEntity('w',[d['x4'],d['x5'],d['x1']],rank = 2)
             >>> # define the CombinatorialComplex from a dictionary of cells
             >>> CC = CombinatorialComplex(cells=d)
-            
+
     """
-    
-    
+
     def __init__(
-        self,
-        cells=None,
-        name=None,
-        ranks=None,
-        weights=None,
-        safe_insertion=False
+        self, cells=None, name=None, ranks=None, weights=None, safe_insertion=False
     ):
         if not name:
             self.name = ""
         else:
             self.name = name
 
-        
         if cells is None:
             setsystem = RankedEntitySet("_", elements=[])
         elif isinstance(cells, RankedEntitySet):
             setsystem = cells
         elif isinstance(cells, RankedEntity) and not isinstance(cells, RankedEntitySet):
-            RankedEntitySet("_", )
+            RankedEntitySet(
+                "_",
+            )
             setsystem = RankedEntitySet("_", cells.incidence_dict)
             setsystem.add(cells)
         elif isinstance(cells, dict):
@@ -116,43 +111,51 @@ class CombinatorialComplex:
         elif isinstance(cells, list) and ranks is None:
             for i in cells:
                 if not isinstance(i, RankedEntity):
-                    raise TopoNetXError("input cells elements must be ranked entities when ranks is None")
+                    raise TopoNetXError(
+                        "input cells elements must be ranked entities when ranks is None"
+                    )
             setsystem = RankedEntitySet("_", cells)
         elif isinstance(cells, tuple) and ranks is None:
             for i in cells:
                 if not isinstance(i, RankedEntity):
-                    raise TopoNetXError("input cells elements must be ranked entities when ranks is None")
+                    raise TopoNetXError(
+                        "input cells elements must be ranked entities when ranks is None"
+                    )
             setsystem = RankedEntitySet("_", cells)
         elif not isinstance(cells, RankedEntitySet):
-            assert(ranks is not None ) # ranks cannot be None
-            assert ( len(ranks) == len(cells)  ) # number of cells must be the same number of entities
+            assert ranks is not None  # ranks cannot be None
+            assert len(ranks) == len(
+                cells
+            )  # number of cells must be the same number of entities
             # If no ids are given, return default ids indexed by position in iterator
             # This should be an iterable of sets
-            cell_labels = [self.name+"c"+ str(x) for x in range(len(cells))]
-            
-            entities = []
-            for uid,element,rank in zip(cell_labels,cells,ranks):
-                assert(isinstance(rank,int))
-                if isinstance(element,numbers.Number):
-                    entities.append( (element, {"elements":[],"rank": rank}  ) )  
-                elif isinstance(element,Iterable):
-                    if len(element)==1: # e.g element=[0]
-                        if isinstance(element[0],numbers.Number): 
-                            entities.append( (element[0], {"elements":[] ,"rank": rank}  ) )
-                    else:    
-                        entities.append( (uid, {"elements":element ,"rank": rank}  ) )
+            cell_labels = [self.name + "c" + str(x) for x in range(len(cells))]
 
-            setsystem = RankedEntitySet("_", elements = OrderedDict(entities))
-            
+            entities = []
+            for uid, element, rank in zip(cell_labels, cells, ranks):
+                assert isinstance(rank, int)
+                if isinstance(element, numbers.Number):
+                    entities.append((element, {"elements": [], "rank": rank}))
+                elif isinstance(element, Iterable):
+                    if len(element) == 1:  # e.g element=[0]
+                        if isinstance(element[0], numbers.Number):
+                            entities.append(
+                                (element[0], {"elements": [], "rank": rank})
+                            )
+                    else:
+                        entities.append((uid, {"elements": element, "rank": rank}))
+
+            setsystem = RankedEntitySet("_", elements=OrderedDict(entities))
+
         self._ranks = sorted(tuple(setsystem.all_ranks))
         self.setsystem = setsystem
-        self._nodes = setsystem.skeleton(0,f"{self.name}:Nodes")
-        
-        self._cells = setsystem.skeleton(1,f"{self.name}:Cells",level="upper")
+        self._nodes = setsystem.skeleton(0, f"{self.name}:Nodes")
 
-        #self._skeletons = {i:setsystem.skeleton(i,f"{self.name}:X"+str(i)) for i in self._ranks[1:] }
-        #self._skeletons[0] = self._nodes        
- 
+        self._cells = setsystem.skeleton(1, f"{self.name}:Cells", level="upper")
+
+        # self._skeletons = {i:setsystem.skeleton(i,f"{self.name}:X"+str(i)) for i in self._ranks[1:] }
+        # self._skeletons[0] = self._nodes
+
     @property
     def cells(self):
         """
@@ -176,7 +179,6 @@ class CombinatorialComplex:
         """
         return self._nodes
 
-
     @property
     def incidence_dict(self):
         """
@@ -199,19 +201,18 @@ class CombinatorialComplex:
         tuple
 
         """
-        return self._ranks   
-    
-    def skeleton(self,k):
+        return self._ranks
+
+    def skeleton(self, k):
         if k == 0:
-            return self.nodes 
+            return self.nodes
         else:
             return self.cells.skeleton(k)
-  
 
     @property
     def dim(self):
         return max(self._ranks)
-    
+
     def __str__(self):
         """
         String representation of CC
@@ -248,7 +249,7 @@ class CombinatorialComplex:
 
     def __iter__(self):
         """
-        Iterate over the nodes of the combinatorial complex 
+        Iterate over the nodes of the combinatorial complex
 
         Returns
         -------
@@ -278,7 +279,7 @@ class CombinatorialComplex:
         Parameters
         ----------
         node : Entity or hashable
-            If hashable, then must be uid of node in combinatorial complex 
+            If hashable, then must be uid of node in combinatorial complex
 
         Returns
         -------
@@ -287,9 +288,7 @@ class CombinatorialComplex:
         """
         return self.neighbors(node)
 
-
-
-    def degree(self, node, rank =1):
+    def degree(self, node, rank=1):
         """
         The number of cells of certain rank that contain node.
 
@@ -308,14 +307,19 @@ class CombinatorialComplex:
         if node in self.nodes:
             memberships = set(self.nodes[node].memberships)
         else:
-            raise(print(f"The input node {node} is not an element of the node set."))
+            raise (print(f"The input node {node} is not an element of the node set."))
         if rank >= 0:
-            return len(set(e for e in memberships if e in self.cells and self.cells[e].rank == rank))
-        elif rank == None : 
+            return len(
+                set(
+                    e
+                    for e in memberships
+                    if e in self.cells and self.cells[e].rank == rank
+                )
+            )
+        elif rank == None:
             return len(memberships)
-        else: 
+        else:
             raise TopoNetXError("Rank must be non-negative integer")
-
 
     def size(self, cell, nodeset=None):
         """
@@ -332,13 +336,12 @@ class CombinatorialComplex:
         size : int
 
         """
-        
-        assert(isinstance(cell, RankedEntity ))
-        
+
+        assert isinstance(cell, RankedEntity)
+
         if cell not in self.cells:
             raise TopoNetXError("Input cell in not in cells of the CC")
-        
-        
+
         if nodeset:
             return len(set(nodeset).intersection(set(self.cells[cell])))
         else:
@@ -391,7 +394,6 @@ class CombinatorialComplex:
         """
         return len(self.nodes)
 
-
     def neighbors(self, node, s=1):
         """
         The nodes in combinatorial complex which share s cell(s) with node.
@@ -421,16 +423,16 @@ class CombinatorialComplex:
             >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
             >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
             >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)    
+            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             >>> # define the Ranked Entity Set
             >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,z,w] )
             >>> CC = CombinatorialComplex(cells=E)
-            
+
             >>> CC.neighbors('x1')
                 ['x4', 'x5', 'x2']
             >>> CC.neighbors('x1',2)
-                ['x4', 'x5']   
-            
+                ['x4', 'x5']
+
         """
         if not node in self.nodes:
             print(f"Node is not in combintorial complex {self.name}.")
@@ -438,9 +440,7 @@ class CombinatorialComplex:
         node = self.nodes[
             node
         ].uid  # this allows node to be an Entity instead of a string
-        memberships = set(self.nodes[node].memberships).intersection(
-            self.cells.uidset
-        )
+        memberships = set(self.nodes[node].memberships).intersection(self.cells.uidset)
         cellset = {e for e in memberships if self.cells[e].rank >= s}
 
         neighborlist = set()
@@ -476,6 +476,7 @@ class CombinatorialComplex:
         return self.dual().neighbors(node, s=s)
         """
         raise NotImplementedError
+
     def remove_node(self, node):
         """
         Removes node from cells and deletes reference in combinatorial complex nodes
@@ -483,13 +484,13 @@ class CombinatorialComplex:
         Parameters
         ----------
         node : hashable or RankedEntity
-            a node in combinatorial complex 
+            a node in combinatorial complex
 
         Returns
         -------
         Combinatorial Complex : CombinatorialComplex
         Example:
-            
+
             >>> x1 = RankedEntity('x1',rank = 0)
             >>> x2 = RankedEntity('x2',rank = 0)
             >>> x3 = RankedEntity('x3',rank = 0)
@@ -500,11 +501,11 @@ class CombinatorialComplex:
             >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
             >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
             >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)   
+            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             >>> # define the Ranked Entity Set
             >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w] )
-            >>> CC = CombinatorialComplex(cells=E)   
-            
+            >>> CC = CombinatorialComplex(cells=E)
+
             CC.remove_node(x1)
 
         """
@@ -513,11 +514,13 @@ class CombinatorialComplex:
         else:
             if not isinstance(node, RankedEntity):
                 node = self._nodes[node]
-            for cell in node.memberships: # supposed to be the cells that contain that node.
+            for (
+                cell
+            ) in node.memberships:  # supposed to be the cells that contain that node.
                 if cell in self._cells:
                     self._cells[cell].remove(node)
-                    if len(self._cells[cell])==0: # if we delete all elements 
-                                                  # of the cell, then its not a valid cell
+                    if len(self._cells[cell]) == 0:  # if we delete all elements
+                        # of the cell, then its not a valid cell
                         self.remove_cell(cell)
             self._nodes.remove(node)
         return self
@@ -540,7 +543,7 @@ class CombinatorialComplex:
             self.remove_node(node)
         return self
 
-    def add_node(self,node):
+    def add_node(self, node):
 
         if node in self._cells:
             raise TopoNetXError("Node already an cell.")
@@ -548,10 +551,12 @@ class CombinatorialComplex:
             self._nodes[node].__dict__.update(node.properties)
         elif node not in self._nodes:
             if isinstance(node, RankedEntity):
-                self._nodes.add(RankedEntity(node.uid, rank = node.rank, **node.properties))
+                self._nodes.add(
+                    RankedEntity(node.uid, rank=node.rank, **node.properties)
+                )
             else:
-                self._nodes.add(RankedEntity(node,rank = 0 ))
-                
+                self._nodes.add(RankedEntity(node, rank=0))
+
     def _add_nodes_from(self, nodes):
         """
         Private helper method instantiates new nodes when cells added to combinatorial complex.
@@ -575,8 +580,8 @@ class CombinatorialComplex:
             If hashable the cell returned will be empty.
         uid : unique identifier that identifies the cell
         rank : rank of a cell
-        
-        
+
+
 
         Returns
         -------
@@ -584,16 +589,16 @@ class CombinatorialComplex:
 
         Notes
         -----
-        
+
         -Rank must be None when input cell is a RankedEntity
         -Rank must be positive integer when cell is hashable
         -Rank must be larger than or equal to one for all cells
-        
+
         When adding an cell to a combinatorial complex children must be removed
         so that nodes do not have elements.
         Each node (element of cell) must be instantiated as a node,
         making sure its uid isn't already present in the self.
-        If an added cell contains nodes that cannot be added to combinatorial complex 
+        If an added cell contains nodes that cannot be added to combinatorial complex
         then an error will be raised.
 
         """
@@ -601,36 +606,34 @@ class CombinatorialComplex:
             if cell in self._cells:
                 warnings.warn("Cannot add cell. Cell uid already in CC")
             elif cell in self._nodes:
-                warnings.warn("Cannot add cell. Cell uid is already a Node")            
-            assert(rank is None) # rank is already stored in the input RankedEntity
+                warnings.warn("Cannot add cell. Cell uid is already a Node")
+            assert rank is None  # rank is already stored in the input RankedEntity
 
             if len(cell) > 0:
-                zeo_cells = cell.skeleton(0) 
-                for c in zeo_cells:    
+                zeo_cells = cell.skeleton(0)
+                for c in zeo_cells:
                     self.add_node(c)
                 self._cells.add(cell)
                 for n in cell.elements:
                     self._nodes[n].memberships[cell.uid] = self._cells[cell.uid]
             else:
-                # len of cell is zero 
+                # len of cell is zero
                 warnings.warn("Cell is empty, input cell will not be inserted.")
         else:
-            assert(isinstance(rank,int)) # rank must be an integer
-            assert(rank > 0) # rank must be larger than or equal to 1 for all cells
+            assert isinstance(rank, int)  # rank must be an integer
+            assert rank > 0  # rank must be larger than or equal to 1 for all cells
             if uid is not None:
-                name= uid 
-            else:    
-                id_=len(self._cells)
-                name ='c_'+str(id_+1)
-                
-            c = RankedEntity(uid = name,
-                                elements = cell,
-                                rank = rank) 
-            for i in c: # upate table of nodes
+                name = uid
+            else:
+                id_ = len(self._cells)
+                name = "c_" + str(id_ + 1)
+
+            c = RankedEntity(uid=name, elements=cell, rank=rank)
+            for i in c:  # upate table of nodes
                 self._nodes.add(i)
-            for n in c.elements: # update membership
+            for n in c.elements:  # update membership
                 self._nodes[n].memberships[c.uid] = self._cells[c.uid]
-            self._cells.add(c) # add cell
+            self._cells.add(c)  # add cell
         return self
 
     def add_cells_from(self, cell_set):
@@ -677,7 +680,7 @@ class CombinatorialComplex:
                 self._cells[cell].add(self._nodes[node])
             else:
                 if not isinstance(node, RankedEntity):
-                    node = RankedEntity(node,rank=0)
+                    node = RankedEntity(node, rank=0)
                 else:
                     node = RankedEntity(node.uid, rank=0, **node.properties)
                 self._cells[cell].add(node)
@@ -732,7 +735,9 @@ class CombinatorialComplex:
             self.remove_cell(cell)
         return self
 
-    def incidence_matrix(self,r,k,incidence_type = "up", weight=None, sparse=True, index=False):
+    def incidence_matrix(
+        self, r, k, incidence_type="up", weight=None, sparse=True, index=False
+    ):
         """
         An incidence matrix for the CC indexed by nodes x cells.
 
@@ -758,26 +763,30 @@ class CombinatorialComplex:
             Dictionary identifying columns with cells
 
         """
-        weight = False # not implemented at this moment
-        if r>0:    
-            return self.cells.incidence_matrix(r,k, incidence_type=incidence_type, sparse=sparse, index=index)
+        weight = False  # not implemented at this moment
+        if r > 0:
+            return self.cells.incidence_matrix(
+                r, k, incidence_type=incidence_type, sparse=sparse, index=index
+            )
         else:
-            cells = self.cells 
-            for x in self.nodes: # add the nodes
-                cells.add_element(x,safe_insert=False)
-            return cells.incidence_matrix(r,k,incidence_type=incidence_type, sparse=sparse, index=index)
+            cells = self.cells
+            for x in self.nodes:  # add the nodes
+                cells.add_element(x, safe_insert=False)
+            return cells.incidence_matrix(
+                r, k, incidence_type=incidence_type, sparse=sparse, index=index
+            )
 
     @staticmethod
     def _incidence_to_adjacency(M, s=1, weights=False):
         """
-        Helper method to obtain adjacency matrix from 
+        Helper method to obtain adjacency matrix from
         boolean incidence matrix for s-metrics.
         Self loops are not supported.
         The adjacency matrix will define an s-linegraph.
 
         Parameters
         ----------
-        M : scipy.sparse.csr.csr_matrix 
+        M : scipy.sparse.csr.csr_matrix
             incidence matrix of 0's and 1's
 
         s : int, optional, default: 1
@@ -792,7 +801,7 @@ class CombinatorialComplex:
 
         """
         M = csr_matrix(M)
-        weights = False ## currently weighting is not supported
+        weights = False  ## currently weighting is not supported
 
         if weights == False:
             A = M.dot(M.transpose())
@@ -800,15 +809,16 @@ class CombinatorialComplex:
             A = (A >= s) * 1
         return A
 
-
-    def adjacency_matrix(self,r,k, s=1, weights=False,index=False):## , weights=False):
+    def adjacency_matrix(
+        self, r, k, s=1, weights=False, index=False
+    ):  ## , weights=False):
         """
         The sparse weighted :term:`s-adjacency matrix`
 
         Parameters
         ----------
         r,k : two ranks for skeletons in the input combinatorial complex, such that r<k
-        
+
         s : int, optional, default: 1
 
         index: boolean, optional, default: False
@@ -824,66 +834,66 @@ class CombinatorialComplex:
         -------
         If index is True
             adjacency_matrix : scipy.sparse.csr.csr_matrix
-    
+
             row dictionary : dict
-            
-        If index if False    
-            
+
+        If index if False
+
             adjacency_matrix : scipy.sparse.csr.csr_matrix
         """
-        
+
         if k is not None:
-            
-            assert(r<k)
+
+            assert r < k
         if index:
-            MP, row, col = self.incidence_matrix(r,k, sparse = True, index=index)
+            MP, row, col = self.incidence_matrix(r, k, sparse=True, index=index)
         else:
-            MP = self.incidence_matrix(r,k,incidence_type='up', sparse = True, index=index)
-        weights = False ## currently weighting is not supported
-        A = self._incidence_to_adjacency(MP,s=s,weights=weights)
-        if index:    
+            MP = self.incidence_matrix(
+                r, k, incidence_type="up", sparse=True, index=index
+            )
+        weights = False  ## currently weighting is not supported
+        A = self._incidence_to_adjacency(MP, s=s, weights=weights)
+        if index:
             return A, row
         else:
             return A
-    
-    def cell_adjacency_matrix(self,index=False, s=1, weights=False):
-        
-        
-        weights=False  ## Currently default weights are not supported
 
-        M = self.incidence_matrix(0, None,incidence_type='up',index=index)
+    def cell_adjacency_matrix(self, index=False, s=1, weights=False):
+
+        weights = False  ## Currently default weights are not supported
+
+        M = self.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
-            
+
             A = self._incidence_to_adjacency(M[0].transpose(), s=s)
-                
+
             return A, M[2]
         else:
             A = self._incidence_to_adjacency(M.transpose(), s=s)
             return A
 
+    def node_adjacency_matrix(self, index=False, s=1, weights=False):
 
-    def node_adjacency_matrix(self,index=False, s=1, weights=False):
+        weights = False  ## Currently default weights are not supported
 
-        weights=False  ## Currently default weights are not supported
-
-        M = self.incidence_matrix(0, None,incidence_type='up',index=index)
+        M = self.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
-            
+
             A = self._incidence_to_adjacency(M[0], s=s)
-                
+
             return A, M[1]
         else:
             A = self._incidence_to_adjacency(M, s=s)
-            return A       
+            return A
 
-    def coadjacency_matrix(self,r,k, s=1, weights=False,index=False):
+    def coadjacency_matrix(self, r, k, s=1, weights=False, index=False):
         """
         The sparse weighted :term:`s-coadjacency matrix`
 
         Parameters
         ----------
         r,k : two ranks for skeletons in the input combinatorial complex, such that r>k
-        
+
         s : int, optional, default: 1
 
         index: boolean, optional, default: False
@@ -899,30 +909,33 @@ class CombinatorialComplex:
         -------
         If index is True
             coadjacency_matrix : scipy.sparse.csr.csr_matrix
-    
+
             row dictionary : dict
-            
-        If index if False    
-            
+
+        If index if False
+
             coadjacency_matrix : scipy.sparse.csr.csr_matrix
         """
         if k is not None:
-            assert(r>k)
+            assert r > k
         if index:
-            
-            MP, row, col = self.incidence_matrix(k,r, incidence_type='down',sparse = True, index=index)
+
+            MP, row, col = self.incidence_matrix(
+                k, r, incidence_type="down", sparse=True, index=index
+            )
         else:
-            MP = self.incidence_matrix(r,k,incidence_type='down',  sparse = True, index=index)
-        weights = False ## currently weighting is not supported
+            MP = self.incidence_matrix(
+                r, k, incidence_type="down", sparse=True, index=index
+            )
+        weights = False  ## currently weighting is not supported
         if weights == False:
             A = MP.T.dot(MP)
             A.setdiag(0)
             A = (A >= s) * 1
-        if index:    
+        if index:
             return A, col
         else:
             return A
-
 
     def collapse_cells(
         self,
@@ -969,26 +982,24 @@ class CombinatorialComplex:
             >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
             >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
             >>> y6 = RankedEntity('y6',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)    
+            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             >>> # define the Ranked Entity Set
             >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w,y6] )
-            >>> CC = CombinatorialComplex(cells=E)        
+            >>> CC = CombinatorialComplex(cells=E)
 
 
         """
         temp = self.cells.collapse_identical_elements(
-                "_", return_equivalence_classes=return_equivalence_classes
-            )
+            "_", return_equivalence_classes=return_equivalence_classes
+        )
         if return_equivalence_classes:
-            return CombinatorialComplex(cells = temp[0], name = name), temp[1]
+            return CombinatorialComplex(cells=temp[0], name=name), temp[1]
         else:
-            return CombinatorialComplex(cells = temp, name = name)
-
-
+            return CombinatorialComplex(cells=temp, name=name)
 
     def restrict_to_cells(self, cellset, name=None):
         """
-        Constructs a combinatorial complex using a subset of the cells in combinatorial complex 
+        Constructs a combinatorial complex using a subset of the cells in combinatorial complex
 
         Parameters
         ----------
@@ -1013,13 +1024,13 @@ class CombinatorialComplex:
             >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
             >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
             >>> y6 = RankedEntity('y6',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)    
+            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             >>> # define the Ranked Entity Set
             >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w,y6] )
-            >>> CC = CombinatorialComplex(cells=E)  
+            >>> CC = CombinatorialComplex(cells=E)
         """
 
-        RNS= self.cells.restrict_to(element_subset=cellset,name=name)
+        RNS = self.cells.restrict_to(element_subset=cellset, name=name)
         return CombinatorialComplex(cells=RNS, name=name)
 
     def restrict_to_nodes(self, nodeset, name=None):
@@ -1050,10 +1061,10 @@ class CombinatorialComplex:
             >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
             >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
             >>> y6 = RankedEntity('y6',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)    
+            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             >>> # define the Ranked Entity Set
             >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w,y6] )
-            >>> CC = CombinatorialComplex(cells=E)  
+            >>> CC = CombinatorialComplex(cells=E)
             >>> CC.restrict_to_nodes([x3,x2])
         """
         memberships = set()
@@ -1063,22 +1074,26 @@ class CombinatorialComplex:
             if node in self.nodes:
                 memberships.update(set(self.nodes[node].memberships))
         newcellset = []
-        tempp=[]
+        tempp = []
         for e in memberships:
             if e in self.cells:
                 temp = self.cells[e].skeleton(0).uidset.intersection(innernodes)
-                tempp.append([e,temp])
+                tempp.append([e, temp])
 
                 if temp:
-                    newcellset.append( RankedEntity(e, 
-                                                    elements = list(temp), 
-                                                    rank=self.cells[e].rank,
-                                                    **self.cells[e].properties))
-           
-        return CombinatorialComplex(RankedEntitySet("",newcellset), name=name)
+                    newcellset.append(
+                        RankedEntity(
+                            e,
+                            elements=list(temp),
+                            rank=self.cells[e].rank,
+                            **self.cells[e].properties,
+                        )
+                    )
+
+        return CombinatorialComplex(RankedEntitySet("", newcellset), name=name)
 
     def to_hypergraph(self):
-        
+
         """
         Example
             >>> x1 = RankedEntity('x1',rank = 0)
@@ -1094,19 +1109,23 @@ class CombinatorialComplex:
             >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             >>> # define the Ranked Entity Set
             >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w])
-            >>> CC = CombinatorialComplex(cells=E)   
+            >>> CC = CombinatorialComplex(cells=E)
             >>> HG = CC.to_hypergraph()
-        """      
-        CC=self.collapse_cells()
-        cells=[]
+        """
+        CC = self.collapse_cells()
+        cells = []
         for n in self.cells:
-            cells.append( Entity(n,elements=CC.cells[n].elements,**CC.cells[n].properties ) ) 
-            
-        E = EntitySet('CC_to_HG',elements=cells)
-        HG=Hypergraph(E) 
-        nodes=[]
+            cells.append(
+                Entity(n, elements=CC.cells[n].elements, **CC.cells[n].properties)
+            )
+
+        E = EntitySet("CC_to_HG", elements=cells)
+        HG = Hypergraph(E)
+        nodes = []
         for n in self.nodes:
-            nodes.append( Entity(n,elements=CC.nodes[n].elements,**CC.nodes[n].properties ) )
+            nodes.append(
+                Entity(n, elements=CC.nodes[n].elements, **CC.nodes[n].properties)
+            )
         HG._add_nodes_from(nodes)
         return HG
 
@@ -1145,21 +1164,17 @@ class CombinatorialComplex:
             >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
             >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
             >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)    
+            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             >>> # define the Ranked Entity Set
             >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w] )
-            >>> CC = CombinatorialComplex(cells=E)   
+            >>> CC = CombinatorialComplex(cells=E)
 
         """
-        M = self.incidence_matrix(0, None,incidence_type='up')
+        M = self.incidence_matrix(0, None, incidence_type="up")
         if cells:
-            A= self._incidence_to_adjacency(
-                M, s=s
-            )
+            A = self._incidence_to_adjacency(M, s=s)
         else:
-            A = self._incidence_to_adjacency(
-                M.transpose(), s=s
-            )
+            A = self._incidence_to_adjacency(M.transpose(), s=s)
         g = nx.from_scipy_sparse_matrix(A)
         return nx.is_connected(g)
 
@@ -1180,9 +1195,8 @@ class CombinatorialComplex:
                 for n in zero_elements:
                     if self.degree(n) == 1:
                         L.append(cell)
-        return L                
-                        
- 
+        return L
+
     def remove_singletons(self, name=None):
         """
         Constructs clone of CC with singleton cells removed.
@@ -1194,7 +1208,7 @@ class CombinatorialComplex:
         Returns
         -------
         new CC : CC
-        
+
         Example :
             >>> x1 = RankedEntity('x1',rank = 0)
             >>> x2 = RankedEntity('x2',rank = 0)
@@ -1207,10 +1221,10 @@ class CombinatorialComplex:
             >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
             >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
             >>> y6 = RankedEntity('y6',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)    
+            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
             >>> # define the Ranked Entity Set
             >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w,y6] )
-            >>> CC = CombinatorialComplex(cells=E)  
+            >>> CC = CombinatorialComplex(cells=E)
             >>> CC_with_singletons = CC.restrict_to_nodes([x3,x2])
             >>> CC_no_singltons = CC_with_singletons.remove_singletons()
         """
@@ -1259,7 +1273,6 @@ class CombinatorialComplex:
 
         """
 
-
         if cells:
             A, coldict = self.cell_adjacency_matrix(s=s, index=True)
             G = nx.from_scipy_sparse_matrix(A)
@@ -1280,7 +1293,7 @@ class CombinatorialComplex:
     def s_component_subgraphs(self, s=1, cells=True, return_singletons=False):
         """
         Returns a generator for the induced subgraphs of s_connected components.
-        Removes singletons unless return_singletons is set to True. 
+        Removes singletons unless return_singletons is set to True.
         Parameters
         ----------
         s : int, optional, default: 1
@@ -1454,7 +1467,7 @@ class CombinatorialComplex:
 
     def cell_diameter(self, s=1):
         """
-        Returns the length of the longest shortest s-walk between cells in combinatorial complex 
+        Returns the length of the longest shortest s-walk between cells in combinatorial complex
 
         Parameters
         ----------
@@ -1541,10 +1554,10 @@ class CombinatorialComplex:
         Parameters
         ----------
         source : cell.uid or cell
-            an cell in the combinatorial complex 
+            an cell in the combinatorial complex
 
         target : cell.uid or cell
-            an cell in the combinatorial complex 
+            an cell in the combinatorial complex
 
         s : positive integer
             the number of intersections between pairwise consecutive cells
@@ -1600,11 +1613,13 @@ class CombinatorialComplex:
         sort_columns : bool, optional, default=True
             sort columns based on hashable cell names
         cell_weights : bool, optional, default=True
-           
+
 
         """
 
-        mat, rdx, cdx = self.cells.incidence_matrix(0,None,incidence_type="up",index=True)
+        mat, rdx, cdx = self.cells.incidence_matrix(
+            0, None, incidence_type="up", index=True
+        )
         index = [rdx[i] for i in rdx]
         columns = [cdx[j] for j in cdx]
         df = pd.DataFrame(mat.todense(), index=index, columns=columns)
@@ -1653,7 +1668,7 @@ class CombinatorialComplex:
 
         Returns
         -------
-         : CombinatorialComplex 
+         : CombinatorialComplex
 
         Note
         ----
@@ -1691,9 +1706,6 @@ class CombinatorialComplex:
         else:
             cellnames = np.array([f"e{jdx}" for jdx in range(M.shape[1])])
 
-
-
-
         # Remove empty column indices from M columns and cellnames
         colidx = np.array([jdx for jdx in range(M.shape[1]) if any(M[:, jdx])])
         colidxsum = np.sum(colidx)
@@ -1705,9 +1717,7 @@ class CombinatorialComplex:
             edict = dict()
             # Create an EntitySet of cells from M
             for jdx, e in enumerate(cellnames):
-                edict[e] = nodenames[
-                    [idx for idx in range(M.shape[0]) if M[idx, jdx]]
-                ]
+                edict[e] = nodenames[[idx for idx in range(M.shape[0]) if M[idx, jdx]]]
             return Hypergraph(edict, name=name)
 
     @classmethod
@@ -1832,4 +1842,3 @@ class CombinatorialComplex:
 
 
 # end of CC class
-
