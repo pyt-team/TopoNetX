@@ -18,8 +18,56 @@ __all__ = ["RankedEntity","RankedEntitySet"]
 
 class RankedEntity(Entity):
     """
-    Base class for objects used in building ranked cell objects 
+    Base class for objects used in building ranked cell objects including cell complexes, 
+    simplicial complexes and combinatorial complexes.
+
+
+   Parameters
+   ----------
+   uid : hashable
+       a unique identifier
+
+   elements : list or dict, optional, default: None
+       a list of entities with identifiers different than uid and/or
+       hashables different than uid, see `Honor System`_
+
+   rankedentity : Entity
+       a RankedEntity object to be cloned into a new RankedEntity with uid. If the uid is the same as
+       RankedEntity.uid then the entities will not be distinguishable and error will be raised.
+       The `elements` in the signature will be added to the cloned Rankedentity.
+
+   weight : float, optional, default : 1
+   props : keyword arguments, optional, default: {}
+       properties belonging to the entity added as key=value pairs.
+       Both key and value must be hashable.
+
+   Notes
+   -----
+
+   A RankedEntity is a container-like object, which has a unique identifier and
+   may contain elements and have properties. 
+   A RankedEntity must have a rank, a non-negative integer that describes the rank of the entity.
+   A RankedEntity may contain other ranked entities such that ranks are consistent with set inclusions:
+       if entity1 <= entity2 then rank(entity1) <= rank(entity2).
+       
+   The RankedEntity class was created as a generic object providing structure for
+   CombinatorialComplex nodes and edges.
+   The RankedEntity class is built on the top of the hypernetx.classes.entity class
+
+   - A RankedEntity is distinguished by its identifier (sortable,hashable) :func:`RankedEntity.uid`
+   - A RankedEntity is a container for other ranked entities but may not contain itself, :func:`RankedEntity.elements`
+   - A RankedEntity may contain other ranked entities such that ranks are consistent with set inclusions:
+          if entity1 <= entity2 then rank(entity1) <= rank(entity2).
+   - A RankedEntity has properties :func:`RankedEntity.properties`
+   - A RankedEntity has memberships to other entities, :func:`RankedEntity.memberships`.
+   - A RankedEntity has children, :func:`RankedEntity.children`, which are the elements of its elements.
+   - :func:`RankedEntity.children` are registered in the :func:`RankedEntity.registry`.
+   - All descendents of RankedEntity are registered in :func:`RankedEntity.fullregistry()`.    
+    
     Examples
+    --------
+    
+    
         >>> x1 = RankedEntity('x1',rank = 0)
         >>> x2 = RankedEntity('x2',rank = 0)
         >>> x3 = RankedEntity('x3',rank = 0)
@@ -58,6 +106,9 @@ class RankedEntity(Entity):
         >>> d['y3'] = RankedEntity('y3',[x2,x3], rank = 1)
         >>> z = RankedEntity('z',d,rank = 3)
         
+    See Also
+    --------
+    RankedEntitySet        
     """
 
     def __init__(self, uid , elements=[], rank=None, rankedentity=None, weight=1.0, safe_insert=True, **props):
@@ -145,7 +196,10 @@ class RankedEntity(Entity):
         return self._rank  
 
     def set_safe_insert(self,value):
-        assert(isinstance(value, bool)) # value must be boolian
+
+        
+        if not isinstance(value, bool):
+            raise TopoNetXError(f" value must be a boolean got {value}.")
         self._safe_insert = value        
 
 
@@ -549,16 +603,16 @@ class RankedEntity(Entity):
 
     def remove_element(self, item):
         """
-        Removes item from entity and reference to ranked entity from
+        Removes item from ranked entity and reference to ranked entity from
         item.memberships
 
         Parameters
         ----------
-        item : Hashable or Entity
+        item : Hashable or RankedEntity
 
         Returns
         -------
-        self : Entity
+        self : RankedEntity
 
 
         """
@@ -575,7 +629,6 @@ class RankedEntity(Entity):
 
 class RankedEntitySet(RankedEntity):
     """
-    .. _entityset:
 
     Parameters
     ----------
@@ -585,11 +638,15 @@ class RankedEntitySet(RankedEntity):
     elements : list or dict, optional, default: None
         a list of entities with identifiers different than uid and/or
         hashables different than uid.
+    safe_insert : determine if elements inserted into the ranked entity set satisfies the 
+                  combintorial complex condition : ent1<=ent2 then rank(ent1)<=rank(ent2)  
 
     props : keyword arguments, optional, default: {}
         properties belonging to the entity added as key=value pairs.
         Both key and value must be hashable.
+        
     Examples:
+    ---------    
         >>> # example1
         >>> a = RankedEntity('a',[1,2,3],1)     
         >>> b = RankedEntity('b',[2,3],1)     
@@ -655,6 +712,20 @@ class RankedEntitySet(RankedEntity):
     def _incidence_matrix_helper(self,children,uidset,sparse=True, index=False):
         
         """
+        
+       Parameters
+       ----------
+       
+       Returns
+       -------
+       
+       Notes
+       -----
+       
+       Examples
+       --------
+        
+        
         helper to create incidence between two sets of RankedEntities children and uidset
         
         uidset.uidset <= children.uidset
@@ -743,7 +814,8 @@ class RankedEntitySet(RankedEntity):
         Notes
         -----
 
-        Example: ::
+        Examples: 
+        ---------    
                 # example_1
                 >>> a = RankedEntity('a',[1,2,3],1)     
                 >>> b = RankedEntity('b',[2,3],1)     
@@ -819,7 +891,7 @@ class RankedEntitySet(RankedEntity):
 
         Returns
         -------
-        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        adjacency_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
 
         row dictionary : dict
             Dictionary identifying row with item in entityset's children
@@ -830,7 +902,8 @@ class RankedEntitySet(RankedEntity):
         Notes
         -----
 
-        Example: ::
+        Examples:
+        ---------    
                 # example_1
                 >>> a = RankedEntity('a',[1,2,3],1)     
                 >>> b = RankedEntity('b',[2,3],1)     
@@ -903,7 +976,7 @@ class RankedEntitySet(RankedEntity):
 
         Returns
         -------
-        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        coadjacency_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
 
         column dictionary of the associted incidence matrix : dict
             Dictionary identifying column with item in entityset's uidset
@@ -911,7 +984,8 @@ class RankedEntitySet(RankedEntity):
         Notes
         -----
 
-        Example: ::
+        Example:
+        ---------    
                 # example_1
                 >>> a = RankedEntity('a',[1,2,3],1)     
                 >>> b = RankedEntity('b',[2,3],1)     
@@ -1035,7 +1109,7 @@ class RankedEntitySet(RankedEntity):
         If use_reps is set to True a representative element of the equivalence class is
         used as identifier instead of the frozenset.
 
-        Example: ::
+        Examples:
             >>> x1 = RankedEntity('x1',rank = 0)
             >>> x2 = RankedEntity('x2',rank = 0)
             >>> x3 = RankedEntity('x3',rank = 0)
@@ -1070,7 +1144,7 @@ class RankedEntitySet(RankedEntity):
             for l in v:
                 uniqe_reps[l] = e
 
-        new_entity_dict=dict()
+        new_entity_dict = dict()
         for k,v in shared_children.items():
             e = v.pop()
             new_entity_dict[e] = {}

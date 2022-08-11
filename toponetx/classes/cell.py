@@ -4,7 +4,7 @@
 
 
 """
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from collections import Counter,deque
 from itertools import zip_longest
 
@@ -41,9 +41,7 @@ class Cell():
                                   +" input cell violates the regularity condition.")
             _adjdict[e[0]] = e[1]
         self.nodes = elements    
-    
-        
-    
+
     # Set methods
     def __len__(self):
         return len(self._edges_cell)
@@ -75,19 +73,20 @@ class Cell():
         """
         return f" Boundary edges : {self._edges_cell} "
 
-
-
 class CellView():
     """A CellView class for cells of a CellComplex
     Parameters
-    ==========
+    ----------
     name : str
+    
+    
     Examples
-    CV = CellView()
-    CV.insert_cell ( (1,2,3,4) )
-    CV.insert_cell ( (2,3,4,1) )
-    CV.insert_cell ( (1,2,3,4) )
-    CV.insert_cell ( (1,2,3,6) )
+    --------   
+         >>> CV = CellView()
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (2,3,4,1) )
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (1,2,3,6) )
     """
 
     def __init__(self,name = None):

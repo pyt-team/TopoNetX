@@ -4,15 +4,10 @@ Regular 2d Cell Complex
 
 
 import warnings
-import pickle
-import numbers
 import networkx as nx
 from networkx.algorithms import bipartite
 import numpy as np
-import pandas as pd
-from scipy.sparse import issparse, coo_matrix, dok_matrix, csr_matrix
-from collections import OrderedDict, defaultdict
-from collections import Counter,deque
+from scipy.sparse import csr_matrix
 from collections.abc import Iterable
 from itertools import zip_longest
 from hypernetx import Hypergraph
@@ -595,7 +590,7 @@ class CellComplex:
                     return False
         return True    
 
-    def boundary_matrix(self,d, sign=True, weights=None, index=False):
+    def incidence_matrix(self,d, sign=True, weights=None, index=False):
         """
         An incidence matrix for the CC indexed by nodes x cells.
 
@@ -612,7 +607,7 @@ class CellComplex:
 
         Returns
         -------
-        boundary_matrix : scipy.sparse.csr.csr_matrix
+        incidence_matrix : scipy.sparse.csr.csr_matrix
 
         row dictionary : dict
             Dictionary identifying rows with nodes
@@ -624,8 +619,8 @@ class CellComplex:
         >>> CX.add_cell([1,2,3,5,6],rank=2)
         >>> CX.add_cell([1,2,4,5,3,0],rank=2)
         >>> CX.add_cell([1,2,4,9,3,0],rank=2)
-        >>> B1 = CX.boundary_matrix(1)
-        >>> B2 = CX.boundary_matrix(2)
+        >>> B1 = CX.incidence_matrix(1)
+        >>> B2 = CX.incidence_matrix(2)
         >>> B1.dot(B2).todense()
         
         """
@@ -724,8 +719,8 @@ class CellComplex:
         >>> CX.add_cell([1,2,3,5,6],rank=2)
         >>> CX.add_cell([1,2,4,5,3,0],rank=2)
         >>> CX.add_cell([1,2,4,9,3,0],rank=2)
-        >>> B1 = CX.boundary_matrix(1)
-        >>> B2 = CX.boundary_matrix(2)
+        >>> B1 = CX.incidence_matrix(1)
+        >>> B2 = CX.incidence_matrix(2)
 
         """
 
@@ -741,14 +736,14 @@ class CellComplex:
 
     def hodge_laplacian_matrix(self, d, signed = True,index=False):
         if d == 0:
-            B_next = self.boundary_matrix(d + 1)
+            B_next = self.incidence_matrix(d + 1)
             L = B_next @ B_next.transpose()
         elif d < 2:
-            B_next = self.boundary_matrix(d + 1)
-            B = self.boundary_matrix(d)
+            B_next = self.incidence_matrix(d + 1)
+            B = self.incidence_matrix(d)
             L = B_next @ B_next.transpose() + B.transpose() @ B
         elif d == self.maxdim:
-            B = self.boundary_matrix(d)
+            B = self.incidence_matrix(d)
             L = B.transpose() @ B
         else:
             raise ValueError(
@@ -761,10 +756,10 @@ class CellComplex:
 
     def up_laplacian_matrix(self, d, signed = True):
         if d == 0:
-            B_next = self.boundary_matrix(d + 1)
+            B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
         elif d < self.maxdim:
-            B_next = self.boundary_matrix(d + 1)
+            B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
         else:
 
@@ -778,7 +773,7 @@ class CellComplex:
 
     def down_laplacian_matrix(self, d, signed = True):
         if d <= self.maxdim and d > 0:
-            B = self.boundary_matrix(d)
+            B = self.incidence_matrix(d)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
@@ -808,8 +803,8 @@ class CellComplex:
         else:
             return abs(L_down)
         
-    def k_hop_boundary_matrix(self, d,k):
-        Bd = self.boundary_matrix(d , signed = True)
+    def k_hop_incidence_matrix(self, d,k):
+        Bd = self.incidence_matrix(d , signed = True)
         if d < self.maxdim and d >= 0:
             Ad = self.adjacency_matrix(d, signed = True)
         if d <= self.maxdim and d > 0:
@@ -821,8 +816,8 @@ class CellComplex:
         else:            
             return Bd @ np.power(Ad,k)+ Bd @ np.power(coAd,k) 
 
-    def k_hop_coboundary_matrix(self, d,k):
-        BTd = self.coboundary_matrix(d , signed = True)
+    def k_hop_coincidence_matrix(self, d,k):
+        BTd = self.coincidence_matrix(d , signed = True)
         if d < self.maxdim and d >= 0:
             Ad = self.adjacency_matrix(d, signed = True)
         if d <= self.maxdim and d > 0:
@@ -872,9 +867,9 @@ class CellComplex:
        
 
         if index:
-            MP, row, col = self.boundary_matrix(d, sign = False, weights=weights, index=index)
+            MP, row, col = self.incidence_matrix(d, sign = False, weights=weights, index=index)
         else:
-            MP = self.boundary_matrix(d+1, sign = False, weights=weights, index=index)
+            MP = self.incidence_matrix(d+1, sign = False, weights=weights, index=index)
         weights = False ## currently weighting is not supported
         A = self._incidence_to_adjacency(MP,weights=weights)
         if index:    
@@ -912,7 +907,7 @@ class CellComplex:
         CC=self.to_combinatorial_complex()    
         weights=False  ## Currently default weights are not supported
 
-        M = CC.boundary_matrix(0, None,incidence_type='up',index=index)
+        M = CC.incidence_matrix(0, None,incidence_type='up',index=index)
         if index:
            
             A = CC._incidence_to_adjacency(M[0], s=s)

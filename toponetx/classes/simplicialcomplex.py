@@ -3,8 +3,6 @@
 Simplicial Complex Class
 
 """
-import sys
-from functools import lru_cache
 from itertools import combinations
 from warnings import warn
 from collections import OrderedDict
@@ -372,7 +370,7 @@ class SimplicialComplex:
 
     # ---------- operators ---------------#
 
-    def boundary_matrix_gudhi(self, d, signed = True, index =False):
+    def incidence_matrix_gudhi(self, d, signed = True, index =False):
         """
         get the boundary map using gudhi
         """
@@ -407,7 +405,7 @@ class SimplicialComplex:
             else:
                 return abs(boundary)
 
-    def boundary_matrix_normal(self, d, signed = True,index=False):
+    def incidence_matrix_normal(self, d, signed = True,index=False):
         source_simplices = self.dic_order_faces(d)
         target_simplices = self.dic_order_faces(d - 1)
 
@@ -439,31 +437,31 @@ class SimplicialComplex:
         else:
             return S
 
-    def boundary_matrix(self, d, signed = True,index=False):
+    def incidence_matrix(self, d, signed = True,index=False):
 
         if d >= 0 and d <= self.maxdim:
             if self.mode == "normal":
-                return self.boundary_matrix_normal(d, signed,index)
+                return self.incidence_matrix_normal(d, signed,index)
             elif self.mode == "gudhi":
-                return self.boundary_matrix_gudhi(d, signed,index)
+                return self.incidence_matrix_gudhi(d, signed,index)
         else:
             raise ValueError(
                 f"d should be larget than zero and not greater than {self.maxdim} (maximal allowed dimension for simplices), got {d}"
             )
 
-    def coboundary_matrix(self, d, signed = True,index=False):
-        return self.boundary_matrix(d, signed,index).T
+    def coincidence_matrix(self, d, signed = True,index=False):
+        return self.incidence_matrix(d, signed,index).T
 
     def hodge_laplacian_matrix(self, d, signed = True,index=False):
         if d == 0:
-            B_next = self.boundary_matrix(d + 1)
+            B_next = self.incidence_matrix(d + 1)
             L = B_next @ B_next.transpose()
         elif d < self.maxdim:
-            B_next = self.boundary_matrix(d + 1)
-            B = self.boundary_matrix(d)
+            B_next = self.incidence_matrix(d + 1)
+            B = self.incidence_matrix(d)
             L = B_next @ B_next.transpose() + B.transpose() @ B
         elif d == self.maxdim:
-            B = self.boundary_matrix(d)
+            B = self.incidence_matrix(d)
             L = B.transpose() @ B
         else:
             raise ValueError(
@@ -476,10 +474,10 @@ class SimplicialComplex:
 
     def up_laplacian_matrix(self, d, signed = True):
         if d == 0:
-            B_next = self.boundary_matrix(d + 1)
+            B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
         elif d < self.maxdim:
-            B_next = self.boundary_matrix(d + 1)
+            B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
         else:
 
@@ -493,7 +491,7 @@ class SimplicialComplex:
 
     def down_laplacian_matrix(self, d, signed = True):
         if d <= self.maxdim and d > 0:
-            B = self.boundary_matrix(d)
+            B = self.incidence_matrix(d)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
@@ -523,8 +521,8 @@ class SimplicialComplex:
         else:
             return abs(L_down)
         
-    def k_hop_boundary_matrix(self, d,k):
-        Bd = self.boundary_matrix(d , signed = True)
+    def k_hop_incidence_matrix(self, d,k):
+        Bd = self.incidence_matrix(d , signed = True)
         if d < self.maxdim and d >= 0:
             Ad = self.adjacency_matrix(d, signed = True)
         if d <= self.maxdim and d > 0:
@@ -536,8 +534,8 @@ class SimplicialComplex:
         else:            
             return Bd @ np.power(Ad,k)+ Bd @ np.power(coAd,k) 
 
-    def k_hop_coboundary_matrix(self, d,k):
-        BTd = self.coboundary_matrix(d , signed = True)
+    def k_hop_coincidence_matrix(self, d,k):
+        BTd = self.coincidence_matrix(d , signed = True)
         if d < self.maxdim and d >= 0:
             Ad = self.adjacency_matrix(d, signed = True)
         if d <= self.maxdim and d > 0:
@@ -591,7 +589,7 @@ class SimplicialComplex:
         return out
     def normalized_coboundary_operator_matrix(self, d, signed = True, normalization="xu"):
 
-        CoBd = self.coboundary_matrix(d, signed)
+        CoBd = self.coincidence_matrix(d, signed)
 
         if normalization == "row":
             return normalize(CoBd, norm="l1", axis=1)
@@ -602,9 +600,9 @@ class SimplicialComplex:
         else:
             raise Exception("invalid normalization method entered.")
 
-    def normalized_k_hop_coboundary_matrix(self, d, k, normalization="xu"):
+    def normalized_k_hop_coincidence_matrix(self, d, k, normalization="xu"):
 
-        CoBd = self.k_hop_coboundary_matrix(d, k)
+        CoBd = self.k_hop_coincidence_matrix(d, k)
 
         if normalization == "row":
             return normalize(CoBd, norm="l1", axis=1)
@@ -615,9 +613,9 @@ class SimplicialComplex:
         else:
             raise Exception("invalid normalization method entered.")
 
-    def normalized_boundary_matrix(self, d, signed = True, normalization="xu"):
+    def normalized_incidence_matrix(self, d, signed = True, normalization="xu"):
 
-        Bd = self.boundary_matrix(d, signed)
+        Bd = self.incidence_matrix(d, signed)
         if normalization == "row":
             return normalize(Bd, norm="l1", axis=1)
         elif normalization == "kipf":
@@ -629,7 +627,7 @@ class SimplicialComplex:
 
     def normalized_k_hop_boundary(self, d,k, normalization="xu"):
 
-        Bd = self.k_hop_boundary_matrix(d,k)
+        Bd = self.k_hop_incidence_matrix(d,k)
         if normalization == "row":
             return normalize(Bd, norm="l1", axis=1)
         elif normalization == "kipf":
