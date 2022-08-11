@@ -10,15 +10,6 @@ as we explore what higher order networks can tell us.
 TNX was developed by pyt-team.
 
 
-Reqs
----------------------------
-1- HyperNetX >= 1.1
-
-2- NetworkX >= 2.0 (Based Graph library)
-
-3- Gudhi (optional) 
-
-
 New Features of Version 1.0
 ---------------------------
 
