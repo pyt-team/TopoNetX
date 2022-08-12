@@ -85,6 +85,7 @@ class CombinatorialComplex:
         >>> CC = CombinatorialComplex(cells= [y1,y2,y3,y4,y5,w])
 
     Example 3
+        >>> d = {}
         >>> d["x1"] = RankedEntity('x1',rank = 0)
         >>> d["x2"] = RankedEntity('x2',rank = 0)
         >>> d["x3"] = RankedEntity('x3',rank = 0)
@@ -165,7 +166,7 @@ class CombinatorialComplex:
                     )
             setsystem = RankedEntitySet("_", cells)
         elif isinstance(cells, Graph):
-            # cells is an instance of networkX graph
+            # cells is an instance of networkX (undirected) graph
             _cells = []
             for e in cells.edges:
                 _cells.append(RankedEntity(e, elements=e, rank=1))
@@ -198,12 +199,12 @@ class CombinatorialComplex:
 
             setsystem = RankedEntitySet("_", elements=OrderedDict(entities))
 
-        self._ranks = sorted(tuple(setsystem.all_ranks))
         self.setsystem = setsystem
         self._nodes = setsystem.skeleton(0, f"{self.name}:Nodes")
 
         self._cells = setsystem.skeleton(1, f"{self.name}:Cells", level="upper")
 
+        self._ranks = sorted(tuple(self._cells.all_ranks))
         # self._skeletons = {i:setsystem.skeleton(i,f"{self.name}:X"+str(i)) for i in self._ranks[1:] }
         # self._skeletons[0] = self._nodes
 
@@ -252,7 +253,10 @@ class CombinatorialComplex:
         tuple
 
         """
-        return self._ranks
+        if len(self.cells) == 2:
+            return 0
+        else:
+            return sorted(tuple(self._cells.all_ranks))
 
     def skeleton(self, k):
         if k == 0:
@@ -262,7 +266,10 @@ class CombinatorialComplex:
 
     @property
     def dim(self):
-        return max(self._ranks)
+        if len(self.cells) == 0:
+            return 0
+        else:
+            return max(self._cells.all_ranks)
 
     def __str__(self):
         """
@@ -671,8 +678,18 @@ class CombinatorialComplex:
                 # len of cell is zero
                 warnings.warn("Cell is empty, input cell will not be inserted.")
         else:
-            assert isinstance(rank, int)  # rank must be an integer
-            assert rank > 0  # rank must be larger than or equal to 1 for all cells
+            if not isinstance(rank, int):
+                raise TopoNetXError(
+                    "rank's type must be integer when cell is hashable,"
+                    + "got {type(rank)}"
+                )
+            #    print("")
+            if rank == 0:
+                raise TopoNetXError(
+                    "rank zero elements should be inserted with add_node."
+                )
+            if rank < 0:
+                raise TopoNetXError(f"rank must be positive integer got, {rank}")
             if uid is not None:
                 name = uid
             else:
@@ -680,7 +697,7 @@ class CombinatorialComplex:
                 name = "c_" + str(id_ + 1)
 
             c = RankedEntity(uid=name, elements=cell, rank=rank)
-            for i in c:  # upate table of nodes
+            for i in c:  # update table of nodes
                 self._nodes.add(i)
             for n in c.elements:  # update membership
                 self._nodes[n].memberships[c.uid] = self._cells[c.uid]
