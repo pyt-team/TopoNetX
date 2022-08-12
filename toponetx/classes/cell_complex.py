@@ -520,6 +520,11 @@ class CellComplex:
         cell_set : iterable of hashables or Cell
             For hashables the cells returned will be empty.
 
+        rank : integer (optional), default is None
+               when each element in cell_set is an iterable then
+               rank must be a number that indicates the rank
+               of the added cells.
+
         Returns
         -------
         Cell Complex : CellComplex
@@ -545,7 +550,7 @@ class CellComplex:
         Notes
         -----
 
-        Deletes reference to cell, keep it boundary edges in the cell comple
+        Deletes reference to cell, keep it boundary edges in the cell complex
 
         """
         if isinstance(cell, Cell) or isinstance(cell, int):
@@ -698,7 +703,7 @@ class CellComplex:
                 else:
                     return abs(A.asformat("csc"))
         else:
-            raise ValueError(f"only dimension 0,1 and 2 are supported, got {d}")
+            raise ValueError(f"Only dimension 0,1 and 2 are supported, got {d}")
 
     @staticmethod
     def _incidence_to_adjacency(M, weights=False):

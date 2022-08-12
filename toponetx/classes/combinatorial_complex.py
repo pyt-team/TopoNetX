@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 from hypernetx import Hypergraph
 from hypernetx.classes.entity import Entity, EntitySet
+from networkx import Graph
 from networkx.algorithms import bipartite
 from scipy.sparse import csr_matrix
 
@@ -97,6 +98,14 @@ class CombinatorialComplex:
         >>> d["w"] = RankedEntity('w',[d['x4'],d['x5'],d['x1']],rank = 2)
         >>> # define the CombinatorialComplex from a dictionary of cells
         >>> CC = CombinatorialComplex(cells=d)
+    Example 4
+        >>> G = Graph() # networkx graph
+        >>> G.add_edge(0,1)
+        >>> G.add_edge(0,3)
+        >>> G.add_edge(0,4)
+        >>> G.add_edge(1,4)
+        >>> CC = CombinatorialComplex(cells=G)
+
 
 
     Parameters
@@ -155,8 +164,15 @@ class CombinatorialComplex:
                         "input cells elements must be ranked entities when ranks is None"
                     )
             setsystem = RankedEntitySet("_", cells)
-        # elif isinstance (cells,Graph):  # cells is an instance of networkX graph
+        elif isinstance(cells, Graph):
+            # cells is an instance of networkX graph
+            _cells = []
+            for e in cells.edges:
+                _cells.append(RankedEntity(e, elements=e, rank=1))
+            for n in cells:
+                _cells.append(RankedEntity(n, elements=[], rank=0))
 
+            setsystem = RankedEntitySet("_", _cells)
         elif not isinstance(cells, RankedEntitySet):
             assert ranks is not None  # ranks cannot be None
             assert len(ranks) == len(

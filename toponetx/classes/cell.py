@@ -13,7 +13,8 @@ class Cell:
     Parameters
     ==========
 
-    elements: any iterable of hashables. Elements order is important and defines the 2 cell up to cyclic permutation.
+    elements: any iterable of hashables. Elements order is important and defines the 2
+    cell up to cyclic permutation.
     name : str
 
     Examples
