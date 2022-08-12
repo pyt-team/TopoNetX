@@ -26,7 +26,10 @@ __all__ = ["CellComplex"]
 class CellComplex:
 
     """
-    Class for Cell Complex
+
+    In TNX cell complexes are implementes to be dynamic in the sense that
+    they can change by adding or subtracting objects
+    from them.
         Example 0
             >> # Cellomplex can be empty
             >>> CC = CellComplex( )

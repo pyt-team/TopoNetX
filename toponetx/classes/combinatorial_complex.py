@@ -27,62 +27,95 @@ __all__ = ["CombinatorialComplex"]
 class CombinatorialComplex:
 
     """
+    Class for Combintorial Complex.
+    A Combintorial Complex (CC) is a triple CC=(S,X,i) where S is an abstract set of entities,
+    X a subset of the power set of X and i is the a rank function that associates for every
+    set x in X a rank.
+
+    A CC is a generlization of graphs, hyppergraphs, cellular and simplicial complexes.
+
+    in TNX, CCs are implemented dynamically and the user is allowed to
+    add or subtract objects to the CC after the initial construction.
+    The dynamic structure of CCs require the user to keep track of its objects,
+    by using a unique names for each cell.
 
 
+    In a CC each cell is instantiated as an RankedEntity (see the ranked_entity.py)
+    and given an identifier or uid. Ranked Entities
+    keep track of inclusion and ranking relationships and can be nested.
 
-    Class for Combintorial Complex
-        Example 0
-            >> # CombinatorialComplex can be empty
-            >>> CC = CombinatorialComplex( )
-        Example 1
-            >> # from the constructor pass a list of cells and a list of correponding ranks
-            >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
-        Example 2
-            >>> x1 = RankedEntity('x1',rank = 0)
-            >>> x2 = RankedEntity('x2',rank = 0)
-            >>> x3 = RankedEntity('x3',rank = 0)
-            >>> x4 = RankedEntity('x4',rank = 0)
-            >>> x5 = RankedEntity('x5',rank = 0)
-            >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
-            >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
-            >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
-            >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-            >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
-            >>> # define the Ranked Entity Set
-            >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w] )
-            >>> # pass the ranked entity set to the CombinatorialComplex constructor
-            >>> CC = CombinatorialComplex(cells=E)
 
-        Example 2
-            >>> x1 = RankedEntity('x1',rank = 0)
-            >>> x2 = RankedEntity('x2',rank = 0)
-            >>> x3 = RankedEntity('x3',rank = 0)
-            >>> x4 = RankedEntity('x4',rank = 0)
-            >>> x5 = RankedEntity('x5',rank = 0)
-            >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
-            >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
-            >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
-            >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-            >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
-            # define the CombinatorialComplex from a list of cells
-            >>> CC = CombinatorialComplex(cells= [y1,y2,y3,y4,y5,w])
+    Example 0
+        >> # CombinatorialComplex can be empty
+        >>> CC = CombinatorialComplex( )
+    Example 1
+        >> # from the constructor pass a list of cells and a list of correponding ranks
+        >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
+    Example 2
+        >>> x1 = RankedEntity('x1',rank = 0)
+        >>> x2 = RankedEntity('x2',rank = 0)
+        >>> x3 = RankedEntity('x3',rank = 0)
+        >>> x4 = RankedEntity('x4',rank = 0)
+        >>> x5 = RankedEntity('x5',rank = 0)
+        >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
+        >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
+        >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
+        >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
+        >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
+        >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
+        >>> # define the Ranked Entity Set
+        >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w] )
+        >>> # pass the ranked entity set to the CombinatorialComplex constructor
+        >>> CC = CombinatorialComplex(cells=E)
 
-        Example 3
-            >>> d["x1"] = RankedEntity('x1',rank = 0)
-            >>> d["x2"] = RankedEntity('x2',rank = 0)
-            >>> d["x3"] = RankedEntity('x3',rank = 0)
-            >>> d["x4"] = RankedEntity('x4',rank = 0)
-            >>> d["x5"] = RankedEntity('x5',rank = 0)
-            >>> d["y1"] = RankedEntity('y1',[d['x1'],d['x2']], rank = 1)
-            >>> d["y2"] = RankedEntity('y2',[d['x2'],d['x3']], rank = 1)
-            >>> d["y3"] = RankedEntity('y3',[d['x3'],d['x4']], rank = 1)
-            >>> d["y4"]= RankedEntity('y4',[d['x4'],d['x1']], rank = 1)
-            >>> d["y5"] = RankedEntity('y5',[d['x4'],d['x5']], rank = 1)
-            >>> d["w"] = RankedEntity('w',[d['x4'],d['x5'],d['x1']],rank = 2)
-            >>> # define the CombinatorialComplex from a dictionary of cells
-            >>> CC = CombinatorialComplex(cells=d)
+    Example 2
+        >>> x1 = RankedEntity('x1',rank = 0)
+        >>> x2 = RankedEntity('x2',rank = 0)
+        >>> x3 = RankedEntity('x3',rank = 0)
+        >>> x4 = RankedEntity('x4',rank = 0)
+        >>> x5 = RankedEntity('x5',rank = 0)
+        >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
+        >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
+        >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
+        >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
+        >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
+        >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
+        # define the CombinatorialComplex from a list of cells
+        >>> CC = CombinatorialComplex(cells= [y1,y2,y3,y4,y5,w])
+
+    Example 3
+        >>> d["x1"] = RankedEntity('x1',rank = 0)
+        >>> d["x2"] = RankedEntity('x2',rank = 0)
+        >>> d["x3"] = RankedEntity('x3',rank = 0)
+        >>> d["x4"] = RankedEntity('x4',rank = 0)
+        >>> d["x5"] = RankedEntity('x5',rank = 0)
+        >>> d["y1"] = RankedEntity('y1',[d['x1'],d['x2']], rank = 1)
+        >>> d["y2"] = RankedEntity('y2',[d['x2'],d['x3']], rank = 1)
+        >>> d["y3"] = RankedEntity('y3',[d['x3'],d['x4']], rank = 1)
+        >>> d["y4"]= RankedEntity('y4',[d['x4'],d['x1']], rank = 1)
+        >>> d["y5"] = RankedEntity('y5',[d['x4'],d['x5']], rank = 1)
+        >>> d["w"] = RankedEntity('w',[d['x4'],d['x5'],d['x1']],rank = 2)
+        >>> # define the CombinatorialComplex from a dictionary of cells
+        >>> CC = CombinatorialComplex(cells=d)
+
+
+    Parameters
+    ----------
+    cells : (optional) RankedEntitySet, dict, iterable, default: None
+
+    name : hashable, optional, default: None
+        If None then a placeholder '_'  will be inserted as name
+
+    ranks : (optional) an iterable or dictionary. When
+    when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
+    size as cells.
+
+    weights : array-like, optional, default : None
+        User specified weights corresponding to setsytem of type pandas.DataFrame,
+        length must equal number of rows in dataframe.
+        If None, weight for all rows is assumed to be 1.
+
+    safe_insertion : boolean, default is False. When True the CC condition is enforced.
 
     """
 
