@@ -9,7 +9,7 @@ __all__ = ["Cell", "CellView"]
 
 
 class Cell:
-    """A Regular 2d Cell class
+    """A Regular 2d cell class.
     Parameters
     ==========
 
@@ -29,32 +29,34 @@ class Cell:
         else:
             self.name = name
         elements = list(elements)
-        self._edges_cell = frozenset(
-            zip_longest(elements, elements[1:] + [elements[0]])
+        self._boundary = frozenset(
+            zip_longest(
+                elements, elements[1:] + [elements[0]]
+            )  # set of edges define the boundary of the 2d cell
         )
-        if len(self._edges_cell) < 2:
+        if len(self._boundary) < 2:
             raise ValueError(
-                f" cell must contain at least 2 edges, got {len(self._edges_cell)}"
+                f" cell must contain at least 2 edges, got {len(self._boundary)}"
             )
         _adjdict = {}
-        for e in self._edges_cell:
+        for e in self._boundary:
             if e[0] in _adjdict:
                 raise ValueError(
                     f" node {e[0]} is repeated multiple times in the input cell."
-                    + " input cell violates the regularity condition."
+                    + " input cell violates the cell complex regularity condition."
                 )
             _adjdict[e[0]] = e[1]
         self.nodes = elements
 
     # Set methods
     def __len__(self):
-        return len(self._edges_cell)
+        return self.nodes
 
     def __iter__(self):
-        return iter(self._edges_cell)
+        return iter(self.nodes)
 
     def __contains__(self, e):
-        return e in self._edges_cell
+        return e in self.nodes
 
     def __repr__(self):
         """
@@ -76,7 +78,7 @@ class Cell:
         ------
         iterator of tuple representing boundary edges given in cyclic order
         """
-        return zip_longest(self.elements, self.elements[1:] + [self.elements[0]])
+        return self._boundary
 
     @property
     def elements(self):
@@ -89,7 +91,7 @@ class Cell:
         -------
         str
         """
-        return f" Boundary edges : {self._edges_cell} "
+        return f"Nodes set: : {self.nodes} and boundary edges : {self.boundary}"
 
 
 class CellView:
@@ -158,6 +160,7 @@ class CellView:
         Returns
         -------
         str
+        329025
         """
 
         return f"{[cell for cell in self._cells.values()]} "
@@ -189,6 +192,7 @@ class CellView:
             raise KeyError(f"The cell with key {key} is not in the complex")
 
     def delete_cell_by_set(self, elements):
+        elements = tuple(elements)
         key_found = False
         to_be_deleted = []
         for e in self._cell_index:

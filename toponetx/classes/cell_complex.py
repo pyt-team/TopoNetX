@@ -680,7 +680,7 @@ class CellComplex:
                 tuple(sorted(edge)): i for i, edge in enumerate(edgelist)
             }  # orient edges
             for celli, cell in enumerate(self.cells):
-                for edge in cell:
+                for edge in cell.boundary:
                     ei = edge_index[tuple(sorted(edge))]
                     if edge in edge_index:
                         A[ei, celli] = 1
