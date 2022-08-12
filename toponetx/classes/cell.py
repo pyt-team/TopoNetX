@@ -29,7 +29,9 @@ class Cell:
         else:
             self.name = name
         elements = list(elements)
-        self._edges_cell = set(zip_longest(elements, elements[1:] + [elements[0]]))
+        self._edges_cell = frozenset(
+            zip_longest(elements, elements[1:] + [elements[0]])
+        )
         if len(self._edges_cell) < 2:
             raise ValueError(
                 f" cell must contain at least 2 edges, got {len(self._edges_cell)}"
@@ -62,6 +64,19 @@ class Cell:
         str
         """
         return f"{self.elements}"
+
+    @property
+    def boundary(self):
+        """
+
+        a 2d cell is characterized by its boundary edges
+
+
+        Return
+        ------
+        iterator of tuple representing boundary edges given in cyclic order
+        """
+        return zip_longest(self.elements, self.elements[1:] + [self.elements[0]])
 
     @property
     def elements(self):

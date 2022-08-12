@@ -155,6 +155,8 @@ class CombinatorialComplex:
                         "input cells elements must be ranked entities when ranks is None"
                     )
             setsystem = RankedEntitySet("_", cells)
+        # elif isinstance (cells,Graph):  # cells is an instance of networkX graph
+
         elif not isinstance(cells, RankedEntitySet):
             assert ranks is not None  # ranks cannot be None
             assert len(ranks) == len(
@@ -1124,6 +1126,52 @@ class CombinatorialComplex:
                     )
 
         return CombinatorialComplex(RankedEntitySet("", newcellset), name=name)
+
+    @staticmethod
+    def from_networkx_graph(G):
+        """
+
+
+        Parameters
+        ----------
+        G : NetworkX graph
+            A networkx graph
+
+        Returns
+        -------
+        CombintorialComplex such that the edges of the graph are ranked 1
+        and the nodes are ranked 0.
+
+        Example
+        ------
+        >>> from networkx import Graph
+
+        >>> G = Graph()
+
+        >>> G.add_edge(0,1)
+
+        >>> G.add_edge(0,4)
+
+        >>> G.add_edge(0,7)
+
+        >>> CX = CombinatorialComplex.from_networkx_graph(G)
+        >>> CX.nodes
+
+        RankedEntitySet(:Nodes,[0, 1, 4, 7],{'weight': 1.0})
+
+        >>> CX.cells
+
+        RankedEntitySet(:Cells,[(0, 1), (0, 7), (0, 4)],{'weight': 1.0})
+
+        """
+        from networkx import Graph
+
+        cells = []
+        for e in G.edges:
+            cells.append(RankedEntity(e, elements=e, rank=1))
+        for n in G:
+            cells.append(RankedEntity(n, elements=[], rank=0))
+        return CombinatorialComplex(cells=cells)
 
     def to_hypergraph(self):
 
