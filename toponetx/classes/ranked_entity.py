@@ -32,10 +32,11 @@ class RankedEntity(Entity):
         a list of entities with identifiers different than uid and/or
         hashables different than uid, see `Honor System`_
 
-    rankedentity : Entity
+    rankedentity : RankedEntity
         a RankedEntity object to be cloned into a new RankedEntity with uid. If the uid is the same as
         RankedEntity.uid then the entities will not be distinguishable and error will be raised.
         The `elements` in the signature will be added to the cloned Rankedentity.
+        The rank of the new ranked entity will be the max of the cloned ranked entity and the input rank.
 
     weight : float, optional, default : 1
     props : keyword arguments, optional, default: {}
@@ -126,7 +127,10 @@ class RankedEntity(Entity):
         isinstance(safe_insert, bool)  # safe_insert must be boolean
         self._all_ranks = set()
         if isinstance(rankedentity, RankedEntity):
-            self._rank = rankedentity._rank
+            if rank == None:
+                self._rank = rankedentity._rank
+            else:
+                self._rank = max(rankedentity._rank, rank)
             self._all_ranks = self._all_ranks.union(rankedentity._all_ranks)
         else:
             if rankedentity is not None:
