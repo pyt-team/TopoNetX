@@ -604,7 +604,9 @@ class CombinatorialComplex:
     def add_node(self, node):
 
         if node in self._cells:
-            raise TopoNetXError("Node already an cell.")
+            warnings.warn(
+                "Cannot add a node. Node uid already is a cell in the combinatorial complex"
+            )
         elif node in self._nodes and isinstance(node, RankedEntity):
             self._nodes[node].__dict__.update(node.properties)
         elif node not in self._nodes:
@@ -685,9 +687,7 @@ class CombinatorialComplex:
                 )
             #    print("")
             if rank == 0:
-                raise TopoNetXError(
-                    "rank zero elements should be inserted with add_node."
-                )
+                raise TopoNetXError("Use add_node to add rank zero cells")
             if rank < 0:
                 raise TopoNetXError(f"rank must be positive integer got, {rank}")
             if uid is not None:

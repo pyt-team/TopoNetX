@@ -228,7 +228,7 @@ class RankedEntity(Entity):
     def set_safe_insert(self, value):
 
         if not isinstance(value, bool):
-            raise TopoNetXError(f" value must be a boolean got {value}.")
+            raise TopoNetXError(f" value must be of type bool got {type(value)}.")
         self._safe_insert = value
 
     def add_element(self, item, safe_insert=True, check_CC_condition=False):
@@ -573,7 +573,7 @@ class RankedEntity(Entity):
 
         """
         Returns a boolean indicating if item is insertable
-        and satisfy the CC condition inside an existing RankedEntity
+        and satisfy the combinatorial complex condition inside an existing RankedEntity
         """
         for k, v in self.elements.items():
             if v.uidset == item.uidset:  # item == v and rank(v)!=rank(item)
