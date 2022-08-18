@@ -11,10 +11,16 @@ import numpy as np
 
 # from collections.abc import Iterable
 from hypernetx.classes.entity import Entity
+import collections
 
 from toponetx import TopoNetXError
 
-__all__ = ["RankedEntity", "RankedEntitySet"]
+__all__ = ["RankedEntity","Node","CellObject", "RankedEntitySet"]
+
+
+
+    
+
 
 
 class RankedEntity(Entity):
@@ -82,16 +88,16 @@ class RankedEntity(Entity):
          RankedEntity(z,['y1', 'y3', 'x1', 'x2'],2,{'weight': 1.0})
 
 
-         >>> x1 = RankedEntity('x1',rank = 0)
-         >>> x2 = RankedEntity('x2',rank = 0)
-         >>> x3 = RankedEntity('x3',rank = 0)
-         >>> x4 = RankedEntity('x4',rank = 0)
-         >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
-         >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
-         >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
-         >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-         >>> z = RankedEntity('z',[y1,y2,y3,y4],rank = 2)
-         >>> w = RankedEntity('w',[z],rank = 3)
+         >>> x1 = RankedEntity(0,rank = 0)
+         >>> x2 = RankedEntity(1,rank = 0)
+         >>> x3 = RankedEntity(2,rank = 0)
+         >>> x4 = RankedEntity(3,rank = 0)
+         >>> y1 = RankedEntity(elements=[x1,x2], rank = 1)
+         >>> y2 = RankedEntity(elements=[x2,x3], rank = 1)
+         >>> y3 = RankedEntity(elements=[x3,x4], rank = 1)
+         >>> y4 = RankedEntity(elements=[x4,x1], rank = 1)
+         >>> z = RankedEntity(elements=[y1,y2,y3,y4],rank = 2)
+         >>> w = RankedEntity([z],rank = 3)
          # d={'0': ([1, 2, 3], 2), '1': ([2, 4], 1)}
 
          >>> d= {'y1': {'elements': [1, 2], 'rank': 1},
@@ -114,8 +120,8 @@ class RankedEntity(Entity):
     """
 
     def __init__(
-        self,
-        uid,
+        self,     
+        uid=None, 
         elements=[],
         rank=None,
         rankedentity=None,
@@ -123,8 +129,8 @@ class RankedEntity(Entity):
         safe_insert=True,
         **props,
     ):
-        super().__init__(uid, None, rankedentity, weight, **props)
-        isinstance(safe_insert, bool)  # safe_insert must be boolean
+        if not isinstance(safe_insert, bool) :
+            raise TopoNetXError("safe_insert must be bool, got {type(safe_insert)}")
         self._all_ranks = set()
         if isinstance(rankedentity, RankedEntity):
             if rank == None:
@@ -139,6 +145,21 @@ class RankedEntity(Entity):
                 )
             else:  # entity is None
                 self._rank = rank
+        if uid is None:
+            if self._rank == 0 :
+                raise TopoNetXError(" uid for ranked zero entities must have a unique identifier, got None ")
+            else:
+                _uid = []
+                for i in elements:
+                    if isinstance(i,RankedEntity):
+                        _uid.append(i.uid)
+                    else: # must be hashable
+                        _uid.append(i)
+                _uid = tuple(_uid)        
+        else:
+            _uid = uid  # user proves the ranked entity key              
+        super().__init__(_uid, None, rankedentity, weight, **props)
+
         self._safe_insert = safe_insert
         self._registry = dict()
 
@@ -664,6 +685,62 @@ class RankedEntity(Entity):
         return self
 
 
+class Node(RankedEntity):
+    def __init__(
+        self,     
+        elements,
+        weight=1.0,
+        **props
+    ):     
+        if not isinstance(elements, collections.Hashable):
+            raise TopoNetXError(f"node's elements must be hashable, got {type(elements)}")    
+        super().__init__(uid = elements, elements=[], rank = 0 , weight=weight, **props)
+
+
+    def __repr__(self):
+        """Returns a string resembling the constructor for ranked entity"""
+        return f"Node({self._uid},rank={self.rank}, {self.properties})"
+        
+
+class CellObject(RankedEntity):
+    """
+    >>> x1 = Node(1)
+    >>> x2 = Node(2)
+    >>> x3 = Node(3)
+    >>> x4 = Node(4)
+    >>> x5 = Node(5)
+    >>> y1 = CellObject([x1,x2], rank = 1)
+    >>> y2 = CellObject([x2,x3], rank = 1)
+    >>> y3 = CellObject([x3,x4], rank = 1)
+    >>> y4 = CellObject([x4,x1], rank = 1)
+    >>> y5 = CellObject([x4,x5], rank = 1)
+    >>> y6 = CellObject([x4,x5], rank = 1)
+    >>> z = CellObject([y6,x2,x3,x4],rank = 2)
+    
+    """
+    def __init__(
+        self,     
+        elements=[],
+        rank=None,
+        rankedentity=None,
+        weight=1.0,
+        safe_insert=True,
+        **props,
+    ):       
+        super().__init__(uid = None, 
+                         elements = elements, 
+                         rank = rank ,
+                         rankedentity=rankedentity,
+                         safe_insert=safe_insert,
+                         weight=weight, **props)
+        
+       
+
+    def __repr__(self):
+        """Returns a string resembling the constructor for ranked entity"""
+        return f"CellObject({self._uid},elements={list(self.uidset)},rank={self.rank}, {self.properties})"
+
+
 class RankedEntitySet(RankedEntity):
     """
 
@@ -1113,7 +1190,7 @@ class RankedEntitySet(RankedEntity):
 
         for item in args:
 
-            if isinstance(item, RankedEntity):
+            if isinstance(item, RankedEntity) or isinstance(item, Node) or isinstance(item, CellObject):
                 self._all_ranks = self._all_ranks.union(item._all_ranks)
                 if safe_insert:
                     self.add_element(item, check_CC_condition=True)
