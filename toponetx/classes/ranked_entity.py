@@ -5,22 +5,28 @@
 """
 
 
+import collections
 from collections import OrderedDict, defaultdict
 
 import numpy as np
 
 # from collections.abc import Iterable
 from hypernetx.classes.entity import Entity
-import collections
 
 from toponetx import TopoNetXError
 
-__all__ = ["RankedEntity","Node","CellObject", "RankedEntitySet"]
+__all__ = ["RankedEntity", "Node", "CellObject", "RankedEntitySet"]
 
 
+"""
 
-    
+def _keyfunc(item):
 
+    if isinstance(item,tuple):
+        return item
+    elif isinstance(item, collections.Hashable):
+        return (False, item)
+"""
 
 
 class RankedEntity(Entity):
@@ -120,8 +126,8 @@ class RankedEntity(Entity):
     """
 
     def __init__(
-        self,     
-        uid=None, 
+        self,
+        uid=None,
         elements=[],
         rank=None,
         rankedentity=None,
@@ -129,8 +135,8 @@ class RankedEntity(Entity):
         safe_insert=True,
         **props,
     ):
-        if not isinstance(safe_insert, bool) :
-            raise TopoNetXError("safe_insert must be bool, got {type(safe_insert)}")
+        if not isinstance(safe_insert, bool):
+            raise TopoNetXError(f"safe_insert must be bool, got {type(safe_insert)}")
         self._all_ranks = set()
         if isinstance(rankedentity, RankedEntity):
             if rank == None:
@@ -146,18 +152,15 @@ class RankedEntity(Entity):
             else:  # entity is None
                 self._rank = rank
         if uid is None:
-            if self._rank == 0 :
-                raise TopoNetXError(" uid for ranked zero entities must have a unique identifier, got None ")
-            else:
-                _uid = []
-                for i in elements:
-                    if isinstance(i,RankedEntity):
-                        _uid.append(i.uid)
-                    else: # must be hashable
-                        _uid.append(i)
-                _uid = tuple(_uid)        
+            if self._rank == 0:
+                raise TopoNetXError(
+                    " uid for ranked zero entities must have a unique identifier, got None "
+                )
+            else:  # assign to self default uid extracted from elements
+                _uid = RankedEntity._get_frozenset_uid_from_elements(elements)
+
         else:
-            _uid = uid  # user proves the ranked entity key              
+            _uid = uid  # user provides RankedEntity key
         super().__init__(_uid, None, rankedentity, weight, **props)
 
         self._safe_insert = safe_insert
@@ -247,8 +250,60 @@ class RankedEntity(Entity):
 
     @property
     def rank(self):
-        """integer specified the rank of the cell"""
+        """integer specified thfe rank of the cell"""
         return self._rank
+
+    @staticmethod
+    def _exrect_unique_uid_from_elements(elements):
+        """
+        Parameters
+        ----------
+        elements : RankedEntity or hashable
+
+
+        Returns
+        -------
+        TYPE
+            tuple : canonical uid that is extracted from  elements
+
+        """
+
+        def _keyfunc(item):
+
+            if isinstance(item, tuple):
+                return item
+            elif isinstance(item, collections.Hashable):
+                return (False, item)
+
+        _uid = []
+        for i in elements:
+            if isinstance(i, RankedEntity):
+                _uid.append(i.uid)
+            else:  # must be hashable
+                _uid.append(i)
+        return tuple(sorted(_uid, key=_keyfunc))  # set cananical order for key
+
+    def _get_frozenset_uid_from_elements(elements):
+        """
+        Parameters
+        ----------
+        elements : RankedEntity or hashable
+
+
+        Returns
+        -------
+        TYPE
+            tuple : canonical uid that is extracted from  elements
+
+        """
+
+        _uid = []
+        for i in elements:
+            if isinstance(i, RankedEntity):
+                _uid.append(i.uid)
+            else:  # must be hashable
+                _uid.append(i)
+        return frozenset(_uid)  # set cananical uid
 
     def set_safe_insert(self, value):
 
@@ -259,16 +314,13 @@ class RankedEntity(Entity):
     def add_element(self, item, safe_insert=True, check_CC_condition=False):
         """
         Adds item to entity elements and adds entity to item.memberships.
-
         Parameters
         ----------
         item : hashable or Ranked Entity
             If hashable, will be replaced with empty RankedEntity using hashable as uid
-
         Returns
         -------
         self : RankedEntity
-
         Notes
         -----
         If item is in entity elements, no new element is added but properties
@@ -454,10 +506,17 @@ class RankedEntity(Entity):
         not unique to their entities.
         Is not transitive.
         """
-        if isinstance(item, RankedEntity):
+        if (
+            isinstance(item, RankedEntity)
+            or isinstance(item, Node)
+            or isinstance(item, CellObject)
+        ):
             return item.uid in self._elements
         else:
-            return item in self._elements
+            return (
+                item in self._elements
+                or RankedEntity._get_frozenset_uid_from_elements(item) in self._elements
+            )
 
     def __getitem__(self, item):
         """
@@ -476,7 +535,12 @@ class RankedEntity(Entity):
         if isinstance(item, RankedEntity):
             return self._elements.get(item.uid, "")
         else:
-            return self._elements.get(item)
+            if self._elements.get(item) is None:
+                return self._elements.get(
+                    RankedEntity._get_frozenset_uid_from_elements(item)
+                )
+            else:
+                return self._elements.get(item)
 
     def restrict_to(self, element_subset, name=None):
         """
@@ -686,21 +750,17 @@ class RankedEntity(Entity):
 
 
 class Node(RankedEntity):
-    def __init__(
-        self,     
-        elements,
-        weight=1.0,
-        **props
-    ):     
+    def __init__(self, elements, weight=1.0, **props):
         if not isinstance(elements, collections.Hashable):
-            raise TopoNetXError(f"node's elements must be hashable, got {type(elements)}")    
-        super().__init__(uid = elements, elements=[], rank = 0 , weight=weight, **props)
-
+            raise TopoNetXError(
+                f"node's elements must be hashable, got {type(elements)}"
+            )
+        super().__init__(uid=elements, elements=[], rank=0, weight=weight, **props)
 
     def __repr__(self):
         """Returns a string resembling the constructor for ranked entity"""
         return f"Node({self._uid},rank={self.rank}, {self.properties})"
-        
+
 
 class CellObject(RankedEntity):
     """
@@ -709,32 +769,40 @@ class CellObject(RankedEntity):
     >>> x3 = Node(3)
     >>> x4 = Node(4)
     >>> x5 = Node(5)
-    >>> y1 = CellObject([x1,x2], rank = 1)
+    >>> y1 = CellObject([x1,x2], rank = 1 )
     >>> y2 = CellObject([x2,x3], rank = 1)
     >>> y3 = CellObject([x3,x4], rank = 1)
     >>> y4 = CellObject([x4,x1], rank = 1)
     >>> y5 = CellObject([x4,x5], rank = 1)
     >>> y6 = CellObject([x4,x5], rank = 1)
     >>> z = CellObject([y6,x2,x3,x4],rank = 2)
-    
+
     """
+
     def __init__(
-        self,     
+        self,
         elements=[],
         rank=None,
         rankedentity=None,
         weight=1.0,
         safe_insert=True,
         **props,
-    ):       
-        super().__init__(uid = None, 
-                         elements = elements, 
-                         rank = rank ,
-                         rankedentity=rankedentity,
-                         safe_insert=safe_insert,
-                         weight=weight, **props)
-        
-       
+    ):
+        if not isinstance(rank, int):
+            raise TopoNetXError(f"rank's type must be integer, got f{type(rank)} ")
+        if rank <= 0:
+            raise TopoNetXError(
+                f"ObjectCell must have rank larger than or equal to 1, got {rank}"
+            )
+        super().__init__(
+            uid=None,
+            elements=elements,
+            rank=rank,
+            rankedentity=rankedentity,
+            safe_insert=safe_insert,
+            weight=weight,
+            **props,
+        )
 
     def __repr__(self):
         """Returns a string resembling the constructor for ranked entity"""
@@ -1190,7 +1258,11 @@ class RankedEntitySet(RankedEntity):
 
         for item in args:
 
-            if isinstance(item, RankedEntity) or isinstance(item, Node) or isinstance(item, CellObject):
+            if (
+                isinstance(item, RankedEntity)
+                or isinstance(item, Node)
+                or isinstance(item, CellObject)
+            ):
                 self._all_ranks = self._all_ranks.union(item._all_ranks)
                 if safe_insert:
                     self.add_element(item, check_CC_condition=True)
