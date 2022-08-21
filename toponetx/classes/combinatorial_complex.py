@@ -727,10 +727,18 @@ class CombinatorialComplex:
         --------
         >>> G = nx.path_graph(3)
         >>> CC = CombinatorialComplex(G)
-        >>> d={(1,2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
-        >>> CC.set_cell_attributes(d)
-        >>> CC.cells[(0,1)].properties['color']
+        >>> d={0: {'color':'red','attr2':1 },1: {'color':'blue','attr2':3 } }
+        >>> CC.set_node_attributes(d)
+        >>> CC.get_node_attributes('color')
+        {0: 'red', 1: 'blue'}
+
+        >>> G = nx.Graph()
+        >>> G.add_nodes_from([1, 2, 3], color="blue")
+        >>> CC = CombinatorialComplex(G)
+        >>> nodes_color = CC.get_node_attributes('color')
+        >>> nodes_color[1]
         'blue'
+
         """
         return {
             n: self.nodes[n].properties[name]
@@ -754,11 +762,12 @@ class CombinatorialComplex:
 
         Examples
         --------
-        >>> G = nx.Graph()
-        >>> G.add_nodes_from([1, 2, 3], color="blue")
+        >>> G = nx.path_graph(3)
         >>> CC = CombinatorialComplex(G)
-        >>> nodes_color = CC.get_node_attributes('color')
-        >>> nodes_color[1]
+        >>> d={(1,2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
+        >>> CC.set_cell_attributes(d)
+        >>> cell_color=CC.get_cell_attributes('color')
+        >>> cell_color[frozenset({0, 1})]
         'blue'
         """
 

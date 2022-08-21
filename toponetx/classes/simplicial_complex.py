@@ -185,9 +185,7 @@ class SimplicialComplex:
         str
 
         """
-        return (
-            f"simplicial Complex with shape {self.shape()} and dimension {self.maxdim}"
-        )
+        return f"simplicial Complex with shape {self.shape} and dimension {self.maxdim}"
 
     def __repr__(self):
         """
@@ -232,7 +230,7 @@ class SimplicialComplex:
         item : tuple, list
 
         """
-        return tuple(item) in self._simplex_set
+        return tuple(sorted(item)) in self._simplex_set
 
     @staticmethod
     def _faces(simplices, max_dim=None):

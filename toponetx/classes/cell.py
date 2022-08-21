@@ -23,7 +23,7 @@ class Cell:
         >>> cell3 = Cell ( ("a","b","c") )
     """
 
-    def __init__(self, elements, name=None):
+    def __init__(self, elements, name=None, **attr):
 
         if name is None:
             self.name = "_"
@@ -48,6 +48,14 @@ class Cell:
                 )
             _adjdict[e[0]] = e[1]
         self.nodes = elements
+        self.properties = dict()
+        self.properties.update(attr)
+
+    def __getitem__(self, item):
+        if item not in self.properties:
+            raise KeyError(f"attr {item} is not an attr in the cell {self.name}")
+        else:
+            return self.properties[item]
 
     # Set methods
     def __len__(self):
@@ -92,7 +100,7 @@ class Cell:
         -------
         str
         """
-        return f"Nodes set: : {self.nodes} and boundary edges : {self.boundary}"
+        return f"Nodes set: : {self.nodes}, boundary edges : {self.boundary}, attrs: {self.properties}"
 
 
 class CellView:
@@ -166,13 +174,14 @@ class CellView:
 
         return f"{[cell for cell in self._cells.values()]} "
 
-    def insert_cell(self, cell):
+    def insert_cell(self, cell, **attr):
         if isinstance(cell, tuple) or isinstance(cell, list):
-            cell = Cell(cell, name=str(len(self._cells)))
+            cell = Cell(elements=cell, name=str(len(self._cells)), **attr)
             l = len(self._cells)
             self._cells[l] = cell
             self._cell_index[cell] = l
         elif isinstance(cell, Cell):
+            cell.properties.update(attr)
             cell.name = str(len(self._cells))
             l = len(self._cells)
             self._cells[l] = cell

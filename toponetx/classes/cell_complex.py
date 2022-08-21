@@ -52,7 +52,7 @@ class CellComplex:
             >>> CX.cells
     """
 
-    def __init__(self, cells=None, name=None):
+    def __init__(self, cells=None, name=None, **attr):
         if not name:
             self.name = ""
         else:
@@ -73,6 +73,8 @@ class CellComplex:
                 raise ValueError(
                     f"cells must be iterable, networkx graph or None, got {type(cells)}"
                 )
+        self.complex = dict()  # dictionary for cell complex attributes
+        self.complex.update(attr)
 
     @property
     def cells(self):
@@ -417,9 +419,9 @@ class CellComplex:
             self.remove_node(node)
         return self
 
-    def add_node(self, node):
+    def add_node(self, node, **attr):
 
-        self._G.add_node(node)
+        self._G.add_node(node, **attr)
 
     def _add_nodes_from(self, nodes):
         """
@@ -433,10 +435,13 @@ class CellComplex:
         for node in nodes:
             self.add_node(node)
 
-    def add_edge(self, u, v):
-        self._G.add_edge(u, v)
+    def add_edge(self, u_of_edge, v_of_edge, **attr):
+        self._G.add_edge(u_of_edge, v_of_edge, **attr)
 
-    def add_cell(self, cell, uid=None, rank=None, check_skeleton=False):
+    def add_edges_from(self, ebunch_to_add, **attr):
+        self._G.add_edge_from(ebunch_to_add, **attr)
+
+    def add_cell(self, cell, rank=None, check_skeleton=False, **attr):
         """
 
         Adds a single cells to combinatorial complex.
@@ -453,6 +458,16 @@ class CellComplex:
         Returns
         -------
         Cell Complex : CellComplex
+
+        Example
+        -------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1,2,3,4],rank=2,color='red')
+        >>> CX.add_cell([2,3,4,5],rank=2,color='blue')
+        >>> CX.add_cell([5,6,7,8],rank=2,color='green')
+        >>> CX.cells[0]['color']
+        'red'
+
 
         Notes
         -----
@@ -472,18 +487,20 @@ class CellComplex:
         if isinstance(cell, Cell):
             for e in cell:
                 self._G.add_edge(e[0], e[1])
-            self._cells.insert_cell(cell)
+            self._cells.insert_cell(cell, **attr)
 
         else:
             if rank == 0:
-                self._G.add_node(cell, name=uid)
+                raise TopoNetXError(
+                    "Use add_node to insert nodes or zero ranked cells."
+                )
             elif rank == 1:
                 if len(cell) != 2:
                     raise ValueError("rank 2 cell must have exactly two nodes")
                 elif len(set(cell)) == 1:
                     raise ValueError(" invalid insertion : self-loops are not allowed.")
                 else:
-                    self.add_edge(cell[0], cell[1])
+                    self.add_edge(cell[0], cell[1], **attr)
 
             elif rank == 2:
                 if isinstance(cell, Cell):
@@ -494,19 +511,19 @@ class CellComplex:
                         edges_cell = set(zip_longest(cell, cell[1:] + [cell[0]]))
                         for e in edges_cell:
                             self._G.add_edges_from(edges_cell)
-                        self._cells.insert_cell(Cell(cell))
+                        self._cells.insert_cell(Cell(cell), **attr)
                     else:
                         print(
-                            "Invalid cycle condition, the input cell can be inserted to the cell complex"
+                            "Invalid cycle condition, the input cell cannot be inserted to the cell complex"
                         )
                         print(
-                            "to force the cell complex condition, set check_skeleton = False."
+                            "to ignore the cell complex condition, set check_skeleton = False."
                         )
                 else:
                     raise ValueError("invalid input")
             else:
                 raise ValueError(
-                    f"Add cell only supports adding cells of dimensions 0,1 or 2--got {rank}",
+                    f"Add cell only supports adding cells of dimensions 0,1 or 2-- got {rank}",
                 )
 
         return self
@@ -575,6 +592,165 @@ class CellComplex:
         for cell in cell_set:
             self.remove_cell(cell)
         return self
+
+    def set_node_attributes(self, values, name=None):
+
+        if name is not None:
+            # if `values` is a dict using `.items()` => {cell: value}
+
+            for cell, value in values.items():
+                try:
+                    self.nodes[cell][name] = value
+                except KeyError:
+                    pass
+
+        else:
+
+            for cell, d in values.items():
+                try:
+                    self.nodes[cell].update(d)
+                except KeyError:
+                    pass
+            return
+
+    def set_cell_attributes(self, values, name=None):
+        """
+
+
+            Parameters
+            ----------
+            values : TYPE
+                DESCRIPTION.
+            name : TYPE, optional
+                DESCRIPTION. The default is None.
+
+            Returns
+            -------
+            None.
+
+            Example
+            ------
+
+            After computing some property of the cell of a combinatorial complex, you may want
+            to assign a cell attribute to store the value of that property for
+            each cell:
+
+            >>> CC = CellComplex()
+            >>> CC.add_cell([1,2,3,4], rank=2)
+            >>> CC.add_cell([1,2,4], rank=2,)
+            >>> CC.add_cell([3,4,8], rank=2)
+            >>> d={(1,2,3,4):'red',(1,2,3):'blue',(3,4):'green'}
+            >>> CC.set_cell_attributes(d,name='color')
+            >>> CC.cells[(3,4)].properties['color']
+            'green'
+
+        If you provide a dictionary of dictionaries as the second argument,
+        the entire dictionary will be used to update edge attributes::
+
+            Examples
+            --------
+            >>> G = nx.path_graph(3)
+            >>> CC = CombinatorialComplex(G)
+            >>> d={(1,2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
+            >>> CC.set_cell_attributes(d)
+            >>> CC.cells[(0,1)].properties['color']
+            'blue'
+            3
+
+        Note that if the dict contains cells that are not in `self.cells`, they are
+        silently ignored::
+
+        """
+
+        if name is not None:
+            # if `values` is a dict using `.items()` => {cell: value}
+
+            for cell, value in values.items():
+                try:
+                    self.cells[cell].properties[name] = value
+                except AttributeError:
+                    pass
+
+        else:
+
+            for cell, d in values.items():
+                try:
+                    self.cells[cell].properties.update(d)
+                except AttributeError:
+                    pass
+            return
+
+    def get_node_attributes(self, name):
+        """Get node attributes from combintorial complex
+
+        Parameters
+        ----------
+
+        name : string
+           Attribute name
+
+        Returns
+        -------
+        Dictionary of attributes keyed by node.
+
+        Examples
+        --------
+        >>> G = nx.path_graph(3)
+        >>> CC = CellComplex(G)
+        >>> d={0: {'color':'red','attr2':1 },1: {'color':'blue','attr2':3 } }
+        >>> CC.set_node_attributes(d)
+        >>> CC.get_node_attributes('color')
+        {0: 'red', 1: 'blue'}
+
+        >>> G = nx.Graph()
+        >>> G.add_nodes_from([1, 2, 3], color="blue")
+        >>> CC = CellComplex(G)
+        >>> nodes_color = CC.get_node_attributes('color')
+        >>> nodes_color[1]
+        'blue'
+
+        """
+        return {n: self.nodes[n][name] for n in self.nodes if name in self.nodes[n]}
+
+    def get_cell_attributes(self, name, k=None):
+        """Get node attributes from graph
+
+        Parameters
+        ----------
+
+        name : string
+           Attribute name
+
+        k : integer rank of the k-cell
+        Returns
+        -------
+        Dictionary of attributes keyed by cell or k-cells if k is not None
+
+        Examples
+        --------
+        >>> import networkx as nx
+        >>> G = nx.path_graph(3)
+        >>> d={(1,2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
+        >>> nx.set_edge_attributes(G,d)
+        >>> CX = CellComplex(G)
+        >>> cell_color=CX.get_cell_attributes('color')
+        >>> cell_color[frozenset({0, 1})]
+        'blue'
+        """
+
+        if k is not None:
+            if k == 0:
+                return self.get_cell_attributes(name)
+            elif k == 1:
+                return nx.get_edge_attributes(self._G, name)
+            elif k == 2:
+                return {
+                    n: self.cells[n].properties[name]
+                    for n in self.cells
+                    if name in self.cells[n].properties
+                }
+            else:
+                raise TopoNetXError(f"k must be 0,1 or 2, got {k}")
 
     def is_insertable_cycle(self, cell, check_skeleton=True, warnings_dis=False):
 
