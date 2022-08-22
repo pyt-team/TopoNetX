@@ -17,7 +17,12 @@ from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell, CellView
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
-from toponetx.classes.ranked_entity import RankedEntity, RankedEntitySet
+from toponetx.classes.ranked_entity import (
+    CellObject,
+    Node,
+    RankedEntity,
+    RankedEntitySet,
+)
 from toponetx.exception import TopoNetXError
 
 __all__ = ["CellComplex"]
@@ -28,7 +33,7 @@ class CellComplex:
     """
 
     In TNX cell complexes are implementes to be dynamic in the sense that
-    they can change by adding or subtracting objects
+    they can change by adding or subtracting objects (nodes, edges, cells)
     from them.
         Example 0
             >> # Cellomplex can be empty
@@ -1285,14 +1290,16 @@ class CellComplex:
         >>> CX.add_cell([1,2,3,4],rank=2)
         >>> CX.add_cell([2,3,4,5],rank=2)
         >>> CX.add_cell([5,6,7,8],rank=2)
+        >>> CC= CX.to_combinatorial_complex()
+        >>> CC.cells
         """
         all_cells = []
 
         for e in self.edges:
-            all_cells.append(RankedEntity(uid=str(e), elements=e, rank=1))
+            all_cells.append(CellObject(elements=e, rank=1, **self.edges[e]))
         for cell in self.cells:
             all_cells.append(
-                RankedEntity(uid=str(cell), elements=cell.elements, rank=2)
+                CellObject(elements=cell.elements, rank=2, **self.cells[cell])
             )
         return CombinatorialComplex(RankedEntitySet("", all_cells), name="_")
 
@@ -1306,10 +1313,10 @@ class CellComplex:
 
         cells = []
         for n in self.cells:
-            cells.append(Entity(n, elements=n.elements))
+            cells.append(Entity(str(list(n.elements)), elements=n.elements))
 
         for n in self.edges:
-            cells.append(Entity(n, elements=n))
+            cells.append(Entity(str(list(n)), elements=n))
         E = EntitySet("CC_to_HG", elements=cells)
         HG = Hypergraph(E)
         nodes = []
