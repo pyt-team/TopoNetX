@@ -485,7 +485,7 @@ class CellComplex:
 
         """
         if isinstance(cell, Cell):
-            for e in cell:
+            for e in cell.boundary:
                 self._G.add_edge(e[0], e[1])
             self._cells.insert_cell(cell, **attr)
 
@@ -570,10 +570,11 @@ class CellComplex:
         Deletes reference to cell, keep it boundary edges in the cell complex
 
         """
-        if isinstance(cell, Cell) or isinstance(cell, int):
+        if isinstance(cell, Cell):
+            self._cells.delete_cell(cell.elements)
+        elif isinstance(cell, tuple):
             self._cells.delete_cell(cell)
-        if isinstance(cell, tuple) or isinstance(cell, cell):
-            self._cells.delete_cell_by_set(cell)
+
         return self
 
     def remove_cells(self, cell_set):
@@ -639,10 +640,10 @@ class CellComplex:
             >>> CC.add_cell([1,2,3,4], rank=2)
             >>> CC.add_cell([1,2,4], rank=2,)
             >>> CC.add_cell([3,4,8], rank=2)
-            >>> d={(1,2,3,4):'red',(1,2,3):'blue',(3,4):'green'}
+            >>> d={(1,2,3,4):'red',(1,2,4):'blue'}
             >>> CC.set_cell_attributes(d,name='color')
-            >>> CC.cells[(3,4)].properties['color']
-            'green'
+            >>> CC.cells[(1,2,3,4)]['color']
+            'red'
 
         If you provide a dictionary of dictionaries as the second argument,
         the entire dictionary will be used to update edge attributes::
@@ -650,33 +651,67 @@ class CellComplex:
             Examples
             --------
             >>> G = nx.path_graph(3)
-            >>> CC = CombinatorialComplex(G)
-            >>> d={(1,2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
+            >>> CC = CellComplex(G)
+            >>> CC.add_cell([1,2,3,4], rank=2)
+            >>> CC.add_cell([1,2,3,4], rank=2)
+            >>> CC.add_cell([1,2,4], rank=2,)
+            >>> CC.add_cell([3,4,8], rank=2)
+            >>> d={ (1,2,3,4): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
             >>> CC.set_cell_attributes(d)
-            >>> CC.cells[(0,1)].properties['color']
-            'blue'
-            3
+            >>> CC.cells[(1,2,3,4)][0]['color']
+            'red'
 
-        Note that if the dict contains cells that are not in `self.cells`, they are
-        silently ignored::
+        Note : If the dict contains cells that are not in `self.cells`, they are
+        silently ignored.
 
         """
 
         if name is not None:
-            # if `values` is a dict using `.items()` => {cell: value}
+            # if `values` is a dict using `.items()` => {cell: (key,value) } or {cell:value}
 
             for cell, value in values.items():
                 try:
-                    self.cells[cell].properties[name] = value
-                except AttributeError:
+
+                    if len(cell) == 2:
+                        if isinstance(cell[0], Iterable) and isinstance(
+                            cell[1], int
+                        ):  # input cell has cell key
+                            self.cells[cell][cell[0]][name] = value
+                        else:
+                            self.cells[cell][name] = value
+
+                    elif isinstance(
+                        self.cells[cell], list
+                    ):  # all cells with same key get same attrs
+                        for i in range(len(self.cells[cell])):
+                            self.cells[cell][i][name] = value
+                    else:
+                        self.cells[cell][name] = value
+
+                except KeyError:
                     pass
 
         else:
 
             for cell, d in values.items():
                 try:
-                    self.cells[cell].properties.update(d)
-                except AttributeError:
+
+                    if len(cell) == 2:
+                        if isinstance(cell[0], Iterable) and isinstance(
+                            cell[1], int
+                        ):  # input cell has cell key
+                            self.cells[cell[0]][cell[1]].update(d)
+                        else:  # length of cell is 2
+                            self.cells[cell].update(d)
+                    elif isinstance(
+                        self.cells[cell], list
+                    ):  # all cells with same key get same attrs
+                        for i in range(len(self.cells[cell])):
+
+                            self.cells[cell][i].update(d)
+                    else:
+                        self.cells[cell].update(d)
+                except KeyError:
                     pass
             return
 
@@ -730,12 +765,17 @@ class CellComplex:
         --------
         >>> import networkx as nx
         >>> G = nx.path_graph(3)
-        >>> d={(1,2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
-        >>> nx.set_edge_attributes(G,d)
-        >>> CX = CellComplex(G)
-        >>> cell_color=CX.get_cell_attributes('color')
-        >>> cell_color[frozenset({0, 1})]
-        'blue'
+
+        >>> d={ ((1,2,3,4),0): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
+        >>> CC = CellComplex(G)
+        >>> CC.add_cell([1,2,3,4], rank=2)
+        >>> CC.add_cell([1,2,3,4], rank=2)
+        >>> CC.add_cell([1,2,4], rank=2,)
+        >>> CC.add_cell([3,4,8], rank=2)
+        >>> CC.set_cell_attributes(d)
+        >>> cell_color=CC.get_cell_attributes('color',2)
+        >>> cell_color
+        '{((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
         """
 
         if k is not None:
@@ -744,11 +784,17 @@ class CellComplex:
             elif k == 1:
                 return nx.get_edge_attributes(self._G, name)
             elif k == 2:
-                return {
-                    n: self.cells[n].properties[name]
-                    for n in self.cells
-                    if name in self.cells[n].properties
-                }
+                d = {}
+                for n in self.cells:
+                    if isinstance(self.cells[n.elements], list):  # multiple cells
+                        for i in range(len(self.cells[n.elements])):
+                            if name in self.cells[n.elements][i]:
+                                d[(n.elements, i)] = self.cells[n.elements][i][name]
+                    else:
+                        if name in self.cells[n.elements]:
+                            d[n.elements] = self.cells[n.elements][name]
+
+                return d
             else:
                 raise TopoNetXError(f"k must be 0,1 or 2, got {k}")
 
@@ -800,9 +846,8 @@ class CellComplex:
             Dictionary identifying columns with cells
 
         >>> CX = CellComplex()
-        >>> CX.add_cell([1,2,3,5,6],rank=2)
-        >>> CX.add_cell([1,2,4,5,3,0],rank=2)
-        >>> CX.add_cell([1,2,4,9,3,0],rank=2)
+        >>> CX.add_cell([1,2,3,4],rank=2)
+        >>> CX.add_cell([3,4,5],rank=2)
         >>> B1 = CX.incidence_matrix(1)
         >>> B2 = CX.incidence_matrix(2)
         >>> B1.dot(B2).todense()
@@ -1175,7 +1220,10 @@ class CellComplex:
         >>> c3= Cell((1,2,5))
         >>> CX = CellComplex([c1,c2,c3])
         >>> CX.add_edge(1,0)
-        >>> CX.restrict_to_cells([c1,[0,1]])
+        >>> CX1= CX.restrict_to_cells([c1, (0,1) ])
+        >>> CX1.cells
+        CellView([Cell(1, 2, 3)])
+
 
 
         """

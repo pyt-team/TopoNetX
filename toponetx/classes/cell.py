@@ -47,7 +47,7 @@ class Cell:
                     + " input cell violates the cell complex regularity condition."
                 )
             _adjdict[e[0]] = e[1]
-        self.nodes = elements
+        self.nodes = tuple(elements)
         self.properties = dict()
         self.properties.update(attr)
 
@@ -74,7 +74,7 @@ class Cell:
         -------
         str
         """
-        return f"{self.elements}"
+        return f"Cell{self.elements}"
 
     @property
     def boundary(self):
@@ -93,6 +93,43 @@ class Cell:
     def elements(self):
         return self.nodes
 
+    def is_homotopic_to(self, cell):
+        """
+        Paramters:
+        ---------
+        cell : tuple, list or Cell
+
+        Return : bool
+        ------
+            return True is self is homotopic to input cell and False otherwise.
+        """
+
+        if isinstance(cell, tuple) or isinstance(cell, list):
+            seq = cell
+        elif isinstance(cell, Cell):
+            seq = cell.elements
+        else:
+            raise ValueError(
+                "input cell must be a tuple/list of nodes defining a cell or Cell"
+            )
+
+        if len(self) != len(cell):
+            return False
+
+        mset1 = Counter(seq)
+        mset2 = Counter(self.elements)
+        if mset1 != mset2:
+            return False
+
+        size = len(seq)
+        deq1 = deque(self.elements)
+        deq2 = deque(seq)
+        for _ in range(size):
+            deq2.rotate()
+            if deq1 == deq2:
+                return True
+        return False
+
     def __str__(self):
         """
         String representation of regular cell
@@ -100,7 +137,7 @@ class Cell:
         -------
         str
         """
-        return f"Nodes set: : {self.nodes}, boundary edges : {self.boundary}, attrs: {self.properties}"
+        return f"Nodes set:{self.nodes}, boundary edges:{self.boundary}, attrs:{self.properties}"
 
 
 class CellView:
@@ -117,6 +154,10 @@ class CellView:
          >>> CV.insert_cell ( (2,3,4,1) )
          >>> CV.insert_cell ( (1,2,3,4) )
          >>> CV.insert_cell ( (1,2,3,6) )
+         >>> c1=Cell((1,2,3,4,5))
+         >>> CV.insert_cell(c1)
+         >>> c1 in CV
+
     """
 
     def __init__(self, name=None):
@@ -127,32 +168,48 @@ class CellView:
             self.name = name
 
         self._cells = dict()
-        self._cell_index = dict()
-        self._num_cells = len(self._cells)
 
-    def __getitem__(self, key):
-        if key in self._cells:
-            return self._cells[key]
-        elif key in self._cell_index:
-            return self._cell_index[key]
+    def __getitem__(self, cell):
+
+        if isinstance(cell, Cell):
+            if len(self._cells[cell.elements]) == 1:
+                return self._cells[cell.elements][0].properties
+            else:
+                return [
+                    self._cells[cell.elements][c].properties
+                    for c in self._cells[cell.elements]
+                ]
+        elif isinstance(cell, tuple) or isinstance(cell, list):
+            cell = tuple(cell)
+            if cell in self._cells:
+                if len(self._cells[cell]) == 1:
+                    return self._cells[cell][0].properties
+                else:
+                    return [self._cells[cell][c].properties for c in self._cells[cell]]
         else:
-            raise KeyError(f"key {key} is not in the cell dictionary")
+            raise KeyError(f"cell {cell} is not in the cell dictionary")
 
     # Set methods
     def __len__(self):
         return len(self._cells)
 
     def __iter__(self):
-        return iter(self._cells.values())
+        return iter(
+            [
+                self._cells[cell][key]
+                for cell in self._cells
+                for key in self._cells[cell]
+            ]
+        )
 
     def __contains__(self, e):
         if isinstance(e, tuple) or isinstance(e, list):
-            for c in self._cells:
-                if tuple(e) == tuple(self._cells[c].elements):
-                    return True
-            return False
+            return e in self._cells
+
         elif isinstance(e, Cell):
-            return e in self._cell_index
+            return e.elements in self._cells
+        else:
+            return False
 
     def __repr__(self):
         """C
@@ -161,66 +218,49 @@ class CellView:
         -------
         str
         """
-        return f"CellView({[cell for cell in self._cells.values()]})"
+        return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
     def __str__(self):
         """
         String representation of regular cell
+
         Returns
         -------
         str
-        329025
         """
 
-        return f"{[cell for cell in self._cells.values()]} "
+        return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
     def insert_cell(self, cell, **attr):
         if isinstance(cell, tuple) or isinstance(cell, list):
             cell = Cell(elements=cell, name=str(len(self._cells)), **attr)
-            l = len(self._cells)
-            self._cells[l] = cell
-            self._cell_index[cell] = l
+            if cell.elements not in self._cells:
+                self._cells[cell.elements] = {0: cell}
+            else:
+                self._cells[cell.elements][len(self._cells[cell.elements])] = cell
+
         elif isinstance(cell, Cell):
-            cell.properties.update(attr)
-            cell.name = str(len(self._cells))
-            l = len(self._cells)
-            self._cells[l] = cell
-            self._cell_index[cell] = l
+            if cell.elements not in self._cells:
+                self._cells[cell.elements] = {0: cell}
+            else:
+                self._cells[cell.elements][len(self._cells[cell.elements])] = cell
+
         else:
             raise ValueError("input must be list, tuple or Cell type")
 
-    def delete_cell(self, key):
-        if key in self._cells:
-            cell = self._cells[key]
-            del self._cells[key]
-            del self._cell_index[cell]
-        elif key in self._cell_index:
-            index = self._cell_index[key]
-            del self._cells[index]
-            del self._cell_index[key]
+    def delete_cell(self, cell, key=None):
+        if cell in self._cells:
+            if key is None:
+                del self._cells[cell]
+            elif key in self._cells[cell]:
+                del self._cells[cell][key]
+            else:
+                raise KeyError(f"cell with key {key} is not in the complex ")
         else:
-            raise KeyError(f"The cell with key {key} is not in the complex")
-
-    def delete_cell_by_set(self, elements):
-        elements = tuple(elements)
-        key_found = False
-        to_be_deleted = []
-        for e in self._cell_index:
-            lst = e.elements
-
-            if tuple(lst) == elements:
-                index = self._cell_index[e]
-                to_be_deleted.append([index, e])
-                key_found = True
-        for keys in to_be_deleted:
-            del self._cells[keys[0]]
-            del self._cell_index[keys[1]]
-
-        if key_found == False:
-            raise KeyError(f"The cell {elements} is not in the complex")
+            raise KeyError(f"cell {cell} is not in the complex")
 
     @staticmethod
-    def _is_cyc_perm(seq1, seq2):
+    def _cyclic_permutation_equiv(seq1, seq2):
         mset1 = Counter(seq1)
         mset2 = Counter(seq2)
         if mset1 != mset2:
