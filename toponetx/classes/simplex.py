@@ -18,7 +18,7 @@ except ImportError:
     )
 
 
-__all__ = ["Simplex", "SimplexView"]
+__all__ = ["Simplex", "SimplexView", "NodeView"]
 
 
 class Simplex:
@@ -231,7 +231,11 @@ class SimplexView:
         -------
         str
         """
-        return f"SimplexView({[simplex for simplex in self._simplices.keys() ] })"
+        all_simplices = []
+        for i in range(len(self.faces_dict)):
+            all_simplices = all_simplices + [tuple(j) for j in self.faces_dict[i]]
+
+        return f"SimplexView({all_simplices})"
 
     def __str__(self):
         """
@@ -241,8 +245,11 @@ class SimplexView:
         -------
         str
         """
+        all_simplices = []
+        for i in range(len(self.faces_dict)):
+            all_simplices = all_simplices + [tuple(j) for j in self.faces_dict[i]]
 
-        return f"SimplexView({[simplex for simplex in self._simplices.keys() ] })"
+        return f"SimplexView({all_simplices})"
 
     @staticmethod
     def _build_faces_dict_from_gudhi_tree(self, simplex_tree):
@@ -421,3 +428,49 @@ class SimplexView:
                 )
         else:
             raise KeyError("simplex is not a part of the simplicial comples")
+
+
+class NodeView(SimplexView):
+
+    """
+    >>> SC = SimplexView()
+    >>> SC.insert_simplex ( (1,2,3,4),weight=1 )
+    >>> c1=Simplex((1,2,3,4,5))
+    >>> NV = NodeView(SC)
+
+    """
+
+    def __init__(self, simplexview, name=None):
+        if name is None:
+            self.name = "_"
+        else:
+            self.name = name
+        if simplexview.faces_dict != []:
+            self.nodes = simplexview.faces_dict[0]
+        else:
+            self.nodes = []
+
+    def __repr__(self):
+        """C
+        String representation of nodes
+        Returns
+        -------
+        str
+        """
+
+        all_nodes = [tuple(j) for j in self.nodes.keys()]
+
+        return f"NodeView({all_nodes})"
+
+    def __len__(self):
+        return len(self.nodes)
+
+    def __contains__(self, e):
+
+        if isinstance(e, Hashable):
+            return frozenset({e}) in self.nodes
+        elif isinstance(e, Iterable):
+            if len(e) == 1:
+                return frozenset(e) in self.nodes
+        else:
+            return False

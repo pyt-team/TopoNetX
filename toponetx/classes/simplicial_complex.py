@@ -20,7 +20,7 @@ from sklearn.preprocessing import normalize
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.ranked_entity import RankedEntity, RankedEntitySet
-from toponetx.classes.simplex import Simplex, SimplexView
+from toponetx.classes.simplex import NodeView, Simplex, SimplexView
 from toponetx.exception import TopoNetXError
 
 try:
@@ -107,6 +107,7 @@ class SimplicialComplex:
 
         else:
             raise ValueError(f" Import modes must be 'normal' and 'gudhi', got {mode}")
+        self._node_set = NodeView(self._simplex_set)
 
     @property
     def shape(self):
@@ -135,18 +136,14 @@ class SimplicialComplex:
 
     @property
     def nodes(self):
-
-        return self.skeleton(0)
+        return self._node_set
 
     @property
     def simplices(self):
         """
         set of all simplices
         """
-        return [
-            self._simplex_set.faces_dict[i].keys()
-            for i in range(len(self._simplex_set.faces_dict))
-        ]
+        return self._simplex_set
 
     def get_simplex_id(self, simplex):
         if simplex in self:
@@ -167,6 +164,8 @@ class SimplicialComplex:
         """
         if n < len(self._simplex_set.faces_dict):
             return list(self._simplex_set.faces_dict[n].keys())
+        elif n < 0:
+            raise ValueError(f"input must be a postive integer, got {n}")
         else:
             raise ValueError(f"input {n} exceeds max dim")
 
@@ -599,6 +598,82 @@ class SimplicialComplex:
             _simplices.append([e])
 
         self.add_simplices_from(_simplices)
+
+    def restrict_to_simplices(self, cellset, name=None):
+        """
+        Constructs a combinatorial complex using a subset of the cells in combinatorial complex
+
+        Parameters
+        ----------
+        cellset: iterable of hashables or RankedEntities
+            A subset of elements of the combinatorial complex  cells
+
+        name: str, optional
+
+        Returns
+        -------
+        new Combinatorial Complex : CombinatorialComplex
+
+        Example
+
+        >>> c1= Simplex((1,2,3))
+        >>> c2= Simplex((1,2,4))
+        >>> c3= Simplex((1,2,5))
+        >>> SC = SimplicialComplex([c1,c2,c3])
+        >>> SC1= SC.restrict_to_simplices([c1, (2,4) ])
+        >>> SC1.simplices
+        CellView([Cell(1, 2, 3)])
+
+
+
+        """
+        RNS = []
+        for i in cellset:
+            if i in self:
+                RNS.append(i)
+
+        SC = SimplicialComplex(simplices=RNS, name=name)
+
+        return SC
+
+    def restrict_to_nodes(self, nodeset, name=None):
+        """
+        Constructs a new combinatorial complex  by restricting the cells in the combintorial complex to
+        the nodes referenced by nodeset.
+
+        Parameters
+        ----------
+        nodeset: iterable of hashables
+            References a subset of elements of self.nodes
+
+        name: string, optional, default: None
+
+        Returns
+        -------
+        new Combinatorial Complex : CombinatorialComplex
+
+        Example
+        >>> CX = CellComplex()
+        >>> c1= Cell((1,2,3))
+        >>> c2= Cell((1,2,4))
+        >>> c3= Cell((1,2,5))
+        >>> CX = CellComplex([c1,c2,c3])
+        >>> CX.add_edge(1,0)
+        >>> CX.restrict_to_nodes([1,2,3,0])
+
+        """
+
+        _G = Graph(self._G.subgraph(nodeset))
+        CX = SimplicialComplex(_G)
+        cells = []
+        for cell in self.cells:
+            if CX.is_insertable_cycle(cell, True):
+                cells.append(cell)
+        CX = CellComplex(_G)
+
+        for e in cells:
+            CX.add_cell(e)
+        return CX
 
     @staticmethod
     def from_nx_graph(G):
