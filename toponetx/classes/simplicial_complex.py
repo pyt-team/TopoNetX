@@ -12,6 +12,7 @@ import networkx as nx
 import numpy as np
 import scipy.sparse.linalg as spl
 from hypernetx import Hypergraph
+from networkx import Graph
 from scipy.linalg import fractional_matrix_power
 from scipy.sparse import coo_matrix, csr_matrix, diags, dok_matrix, eye
 from sklearn.preprocessing import normalize
@@ -66,6 +67,14 @@ class SimplicialComplex:
                     f"Input simplices must be given as Iterable, got {type(simplices)}."
                 )
 
+        if isinstance(simplices, Graph):
+            _simplices = []
+            for e in simplices.edges:
+                _simplices.append(e)
+            for e in simplices.nodes:
+                _simplices.append([e])
+            simplices = _simplices
+
         self.mode = mode
         if name is None:
             self.name = ""
@@ -86,7 +95,9 @@ class SimplicialComplex:
 
         if self.mode == "normal":
             if simplices is not None:
-                self._simplex_set.add_simplices_from(simplices)
+                if isinstance(simplices, Iterable):
+                    self._simplex_set.add_simplices_from(simplices)
+
         elif self.mode == "gudhi":
             st = SimplexTree()
             if simplices is not None:
@@ -580,6 +591,19 @@ class SimplicialComplex:
         else:
             return np.power(Ad, k) @ BTd + np.power(coAd, k) @ BTd
 
+    def add_elements_from_nx_graph(self, G):
+        _simplices = []
+        for e in G.edges:
+            _simplices.append(e)
+        for e in G.nodes:
+            _simplices.append([e])
+
+        self.add_simplices_from(_simplices)
+
+    @staticmethod
+    def from_nx_graph(G):
+        return SimplicialComplex(G)
+
     def is_connected(self):
         g = nx.Graph()
 
@@ -596,16 +620,6 @@ class SimplicialComplex:
             edge = [list(j) for j in self.skeleton(i)]
             graph = graph + edge
         return Hypergraph(graph, static=True)
-
-    def to_cellcomplex(self):
-        """
-
-        graph = []
-        for i in range(1, self.dim + 1):
-            edge = [list(j) for j in self.skeleton(i)]
-            graph = graph + edge
-        return CellComplex(graph)
-        """
 
     def to_combinatorialcomplex(self):
         graph = []
