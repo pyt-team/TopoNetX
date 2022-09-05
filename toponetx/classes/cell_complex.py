@@ -357,7 +357,7 @@ class CellComplex:
             print(f"Node is not in cell complex {self.name}.")
             return
 
-        return self._G.neighbors
+        return self._G[node]
 
     def cell_neighbors(self, cell, s=1):
         """
@@ -403,8 +403,9 @@ class CellComplex:
 
 
         """
-        self._G.remove_node(node)
-        return self
+        raise NotImplementedError
+        # self._G.remove_node(node)
+        # return self
 
     def remove_nodes(self, node_set):
         """
@@ -420,9 +421,10 @@ class CellComplex:
         Combinatorial Complex : CombinatorialComplex
 
         """
-        for node in node_set:
-            self.remove_node(node)
-        return self
+        raise NotImplementedError
+        # for node in node_set:
+        #    self.remove_node(node)
+        # return self
 
     def add_node(self, node, **attr):
 
@@ -467,10 +469,12 @@ class CellComplex:
         Example
         -------
         >>> CX = CellComplex()
+        >>> c1 = Cell((2,3,4), color = 'black' )
+        >>> CX.add_cell(c1,weight=3)
         >>> CX.add_cell([1,2,3,4],rank=2,color='red')
         >>> CX.add_cell([2,3,4,5],rank=2,color='blue')
         >>> CX.add_cell([5,6,7,8],rank=2,color='green')
-        >>> CX.cells[0]['color']
+        >>> CX.cells[(1,2,3,4)]['color']
         'red'
 
 
@@ -509,7 +513,7 @@ class CellComplex:
 
             elif rank == 2:
                 if isinstance(cell, Cell):
-                    self._cells.insert(Cell)
+                    self._cells.insert_cell(Cell, **attr)
                 elif isinstance(cell, tuple) or isinstance(cell, list):
 
                     if self.is_insertable_cycle(cell, check_skeleton=check_skeleton):

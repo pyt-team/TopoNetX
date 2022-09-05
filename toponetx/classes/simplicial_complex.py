@@ -3,7 +3,8 @@
 Simplicial Complex Class
 
 """
-from collections import OrderedDict
+from collections import Hashable, OrderedDict
+from collections.abc import Iterable
 from itertools import combinations
 from warnings import warn
 
@@ -15,8 +16,11 @@ from scipy.linalg import fractional_matrix_power
 from scipy.sparse import coo_matrix, csr_matrix, diags, dok_matrix, eye
 from sklearn.preprocessing import normalize
 
+from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.ranked_entity import RankedEntity, RankedEntitySet
+from toponetx.classes.simplex import Simplex, SimplexView
+from toponetx.exception import TopoNetXError
 
 try:
     from gudhi import SimplexTree
@@ -46,40 +50,30 @@ class SimplicialComplex:
 
     mode : computational mode, available options are "normal" or "gudhi".
     default is normal
+
+    Example
+    =======
+    >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+
+
     """
 
-    def __init__(self, simplices=None, name=None, maxdimension=None, mode="normal"):
+    def __init__(self, simplices=None, name=None, mode="normal", *attr):
+        if simplices is not None:
+
+            if not isinstance(simplices, Iterable):
+                raise TypeError(
+                    f"Input simplices must be given as Iterable, got {type(simplices)}."
+                )
+
         self.mode = mode
         if name is None:
+            self.name = ""
+        else:
             self.name = name
-        else:
-            self.name = "_"
-        self._simplex_set = set()
-        if maxdimension != None:
-            self.constrain_dim = maxdimension
-        else:
-            self.constrain_dim = -1
 
-        if simplices is None:
-            self.maxdim = -1
-            if self.mode == "normal":
-                pass
-            elif self.mode == "gudhi":
-                self.st = self.get_simplex_tree()
-                self.faces_dict = SimplicialComplex.extract_simplices(self.st)
-            else:
-                raise ValueError(
-                    f" Import modes must be 'normal' and 'gudhi', got {mode}"
-                )
-
-        else:
-            if not isinstance(simplices, (list, tuple)):
-                raise TypeError(
-                    f"Input simplices must be given as a list or tuple, got {type(simplices)}."
-                )
-
-            max_simplex_size = len(max(simplices, key=lambda el: len(el)))
-
+        self._simplex_set = SimplexView()
+        if self.mode == "gudhi":
             try:
                 from gudhi import SimplexTree
             except ImportError:
@@ -88,56 +82,20 @@ class SimplicialComplex:
                     + "normal mode will be used for computations",
                     stacklevel=2,
                 )
-                self.mode = "normal"
-            if self.mode == "normal":
+            self.mode = "normal"
 
-                self._import_simplices(simplices=simplices)
-
-                if maxdimension is None:
-                    self.maxdim = max_simplex_size - 1
-                else:
-
-                    if maxdimension > max_simplex_size - 1:
-                        warn(
-                            f"Maximal simplex in the collection has size {max_simplex_size}."
-                            + "\n maxdimension is set to {max_simplex_size-1}",
-                            stacklevel=2,
-                        )
-                        self.maxdim = max_simplex_size - 1
-                    elif maxdimension < 0:
-                        raise ValueError(
-                            f"maxdimension should be a positive integer, got {maxdimension}."
-                        )
-                    else:
-                        self.constrain_dim = maxdimension
-            elif self.mode == "gudhi":
-                self.st = self.get_simplex_tree()
+        if self.mode == "normal":
+            if simplices is not None:
+                self._simplex_set.add_simplices_from(simplices)
+        elif self.mode == "gudhi":
+            st = SimplexTree()
+            if simplices is not None:
                 for s in simplices:
-                    self.st.insert(s)
-                self.faces_dict = SimplicialComplex.extract_simplices(self.st)
-                self._import_simplices(simplices=simplices)
-                max_simplex_size = self.st.dimension() + 1
-                if maxdimension is None:
-                    self.maxdim = max_simplex_size - 1
-                else:
+                    st.insert(s)
+                self._simplex_set._build_faces_dict_from_gudhi_tree(st)
 
-                    if maxdimension > max_simplex_size - 1:
-                        warn(
-                            f"Maximal simplex in the collection has size {max_simplex_size}."
-                            + f" \n {maxdimension} is set to {max_simplex_size-1}",
-                            stacklevel=2,
-                        )
-                        self.maxdim = max_simplex_size - 1
-                    elif maxdimension < 0:
-                        raise ValueError(
-                            f"maxdimension should be a positive integer, got {maxdimension}."
-                        )
-                    else:
-                        self.constrain_dim = maxdimension
-            else:
-                raise ValueError(
-                    f" Import modes must be 'normal' and 'gudhi', got {mode}"
-                )
+        else:
+            raise ValueError(f" Import modes must be 'normal' and 'gudhi', got {mode}")
 
     @property
     def shape(self):
@@ -149,24 +107,46 @@ class SimplicialComplex:
         tuple
 
         """
-        if len(self._simplex_set) == 0:
+        if len(self._simplex_set.faces_dict) == 0:
             print("Simplicial Complex is empty.")
         else:
-            return [len(self._n_faces(i)) for i in range(self.maxdim + 1)]
+            return [
+                len(self._simplex_set.faces_dict[i])
+                for i in range(len(self._simplex_set.faces_dict))
+            ]
 
     @property
     def dim(self):
         """
         dimension of the simplicial complex is the highest dimension of any simplex in the complex
         """
-        return self.maxdim
+        return self._simplex_set.max_dim
+
+    @property
+    def nodes(self):
+
+        return self.skeleton(0)
 
     @property
     def simplices(self):
         """
         set of all simplices
         """
-        return self._simplex_set
+        return [
+            self._simplex_set.faces_dict[i].keys()
+            for i in range(len(self._simplex_set.faces_dict))
+        ]
+
+    def get_simplex_id(self, simplex):
+        if simplex in self:
+            return self[simplex]["id"]
+
+    def is_maximal(self, simplex):
+        if simplex in self:
+            return self[simplex]["is_maximal"]
+
+    def get_maximal_simplices(self, simplex):
+        return self[simplex]["membership"]
 
     def skeleton(self, n):
         """
@@ -174,7 +154,10 @@ class SimplicialComplex:
         -------
         set of simplices of dimesnsion n
         """
-        return self.dic_order_faces(n)
+        if n < len(self._simplex_set.faces_dict):
+            return list(self._simplex_set.faces_dict[n].keys())
+        else:
+            raise ValueError(f"input {n} exceeds max dim")
 
     def __str__(self):
         """
@@ -185,7 +168,7 @@ class SimplicialComplex:
         str
 
         """
-        return f"simplicial Complex with shape {self.shape} and dimension {self.maxdim}"
+        return f"simplicial Complex with shape {self.shape} and dimension {self.dim}"
 
     def __repr__(self):
         """
@@ -208,7 +191,19 @@ class SimplicialComplex:
 
         """
 
-        return len(self._simplex_set)
+        return np.sum(self.shape)
+
+    def __getitem__(self, simplex):
+        if simplex in self:
+            return self._simplex_set[simplex]
+        else:
+            raise KeyError("simplex is not in the simplicial complex")
+
+    def __setitem__(self, simplex, **attr):
+        if simplex in self:
+            self._simplex_set.__setitem__(simplex, **attr)
+        else:
+            raise KeyError("simplex is not in the simplicial complex")
 
     def __iter__(self):
         """
@@ -219,7 +214,11 @@ class SimplicialComplex:
         dict_keyiterator
 
         """
-        return iter(self._simplex_set)
+
+        all_simplices = []
+        for i in range(len(self._simplex_set.faces_dict)):
+            all_simplices = all_simplices + list(self._simplex_set.faces_dict[i].keys())
+        return iter(all_simplices)
 
     def __contains__(self, item):
         """
@@ -230,10 +229,10 @@ class SimplicialComplex:
         item : tuple, list
 
         """
-        return tuple(sorted(item)) in self._simplex_set
+        return item in self._simplex_set
 
     @staticmethod
-    def _faces(simplices, max_dim=None):
+    def get_boundaries(simplices, max_dim=None):
         """
         Parameters
         ----------
@@ -248,7 +247,7 @@ class SimplicialComplex:
 
         # valid in normal mode and can be used as a static method on any face
         # TODO, do for gudhi mode as well.
-        if not isinstance(simplices, (list, tuple)):
+        if not isinstance(simplices, Iterable):
             raise TypeError(
                 f"Input simplices must be given as a list or tuple, got {type(simplices)}."
             )
@@ -264,98 +263,142 @@ class SimplicialComplex:
                         faceset.add(tuple(sorted(face)))
         return faceset
 
-    def _import_simplices(self, simplices=[]):
-        if self.mode == "normal":
-            ordered_simplices = tuple(
-                map(lambda simplex: tuple(sorted(simplex)), simplices)
-            )
-            if self.constrain_dim == -1:
-                self._simplex_set = SimplicialComplex._faces(ordered_simplices)
-            else:
-                self._simplex_set = SimplicialComplex._faces(
-                    ordered_simplices, self.constrain_dim
-                )
+    def remove_maximal_simplex(self, simplex):
+        self._simplex_set.remove_maximal_simplex(simplex)
 
-        elif self.mode == "gudhi":
-            lst = []
-            for i in range(0, len(self.faces_dict)):
-                lst = lst + list(self.faces_dict[i].keys())
-            self._simplex_set = lst
+    def add_simplex(self, simplex, **attr):
+        self._simplex_set.insert_simplex(simplex, **attr)
 
-    def _n_faces(self, n):
-        if n >= 0 and n <= self.maxdim:
-            if self.mode == "normal":
-                return tuple(filter(lambda face: len(face) == n + 1, self._simplex_set))
-            elif self.mode == "gudhi":
-                d = self.faces_dict[n]
-                return tuple(
-                    OrderedDict(sorted(d.items(), key=lambda t: tuple(t[0]))).keys()
-                )
-        else:
-            raise ValueError(
-                f"dimension n should be larger than zero and not greater than {self.maxdim}\n"
-                f"(maximal simplices dimension), got {n}"
-            )
-
-    def dic_order_faces(self, n):
-        return sorted(self._n_faces(n))
-
-    def get_sorted_entire_simplex_set(self):
-        simpleces_lst = list(self._simplex_set)
-        simpleces_lst.sort(key=lambda a: len(a))
-        return simpleces_lst
-
-    def get_simplex_tree(self):  # requires gudhi
-        """
-        get an empty simplex tree.
-        """
-        st = SimplexTree()
-        return st
-
-    def add_simplex(self, simplex):
-        assert isinstance(simplex, tuple) or isinstance(simplex, list)
-        simplex = tuple(sorted(simplex))  # put the simplex in cananical order
-        if simplex is self._simplex_set:
-            warn(f" simplex  {simplex} is already inserted.")
-            return
-        else:
-            if self.mode == "gudhi":
-                raise NotImplementedError(
-                    " insertion is only implemented for normal mode, "
-                    + "gudhi mode only supports defining complexes from constructors."
-                )
-
-            elif self.mode == "normal":
-
-                if self.constrain_dim == -1:
-                    s_tree = SimplicialComplex._faces([simplex])
-                else:
-                    s_tree = SimplicialComplex._faces([simplex], self.constrain_dim)
-                self._simplex_set = self._simplex_set.union(set(s_tree))
-                if len(simplex) - 1 > self.maxdim:
-                    if self.constrain_dim == -1:
-                        self.maxdim = len(simplex) - 1
-                    else:
-                        self.maxdim = self.constrain_dim
-
-    def insert_simplices_from(self, simplices):
+    def add_simplices_from(self, simplices):
         for s in simplices:
-            self.insert_simplex(s)
+            self.add_simplex(s)
 
-    @staticmethod
-    def extract_simplices(simplex_tree):
+    def set_simplex_attributes(self, values, name=None):
         """
-        extract skeletons from gudhi simples tree
 
-        Remark
-            faces_dict[i] = X^i where X^i is the ith skeleton of the input SC X.
+            Parameters
+            ----------
+            values : TYPE
+                DESCRIPTION.
+            name : TYPE, optional
+                DESCRIPTION. The default is None.
+
+            Returns
+            -------
+            None.
+
+            Example
+            ------
+
+            After computing some property of the simplex of a simplicial complex, you may want
+            to assign a simplex attribute to store the value of that property for
+            each simplex:
+
+            >>> SC = SimplicialComplex()
+            >>> SC.add_simplex([1,2,3,4])
+            >>> SC.add_simplex([1,2,4])
+            >>> SC.add_simplex([3,4,8])
+            >>> d={(1,2,3):'red',(1,2,4):'blue'}
+            >>> SC.set_simplex_attributes(d,name='color')
+            >>> SC[(1,2,3)]['color']
+            'red'
+
+        If you provide a dictionary of dictionaries as the second argument,
+        the entire dictionary will be used to update simplex attributes::
+
+            Examples
+            --------
+            >>> CC = SimplicialComplex()
+            >>> CC.add_simplex([1,3,4])
+            >>> CC.add_simplex([1,2,3])
+            >>> CC.add_simplex([1,2,4])
+            >>> d={ (1,3,4): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
+            >>> CC.set_simplex_attributes(d)
+            >>> CC[(1,3,4)]['color']
+            'red'
+
+        Note : If the dict contains simplices that are not in `self.simplices`, they are
+        silently ignored.
 
         """
-        faces_dict = [OrderedDict() for _ in range(simplex_tree.dimension() + 1)]
-        for simplex, _ in simplex_tree.get_skeleton(simplex_tree.dimension()):
-            k = len(simplex)
-            faces_dict[k - 1][frozenset(simplex)] = len(faces_dict[k - 1])
-        return faces_dict
+
+        if name is not None:
+            # if `values` is a dict using `.items()` => {simplex: value}
+
+            for simplex, value in values.items():
+                try:
+                    self[simplex][name] = value
+                except KeyError:
+                    pass
+
+        else:
+
+            for simplex, d in values.items():
+                try:
+                    self[simplex].update(d)
+                except KeyError:
+                    pass
+            return
+
+    def get_node_attributes(self, name):
+        """Get node attributes from combintorial complex
+
+        Parameters
+        ----------
+
+        name : string
+           Attribute name
+
+        Returns
+        -------
+        Dictionary of attributes keyed by node.
+
+        Examples
+        --------
+            >>> SC = SimplicialComplex()
+            >>> SC.add_simplex([1,2,3,4])
+            >>> SC.add_simplex([1,2,4])
+            >>> SC.add_simplex([3,4,8])
+            >>> d={(1):'red',(2):'blue',(3):"black"}
+            >>> SC.set_simplex_attributes(d,name='color')
+            >>> SC.get_node_attributes('color')
+            >>>
+        'blue'
+
+        """
+        return {tuple(n): self[n][name] for n in self.skeleton(0) if name in self[n]}
+
+    def get_simplex_attributes(self, name, k=None):
+        """Get node attributes from simplical complex
+
+        Parameters
+        ----------
+
+        name : string
+           Attribute name
+
+        k : integer rank of the k-cell
+        Returns
+        -------
+        Dictionary of attributes keyed by cell or k-cells if k is not None
+
+        Examples
+        --------
+            >>> SC = SimplicialComplex()
+            >>> SC.add_simplex([1,2,3,4])
+            >>> SC.add_simplex([1,2,4])
+            >>> SC.add_simplex([3,4,8])
+            >>> d={(1,2):'red',(2,3):'blue',(3,4):"black"}
+            >>> SC.set_simplex_attributes(d,name='color')
+            >>> SC.get_simplex_attributes('color')
+
+        """
+
+        if k is None:
+
+            return {n: self[n][name] for n in self if name in self[n]}
+        else:
+            return {n: self[n][name] for n in self.skeleton(k) if name in self[n]}
 
     @staticmethod
     def get_edges_from_matrix(matrix):
@@ -386,89 +429,63 @@ class SimplicialComplex:
 
     # ---------- operators ---------------#
 
-    def incidence_matrix_gudhi(self, d, signed=True, index=False):
+    def incidence_matrix(self, d, signed=True, weights=None, index=False):
         """
         get the boundary map using gudhi
         """
 
         if d == 0:
             boundary = dok_matrix(
-                (1, len(self.faces_dict[d].items())), dtype=np.float32
+                (1, len(self._simplex_set.faces_dict[d].items())), dtype=np.float32
             )
-            boundary[0, 0 : len(self.faces_dict[d].items())] = 1
+            boundary[0, 0 : len(self._simplex_set.faces_dict[d].items())] = 1
             return boundary.tocsr()
         idx_simplices, idx_faces, values = [], [], []
-        for simplex, idx_simplex in self.faces_dict[d].items():
+        for simplex, idx_simplex in self._simplex_set.faces_dict[d].items():
             for i, left_out in enumerate(np.sort(list(simplex))):
-                idx_simplices.append(idx_simplex)
+                idx_simplices.append(idx_simplex["id"])
                 values.append((-1) ** i)
                 face = simplex.difference({left_out})
-                idx_faces.append(self.faces_dict[d - 1][face])
-        assert len(values) == (d + 1) * len(self.faces_dict[d])
+                idx_faces.append(self._simplex_set.faces_dict[d - 1][face]["id"])
+        assert len(values) == (d + 1) * len(self._simplex_set.faces_dict[d])
         boundary = coo_matrix(
             (values, (idx_faces, idx_simplices)),
             dtype=np.float32,
-            shape=(len(self.faces_dict[d - 1]), len(self.faces_dict[d])),
+            shape=(
+                len(self._simplex_set.faces_dict[d - 1]),
+                len(self._simplex_set.faces_dict[d]),
+            ),
         )
         if index:
             if signed:
-                return self.faces_dict[d], self.faces_dict[d - 1], boundary
+                return (
+                    list(self._simplex_set.faces_dict[d - 1].keys()),
+                    list(self._simplex_set.faces_dict[d].keys()),
+                    boundary,
+                )
             else:
-                return self.faces_dict[d], self.faces_dict[d - 1], abs(boundary)
+                return (
+                    list(self._simplex_set.faces_dict[d - 1].keys()),
+                    list(self._simplex_set.faces_dict[d].keys()),
+                    abs(boundary),
+                )
         else:
             if signed:
                 return boundary
             else:
                 return abs(boundary)
 
-    def incidence_matrix_normal(self, d, signed=True, index=False):
-        source_simplices = self.dic_order_faces(d)
-        target_simplices = self.dic_order_faces(d - 1)
+    def coincidence_matrix(self, d, signed=True, weights=None, index=False):
 
-        if len(target_simplices) == 0:
-            S = dok_matrix((1, len(source_simplices)), dtype=np.float32)
-            S[0, 0 : len(source_simplices)] = 1
-        else:
-            source_simplices_dict = {
-                source_simplices[j]: j for j in range(len(source_simplices))
-            }
-            target_simplices_dict = {
-                target_simplices[i]: i for i in range(len(target_simplices))
-            }
-
-            S = dok_matrix(
-                (len(target_simplices), len(source_simplices)), dtype=np.float32
-            )
-            for source_simplex in source_simplices:
-                for a in range(len(source_simplex)):
-                    target_simplex = source_simplex[:a] + source_simplex[(a + 1) :]
-                    i = target_simplices_dict[target_simplex]
-                    j = source_simplices_dict[source_simplex]
-                    if signed:
-                        S[i, j] = -1 if a % 2 == 1 else 1
-                    else:
-                        S[i, j] = 1
         if index:
-            return source_simplices, target_simplices, S
+            idx_faces, idx_simplices, boundary = self.incidence_matrix(
+                d, signed, index
+            ).T
+            return idx_faces, idx_simplices, boundary.T
         else:
-            return S
+            return self.incidence_matrix(d, signed, index).T
 
-    def incidence_matrix(self, d, signed=True, index=False):
-
-        if d >= 0 and d <= self.maxdim:
-            if self.mode == "normal":
-                return self.incidence_matrix_normal(d, signed, index)
-            elif self.mode == "gudhi":
-                return self.incidence_matrix_gudhi(d, signed, index)
-        else:
-            raise ValueError(
-                f"d should be larget than zero and not greater than {self.maxdim} (maximal allowed dimension for simplices), got {d}"
-            )
-
-    def coincidence_matrix(self, d, signed=True, index=False):
-        return self.incidence_matrix(d, signed, index).T
-
-    def hodge_laplacian_matrix(self, d, signed=True, index=False):
+    def hodge_laplacian_matrix(self, d, signed=True, weights=None, index=False):
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L = B_next @ B_next.transpose()
@@ -488,7 +505,7 @@ class SimplicialComplex:
         else:
             return abs(L)
 
-    def up_laplacian_matrix(self, d, signed=True):
+    def up_laplacian_matrix(self, d, weights=None, signed=True):
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
@@ -505,7 +522,7 @@ class SimplicialComplex:
         else:
             return abs(L_up)
 
-    def down_laplacian_matrix(self, d, signed=True):
+    def down_laplacian_matrix(self, d, weights=None, signed=True):
         if d <= self.maxdim and d > 0:
             B = self.incidence_matrix(d)
             L_down = B.transpose() @ B
@@ -518,7 +535,7 @@ class SimplicialComplex:
         else:
             return abs(L_down)
 
-    def adjacency_matrix(self, d, signed=False):
+    def adjacency_matrix(self, d, weights=None, signed=False):
 
         L_up = self.up_laplacian_matrix(d, signed)
         L_up.setdiag(0)
@@ -528,7 +545,7 @@ class SimplicialComplex:
         else:
             return abs(L_up)
 
-    def coadjacency_matrix(self, d, signed=False):
+    def coadjacency_matrix(self, d, weights=None, signed=False):
 
         L_down = self.down_laplacian_matrix(d, signed)
         L_down.setdiag(0)
@@ -565,254 +582,38 @@ class SimplicialComplex:
 
     def is_connected(self):
         g = nx.Graph()
+
         for e in self.skeleton(1):
+            e = list(e)
             g.add_edge(e[0], e[1])
+        for n in self.skeleton(0):
+            g.add_node(list(n)[0])
         return nx.is_connected(g)
 
     def to_hypergraph(self):
         graph = []
-        for i in range(1, self.maxdim + 1):
-            edge = [list(j) for j in self._n_faces(i)]
+        for i in range(1, self.dim + 1):
+            edge = [list(j) for j in self.skeleton(i)]
             graph = graph + edge
         return Hypergraph(graph, static=True)
 
+    def to_cellcomplex(self):
+        """
+
+        graph = []
+        for i in range(1, self.dim + 1):
+            edge = [list(j) for j in self.skeleton(i)]
+            graph = graph + edge
+        return CellComplex(graph)
+        """
+
     def to_combinatorialcomplex(self):
         graph = []
-        for i in range(1, self.maxdim + 1):
+        for i in range(1, self.dim + 1):
             edge = [
                 RankedEntity(uid=tuple(j), elements=list(j), rank=len(j) - 1)
-                for j in self._n_faces(i)
+                for j in self.skeleton(i)
             ]
             graph = graph + edge
         RES = RankedEntitySet("", graph)
         return CombinatorialComplex(RES)
-
-    #  -----------normalized operators------------------#
-
-    def normalized_hodge_laplacian_matrix(self, d, signed=True):
-
-        return SimplicialComplex.normalize_laplacian(
-            self.hodge_laplacian_matrix(d=d), signed=signed
-        )
-
-    def normalized_down_laplacian_matrix(self, d):
-        Ld = self.hodge_laplacian_matrix(d=d)
-        Ldown = self.down_laplacian_matrix(d=d)
-        out = SimplicialComplex.normalize_x_laplacian(Ld, Ldown)
-        return out
-
-    def normalized_up_laplacian_matrix(self, d):
-        Ld = self.hodge_laplacian_matrix(d=d)
-        Lup = self.up_laplacian_matrix(d=d)
-        out = SimplicialComplex.normalize_x_laplacian(Ld, Lup)
-        return out
-
-    def normalized_coboundary_operator_matrix(self, d, signed=True, normalization="xu"):
-
-        CoBd = self.coincidence_matrix(d, signed)
-
-        if normalization == "row":
-            return normalize(CoBd, norm="l1", axis=1)
-        elif normalization == "kipf":
-            return SimplicialComplex.asymmetric_kipf_normalization(CoBd)
-        elif normalization == "xu":
-            return SimplicialComplex.asymmetric_xu_normalization(CoBd)
-        else:
-            raise Exception("invalid normalization method entered.")
-
-    def normalized_k_hop_coincidence_matrix(self, d, k, normalization="xu"):
-
-        CoBd = self.k_hop_coincidence_matrix(d, k)
-
-        if normalization == "row":
-            return normalize(CoBd, norm="l1", axis=1)
-        elif normalization == "kipf":
-            return SimplicialComplex.asymmetric_kipf_normalization(CoBd)
-        elif normalization == "xu":
-            return SimplicialComplex.asymmetric_xu_normalization(CoBd)
-        else:
-            raise Exception("invalid normalization method entered.")
-
-    def normalized_incidence_matrix(self, d, signed=True, normalization="xu"):
-
-        Bd = self.incidence_matrix(d, signed)
-        if normalization == "row":
-            return normalize(Bd, norm="l1", axis=1)
-        elif normalization == "kipf":
-            return SimplicialComplex.asymmetric_kipf_normalization(Bd)
-        elif normalization == "xu":
-            return SimplicialComplex.asymmetric_xu_normalization(Bd)
-        else:
-            raise Exception("invalid normalization method entered.")
-
-    def normalized_k_hop_boundary(self, d, k, normalization="xu"):
-
-        Bd = self.k_hop_incidence_matrix(d, k)
-        if normalization == "row":
-            return normalize(Bd, norm="l1", axis=1)
-        elif normalization == "kipf":
-            return SimplicialComplex.asymmetric_kipf_normalization(Bd)
-        elif normalization == "xu":
-            return SimplicialComplex.asymmetric_xu_normalization(Bd)
-        else:
-            raise Exception("invalid normalization method entered.")
-
-    def normalized_adjacency(self, d, signed=False, normalization="kipf"):
-        """
-        Args:
-            d: dimenion of the higher order adjacency matrix
-            signed: Boolean determines if the adj matrix is signed or not.
-
-        return:
-             D^{-0.5}* (adj(d)+Id)* D^{-0.5}.
-        """
-        # A_adjacency is an opt that maps a j-cochain to a k-cochain.
-        #   shape [num_of_k_simplices num_of_j_simplices]
-        A_adjacency = self.adjacency_matrix(d, signed=signed)
-        A_adjacency = A_adjacency + eye(A_adjacency.shape[0])
-        if normalization == "row":
-            return normalize(A_adjacency, norm="l1", axis=1)
-        elif normalization == "kipf":
-            return SimplicialComplex.normalize_adjacency(A_adjacency)
-        elif normalization == "xu":
-            return SimplicialComplex.asymmetric_xu_normalization(A_adjacency)
-        else:
-            raise Exception("invalid normalization method entered.")
-
-    def normalized_coadjacency(self, d, signed=False, normalization="xu"):
-        """
-        Args:
-            d: dimenion of the higher order adjacency matrix
-            signed: Boolean determines if the adj matrix is signed or not.
-
-        return:
-             D^{-0.5}* (co-adj(d)+Id)* D^{-0.5}.
-        """
-        # A_adjacency is an opt that maps a j-cochain to a k-cochain.
-        #   shape [num_of_k_simplices num_of_j_simplices]
-        A_coadjacency = self.coadjacency_matrix(d, signed=signed)
-        A_coadjacency = A_coadjacency + eye(A_coadjacency.shape[0])
-        if normalization == "row":
-            return normalize(A_coadjacency, norm="l1", axis=1)
-        elif normalization == "kipf":
-            return SimplicialComplex.normalize_adjacency(A_coadjacency)
-        elif normalization == "xu":
-            return SimplicialComplex.asymmetric_xu_normalization(A_coadjacency)
-        else:
-            raise Exception("invalid normalization method entered.")
-
-    @staticmethod
-    def normalize_laplacian(L, signed=True):
-
-        topeigen_val = spl.eigsh(L, k=1, which="LM", return_eigenvectors=False)[0]
-        out = L.copy()
-        out *= 1.0 / topeigen_val
-        if signed:
-            return out
-        else:
-            return abs(out)
-
-    @staticmethod
-    def normalize_x_laplacian(L, Lx):  # used to normalize the up or the down Laplacians
-        assert L.shape[0] == L.shape[1]
-        topeig = spl.eigsh(L, k=1, which="LM", return_eigenvectors=False)[0]
-        out = Lx.copy()
-        out *= 1.0 / topeig
-        return out
-
-    @staticmethod
-    def normalize_adjacency(A_opt):
-        """
-        Args:
-            A_opt is an opt that maps a j-cochain to a k-cochain.
-            shape [num_of_k_simplices num_of_j_simplices]
-
-        return:
-             D^{-0.5}* (A_opt)* D^{-0.5}.
-        """
-        rowsum = np.array(np.abs(A_opt).sum(1))
-        r_inv_sqrt = np.power(rowsum, -0.5).flatten()
-        r_inv_sqrt[np.isinf(r_inv_sqrt)] = 0.0
-        r_mat_inv_sqrt = diags(r_inv_sqrt)
-        A_opt_to = A_opt.dot(r_mat_inv_sqrt).transpose().dot(r_mat_inv_sqrt)
-
-        return coo_matrix(A_opt_to)
-
-    @staticmethod
-    def asymmetric_kipf_normalization(A_opt, is_sparse=True):
-        """
-        This version works for asymmetric matrices such as
-        the coboundary matrices, as well as symmetric ones
-        such as higher order adjacency.
-
-        Args:
-            A_opt is an opt that maps a j-cochain to a k-cochain.
-            shape [num_of_k_simplices num_of_j_simplices]
-
-        return:
-            a normalized version of the operator A_opt:
-                D_{i}^{-0.5}* (A_opt)* D_{j}^{-0.5}
-                where Di = np.sum(A_opt, axis=1)
-                and Dj = np.sum(A_opt, axis=0)
-        """
-        if is_sparse:
-            rowsum = np.array(np.abs(A_opt).sum(1))
-            colsum = np.array(np.abs(A_opt).sum(0))
-            degree_mat_inv_sqrt_row = diags(np.power(rowsum, -0.5).flatten())
-            degree_mat_inv_sqrt_col = diags(np.power(colsum, -0.5).flatten())
-            degree_mat_inv_sqrt_row = degree_mat_inv_sqrt_row.toarray()
-            degree_mat_inv_sqrt_col = degree_mat_inv_sqrt_col.toarray()
-            degree_mat_inv_sqrt_row[np.isinf(degree_mat_inv_sqrt_row)] = 0.0
-            degree_mat_inv_sqrt_col[np.isinf(degree_mat_inv_sqrt_col)] = 0.0
-            degree_mat_inv_sqrt_row = coo_matrix(degree_mat_inv_sqrt_row)
-            degree_mat_inv_sqrt_col = coo_matrix(degree_mat_inv_sqrt_col)
-
-            normalized_operator = (
-                A_opt.dot(degree_mat_inv_sqrt_col)
-                .transpose()
-                .dot(degree_mat_inv_sqrt_row)
-            ).T.tocoo()
-            return normalized_operator
-
-        else:
-            Di = np.sum(np.abs(A_opt), axis=1)
-            Dj = np.sum(np.abs(A_opt), axis=0)
-            inv_Dj = np.mat(np.diag(np.power(Dj, -0.5)))
-            inv_Dj[np.isinf(inv_Dj)] = 0.0
-            Di2 = np.mat(np.diag(np.power(Di, -0.5)))
-            Di2[np.isinf(Di2)] = 0.0
-            A_opt = np.mat(A_opt)
-            G = Di2 * A_opt * inv_Dj
-            return G
-
-    @staticmethod
-    def asymmetric_xu_normalization(A_opt, is_sparse=True):
-        """
-        This version works for asymmetric matrices such as
-        the coboundary matrices, as well as symmetric ones
-        such as higher order adjacency.
-
-        Args:
-            A_opt is an opt that maps a j-cochain to a k-cochain.
-            shape [num_of_k_simplices num_of_j_simplices]
-
-        return:
-            a normalized version of the operator A_opt:
-                D_{i}^{-1}* (A_opt)
-                where Di = np.sum(A_opt, axis=1)
-        """
-        if is_sparse:
-            rowsum = np.array(np.abs(A_opt).sum(1))
-            r_inv = np.power(rowsum, -1).flatten()
-            r_inv[np.isinf(r_inv)] = 0.0
-            r_mat_inv = diags(r_inv)
-            normalized_operator = r_mat_inv.dot(A_opt)
-            return normalized_operator
-
-        else:
-            Di = np.sum(np.abs(A_opt), axis=1)
-            Di2 = np.mat(np.diag(np.power(Di, -1)))
-            Di2[np.isinf(Di2)] = 0.0
-            A_opt = np.mat(A_opt)
-            normalized_operator = Di2 * A_opt
-            return normalized_operator
