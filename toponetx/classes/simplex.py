@@ -343,11 +343,7 @@ class SimplexView:
                 self.faces_dict[k - 1][simplex_].update(attr)
 
     def insert_simplex(self, simplex, **attr):
-        if (
-            isinstance(simplex, tuple)
-            or isinstance(simplex, list)
-            or isinstance(simplex, Simplex)
-        ):
+        if isinstance(simplex, Iterable) or isinstance(simplex, Simplex):
             if not isinstance(simplex, Simplex):
                 simplex_ = frozenset(
                     sorted(simplex)

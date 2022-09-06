@@ -153,7 +153,7 @@ class SimplicialComplex:
         if simplex in self:
             return self[simplex]["is_maximal"]
 
-    def get_maximal_simplices(self, simplex):
+    def get_maximal_simplices_of_simplex(self, simplex):
         return self[simplex]["membership"]
 
     def skeleton(self, n):
@@ -650,30 +650,41 @@ class SimplicialComplex:
 
         Returns
         -------
-        new Combinatorial Complex : CombinatorialComplex
+        new Simplicial Complex : SimplicialComplex
 
         Example
-        >>> CX = CellComplex()
-        >>> c1= Cell((1,2,3))
-        >>> c2= Cell((1,2,4))
-        >>> c3= Cell((1,2,5))
-        >>> CX = CellComplex([c1,c2,c3])
-        >>> CX.add_edge(1,0)
-        >>> CX.restrict_to_nodes([1,2,3,0])
+        >>> c1= Simplex((1,2,3))
+        >>> c2= Simplex((1,2,4))
+        >>> c3= Simplex((1,2,5))
+        >>> SC = SimplicialComplex([c1,c2,c3])
+        >>> SC.restrict_to_nodes([1,2,3,4])
 
         """
 
-        _G = Graph(self._G.subgraph(nodeset))
-        CX = SimplicialComplex(_G)
-        cells = []
-        for cell in self.cells:
-            if CX.is_insertable_cycle(cell, True):
-                cells.append(cell)
-        CX = CellComplex(_G)
+        simplices = []
+        nodeset = set(nodeset)
+        for i in range(1, self.dim + 1):
+            for s in self.skeleton(i):
+                if s.issubset(nodeset):
+                    simplices.append(s)
+        all_sim = simplices + list([frozenset({i}) for i in nodeset if i in self.nodes])
 
-        for e in cells:
-            CX.add_cell(e)
-        return CX
+        return SimplicialComplex(all_sim, name=name)
+
+    def get_all_maximal_simplices(self):
+        """
+        Example
+        >>> c1= Simplex((1,2,3))
+        >>> c2= Simplex((1,2,4))
+        >>> c3= Simplex((2,5))
+        >>> SC = SimplicialComplex([c1,c2,c3])
+        >>> SC.get_all_maximal_simplices()
+        """
+        maxmimals = []
+        for s in self:
+            if self.is_maximal(s):
+                maxmimals.append(s)
+        return maxmimals
 
     @staticmethod
     def from_nx_graph(G):
