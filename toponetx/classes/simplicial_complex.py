@@ -54,8 +54,17 @@ class SimplicialComplex:
 
     Example
     =======
-    >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    Example 1
 
+        >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+
+    Example 2
+        >>> G = Graph() # networkx graph
+        >>> G.add_edge(0,1,weight=4)
+        >>> G.add_edge(0,3)
+        >>> G.add_edge(0,4)
+        >>> G.add_edge(1,4)
+        >>> SC = SimplicialComplex(simplices=G)
 
     """
 
@@ -68,12 +77,18 @@ class SimplicialComplex:
                 )
 
         if isinstance(simplices, Graph):
+
             _simplices = []
+            for n in simplices:  # simplices is a networkx graph
+                _simplices.append(([n], simplices.nodes[n]))
             for e in simplices.edges:
-                _simplices.append(e)
-            for e in simplices.nodes:
-                _simplices.append([e])
-            simplices = _simplices
+                u, v = e
+                _simplices.append((e, simplices.get_edge_data(u, v)))
+
+            simplices = []
+            for s in _simplices:
+                s1 = Simplex(s[0], **s[1])
+                simplices.append(s1)
 
         self.mode = mode
         if name is None:
@@ -499,16 +514,16 @@ class SimplicialComplex:
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L = B_next @ B_next.transpose()
-        elif d < self.maxdim:
+        elif d < self.dim:
             B_next = self.incidence_matrix(d + 1)
             B = self.incidence_matrix(d)
             L = B_next @ B_next.transpose() + B.transpose() @ B
-        elif d == self.maxdim:
+        elif d == self.dim:
             B = self.incidence_matrix(d)
             L = B.transpose() @ B
         else:
             raise ValueError(
-                f"d should be larger than 0 and <= {self.maxdim} (maximal dimension simplices), got {d}"
+                f"d should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {d}"
             )
         if signed:
             return L
@@ -519,13 +534,13 @@ class SimplicialComplex:
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
-        elif d < self.maxdim:
+        elif d < self.dim:
             B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
         else:
 
             raise ValueError(
-                f"d should larger than 0 and <= {self.maxdim-1} (maximal dimension simplices-1), got {d}"
+                f"d should larger than 0 and <= {self.dim-1} (maximal dimension simplices-1), got {d}"
             )
         if signed:
             return L_up
@@ -533,12 +548,12 @@ class SimplicialComplex:
             return abs(L_up)
 
     def down_laplacian_matrix(self, d, weights=None, signed=True):
-        if d <= self.maxdim and d > 0:
+        if d <= self.dim and d > 0:
             B = self.incidence_matrix(d)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
-                f"d should be larger than 1 and <= {self.maxdim} (maximal dimension simplices), got {d}."
+                f"d should be larger than 1 and <= {self.dim} (maximal dimension simplices), got {d}."
             )
         if signed:
             return L_down
@@ -566,11 +581,11 @@ class SimplicialComplex:
 
     def k_hop_incidence_matrix(self, d, k):
         Bd = self.incidence_matrix(d, signed=True)
-        if d < self.maxdim and d >= 0:
+        if d < self.dim and d >= 0:
             Ad = self.adjacency_matrix(d, signed=True)
-        if d <= self.maxdim and d > 0:
+        if d <= self.dim and d > 0:
             coAd = self.coadjacency_matrix(d, signed=True)
-        if d == self.maxdim:
+        if d == self.dim:
             return Bd @ np.power(coAd, k)
         elif d == 0:
             return Bd @ np.power(Ad, k)
@@ -579,11 +594,11 @@ class SimplicialComplex:
 
     def k_hop_coincidence_matrix(self, d, k):
         BTd = self.coincidence_matrix(d, signed=True)
-        if d < self.maxdim and d >= 0:
+        if d < self.dim and d >= 0:
             Ad = self.adjacency_matrix(d, signed=True)
-        if d <= self.maxdim and d > 0:
+        if d <= self.dim and d > 0:
             coAd = self.coadjacency_matrix(d, signed=True)
-        if d == self.maxdim:
+        if d == self.dim:
             return np.power(coAd, k) @ BTd
         elif d == 0:
             return np.power(Ad, k) @ BTd
@@ -688,11 +703,32 @@ class SimplicialComplex:
 
     @staticmethod
     def from_nx_graph(G):
-        return SimplicialComplex(G)
+        """
+        Examples
+        --------
+        >>> G = nx.Graph()  # or DiGraph, MultiGraph, MultiDiGraph, etc
+        >>> G.add_edge(1, 2, weight=2)
+        >>> G.add_edge(3, 4, weight=4)
+        >>> SC = SimplicialComplex.from_nx_graph(G)
+        >>> SC[(1,2)]['weight']
+
+        """
+
+        simplices = []
+        for n in G:
+            simplices.append(([n], G.nodes[n]))
+        for e in G.edges:
+            u, v = e
+            simplices.append((e, G.get_edge_data(u, v)))
+        SCC = SimplicialComplex()
+
+        for s in simplices:
+            s1 = Simplex(s[0], **s[1])
+            SCC.add_simplex(s1)
+        return SCC
 
     def is_connected(self):
         g = nx.Graph()
-
         for e in self.skeleton(1):
             e = list(e)
             g.add_edge(e[0], e[1])
@@ -701,6 +737,14 @@ class SimplicialComplex:
         return nx.is_connected(g)
 
     def to_hypergraph(self):
+        """
+        Example
+        >>> c1= Simplex((1,2,3))
+        >>> c2= Simplex((1,2,4))
+        >>> c3= Simplex((2,5))
+        >>> SC = SimplicialComplex([c1,c2,c3])
+        >>> SC.to_hypergraph()
+        """
         graph = []
         for i in range(1, self.dim + 1):
             edge = [list(j) for j in self.skeleton(i)]
@@ -708,6 +752,14 @@ class SimplicialComplex:
         return Hypergraph(graph, static=True)
 
     def to_combinatorialcomplex(self):
+        """
+        Example
+        >>> c1= Simplex((1,2,3))
+        >>> c2= Simplex((1,2,4))
+        >>> c3= Simplex((2,5))
+        >>> SC = SimplicialComplex([c1,c2,c3])
+        >>> SC.to_combinatorialcomplex()
+        """
         graph = []
         for i in range(1, self.dim + 1):
             edge = [

@@ -343,6 +343,9 @@ class SimplexView:
                 self.faces_dict[k - 1][simplex_].update(attr)
 
     def insert_simplex(self, simplex, **attr):
+
+        if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
+            simplex = [simplex]
         if isinstance(simplex, Iterable) or isinstance(simplex, Simplex):
             if not isinstance(simplex, Simplex):
                 simplex_ = frozenset(
@@ -364,6 +367,9 @@ class SimplexView:
             for r in range(numnodes, 0, -1):
                 for face in combinations(simplex_, r):
                     self._update_faces_dict_entry(face, simplex_, **attr)
+            if isinstance(simplex, Simplex):
+
+                self.faces_dict[len(simplex_) - 1][simplex_].update(simplex.properties)
 
         else:
             raise TypeError("input type must be iterable, or Simplex")
