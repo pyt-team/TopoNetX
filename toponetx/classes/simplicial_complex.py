@@ -66,9 +66,22 @@ class SimplicialComplex:
         >>> G.add_edge(1,4)
         >>> SC = SimplicialComplex(simplices=G)
 
+
     """
 
-    def __init__(self, simplices=None, name=None, mode="normal", *attr):
+    def __init__(self, simplices=None, name=None, mode="normal", **attr):
+
+        self.mode = mode
+        if name is None:
+            self.name = ""
+        else:
+            self.name = name
+
+        self._simplex_set = SimplexView()
+
+        self.complex = dict()  # dictionary for simplicial complex attributes
+        self.complex.update(attr)
+
         if simplices is not None:
 
             if not isinstance(simplices, Iterable):
@@ -90,13 +103,6 @@ class SimplicialComplex:
                 s1 = Simplex(s[0], **s[1])
                 simplices.append(s1)
 
-        self.mode = mode
-        if name is None:
-            self.name = ""
-        else:
-            self.name = name
-
-        self._simplex_set = SimplexView()
         if self.mode == "gudhi":
             try:
                 from gudhi import SimplexTree
@@ -454,7 +460,7 @@ class SimplicialComplex:
 
     # ---------- operators ---------------#
 
-    def incidence_matrix(self, d, signed=True, weights=None, index=False):
+    def incidence_matrix(self, d, signed=True, weight=None, index=False):
         """
         get the boundary map using gudhi
         """
@@ -500,17 +506,17 @@ class SimplicialComplex:
             else:
                 return abs(boundary)
 
-    def coincidence_matrix(self, d, signed=True, weights=None, index=False):
+    def coincidence_matrix(self, d, signed=True, weight=None, index=False):
 
         if index:
             idx_faces, idx_simplices, boundary = self.incidence_matrix(
-                d, signed, index
+                d, signed=signed, weight=weight, index=index
             ).T
             return idx_faces, idx_simplices, boundary.T
         else:
             return self.incidence_matrix(d, signed, index).T
 
-    def hodge_laplacian_matrix(self, d, signed=True, weights=None, index=False):
+    def hodge_laplacian_matrix(self, d, signed=True, weight=None, index=False):
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L = B_next @ B_next.transpose()
@@ -530,7 +536,62 @@ class SimplicialComplex:
         else:
             return abs(L)
 
-    def up_laplacian_matrix(self, d, weights=None, signed=True):
+    def normalized_laplacian_matrix(self, d, weight=None):
+        r"""Returns the normalized Laplacian matrix of G.
+
+            The normalized graph Laplacian is the matrix
+
+            .. math::
+
+                N_d = D^{-1/2} L_d D^{-1/2}
+
+            where `L` is the simplcial complex Laplacian and `D` is the diagonal matrix of
+            d^th simplices degrees.
+
+            Parameters
+            ----------
+            d : int
+                dimension of the hodge laplacian matrix
+
+
+            weight : string or None, optional (default='weight')
+               The edge data key used to compute each value in the matrix.
+               If None, then each edge has weight 1.
+
+            Returns
+            -------
+            N : Scipy sparse matrix
+              The normalized hodge Laplacian matrix of complex.
+
+            -----
+
+
+        Example 1
+
+            >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+
+            >>> NL1= SC.normalized_hodge_laplacian_matrix(1)
+
+            >>> NL1
+
+
+        """
+        import numpy as np
+        import scipy as sp
+        import scipy.sparse  # call as sp.sparse
+
+        L = self.hodge_laplacian_matrix(d)
+        m, n = L.shape
+        diags_ = abs(L).sum(axis=1)
+
+        with sp.errstate(divide="ignore"):
+            diags_sqrt = 1.0 / np.sqrt(diags_)
+        diags_sqrt[np.isinf(diags_sqrt)] = 0
+        DH = sp.sparse.csr_array(sp.sparse.spdiags(diags_sqrt.T, 0, m, n, format="csr"))
+
+        return sp.sparse.csr_matrix(DH @ (L @ DH))
+
+    def up_laplacian_matrix(self, d, signed=True, weight=None, index=False):
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
@@ -547,7 +608,7 @@ class SimplicialComplex:
         else:
             return abs(L_up)
 
-    def down_laplacian_matrix(self, d, weights=None, signed=True):
+    def down_laplacian_matrix(self, d, signed=True, weight=None, index=False):
         if d <= self.dim and d > 0:
             B = self.incidence_matrix(d)
             L_down = B.transpose() @ B
@@ -560,9 +621,9 @@ class SimplicialComplex:
         else:
             return abs(L_down)
 
-    def adjacency_matrix(self, d, weights=None, signed=False):
+    def adjacency_matrix(self, d, signed=False, weight=None, index=False):
 
-        L_up = self.up_laplacian_matrix(d, signed)
+        L_up = self.up_laplacian_matrix(d, signed=signed)
         L_up.setdiag(0)
 
         if signed:
@@ -570,9 +631,9 @@ class SimplicialComplex:
         else:
             return abs(L_up)
 
-    def coadjacency_matrix(self, d, weights=None, signed=False):
+    def coadjacency_matrix(self, d, signed=False, weight=None, index=False):
 
-        L_down = self.down_laplacian_matrix(d, signed)
+        L_down = self.down_laplacian_matrix(d, signed=signed)
         L_down.setdiag(0)
         if signed:
             return L_down
@@ -707,25 +768,13 @@ class SimplicialComplex:
         Examples
         --------
         >>> G = nx.Graph()  # or DiGraph, MultiGraph, MultiDiGraph, etc
-        >>> G.add_edge(1, 2, weight=2)
-        >>> G.add_edge(3, 4, weight=4)
+        >>> G.add_edge('1', '2', weight=2)
+        >>> G.add_edge('3', '4', weight=4)
         >>> SC = SimplicialComplex.from_nx_graph(G)
-        >>> SC[(1,2)]['weight']
+        >>> SC[('1','2')]['weight']
 
         """
-
-        simplices = []
-        for n in G:
-            simplices.append(([n], G.nodes[n]))
-        for e in G.edges:
-            u, v = e
-            simplices.append((e, G.get_edge_data(u, v)))
-        SCC = SimplicialComplex()
-
-        for s in simplices:
-            s1 = Simplex(s[0], **s[1])
-            SCC.add_simplex(s1)
-        return SCC
+        return SimplicialComplex(G, name=G.name)
 
     def is_connected(self):
         g = nx.Graph()

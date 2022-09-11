@@ -242,7 +242,8 @@ class CellView:
                 raise KeyError(f"cell {cell} is not in the cell dictionary")
 
             elif len(self._cells[cell.elements]) == 1:
-                return self._cells[cell.elements][0].properties
+                k = next(iter(self._cells[cell.elements].keys()))
+                return self._cells[cell.elements][k].properties
             else:
                 return [
                     self._cells[cell.elements][c].properties
@@ -253,7 +254,8 @@ class CellView:
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
-                    return self._cells[cell][0].properties
+                    k = next(iter(self._cells[cell].keys()))
+                    return self._cells[cell][k].properties
                 else:
                     return [self._cells[cell][c].properties for c in self._cells[cell]]
             else:
@@ -323,6 +325,10 @@ class CellView:
             raise ValueError("input must be list, tuple or Cell type")
 
     def delete_cell(self, cell, key=None):
+
+        if isinstance(cell, Cell):
+            cell = cell.elements
+
         if cell in self._cells:
             if key is None:
                 del self._cells[cell]
@@ -333,22 +339,77 @@ class CellView:
         else:
             raise KeyError(f"cell {cell} is not in the complex")
 
-    @staticmethod
-    def _cyclic_permutation_equiv(seq1, seq2):
-        mset1 = Counter(seq1)
-        mset2 = Counter(seq2)
-        if mset1 != mset2:
-            return False
+    def _cell_equivelance_class(self):
+        """
 
-        size = len(seq1)
-        deq1 = deque(seq1)
-        deq2 = deque(seq2)
-        for _ in range(size):
-            deq2.rotate()
-            if deq1 == deq2:
-                return True
-        return False
 
-    def collapse_identical_elements(self, return_equivalence_classes=False):
+        Returns
+        -------
+        equiv : TYPE
+            DESCRIPTION.
 
-        return defaultdict(set)
+
+        Example
+        ------
+         >>> CV = CellView()
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (2,3,4,1) )
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (1,2,3,6) )
+         >>> CV.insert_cell ( (3,4,1,2) )
+         >>> CV.insert_cell ( (4,3,2,1) )
+         >>> CV.insert_cell ( (1,2,7,3) )
+         >>> c1=Cell((1,2,3,4,5))
+         >>> CV.insert_cell(c1)
+         >>> d = CV. _cell_equivelance_class()
+         >>> d
+
+        """
+        equiv_classes = defaultdict(set)
+        all_inserted_cells = set()
+        for i, c1 in enumerate(self):
+            for j, c2 in enumerate(self):
+                if i == j:
+                    if j not in all_inserted_cells:
+                        equiv_classes[c1].add(j)
+                elif i > j:
+                    continue
+                elif j in all_inserted_cells:
+                    continue
+                else:
+                    if c1.is_homotopic_to(c2):
+                        equiv_classes[c1].add(j)
+                        all_inserted_cells.add(j)
+        return equiv_classes
+
+    def remove_equivalent_cells(self):
+        """
+        Example:
+        ---------
+         >>> CV = CellView()
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (2,3,4,1) )
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (1,2,3,6) )
+         >>> CV.insert_cell ( (3,4,1,2) )
+         >>> CV.insert_cell ( (4,3,2,1) )
+         >>> CV.insert_cell ( (1,2,7,3) )
+         >>> c1=Cell((1,2,3,4,5))
+         >>> CV.insert_cell(c1)
+         >>> CV.remove_equivalent_cells()
+         >>> CV
+
+
+        """
+        equiv_classes = self._cell_equivelance_class()
+        for c in list(self):
+            if c not in equiv_classes:
+                d = self._cells[c.elements]
+                if len(d) == 1:
+                    self.delete_cell(c)
+                else:
+                    for k, v in d.items():
+                        if len(d) == 1:
+                            break
+                    else:
+                        self.delete_cell(c, k)

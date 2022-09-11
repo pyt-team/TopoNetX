@@ -146,10 +146,12 @@ class CellComplex:
     def skeleton(self, k):
         if k == 0:
             return self.nodes
-        if k == 1:
+        elif k == 1:
             return self.edges
-        if k == 2:
+        elif k == 2:
             return self.cells
+        else:
+            raise TopoNetXError("Only dimensions 0,1, and 2 are supported.")
 
     def __str__(self):
         """
@@ -807,6 +809,34 @@ class CellComplex:
             else:
                 raise TopoNetXError(f"k must be 0,1 or 2, got {k}")
 
+    def remove_equivalent_cells(self):
+        """
+         Example
+         -------
+
+            >>> import networkx as nx
+            >>> G = nx.path_graph(3)
+            >>> d={ ((1,2,3,4),0): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
+            >>> CC = CellComplex(G)
+            >>> CC.add_cell([1,2,3,4], rank=2)
+            >>> CC.add_cell([1,2,3,4], rank=2)
+            >>> CC.add_cell([2,3,4,1], rank=2)
+            >>> CC.add_cell([1,2,4], rank=2,)
+            >>> CC.add_cell([3,4,8], rank=2)
+            >>> CC.remove_equivalent_cells()
+
+        Note
+        ------
+        Remove all 2d- cells that are homotpic (equivalent to each other)
+
+
+         Returns
+         -------
+         None.
+
+        """
+        self.cells.remove_equivalent_cells()
+
     def is_insertable_cycle(self, cell, check_skeleton=True, warnings_dis=False):
 
         if isinstance(cell, Cell):
@@ -829,16 +859,16 @@ class CellComplex:
                     return False
         return True
 
-    def incidence_matrix(self, d, sign=True, weights=None, index=False):
+    def incidence_matrix(self, d, signed=True, weight=None, index=False):
         """
         An incidence matrix for the CC indexed by nodes x cells.
 
         Parameters
         ----------
-        weights : bool, default=False
+        weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
-            self.cells.cell_weights dictionary values.
+            self.cells.cell_weight dictionary values.
 
         index : boolean, optional, default False
             If True return will include a dictionary of node uid : row number
@@ -862,7 +892,7 @@ class CellComplex:
         >>> B1.dot(B2).todense()
 
         """
-        weights = None  # not supported at this version
+        weight = None  # not supported at this version
         import scipy as sp
         import scipy.sparse
 
@@ -872,12 +902,12 @@ class CellComplex:
             for i in range(0, len(self._G.nodes)):
                 A[0, i] = 1
             if index:
-                if sign:
+                if signed:
                     return self._G.nodes, [], A.asformat("csc")
                 else:
                     return self._G.nodes, [], abs(A.asformat("csc"))
             else:
-                if sign:
+                if signed:
 
                     return A.asformat("csc")
                 else:
@@ -897,12 +927,12 @@ class CellComplex:
                 A[ui, ei] = -1
                 A[vi, ei] = 1
             if index:
-                if sign:
+                if signed:
                     return nodelist, edgelist, A.asformat("csc")
                 else:
                     return nodelist, edgelist, abs(A.asformat("csc"))
             else:
-                if sign:
+                if signed:
                     return A.asformat("csc")
                 else:
                     return abs(A.asformat("csc"))
@@ -923,12 +953,12 @@ class CellComplex:
                         A[ei, celli] = -1
             if index:
                 cell_index = {cell: i for i, cell in enumerate(self.cells)}
-                if sign:
+                if signed:
                     return edge_index, cell_index, A.asformat("csc")
                 else:
                     return edge_index, cell_index, abs(A.asformat("csc"))
             else:
-                if sign:
+                if signed:
                     return A.asformat("csc")
                 else:
                     return abs(A.asformat("csc"))
@@ -936,7 +966,7 @@ class CellComplex:
             raise ValueError(f"Only dimension 0,1 and 2 are supported, got {d}")
 
     @staticmethod
-    def _incidence_to_adjacency(M, weights=False):
+    def _incidence_to_adjacency(M, weight=False):
         """
         Helper method to obtain adjacency matrix from
         boolean incidence matrix for s-metrics.
@@ -950,9 +980,9 @@ class CellComplex:
 
         s : int, optional, default: 1
 
-        # weights : bool, dict optional, default=True
+        # weight : bool, dict optional, default=True
         #     If False all nonzero entries are 1.
-        #     Otherwise, weights will be as in product.
+        #     Otherwise, weight will be as in product.
 
         Returns
         -------
@@ -968,14 +998,14 @@ class CellComplex:
         """
 
         M = csr_matrix(M)
-        weights = False  ## currently weighting is not supported
+        weight = False  ## currently weighting is not supported
 
-        if weights == False:
+        if weight == False:
             A = M.dot(M.transpose())
             A.setdiag(0)
         return A
 
-    def hodge_laplacian_matrix(self, d, signed=True, index=False):
+    def hodge_laplacian_matrix(self, d, signed=True, weight=None, index=False):
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L = B_next @ B_next.transpose()
@@ -995,7 +1025,7 @@ class CellComplex:
         else:
             return abs(L)
 
-    def up_laplacian_matrix(self, d, signed=True):
+    def up_laplacian_matrix(self, d, signed=True, weight=None, index=False):
         if d == 0:
             B_next = self.incidence_matrix(d + 1)
             L_up = B_next @ B_next.transpose()
@@ -1012,7 +1042,7 @@ class CellComplex:
         else:
             return abs(L_up)
 
-    def down_laplacian_matrix(self, d, signed=True):
+    def down_laplacian_matrix(self, d, signed=True, weight=None, index=False):
         if d <= self.maxdim and d > 0:
             B = self.incidence_matrix(d)
             L_down = B.transpose() @ B
@@ -1025,9 +1055,9 @@ class CellComplex:
         else:
             return abs(L_down)
 
-    def adjacency_matrix(self, d, signed=False):
+    def adjacency_matrix(self, d, signed=False, weight=None, index=False):
 
-        L_up = self.up_laplacian_matrix(d, signed)
+        L_up = self.up_laplacian_matrix(d, signed=signed)
         L_up.setdiag(0)
 
         if signed:
@@ -1035,9 +1065,9 @@ class CellComplex:
         else:
             return abs(L_up)
 
-    def coadjacency_matrix(self, d, signed=False):
+    def coadjacency_matrix(self, d, signed=False, weight=None, index=False):
 
-        L_down = self.down_laplacian_matrix(d, signed)
+        L_down = self.down_laplacian_matrix(d, signed=signed)
         L_down.setdiag(0)
         if signed:
             return L_down
@@ -1070,7 +1100,9 @@ class CellComplex:
         else:
             return np.power(Ad, k) @ BTd + np.power(coAd, k) @ BTd
 
-    def adjacency_matrix(self, d, weights=False, index=False):  ## , weights=False):
+    def adjacency_matrix(
+        self, d, signed=True, weight=None, index=False
+    ):  ## , weight=False):
         """
         The sparse weighted :term:`s-adjacency matrix`
 
@@ -1083,7 +1115,7 @@ class CellComplex:
         index: boolean, optional, default: False
             if True, will return a rowdict of row to node uid
 
-        weights: bool, default=True
+        weight: bool, default=True
             If False all nonzero entries are 1.
             If True adjacency matrix will depend on weighted incidence matrix,
         index : book, default=False
@@ -1108,18 +1140,18 @@ class CellComplex:
 
         if index:
             MP, row, col = self.incidence_matrix(
-                d, sign=False, weights=weights, index=index
+                d, signed=False, weight=weight, index=index
             )
         else:
-            MP = self.incidence_matrix(d + 1, sign=False, weights=weights, index=index)
-        weights = False  ## currently weighting is not supported
-        A = self._incidence_to_adjacency(MP, weights=weights)
+            MP = self.incidence_matrix(d + 1, signed=False, weight=weight, index=index)
+        weight = False  ## currently weighting is not supported
+        A = self._incidence_to_adjacency(MP, weight=weight)
         if index:
             return A, row
         else:
             return A
 
-    def cell_adjacency_matrix(self, index=False, weights=False):
+    def cell_adjacency_matrix(self, signed=True, weight=None, index=False):
         """
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3],rank=2)
@@ -1130,7 +1162,7 @@ class CellComplex:
         """
 
         CC = self.to_combinatorial_complex()
-        weights = False  ## Currently default weights are not supported
+        weight = False  ## Currently default weight are not supported
 
         M = CC.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
@@ -1142,10 +1174,10 @@ class CellComplex:
             A = CC._incidence_to_adjacency(M.transpose())
             return A
 
-    def node_adjacency_matrix(self, index=False, s=1, weights=False):
+    def node_adjacency_matrix(self, index=False, s=1, weight=False):
 
         CC = self.to_combinatorial_complex()
-        weights = False  ## Currently default weights are not supported
+        weight = False  ## Currently default weight are not supported
 
         M = CC.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
@@ -1311,6 +1343,12 @@ class CellComplex:
 
         """
         Example
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([2,3,4,5],rank=2)
+            >>> CX.add_cell([5,6,7,8],rank=2)
+            >>> HG = CX.to_hypergraph()
+            >>> HG
 
         """
         from hypernetx.classes.entity import EntitySet
@@ -1321,7 +1359,7 @@ class CellComplex:
 
         for n in self.edges:
             cells.append(Entity(str(list(n)), elements=n))
-        E = EntitySet("CC_to_HG", elements=cells)
+        E = EntitySet("CX_to_HG", elements=cells)
         HG = Hypergraph(E)
         nodes = []
         for n in self.nodes:
@@ -1374,6 +1412,7 @@ class CellComplex:
             >>> CX.add_cell([5,6,7,8],rank=2)
             >>> CX.add_node(0)
             >>> CX.add_node(10)
+            >>> CX.singletons()
 
         """
 

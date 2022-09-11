@@ -126,8 +126,8 @@ class CombinatorialComplex:
     when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
     size as cells.
 
-    weights : array-like, optional, default : None
-        User specified weights corresponding to setsytem of type pandas.DataFrame,
+    weight : array-like, optional, default : None
+        User specified weight corresponding to setsytem of type pandas.DataFrame,
         length must equal number of rows in dataframe.
         If None, weight for all rows is assumed to be 1.
 
@@ -136,7 +136,7 @@ class CombinatorialComplex:
     """
 
     def __init__(
-        self, cells=None, name=None, ranks=None, weights=None, safe_insertion=False
+        self, cells=None, name=None, ranks=None, weight=None, safe_insertion=False
     ):
         if not name:
             self.name = ""
@@ -979,10 +979,10 @@ class CombinatorialComplex:
 
         Parameters
         ----------
-        weights : bool, default=False
+        weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
-            self.cells.cell_weights dictionary values.
+            self.cells.cell_weight dictionary values.
 
         index : boolean, optional, default False
             If True return will include a dictionary of node uid : row number
@@ -1013,7 +1013,7 @@ class CombinatorialComplex:
             )
 
     @staticmethod
-    def _incidence_to_adjacency(M, s=1, weights=False):
+    def _incidence_to_adjacency(M, s=1, weight=False):
         """
         Helper method to obtain adjacency matrix from
         boolean incidence matrix for s-metrics.
@@ -1028,9 +1028,9 @@ class CombinatorialComplex:
         s : int, list, optional, default : 1
             Minimum number of edges shared by neighbors with node.
 
-        # weights : bool, dict optional, default=True
+        # weight : bool, dict optional, default=True
         #     If False all nonzero entries are 1.
-        #     Otherwise, weights will be as in product.
+        #     Otherwise, weight will be as in product.
 
         Returns
         -------
@@ -1038,17 +1038,17 @@ class CombinatorialComplex:
 
         """
         M = csr_matrix(M)
-        weights = False  ## currently weighting is not supported
+        weight = False  ## currently weighting is not supported
 
-        if weights == False:
+        if weight == False:
             A = M.dot(M.transpose())
             A.setdiag(0)
             A = (A >= s) * 1
         return A
 
     def adjacency_matrix(
-        self, r, k, s=1, weights=False, index=False
-    ):  ## , weights=False):
+        self, r, k, s=1, weight=False, index=False
+    ):  ## , weight=False):
         """
         The sparse weighted :term:`s-adjacency matrix`
 
@@ -1062,7 +1062,7 @@ class CombinatorialComplex:
         index: boolean, optional, default: False
             if True, will return a rowdict of row to node uid
 
-        weights: bool, default=True
+        weight: bool, default=True
             If False all nonzero entries are 1.
             If True adjacency matrix will depend on weighted incidence matrix,
         index : book, default=False
@@ -1089,14 +1089,14 @@ class CombinatorialComplex:
             MP = self.incidence_matrix(
                 r, k, incidence_type="up", sparse=True, index=index
             )
-        weights = False  ## currently weighting is not supported
-        A = self._incidence_to_adjacency(MP, s=s, weights=weights)
+        weight = False  ## currently weighting is not supported
+        A = self._incidence_to_adjacency(MP, s=s, weight=weight)
         if index:
             return A, row
         else:
             return A
 
-    def cell_adjacency_matrix(self, index=False, s=1, weights=False):
+    def cell_adjacency_matrix(self, index=False, s=1, weight=False):
 
         """
         Parameters
@@ -1110,7 +1110,7 @@ class CombinatorialComplex:
 
         """
 
-        weights = False  ## Currently default weights are not supported
+        weight = False  ## Currently default weight are not supported
 
         M = self.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
@@ -1122,9 +1122,9 @@ class CombinatorialComplex:
             A = self._incidence_to_adjacency(M.transpose(), s=s)
             return A
 
-    def node_adjacency_matrix(self, index=False, s=1, weights=False):
+    def node_adjacency_matrix(self, index=False, s=1, weight=False):
 
-        weights = False  ## Currently default weights are not supported
+        weight = False  ## Currently default weight are not supported
 
         M = self.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
@@ -1136,7 +1136,7 @@ class CombinatorialComplex:
             A = self._incidence_to_adjacency(M, s=s)
             return A
 
-    def coadjacency_matrix(self, r, k, s=1, weights=False, index=False):
+    def coadjacency_matrix(self, r, k, s=1, weight=False, index=False):
         """
         The sparse weighted :term:`s-coadjacency matrix`
 
@@ -1150,7 +1150,7 @@ class CombinatorialComplex:
         index: boolean, optional, default: False
             if True, will return a rowdict of row to node uid
 
-        weights: bool, default=True
+        weight: bool, default=True
             If False all nonzero entries are 1.
             If True adjacency matrix will depend on weighted incidence matrix,
         index : book, default=False
@@ -1178,8 +1178,8 @@ class CombinatorialComplex:
             MP = self.incidence_matrix(
                 r, k, incidence_type="down", sparse=True, index=index
             )
-        weights = False  ## currently weighting is not supported
-        if weights == False:
+        weight = False  ## currently weighting is not supported
+        if weight == False:
             A = MP.T.dot(MP)
             A.setdiag(0)
             A = (A >= s) * 1
@@ -1909,7 +1909,7 @@ class CombinatorialComplex:
             warnings.warn(f"No {s}-path between {source} and {target}")
             return np.inf
 
-    def dataframe(self, sort_rows=False, sort_columns=False, cell_weights=True):
+    def dataframe(self, sort_rows=False, sort_columns=False, cell_weight=True):
         """
         Returns a pandas dataframe for CC indexed by the nodes and
         with column headers given by the cell names.
@@ -1920,7 +1920,7 @@ class CombinatorialComplex:
             sort rows based on hashable node names
         sort_columns : bool, optional, default=True
             sort columns based on hashable cell names
-        cell_weights : bool, optional, default=True
+        cell_weight : bool, optional, default=True
 
 
         """
