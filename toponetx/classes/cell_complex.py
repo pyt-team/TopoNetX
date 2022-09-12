@@ -1,5 +1,6 @@
 """
-Regular 2d Cell Complex
+Class for creation and manipulation of 2d Cell Complex.
+The class also supports attaching arbitrary attributes and data to cells.
 """
 
 
@@ -57,12 +58,13 @@ class CellComplex:
             >>> CX.cells
     """
 
-    def __init__(self, cells=None, name=None, **attr):
+    def __init__(self, cells=None, name=None, regular=True, **attr):
         if not name:
             self.name = ""
         else:
             self.name = name
 
+        self._regular = regular
         self._G = Graph()
 
         self._cells = CellView()
@@ -252,7 +254,7 @@ class CellComplex:
         Parameters
         ----------
         cell : hashable
-            The uid of an cell in the CC
+            The uid of an cell in the cell complex
 
         Returns
         -------
@@ -406,8 +408,6 @@ class CellComplex:
 
         """
         raise NotImplementedError
-        # self._G.remove_node(node)
-        # return self
 
     def remove_nodes(self, node_set):
         """
@@ -424,9 +424,6 @@ class CellComplex:
 
         """
         raise NotImplementedError
-        # for node in node_set:
-        #    self.remove_node(node)
-        # return self
 
     def add_node(self, node, **attr):
 
@@ -482,24 +479,30 @@ class CellComplex:
 
         Notes
         -----
+        - Rank must be 0,1,2
 
-        -Rank must be None when input cell is a RankedEntity
-        -Rank must be positive integer when cell is hashable
-        -Rank must be larger than or equal to one for all cells
-
-        When adding an cell to a combinatorial complex children must be removed
-        so that nodes do not have elements.
-        Each node (element of cell) must be instantiated as a node,
-        making sure its uid isn't already present in the self.
-        If an added cell contains nodes that cannot be added to combinatorial complex
-        then an error will be raised.
 
         """
-        if isinstance(cell, Cell):
-            for e in cell.boundary:
-                self._G.add_edge(e[0], e[1])
-            self._cells.insert_cell(cell, **attr)
-
+        if isinstance(cell, Cell):  # rank check will be ignored, cells by default
+            # are assumed to be of rank 2
+            if self.is_insertable_cycle(
+                cell, check_skeleton=check_skeleton, warnings_dis=True
+            ):
+                for e in cell.boundary:
+                    self._G.add_edge(e[0], e[1])
+                if self._regular:
+                    if cell.is_regular:
+                        self._cells.insert_cell(cell, **attr)
+                    else:
+                        raise TopoNetXError(
+                            "input cell violates the regularity condition."
+                        )
+                else:
+                    self._cells.insert_cell(cell, **attr)
+            else:
+                print(
+                    "Invalid cycle condition, the input cell cannot be inserted to the cell complex"
+                )
         else:
             if rank == 0:
                 raise TopoNetXError(
@@ -514,22 +517,21 @@ class CellComplex:
                     self.add_edge(cell[0], cell[1], **attr)
 
             elif rank == 2:
-                if isinstance(cell, Cell):
-                    self._cells.insert_cell(Cell, **attr)
-                elif isinstance(cell, tuple) or isinstance(cell, list):
-
-                    if self.is_insertable_cycle(cell, check_skeleton=check_skeleton):
+                if isinstance(cell, tuple) or isinstance(cell, list):
+                    if self.is_insertable_cycle(
+                        cell, check_skeleton=check_skeleton, warnings_dis=True
+                    ):
                         edges_cell = set(zip_longest(cell, cell[1:] + [cell[0]]))
                         for e in edges_cell:
                             self._G.add_edges_from(edges_cell)
-                        self._cells.insert_cell(Cell(cell), **attr)
+                        self._cells.insert_cell(
+                            Cell(cell, regular=self._regular), **attr
+                        )
                     else:
                         print(
-                            "Invalid cycle condition, the input cell cannot be inserted to the cell complex"
+                            "Invalid cycle condition, check if edges of the input cells are in the 1-skeleton."
                         )
-                        print(
-                            "to ignore the cell complex condition, set check_skeleton = False."
-                        )
+                        print(" To ignore this check, set check_skeleton = False.")
                 else:
                     raise ValueError("invalid input")
             else:
@@ -816,7 +818,6 @@ class CellComplex:
 
             >>> import networkx as nx
             >>> G = nx.path_graph(3)
-            >>> d={ ((1,2,3,4),0): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
             >>> CC = CellComplex(G)
             >>> CC.add_cell([1,2,3,4], rank=2)
             >>> CC.add_cell([1,2,3,4], rank=2)
@@ -841,12 +842,17 @@ class CellComplex:
 
         if isinstance(cell, Cell):
             cell = cell.elements
-        if len(cell) <= 2:
-            return False
-        if len(set(cell)) != len(cell):
+        if len(cell) <= 1:
             if warnings_dis:
-                warnings.warn(f"repeating nodes invalidates the 2-cell condition")
+                warnings.warn(f"a cell must contain at least 2 edges, got {len(cell)}")
             return False
+        if self._regular:
+            if len(set(cell)) != len(cell):
+                if warnings_dis:
+                    warnings.warn(
+                        f"repeating nodes invalidates the 2-cell regular condition"
+                    )
+                return False
         if check_skeleton:
             enum = zip_longest(cell, cell[1:] + [cell[0]])
             for i in enum:
@@ -884,12 +890,44 @@ class CellComplex:
         column dictionary : dict
             Dictionary identifying columns with cells
 
-        >>> CX = CellComplex()
-        >>> CX.add_cell([1,2,3,4],rank=2)
-        >>> CX.add_cell([3,4,5],rank=2)
-        >>> B1 = CX.incidence_matrix(1)
-        >>> B2 = CX.incidence_matrix(2)
-        >>> B1.dot(B2).todense()
+        Example1
+        -------
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
+            >>> B1.dot(B2).todense()
+
+
+        Example2
+        --------
+            ## note that in this example, the first three cells are
+            ## equivalent and hence they have similar incidence to lower edges
+            ## they are incident to
+            >>> import networkx as nx
+            >>> G = nx.path_graph(3)
+            >>> CC = CellComplex(G)
+            >>> CC.add_cell([1,2,3,4], rank=2)
+            >>> CC.add_cell([4,3,2,1], rank=2)
+            >>> CC.add_cell([2,3,4,1], rank=2)
+            >>> CC.add_cell([1,2,4], rank=2,)
+            >>> CC.add_cell([3,4,8], rank=2)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
+            >>> B1.dot(B2).todense()
+
+
+        Example3
+        -------
+            # non-regular complex example
+            >>> CX = CellComplex(regular=False)
+            >>> CX.add_cell([1,2,3,2],rank=2)
+            >>> CX.add_cell([3,4,5,3,4,5],rank=2)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
+            >>> B1.dot(B2).todense()
+
 
         """
         weight = None  # not supported at this version
@@ -945,12 +983,29 @@ class CellComplex:
                 tuple(sorted(edge)): i for i, edge in enumerate(edgelist)
             }  # orient edges
             for celli, cell in enumerate(self.cells):
+                edge_visiting_dic = {}  # this dictionary is cell dependent
+                # mainly used to handle the cell complex non-regular case
                 for edge in cell.boundary:
                     ei = edge_index[tuple(sorted(edge))]
-                    if edge in edge_index:
-                        A[ei, celli] = 1
+                    if ei not in edge_visiting_dic:
+                        if edge in edge_index:
+                            edge_visiting_dic[ei] = 1
+                        else:
+                            edge_visiting_dic[ei] = -1
                     else:
-                        A[ei, celli] = -1
+                        if edge in edge_index:
+                            edge_visiting_dic[ei] = edge_visiting_dic[ei] + 1
+                        else:
+                            edge_visiting_dic[ei] = edge_visiting_dic[ei] - 1
+
+                    A[ei, celli] = edge_visiting_dic[
+                        ei
+                    ]  # this will update everytime we visit this edge for non-regular CC
+                    # the regular case can be handled more efficiently :
+                    # if edge in edge_index:
+                    #    A[ei, celli] = 1
+                    # else:
+                    #    A[ei, celli] = -1
             if index:
                 cell_index = {cell: i for i, cell in enumerate(self.cells)}
                 if signed:
@@ -1043,6 +1098,19 @@ class CellComplex:
             return abs(L_up)
 
     def down_laplacian_matrix(self, d, signed=True, weight=None, index=False):
+        """
+        >>> import networkx as nx
+        >>> G = nx.path_graph(3)
+        >>> CC = CellComplex(G)
+        >>> CC.add_cell([1,2,3,4], rank=2)
+        >>> CC.add_cell([1,2,3,4], rank=2)
+        >>> CC.add_cell([2,3,4,1], rank=2)
+        >>> CC.add_cell([1,2,4], rank=2,)
+        >>> CC.add_cell([3,4,8], rank=2)
+        >>> CC.down_laplacian_matrix(2)
+
+        """
+
         if d <= self.maxdim and d > 0:
             B = self.incidence_matrix(d)
             L_down = B.transpose() @ B
@@ -1100,9 +1168,7 @@ class CellComplex:
         else:
             return np.power(Ad, k) @ BTd + np.power(coAd, k) @ BTd
 
-    def adjacency_matrix(
-        self, d, signed=True, weight=None, index=False
-    ):  ## , weight=False):
+    def adjacency_matrix(self, d, signed=True, weight=None, index=False):
         """
         The sparse weighted :term:`s-adjacency matrix`
 
@@ -1331,6 +1397,9 @@ class CellComplex:
         """
         all_cells = []
 
+        for n in self.nodes:
+            all_cells.append(Node(elements=n, **self.nodes[n]))
+
         for e in self.edges:
             all_cells.append(CellObject(elements=e, rank=1, **self.edges[e]))
         for cell in self.cells:
@@ -1356,7 +1425,6 @@ class CellComplex:
         cells = []
         for n in self.cells:
             cells.append(Entity(str(list(n.elements)), elements=n.elements))
-
         for n in self.edges:
             cells.append(Entity(str(list(n)), elements=n))
         E = EntitySet("CX_to_HG", elements=cells)

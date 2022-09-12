@@ -5,6 +5,8 @@
 from collections import Counter, defaultdict, deque
 from itertools import zip_longest
 
+import numpy as np
+
 __all__ = ["Cell", "CellView"]
 
 
@@ -25,31 +27,41 @@ class Cell:
 
     Note
     ------
-    The regularity condition of a 2d cell :
-            a 2d cell is regular if and only if there is no
-            repeatition in the edges
+    - a cell is defined as an ordered sequence of nodes (n1,...,nk)
+      each two consequitive nodes (ni,n_{i+1}) define an edge in the boundary of the cell
+      note that the last edge (n_k,n1) is also included in the boundary of the cell
+      and it is used to close the cell
+      so a Cell that is defined as c = Cell((1,2,3))
+      will have a c.boundary = [(1, 2), (2, 3), (3, 1)] which consists of three edges.
 
+    - The regularity condition of a 2d cell :
+            a 2d cell is regular if and only if there is no
+            repeatition in the boundary edges that define the cell
+            by default Cell is assumed to be regular unless otherwise specified.
+            self loops are not allowed in the boundary of the edge
     Examples
         >>> cell1 = Cell ( (1,2,3) )
         >>> cell2 = Cell ( (1,2,4,5),weight = 1 )
         >>> cell3 = Cell ( ("a","b","c") )
     """
 
-    def __init__(self, elements, name=None, is_regular=True, **attr):
+    def __init__(self, elements, name=None, regular=True, **attr):
 
         if name is None:
             self.name = "_"
         else:
             self.name = name
-        self._is_regular = is_regular
+        self._regular = regular
         elements = list(elements)
         self._boundary = list(
             zip_longest(elements, elements[1:] + [elements[0]])
         )  # list of edges define the boundary of the 2d cell
+        if len(elements) <= 1:
+            raise ValueError(
+                f"cell must contain at least 2 edges, got {len(elements)+1}"
+            )
 
-        if is_regular:
-            if len(elements) == 2:
-                raise ValueError(f" cell must contain at least 2 edges, got 2")
+        if regular:
             _adjdict = {}
             for e in self._boundary:
                 if e[0] in _adjdict:
@@ -59,10 +71,11 @@ class Cell:
                     )
                 _adjdict[e[0]] = e[1]
         else:
+
             for e in self._boundary:
                 if e[0] == e[1]:
                     raise ValueError(
-                        f"loops are not permitted, got f{e[0]} and f{e[1]} as an edge in the cell"
+                        f"self loops are not permitted, got {(e[0],e[1])} as an edge in the cell's boundary"
                     )
 
         self.nodes = tuple(elements)
@@ -77,6 +90,23 @@ class Cell:
 
     def __setitem__(self, key, item):
         self.properties[key] = item
+
+    @property
+    def is_regular(self):
+        """
+        Returns true is the Cell is a regular cell, and False otherwise
+        """
+
+        if self._regular:  # condition enforced
+            return True
+        else:
+            _adjdict = {}
+            for e in self._boundary:
+                if e[0] in _adjdict:
+                    return False
+                _adjdict[e[0]] = e[1]
+
+        return True
 
     def __len__(self):
         return len(self.nodes)
@@ -266,7 +296,8 @@ class CellView:
 
     # Set methods
     def __len__(self):
-        return len(self._cells)
+
+        return np.sum([len(self._cells[cell]) for cell in self._cells])
 
     def __iter__(self):
         return iter(

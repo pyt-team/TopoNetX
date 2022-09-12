@@ -1078,6 +1078,17 @@ class CombinatorialComplex:
         If index if False
 
             adjacency_matrix : scipy.sparse.csr.csr_matrix
+
+
+        Example
+        --------
+        >>> G = Graph() # networkx graph
+        >>> G.add_edge(0,1)
+        >>> G.add_edge(0,3)
+        >>> G.add_edge(0,4)
+        >>> G.add_edge(1,4)
+        >>> CC = CombinatorialComplex(cells=G)
+        >>> CC.adjacency_matrix(0,1)
         """
 
         if k is not None:
