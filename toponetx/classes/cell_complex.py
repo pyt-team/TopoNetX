@@ -56,6 +56,15 @@ class CellComplex:
             >>> CX = CellComplex(G)
             >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
             >>> CX.cells
+        Example 4
+            >>> CX = CellComplex(regular=False)
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([2,3,4,5,2,3,4,5],rank=2) #non-regular 2-cell
+            >>> c1=Cell((1,2,3,4,5,1,2,3,4,5),regular=False)
+            >>> CX.add_cell(c1)
+            >>> CX.add_cell([5,6,7,8],rank=2)
+            >>> CX.is_regular
+
     """
 
     def __init__(self, cells=None, name=None, regular=True, **attr):
@@ -155,9 +164,37 @@ class CellComplex:
         else:
             raise TopoNetXError("Only dimensions 0,1, and 2 are supported.")
 
+    @property
+    def is_regular(self):
+
+        """
+        Checking the regularity condition of the cell complex
+
+        Returns
+        -------
+        bool
+
+        Example
+        -------
+            >>> CX = CellComplex(regular=False)
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([2,3,4,5,2,3,4,5],rank=2) #non-regular 2-cell
+            >>> c1=Cell((1,2,3,4,5,1,2,3,4,5),regular=False)
+            >>> CX.add_cell(c1)
+            >>> CX.add_cell([5,6,7,8],rank=2)
+            >>> CX.is_regular
+        """
+
+        if self._regular:  # condition is enforced for all cells
+            return True
+        for c in self.cells:
+            if not c.is_regular:
+                return False
+        return True
+
     def __str__(self):
         """
-        String representation of CC
+        String representation of CX
 
         Returns
         -------
@@ -168,7 +205,7 @@ class CellComplex:
 
     def __repr__(self):
         """
-        String representation of combinatorial complex
+        String representation of cell complex
 
         Returns
         -------
@@ -191,7 +228,7 @@ class CellComplex:
 
     def __iter__(self):
         """
-        Iterate over the nodes of the combinatorial complex
+        Iterate over the nodes of the cell complex
 
         Returns
         -------
@@ -219,7 +256,7 @@ class CellComplex:
         Parameters
         ----------
         node : Entity or hashable
-            If hashable, then must be uid of node in combinatorial complex
+            If hashable, then must be uid of node in cell complex
 
         Returns
         -------
@@ -272,11 +309,11 @@ class CellComplex:
 
     def number_of_nodes(self, nodeset=None):
         """
-        The number of nodes in nodeset belonging to combinatorial complex.
+        The number of nodes in nodeset belonging to cell complex.
 
         Parameters
         ----------
-        nodeset : an interable of Entities, optional, default: None
+        nodeset : an interable of nodes, optional, default: None
             If None, then return the number of nodes in cell complex.
 
         Returns
@@ -309,12 +346,12 @@ class CellComplex:
 
     def number_of_cells(self, cellset=None):
         """
-        The number of cells in cellset belonging to combinatorial complex.
+        The number of cells in cellset belonging to cell complex.
 
         Parameters
         ----------
         cellset : an interable of RankedEntities, optional, default: None
-            If None, then return the number of cells in combinatorial complex.
+            If None, then return the number of cells in cell complex.
 
         Returns
         -------
@@ -337,12 +374,12 @@ class CellComplex:
 
     def neighbors(self, node):
         """
-        The nodes in combinatorial complex which share s cell(s) with node.
+        The nodes in cell complex which share s cell(s) with node.
 
         Parameters
         ----------
         node : hashable or Entity
-            uid for a node in combinatorial complex or the node Entity
+            uid for a node in cell complex or the node Entity
 
         s : int, list, optional, default : 1
             Minimum rank of cells shared by neighbors with node.
@@ -370,7 +407,7 @@ class CellComplex:
         Parameters
         ----------
         cell : hashable or RankedEntity
-            uid for a cell in combintorial complex or the cell RankedEntity
+            uid for a cell in cell complex or the cell RankedEntity
 
         s : int, list, optional, default : 1
             Minimum number of nodes shared by neighbors cell node.
@@ -393,12 +430,12 @@ class CellComplex:
 
     def remove_node(self, node):
         """
-        Removes node from cells and deletes reference in combinatorial complex nodes
+        Removes node from cells and deletes reference in cell complex nodes
 
         Parameters
         ----------
         node : hashable or RankedEntity
-            a node in combinatorial complex
+            a node in cell complex
 
         Returns
         -------
@@ -411,7 +448,7 @@ class CellComplex:
 
     def remove_nodes(self, node_set):
         """
-        Removes nodes from cells and deletes references in combinatorial complex nodes
+        Removes nodes from cells and deletes references in cell complex nodes
 
         Parameters
         ----------
@@ -420,7 +457,7 @@ class CellComplex:
 
         Returns
         -------
-        Combinatorial Complex : CombinatorialComplex
+        cell complex : CombinatorialComplex
 
         """
         raise NotImplementedError
@@ -431,7 +468,7 @@ class CellComplex:
 
     def _add_nodes_from(self, nodes):
         """
-        Private helper method instantiates new nodes when cells added to combinatorial complex.
+        Private helper method instantiates new nodes when cells added to cell complex.
 
         Parameters
         ----------
@@ -450,7 +487,7 @@ class CellComplex:
     def add_cell(self, cell, rank=None, check_skeleton=False, **attr):
         """
 
-        Adds a single cells to combinatorial complex.
+        Adds a single cells to cell complex.
 
         Parameters
         ----------
@@ -600,7 +637,7 @@ class CellComplex:
 
         Returns
         -------
-        Combinatorial Complex : CombinatorialComplex
+        cell complex : CombinatorialComplex
 
         """
         for cell in cell_set:
@@ -645,7 +682,7 @@ class CellComplex:
             Example
             ------
 
-            After computing some property of the cell of a combinatorial complex, you may want
+            After computing some property of the cell of a cell complex, you may want
             to assign a cell attribute to store the value of that property for
             each cell:
 
@@ -729,7 +766,7 @@ class CellComplex:
             return
 
     def get_node_attributes(self, name):
-        """Get node attributes from combintorial complex
+        """Get node attributes from cell complex
 
         Parameters
         ----------
@@ -1174,7 +1211,7 @@ class CellComplex:
 
         Parameters
         ----------
-        r,k : two ranks for skeletons in the input combinatorial complex, such that r<k
+        r,k : two ranks for skeletons in the input cell complex, such that r<k
 
         s : int, optional, default: 1
 
@@ -1261,7 +1298,7 @@ class CellComplex:
         return_equivalence_classes=False,
     ):
         """
-        Constructs a new Combinatorial Complex gotten by identifying cells containing the same nodes
+        Constructs a new cell complex gotten by identifying cells containing the same nodes
 
         Parameters
         ----------
@@ -1272,7 +1309,7 @@ class CellComplex:
 
         Returns
         -------
-        new Combinatorial Complex : CombinatorialComplex
+        new cell complex : CombinatorialComplex
             Equivalent cells are collapsed to a single cell named by a representative of the equivalent
             cells followed by a colon and the number of cells it represents.
 
@@ -1306,18 +1343,18 @@ class CellComplex:
 
     def restrict_to_cells(self, cellset, name=None):
         """
-        Constructs a combinatorial complex using a subset of the cells in combinatorial complex
+        Constructs a cell complex using a subset of the cells in cell complex
 
         Parameters
         ----------
         cellset: iterable of hashables or RankedEntities
-            A subset of elements of the combinatorial complex  cells
+            A subset of elements of the cell complex  cells
 
         name: str, optional
 
         Returns
         -------
-        new Combinatorial Complex : CombinatorialComplex
+        new cell complex : CombinatorialComplex
 
         Example
 
@@ -1349,7 +1386,7 @@ class CellComplex:
 
     def restrict_to_nodes(self, nodeset, name=None):
         """
-        Constructs a new combinatorial complex  by restricting the cells in the combintorial complex to
+        Constructs a new cell complex  by restricting the cells in the cell complex to
         the nodes referenced by nodeset.
 
         Parameters
@@ -1361,7 +1398,7 @@ class CellComplex:
 
         Returns
         -------
-        new Combinatorial Complex : CombinatorialComplex
+        new Cell Complex : Cellcomplex
 
         Example
         >>> CX = CellComplex()
@@ -1437,7 +1474,7 @@ class CellComplex:
 
     def is_connected(self, s=1, cells=False):
         """
-        Determines if combinatorial complex is :term:`s-connected <s-connected, s-node-connected>`.
+        Determines if cell complex is :term:`s-connected <s-connected, s-node-connected>`.
 
         Parameters
         ----------
@@ -1508,7 +1545,7 @@ class CellComplex:
         """
         Returns a generator for the :term:`s-cell-connected components <s-cell-connected component>`
         or the :term:`s-node-connected components <s-connected component, s-node-connected component>`
-        of the combinatorial complex.
+        of the cell complex.
 
         Parameters
         ----------
@@ -1532,7 +1569,7 @@ class CellComplex:
         Two nodes v1 and v2 are s-walk-connected if there is a
         sequence of nodes starting with v1 and ending with v2 such that pairwise
         adjacent nodes in the sequence share s cells. If s=1 these are the
-        path components of the combinatorial complex .
+        path components of the cell complex .
 
         Example
         -------
@@ -1581,7 +1618,7 @@ class CellComplex:
         ------
         s_component_subgraphs : iterator
             Iterator returns subgraphs generated by the cells (or nodes) in the
-            s-cell(node) components of combinatorial complex.
+            s-cell(node) components of cell complex.
 
         """
         for idx, c in enumerate(
@@ -1648,7 +1685,7 @@ class CellComplex:
 
     def node_diameters(self, s=1):
         """
-        Returns the node diameters of the connected components in combinatorial complex.
+        Returns the node diameters of the connected components in cell complex.
 
         Parameters
         ----------
@@ -1707,7 +1744,7 @@ class CellComplex:
 
     def diameter(self, s=1):
         """
-        Returns the length of the longest shortest s-walk between nodes in combinatorial complex
+        Returns the length of the longest shortest s-walk between nodes in cell complex
 
         Parameters
         ----------
@@ -1740,7 +1777,7 @@ class CellComplex:
 
     def cell_diameter(self, s=1):
         """
-        Returns the length of the longest shortest s-walk between cells in combinatorial complex
+        Returns the length of the longest shortest s-walk between cells in cell complex
 
         Parameters
         ----------
@@ -1753,7 +1790,7 @@ class CellComplex:
         Raises
         ------
         TopoNetXError
-            If combinatorial complex is not s-cell-connected
+            If cell complex is not s-cell-connected
 
         Notes
         -----
@@ -1773,7 +1810,7 @@ class CellComplex:
 
     def distance(self, source, target, s=1):
         """
-        Returns the shortest s-walk distance between two nodes in the combinatorial complex.
+        Returns the shortest s-walk distance between two nodes in the cell complex.
 
         Parameters
         ----------
@@ -1822,15 +1859,15 @@ class CellComplex:
 
     def cell_distance(self, source, target, s=1):
         """
-        Returns the shortest s-walk distance between two cells in the combinatorial complex.
+        Returns the shortest s-walk distance between two cells in the cell complex.
 
         Parameters
         ----------
         source : cell.uid or cell
-            an cell in the combinatorial complex
+            an cell in the cell complex
 
         target : cell.uid or cell
-            an cell in the combinatorial complex
+            an cell in the cell complex
 
         s : positive integer
             the number of intersections between pairwise consecutive cells
