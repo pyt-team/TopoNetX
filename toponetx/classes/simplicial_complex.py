@@ -44,27 +44,36 @@ class SimplicialComplex:
 
     Parameters
     ----------
-    simplices : list of maximal simplices that define the simplicial complex
-    name : hashable, optional, default: None
-        If None then a placeholder '_'  will be inserted as name
-    maxdimension: constrain the max dimension of the input inserted simplices
+    -simplices : list of maximal simplices that define the simplicial complex
+    -name : hashable, optional, default: None
+        If None then a placeholder ''  will be inserted as name
+    -mode : computational mode, available options are "normal" or "gudhi".
+        default is 'normal'
 
-    mode : computational mode, available options are "normal" or "gudhi".
-    default is normal
 
-    Example
-    =======
+    Note:
+    -----
+    A simplicial complex is determined by its maximal simplices, simplices that are not
+    contained in any other simplices. If a maximal simplex is inserted, all faces of this
+    simplex will be inserted automatically.
+
+    Examples
+    -------
     Example 1
-
+        # defining a simplicial complex using a set of maximal simplices.
         >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
 
+
     Example 2
+        # compatabiltiy with networkx
         >>> G = Graph() # networkx graph
         >>> G.add_edge(0,1,weight=4)
         >>> G.add_edge(0,3)
         >>> G.add_edge(0,4)
         >>> G.add_edge(1,4)
         >>> SC = SimplicialComplex(simplices=G)
+        >>> SC.add_simplex([1,2,3])
+        >>> SC.simplices
 
 
     """
@@ -462,7 +471,17 @@ class SimplicialComplex:
 
     def incidence_matrix(self, d, signed=True, weight=None, index=False):
         """
-        get the boundary map using gudhi
+        getting the matrix that correpodnds to the boundary matrix of the input SC.
+
+        Examples
+        --------
+            >>> SC = SimplicialComplex()
+            >>> SC.add_simplex([1,2,3,4])
+            >>> SC.add_simplex([1,2,4])
+            >>> SC.add_simplex([3,4,8])
+            >>> B1 = SC.incidence_matrix(1)
+            >>> B2 = SC.incidence_matrix(2)
+
         """
 
         if d == 0:
@@ -569,9 +588,7 @@ class SimplicialComplex:
         Example 1
 
             >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
-
             >>> NL1= SC.normalized_hodge_laplacian_matrix(1)
-
             >>> NL1
 
 

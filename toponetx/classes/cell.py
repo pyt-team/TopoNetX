@@ -157,7 +157,7 @@ class Cell:
         ------
 
         """
-        c = Cell(self.nodes[::-1], name=self.name, is_regular=self._is_regular)
+        c = Cell(self.nodes[::-1], name=self.name, regular=self._regular)
         c.properties = self.properties
         return c
 
@@ -392,7 +392,7 @@ class CellView:
          >>> CV.insert_cell ( (1,2,7,3) )
          >>> c1=Cell((1,2,3,4,5))
          >>> CV.insert_cell(c1)
-         >>> d = CV. _cell_equivelance_class()
+         >>> d = CV._cell_equivelance_class()
          >>> d
 
         """

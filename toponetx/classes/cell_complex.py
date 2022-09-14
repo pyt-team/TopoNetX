@@ -944,12 +944,12 @@ class CellComplex:
             ## they are incident to
             >>> import networkx as nx
             >>> G = nx.path_graph(3)
-            >>> CC = CellComplex(G)
-            >>> CC.add_cell([1,2,3,4], rank=2)
-            >>> CC.add_cell([4,3,2,1], rank=2)
-            >>> CC.add_cell([2,3,4,1], rank=2)
-            >>> CC.add_cell([1,2,4], rank=2,)
-            >>> CC.add_cell([3,4,8], rank=2)
+            >>> CX = CellComplex(G)
+            >>> CX.add_cell([1,2,3,4], rank=2)
+            >>> CX.add_cell([4,3,2,1], rank=2)
+            >>> CX.add_cell([2,3,4,1], rank=2)
+            >>> CX.add_cell([1,2,4], rank=2,)
+            >>> CX.add_cell([3,4,8], rank=2)
             >>> B1 = CX.incidence_matrix(1)
             >>> B2 = CX.incidence_matrix(2)
             >>> B1.dot(B2).todense()
@@ -1347,14 +1347,14 @@ class CellComplex:
 
         Parameters
         ----------
-        cellset: iterable of hashables or RankedEntities
-            A subset of elements of the cell complex  cells
+        cellset: iterable of hashables or Cell
+            A subset of elements of the cell complex's cells (self.cells)
 
         name: str, optional
 
         Returns
         -------
-        new cell complex : CombinatorialComplex
+        new cell complex : CellComplex
 
         Example
 

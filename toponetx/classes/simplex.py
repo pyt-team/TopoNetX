@@ -305,7 +305,7 @@ class SimplexView:
             for _ in range(diff):
                 self.faces_dict.append(dict())
 
-    def _update_faces_dict_entry(self, face, simplex_, **attr):
+    def _update_faces_dict_entry(self, face, simplex_, maximal_faces, **attr):
 
         """
         Parameters:
@@ -323,22 +323,44 @@ class SimplexView:
         if frozenset(sorted(face)) not in self.faces_dict[k - 1]:
             if len(face) == len(simplex_):
                 self.faces_dict[k - 1][frozenset(sorted(face))] = {
-                    "id": len(self.faces_dict[k - 1]),
+                    "id": (k, len(self.faces_dict[k - 1])),
                     "is_maximal": True,
                     "membership": set(),
                 }
             else:
                 self.faces_dict[k - 1][frozenset(sorted(face))] = {
-                    "id": len(self.faces_dict[k - 1]),
+                    "id": (k, len(self.faces_dict[k - 1])),
                     "is_maximal": False,
                     "membership": set({simplex_}),
                 }
         else:
             if len(face) != len(simplex_):
-                self.faces_dict[k - 1][frozenset(sorted(face))]["is_maximal"] = False
-                self.faces_dict[k - 1][frozenset(sorted(face))]["membership"].add(
-                    simplex_
-                )
+                if self.faces_dict[k - 1][frozenset(sorted(face))]["is_maximal"]:
+                    maximal_faces.add(frozenset(sorted(face)))
+                    self.faces_dict[k - 1][frozenset(sorted(face))][
+                        "is_maximal"
+                    ] = False
+                    self.faces_dict[k - 1][frozenset(sorted(face))]["membership"].add(
+                        simplex_
+                    )
+
+                else:  # make sure all children of previous maximal simplices do
+                    # not have that membership  anymore
+                    d = self.faces_dict[k - 1][frozenset(sorted(face))][
+                        "membership"
+                    ].copy()
+                    for f in d:
+                        if f in maximal_faces:
+                            self.faces_dict[k - 1][frozenset(sorted(face))][
+                                "membership"
+                            ].remove(f)
+                    self.faces_dict[k - 1][frozenset(sorted(face))][
+                        "is_maximal"
+                    ] = False
+                    self.faces_dict[k - 1][frozenset(sorted(face))]["membership"].add(
+                        simplex_
+                    )
+
             else:
                 self.faces_dict[k - 1][simplex_].update(attr)
 
@@ -359,14 +381,16 @@ class SimplexView:
 
             if simplex_ in self.faces_dict[len(simplex_) - 1]:
                 self.faces_dict[len(simplex_) - 1][simplex_].update(attr)
-                return
+
             if self.max_dim < len(simplex) - 1:
                 self.max_dim = len(simplex) - 1
 
             numnodes = len(simplex_)
+            maximal_faces = set()
             for r in range(numnodes, 0, -1):
+
                 for face in combinations(simplex_, r):
-                    self._update_faces_dict_entry(face, simplex_, **attr)
+                    self._update_faces_dict_entry(face, simplex_, maximal_faces, **attr)
             if isinstance(simplex, Simplex):
 
                 self.faces_dict[len(simplex_) - 1][simplex_].update(simplex.properties)
