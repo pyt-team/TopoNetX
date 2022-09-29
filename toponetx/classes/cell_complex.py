@@ -5,7 +5,12 @@ The class also supports attaching arbitrary attributes and data to cells.
 
 
 import warnings
-from collections import Hashable, Iterable
+
+try:
+    from collections.abc import Hashable, Iterable
+except ImportError:
+    from collections import Iterable, Hashable
+
 from itertools import zip_longest
 
 import networkx as nx

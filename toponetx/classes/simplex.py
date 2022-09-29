@@ -2,12 +2,11 @@
 Simplex and SimplexView Classes
 
 """
-from collections import Hashable
-
 try:
-    from collections.abc import Iterable
+    from collections.abc import Hashable, Iterable
 except ImportError:
-    from collections import Iterable
+    from collections import Iterable, Hashable
+
 from itertools import combinations
 
 __all__ = ["Simplex", "SimplexView", "NodeView"]
