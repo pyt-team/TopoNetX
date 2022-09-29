@@ -3,8 +3,12 @@
 Simplicial Complex Class
 
 """
-from collections import Hashable, OrderedDict
-from collections.abc import Iterable
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 from itertools import combinations
 from warnings import warn
 

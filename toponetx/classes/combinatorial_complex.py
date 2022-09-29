@@ -6,10 +6,12 @@
 
 
 import collections
-import numbers
 import warnings
-from collections import OrderedDict
-from collections.abc import Iterable
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 import networkx as nx
 import numpy as np
