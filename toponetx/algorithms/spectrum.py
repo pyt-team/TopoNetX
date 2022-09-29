@@ -1,13 +1,114 @@
 # -*- coding: utf-8 -*-
 
 
+import scipy.sparse as sparse
+from numpy import linalg as LA
+from scipy.sparse import diags
+
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
-# from toponetx.classes.cell_complex import hodge_laplacian_matrix as cx_lap
-# from toponetx.classes.simplicial_complex import hodge_laplacian_matrix as sc_lap
-# from toponetx.classes.simplicial_complex import adjacency_matrix as cc_adj
+
+def hodge_laplacian_eigenvectors(laplacian, k):
+
+    """
+    Input
+    ======
+        laplacian : scipy sparse matrix representing the hodge laplacian
+        k : int, the number of eigenvectors one needs to output, if
+            laplacian.shape[0]<=10, then all eigenvectors will be returned
+    output:
+    =======
+        first k eigevals and eigenvec associated with the laplacian matrix.
+    example
+    ========
+    >>> SC = SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> row,column,B1 = SC.incidence_matrix(1,index=True)
+    >>> L1 = SC.hodge_laplacian_matrix(1)
+    >>> vals,vecs = hodge_laplacian_eigenvectors(L1,2)
+
+    """
+
+    Diag = diags(laplacian.diagonal())
+    if Diag.shape[0] > 10:
+        vals, vect = sparse.linalg.eigs(
+            laplacian, k, M=Diag, which="SM"
+        )  # the lowest k eigenstuff
+    else:
+        vals, vect = LA.eig(laplacian.toarray())
+
+    eigenvaluevector = []
+    for i in vals.real:
+        eigenvaluevector.append(round(i, 15))
+    eigenvectorstemp = vect.transpose().real
+    mydict = {}
+    for i in range(0, len(eigenvaluevector)):
+        mydict[eigenvaluevector[i]] = eigenvectorstemp[i]
+    eigenvaluevector.sort()
+    finaleigenvectors = []
+    for val in eigenvaluevector:
+        finaleigenvectors.append(mydict[val])
+    return [eigenvaluevector, finaleigenvectors]
+
+
+def hodge_laplacian_eigenvector_attrs(
+    cmplex, dim, k, laplacian_type="hodge", normalized=True
+):
+    """
+    input
+    =====
+        complex : a SimplialComplex object
+        dim : int, the dimension of the hodge laplacian to be computed
+        k : int, the number of eigenvectors to be computed
+        laplacian_type : str, type of hodge matrix to be computed,
+                        options : up, down, hodge
+        normalized: bool, normalize the eigenvector or not.
+    output
+    ======
+        complex with eigecvectors are stored in the correpsonding skeleton on the k-th skeleton
+
+    example
+    ========
+    >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> SC = hodge_laplacian_eigenvector_attrs(SC,1,2,"down")
+    >>> SC.get_simplex_attributes("0.th_eigen")
+    """
+    index = cmplex.skeleton(dim)
+    if laplacian_type == "hodge":
+        L = cmplex.hodge_laplacian_matrix(dim)
+    elif laplacian_type == "up":
+        L = cmplex.up_laplacian_matrix(dim)
+    elif laplacian_type == "down":
+        L = cmplex.up_laplacian_matrix(dim)
+    else:
+        raise ValueError("type must be up, down or hodge")
+    vals, vect = hodge_laplacian_eigenvectors(L, k)
+
+    for i in range(len(vect)):
+        d = dict(zip(index, vect[i]))
+        if normalized:
+            d = normalize(d)
+        cmplex.set_simplex_attributes(d, str(i) + ".th_eigen")
+    return cmplex
+
+
+def normalize(f):
+    """
+    input f ascalar function on nodes of a graph
+    output a  normalized copy of f between [0,1].
+    """
+    minf = min(f.values())
+    maxf = max(f.values())
+    f_normalized = {}
+    for v in f.keys():
+
+        if minf == maxf:
+            f_normalized[v] = 0
+        else:
+            f_normalized[v] = (f[v] - minf) / (maxf - minf)
+
+    return f_normalized
 
 
 def laplacian_spectrum(matrix, weight="weight"):

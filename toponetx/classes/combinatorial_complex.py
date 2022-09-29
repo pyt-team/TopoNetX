@@ -41,7 +41,7 @@ class CombinatorialComplex:
 
     A CC is a generlization of graphs, hyppergraphs, cellular and simplicial complexes.
 
-    in TNX, CCs are implemented dynamically and the user is allowed to
+    in TopoNetX, CCs are implemented dynamically and the user is allowed to
     add or subtract objects to the CC after the initial construction.
     The dynamic structure of CCs require the user to keep track of its objects,
     by using a unique names for each cell.
@@ -53,12 +53,14 @@ class CombinatorialComplex:
 
 
     Example 0
-        >> # CombinatorialComplex can be empty
+        >>> # CombinatorialComplex can be empty
         >>> CC = CombinatorialComplex( )
     Example 1
-        >> # from the constructor pass a list of cells and a list of correponding ranks
+        >>> # from the constructor pass a list of cells and a list of correponding ranks
         >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
     Example 2
+        >>> # create a collection of Node objects and a collection of CellObjects
+        >>> # and pass them to RankedEntitySet which is then passed to CombinatorialComplex
         >>> x1 = Node(1)
         >>> x2 = Node(2)
         >>> x3 = Node(3)
@@ -75,7 +77,9 @@ class CombinatorialComplex:
         >>> # pass the ranked entity set to the CombinatorialComplex constructor
         >>> CC = CombinatorialComplex(cells=E)
 
-    Example 2
+    Example 3
+        >>> # create a collection of Node objects and a collection of CellObjects
+        >>> # and pass them to CombinatorialComplex
         >>> x1 = Node(1)
         >>> x2 = Node(2)
         >>> x3 = Node(3)
@@ -90,7 +94,9 @@ class CombinatorialComplex:
         # define the CombinatorialComplex from a list of cells
         >>> CC = CombinatorialComplex(cells= [y1,y2,y3,y4,y5,w])
 
-    Example 3
+    Example 4
+        >>> # create dictionary that defines the CC
+        >>> # and pass it to CombinatorialComplex
         >>> d = {}
         >>> d["x1"] = Node(1)
         >>> d["x2"] = Node(2)
@@ -105,7 +111,9 @@ class CombinatorialComplex:
         >>> d["w"] = CellObject([d['x4'],d['x5'],d['x1']],rank = 2)
         >>> # define the CombinatorialComplex from a dictionary of cells
         >>> CC = CombinatorialComplex(cells=d)
-    Example 4
+    Example 5
+        >>> # create networkx graph
+        >>> # and pass it to CombinatorialComplex
         >>> G = Graph() # networkx graph
         >>> G.add_edge(0,1)
         >>> G.add_edge(0,3)
@@ -122,9 +130,9 @@ class CombinatorialComplex:
     name : hashable, optional, default: None
         If None then a placeholder '_'  will be inserted as name
 
-    ranks : (optional) an iterable or dictionary. When
-    when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
-    size as cells.
+    ranks : (optional) an iterable, default: None.
+        when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
+        size as cells.
 
     weight : array-like, optional, default : None
         User specified weight corresponding to setsytem of type pandas.DataFrame,

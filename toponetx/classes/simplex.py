@@ -2,21 +2,9 @@
 Simplex and SimplexView Classes
 
 """
-from collections import Counter, Hashable, OrderedDict, defaultdict, deque
-from collections.abc import Iterable
+from collections import Hashable, Iterable
 from itertools import combinations
 from warnings import warn
-
-try:
-    from gudhi import SimplexTree
-except ImportError:
-    warn(
-        "gudhi library is not installed."
-        + " Default computing protocol will be set for 'normal'.\n"
-        + " gudhi can be installed using: 'pip install gudhi'",
-        stacklevel=2,
-    )
-
 
 __all__ = ["Simplex", "SimplexView", "NodeView"]
 
@@ -196,6 +184,7 @@ class SimplexView:
             )
 
     # Set methods
+    @property
     def shape(self):
 
         if len(self.faces_dict) == 0:
@@ -209,7 +198,10 @@ class SimplexView:
         return np.sum(self.shape())
 
     def __iter__(self):
-        return iter
+        all_simplices = []
+        for i in range(len(self.faces_dict)):
+            all_simplices = all_simplices + list(self.faces_dict[i].keys())
+        return iter(all_simplices)
 
     def __contains__(self, e):
         if isinstance(e, Iterable):
@@ -323,13 +315,13 @@ class SimplexView:
         if frozenset(sorted(face)) not in self.faces_dict[k - 1]:
             if len(face) == len(simplex_):
                 self.faces_dict[k - 1][frozenset(sorted(face))] = {
-                    "id": (k, len(self.faces_dict[k - 1])),
+                    "id": len(self.faces_dict[k - 1]),
                     "is_maximal": True,
                     "membership": set(),
                 }
             else:
                 self.faces_dict[k - 1][frozenset(sorted(face))] = {
-                    "id": (k, len(self.faces_dict[k - 1])),
+                    "id": len(self.faces_dict[k - 1]),
                     "is_maximal": False,
                     "membership": set({simplex_}),
                 }

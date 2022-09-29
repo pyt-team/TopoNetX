@@ -5,7 +5,7 @@ The class also supports attaching arbitrary attributes and data to cells.
 
 
 import warnings
-from collections.abc import Iterable
+from collections import Hashable, Iterable
 from itertools import zip_longest
 
 import networkx as nx
@@ -36,19 +36,19 @@ class CellComplex:
     In TNX cell complexes are implementes to be dynamic in the sense that
     they can change by adding or subtracting objects (nodes, edges, cells)
     from them.
-        Example 0
-            >> # Cellomplex can be empty
+        #Example 0
+            >>> # Cell Complex can be empty
             >>> CC = CellComplex( )
-        Example 1
+        #Example 1
             >>> CX = CellComplex()
             >>> CX.add_cell([1,2,3,4],rank=2)
             >>> CX.add_cell([2,3,4,5],rank=2)
             >>> CX.add_cell([5,6,7,8],rank=2)
-        Example 2
+        #Example 2
             >>> c1= Cell( (1,2,3))
             >>> c2= Cell( (1,2,3,4) )
             >>> CX = CellComplex( [c1,c2] )
-        Example 3
+        #Example 3
             >>> G= Graph()
             >>> G.add_edge(1,0)
             >>> G.add_edge(2,0)
@@ -56,7 +56,8 @@ class CellComplex:
             >>> CX = CellComplex(G)
             >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
             >>> CX.cells
-        Example 4
+        #Example 4
+            >>> # non-regular cell complex
             >>> CX = CellComplex(regular=False)
             >>> CX.add_cell([1,2,3,4],rank=2)
             >>> CX.add_cell([2,3,4,5,2,3,4,5],rank=2) #non-regular 2-cell
@@ -80,10 +81,19 @@ class CellComplex:
         if cells is not None:
             if isinstance(cells, Graph):
                 self._G = cells
-
             elif isinstance(cells, Iterable) and not isinstance(cells, Graph):
                 for c in cells:
-                    self.add_cell(c)
+                    if isinstance(c, Hashable) and not isinstance(
+                        c, Iterable
+                    ):  # c is a node
+                        self.add_node(c)
+                    elif isinstance(c, Iterable):
+                        if len(c) == 2:
+                            self.add_cell(c, rank=1)
+                        elif len(c) == 1:
+                            self.add_node(tuple(c)[0])
+                        else:
+                            self.add_cell(c, rank=2)
 
             else:
                 raise ValueError(
@@ -554,10 +564,14 @@ class CellComplex:
                     self.add_edge(cell[0], cell[1], **attr)
 
             elif rank == 2:
-                if isinstance(cell, tuple) or isinstance(cell, list):
+                if isinstance(cell, Iterable):
+                    if not isinstance(cell, list):
+                        cell = list(cell)
+
                     if self.is_insertable_cycle(
                         cell, check_skeleton=check_skeleton, warnings_dis=True
                     ):
+
                         edges_cell = set(zip_longest(cell, cell[1:] + [cell[0]]))
                         for e in edges_cell:
                             self._G.add_edges_from(edges_cell)
@@ -850,9 +864,20 @@ class CellComplex:
 
     def remove_equivalent_cells(self):
         """
+        Remove cells from the cell complex which are homotopic.
+        In other words, this is equivalent to identifying cells
+        containing the same nodes
+
+         Note
+         ------
+         Remove all 2d- cells that are homotpic (equivalent to each other)
+
+         Returns
+         -------
+         None.
+
          Example
          -------
-
             >>> import networkx as nx
             >>> G = nx.path_graph(3)
             >>> CC = CellComplex(G)
@@ -862,15 +887,6 @@ class CellComplex:
             >>> CC.add_cell([1,2,4], rank=2,)
             >>> CC.add_cell([3,4,8], rank=2)
             >>> CC.remove_equivalent_cells()
-
-        Note
-        ------
-        Remove all 2d- cells that are homotpic (equivalent to each other)
-
-
-         Returns
-         -------
-         None.
 
         """
         self.cells.remove_equivalent_cells()
@@ -936,7 +952,6 @@ class CellComplex:
             >>> B2 = CX.incidence_matrix(2)
             >>> B1.dot(B2).todense()
 
-
         Example2
         --------
             ## note that in this example, the first three cells are
@@ -954,7 +969,6 @@ class CellComplex:
             >>> B2 = CX.incidence_matrix(2)
             >>> B1.dot(B2).todense()
 
-
         Example3
         -------
             # non-regular complex example
@@ -964,8 +978,6 @@ class CellComplex:
             >>> B1 = CX.incidence_matrix(1)
             >>> B2 = CX.incidence_matrix(2)
             >>> B1.dot(B2).todense()
-
-
         """
         weight = None  # not supported at this version
         import scipy as sp
@@ -1292,55 +1304,6 @@ class CellComplex:
             A = CC._incidence_to_adjacency(M, s=s)
             return A
 
-    def collapse_cells(
-        self,
-        name=None,
-        return_equivalence_classes=False,
-    ):
-        """
-        Constructs a new cell complex gotten by identifying cells containing the same nodes
-
-        Parameters
-        ----------
-        name : hashable, optional, default: None
-
-        return_equivalence_classes: boolean, optional, default: False
-            Returns a dictionary of cell equivalence classes keyed by frozen sets of nodes
-
-        Returns
-        -------
-        new cell complex : CombinatorialComplex
-            Equivalent cells are collapsed to a single cell named by a representative of the equivalent
-            cells followed by a colon and the number of cells it represents.
-
-        equivalence_classes : dict
-            A dictionary keyed by representative cell names with values equal to the cells in
-            its equivalence class
-
-        Notes
-        -----
-        Two cells are identified if their respective elements are the same.
-        Using this as an equivalence relation, the uids of the cells are partitioned into
-        equivalence classes.
-
-        A single cell from the collapsed cells followed by a colon and the number of elements
-        in its equivalence class as uid for the new cell
-        Example
-
-
-
-        """
-        """
-        temp = self.cells.collapse_identical_elements(
-                "_", return_equivalence_classes=return_equivalence_classes
-            )
-        if return_equivalence_classes:
-            return CombinatorialComplex(cells = temp[0], name = name), temp[1]
-        else:
-            return CombinatorialComplex(cells = temp, name = name)
-        """
-        raise NotImplementedError
-
     def restrict_to_cells(self, cellset, name=None):
         """
         Constructs a cell complex using a subset of the cells in cell complex
@@ -1367,8 +1330,6 @@ class CellComplex:
         >>> CX1= CX.restrict_to_cells([c1, (0,1) ])
         >>> CX1.cells
         CellView([Cell(1, 2, 3)])
-
-
 
         """
         RNS = []
@@ -1910,3 +1871,59 @@ class CellComplex:
         except:
             warnings.warn(f"No {s}-path between {source} and {target}")
             return np.inf
+
+    @staticmethod
+    def from_trimesh(mesh):
+        """
+        >>> import trimesh
+        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
+                               faces=[[0, 1, 2]],
+                               process=False)
+        >>> CX = CellComplex.from_trimesh(mesh)
+        >>> print(CX.nodes)
+        >>> print(CX.cells)
+        >>> CX.nodes[0]['position']
+
+        """
+        # try to see the index of the first vertex
+
+        CX = CellComplex(mesh.faces)
+
+        first_ind = np.min(mesh.faces)
+
+        if first_ind == 0:
+
+            CX.set_node_attributes(
+                dict(zip(range(len(mesh.vertices)), mesh.vertices)), name="position"
+            )
+        else:  # first index starts at 1.
+
+            CX.set_node_attributes(
+                dict(
+                    zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
+                ),
+                name="position",
+            )
+
+        return CX
+
+    @staticmethod
+    def from_mesh_file(file_path, process=False, force=None):
+        """
+        file_path: str, the source of the data to be loadeded
+
+        process : bool, trimesh will try to process the mesh before loading it.
+
+        force: (str or None)
+            options: 'mesh' loader will "force" the result into a mesh through concatenation
+                     None : will not force the above.
+        Note:
+            file supported : obj, off, glb
+        >>> CX = CellComplex.from_file("/path_to_file/bunny.obj")
+        >>> CX.nodes
+
+        """
+        import trimesh
+
+        mesh = trimesh.load_mesh(file_path, process=process, force=None)
+        return CellComplex.from_trimesh(mesh)

@@ -348,13 +348,13 @@ class SimplicialComplex:
 
             Examples
             --------
-            >>> CC = SimplicialComplex()
-            >>> CC.add_simplex([1,3,4])
-            >>> CC.add_simplex([1,2,3])
-            >>> CC.add_simplex([1,2,4])
+            >>> SC = SimplicialComplex()
+            >>> SC.add_simplex([1,3,4])
+            >>> SC.add_simplex([1,2,3])
+            >>> SC.add_simplex([1,2,4])
             >>> d={ (1,3,4): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
-            >>> CC.set_simplex_attributes(d)
-            >>> CC[(1,3,4)]['color']
+            >>> SC.set_simplex_attributes(d)
+            >>> SC[(1,3,4)]['color']
             'red'
 
         Note : If the dict contains simplices that are not in `self.simplices`, they are
@@ -776,8 +776,110 @@ class SimplicialComplex:
         maxmimals = []
         for s in self:
             if self.is_maximal(s):
-                maxmimals.append(s)
+                maxmimals.append(tuple(s))
         return maxmimals
+
+    @staticmethod
+    def from_trimesh(mesh):
+        """
+        >>> import trimesh
+        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
+                               faces=[[0, 1, 2]],
+                               process=False)
+        >>> SC = SimplicialComplex.from_trimesh(mesh)
+        >>> print(SC.nodes0
+        >>> Sprint(C.simplices)
+        >>> SC[(0)]['position']
+
+        """
+        # try to see the index of the first vertex
+
+        SC = SimplicialComplex(mesh.faces)
+
+        first_ind = np.min(mesh.faces)
+
+        if first_ind == 0:
+
+            SC.set_simplex_attributes(
+                dict(zip(range(len(mesh.vertices)), mesh.vertices)), name="position"
+            )
+        else:  # first index starts at 1.
+
+            SC.set_simplex_attributes(
+                dict(
+                    zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
+                ),
+                name="position",
+            )
+
+        return SC
+
+    @staticmethod
+    def from_mesh_file(file_path, process=False, force=None):
+        """
+
+        Parameters
+        ----------
+
+            file_path: str, the source of the data to be loadeded
+
+            process : bool, trimesh will try to process the mesh before loading it.
+
+            force: (str or None)
+                options: 'mesh' loader will "force" the result into a mesh through concatenation
+                         None : will not force the above.
+
+        Return
+        -------
+            SimplicialComplex
+                the output simplicial complex stores the same structure stored in the mesh input file.
+
+        Note:
+        -------
+            mesh files supported : obj, off, glb
+
+
+        >>> SC = SimplicialComplex.from_mesh_file("/Users/mhajij/Downloads/bunny.obj")
+
+        >>> SC.nodes
+
+        """
+        import trimesh
+
+        mesh = trimesh.load_mesh(file_path, process=process, force=None)
+        return SimplicialComplex.from_trimesh(mesh)
+
+    def is_triangular_mesh(self):
+
+        if self.dim <= 2:
+
+            lst = self.get_all_maximal_simplices()
+            for i in lst:
+                if len(i) == 2:  # gas edges that are not part of a face
+                    return False
+            return True
+        else:
+            return False
+
+    def to_trimesh(self, vertex_position_name="position"):
+
+        import trimesh
+
+        if not self.is_triangular_mesh():
+            raise TopoNetXError(
+                "input simplicial complex is higher than 2 dimesion and it cannot be converted to a trimesh object"
+            )
+        else:
+
+            vertices = list(
+                dict(
+                    sorted(self.get_node_attributes(vertex_position_name).items())
+                ).values()
+            )
+
+            return trimesh.Trimesh(
+                faces=self.get_all_maximal_simplices(), vertices=vertices, process=False
+            )
 
     @staticmethod
     def from_nx_graph(G):
@@ -802,6 +904,17 @@ class SimplicialComplex:
             g.add_node(list(n)[0])
         return nx.is_connected(g)
 
+    def to_cell_complex(self):
+        """
+        Example
+        >>> c1= Simplex((1,2,3))
+        >>> c2= Simplex((1,2,4))
+        >>> c3= Simplex((2,5))
+        >>> SC = SimplicialComplex([c1,c2,c3])
+        >>> SC.to_cell_complex()
+        """
+        return CellComplex(self.get_all_maximal_simplices())
+
     def to_hypergraph(self):
         """
         Example
@@ -817,14 +930,14 @@ class SimplicialComplex:
             graph = graph + edge
         return Hypergraph(graph, static=True)
 
-    def to_combinatorialcomplex(self):
+    def to_combinatorial_complex(self):
         """
         Example
         >>> c1= Simplex((1,2,3))
         >>> c2= Simplex((1,2,4))
         >>> c3= Simplex((2,5))
         >>> SC = SimplicialComplex([c1,c2,c3])
-        >>> SC.to_combinatorialcomplex()
+        >>> SC.to_combinatorial_complex()
         """
         graph = []
         for i in range(1, self.dim + 1):
