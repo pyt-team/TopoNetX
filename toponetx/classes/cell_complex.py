@@ -562,8 +562,8 @@ class CellComplex:
                 )
             elif rank == 1:
                 if len(cell) != 2:
-                    raise ValueError("rank 2 cell must have exactly two nodes")
-                elif len(set(cell)) == 1:
+                    raise ValueError("rank 1 cells (edges) must have exactly two nodes")
+                if len(set(cell)) == 1:
                     raise ValueError(" invalid insertion : self-loops are not allowed.")
                 else:
                     self.add_edge(cell[0], cell[1], **attr)
@@ -597,7 +597,7 @@ class CellComplex:
 
         return self
 
-    def add_cells_from(self, cell_set, rank=None):
+    def add_cells_from(self, cell_set, rank=None, check_skeleton=False, **attr):
         """
         Add cells to cell complex .
 
@@ -618,7 +618,7 @@ class CellComplex:
         """
 
         for cell in cell_set:
-            self.add_cell(cell=cell, rank=rank)
+            self.add_cell(cell=cell, rank=rank, check_skeleton=check_skeleton, **attr)
         return self
 
     def remove_cell(self, cell):
@@ -673,7 +673,6 @@ class CellComplex:
                     self.nodes[cell][name] = value
                 except KeyError:
                     pass
-
         else:
 
             for cell, d in values.items():

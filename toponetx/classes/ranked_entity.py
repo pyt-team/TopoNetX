@@ -260,7 +260,6 @@ class RankedEntity(Entity):
         ----------
         elements : RankedEntity or hashable
 
-
         Returns
         -------
         TYPE

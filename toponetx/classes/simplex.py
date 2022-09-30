@@ -9,6 +9,8 @@ except ImportError:
 
 from itertools import combinations
 
+import numpy as np
+
 __all__ = ["Simplex", "SimplexView", "NodeView"]
 
 
@@ -177,7 +179,6 @@ class SimplexView:
                     self.faces_dict[len(simplex) - 1].update(attr)
                 else:
                     raise KeyError(f"cell {simplex} is not in the simplex dictionary")
-
             elif isinstance(simplex, Hashable):
                 if frozenset({simplex}) in self:
                     self.faces_dict[0].update(attr)
@@ -189,16 +190,16 @@ class SimplexView:
     # Set methods
     @property
     def shape(self):
-
         if len(self.faces_dict) == 0:
             print("Complex is empty.")
         else:
             return [len(self.faces_dict[i]) for i in range(len(self.faces_dict))]
 
     def __len__(self):
-        import numpy as np
-
-        return np.sum(self.shape())
+        if len(self.faces_dict) == 0:
+            return 0
+        else:
+            return np.sum(self.shape)
 
     def __iter__(self):
         all_simplices = []
