@@ -1,7 +1,12 @@
 import unittest
 
-from toponetx import CombinatorialComplex, RankedEntity, RankedEntitySet
-from toponetx.classes.ranked_entity import CellObject, Node
+from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.ranked_entity import (
+    CellObject,
+    Node,
+    RankedEntity,
+    RankedEntitySet,
+)
 
 
 class TestCombintorialComplex(unittest.TestCase):
@@ -9,9 +14,9 @@ class TestCombintorialComplex(unittest.TestCase):
         x1 = Node(1)
         x2 = Node(2)
         y1 = CellObject(elements=[x1, x2], rank=1)
-        self.assertEquals(x1.rank, 0)
-        self.assertEquals(x2.rank, 0)
-        self.assertEquals(y1.rank, 1)
+        self.assertEqual(x1.rank, 0)
+        self.assertEqual(x2.rank, 0)
+        self.assertEqual(y1.rank, 1)
 
     def test_combinatorial_complex_skeleton(self):
         x1 = RankedEntity("x1", rank=0)
@@ -28,9 +33,9 @@ class TestCombintorialComplex(unittest.TestCase):
         w = RankedEntity("w", [x4, x5, x1], rank=2)
         E = RankedEntitySet("E", [y1, y2, y3, y4, y5, w, y6])
         CC = CombinatorialComplex(cells=E)
-        self.assertEquals(len(CC.skeleton(0)), 5)
-        self.assertEquals(len(CC.skeleton(1)), 6)
-        self.assertEquals(len(CC.skeleton(2)), 1)
+        self.assertEqual(len(CC.skeleton(0)), 5)
+        self.assertEqual(len(CC.skeleton(1)), 6)
+        self.assertEqual(len(CC.skeleton(2)), 1)
 
 
 if __name__ == "__main__":
