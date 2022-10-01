@@ -5,7 +5,11 @@
 """
 
 
-import collections
+try:
+    from collections.abc import Hashable, Iterable
+except ImportError:
+    from collections import Iterable, Hashable
+
 from collections import OrderedDict, defaultdict
 
 import numpy as np
@@ -271,7 +275,7 @@ class RankedEntity(Entity):
 
             if isinstance(item, tuple):
                 return item
-            elif isinstance(item, collections.Hashable):
+            elif isinstance(item, Hashable):
                 return (False, item)
 
         _uid = []
@@ -750,7 +754,7 @@ class RankedEntity(Entity):
 
 class Node(RankedEntity):
     def __init__(self, elements, weight=1.0, **props):
-        if not isinstance(elements, collections.Hashable):
+        if not isinstance(elements, Hashable):
             raise TopoNetXError(
                 f"node's elements must be hashable, got {type(elements)}"
             )

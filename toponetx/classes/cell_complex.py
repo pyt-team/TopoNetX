@@ -1914,7 +1914,7 @@ class CellComplex:
     @staticmethod
     def from_mesh_file(file_path, process=False, force=None):
         """
-        file_path: str, the source of the data to be loadeded
+        file_path: str, the file path of the data to be loadeded
 
         process : bool, trimesh will try to process the mesh before loading it.
 
@@ -1923,7 +1923,7 @@ class CellComplex:
                      None : will not force the above.
         Note:
             file supported : obj, off, glb
-        >>> CX = CellComplex.from_file("/path_to_file/bunny.obj")
+        >>> CX = CellComplex.from_mesh_file("bunny.obj")
         >>> CX.nodes
 
         """
