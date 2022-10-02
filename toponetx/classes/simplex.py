@@ -375,8 +375,11 @@ class SimplexView:
                 simplex_ = simplex.nodes
             self._update_faces_dict_length(simplex_)
 
-            if simplex_ in self.faces_dict[len(simplex_) - 1]:
+            if (
+                simplex_ in self.faces_dict[len(simplex_) - 1]
+            ):  # simplex is already in the complex
                 self.faces_dict[len(simplex_) - 1][simplex_].update(attr)
+                return
 
             if self.max_dim < len(simplex) - 1:
                 self.max_dim = len(simplex) - 1

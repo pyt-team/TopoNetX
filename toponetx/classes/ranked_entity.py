@@ -107,7 +107,7 @@ class RankedEntity(Entity):
          >>> y3 = RankedEntity(elements=[x3,x4], rank = 1)
          >>> y4 = RankedEntity(elements=[x4,x1], rank = 1)
          >>> z = RankedEntity(elements=[y1,y2,y3,y4],rank = 2)
-         >>> w = RankedEntity([z],rank = 3)
+         >>> w = RankedEntity(elements=[z],rank = 3)
          # d={'0': ([1, 2, 3], 2), '1': ([2, 4], 1)}
 
          >>> d= {'y1': {'elements': [1, 2], 'rank': 1},
@@ -382,7 +382,7 @@ class RankedEntity(Entity):
             # item must be a hashable.
             # if it appears as a uid in checkelts then
             # the corresponding Entity will become an element of ranked entity.
-            # Otherwise, at most it will be added as an empty rank zero RankedEntity.
+            # Otherwise, at most it will be added as an zero rank empty RankedEntity.
             if self.uid == item:
                 raise TopoNetXError(
                     f"Error: Self reference in submitted elements."
@@ -412,7 +412,7 @@ class RankedEntity(Entity):
                                     checkelts[i]
                                 )  # element is an existing RankedEntity
                             else:
-                                elem.append(i)  # element is a primitive entity
+                                elem.append(i)  # element is a node entity
                         ent = RankedEntity(
                             item[0],
                             elements=elem,
@@ -449,7 +449,7 @@ class RankedEntity(Entity):
                     self._elements[item] = checkelts[item]
                     checkelts[item]._memberships[self.uid] = self
                     self._all_ranks = self._all_ranks.union(checkelts[item]._all_ranks)
-                else:  # assume primitive input
+                else:  # assume node input
                     self._elements[item] = RankedEntity(
                         item, _memberships={self.uid: self}, rank=0
                     )

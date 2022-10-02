@@ -843,7 +843,7 @@ class SimplicialComplex:
             mesh files supported : obj, off, glb
 
 
-        >>> SC = SimplicialComplex.from_mesh_file("/Users/mhajij/Downloads/bunny.obj")
+        >>> SC = SimplicialComplex.from_mesh_file("/Users/mhajij/Downloads/elephant_10.obj")
 
         >>> SC.nodes
 
