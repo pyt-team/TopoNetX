@@ -159,7 +159,7 @@ class SimplexView:
             if simplex in self.faces_dict[len(simplex) - 1]:
                 return self.faces_dict[len(simplex) - 1][simplex]
             else:
-                raise KeyError(f"cell {simplex} is not in the simplex dictionary")
+                raise KeyError(f"input {simplex} is not in the simplex dictionary")
 
         elif isinstance(simplex, Hashable):
 
@@ -413,11 +413,7 @@ class SimplexView:
 
         """
 
-        if (
-            isinstance(simplex, tuple)
-            or isinstance(simplex, list)
-            or isinstance(simplex, Simplex)
-        ):
+        if isinstance(simplex, Iterable):
             if not isinstance(simplex, Simplex):
                 simplex_ = frozenset(
                     sorted(simplex)
@@ -452,7 +448,7 @@ class SimplexView:
                     "only maximal simplices can be deleted, input simplex is not maximal"
                 )
         else:
-            raise KeyError("simplex is not a part of the simplicial comples")
+            raise KeyError("simplex is not a part of the simplicial complex")
 
 
 class NodeView(SimplexView):
@@ -486,6 +482,52 @@ class NodeView(SimplexView):
         all_nodes = [tuple(j) for j in self.nodes.keys()]
 
         return f"NodeView({all_nodes})"
+
+    def __getitem__(self, simplex):
+        """
+        Parameters
+        ----------
+        cell : tuple list or Simplex
+            DESCRIPTION.
+        Returns
+        -------
+        TYPE : dict or ilst or dicts
+            return dict of properties associated with that cells
+
+        """
+
+        if isinstance(simplex, Simplex):
+            if simplex.nodes in self.nodes:
+                return self.nodes[simplex.nodes]
+        elif isinstance(simplex, Iterable):
+            simplex = frozenset(simplex)
+            if simplex in self.nodes:
+                return self.nodes[simplex]
+            else:
+                raise KeyError(f"input {simplex} is not in the node set of the complex")
+
+        elif isinstance(simplex, Hashable):
+
+            if simplex in self:
+
+                return self.nodes[frozenset({simplex})]
+
+    def __setitem__(self, simplex, **attr):
+        if simplex in self:
+            if isinstance(simplex, Simplex):
+                if simplex.nodes in self.nodes:
+                    self.nodes.update(attr)
+            elif isinstance(simplex, Iterable):
+                simplex = frozenset(simplex)
+                if simplex in self.nodes:
+                    self.nodes.update(attr)
+                else:
+                    raise KeyError(f"node {simplex} is not in complex")
+            elif isinstance(simplex, Hashable):
+                if frozenset({simplex}) in self:
+                    self.nodes.update(attr)
+        else:
+            raise KeyError(f"node  {simplex} is not in the complex")
 
     def __len__(self):
         return len(self.nodes)
