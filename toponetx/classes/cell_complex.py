@@ -37,6 +37,10 @@ __all__ = ["CellComplex"]
 class CellComplex:
 
     """
+    In TNX the class CellComplex supports building a regular or non-regular
+    2d cell complex. The class CellComplex only supports the construction
+    of 2d cell complexes. If higher order constructions are desired
+    then one should utilize the class CombinatorialComplex.
 
     In TNX cell complexes are implementes to be dynamic in the sense that
     they can change by adding or subtracting objects (nodes, edges, cells)
@@ -50,7 +54,7 @@ class CellComplex:
             >>> CX.add_cell([2,3,4,5],rank=2)
             >>> CX.add_cell([5,6,7,8],rank=2)
         #Example 2
-            >>> c1= Cell( (1,2,3))
+            >>> c1= Cell( (1,2,3)) # a cell here is always assumed to be 2d
             >>> c2= Cell( (1,2,3,4) )
             >>> CX = CellComplex( [c1,c2] )
         #Example 3
@@ -64,12 +68,17 @@ class CellComplex:
         #Example 4
             >>> # non-regular cell complex
             >>> CX = CellComplex(regular=False)
-            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([1,2,3,4],rank=2,)
             >>> CX.add_cell([2,3,4,5,2,3,4,5],rank=2) #non-regular 2-cell
             >>> c1=Cell((1,2,3,4,5,1,2,3,4,5),regular=False)
             >>> CX.add_cell(c1)
             >>> CX.add_cell([5,6,7,8],rank=2)
             >>> CX.is_regular
+        #Example 5
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2, weight = 5)
+            >>> CX.add_cell([2,3,4,5],rank=2,  weight = 10)
+            >>> CX.add_cell([5,6,7,8],rank=2,  weight = 13)
 
     """
 
