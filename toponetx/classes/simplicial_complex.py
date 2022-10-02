@@ -529,13 +529,17 @@ class SimplicialComplex:
 
     def coincidence_matrix(self, d, signed=True, weight=None, index=False):
 
+        """
+        Note : also called the coboundary matrix
+        """
+
         if index:
             idx_faces, idx_simplices, boundary = self.incidence_matrix(
                 d, signed=signed, weight=weight, index=index
             ).T
             return idx_faces, idx_simplices, boundary.T
         else:
-            return self.incidence_matrix(d, signed, index).T
+            return self.incidence_matrix(d, signed=signed, weight=weight, index=index).T
 
     def hodge_laplacian_matrix(self, d, signed=True, weight=None, index=False):
         if d == 0:
@@ -558,12 +562,11 @@ class SimplicialComplex:
             return abs(L)
 
     def normalized_laplacian_matrix(self, d, weight=None):
-        r"""Returns the normalized Laplacian matrix of G.
+        r"""Returns the normalized hoodge Laplacian matrix of G.
 
-            The normalized graph Laplacian is the matrix
+            The normalized hodge Laplacian is the matrix
 
             .. math::
-
                 N_d = D^{-1/2} L_d D^{-1/2}
 
             where `L` is the simplcial complex Laplacian and `D` is the diagonal matrix of
@@ -590,7 +593,7 @@ class SimplicialComplex:
         Example 1
 
             >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
-            >>> NL1= SC.normalized_hodge_laplacian_matrix(1)
+            >>> NL1= SC.normalized_laplacian_matrix(1)
             >>> NL1
 
 
@@ -869,7 +872,7 @@ class SimplicialComplex:
 
         if not self.is_triangular_mesh():
             raise TopoNetXError(
-                "input simplicial complex is higher than 2 dimesion and it cannot be converted to a trimesh object"
+                "input simplicial complex has dimension higher than 2 and hence it cannot be converted to a trimesh object"
             )
         else:
 
@@ -898,6 +901,12 @@ class SimplicialComplex:
         return SimplicialComplex(G, name=G.name)
 
     def is_connected(self):
+
+        """
+        Note: a simplicial complex is connected iff its 1-skeleton graph is connected.
+
+        """
+
         g = nx.Graph()
         for e in self.skeleton(1):
             e = list(e)
