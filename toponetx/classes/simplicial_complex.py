@@ -231,10 +231,8 @@ class SimplicialComplex:
 
         Returns
         -------
-        int
-
+        int, total number of simplices in all dimensions
         """
-
         return np.sum(self.shape)
 
     def __getitem__(self, simplex):

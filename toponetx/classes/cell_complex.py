@@ -648,7 +648,7 @@ class CellComplex:
 
     def remove_cells(self, cell_set):
         """
-        Removes cells from CC.
+        Removes cells from a cell complex.
 
         Parameters
         ----------
@@ -656,14 +656,107 @@ class CellComplex:
 
         Returns
         -------
-        cell complex : CombinatorialComplex
+        cell complex : CellComplex
 
         """
         for cell in cell_set:
             self.remove_cell(cell)
         return self
 
+    def set_filtration(self, values, name=None):
+        """
+        Parameters
+        ----------
+        values : dic
+        name : str
+
+        Returns
+        -------
+        None
+
+        Note : this is equivalent to setting a real-valued feature defined on the entire cell complex
+
+
+        Note : If the dict contains cells that are not in `self.cells`, they are
+        silently ignored.
+
+
+        Example
+        -------
+        >>> G = nx.path_graph(3)
+        >>> CC = CellComplex(G)
+        >>> d={0: 1, 1: 0,2:2, (0,1) : 1 ,(1,2) : 3}
+
+        >>> CC.set_filtration(d,"f")
+
+        """
+        import numbers
+
+        d_nodes, d_edges, d_cells = [{}, {}, {}]
+
+        for k, v in values.items():
+
+            # to do, make sure v is a number
+
+            if not isinstance(v, (int, float)):
+                raise ValueError(f"filtration value must be a int or float, input {v}")
+
+            if isinstance(k, Hashable) and not isinstance(k, Iterable):  # node
+                d_nodes[k] = v
+            elif isinstance(k, Iterable) and len(k) == 2:  # edge
+                d_edges[k] = v
+            elif isinstance(k, Iterable) and len(k) != 2:  # cell
+                d_cells[k] = v
+        self.set_node_attributes(d_nodes, name)
+        self.set_edge_attributes(d_edges, name)
+        self.set_cell_attributes(d_cells, name)
+
+    def get_filtration(self, name):
+
+        """
+
+        Note : this is equivalent to getting a feature defined on the entire cell complex
+
+        >>> G = nx.path_graph(3)
+        >>> CC = CellComplex(G)
+        >>> d={0: 1, 1: 0,2:2, (0,1) : 1 ,(1,2) : 3}
+        >>> CC.set_filtration(d,"f")
+        >>> CC.get_filtration("f")
+
+        {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
+
+        """
+
+        lst = [
+            self.get_node_attributes(name),
+            self.get_edge_attributes(name),
+            self.get_cell_attributes(name),
+        ]
+        d = {}
+        for i in lst:
+            if i is not None:
+                d.update(i)
+        return d
+
     def set_node_attributes(self, values, name=None):
+        """
+        Parameters
+        ----------
+        values : dic
+        name : str
+
+        Returns
+        -------
+        None
+
+        Example
+        -------
+        >>> G = nx.path_graph(3)
+        >>> CC = CellComplex(G)
+        >>> d={0: {'color':'red','attr2':1 },1: {'color':'blue','attr2':3 } }
+        >>> CC.set_node_attributes(d)
+
+        """
 
         if name is not None:
             # if `values` is a dict using `.items()` => {cell: value}
@@ -681,6 +774,60 @@ class CellComplex:
                 except KeyError:
                     pass
             return
+
+    def set_edge_attributes(self, values, name=None):
+        """
+        Parameters
+        ----------
+        values : dic
+        name : str
+
+        Returns
+        -------
+        None
+
+
+        Example
+        -------
+
+        >>> G = nx.path_graph(3)
+        >>> CC = CellComplex(G)
+        >>> d={ (0,1) : {'color':'red','attr2':1 },(1,2): {'color':'blue','attr2':3 } }
+        >>> CC.set_edge_attributes(d)
+
+        """
+
+        if name is not None:
+            # if `values` is a dict using `.items()` => {edge: value}
+
+            for cell, value in values.items():
+                try:
+                    self.edges[cell][name] = value
+                except KeyError:
+                    pass
+        else:
+            for cell, d in values.items():
+                try:
+                    self.edges[cell].update(d)
+                except KeyError:
+                    pass
+            return
+
+    def get_edge_attributes(self, name):
+        """Get edge attributes from cell complex
+
+        Parameters
+        ----------
+
+        name : string
+           Attribute name
+
+        Returns
+        -------
+        Dictionary of attributes keyed by edge.
+
+        """
+        return {n: self.edges[n][name] for n in self.edges if name in self.edges[n]}
 
     def set_cell_attributes(self, values, name=None):
         """
@@ -739,7 +886,6 @@ class CellComplex:
 
             for cell, value in values.items():
                 try:
-
                     if len(cell) == 2:
                         if isinstance(cell[0], Iterable) and isinstance(
                             cell[1], int
@@ -747,7 +893,6 @@ class CellComplex:
                             self.cells[cell][cell[0]][name] = value
                         else:
                             self.cells[cell][name] = value
-
                     elif isinstance(
                         self.cells[cell], list
                     ):  # all cells with same key get same attrs
