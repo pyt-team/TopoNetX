@@ -22,6 +22,7 @@ install_requires = [
     "numpy",
     "pre-commit",
     "scipy",
+    "trimesh"
 ]
 
 full_requires = []
@@ -65,6 +66,7 @@ setup(
         "Simplicial Complexes",
         "Cellular complexes",
         "Combinatorial complexes",
+        "CW Complex"
     ],
     python_requires=">=3.7",
     install_requires=install_requires,
