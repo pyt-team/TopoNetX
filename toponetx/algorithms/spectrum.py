@@ -24,7 +24,31 @@ __all__ = [
     "cell_complex_adjacency_spectrum",
     "simplcial_complex_adjacency_spectrum",
     "combintorial_complex_adjacency_spectrum",
+    "normalized_spectral_embedding",
+    "set_normalized_spectral_embedding_attr",
 ]
+
+
+def _sparse_spectral(L, dim=2):
+
+    # Hodge Laplcian matrix A
+    # Uses sparse eigenvalue solver from scipy
+    # ref:
+    # https://networkx.org/documentation/networkx-1.9/_modules/networkx/drawing/layout.html#spectral_layout
+
+    try:
+        from scipy.sparse.linalg.eigen import eigsh
+    except ImportError:
+        # scipy <0.9.0 names eigsh differently
+        from scipy.sparse.linalg import eigen_symmetric as eigsh
+
+    k = dim + 1
+    # number of Lanczos vectors for ARPACK solver.What is the right scaling?
+    ncv = max(2 * k + 1, int(np.sqrt(L.shape[9])))
+    # return smallest k eigenvalues and eigenvectors
+    eigenvalues, eigenvectors = eigsh(L, k, which="SM", ncv=ncv)
+    index = np.argsort(eigenvalues)[1:k]  # 0 index is zero eigenvalue
+    return eigenvalues, np.real(eigenvectors[:, index])
 
 
 def hodge_laplacian_eigenvectors(laplacian, n_components):
@@ -107,7 +131,55 @@ def set_hodge_laplacian_eigenvector_attrs(
         cmplex.set_simplex_attributes(d, str(i) + ".th_eigen")
 
 
-def compute_spectral_embedding(cmplex, dim, n_components):
+def normalized_spectral_embedding(cmplex, dim, n_components):
+    """
+    input
+    =====
+        cmplex : a SimplialComplex/CellComplex object
+        dim : int, the dimension of the hodge laplacian to be computed
+        n_components : int, the number of eigenvectors to be computed
+        align : bool, indicates wheather the eigenvectors are to be aligned
+
+
+    example
+    ========
+    >>> SC = SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> vect = normalized_spectral_embedding(SC,dim=0,n_components=2)
+    """
+
+    from sklearn.manifold import SpectralEmbedding
+
+    embedding = SpectralEmbedding(affinity="precomputed", n_components=n_components)
+    A = cmplex.adjacency_matrix(dim)
+    vect = embedding.fit_transform(A)
+    return vect
+
+
+def set_normalized_spectral_embedding_attr(cmplex, dim, n_components):
+    """
+    input
+    =====
+        cmplex : a SimplialComplex/CellComplex object
+        dim : int, the dimension of the hodge laplacian to be computed
+        n_components : int, the number of eigenvectors to be computed
+        align : bool, indicates wheather the eigenvectors are to be aligned
+
+
+    example
+    ========
+    >>> SC = SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> set_normalized_spectral_embedding_attr(SC,0,2)
+    >>> SC.get_simplex_attributes("0.normalized_spec_embedding",0)
+    """
+
+    index = cmplex.skeleton(dim)
+    vect = normalized_spectral_embedding(cmplex, dim, n_components)
+    for i in range(n_components):
+        d = dict(zip(index, vect[:, i]))
+        cmplex.set_simplex_attributes(d, str(i) + ".normalized_spec_embedding")
+
+
+def spectral_embedding_unnormalized(cmplex, dim, n_components):
     """
     input
     =====
@@ -147,7 +219,7 @@ def set_spectral_embedding_attr(cmplex, dim, n_components=2):
     >>> SC.get_simplex_attributes("0.spec_embedding",0)
     """
     index = cmplex.skeleton(dim)
-    vect = compute_spectral_embedding(cmplex, dim, n_components)
+    vect = spectral_embedding_unnormalized(cmplex, dim, n_components)
 
     for i in range(n_components):
         d = dict(zip(index, vect[:, i]))
@@ -200,7 +272,7 @@ def set_spectral_embedding_attr_list_of_complexes(
     else:
         all_eigen_vectors = []
         for cmplex in cmplex_list:
-            vect = compute_spectral_embedding(cmplex, dim, n_components)
+            vect = spectral_embedding_unnormalized(cmplex, dim, n_components)
             all_eigen_vectors.append(vect)
 
         index = cmplex_list[0].skeleton(dim)
