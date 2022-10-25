@@ -465,7 +465,7 @@ class SimplicialComplex:
          can be reduced to graph computations.
 
         """
-        rows, cols = np.where(np.sign(np.abs(matrix)) == 1)
+        rows, cols = np.where(np.sign(np.abs(matrix)) > 0)
         edges = zip(rows.tolist(), cols.tolist())
         return edges
 
@@ -820,7 +820,7 @@ class SimplicialComplex:
         return SC
 
     @staticmethod
-    def from_mesh_file(file_path, process=False, force=None):
+    def load_mesh(file_path, process=False, force=None):
         """
 
         Parameters

@@ -1,22 +1,39 @@
 # -*- coding: utf-8 -*-
 
-
+import numpy as np
 import scipy.sparse as sparse
 from numpy import linalg as LA
 from scipy.sparse import diags
+from scipy.sparse.linalg import eigsh
 
+from toponetx.algorithms.eigen_align import *
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
+__all__ = [
+    "hodge_laplacian_eigenvectors",
+    "set_hodge_laplacian_eigenvector_attrs",
+    "compute_spectral_embedding",
+    "set_spectral_embedding_attr",
+    "set_spectral_embedding_attr_list_of_complexes",
+    "normalize",
+    "laplacian_spectrum",
+    "cell_complex_hodge_laplacian_spectrum",
+    "simplicial_complex_hodge_laplacian_spectrum",
+    "cell_complex_adjacency_spectrum",
+    "simplcial_complex_adjacency_spectrum",
+    "combintorial_complex_adjacency_spectrum",
+]
 
-def hodge_laplacian_eigenvectors(laplacian, k):
+
+def hodge_laplacian_eigenvectors(laplacian, n_components):
 
     """
     Input
     ======
         laplacian : scipy sparse matrix representing the hodge laplacian
-        k : int, the number of eigenvectors one needs to output, if
+        n_components : int, the number of eigenvectors one needs to output, if
             laplacian.shape[0]<=10, then all eigenvectors will be returned
     output:
     =======
@@ -33,7 +50,7 @@ def hodge_laplacian_eigenvectors(laplacian, k):
     Diag = diags(laplacian.diagonal())
     if Diag.shape[0] > 10:
         vals, vect = sparse.linalg.eigs(
-            laplacian, k, M=Diag, which="SM"
+            laplacian, n_components, M=Diag, which="SM"
         )  # the lowest k eigenstuff
     else:
         vals, vect = LA.eig(laplacian.toarray())
@@ -52,27 +69,25 @@ def hodge_laplacian_eigenvectors(laplacian, k):
     return [eigenvaluevector, finaleigenvectors]
 
 
-def hodge_laplacian_eigenvector_attrs(
-    cmplex, dim, k, laplacian_type="hodge", normalized=True
+def set_hodge_laplacian_eigenvector_attrs(
+    cmplex, dim, n_components, laplacian_type="hodge", normalized=True
 ):
     """
     input
     =====
-        complex : a SimplialComplex object
+        cmplex : a SimplialComplex/CellComplex object
         dim : int, the dimension of the hodge laplacian to be computed
-        k : int, the number of eigenvectors to be computed
+        n_components : int, the number of eigenvectors to be computed
         laplacian_type : str, type of hodge matrix to be computed,
                         options : up, down, hodge
         normalized: bool, normalize the eigenvector or not.
-    output
-    ======
-        complex with eigecvectors are stored in the correpsonding skeleton on the k-th skeleton
+
 
     example
     ========
     >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
-    >>> SC = hodge_laplacian_eigenvector_attrs(SC,1,2,"down")
-    >>> SC.get_simplex_attributes("0.th_eigen")
+    >>> SC = set_hodge_laplacian_eigenvector_attrs(SC,1,2,"down")
+    >>> SC.get_simplex_attributes("0.th_eigen", 1)
     """
     index = cmplex.skeleton(dim)
     if laplacian_type == "hodge":
@@ -83,14 +98,126 @@ def hodge_laplacian_eigenvector_attrs(
         L = cmplex.up_laplacian_matrix(dim)
     else:
         raise ValueError("type must be up, down or hodge")
-    vals, vect = hodge_laplacian_eigenvectors(L, k)
+    vals, vect = hodge_laplacian_eigenvectors(L, n_components)
 
     for i in range(len(vect)):
         d = dict(zip(index, vect[i]))
         if normalized:
             d = normalize(d)
         cmplex.set_simplex_attributes(d, str(i) + ".th_eigen")
-    return cmplex
+
+
+def compute_spectral_embedding(cmplex, dim, n_components):
+    """
+    input
+    =====
+        cmplex : a SimplialComplex/CellComplex object
+        dim : int, the dimension of the hodge laplacian to be computed
+        n_components : int, the number of eigenvectors to be computed
+        align : bool, indicates wheather the eigenvectors are to be aligned
+
+
+    example
+    ========
+    >>> SC = SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> vect = compute_spectral_embedding(SC,dim=0,n_components=2)
+    """
+
+    L = cmplex.hodge_laplacian_matrix(dim)
+    _, vect = eigsh(L, k=n_components, which="SM")
+    n = L.shape[0]
+    vect *= np.sqrt(n)
+    return vect
+
+
+def set_spectral_embedding_attr(cmplex, dim, n_components=2):
+    """
+    input
+    =====
+        cmplex : a SimplialComplex/CellComplex object
+        dim : int, the dimension of the hodge laplacian to be computed
+        n_components : int, the number of eigenvectors to be computed
+        align : bool, indicates wheather the eigenvectors are to be aligned
+
+
+    example
+    ========
+    >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> set_spectral_embedding_attr(SC,dim=0,n_components=2)
+    >>> SC.get_simplex_attributes("0.spec_embedding",0)
+    """
+    index = cmplex.skeleton(dim)
+    vect = compute_spectral_embedding(cmplex, dim, n_components)
+
+    for i in range(n_components):
+        d = dict(zip(index, vect[:, i]))
+        cmplex.set_simplex_attributes(d, str(i) + ".spec_embedding")
+
+
+def set_spectral_embedding_attr_list_of_complexes(
+    cmplex_list, dim, n_components=2, align=True
+):
+    """
+    input
+    =====
+        cmplex_list : a list of SimplialComplex/CellComplex objects
+        dim : int, the dimension of the hodge laplacian to be computed
+        n_components : int, the number of eigenvectors to be computed
+        align : bool, indicates wheather the eigenvectors are to be aligned
+
+
+    example1
+    ========
+
+    >>> SC1=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> SC2=SimplicialComplex([[1,2,3],[2,3,5],[0,1],[0,7]])
+    >>> set_spectral_embedding_attr_list_of_complexes( [SC1,SC2] , dim=0,n_components=4,align =True)
+    >>> SC1.get_simplex_attributes("1.spec_embedding",0)
+    >>> SC2.get_simplex_attributes("1.spec_embedding",0)
+
+    example2
+    ========
+    >>> SC1=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> SC2=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> SC3=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> SC4=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> set_spectral_embedding_attr_list_of_complexes( [SC1,SC2,SC3,SC4] , dim=0,n_components=4,align =True)
+    >>> # must be equal
+    >>> SC1.get_simplex_attributes("1.spec_embedding",0)
+    >>> SC2.get_simplex_attributes("1.spec_embedding",0)
+    >>> SC3.get_simplex_attributes("1.spec_embedding",0)
+    >>> SC4.get_simplex_attributes("1.spec_embedding",0)
+    """
+
+    if not isinstance(cmplex_list, list):
+        raise TypeError("input cmplex_list must be a list")
+    if len(cmplex_list) == 1:
+        return set_spectral_embedding_attr(cmplex_list[0], dim, n_components)
+
+    if not align:
+        for C in cmplex_list:
+            set_spectral_embedding_attr(C, dim, n_components)
+    else:
+        all_eigen_vectors = []
+        for cmplex in cmplex_list:
+            vect = compute_spectral_embedding(cmplex, dim, n_components)
+            all_eigen_vectors.append(vect)
+
+        index = cmplex_list[0].skeleton(dim)
+        for i in range(n_components):
+            d = dict(zip(index, all_eigen_vectors[0][:, i]))
+            cmplex_list[0].set_simplex_attributes(d, str(i) + ".spec_embedding")
+
+        for i in range(1, len(cmplex_list)):
+            cmplex = cmplex_list[i]
+
+            aligned_vect = align_eigenvectors_kl(
+                all_eigen_vectors[0], all_eigen_vectors[i]
+            )
+            index = cmplex.skeleton(dim)
+            for j in range(n_components):
+                d = dict(zip(index, aligned_vect[:, j]))
+                cmplex.set_simplex_attributes(d, str(j) + ".spec_embedding")
 
 
 def normalize(f):
