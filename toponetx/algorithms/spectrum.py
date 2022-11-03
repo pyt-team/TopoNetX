@@ -6,18 +6,20 @@ from numpy import linalg as LA
 from scipy.sparse import diags
 from scipy.sparse.linalg import eigsh
 
-from toponetx.algorithms.eigen_align import *
+from toponetx.classes.algorithms.eigen_align import *
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = [
+    "_sparse_spectral",
     "hodge_laplacian_eigenvectors",
     "set_hodge_laplacian_eigenvector_attrs",
     "compute_spectral_embedding",
     "set_spectral_embedding_attr",
     "set_spectral_embedding_attr_list_of_complexes",
     "normalize",
+    "laplacian_beltrami_eigenvectors",
     "laplacian_spectrum",
     "cell_complex_hodge_laplacian_spectrum",
     "simplicial_complex_hodge_laplacian_spectrum",
@@ -243,7 +245,10 @@ def set_spectral_embedding_attr_list_of_complexes(
 
     >>> SC1=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> SC2=SimplicialComplex([[1,2,3],[2,3,5],[0,1],[0,7]])
-    >>> set_spectral_embedding_attr_list_of_complexes( [SC1,SC2] , dim=0,n_components=4,align =True)
+    >>> set_spectral_embedding_attr_list_of_complexes( [SC1,SC2] ,
+                                                      dim=0,
+                                                      n_components=4,
+                                                      align =True)
     >>> SC1.get_simplex_attributes("1.spec_embedding",0)
     >>> SC2.get_simplex_attributes("1.spec_embedding",0)
 
@@ -253,7 +258,10 @@ def set_spectral_embedding_attr_list_of_complexes(
     >>> SC2=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> SC3=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> SC4=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
-    >>> set_spectral_embedding_attr_list_of_complexes( [SC1,SC2,SC3,SC4] , dim=0,n_components=4,align =True)
+    >>> set_spectral_embedding_attr_list_of_complexes( [SC1,SC2,SC3,SC4] ,
+                                                      dim=0,
+                                                      n_components=4,
+                                                      align =True)
     >>> # must be equal
     >>> SC1.get_simplex_attributes("1.spec_embedding",0)
     >>> SC2.get_simplex_attributes("1.spec_embedding",0)
@@ -310,8 +318,45 @@ def normalize(f):
     return f_normalized
 
 
+def laplacian_beltrami_eigenvectors(SC):
+
+    """
+    >>> SC = SimplicialComplex.load_mesh("C:/Users/musta/OneDrive/Desktop/bunny.obj")
+    >>> eigenvectors, eigenvalues = laplacian_beltrami_eigenvectors(SC)
+    """
+
+    import spharapy.spharabasis as sb
+
+    mesh = SC.to_spharapy()
+    sphara_basis = sb.SpharaBasis(mesh, "fem")
+    eigenvectors, eigenvalues = sphara_basis.basis()
+    return eigenvectors, eigenvalues
+
+
+def set_laplacian_beltrami_eigenvectors(cmplex):
+    """
+    input
+    =====
+        cmplex : a SimplialComplex object
+    example
+    ========
+    >>> SC = SimplicialComplex.load_mesh("C:/Users/musta/OneDrive/Desktop/bunny.obj")
+    >>> set_laplacian_beltrami_eigenvectors(SC)
+    >>> vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
+    """
+
+    index = cmplex.skeleton(0)
+    vect, vals = laplacian_beltrami_eigenvectors(cmplex)
+    for i in range(len(vect)):
+        d = dict(zip(index, vect[:, i]))
+        cmplex.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
+
+
+# ---------------- laplacian spectrum for various complexes ---------------#
+
+
 def laplacian_spectrum(matrix, weight="weight"):
-    """Returns eigenvalues of the Laplacian of G
+    """Returns eigenvalues of the Laplacian matrix
 
     Parameters
     ----------

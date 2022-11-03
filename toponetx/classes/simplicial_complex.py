@@ -785,6 +785,38 @@ class SimplicialComplex:
         return maxmimals
 
     @staticmethod
+    def from_spharpy(mesh):
+        """
+        >>> import spharapy.trimesh as tm
+        >>> import spharapy.spharabasis as sb
+        >>> import spharapy.datasets as sd
+        >>> mesh = tm.TriMesh([[0, 1, 2]], [[1., 0., 0.], [0., 2., 0.],
+        ...                                        [0., 0., 3.]])
+
+        >>> SC = SimplicialComplex.from_spharpy(mesh)
+
+        """
+
+        vertices = np.array(mesh.vertlist)
+        SC = SimplicialComplex(mesh.trilist)
+
+        first_ind = np.min(mesh.trilist)
+
+        if first_ind == 0:
+
+            SC.set_simplex_attributes(
+                dict(zip(range(len(vertices)), vertices)), name="position"
+            )
+        else:  # first index starts at 1.
+
+            SC.set_simplex_attributes(
+                dict(zip(range(first_ind, len(vertices) + first_ind), vertices)),
+                name="position",
+            )
+
+        return SC
+
+    @staticmethod
     def from_trimesh(mesh):
         """
         >>> import trimesh
@@ -844,7 +876,7 @@ class SimplicialComplex:
             mesh files supported : obj, off, glb
 
 
-        >>> SC = SimplicialComplex.from_mesh_file("/Users/mhajij/Downloads/elephant_10.obj")
+        >>> SC = SimplicialComplex.load_mesh("/Users/mhajij/Downloads/elephant_10.obj")
 
         >>> SC.nodes
 
@@ -885,6 +917,69 @@ class SimplicialComplex:
             return trimesh.Trimesh(
                 faces=self.get_all_maximal_simplices(), vertices=vertices, process=False
             )
+
+    def to_spharapy(self, vertex_position_name="position"):
+
+        """
+        >>> import spharapy.trimesh as tm
+        >>> import spharapy.spharabasis as sb
+        >>> import spharapy.datasets as sd
+        >>> mesh = tm.TriMesh([[0, 1, 2]],[[0, 0, 0], [0, 0, 1], [0, 1, 0]] )
+        >>> SC = SimplicialComplex.from_spharpy(mesh)
+        >>> mesh2 = SC.to_spharapy()
+
+        >>> mesh2.vertlist == mesh.vertlist
+        >>> mesh2.trilist == mesh.trilist
+
+
+
+
+        """
+
+        import spharapy.trimesh as tm
+
+        if not self.is_triangular_mesh():
+            raise TopoNetXError(
+                "input simplicial complex has dimension higher than 2 and hence it cannot be converted to a trimesh object"
+            )
+
+        else:
+
+            vertices = list(
+                dict(
+                    sorted(self.get_node_attributes(vertex_position_name).items())
+                ).values()
+            )
+
+            return tm.TriMesh(self.get_all_maximal_simplices(), vertices)
+
+    def laplace_beltrami_operator(self, mode="inv_euclidean"):
+
+        """Compute a laplacian matrix for a triangular mesh
+        The method creates a laplacian matrix for a triangular
+        mesh using different weighting function.
+        Parameters
+        ----------
+        mode : {'unit', 'inv_euclidean', 'half_cotangent'}, optional
+            The methods for determining the edge weights. Using the option
+            'unit' all edges of the mesh are weighted by unit weighting
+            function, the result is an adjacency matrix. The option
+            'inv_euclidean' results in edge weights corresponding to the
+            inverse Euclidean distance of the edge lengths. The option
+            'half_cotangent' uses the half of the cotangent of the two angles
+            opposed to an edge as weighting function. the default weighting
+            function is 'inv_euclidean'.
+        Returns
+        -------
+        laplacianmatrix : array, shape (n_vertices, n_vertices)
+            Matrix, which contains the discrete laplace operator for data
+            defined at the vertices of a triangular mesh. The number of
+            vertices of the triangular mesh is n_points.
+
+        """
+
+        mesh = self.to_spharapy()
+        return mesh.laplacianmatrix(mode=mode)
 
     @staticmethod
     def from_nx_graph(G):
