@@ -23,7 +23,12 @@ from sklearn.preprocessing import normalize
 
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
-from toponetx.classes.ranked_entity import RankedEntity, RankedEntitySet
+from toponetx.classes.ranked_entity import (
+    CellObject,
+    Node,
+    RankedEntity,
+    RankedEntitySet,
+)
 from toponetx.classes.simplex import NodeView, Simplex, SimplexView
 from toponetx.exception import TopoNetXError
 
@@ -48,11 +53,19 @@ class SimplicialComplex:
 
     Parameters
     ----------
-    -simplices : list of maximal simplices that define the simplicial complex
+    -simplices : list, optional,  default: None
+                list of maximal simplices that define the simplicial complex
     -name : hashable, optional, default: None
-        If None then a placeholder ''  will be inserted as name
-    -mode : computational mode, available options are "normal" or "gudhi".
-        default is 'normal'
+        If None then a placeholder '' will be inserted as name
+    -mode : string, optional, default 'normal'.
+        computational mode, available options are "normal" or "gudhi".
+        default is 'normal'.
+
+        Note : When ghudi is selected additioanl structure
+        obtained from the simplicial tree is stored.
+        this creates an additional reduannt storage
+        but it can be used for access the simplicial
+        tree of the complex.
 
 
     Note:
@@ -80,6 +93,8 @@ class SimplicialComplex:
         >>> SC.simplices
 
 
+
+
     """
 
     def __init__(self, simplices=None, name=None, mode="normal", **attr):
@@ -93,7 +108,6 @@ class SimplicialComplex:
         self._simplex_set = SimplexView()
 
         self.complex = dict()  # dictionary for simplicial complex attributes
-        self.complex.update(attr)
 
         if simplices is not None:
 
@@ -125,7 +139,6 @@ class SimplicialComplex:
                     + "normal mode will be used for computations",
                     stacklevel=2,
                 )
-            self.mode = "normal"
 
         if self.mode == "normal":
             if simplices is not None:
@@ -133,11 +146,14 @@ class SimplicialComplex:
                     self._simplex_set.add_simplices_from(simplices)
 
         elif self.mode == "gudhi":
-            st = SimplexTree()
+
+            self.st = SimplexTree()
             if simplices is not None:
-                for s in simplices:
-                    st.insert(s)
-                self._simplex_set._build_faces_dict_from_gudhi_tree(st)
+
+                if isinstance(simplices, Iterable):
+                    for s in simplices:
+                        self.st.insert(s)
+                    self._simplex_set.build_faces_dict_from_gudhi_tree(self.st)
 
         else:
             raise ValueError(f" Import modes must be 'normal' and 'gudhi', got {mode}")
@@ -163,6 +179,13 @@ class SimplicialComplex:
 
     @property
     def dim(self):
+        """
+        dimension of the simplicial complex is the highest dimension of any simplex in the complex
+        """
+        return self._simplex_set.max_dim
+
+    @property
+    def maxdim(self):
         """
         dimension of the simplicial complex is the highest dimension of any simplex in the complex
         """
@@ -274,7 +297,7 @@ class SimplicialComplex:
         return item in self._simplex_set
 
     @staticmethod
-    def get_boundaries(simplices, max_dim=None):
+    def get_boundaries(simplices, min_dim=None, max_dim=None):
         """
         Parameters
         ----------
@@ -299,10 +322,18 @@ class SimplicialComplex:
             numnodes = len(simplex)
             for r in range(numnodes, 0, -1):
                 for face in combinations(simplex, r):
-                    if max_dim is None:
-                        faceset.add(tuple(sorted(face)))
-                    elif len(face) <= max_dim + 1:
-                        faceset.add(tuple(sorted(face)))
+                    if max_dim is None and min_dim is None:
+                        faceset.add(frozenset(sorted(face)))
+                    elif max_dim is not None and min_dim is not None:
+                        if len(face) <= max_dim + 1 and len(face) >= min_dim + 1:
+                            faceset.add(frozenset(sorted(face)))
+                    elif max_dim is not None and min_dim is None:
+                        if len(face) <= max_dim + 1:
+                            faceset.add(frozenset(sorted(face)))
+                    elif max_dim is None and min_dim is not None:
+                        if len(face) >= min_dim + 1:
+                            faceset.add(frozenset(sorted(face)))
+
         return faceset
 
     def remove_maximal_simplex(self, simplex):
@@ -314,6 +345,54 @@ class SimplicialComplex:
     def add_simplices_from(self, simplices):
         for s in simplices:
             self.add_simplex(s)
+
+    def get_cofaces(self, simplex, codimension):
+        """
+        Parameters
+        ----------
+        simplex : list, tuple or simplex
+            DESCRIPTION. the n simplex represented by a list of its nodes
+        codimension : int
+            DESCRIPTION. The codimension. If codimension = 0, all cofaces are returned
+
+        Raises
+        ------
+        ValueError
+            return an error if the computation mode is 'normal'.
+
+        Returns
+        -------
+        TYPE
+            list of tuples(simplex, filtration).
+
+        """
+        entire_tree = self.get_boundaries(
+            self.get_maximal_simplices_of_simplex(simplex)
+        )
+        return [
+            i
+            for i in entire_tree
+            if frozenset(simplex).issubset(i) and len(i) - len(simplex) >= codimension
+        ]
+
+    def get_star(self, simplex):
+        """
+        Parameters
+        ----------
+        simplex : list, tuple or simplex
+            DESCRIPTION. the n simplex represented by a list of its nodes
+
+
+        Returns
+        -------
+        TYPE
+            list of tuples(simplex),
+
+        Note : return of this function is
+            same as get_cofaces(simplex,0) .
+
+        """
+        return self.get_cofaces(simplex, 0)
 
     def set_simplex_attributes(self, values, name=None):
         """
@@ -493,32 +572,42 @@ class SimplicialComplex:
             boundary[0, 0 : len(self._simplex_set.faces_dict[d].items())] = 1
             return boundary.tocsr()
         idx_simplices, idx_faces, values = [], [], []
-        for simplex, idx_simplex in self._simplex_set.faces_dict[d].items():
+
+        simplex_dict_d = {
+            simplex: i
+            for i, simplex in enumerate(self._simplex_set.faces_dict[d].keys())
+        }
+        simplex_dict_d_minus_1 = {
+            simplex: i
+            for i, simplex in enumerate(self._simplex_set.faces_dict[d - 1].keys())
+        }
+        for simplex, idx_simplex in simplex_dict_d.items():
+            # for simplex, idx_simplex in self._simplex_set.faces_dict[d].items():
             for i, left_out in enumerate(np.sort(list(simplex))):
-                idx_simplices.append(idx_simplex["id"])
+                idx_simplices.append(idx_simplex)
                 values.append((-1) ** i)
                 face = simplex.difference({left_out})
-                idx_faces.append(self._simplex_set.faces_dict[d - 1][face]["id"])
-        assert len(values) == (d + 1) * len(self._simplex_set.faces_dict[d])
+                idx_faces.append(simplex_dict_d_minus_1[face])
+        assert len(values) == (d + 1) * len(simplex_dict_d)
         boundary = coo_matrix(
             (values, (idx_faces, idx_simplices)),
             dtype=np.float32,
             shape=(
-                len(self._simplex_set.faces_dict[d - 1]),
-                len(self._simplex_set.faces_dict[d]),
+                len(simplex_dict_d_minus_1),
+                len(simplex_dict_d),
             ),
         )
         if index:
             if signed:
                 return (
-                    list(self._simplex_set.faces_dict[d - 1].keys()),
-                    list(self._simplex_set.faces_dict[d].keys()),
+                    list(simplex_dict_d_minus_1.keys()),
+                    list(simplex_dict_d.keys()),
                     boundary,
                 )
             else:
                 return (
-                    list(self._simplex_set.faces_dict[d - 1].keys()),
-                    list(self._simplex_set.faces_dict[d].keys()),
+                    list(simplex_dict_d_minus_1.keys()),
+                    list(simplex_dict_d.keys()),
                     abs(boundary),
                 )
         else:
@@ -542,22 +631,82 @@ class SimplicialComplex:
             return self.incidence_matrix(d, signed=signed, weight=weight, index=index).T
 
     def hodge_laplacian_matrix(self, d, signed=True, weight=None, index=False):
+        """
+        An hodge-laplacian matrix for the simplicial complex
+
+        Parameters
+        ----------
+        d : int, dimension of the Laplacian matrix.
+
+        signed : bool, is true return absolute value entry of the Laplacian matrix
+                       this is useful when one needs to obtain higher-order
+                       adjacency matrices from the hodge-laplacian
+                       typically higher-order adjacency matrices' entries are
+                       typically positive.
+
+        weight : bool, default=False
+
+        index : boolean, optional, default False
+                indicates wheather to return the indices that define the incidence matrix
+
+
+        Returns
+        -------
+        Laplacian : scipy.sparse.csr.csr_matrix
+
+        when index is true:
+            return also a list : list
+
+
+
+          Examples
+          --------
+              >>> SC = SimplicialComplex()
+              >>> SC.add_simplex([1,2,3,4])
+              >>> SC.add_simplex([1,2,4])
+              >>> SC.add_simplex([3,4,8])
+              >>> L1 = SC.hodge_laplacian_matrix(1)
+        """
         if d == 0:
-            B_next = self.incidence_matrix(d + 1)
+            row, column, B_next = self.incidence_matrix(
+                d + 1, weight=weight, index=True
+            )
             L = B_next @ B_next.transpose()
+            if not signed:
+                L = abs(L)
+            if index:
+                return row, L
+            else:
+                return L
         elif d < self.dim:
-            B_next = self.incidence_matrix(d + 1)
-            B = self.incidence_matrix(d)
+            row, column, B_next = self.incidence_matrix(
+                d + 1, weight=weight, index=True
+            )
+            row, column, B = self.incidence_matrix(d, weight=weight, index=True)
             L = B_next @ B_next.transpose() + B.transpose() @ B
+            if not signed:
+                L = abs(L)
+            if index:
+                return column, L
+            else:
+                return L
+
         elif d == self.dim:
-            B = self.incidence_matrix(d)
+            row, column, B = self.incidence_matrix(d, weight=weight, index=True)
             L = B.transpose() @ B
+            if not signed:
+                L = abs(L)
+            if index:
+                return column, L
+            else:
+                return L
+
         else:
             raise ValueError(
                 f"d should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {d}"
             )
-        if signed:
-            return L
+        if not signed:
+            L = abs(L)
         else:
             return abs(L)
 
@@ -614,53 +763,155 @@ class SimplicialComplex:
         return sp.sparse.csr_matrix(DH @ (L @ DH))
 
     def up_laplacian_matrix(self, d, signed=True, weight=None, index=False):
+        """
+
+        Parameters
+        ----------
+        d : int, dimension of the up Laplacian matrix.
+
+        signed : bool, is true return absolute value entry of the Laplacian matrix
+                       this is useful when one needs to obtain higher-order
+                       adjacency matrices from the hodge-laplacian
+                       typically higher-order adjacency matrices' entries are
+                       typically positive.
+
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+
+        index : boolean, optional, default False
+            list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
+            dependeing on the input dimension
+        Returns
+        -------
+        up Laplacian : scipy.sparse.csr.csr_matrix
+
+        when index is true:
+            return also a list : list
+            list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
+            dependeing on the input dimension
+
+
+
+
+
+        """
+
+        weight = None  # this feature is not supported in this version
+
         if d == 0:
-            B_next = self.incidence_matrix(d + 1)
+            row, col, B_next = self.incidence_matrix(d + 1, weight=weight, index=True)
             L_up = B_next @ B_next.transpose()
-        elif d < self.dim:
-            B_next = self.incidence_matrix(d + 1)
+        elif d < self.maxdim:
+            row, col, B_next = self.incidence_matrix(d + 1, weight=weight, index=True)
             L_up = B_next @ B_next.transpose()
         else:
 
             raise ValueError(
-                f"d should larger than 0 and <= {self.dim-1} (maximal dimension simplices-1), got {d}"
+                f"d should larger than 0 and <= {self.maxdim-1} (maximal dimension cells-1), got {d}"
             )
-        if signed:
-            return L_up
+        if not signed:
+            L_up = abs(L_up)
+
+        if index:
+            return row, L_up
         else:
-            return abs(L_up)
+            return L_up
 
     def down_laplacian_matrix(self, d, signed=True, weight=None, index=False):
-        if d <= self.dim and d > 0:
-            B = self.incidence_matrix(d)
+        """
+
+        Parameters
+        ----------
+        d : int, dimension of the down Laplacian matrix.
+
+        signed : bool, is true return absolute value entry of the Laplacian matrix
+                       this is useful when one needs to obtain higher-order
+                       adjacency matrices from the hodge-laplacian
+                       typically higher-order adjacency matrices' entries are
+                       typically positive.
+
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+
+        index : boolean, optional, default False
+            list identifying rows with simplices used to index the hodge Laplacian matrix
+            dependeing on the input dimension
+        Returns
+        -------
+        down Laplacian : scipy.sparse.csr.csr_matrix
+
+        when index is true:
+            return also a list : list
+            list identifying rows with simplices used to index the hodge Laplacian matrix
+            dependeing on the input dimension
+
+
+
+
+        """
+        weight = None  # this feature is not supported in this version
+
+        if d <= self.maxdim and d > 0:
+            row, column, B = self.incidence_matrix(d, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
-                f"d should be larger than 1 and <= {self.dim} (maximal dimension simplices), got {d}."
+                f"d should be larger than 1 and <= {self.maxdim} (maximal dimension cells), got {d}."
             )
-        if signed:
-            return L_down
+        if not signed:
+            L_down = abs(L_down)
+        if index:
+            return row, L_down
         else:
-            return abs(L_down)
+            return L_down
 
     def adjacency_matrix(self, d, signed=False, weight=None, index=False):
+        """
 
-        L_up = self.up_laplacian_matrix(d, signed=signed)
+
+
+        Examples
+        --------
+            >>> SC = SimplicialComplex()
+            >>> SC.add_simplex([1,2,3,4])
+            >>> SC.add_simplex([1,2,4])
+            >>> SC.add_simplex([3,4,8])
+            >>> A1 = SC.adjacency_matrix(1)
+
+        """
+
+        weight = None  # this feature is not supported in this version
+
+        ind, L_up = self.up_laplacian_matrix(
+            d, signed=signed, weight=weight, index=True
+        )
         L_up.setdiag(0)
 
-        if signed:
-            return L_up
+        if not signed:
+            L_up = abs(L_up)
+        if index:
+            return ind, L_up
         else:
-            return abs(L_up)
+            return L_up
 
     def coadjacency_matrix(self, d, signed=False, weight=None, index=False):
 
-        L_down = self.down_laplacian_matrix(d, signed=signed)
+        weight = None  # this feature is not supported in this version
+
+        ind, L_down = self.down_laplacian_matrix(
+            d, signed=signed, weight=weight, index=True
+        )
         L_down.setdiag(0)
-        if signed:
-            return L_down
+        if not signed:
+            L_down = abs(L_down)
+        if ind:
+            return index, L_down
         else:
-            return abs(L_down)
+            return L_down
 
     def k_hop_incidence_matrix(self, d, k):
         Bd = self.incidence_matrix(d, signed=True)
@@ -699,18 +950,19 @@ class SimplicialComplex:
 
     def restrict_to_simplices(self, cellset, name=None):
         """
-        Constructs a combinatorial complex using a subset of the cells in combinatorial complex
+        Constructs a simplicial complex using a subset of the simplices
+        in simplicial complex
 
         Parameters
         ----------
-        cellset: iterable of hashables or RankedEntities
-            A subset of elements of the combinatorial complex  cells
+        cellset: iterable of hashables or simplices
+            A subset of elements of the simplicial complex
 
         name: str, optional
 
         Returns
         -------
-        new Combinatorial Complex : CombinatorialComplex
+        new simplicial Complex : SimplicialComplex
 
         Example
 
@@ -720,9 +972,6 @@ class SimplicialComplex:
         >>> SC = SimplicialComplex([c1,c2,c3])
         >>> SC1= SC.restrict_to_simplices([c1, (2,4) ])
         >>> SC1.simplices
-        CellView([Cell(1, 2, 3)])
-
-
 
         """
         RNS = []
@@ -736,8 +985,8 @@ class SimplicialComplex:
 
     def restrict_to_nodes(self, nodeset, name=None):
         """
-        Constructs a new combinatorial complex  by restricting the cells in the combintorial complex to
-        the nodes referenced by nodeset.
+        Constructs a new simplicial complex  by restricting the simplices in the
+        simplicial complex to the nodes referenced by nodeset.
 
         Parameters
         ----------
@@ -817,6 +1066,18 @@ class SimplicialComplex:
         return SC
 
     @staticmethod
+    def from_gudhi(tree):
+        """
+        >>> from gudhi import SimplexTree
+        >>> tree = SimplexTree()
+        >>> tree.insert([1,2,3,5])
+        >>> SC = SimplicialComplex.from_gudhi(tree)
+        """
+        SC = SimplicialComplex()
+        SC._simplex_set.build_faces_dict_from_gudhi_tree(tree)
+        return SC
+
+    @staticmethod
     def from_trimesh(mesh):
         """
         >>> import trimesh
@@ -876,7 +1137,7 @@ class SimplicialComplex:
             mesh files supported : obj, off, glb
 
 
-        >>> SC = SimplicialComplex.load_mesh("/Users/mhajij/Downloads/elephant_10.obj")
+        >>> SC = SimplicialComplex.load_mesh("C:/temp/stanford-bunny.obj")
 
         >>> SC.nodes
 
@@ -1040,17 +1301,18 @@ class SimplicialComplex:
         """
         Example
         >>> c1= Simplex((1,2,3))
-        >>> c2= Simplex((1,2,4))
-        >>> c3= Simplex((2,5))
+        >>> c2= Simplex((1,2,3))
+
+        >>> c3= Simplex((1,2,4))
+        >>> c4= Simplex((2,5))
         >>> SC = SimplicialComplex([c1,c2,c3])
         >>> SC.to_combinatorial_complex()
         """
         graph = []
         for i in range(1, self.dim + 1):
             edge = [
-                RankedEntity(uid=tuple(j), elements=list(j), rank=len(j) - 1)
-                for j in self.skeleton(i)
+                CellObject(elements=list(j), rank=len(j) - 1) for j in self.skeleton(i)
             ]
             graph = graph + edge
-        RES = RankedEntitySet("", graph)
+        RES = RankedEntitySet("", graph, safe_insert=False)
         return CombinatorialComplex(RES)

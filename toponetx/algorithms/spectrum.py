@@ -318,7 +318,7 @@ def normalize(f):
     return f_normalized
 
 
-def laplacian_beltrami_eigenvectors(SC):
+def laplacian_beltrami_eigenvectors(SC, mode="fem"):
 
     """
     >>> SC = SimplicialComplex.load_mesh("C:/Users/musta/OneDrive/Desktop/bunny.obj")
@@ -328,7 +328,7 @@ def laplacian_beltrami_eigenvectors(SC):
     import spharapy.spharabasis as sb
 
     mesh = SC.to_spharapy()
-    sphara_basis = sb.SpharaBasis(mesh, "fem")
+    sphara_basis = sb.SpharaBasis(mesh, mode=mode)
     eigenvectors, eigenvalues = sphara_basis.basis()
     return eigenvectors, eigenvalues
 

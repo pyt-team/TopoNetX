@@ -1095,20 +1095,23 @@ class CellComplex:
         -------
         incidence_matrix : scipy.sparse.csr.csr_matrix
 
-        row dictionary : dict
-            Dictionary identifying rows with nodes
+        row list : list
+            list of cells in the complex with the same
+            order of the row of the matrix
 
-        column dictionary : dict
-            Dictionary identifying columns with cells
-
+        column list : list
+            list of cells in the complex with the same
+            order of the column of the matrix
         Example1
         -------
             >>> CX = CellComplex()
             >>> CX.add_cell([1,2,3,4],rank=2)
             >>> CX.add_cell([3,4,5],rank=2)
+            >>> B0 = CX.incidence_matrix(0)
             >>> B1 = CX.incidence_matrix(1)
             >>> B2 = CX.incidence_matrix(2)
             >>> B1.dot(B2).todense()
+            >>> B0.dot(B1).todense()
 
         Example2
         --------
@@ -1135,25 +1138,36 @@ class CellComplex:
             >>> CX.add_cell([3,4,5,3,4,5],rank=2)
             >>> B1 = CX.incidence_matrix(1)
             >>> B2 = CX.incidence_matrix(2)
+            >>> print(B2.todense()) # observe the non-unit entries
             >>> B1.dot(B2).todense()
+        Example4
+        -------
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> row,column,B1 = CX.incidence_matrix(1,index=True)
+            >>> print(row)
+            >>> print(column)
+            >>> print(B1.todense())
+
         """
         weight = None  # not supported at this version
+
         import scipy as sp
         import scipy.sparse
 
         if d == 0:
-
             A = sp.sparse.lil_matrix((1, len(self._G.nodes)))
             for i in range(0, len(self._G.nodes)):
                 A[0, i] = 1
             if index:
+                node_index = {node: i for i, node in enumerate(sorted(self._G.nodes))}
                 if signed:
-                    return self._G.nodes, [], A.asformat("csc")
+                    return node_index, [], A.asformat("csc")
                 else:
-                    return self._G.nodes, [], abs(A.asformat("csc"))
+                    return node_index, [], abs(A.asformat("csc"))
             else:
                 if signed:
-
                     return A.asformat("csc")
                 else:
                     return abs(A.asformat("csc"))
@@ -1162,27 +1176,28 @@ class CellComplex:
             nodelist = sorted(
                 self._G.nodes
             )  # always output boundary matrix in dictionary order
-            edgelist = sorted(self._G.edges)
+            edgelist = sorted([sorted(e) for e in self._G.edges])
             A = sp.sparse.lil_matrix((len(nodelist), len(edgelist)))
             node_index = {node: i for i, node in enumerate(nodelist)}
             for ei, e in enumerate(edgelist):
-                (u, v) = sorted(e[:2])
+                (u, v) = e[:2]
                 ui = node_index[u]
                 vi = node_index[v]
                 A[ui, ei] = -1
                 A[vi, ei] = 1
             if index:
+                edge_index = {tuple(sorted(edge)): i for i, edge in enumerate(edgelist)}
                 if signed:
-                    return nodelist, edgelist, A.asformat("csc")
+                    return node_index, edge_index, A.asformat("csc")
                 else:
-                    return nodelist, edgelist, abs(A.asformat("csc"))
+                    return node_index, edge_index, abs(A.asformat("csc"))
             else:
                 if signed:
                     return A.asformat("csc")
                 else:
                     return abs(A.asformat("csc"))
         elif d == 2:
-            edgelist = sorted(self._G.edges)
+            edgelist = sorted([sorted(e) for e in self._G.edges])
 
             A = sp.sparse.lil_matrix((len(edgelist), len(self.cells)))
 
@@ -1214,7 +1229,7 @@ class CellComplex:
                     # else:
                     #    A[ei, celli] = -1
             if index:
-                cell_index = {cell: i for i, cell in enumerate(self.cells)}
+                cell_index = {cell.elements: i for i, c in enumerate(self.cells)}
                 if signed:
                     return edge_index, cell_index, A.asformat("csc")
                 else:
@@ -1240,7 +1255,6 @@ class CellComplex:
         M : scipy.sparse.csr.csr_matrix
             incidence matrix of 0's and 1's
 
-        s : int, optional, default: 1
 
         # weight : bool, dict optional, default=True
         #     If False all nonzero entries are 1.
@@ -1254,100 +1268,310 @@ class CellComplex:
         >>> CX.add_cell([1,2,3,5,6],rank=2)
         >>> CX.add_cell([1,2,4,5,3,0],rank=2)
         >>> CX.add_cell([1,2,4,9,3,0],rank=2)
-        >>> B1 = CX.incidence_matrix(1)
-        >>> B2 = CX.incidence_matrix(2)
+        >>> B1 = CX.incidence_matrix(1,signed = False)
+        >>> A1 = CX._incidence_to_adjacency(B1)
 
         """
 
         M = csr_matrix(M)
         weight = False  ## currently weighting is not supported
-
+        M = abs(M)  # make sure the incidence matrix has only positive entries
         if weight == False:
             A = M.dot(M.transpose())
             A.setdiag(0)
         return A
 
     def hodge_laplacian_matrix(self, d, signed=True, weight=None, index=False):
-        if d == 0:
-            B_next = self.incidence_matrix(d + 1)
-            L = B_next @ B_next.transpose()
-        elif d < 2:
-            B_next = self.incidence_matrix(d + 1)
-            B = self.incidence_matrix(d)
-            L = B_next @ B_next.transpose() + B.transpose() @ B
-        elif d == self.maxdim:
-            B = self.incidence_matrix(d)
+        """
+        An hodge-laplacian matrix for the CC
+
+        Parameters
+        ----------
+        d : int, dimension of the Laplacian matrix.
+            Supported dimension are 0,1 and 2
+
+        signed : bool, is true return absolute value entry of the Laplacian matrix
+                       this is useful when one needs to obtain higher-order
+                       adjacency matrices from the hodge-laplacian
+                       typically higher-order adjacency matrices' entries are
+                       typically positive.
+
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+
+        index : boolean, optional, default False
+                indicates wheather to return the indices that define the incidence matrix
+
+
+        Returns
+        -------
+        Laplacian : scipy.sparse.csr.csr_matrix
+
+        when index is true:
+            return also a list : list
+            list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
+            dependeing on the input dimension
+
+
+
+        Example1
+        -------
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> L1 = CX.hodge_laplacian_matrix(1)
+
+
+        Example2
+        --------
+            ## note that in this example, the first three cells are
+            ## equivalent and hence they have similar incidence to lower edges
+            ## they are incident to
+            >>> import networkx as nx
+            >>> G = nx.path_graph(3)
+            >>> CX = CellComplex(G)
+            >>> CX.add_cell([1,2,3,4], rank=2)
+            >>> CX.add_cell([4,3,2,1], rank=2)
+            >>> CX.add_cell([2,3,4,1], rank=2)
+            >>> CX.add_cell([1,2,4], rank=2,)
+            >>> CX.add_cell([3,4,8], rank=2)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
+            >>> B1.dot(B2).todense()
+
+        Example3
+        -------
+            # non-regular complex example
+            >>> CX = CellComplex(regular=False)
+            >>> CX.add_cell([1,2,3,2],rank=2)
+            >>> CX.add_cell([3,4,5,3,4,5],rank=2)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
+            >>> B1.dot(B2).todense()
+
+        """
+
+        if d == 0:  # return L0, the unit graph laplacian
+            if index:
+                nodelist, _, B_next = self.incidence_matrix(
+                    d + 1, weight=weight, index=True
+                )
+                L = B_next @ B_next.transpose()
+                if signed:
+                    return nodelist, L
+                else:
+                    return nodelist, abs(L)
+            else:
+                B_next = self.incidence_matrix(d + 1, weight=weight)
+                L = B_next @ B_next.transpose()
+                if signed:
+                    return L
+                else:
+                    return abs(L)
+        elif d < 2:  # d == 1, return L1
+
+            if self.maxdim == 2:
+                edge_list, cell_list, B_next = self.incidence_matrix(
+                    d + 1, weight=weight, index=True
+                )
+                B = self.incidence_matrix(d, weight=weight, index=False)
+                L = B_next @ B_next.transpose() + B.transpose() @ B
+            else:
+                L = B.transpose() @ B
+            if not signed:
+                L = abs(L)
+            if index:
+                return edge_list, L
+            else:
+                return L
+
+        elif d == 2 and self.maxdim == 2:
+
+            edge_list, cell_list, B = self.incidence_matrix(
+                d, weight=weight, index=True
+            )
             L = B.transpose() @ B
+            if not signed:
+                L = abs(L)
+
+            if index:
+                return cell_list, L
+            else:
+                return L
+        elif d == 2 and self.maxdim != 2:
+            raise ValueError(
+                f"the input complex does not have cells of dim 2, max cell dim is {self.maxdim} (maximal dimension cells), got {d}"
+            )
         else:
             raise ValueError(
                 f"d should be larger than 0 and <= {self.maxdim} (maximal dimension cells), got {d}"
             )
-        if signed:
-            return L
-        else:
-            return abs(L)
 
     def up_laplacian_matrix(self, d, signed=True, weight=None, index=False):
+        """
+
+        Parameters
+        ----------
+        d : int, dimension of the up Laplacian matrix.
+            Supported dimension are 0,1
+
+        signed : bool, is true return absolute value entry of the Laplacian matrix
+                       this is useful when one needs to obtain higher-order
+                       adjacency matrices from the hodge-laplacian
+                       typically higher-order adjacency matrices' entries are
+                       typically positive.
+
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+
+        index : boolean, optional, default False
+            list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
+            dependeing on the input dimension
+        Returns
+        -------
+        up Laplacian : scipy.sparse.csr.csr_matrix
+
+        when index is true:
+            return also a list : list
+            list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
+            dependeing on the input dimension
+
+
+        Example1
+        -------
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> L1_up = CX.up_laplacian_matrix(1)
+
+        Example2
+        -------
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> index , L1_up = CX.up_laplacian_matrix(1,index=True)
+            >>> print(index)
+            >>> print(L1_up)
+
+
+        """
+
+        weight = None  # this feature is not supported in this version
+
         if d == 0:
-            B_next = self.incidence_matrix(d + 1)
+            row, col, B_next = self.incidence_matrix(d + 1, weight=weight, index=True)
             L_up = B_next @ B_next.transpose()
         elif d < self.maxdim:
-            B_next = self.incidence_matrix(d + 1)
+            row, col, B_next = self.incidence_matrix(d + 1, weight=weight, index=True)
             L_up = B_next @ B_next.transpose()
         else:
 
             raise ValueError(
                 f"d should larger than 0 and <= {self.maxdim-1} (maximal dimension cells-1), got {d}"
             )
-        if signed:
-            return L_up
+        if not signed:
+            L_up = abs(L_up)
+
+        if index:
+            return row, L_up
         else:
-            return abs(L_up)
+            return L_up
 
     def down_laplacian_matrix(self, d, signed=True, weight=None, index=False):
         """
-        >>> import networkx as nx
-        >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
-        >>> CC.add_cell([1,2,3,4], rank=2)
-        >>> CC.add_cell([1,2,3,4], rank=2)
-        >>> CC.add_cell([2,3,4,1], rank=2)
-        >>> CC.add_cell([1,2,4], rank=2,)
-        >>> CC.add_cell([3,4,8], rank=2)
-        >>> CC.down_laplacian_matrix(2)
+
+        Parameters
+        ----------
+        d : int, dimension of the down Laplacian matrix.
+            Supported dimension are 0,1
+
+        signed : bool, is true return absolute value entry of the Laplacian matrix
+                       this is useful when one needs to obtain higher-order
+                       adjacency matrices from the hodge-laplacian
+                       typically higher-order adjacency matrices' entries are
+                       typically positive.
+
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+
+        index : boolean, optional, default False
+            list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
+            dependeing on the input dimension
+        Returns
+        -------
+        down Laplacian : scipy.sparse.csr.csr_matrix
+
+        when index is true:
+            return also a list : list
+            list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
+            dependeing on the input dimension
+
+        Example
+        -------
+          >>> import networkx as nx
+          >>> G = nx.path_graph(3)
+          >>> CC = CellComplex(G)
+          >>> CC.add_cell([1,2,3,4], rank=2)
+          >>> CC.add_cell([1,2,3,4], rank=2)
+          >>> CC.add_cell([2,3,4,1], rank=2)
+          >>> CC.add_cell([1,2,4], rank=2,)
+          >>> CC.add_cell([3,4,8], rank=2)
+          >>> CC.down_laplacian_matrix(2)
+
 
         """
+        weight = None  # this feature is not supported in this version
 
         if d <= self.maxdim and d > 0:
-            B = self.incidence_matrix(d)
+            row, column, B = self.incidence_matrix(d, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
                 f"d should be larger than 1 and <= {self.maxdim} (maximal dimension cells), got {d}."
             )
-        if signed:
-            return L_down
+        if not signed:
+            L_down = abs(L_down)
+        if index:
+            return row, L_down
         else:
-            return abs(L_down)
+            return L_down
 
     def adjacency_matrix(self, d, signed=False, weight=None, index=False):
 
-        L_up = self.up_laplacian_matrix(d, signed=signed)
+        weight = None  # this feature is not supported in this version
+
+        ind, L_up = self.up_laplacian_matrix(
+            d, signed=signed, weight=weight, index=True
+        )
         L_up.setdiag(0)
 
-        if signed:
-            return L_up
+        if not signed:
+            L_up = abs(L_up)
+        if index:
+            return ind, L_up
         else:
-            return abs(L_up)
+            return L_up
 
     def coadjacency_matrix(self, d, signed=False, weight=None, index=False):
 
-        L_down = self.down_laplacian_matrix(d, signed=signed)
+        weight = None  # this feature is not supported in this version
+
+        ind, L_down = self.down_laplacian_matrix(
+            d, signed=signed, weight=weight, index=True
+        )
         L_down.setdiag(0)
-        if signed:
-            return L_down
+        if not signed:
+            L_down = abs(L_down)
+        if index:
+            return ind, L_down
         else:
-            return abs(L_down)
+            return L_down
 
     def k_hop_incidence_matrix(self, d, k):
         Bd = self.incidence_matrix(d, signed=True)
@@ -1562,7 +1786,9 @@ class CellComplex:
             all_cells.append(
                 CellObject(elements=cell.elements, rank=2, **self.cells[cell])
             )
-        return CombinatorialComplex(RankedEntitySet("", all_cells), name="_")
+        return CombinatorialComplex(
+            RankedEntitySet("", all_cells, safe_insert=False), name="_"
+        )
 
     def to_hypergraph(self):
 
@@ -2066,7 +2292,7 @@ class CellComplex:
         return CX
 
     @staticmethod
-    def from_mesh_file(file_path, process=False, force=None):
+    def load_mesh(file_path, process=False, force=None):
         """
         file_path: str, the file path of the data to be loadeded
 
@@ -2077,7 +2303,8 @@ class CellComplex:
                      None : will not force the above.
         Note:
             file supported : obj, off, glb
-        >>> CX = CellComplex.from_mesh_file("bunny.obj")
+        >>> CX = CellComplex.load_mesh("bunny.obj")
+
         >>> CX.nodes
 
         """

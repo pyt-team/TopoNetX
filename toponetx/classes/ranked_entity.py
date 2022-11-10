@@ -335,6 +335,7 @@ class RankedEntity(Entity):
         """
 
         checkelts = self.complete_registry()
+
         if isinstance(item, RankedEntity):
             condition = False
             if check_CC_condition:
@@ -667,6 +668,37 @@ class RankedEntity(Entity):
         Returns a boolean indicating if item is insertable
         and satisfy the combinatorial complex condition inside an existing RankedEntity
         """
+        for k, v in self.elements.items():
+            if v.uidset == item.uidset:  # item == v and rank(v)!=rank(item)
+                if v.rank != item.rank:
+                    raise TopoNetXError(
+                        f"Error: entity uidset exists within the entity with different rank."
+                        f"inserted entity has rank {item.rank} and existing entity has rank {v.rank} ."
+                    )
+
+            elif v.uidset.issubset(item.uidset):  # item => v and rank(item) < rank(v)
+                if v.rank > item.rank:
+                    raise TopoNetXError(
+                        f"Error: Fails the CC condition for Ranked EntitySet."
+                    )
+            elif item.uidset.issubset(v.uidset):  # item <= v and rank(item) > rank(v)
+                if v.rank < item.rank:
+                    raise TopoNetXError(
+                        f"Error: Fails the CC condition for Ranked EntitySet."
+                    )
+            return True
+
+    def _insert_cell_condition2(self, item):
+
+        """
+        Returns a boolean indicating if item is insertable
+        and satisfy the combinatorial complex condition inside an existing RankedEntity
+        """
+        membership = item.memberships
+
+        if len(membership) == 0:
+            return True
+
         for k, v in self.elements.items():
             if v.uidset == item.uidset:  # item == v and rank(v)!=rank(item)
                 if v.rank != item.rank:

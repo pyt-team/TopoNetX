@@ -208,14 +208,30 @@ class SimplexView:
         return iter(all_simplices)
 
     def __contains__(self, e):
+
         if isinstance(e, Iterable):
-            return frozenset(e) in self.faces_dict[len(e) - 1]
+            if len(e) - 1 > self.max_dim:
+                return False
+            elif len(e) == 0:
+                return False
+            else:
+                return frozenset(e) in self.faces_dict[len(e) - 1]
 
         elif isinstance(e, Simplex):
-            return e.nodes in self.faces_dict[len(e) - 1]
+            if len(e) - 1 > self.max_dim:
+                return False
+            elif len(e) == 0:
+                return False
+            else:
+                return e.nodes in self.faces_dict[len(e) - 1]
 
         elif isinstance(e, Hashable):
-            return frozenset({e}) in self.faces_dict[0]
+            if len(e) - 1 > self.max_dim:
+                return False
+            elif len(e) == 0:
+                return False
+            else:
+                return frozenset({e}) in self.faces_dict[0]
 
         else:
             return False
@@ -247,8 +263,7 @@ class SimplexView:
 
         return f"SimplexView({all_simplices})"
 
-    @staticmethod
-    def _build_faces_dict_from_gudhi_tree(self, simplex_tree):
+    def build_faces_dict_from_gudhi_tree(self, simplex_tree):
         """
         extract skeletons from gudhi simples tree
 
@@ -269,8 +284,8 @@ class SimplexView:
             if self.max_dim < len(simplex) - 1:
                 self.max_dim = len(simplex) - 1
             k = len(simplex)
-            if len(simplex_tree.get_cofaces(simplex)) != 0:
-                cofaces = [s[0] for s in simplex_tree.cofaces(simplex)]
+            if len(simplex_tree.get_cofaces(simplex, 0)) != 0:
+                cofaces = [s[0] for s in simplex_tree.get_cofaces(simplex, 0)]
                 max_simplex_length = len(max(cofaces, key=len))
                 max_simplices = set(
                     [frozenset(s) for s in cofaces if len(s) == max_simplex_length]
@@ -386,6 +401,7 @@ class SimplexView:
 
             numnodes = len(simplex_)
             maximal_faces = set()
+
             for r in range(numnodes, 0, -1):
 
                 for face in combinations(simplex_, r):
@@ -393,7 +409,8 @@ class SimplexView:
             if isinstance(simplex, Simplex):
 
                 self.faces_dict[len(simplex_) - 1][simplex_].update(simplex.properties)
-
+            else:
+                self.faces_dict[len(simplex_) - 1][simplex_].update(attr)
         else:
             raise TypeError("input type must be iterable, or Simplex")
 
