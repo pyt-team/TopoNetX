@@ -19,7 +19,7 @@ from hypernetx.classes.entity import Entity
 
 from toponetx import TopoNetXError
 
-__all__ = ["RankedEntity", "Node", "CellObject", "RankedEntitySet"]
+__all__ = ["RankedEntity", "Node", "DynamicCell", "RankedEntitySet"]
 
 
 """
@@ -55,6 +55,7 @@ class RankedEntity(Entity):
         The rank of the new ranked entity will be the max of the cloned ranked entity and the input rank.
 
     weight : float, optional, default : 1
+    safe_insert : bool, check for the combintorial complex condition when constructing the cell
     props : keyword arguments, optional, default: {}
         properties belonging to the entity added as key=value pairs.
         Both key and value must be hashable.
@@ -513,7 +514,7 @@ class RankedEntity(Entity):
         if (
             isinstance(item, RankedEntity)
             or isinstance(item, Node)
-            or isinstance(item, CellObject)
+            or isinstance(item, DynamicCell)
         ):
             return item.uid in self._elements
         else:
@@ -617,8 +618,8 @@ class RankedEntity(Entity):
         """
         Dictionary of element.uid:element.uidset for each element in entity
 
-        To return an incidence dictionary of all nested entities in entity
-        use nested_incidence_dict
+        To return an incidence dictionary of all Dynamic entities in entity
+        use Dynamic_incidence_dict
         """
         temp = OrderedDict()
 
@@ -784,68 +785,11 @@ class RankedEntity(Entity):
         return self
 
 
-class Node(RankedEntity):
-    def __init__(self, elements, weight=1.0, **props):
-        if not isinstance(elements, Hashable):
-            raise TopoNetXError(
-                f"node's elements must be hashable, got {type(elements)}"
-            )
-        super().__init__(uid=elements, elements=[], rank=0, weight=weight, **props)
-
-    def __repr__(self):
-        """Returns a string resembling the constructor for ranked entity"""
-        return f"Node({self._uid},rank={self.rank}, {self.properties})"
-
-
-class CellObject(RankedEntity):
-    """
-    >>> x1 = Node(1)
-    >>> x2 = Node(2)
-    >>> x3 = Node(3)
-    >>> x4 = Node(4)
-    >>> x5 = Node(5)
-    >>> y1 = CellObject([x1,x2], rank = 1 )
-    >>> y2 = CellObject([x2,x3], rank = 1)
-    >>> y3 = CellObject([x3,x4], rank = 1)
-    >>> y4 = CellObject([x4,x1], rank = 1)
-    >>> y5 = CellObject([x4,x5], rank = 1)
-    >>> y6 = CellObject([x4,x5], rank = 1)
-    >>> z = CellObject([y6,x2,x3,x4],rank = 2)
-
-    """
-
-    def __init__(
-        self,
-        elements=[],
-        rank=None,
-        rankedentity=None,
-        weight=1.0,
-        safe_insert=True,
-        **props,
-    ):
-        if not isinstance(rank, int):
-            raise TopoNetXError(f"rank's type must be integer, got f{type(rank)} ")
-        if rank <= 0:
-            raise TopoNetXError(
-                f"ObjectCell must have rank larger than or equal to 1, got {rank}"
-            )
-        super().__init__(
-            uid=None,
-            elements=elements,
-            rank=rank,
-            rankedentity=rankedentity,
-            safe_insert=safe_insert,
-            weight=weight,
-            **props,
-        )
-
-    def __repr__(self):
-        """Returns a string resembling the constructor for ranked entity"""
-        return f"CellObject({self._uid},elements={list(self.uidset)},rank={self.rank}, {self.properties})"
-
-
 class RankedEntitySet(RankedEntity):
     """
+    a set of ranked entity elements. The container allows to define operations between
+    the cells such as incidence and adjacency.
+
 
     Parameters
     ----------
@@ -1296,7 +1240,7 @@ class RankedEntitySet(RankedEntity):
             if (
                 isinstance(item, RankedEntity)
                 or isinstance(item, Node)
-                or isinstance(item, CellObject)
+                or isinstance(item, DynamicCell)
             ):
                 self._all_ranks = self._all_ranks.union(item._all_ranks)
                 if safe_insert:
@@ -1429,3 +1373,92 @@ class RankedEntitySet(RankedEntity):
         """Returns a string resembling the constructor for entityset without any
         children"""
         return f"RankedEntitySet({self._uid},{list(self.uidset)},{self.properties})"
+
+
+class Node(RankedEntity):
+    def __init__(self, elements, weight=1.0, **props):
+        if not isinstance(elements, Hashable):
+            raise TopoNetXError(
+                f"node's elements must be hashable, got {type(elements)}"
+            )
+        super().__init__(uid=elements, elements=[], rank=0, weight=weight, **props)
+
+    def __repr__(self):
+        """Returns a string resembling the constructor for ranked entity"""
+        return f"Node({self._uid},rank={self.rank}, {self.properties})"
+
+
+class DynamicCell(RankedEntity):
+    """
+     Base class for objects used in building ranked cell objects including cell complexes,
+     simplicial complexes and combinatorial complexes.
+
+    Parameters
+    ----------
+
+    elements : list or dict, optional, default: None
+        a list of entities with identifiers different than uid and/or
+        hashables different than uid, see `Honor System`_
+
+    rankedentity : RankedEntity
+        a RankedEntity object to be cloned into a new RankedEntity with uid. If the uid is the same as
+        RankedEntity.uid then the entities will not be distinguishable and error will be raised.
+        The `elements` in the signature will be added to the cloned Rankedentity.
+        The rank of the new ranked entity will be the max of the cloned ranked entity and the input rank.
+    safe_insert : bool, check for the combintorial complex condition when constructing the cell
+    weight : float, optional, default : 1
+    props : keyword arguments, optional, default: {}
+        properties belonging to the entity added as key=value pairs.
+        Both key and value must be hashable.
+
+     Notes:
+
+     -This class inherets from RankedEntity
+     the same properties but it does autmatically assigns a uid to the initiated cell.
+
+     - A dynamic cell is completely determined by its elements, a list of iterables or other dynamic cells.
+     - A dynamic cell may contain other cells, in a nested fashion.
+
+    >>> x1 = Node(1)
+    >>> x2 = Node(2)
+    >>> x3 = Node(3)
+    >>> x4 = Node(4)
+    >>> x5 = Node(5)
+    >>> y1 = DynamicCell([x1,x2], rank = 1 )
+    >>> y2 = DynamicCell([x2,x3], rank = 1)
+    >>> y3 = DynamicCell([x3,x4], rank = 1)
+    >>> y4 = DynamicCell([x4,x1], rank = 1)
+    >>> y5 = DynamicCell([x4,x5], rank = 1)
+    >>> y6 = DynamicCell([x4,x5], rank = 1)
+    >>> z = DynamicCell([y6,x2,x3,x4],rank = 2)
+
+    """
+
+    def __init__(
+        self,
+        elements=[],
+        rank=None,
+        rankedentity=None,
+        weight=1.0,
+        safe_insert=True,
+        **props,
+    ):
+        if not isinstance(rank, int):
+            raise TopoNetXError(f"rank's type must be integer, got f{type(rank)} ")
+        if rank <= 0:
+            raise TopoNetXError(
+                f"ObjectCell must have rank larger than or equal to 1, got {rank}"
+            )
+        super().__init__(
+            uid=None,
+            elements=elements,
+            rank=rank,
+            rankedentity=rankedentity,
+            safe_insert=safe_insert,
+            weight=weight,
+            **props,
+        )
+
+    def __repr__(self):
+        """Returns a string resembling the constructor for ranked entity"""
+        return f"DynamicCell({self._uid},elements={list(self.uidset)},rank={self.rank}, {self.properties})"

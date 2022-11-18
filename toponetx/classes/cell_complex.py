@@ -24,7 +24,7 @@ from scipy.sparse import csr_matrix
 from toponetx.classes.cell import Cell, CellView
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.ranked_entity import (
-    CellObject,
+    DynamicCell,
     Node,
     RankedEntity,
     RankedEntitySet,

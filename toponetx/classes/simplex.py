@@ -209,6 +209,9 @@ class SimplexView:
 
     def __contains__(self, e):
 
+        if len(self.faces_dict) == 0:
+            return False
+
         if isinstance(e, Iterable):
             if len(e) - 1 > self.max_dim:
                 return False
@@ -226,13 +229,13 @@ class SimplexView:
                 return e.nodes in self.faces_dict[len(e) - 1]
 
         elif isinstance(e, Hashable):
-            if len(e) - 1 > self.max_dim:
-                return False
-            elif len(e) == 0:
-                return False
+            if isinstance(e, Iterable):
+                if len(e) - 1 > self.max_dim:
+                    return False
+                elif len(e) == 0:
+                    return False
             else:
                 return frozenset({e}) in self.faces_dict[0]
-
         else:
             return False
 
@@ -427,7 +430,6 @@ class SimplexView:
              >>> c1=Simplex((1,2,3,4,5))
              >>> SC.insert_simplex(c1)
              >>> SC.remove_maximal_simplex((1,2,3,4,5))
-
         """
 
         if isinstance(simplex, Iterable):
@@ -483,10 +485,10 @@ class NodeView(SimplexView):
             self.name = "_"
         else:
             self.name = name
-        if simplexview.faces_dict != []:
+        if len(simplexview.faces_dict) != 0:
             self.nodes = simplexview.faces_dict[0]
         else:
-            self.nodes = []
+            self.nodes = {}
 
     def __repr__(self):
         """C
@@ -504,11 +506,11 @@ class NodeView(SimplexView):
         """
         Parameters
         ----------
-        cell : tuple list or Simplex
+        simplex : tuple list or Simplex
             DESCRIPTION.
         Returns
         -------
-        TYPE : dict or ilst or dicts
+        TYPE : dict or list or dicts
             return dict of properties associated with that cells
 
         """

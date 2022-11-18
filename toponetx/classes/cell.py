@@ -11,7 +11,8 @@ __all__ = ["Cell", "CellView"]
 
 
 class Cell:
-    """A Regular 2d cell class.
+    """A 2d cell class. The elementry building block used
+        to build a 2d cell complex (regular or non-regular).
     Parameters
     ==========
 
@@ -24,6 +25,9 @@ class Cell:
     is_regular : bool
         checks for regularity conditions of the cell. Raises ValueError when
         the True and when the input elements do not satisfy the regullarity condition
+    attr : keyword arguments, optional, default: {}
+        properties belonging to cell added as key=value pairs.
+        Both key and value must be hashable.
 
     Note
     ------
@@ -187,6 +191,12 @@ class Cell:
         Return : bool
         ------
             return True is self is homotopic to input cell and False otherwise.
+
+        Note :
+        -------
+            in a 2d-cell complex, two 2d-cells are homotopic iff one
+                of them can be obtaine from the other by a cylic rotation
+                of the boundary verties defining the 2d cells.
         """
 
         if isinstance(cell, tuple) or isinstance(cell, list):
@@ -230,8 +240,6 @@ class CellView:
     Parameters
     ----------
     name : str
-
-
     Examples
     --------
          >>> CV = CellView()
