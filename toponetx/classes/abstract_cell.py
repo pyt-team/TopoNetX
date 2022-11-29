@@ -16,13 +16,13 @@ class AbstractCell:
     """A AbstractCell class.
     Parameters
     ==========
-
     elements: any iterable of hashables.
     rank: int, rank of a cell, default is None.
     name: string, optional default is None.
     name : str
 
     Examples
+    ========
         >>> ac1 = AbstractCell ( (1,2,3) )
         >>> ac2 = AbstractCell ( (1,2,4,5) )
         >>> ac3 = AbstractCell ( ("a","b","c") )
@@ -409,7 +409,8 @@ class AbstractCellView:
             if rank != 0:
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             else:
-                self.cell_dict[0] = {}
+                if 0 not in self.cell_dict:
+                    self.cell_dict[0] = {}
                 self.cell_dict[0][frozenset({cell})] = {}
                 self.cell_dict[0][frozenset({cell})].update(attr)
                 self._aux_complex.add_simplex(Simplex(frozenset({cell}), r=0))
@@ -500,19 +501,13 @@ class AbstractCellView:
         self.remove_cell(node)
 
     def _incidence_matrix_helper(self, children, uidset, sparse=True, index=False):
-
         """
-
         Parameters
         ----------
-
         Returns
         -------
-
         Notes
         -----
-
-
         """
 
         if sparse:
@@ -552,12 +547,12 @@ class AbstractCellView:
                         if r_cell_dict[n] <= k_cell_dict[e]:
                             MP[ndict[n], edict[e]] = 1
             if index:
-                return MP, rowdict, coldict
+                return rowdict, coldict, MP
             else:
                 return MP
         else:
             if index:
-                return np.zeros(1), {}, {}
+                return {}, {}, np.zeros(1)
             else:
                 return np.zeros(1)
 

@@ -15,7 +15,15 @@ def sparse_array_to_neighborhood_list(
         ``sparse_array``:  sparse array representing the higher order structure between S and T cells
     """
     src_idx, dst_idx = sparse_array.nonzero()
-    return zip(dst_idx, src_idx)
+
+    if src_dict is None and dst_dict is None:
+        return zip(dst_idx, src_idx)
+    elif src_dict is not None and dst_dict is not None:
+        src_list = [src_dict[i] for i in src_idx]
+        dest_list = [dst_dict[i] for i in dst_idx]
+        return zip(dest_list, src_list)
+    else:
+        raise ValueError("src_dict and dst_dict must be either None or both not None")
 
 
 def neighborhood_list_to_neighborhood_dict(
@@ -27,11 +35,17 @@ def neighborhood_list_to_neighborhood_dict(
     Args:
         ``n_list`` (``List[Tuple[int, int]]``): neighborhood list.
     """
-
-    neighborhood_dict = defaultdict(list)
-    for src_idx, dst_idx in n_list:
-        neighborhood_dict[src_idx].append(dst_idx)
-    return neighborhood_dict
+    if src_dict is None and dst_dict is None:
+        neighborhood_dict = defaultdict(list)
+        for src_idx, dst_idx in n_list:
+            neighborhood_dict[src_idx].append(dst_idx)
+        return neighborhood_dict
+    elif src_dict is not None and dst_dict is not None:
+        for src_idx, dst_idx in n_list:
+            neighborhood_dict[src_dict[src_idx]].append(dst_dict[dst_idx])
+        return neighborhood_dict
+    else:
+        raise ValueError("src_dict and dst_dict must be either None or both not None")
 
 
 def sparse_array_to_neighborhood_dict(
@@ -47,5 +61,5 @@ def sparse_array_to_neighborhood_dict(
         ``sparse_array``:  sparse array representing the higher order structure between S and T cells
     """
     return neighborhood_list_to_neighborhood_dict(
-        sparse_array_to_neighborhood_list(sparse_array)
+        sparse_array_to_neighborhood_list(sparse_array, src_dict, dst_dict)
     )

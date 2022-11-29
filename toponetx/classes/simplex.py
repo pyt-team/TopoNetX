@@ -11,7 +11,7 @@ from itertools import combinations
 
 import numpy as np
 
-__all__ = ["Simplex", "SimplexView", "NodeView"]
+__all__ = ["Simplex", "SimplexView"]
 
 
 class Simplex:
@@ -23,7 +23,10 @@ class Simplex:
 
     name : str
 
+    construct_tree : bool, if True construct the entire simplicial tree
+
     Examples
+    ========
         >>> simplex1 = Simplex ( (1,2,3) )
         >>> simplex12 = Simplex ( (1,2,4,5),weight = 1 )
         >>> simplex13 = Simplex ( ("a","b","c") )
@@ -468,95 +471,3 @@ class SimplexView:
                 )
         else:
             raise KeyError("simplex is not a part of the simplicial complex")
-
-
-class NodeView(SimplexView):
-
-    """
-    >>> SC = SimplexView()
-    >>> SC.insert_simplex ( (1,2,3,4),weight=1 )
-    >>> c1=Simplex((1,2,3,4,5))
-    >>> NV = NodeView(SC)
-
-    """
-
-    def __init__(self, simplexview, name=None):
-        if name is None:
-            self.name = "_"
-        else:
-            self.name = name
-        if len(simplexview.faces_dict) != 0:
-            self.nodes = simplexview.faces_dict[0]
-        else:
-            self.nodes = {}
-
-    def __repr__(self):
-        """C
-        String representation of nodes
-        Returns
-        -------
-        str
-        """
-
-        all_nodes = [tuple(j) for j in self.nodes.keys()]
-
-        return f"NodeView({all_nodes})"
-
-    def __getitem__(self, simplex):
-        """
-        Parameters
-        ----------
-        simplex : tuple list or Simplex
-            DESCRIPTION.
-        Returns
-        -------
-        TYPE : dict or list or dicts
-            return dict of properties associated with that cells
-
-        """
-
-        if isinstance(simplex, Simplex):
-            if simplex.nodes in self.nodes:
-                return self.nodes[simplex.nodes]
-        elif isinstance(simplex, Iterable):
-            simplex = frozenset(simplex)
-            if simplex in self.nodes:
-                return self.nodes[simplex]
-            else:
-                raise KeyError(f"input {simplex} is not in the node set of the complex")
-
-        elif isinstance(simplex, Hashable):
-
-            if simplex in self:
-
-                return self.nodes[frozenset({simplex})]
-
-    def __setitem__(self, simplex, **attr):
-        if simplex in self:
-            if isinstance(simplex, Simplex):
-                if simplex.nodes in self.nodes:
-                    self.nodes.update(attr)
-            elif isinstance(simplex, Iterable):
-                simplex = frozenset(simplex)
-                if simplex in self.nodes:
-                    self.nodes.update(attr)
-                else:
-                    raise KeyError(f"node {simplex} is not in complex")
-            elif isinstance(simplex, Hashable):
-                if frozenset({simplex}) in self:
-                    self.nodes.update(attr)
-        else:
-            raise KeyError(f"node  {simplex} is not in the complex")
-
-    def __len__(self):
-        return len(self.nodes)
-
-    def __contains__(self, e):
-
-        if isinstance(e, Hashable):
-            return frozenset({e}) in self.nodes
-        elif isinstance(e, Iterable):
-            if len(e) == 1:
-                return frozenset(e) in self.nodes
-        else:
-            return False

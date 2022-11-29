@@ -21,8 +21,6 @@ from scipy.linalg import fractional_matrix_power
 from scipy.sparse import coo_matrix, csr_matrix, diags, dok_matrix, eye
 from sklearn.preprocessing import normalize
 
-from toponetx.classes.cell_complex import CellComplex
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.node_view import NodeView
 from toponetx.classes.ranked_entity import (
     DynamicCell,
@@ -43,6 +41,10 @@ except ImportError:
         stacklevel=2,
     )
 
+
+# from toponetx.classes.cell_complex import CellComplex
+# from toponetx.classes.combinatorial_complex import CombinatorialComplex
+# from toponetx.classes.dynamic_combinatorial_complex import DynamicCombinatorialComplex
 
 __all__ = ["SimplicialComplex"]
 
@@ -337,6 +339,9 @@ class SimplicialComplex:
 
     def remove_maximal_simplex(self, simplex):
         self._simplex_set.remove_maximal_simplex(simplex)
+
+    def add_node(self, node, **attr):
+        self.add_simplex(node, **attr)
 
     def add_simplex(self, simplex, **attr):
         self._simplex_set.insert_simplex(simplex, **attr)
@@ -862,9 +867,6 @@ class SimplicialComplex:
 
     def adjacency_matrix(self, d, signed=False, weight=None, index=False):
         """
-
-
-
         Examples
         --------
             >>> SC = SimplicialComplex()
@@ -1266,6 +1268,8 @@ class SimplicialComplex:
         >>> SC = SimplicialComplex([c1,c2,c3])
         >>> SC.to_cell_complex()
         """
+        from toponetx.classes.cell_complex import CellComplex
+
         return CellComplex(self.get_all_maximal_simplices())
 
     def to_hypergraph(self):
@@ -1283,8 +1287,14 @@ class SimplicialComplex:
             graph = graph + edge
         return Hypergraph(graph, static=True)
 
-    def to_combinatorial_complex(self):
+    def to_combinatorial_complex(self, dynamic=True):
         """
+
+        Parameters:
+            dynamic:bool, optional, default is false
+            when True returns DynamicCombinatorialComplex
+            when False returns CombinatorialComplex
+
         Example
         >>> c1= Simplex((1,2,3))
         >>> c2= Simplex((1,2,3))
@@ -1292,13 +1302,27 @@ class SimplicialComplex:
         >>> c3= Simplex((1,2,4))
         >>> c4= Simplex((2,5))
         >>> SC = SimplicialComplex([c1,c2,c3])
-        >>> SC.to_combinatorial_complex()
+        >>> CC = SC.to_combinatorial_complex()
         """
-        graph = []
-        for i in range(1, self.dim + 1):
-            edge = [
-                CellObject(elements=list(j), rank=len(j) - 1) for j in self.skeleton(i)
-            ]
-            graph = graph + edge
-        RES = RankedEntitySet("", graph, safe_insert=False)
-        return CombinatorialComplex(RES)
+
+        from toponetx.classes.combinatorial_complex import CombinatorialComplex
+        from toponetx.classes.dynamic_combinatorial_complex import (
+            DynamicCombinatorialComplex,
+        )
+
+        if dynamic:
+            graph = []
+            for i in range(1, self.dim + 1):
+                edge = [
+                    DynamicCell(elements=list(j), rank=len(j) - 1, **self[j])
+                    for j in self.skeleton(i)
+                ]
+                graph = graph + edge
+            RES = RankedEntitySet("", graph, safe_insert=False)
+            return DynamicCombinatorialComplex(RES)
+        else:
+            CC = CombinatorialComplex()
+            for i in range(1, self.dim + 1):
+                for j in self.skeleton(i):
+                    CC.add_cell(j, rank=len(j) - 1, **self[j])
+            return CC

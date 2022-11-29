@@ -1,1 +1,1 @@
-from toponetx.utils.stucture import *
+from .structure import *

@@ -31,6 +31,7 @@ from toponetx.classes.ranked_entity import (
     RankedEntitySet,
 )
 from toponetx.exception import TopoNetXError
+from toponetx.utils.structure import sparse_array_to_neighborhood_dict
 
 __all__ = ["CombinatorialComplex"]
 
@@ -39,9 +40,10 @@ class CombinatorialComplex:
 
     """
     Class for Combintorial Complex.
-    A Combintorial Complex (CC) is a triple CC=(S,X,i) where S is an abstract set of entities,
+    A Combintorial Complex (CC) is a triple CC = (S,X,i) where S is an abstract set of entities,
     X a subset of the power set of X and i is the a rank function that associates for every
-    set x in X a rank.
+    set x in X a rank, a positive integer. Ranking function i must satisfy x<=y then i(x)<=i(y).
+    We call this condition the CC condition.
 
     A CC is a generlization of graphs, hyppergraphs, cellular and simplicial complexes.
 
@@ -66,6 +68,14 @@ class CombinatorialComplex:
     graph_based : boolean, default is False. When true
                 rank 1 edges must have cardinality equals to 1
 
+
+    Examples
+    ---------
+        >>> CC = CombinatorialComplex()
+        >>> CC.add_cell([1,2,3,4], rank=2)
+        >>> CC.add_cell([1,2,4], rank=2)
+        >>> CC.add_cell([3,4], rank=2)
+
     """
 
     def __init__(
@@ -87,6 +97,21 @@ class CombinatorialComplex:
                 raise TypeError(
                     f"Input cells must be given as Iterable, got {type(cells)}."
                 )
+
+        if cells is not None:
+
+            if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
+
+                if len(cells) != len(ranks):
+                    raise TopoNetXError(
+                        "cells and ranks must have equal number of elements"
+                    )
+                else:
+                    for c, r in zip(cells, ranks):
+                        self.add_cell(c, r)
+            if isinstance(cells, Iterable) and isinstance(ranks, int):
+                for c in cells:
+                    self.add_cell(c, ranks)
 
         if isinstance(cells, Graph):
             for n in cells.nodes:  # cells is a networkx graph
@@ -116,7 +141,7 @@ class CombinatorialComplex:
         RankedEntitySet
 
         """
-        return NodeView(self._complex_set.cell_dict)
+        return NodeView(self._complex_set.cell_dict, cell_type=AbstractCell)
 
     @property
     def incidence_dict(self):
@@ -128,7 +153,7 @@ class CombinatorialComplex:
         dict
 
         """
-        return
+        return self._complex_set.cell_dict
 
     @property
     def shape(self):
@@ -186,7 +211,7 @@ class CombinatorialComplex:
 
         """
 
-        return len(self._nodes)
+        return len(self.nodes)
 
     def __iter__(self):
         """
@@ -213,19 +238,18 @@ class CombinatorialComplex:
 
     def __getitem__(self, node):
         """
-        Returns the neighbors of node
+        Returns the attrs of of node
 
         Parameters
         ----------
-        node : Entity or hashable
-            If hashable, then must be uid of node in combinatorial complex
+        node :  hashable
 
         Returns
         -------
-        neighbors(node) : iterator
+        dictionary of attrs assocaited with node
 
         """
-        return self.neighbors(node)
+        return self.nodes[node]
 
     def degree(self, node, rank=1):
         """
@@ -620,6 +644,19 @@ class CombinatorialComplex:
 
         return self
 
+    def get_incidence_structure_dict(self, i, j):
+        return sparse_array_to_neighborhood_dict(self.incidence_matrix(i, j))
+
+    def get_adjacency_structure_dict(self, i, j):
+        return sparse_array_to_neighborhood_dict(self.adjacency_matrix(i, j))
+
+    def get_all_indicence_structure_dict(self):
+        d = {}
+        for i in range(1, self.dim):
+            B0i = sparse_array_to_neighborhood_dict(self.incidence_matrix(0, i))
+            d["B_0_" + {i}] = B0i
+        return d
+
     def remove_cells(self, cell_set):
         """
         Removes cells from CC.
@@ -746,7 +783,7 @@ class CombinatorialComplex:
         >>> G.add_edge(0,3)
         >>> G.add_edge(0,4)
         >>> G.add_edge(1,4)
-        >>> CC = NestedCombinatorialComplex(cells=G)
+        >>> CC = CombinatorialComplex(cells=G)
         >>> CC.adjacency_matrix(0,1)
         """
 

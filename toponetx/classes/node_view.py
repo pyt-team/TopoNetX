@@ -8,13 +8,12 @@ Created on Wed Nov 16 09:18:14 2022
 try:
     from collections.abc import Hashable, Iterable
 except ImportError:
-    from collections import Iterable, Hashable
+    from collections import Hashable, Iterable
 
-from abstract_cell import AbstractCell, AbstractCellView
-from simplex import Simplex
+# from toponetx.classes.abstract_cell import AbstractCell
 
 
-class NodeView(AbstractCellView):
+class NodeView:
 
     """
     >>> CC = AbstractCellView()
@@ -23,7 +22,7 @@ class NodeView(AbstractCellView):
 
     """
 
-    def __init__(self, objectdict, cell_type=AbstractCell, name=None):
+    def __init__(self, objectdict, cell_type, name=None):
         if name is None:
             self.name = "_"
         else:
@@ -32,6 +31,9 @@ class NodeView(AbstractCellView):
             self.nodes = objectdict[0]
         else:
             self.nodes = {}
+
+        if cell_type is None:
+            raise ValueError("cell_type cannot be None")
 
         self.cell_type = cell_type
 
