@@ -15,6 +15,7 @@ class TestCellComplex(unittest.TestCase):
         self.assertEqual(cc.dim, 0)
 
         # Test cell complex with cells
+
         c1 = Cell([1, 2, 3])
         c2 = Cell([1, 2, 3, 4])
         cc = CellComplex([c1, c2])
@@ -23,6 +24,7 @@ class TestCellComplex(unittest.TestCase):
         self.assertEqual(cc.dim, 2)
 
         # Test cell complex with graph
+
         G = nx.Graph()
         G.add_edge(1, 0)
         G.add_edge(2, 0)
@@ -31,9 +33,10 @@ class TestCellComplex(unittest.TestCase):
         self.assertEqual(cc.dim, 1)
 
         # Test non-regular cell complex
-        cc = CellComplex(regular=False) # allows for constructions of non-regular cells
+        # allows for constructions of non-regular cells
+        cc = CellComplex(regular=False)  
         # the "is_regular" method checks if any non-regular cells are added
-        self.assertEqual(cc.is_regular, True) 
+        self.assertEqual(cc.is_regular, True)
         self.assertEqual(cc.dim, 0)
 
         # test non-regular cell complex
