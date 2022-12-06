@@ -1,6 +1,6 @@
 import unittest
 
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.dynamic_combinatorial_complex import DynamicCombinatorialComplex
 from toponetx.classes.ranked_entity import (
     CellObject,
     Node,
@@ -32,7 +32,7 @@ class TestCombintorialComplex(unittest.TestCase):
         y6 = RankedEntity("y6", [x4, x5], rank=1)
         w = RankedEntity("w", [x4, x5, x1], rank=2)
         E = RankedEntitySet("E", [y1, y2, y3, y4, y5, w, y6])
-        CC = CombinatorialComplex(cells=E)
+        CC = DynamicCombinatorialComplex(cells=E)
         self.assertEqual(len(CC.skeleton(0)), 5)
         self.assertEqual(len(CC.skeleton(1)), 6)
         self.assertEqual(len(CC.skeleton(2)), 1)
