@@ -31,8 +31,9 @@ class TestCellComplex(unittest.TestCase):
         self.assertEqual(cc.dim, 1)
 
         # Test non-regular cell complex
-        cc = CellComplex(regular=False)
-        self.assertEqual(cc.is_regular, False)
+        cc = CellComplex(regular=False) # allows for constructions of non-regular cells
+        # the "is_regular" method checks if any non-regular cells are added
+        self.assertEqual(cc.is_regular, True) 
         self.assertEqual(cc.dim, 0)
 
         # test non-regular cell complex
@@ -43,7 +44,7 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell(c1)
         CX.add_cell([5, 6, 7, 8], rank=2)
 
-        assert CX.is_regular == True
+        assert CX.is_regular == False
 
 
 def test_CellComplex_add_cell():
