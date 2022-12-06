@@ -683,7 +683,7 @@ class CellComplex:
 
     def remove_cells(self, cell_set):
         """
-        Removes cells from a cell complex.
+        Removes cells from a cell complex that are in cell_set.
 
         Parameters
         ----------
@@ -695,6 +695,23 @@ class CellComplex:
 
         """
         for cell in cell_set:
+            self.remove_cell(cell)
+        return self
+
+    def clear(self):
+        """
+        Removes all cells from a cell complex.
+
+        Parameters
+        ----------
+        cell_set : iterable of hashables or RankedEntities
+
+        Returns
+        -------
+        cell complex : CellComplex
+
+        """
+        for cell in self.cells:
             self.remove_cell(cell)
         return self
 
