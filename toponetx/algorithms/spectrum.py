@@ -32,6 +32,19 @@ __all__ = [
 
 
 def _sparse_spectral(L, dim=2):
+    """
+    Compute the spectral layout of a graph using the sparse eigenvalue solver from scipy.
+
+    This function computes the eigenvectors of the Hodge Laplacian matrix of the given graph,
+    and returns the eigenvalues and eigenvectors corresponding to the k smallest nonzero eigenvalues.
+
+    :param L: The Hodge Laplacian matrix of the graph.
+    :type L: scipy.sparse.csr_matrix
+    :param dim: The number of dimensions in the layout. Default is 2.
+    :type dim: int
+    :return: The eigenvalues and eigenvectors of the Hodge Laplacian matrix.
+    :rtype: tuple of ndarray
+    """
 
     # Hodge Laplcian matrix A
     # Uses sparse eigenvalue solver from scipy

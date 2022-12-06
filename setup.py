@@ -22,7 +22,7 @@ install_requires = [
     "numpy",
     "pre-commit",
     "scipy",
-    "trimesh"
+    "trimesh",
 ]
 
 full_requires = []
@@ -64,9 +64,17 @@ setup(
     keywords=[
         "higher order networks",
         "Simplicial Complexes",
+        "Simplicial Complex Neural Networks",
+        "Cell Complex Neural Networks",
+        "Cell Complex Networks",
+        "Cubical Complexes",
         "Cellular complexes",
+        "Cell Complex",
+        "Topological Data Analysis",
+        "Topological Machine Learning",
+        "Topological Deep Learning",
         "Combinatorial complexes",
-        "CW Complex"
+        "CW Complex",
     ],
     python_requires=">=3.7",
     install_requires=install_requires,

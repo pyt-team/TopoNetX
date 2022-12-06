@@ -2,6 +2,10 @@
 
 
 """
+try:
+    from collections.abc import Hashable, Iterable
+except ImportError:
+    from collections import Iterable, Hashable
 from collections import Counter, defaultdict, deque
 from itertools import zip_longest
 
@@ -117,6 +121,21 @@ class Cell:
 
     def __iter__(self):
         return iter(self.nodes)
+
+    def sign(self, edge):
+        if isinstance(edge, Iterable):
+            if len(edge) == 2:
+                if tuple(edge) in self.boundary:
+                    return 1
+                elif tuple(edge)[::-1] in self.boundary:
+                    return -1
+                else:
+                    raise KeyError(
+                        f"the input {edge} is not in the boundary of the cell"
+                    )
+
+            raise ValueError(f"the input {edge} is not a valud edge")
+        raise ValueError(f"the input {edge} must be iterable")
 
     def __contains__(self, e):
         return e in self.nodes
@@ -304,8 +323,10 @@ class CellView:
 
     # Set methods
     def __len__(self):
-
-        return np.sum([len(self._cells[cell]) for cell in self._cells])
+        if len(self._cells) == 0:
+            return 0
+        else:
+            return np.sum([len(self._cells[cell]) for cell in self._cells])
 
     def __iter__(self):
         return iter(

@@ -15,21 +15,31 @@ __all__ = ["Simplex", "SimplexView"]
 
 
 class Simplex:
-    """A simplex class.
-    Parameters
-    ==========
+    """A class representing a simplex in a simplicial complex.
 
-    elements: any iterable of hashables.
+    This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension.
+    The simplex is immutable, and the nodes in the simplex must be hashable and unique.
 
-    name : str
+    :param elements: The nodes in the simplex.
+    :type elements: any iterable of hashables
+    :param name: A name for the simplex, default is None.
+    :type name: str, optional
+    :param construct_tree: If True, construct the entire simplicial tree for the simplex. Default is True.
+    :type construct_tree: bool, optional
+    :param attr: Additional attributes to be associated with the simplex.
+    :type attr: keyword arguments, optional
 
-    construct_tree : bool, if True construct the entire simplicial tree
-
-    Examples
-    ========
+    :Example:
+        >>> # Create a 0-dimensional simplex (point)
+        >>> s = Simplex((1,))
+        >>> # Create a 1-dimensional simplex (line segment)
+        >>> s = Simplex((1, 2))
+        >>> # Create a 2-dimensional simplex ( triangle )
         >>> simplex1 = Simplex ( (1,2,3) )
-        >>> simplex12 = Simplex ( (1,2,4,5),weight = 1 )
-        >>> simplex13 = Simplex ( ("a","b","c") )
+        >>> simplex2 = Simplex ( ("a","b","c") )
+        >>> # Create a 3-dimensional simplex ( tetrahedron )
+        >>> simplex3 = Simplex ( (1,2,4,5),weight = 1 )
+
     """
 
     def __init__(self, elements, name=None, construct_tree=True, **attr):
@@ -50,6 +60,22 @@ class Simplex:
         self.properties = dict()
         self.properties.update(attr)
 
+    def __contains__(self, e):
+        if len(self.nodes) == 0:
+            return False
+        if isinstance(e, Iterable):
+            if len(e) != 1:
+                return False
+            else:
+                if isinstance(e, frozenset):
+                    return e <= self.nodes
+                else:
+                    return frozenset(e) <= self.nodes
+        elif isinstance(e, Hashable):
+            return frozenset({e}) in self.nodes
+        else:
+            return False
+
     @staticmethod
     def construct_simplex_tree(elements):
         faceset = set()
@@ -63,11 +89,17 @@ class Simplex:
 
     @property
     def boundary(self):
+        """
+        get the faces of the simplex
+        """
         if self.construct_tree:
             return frozenset(i for i in self._faces if len(i) == len(self) - 1)
         else:
             faces = Simplex.construct_simplex_tree(self.nodes)
             return frozenset(i for i in faces if len(i) == len(self) - 1)
+
+    def sign(self, face):
+        raise NotImplementedError
 
     @property
     def faces(self):
@@ -90,9 +122,6 @@ class Simplex:
 
     def __iter__(self):
         return iter(self.nodes)
-
-    def __contains__(self, e):
-        return e in self.nodes
 
     def __repr__(self):
         """

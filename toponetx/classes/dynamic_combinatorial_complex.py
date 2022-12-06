@@ -53,6 +53,15 @@ class DynamicCombinatorialComplex:
     and given an identifier or uid. Ranked Entities
     keep track of inclusion and ranking relationships and can be Dynamic.
 
+    Mathematical example
+    ---------------------
+    Let S = {1,2,3,4} be a set of entities.
+    Let X = {{1,2}, {1,2,3}, {1,3}, {1,4}} be a subset of the power set of S.
+    Let i be the ranking function that assigns the
+    length of a set as its rank, i.e. i({1,2}) = 2, i({1,2,3}) = 3, etc.
+
+    Then, (S,X,i) is a combinatorial complex.
+
 
     Example 0
         >>> # DynamicCombinatorialComplex can be empty

@@ -37,6 +37,32 @@ __all__ = ["CellComplex"]
 class CellComplex:
 
     """
+    A class representing a cell complex.
+
+    In mathematics, a cell complex is a space that is constructed by attaching lower-dimensional
+    cells to a topological space to form a new space. The cells are attached to the space in a specific way,
+    and the resulting space has a well-defined structure.
+
+    For example, a cell complex can be used to represent a simplicial complex,
+    which is a collection of points, line segments, triangles, and higher-dimensional
+    simplices that are connected in a specific way. Each simplex in the simplicial complex
+    is called a cell, and the cell complex consists of all of these cells and the way they are connected.
+
+    A cell complex is a mathematical structure consisting of a
+    set of points (called vertices or 0-cells), a set of line segments
+    (called edges or 1-cells), and a set of polygons (called faces or 2-cells),
+    such that the vertices, edges, and faces are connected in a consistent way.
+
+    Cell complexes can be used to represent various mathematical objects, such as graphs,
+    manifolds, and discrete geometric shapes. They are useful in many areas of mathematics,
+    such as algebraic topology and geometry, where they can be used to study the structure and
+    properties of these objects.
+
+
+    This class represents a cell complex, which is a space constructed by
+    attaching cells of different dimensions to a topological space.
+
+
     In TNX the class CellComplex supports building a regular or non-regular
     2d cell complex. The class CellComplex only supports the construction
     of 2d cell complexes. If higher order constructions are desired
@@ -209,8 +235,6 @@ class CellComplex:
             >>> CX.is_regular
         """
 
-        if self._regular:  # condition is enforced for all cells
-            return True
         for c in self.cells:
             if not c.is_regular:
                 return False
@@ -650,7 +674,9 @@ class CellComplex:
         """
         if isinstance(cell, Cell):
             self._cells.delete_cell(cell.elements)
-        elif isinstance(cell, tuple):
+        elif isinstance(cell, Iterable):
+            if not isinstance(cell, tuple):
+                cell = tuple(cell)
             self._cells.delete_cell(cell)
 
         return self
@@ -1768,6 +1794,11 @@ class CellComplex:
 
     def to_combinatorial_complex(self):
         """
+        A cell complex is a type of combinatorial complex.
+        The rank of an element in a cell complex is its dimension, so vertices have rank 0,
+        edges have rank 1, and faces have rank 2.
+
+
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3,4],rank=2)
         >>> CX.add_cell([2,3,4,5],rank=2)

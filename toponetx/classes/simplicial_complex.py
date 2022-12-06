@@ -54,6 +54,22 @@ class SimplicialComplex:
     higher order (co)adjacency operators from collection of
     simplices.
 
+    A simplicial complex is a topological space of a specific kind, constructed by
+    "gluing together" points, line segments, triangles, and their higher-dimensional
+    counterparts. It is a generalization of the notion of a triangle in a triangulated surface,
+    or a tetrahedron in a tetrahedralized 3-dimensional manifold. Simplicial complexes are the
+    basic objects of study in combinatorial topology.
+
+    For example, a triangle is a simplicial complex because it is a collection of three
+    points that are connected to each other in a specific way. Similarly, a tetrahedron is a
+    simplicial complex because it is a collection of four points that are connected to each
+    other in a specific way. These simplices can be thought of as the "building blocks" of a
+    simplicial complex, and the complex itself is constructed by combining these building blocks
+    in a specific way. For example, a 2-dimensional simplicial complex could be a collection of
+    triangles that are connected to each other to form a surface, while a 3-dimensional simplicial
+    complex could be a collection of tetrahedra that are connected to each other to form a solid object.
+
+
     Parameters
     ----------
     -simplices : list, optional,  default: None
@@ -867,6 +883,12 @@ class SimplicialComplex:
 
     def adjacency_matrix(self, d, signed=False, weight=None, index=False):
         """
+        The method takes a d parameter, which is the dimension of the simplicial complex,
+        and two optional parameters: signed and weight. The signed parameter determines whether
+        the adjacency matrix should be signed or unsigned, and the weight parameter allows for
+        specifying weights for the edges in the adjacency matrix. The index parameter determines
+        whether the method should return the matrix indices along with the adjacency matrix.
+
         Examples
         --------
             >>> SC = SimplicialComplex()

@@ -13,13 +13,20 @@ __all__ = ["AbstractCell", "AbstractCellView"]
 
 
 class AbstractCell:
-    """A AbstractCell class.
-    Parameters
-    ==========
-    elements: any iterable of hashables.
-    rank: int, rank of a cell, default is None.
-    name: string, optional default is None.
-    name : str
+    """
+    A class representing an abstract cell in a combinatorial complex or a cell complex.
+
+    This class represents an abstract cell in a combinatorial complex, which is a set of nodes with optional attributes and a rank.
+    The nodes in a cell must be hashable and unique, and the cell itself is immutable.
+
+
+    :param elements: The nodes in the cell.
+    :type elements: any iterable of hashables
+    :param rank: The rank of the cell, if any. Default is None.
+    :type rank: int, optional
+    :param name: The name of the cell, if any. Default is None.
+    :type name: str, optional
+    :param **attr: Additional attributes of the cell, as keyword arguments.
 
     Examples
     ========

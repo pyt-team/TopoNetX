@@ -69,9 +69,21 @@ class CombinatorialComplex:
                 rank 1 edges must have cardinality equals to 1
 
 
+    Mathematical example
+    ---------------------
+    Let S = {1,2,3,4} be a set of entities.
+    Let X = {{1,2}, {1,2,3}, {1,3}, {1,4}} be a subset of the power set of S.
+    Let i be the ranking function that assigns the
+    length of a set as its rank, i.e. i({1,2}) = 2, i({1,2,3}) = 3, etc.
+
+    Then, (S,X,i) is a combinatorial complex.
+
+
     Examples
     ---------
+        >>> # define an empty Combinatorial Complex
         >>> CC = CombinatorialComplex()
+        >>> # add cells using the add_cell method
         >>> CC.add_cell([1,2,3,4], rank=2)
         >>> CC.add_cell([1,2,4], rank=2)
         >>> CC.add_cell([3,4], rank=2)
