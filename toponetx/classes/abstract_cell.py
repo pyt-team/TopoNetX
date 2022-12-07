@@ -105,10 +105,15 @@ class AbstractCell:
 
 
 class AbstractCellView:
-    """A AbstractCellView class for cells of a combintorial_complex
+    """A class for viewing the cells of a combinatorial complex.
+
+    Provides methods for accessing, manipulating, and retrieving
+    information about the cells of a complex.
+
     Parameters
     ----------
     name : str
+        The name of the view.
 
     Examples
     --------
@@ -324,7 +329,14 @@ class AbstractCellView:
                         return i
                 raise KeyError(f"cell {e} is not in the complex")
 
-        elif isinstance(e, Hashable):
+        elif isinstance(e, Hashable) and not isinstance(e, Iterable):
+
+            if e in self.cell_dict[0]:
+                return 0
+            else:
+                raise KeyError(f"cell {e} is not in the complex")
+
+        elif isinstance(e, str):
 
             if e in self.cell_dict[0]:
                 return 0
@@ -402,15 +414,58 @@ class AbstractCellView:
                     self.cell_dict[0][frozenset({i})] = {"weight": 1}
 
     def add_node(self, node, **attr):
-        self.add_cell(node, 0, **attr)
+        self.add_cell(cell=node, rank=0, **attr)
 
     def add_cell(self, cell, rank, **attr):
+        """
+        Parameters
+        ----------
+        cell : AbstractCell, Hashable or Iterable
+            a cell in a combinatorial complex
+        rank : int
+            the rank of a cell, must be zero when the cell is Hashable.
+        **attr : attr associated with cell
+
+
+        Returns
+        -------
+        None.
+
+        Note
+        -----
+         The add_cell is a method for adding cells to the AbstractCellView instance.
+         It takes two arguments: cell and rank, where cell is a tuple or AbstractCell instance
+         representing the cell to be added, and rank is an integer representing the rank of the cell.
+         The add_cell method then adds the cell to the cell_dict attribute of the AbstractCellView
+         instance, using the cell's rank as the key and the cell itself as the value.
+         This allows the cell to be accessed later using its rank.
+
+        Note that the add_cell method also appears to check whether the cell being added
+        is a valid cell of the combinatorial complex by checking whether the cell's nodes
+        are contained in the _aux_complex attribute of the AbstractCellView instance.
+        If the cell's nodes are not contained in _aux_complex, then the add_cell method will
+        not add the cell to cell_dict. This is done to ensure that the AbstractCellView
+        instance only contains valid cells of the complex.
+
+        """
 
         if not isinstance(rank, int):
-            raise ValueError(f"rank must be an integer, got {type(rank)}")
+            raise ValueError(f"rank must be an integer, got {rank}")
 
         if rank < 0:
             raise ValueError(f"rank must be non-negative integer, got {rank}")
+
+        if isinstance(cell, str):
+            if rank != 0:
+                raise ValueError(f"rank must be zero for string input, got rank {rank}")
+            else:
+                if 0 not in self.cell_dict:
+                    self.cell_dict[0] = {}
+                self.cell_dict[0][frozenset({cell})] = {}
+                self.cell_dict[0][frozenset({cell})].update(attr)
+                self._aux_complex.add_simplex(Simplex(frozenset({cell}), r=0))
+                self.cell_dict[0][frozenset({cell})]["weight"] = 1
+                return
 
         if isinstance(cell, Hashable) and not isinstance(cell, Iterable):
             if rank != 0:
@@ -438,10 +493,11 @@ class AbstractCellView:
                     raise ValueError(
                         "every element cell must be hashable, input cell is {cell_}"
                     )
-        if rank == 0:
-            raise ValueError(
-                "rank must be positive for higher order cells, got {rank} "
-            )
+        if rank == 0 and isinstance(cell, Iterable) and not isinstance(cell, str):
+            if len(cell) > 1:
+                raise ValueError(
+                    "rank must be positive for higher order cells, got rank = 0 "
+                )
 
         self._aux_complex.add_simplex(Simplex(cell_, r=rank))
         if self._aux_complex.is_maximal(cell_):  # safe to insert the cell
@@ -593,11 +649,28 @@ class AbstractCellView:
 
         Notes
         -----
+        Incidence_matrix method  is a method for generating the incidence matrix of a combinatorial complex.
+        An incidence matrix is a matrix that describes the relationships between the cells
+        of a complex. In this case, the incidence_matrix method generates a matrix where
+        the rows correspond to the cells of the complex and the columns correspond to the faces
+        of the complex. The entries in the matrix are either 0 or 1,
+        depending on whether a cell contains a given face or not.
+        For example, if cell i contains face j, then the entry in the ith
+        row and jth column of the matrix will be 1, otherwise it will be 0.
+
+        To generate the incidence matrix, the incidence_matrix method first creates
+        a dictionary where the keys are the faces of the complex and the values are
+        the cells that contain that face. This allows the method to quickly look up
+        which cells contain a given face. The method then iterates over the cells in
+        the AbstractCellView instance, and for each cell, it checks which faces it contains.
+        For each face that the cell contains, the method increments the corresponding entry
+        in the matrix. Finally, the method returns the completed incidence matrix.
 
 
         """
         weight = None  # weight is not supported in this version
-        assert r != k  # r and k must be different
+        if r == k:
+            raise ValueError("incidence must be computed for k!=r, got equal r and k.")
         if k is None:
             if incidence_type == "up":
                 children = self.skeleton(r)
@@ -698,8 +771,6 @@ class AbstractCellView:
 
         Notes
         -----
-
-
 
 
         """

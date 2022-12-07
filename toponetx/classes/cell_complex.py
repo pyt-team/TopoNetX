@@ -1829,10 +1829,10 @@ class CellComplex:
             all_cells.append(Node(elements=n, **self.nodes[n]))
 
         for e in self.edges:
-            all_cells.append(CellObject(elements=e, rank=1, **self.edges[e]))
+            all_cells.append(DynamicCell(elements=e, rank=1, **self.edges[e]))
         for cell in self.cells:
             all_cells.append(
-                CellObject(elements=cell.elements, rank=2, **self.cells[cell])
+                DynamicCell(elements=cell.elements, rank=2, **self.cells[cell])
             )
         return CombinatorialComplex(
             RankedEntitySet("", all_cells, safe_insert=False), name="_"
@@ -2303,6 +2303,28 @@ class CellComplex:
         except:
             warnings.warn(f"No {s}-path between {source} and {target}")
             return np.inf
+
+    def from_networkx_graph(self, G):
+        """
+        add edges and nodes from a a graph G to self
+
+        >>> CX = CellComplex()
+        >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
+
+        >>> G= Graph()
+        >>> G.add_edge(1,0)
+        >>> G.add_edge(2,0)
+        >>> G.add_edge(1,2)
+        >>> CX.from_networkx_graph(G)
+        >>> CX.edges
+
+
+        """
+
+        for i in G.edges:
+            self.add_cell(i, rank=1)
+        for i in G.nodes:
+            self.add_node(i)
 
     @staticmethod
     def from_trimesh(mesh):

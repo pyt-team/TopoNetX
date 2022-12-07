@@ -90,7 +90,7 @@ class Simplex:
     @property
     def boundary(self):
         """
-        get the faces of the simplex
+        get the boundary faces of the simplex
         """
         if self.construct_tree:
             return frozenset(i for i in self._faces if len(i) == len(self) - 1)

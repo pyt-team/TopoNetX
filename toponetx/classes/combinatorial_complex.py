@@ -623,23 +623,45 @@ class CombinatorialComplex:
 
         return self
 
-    def add_cells_from(self, cell_set):
+    def add_cells_from(self, cells, ranks=None):
+
         """
         Add cells to combinatorial complex .
 
         Parameters
         ----------
-        cell_set : iterable of hashables or RankedEntities
+        cells : iterable of hashables or RankedEntities
             For hashables the cells returned will be empty.
+        ranks: Iterable or int. When iterable, len(ranks) == len(cells)
 
         Returns
         -------
-        Combinatorial Complex : NestedCombinatorialComplex
+        Combinatorial Complex : CombinatorialComplex
 
         """
-        for cell in cell_set:
-            self.add_cell(cell)
-        return self
+
+        if ranks is None:
+            for c in cells:
+                if not isinstance(c, AbstractCell):
+                    raise ValueError(
+                        f"input must be an AbstractCell {c} object when rank is None"
+                    )
+                if c.rank is None:
+                    raise ValueError(f"input AbstractCell {c} has None rank")
+                self.add_cell(c, c.rank)
+        else:
+            if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
+
+                if len(cells) != len(ranks):
+                    raise TopoNetXError(
+                        "cells and ranks must have equal number of elements"
+                    )
+                else:
+                    for c, r in zip(cells, ranks):
+                        self.add_cell(c, r)
+        if isinstance(cells, Iterable) and isinstance(ranks, int):
+            for c in cells:
+                self.add_cell(c, ranks)
 
     def remove_cell(self, cell):
         """
@@ -651,7 +673,7 @@ class CombinatorialComplex:
 
         Returns
         -------
-        Combinatorial Complex : NestedCombinatorialComplex
+        Combinatorial Complex : CombinatorialComplex
 
         Notes
         -----
@@ -975,8 +997,7 @@ class CombinatorialComplex:
 
         """
 
-    @staticmethod
-    def from_networkx_graph(G):
+    def from_networkx_graph(self, G):
         """
 
 
@@ -1002,7 +1023,7 @@ class CombinatorialComplex:
 
         >>> G.add_edge(0,7)
 
-        >>> CX = NestedCombinatorialComplex.from_networkx_graph(G)
+        >>> CX = CombinatorialComplex.from_networkx_graph(G)
         >>> CX.nodes
 
         RankedEntitySet(:Nodes,[0, 1, 4, 7],{'weight': 1.0})
@@ -1012,26 +1033,18 @@ class CombinatorialComplex:
         RankedEntitySet(:Cells,[(0, 1), (0, 7), (0, 4)],{'weight': 1.0})
 
         """
-        from networkx import Graph
+
+        for v in G.nodes:
+            self.add_node(v)
+        for e in G.edges:
+            self.add_cell(e, rank=1)
 
     def to_hypergraph(self):
 
         """
         Example
-            >>> x1 = RankedEntity('x1',rank = 0)
-            >>> x2 = RankedEntity('x2',rank = 0)
-            >>> x3 = RankedEntity('x3',rank = 0)
-            >>> x4 = RankedEntity('x4',rank = 0)
-            >>> x5 = RankedEntity('x5',rank = 0)
-            >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
-            >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
-            >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
-            >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-            >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
-            >>> # define the Ranked Entity Set
-            >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w])
-            >>> CC = NestedCombinatorialComplex(cells=E)
+
+            >>> CC = CombinatorialComplex(cells=E)
             >>> HG = CC.to_hypergraph()
         """
 
@@ -1061,20 +1074,8 @@ class CombinatorialComplex:
         share at least s cell.
 
             # example
-            >>> x1 = RankedEntity('x1',rank = 0)
-            >>> x2 = RankedEntity('x2',rank = 0)
-            >>> x3 = RankedEntity('x3',rank = 0)
-            >>> x4 = RankedEntity('x4',rank = 0)
-            >>> x5 = RankedEntity('x5',rank = 0)
-            >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
-            >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
-            >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
-            >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-            >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-            >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
-            >>> # define the Ranked Entity Set
-            >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,w] )
-            >>> CC = NestedCombinatorialComplex(cells=E)
+
+            >>> CC = CombinatorialComplex(cells=E)
 
         """
         M = self.incidence_matrix(0, None, incidence_type="up")
@@ -1635,126 +1636,6 @@ class CombinatorialComplex:
             for jdx, e in enumerate(cellnames):
                 edict[e] = nodenames[[idx for idx in range(M.shape[0]) if M[idx, jdx]]]
             return Hypergraph(edict, name=name)
-
-    @classmethod
-    def from_dataframe(
-        cls,
-        df,
-        columns=None,
-        rows=None,
-        name=None,
-        fillna=0,
-        transpose=False,
-        transforms=[],
-        key=None,
-        node_label="nodes",
-        cell_label="cells",
-        static=False,
-        use_nwhy=False,
-    ):
-        """
-        Create a hypergraph from a Pandas Dataframe object using index to label vertices
-        and Columns to label cells. The values of the dataframe are transformed into an
-        incidence matrix.
-        Note this is different than passing a dataframe directly
-        into the Hypergraph constructor. The latter automatically generates a static hypergraph
-        with cell and node labels given by the cell values.
-
-        Parameters
-        ----------
-        df : Pandas.Dataframe
-            a real valued dataframe with a single index
-
-        columns : (optional) list, default = None
-            restricts df to the columns with headers in this list.
-
-        rows : (optional) list, default = None
-            restricts df to the rows indexed by the elements in this list.
-
-        name : (optional) string, default = None
-
-        fillna : float, default = 0
-            a real value to place in empty cell, all-zero columns will not generate
-            an cell.
-
-        transpose : (optional) bool, default = False
-            option to transpose the dataframe, in this case df.Index will label the cells
-            and df.columns will label the nodes, transpose is applied before transforms and
-            key
-
-        transforms : (optional) list, default = []
-            optional list of transformations to apply to each column,
-            of the dataframe using pd.DataFrame.apply().
-            Transformations are applied in the order they are
-            given (ex. abs). To apply transforms to rows or for additional
-            functionality, consider transforming df using pandas.DataFrame methods
-            prior to generating the hypergraph.
-
-        key : (optional) function, default = None
-            boolean function to be applied to dataframe. Must be defined on numpy
-            arrays.
-
-        See also
-        --------
-        from_numpy_array())
-
-
-        Returns
-        -------
-        : Hypergraph
-
-        Notes
-        -----
-        The `from_dataframe` constructor does not generate empty cells.
-        All-zero columns in df are removed and the names corresponding to these
-        cells are discarded.
-        Restrictions and data processing will occur in this order:
-
-            1. column and row restrictions
-            2. fillna replace NaNs in dataframe
-            3. transpose the dataframe
-            4. transforms in the order listed
-            5. boolean key
-
-        This method offers the above options for wrangling a dataframe into an incidence
-        matrix for a hypergraph. For more flexibility we recommend you use the Pandas
-        library to format the values of your dataframe before submitting it to this
-        constructor.
-
-        """
-
-        if type(df) != pd.core.frame.DataFrame:
-            raise TopoNetXError("Error: Input object must be a pandas dataframe.")
-
-        if columns:
-            df = df[columns]
-        if rows:
-            df = df.loc[rows]
-
-        df = df.fillna(fillna)
-        if transpose:
-            df = df.transpose()
-
-        # node_names = np.array(df.index)
-        # cell_names = np.array(df.columns)
-
-        for t in transforms:
-            df = df.apply(t)
-        if key:
-            mat = key(df.values) * 1
-        else:
-            mat = df.values * 1
-
-        params = {
-            "node_names": np.array(df.index),
-            "cell_names": np.array(df.columns),
-            "name": name,
-            "node_label": node_label,
-            "cell_label": cell_label,
-            "static": static,
-            "use_nwhy": use_nwhy,
-        }
-        return cls.from_numpy_array(mat, **params)
 
 
 # end of CC class
