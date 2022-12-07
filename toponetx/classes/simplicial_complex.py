@@ -70,6 +70,12 @@ class SimplicialComplex:
     complex could be a collection of tetrahedra that are connected to each other to form a solid object.
 
 
+    The SimplicialComplex class is a class for representing simplicial complexes,
+    which are a type of topological space constructed by "gluing together" points, line segments,
+    triangles, and higher-dimensional counterparts. The class provides methods for computing boundary
+    operators, Hodge Laplacians, and higher-order adjacency operators on the simplicial complex.
+    It also allows for compatibility with the NetworkX and gudhi libraries.
+
     Parameters
     ----------
     -simplices : list, optional,  default: None

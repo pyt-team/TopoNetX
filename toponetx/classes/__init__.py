@@ -7,3 +7,4 @@ from .cell_complex import *
 from .dynamic_combinatorial_complex import *
 from .combinatorial_complex import *
 from .cell_complex import *
+from .node_view import *

@@ -143,7 +143,12 @@ class Simplex:
 
 
 class SimplexView:
-    """A SimplexView class for cells of a simplicial_complex
+    """
+    The SimplexView class is used to provide a view into a subset of the nodes
+    in a simplex, allowing for efficient computations on the subset of nodes.
+    These classes are used in conjunction with the SimplicialComplex class
+    to perform computations on simplicial complexes.
+
     Parameters
     ----------
     name : str

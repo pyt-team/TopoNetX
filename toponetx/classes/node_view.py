@@ -13,6 +13,9 @@ except ImportError:
 # from toponetx.classes.abstract_cell import AbstractCell
 
 
+__all__ = ["NodeView"]
+
+
 class NodeView:
 
     """
