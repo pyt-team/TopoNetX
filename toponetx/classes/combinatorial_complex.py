@@ -111,26 +111,36 @@ class CombinatorialComplex:
                 )
 
         if cells is not None:
-
-            if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-
-                if len(cells) != len(ranks):
-                    raise TopoNetXError(
-                        "cells and ranks must have equal number of elements"
-                    )
+            if not isinstance(cells, Graph):
+                if ranks is None:
+                    for c in cells:
+                        if not isinstance(c, AbstractCell):
+                            raise ValueError(
+                                f"input must be an AbstractCell {c} object when rank is None"
+                            )
+                        if c.rank is None:
+                            raise ValueError(f"input AbstractCell {c} has None rank")
+                        self.add_cell(c, c.rank)
                 else:
-                    for c, r in zip(cells, ranks):
-                        self.add_cell(c, r)
-            if isinstance(cells, Iterable) and isinstance(ranks, int):
-                for c in cells:
-                    self.add_cell(c, ranks)
+                    if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
 
-        if isinstance(cells, Graph):
-            for n in cells.nodes:  # cells is a networkx graph
-                self.add_node(n, **cells.nodes[n])
-            for e in cells.edges:
-                u, v = e
-                self.add_cell([u, v], 1, **cells.get_edge_data(u, v))
+                        if len(cells) != len(ranks):
+                            raise TopoNetXError(
+                                "cells and ranks must have equal number of elements"
+                            )
+                        else:
+                            for c, r in zip(cells, ranks):
+                                self.add_cell(c, r)
+                if isinstance(cells, Iterable) and isinstance(ranks, int):
+                    for c in cells:
+                        self.add_cell(c, ranks)
+            else:
+
+                for n in cells.nodes:  # cells is a networkx graph
+                    self.add_node(n, **cells.nodes[n])
+                for e in cells.edges:
+                    u, v = e
+                    self.add_cell([u, v], 1, **cells.get_edge_data(u, v))
 
     @property
     def cells(self):

@@ -10,7 +10,7 @@ class TestSimplicialComplex(unittest.TestCase):
         # create a SimplicialComplex object with no simplices
         sc = SimplicialComplex()
 
-        # add a maximal simplex using the add_maximal_simplex() method
+        # add a simplex using the add_simplex() method
         sc.add_simplex([1, 2, 3])
 
         # assert that the simplex was added correctly
@@ -69,6 +69,16 @@ class TestSimplicialComplex(unittest.TestCase):
 
         # compute the Hodge Laplacian using the hodge_laplacian_matrix() method
         hl = sc.hodge_laplacian_matrix(0)
+
+        # the index for this hodge laplacian is given as follows :
+        # index = [frozenset({1}),
+        # frozenset({2}),
+        # frozenset({3}),
+        # frozenset({4}),
+        # frozenset({0})]
+
+        # this can be checked by :
+        # >>> index, hl = sc.hodge_laplacian_matrix(0,index=True)
 
         # assert that the Hodge Laplacian is correct
         np.testing.assert_array_equal(

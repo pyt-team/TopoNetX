@@ -1,41 +1,43 @@
 import unittest
 
-from toponetx.classes.dynamic_combinatorial_complex import DynamicCombinatorialComplex
-from toponetx.classes.ranked_entity import (
-    DynamicCell,
-    Node,
-    RankedEntity,
-    RankedEntitySet,
-)
+import networkx as nx
+
+from toponetx.classes.abstract_cell import AbstractCell
+from toponetx.classes.combinatorial_complex import CombinatorialComplex
 
 
-class TestCombintorialComplex(unittest.TestCase):
-    def test_combinatorial_complex_ranks(self):
-        x1 = Node(1)
-        x2 = Node(2)
-        y1 = DynamicCell(elements=[x1, x2], rank=1)
-        self.assertEqual(x1.rank, 0)
-        self.assertEqual(x2.rank, 0)
-        self.assertEqual(y1.rank, 1)
+class TestCombinatorialComplex(unittest.TestCase):
+    def create_CombinatorialComplex_from_nodes_and_cells(self):
+        # create a collection of Node objects and a collection of DynamicCells
+        # and pass them to DynamicCombinatorialComplex
 
-    def test_combinatorial_complex_skeleton(self):
-        x1 = RankedEntity("x1", rank=0)
-        x2 = RankedEntity("x2", rank=0)
-        x3 = RankedEntity("x3", rank=0)
-        x4 = RankedEntity("x4", rank=0)
-        x5 = RankedEntity("x5", rank=0)
-        y1 = RankedEntity("y1", [x1, x2], rank=1)
-        y2 = RankedEntity("y2", [x2, x3], rank=1)
-        y3 = RankedEntity("y3", [x3, x4], rank=1)
-        y4 = RankedEntity("y4", [x4, x1], rank=1)
-        y5 = RankedEntity("y5", [x4, x5], rank=1)
-        y6 = RankedEntity("y6", [x4, x5], rank=1)
-        w = RankedEntity("w", [x4, x5, x1], rank=2)
-        E = RankedEntitySet("E", [y1, y2, y3, y4, y5, w, y6])
-        CC = DynamicCombinatorialComplex(cells=E)
-        self.assertEqual(len(CC.skeleton(0)), 5)
-        self.assertEqual(len(CC.skeleton(1)), 6)
-        self.assertEqual(len(CC.skeleton(2)), 1)
+        y1 = AbstractCell(elements=[1, 2], rank=1)
+        y2 = AbstractCell(elements=[2, 4], rank=1)
+        y3 = AbstractCell(elements=[3, 5], rank=1)
+        y4 = AbstractCell(elements=[4, 5], rank=1)
+        y5 = AbstractCell(elements=[5, 7], rank=1)
+        # define the DynamicCombinatorialComplex from a list of cells
+        CC = CombinatorialComplex(cells=[y1, y2, y3, y4, y5])
+
+        assert y1 in CC.cells
+        assert y2 in CC.cells
+        assert y3 in CC.cells
+        assert y4 in CC.cells
+        assert y5 in CC.cells
+
+    def create_CombinatorialComplex_from_graph(self):
+
+        G = nx.Graph()  # networkx graph
+        G.add_edge(0, 1)
+        G.add_edge(0, 3)
+        G.add_edge(0, 4)
+        G.add_edge(1, 4)
+        CC = CombinatorialComplex(cells=G)
+        assert (0, 1) in CC.cells
+        assert (0, 3) in CC.cells
+        assert (0, 4) in CC.cells
+        assert (1, 4) in CC.cells
+        assert (0, 5) not in CC.cells
 
 
 if __name__ == "__main__":

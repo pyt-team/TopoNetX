@@ -50,33 +50,31 @@ class TestCellComplex(unittest.TestCase):
 
         assert CX.is_regular == False
 
+    def test_CellComplex_add_cell(self):
+        # Test adding a single cell
+        cx = CellComplex()
+        cx.add_cell([1, 2, 3, 4], rank=2)
+        assert len(cx.cells) == 1
 
-def test_CellComplex_add_cell():
-    # Test adding a single cell
-    cx = CellComplex()
-    cx.add_cell([1, 2, 3, 4], rank=2)
-    assert len(cx.cells) == 1
+        # Test adding multiple cells
+        cx = CellComplex()
+        cx.add_cell([1, 2, 3, 4], rank=2)
+        cx.add_cell([2, 3, 4, 5], rank=2)
+        cx.add_cell([5, 6, 7, 8], rank=2)
+        assert len(cx.cells) == 3
 
-    # Test adding multiple cells
-    cx = CellComplex()
-    cx.add_cell([1, 2, 3, 4], rank=2)
-    cx.add_cell([2, 3, 4, 5], rank=2)
-    cx.add_cell([5, 6, 7, 8], rank=2)
-    assert len(cx.cells) == 3
+    def test_CellComplex_add_cells_from(self):
+        # Test adding cells from a list of cells
+        cx = CellComplex()
+        cells = [Cell((1, 2, 3, 4)), Cell((2, 3, 4, 5))]
+        cx.add_cells_from(cells)
+        assert len(cx.cells) == 2
 
-
-def test_CellComplex_add_cells_from():
-    # Test adding cells from a list of cells
-    cx = CellComplex()
-    cells = [Cell((1, 2, 3, 4)), Cell((2, 3, 4, 5))]
-    cx.add_cells_from(cells)
-    assert len(cx.cells) == 2
-
-    # Test adding cells from a list of cell lists
-    cx = CellComplex()
-    cell_lists = [[1, 2, 3, 4], [2, 3, 4, 5]]
-    cx.add_cells_from(cell_lists, rank=2)
-    assert len(cx.cells) == 2
+        # Test adding cells from a list of cell lists
+        cx = CellComplex()
+        cell_lists = [[1, 2, 3, 4], [2, 3, 4, 5]]
+        cx.add_cells_from(cell_lists, rank=2)
+        assert len(cx.cells) == 2
 
     def test_CellComplex_remove_cell(self):
         # Test removing a single cell
@@ -156,10 +154,8 @@ def test_CellComplex_add_cells_from():
         cx = CellComplex()
         cx.add_cells_from([[1, 2, 3], [2, 3, 4]], rank=2)
 
-        assert cx.cells[1].rank == 2
-
         # Test adding multiple cells with duplicate vertices to a cell complex
-        cx.add_cells_from([[1, 2, 3, 1], [2, 3, 4, 2]], rank=2)
+        cx.add_cells_from([[1, 2, 3, 4], [2, 3, 4, 5]], rank=2)
         assert len(cx.cells) == 4
 
         # Test adding multiple cells with vertices that do not exist in the cell complex
@@ -175,7 +171,7 @@ def test_CellComplex_add_cells_from():
         cx.add_cells_from([[1, 2, 3, 4], [2, 3, 4, 5], [5, 6, 7, 8]], rank=2)
         incidence_matrix = cx.incidence_matrix(2)
         assert incidence_matrix.shape == (10, 3)
-        B1 = cx.incidence_matrix(2)
+        B1 = cx.incidence_matrix(1)
         assert B1.shape == (8, 10)
 
     def test_incidence_matrix2(self):
