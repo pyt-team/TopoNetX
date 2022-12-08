@@ -895,7 +895,7 @@ class SimplicialComplex:
         if not signed:
             L_down = abs(L_down)
         if index:
-            return row, L_down
+            return column, L_down
         else:
             return L_down
 
@@ -941,8 +941,8 @@ class SimplicialComplex:
         L_down.setdiag(0)
         if not signed:
             L_down = abs(L_down)
-        if ind:
-            return index, L_down
+        if index:
+            return ind, L_down
         else:
             return L_down
 

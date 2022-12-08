@@ -39,6 +39,14 @@ class TestCombinatorialComplex(unittest.TestCase):
         assert (1, 4) in CC.cells
         assert (0, 5) not in CC.cells
 
+        g = nx.Graph()
+        g.add_edge(5, 7)
+        g.add_edge("a", "b")
+
+        CC.from_networkx_graph(g)
+
+        assert "a" in CC.cells
+
     def test_combinatorial_complex_init(self):
         # Test empty combinatorial complex
         cc = CombinatorialComplex()

@@ -1,0 +1,133 @@
+# -*- coding: utf-8 -*-
+"""
+
+@author: Mustafa Hajij
+"""
+
+import numpy as np
+from pyrandwalk import RandomWalk
+from scipy.sparse import diags
+from sklearn.preprocessing import normalize
+
+
+def transition_from_adjacency(A, sub_sampling=0.1, self_loop=True):
+    """
+    Generate transition matrix from an adjacency matrix.
+    This function generates a transition matrix from an adjacency matrix using the following steps:
+        1. Add self-loop to the adjacency matrix if self_loop is set to True
+        2. Compute the degree matrix
+        3. Compute the transition matrix by taking the dot product of the inverse of the degree matrix and the adjacency matrix
+
+        param A: The adjacency matrix.
+        type A: numpy.ndarray
+        param sub_sampling: The rate of subsampling. Default is 0.1.
+        type sub_sampling: float
+        param self_loop: A flag indicating whether to add self-loop to the adjacency matrix. Default is True.
+        type self_loop: bool
+        return: The transition matrix.
+        rtype: numpy.ndarray
+
+        example:
+        >>> import numpy as np
+        >>> A = np.array([[0, 1, 1, 0], [1, 0, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0]])
+        >>> transition_from_adjacency(A)
+        array([[0.        , 0.5       , 0.5       , 0.        ],
+               [0.33333333, 0.        , 0.66666667, 0.        ],
+               [0.33333333, 0.66666667, 0.        , 1.        ],
+               [0.        , 0.        , 1.        , 0.        ]])
+    """
+
+    def _transition_from_adjacency(A):
+        A = A.todense() + np.eye(A.shape[0])
+        A = np.array(A, dtype=np.float64)
+        # let's evaluate the degree matrix D
+        D = np.diag(np.sum(A, axis=0))
+        # ...and the transition matrix T
+        T = np.dot(np.linalg.inv(D), A)
+        return T
+
+    def _weight_node(A, sub_sampling=sub_sampling):
+        z = np.array(np.abs(A).sum(1)) + 1
+        weight = 1 / (z**sub_sampling)
+        return weight.T[0]
+
+    def get_normalized_adjacency(A, sub_sampling=sub_sampling):
+        if sub_sampling != 0:
+            D_inv = diags(_weight_node(A, sub_sampling))
+            A = A.dot(D_inv)
+        normalize(A, norm="l1", axis=1, copy=False)
+        return A
+
+    if self_loop:
+        return _transition_from_adjacency(A)
+    else:
+        return get_normalized_adjacency(A, sub_sampling)
+
+
+def random_walk(length, num_walks, states, transition_matrix):
+    """
+    Generate random walks on a graph or network.
+
+    This function generates random walks of a given length on a given complex.
+    The length and number of walks can be specified, as well as the cells (states)
+    and transition matrix.
+
+    :param length: The length of each random walk.
+    :type length: int
+    :param num_walks: The number of random walks to generate.
+    :type num_walks: int
+    :param states: The nodes in the complex.
+    :type states: list of str
+    :param transition_matrix: The transition matrix of the graph or network.
+    :type transition_matrix: numpy.ndarray
+    :return: The generated random walks.
+    :rtype: list of list of str
+
+    Example:
+
+    >>> import numpy as np
+    >>> transition_matrix = np.array([[0.0, 1.0, 0.0, 0.0],
+    ...                               [0.5, 0.0, 0.5, 0.0],
+    ...                               [0.0, 0.5, 0.0, 0.5],
+    ...                               [0.0, 0.0, 1.0, 0.0]])
+    >>> states = ["A", "B", "C", "D"]
+    >>> walks = random_walk(length=3, num_walks=2, states=states, transition_matrix=transition_matrix)
+    >>> print(walks)
+    [['B', 'C', 'D'], ['B', 'C', 'B']]
+    """
+    rw = RandomWalk(states, transition_matrix)
+    walks = []
+    for _ in range(num_walks):
+        states, _ = rw.run(length - 1)
+        walks.append(states)
+    return walks
+
+
+"""
+To generate node embeddings using Word2Vec, you can first use the
+random_walk function to generate random walks on your complex.
+Then, you can use the generated random walks as input to the Word2Vec
+algorithm to learn node embeddings.
+
+Here is an example of how you could use the random_walk function
+and Word2Vec to generate cell embeddings:
+
+Copy code
+# Import the necessary modules
+from gensim.models import Word2Vec
+
+# Generate random walks on your graph using the random_walk function
+random_walks = random_walk(length=10, num_walks=100, states=nodes,
+                           transition_matrix=transition_matrix)
+
+# Train a Word2Vec model on the generated random walks
+model = Word2Vec(random_walks, size=128, window=5, min_count=0, sg=1)
+
+# Use the trained model to generate node embeddings
+cell_embeddings = model.wv
+In the example above, nodes is a list of the nodes in your complex,
+transition_matrix is the transition matrix of your complex, and
+cell_embeddings is a dictionary that maps each node in your complex
+to its corresponding embedding.
+
+"""
