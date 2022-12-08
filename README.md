@@ -4,10 +4,51 @@
 TopoNetX
 =========
 
-The TNX library provides classes and methods for modeling the entities and relationships
+
+TopoNetX is a powerful and versatile package for studying the topological properties
+of shapes and spaces. With its dynamic construction capabilities and support for arbitrary
+attributes and data, TopoNetX allows users to easily explore the topological structure
+of their data and gain insights into its underlying geometric and algebraic properties.
+From computing boundary operators and Hodge Laplacians on simplicial complexes,
+to performing higher-order adjacency calculations
+
+TopoNetX is similar to NetworkX, a popular graph package, but extends its capabilities to support a
+wider range of mathematical structures, including cell complexes, simplicial complexes, and
+combinatorial complexes. The TNX library provides classes and methods for modeling the entities and relationships
 found in higher order networks such as simplicial, cellular, CW and combinatorial complexes.
 This library serves as a repository of the methods and algorithms we find most useful
-as we explore what higher order networks can tell us .
+as we explore what higher order networks can tell us.
+
+
+The package supports the construction many topological structures including the CellComplex, SimplicialComplex, and CombinatorialComplex classes.
+ The classes provide methods for computing boundary operators, Hodge Laplacians,
+ and higher-order adjacency operators on the cell, simplicial, and combinatorial complexes,
+  respectively. The classes are used in many areas of mathematics and computer science,
+  such as algebraic topology, geometry, and data analysis.
+
+
+Some key features of TopoNetX include:
+=====================================
+
+1. Dynamic construction of cell complexes, simplicial complexes, and combinatorial complexes, allowing users to
+ add or remove objects from these structures after their initial creation.
+2. Compatibility with the NetworkX and gudhi libraries, enabling users to
+    leverage the powerful algorithms and data structures provided by these packages.
+3. Support for attaching arbitrary attributes and data to cells, simplices, and other entities in the complex, allowing users to store and manipulate additional information about these objects.
+4. Computation of boundary operators, Hodge Laplacians, and higher-order adjacency
+     operators on the complex, enabling users to study the topological properties of the space.
+5. Efficient storage and manipulation of complex data structures, using advanced
+     data structures such as sparse matrices and hypergraphs.
+6. Support for different computational modes, including "normal" and "gudhi",
+    allowing users to choose the mode that best fits their needs.
+7. Robust error handling and validation of input data, ensuring that the package is
+    reliable and easy to use.
+8. Support for arbitrary attributes and data: users can attach arbitrary attributes and data to cells, edges, and vertices in the complex.
+
+9. Boundary operator and Hodge Laplacian computation: TopoNetX provides methods for computing boundary operators and Hodge Laplacians on simplicial complexes.
+
+
+
 
 TNX was developed by pyt-team.
 

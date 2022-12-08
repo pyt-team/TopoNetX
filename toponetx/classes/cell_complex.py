@@ -68,9 +68,22 @@ class CellComplex:
     of 2d cell complexes. If higher order constructions are desired
     then one should utilize the class CombinatorialComplex.
 
+
     In TNX cell complexes are implementes to be dynamic in the sense that
     they can change by adding or subtracting objects (nodes, edges, cells)
     from them.
+
+
+    1. Dynamic construction of cell complexes, allowing users to add or remove objects from these
+        structures after their initial creation.
+    2. Compatibility with the NetworkX library, enabling users to leverage the powerful algorithms
+        and data structures provided by this package.
+    3. Support for attaching arbitrary attributes and data to cells in the complex, allowing users to store
+        and manipulate additional information about these objects.
+    4. Efficient storage and manipulation of complex data structures, using advanced data structures
+        such as sparse matrices.
+    5. Robust error handling and validation of input data, ensuring that the package is reliable and easy to use.
+
         #Example 0
             >>> # Cell Complex can be empty
             >>> CC = CellComplex( )
@@ -477,22 +490,33 @@ class CellComplex:
         raise NotImplementedError
 
     def remove_node(self, node):
-        """
-        Removes node from cells and deletes reference in cell complex nodes
+
+        """Removes the given node from the cell complex.
+
+        This method removes the given node from the cell complex, along with any
+        cells that contain the node.
 
         Parameters
         ----------
-        node : hashable or RankedEntity
-            a node in cell complex
+        node : hashable
+            The node to be removed from the cell complex.
 
-        Returns
-        -------
-        Cell Complex : CellComplex
-        Example:
-
+        Raises
+        ------
+        TopoNetXError
+            If the given node does not exist in the cell complex.
 
         """
-        raise NotImplementedError
+
+        if node not in self.nodes:
+            raise TopoNetXError("The given node does not exist in the cell complex.")
+        # Remove the node from the cell complex
+        self._G.remove_node(node)
+        # Remove any cells that contain the node
+        for cell in self.cells:
+            if node in cell:
+
+                self.remove_cell(cell)
 
     def remove_nodes(self, node_set):
         """
@@ -508,7 +532,8 @@ class CellComplex:
         cell complex : CombinatorialComplex
 
         """
-        raise NotImplementedError
+        for n in node_set:
+            self.remove_node(n)
 
     def add_node(self, node, **attr):
 
@@ -542,7 +567,7 @@ class CellComplex:
         cell : hashable or RankedEntity
             If hashable the cell returned will be empty.
         uid : unique identifier that identifies the cell
-        rank : rank of a cell
+        rank : rank of a cell, supported ranks is 1 or 2
 
 
 
@@ -678,7 +703,6 @@ class CellComplex:
             if not isinstance(cell, tuple):
                 cell = tuple(cell)
             self._cells.delete_cell(cell)
-
         return self
 
     def remove_cells(self, cell_set):
@@ -1067,7 +1091,8 @@ class CellComplex:
         """
         Remove cells from the cell complex which are homotopic.
         In other words, this is equivalent to identifying cells
-        containing the same nodes
+        containing the same nodes and are equivalent up to cyclic
+        permutation.
 
          Note
          ------

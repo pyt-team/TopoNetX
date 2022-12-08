@@ -43,10 +43,19 @@ class DynamicCombinatorialComplex:
 
     A CC is a generlization of graphs, hyppergraphs, cellular and simplicial complexes.
 
-    in TopoNetX, CCs are implemented dynamically and the user is allowed to
+    In TopoNetX, DynamicCombinatorialComplex implements CCs dynamically and the user is allowed to
     add or subtract objects to the CC after the initial construction.
     The dynamic structure of CCs require the user to keep track of its objects,
     by using a unique names for each cell.
+
+    The DynamicCombinatorialComplex class is a mathematical structure used to study the
+    combinatorial properties of sets and collections of objects. It is made up of a set
+    of entities called vertices, a subset of the power set of vertices called cells, and
+    a ranking function that assigns a rank to each cell based on its size. The class supports
+    basic functions and construction methods over combinatorial complexes, and allows the user
+    to dynamically add or subtract objects from the complex after its initial construction.
+    It is used in many areas of mathematics, such as graph theory, algebraic topology,
+    and discrete geometry.
 
 
     In a CC each cell is instantiated as an RankedEntity (see the ranked_entity.py)

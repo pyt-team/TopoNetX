@@ -265,6 +265,31 @@ class TestCellComplex(unittest.TestCase):
         assert CX.cells[(2, 3, 4, 5)]["color"] == "blue"
         assert CX.cells[(5, 6, 7, 8)]["color"] == "green"
 
+    def test_cellcomplex_adjacency_matrix(self):
+        # Test adjacency matrix of empty CellComplex
+        CX = CellComplex()
+        np.testing.assert_array_equal(CX.adjacency_matrix(0), np.zeros((0, 0)))
+
+        # Test adjacency matrix of CellComplex with one cell
+        CX.add_cell([1, 2, 3], rank=2)
+        A1 = np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]])
+        np.testing.assert_array_equal(CX.adjacency_matrix(0).todense(), A1)
+
+        # Test adjacency matrix of CellComplex with multiple cells
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([4, 5, 6], rank=2)
+        A = np.array(
+            [
+                [0.0, 1.0, 1.0, 0.0, 0.0, 0.0],
+                [1.0, 0.0, 1.0, 1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0, 1.0, 0.0, 0.0],
+                [0.0, 1.0, 1.0, 0.0, 1.0, 1.0],
+                [0.0, 0.0, 0.0, 1.0, 0.0, 1.0],
+                [0.0, 0.0, 0.0, 1.0, 1.0, 0.0],
+            ]
+        )
+        np.testing.assert_array_equal(CX.adjacency_matrix(0).toarray(), A)
+
 
 if __name__ == "__main__":
     unittest.main()

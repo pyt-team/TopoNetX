@@ -76,6 +76,18 @@ class SimplicialComplex:
     operators, Hodge Laplacians, and higher-order adjacency operators on the simplicial complex.
     It also allows for compatibility with the NetworkX and gudhi libraries.
 
+    main features:
+    --------------
+    1. The SimplicialComplex class allows for the dynamic construction of simplicial complexes,
+        enabling users to add or remove simplices from the complex after its initial creation.
+    2. The class provides methods for computing boundary operators, Hodge Laplacians,
+        and higher-order adjacency operators on the simplicial complex.
+    3. The class is compatible with the gudhi library, allowing users to leverage the powerful
+        algorithms and data structures provided by this package.
+    4. The class supports the attachment of arbitrary attributes and data to simplices,
+        enabling users to store and manipulate additional information about these objects.
+    5. The class has robust error handling and input validation, ensuring reliable and easy use of the class.
+
     Parameters
     ----------
     -simplices : list, optional,  default: None
