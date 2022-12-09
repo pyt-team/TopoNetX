@@ -100,7 +100,7 @@ B2 = sc.incidence_matrix(2)
 ```
 
 
-### Getting Started : creating a cell complex 
+## Getting Started : creating a cell complex 
 
 ```ruby
 import toponetx as tnx
@@ -119,7 +119,7 @@ L1 = cx.hodge_laplacian_matrix(1)
 L2 = cx.hodge_laplacian_matrix(2)
 ```
 
-### Getting Started : creating a combinatorial complex 
+## Getting Started : creating a combinatorial complex 
 
 ```ruby
 import toponetx as tnx
