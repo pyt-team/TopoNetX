@@ -27,8 +27,14 @@ The package supports the construction many topological structures including the 
   such as algebraic topology, geometry, and data analysis.
 
 
-Some key features of TopoNetX include:
-=====================================
+
+TNX was developed by pyt-team.
+
+
+
+
+New Features of Version 1.0
+---------------------------
 
 1. Dynamic construction of cell complexes, simplicial complexes, and combinatorial complexes, allowing users to
  add or remove objects from these structures after their initial creation.
@@ -46,14 +52,6 @@ Some key features of TopoNetX include:
 8. Support for arbitrary attributes and data: users can attach arbitrary attributes and data to cells, edges, and vertices in the complex.
 
 9. Boundary operator and Hodge Laplacian computation: TopoNetX provides methods for computing boundary operators and Hodge Laplacians on simplicial complexes.
-
-TNX was developed by pyt-team.
-
-
-
-
-New Features of Version 1.0
----------------------------
 
 
 Installing TopoNetX
@@ -121,7 +119,7 @@ L1 = cx.hodge_laplacian_matrix(1)
 L2 = cx.hodge_laplacian_matrix(2)
 ```
 
-### Getting Started : creating a cell complex 
+### Getting Started : creating a combinatorial complex 
 
 ```ruby
 import toponetx as tnx
