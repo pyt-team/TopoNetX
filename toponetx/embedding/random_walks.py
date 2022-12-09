@@ -5,8 +5,8 @@
 """
 
 import numpy as np
+import scipy
 from pyrandwalk import RandomWalk
-from scipy.sparse import diags
 from sklearn.preprocessing import normalize
 
 
@@ -31,15 +31,18 @@ def transition_from_adjacency(A, sub_sampling=0.1, self_loop=True):
         >>> import numpy as np
         >>> A = np.array([[0, 1, 1, 0], [1, 0, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0]])
         >>> transition_from_adjacency(A)
-        array([[0.        , 0.5       , 0.5       , 0.        ],
-               [0.33333333, 0.        , 0.66666667, 0.        ],
-               [0.33333333, 0.66666667, 0.        , 1.        ],
-               [0.        , 0.        , 1.        , 0.        ]])
+            array([[0.33333333, 0.33333333, 0.33333333, 0.        ],
+                   [0.33333333, 0.33333333, 0.33333333, 0.        ],
+                   [0.25      , 0.25      , 0.25      , 0.25      ],
+                   [0.        , 0.        , 0.5       , 0.5       ]])
     """
 
     def _transition_from_adjacency(A):
-        A = A.todense() + np.eye(A.shape[0])
-        A = np.array(A, dtype=np.float64)
+
+        if scipy.sparse.issparse(A):
+            A = A.todense()
+
+        A = A + np.eye(A.shape[0])
         # let's evaluate the degree matrix D
         D = np.diag(np.sum(A, axis=0))
         # ...and the transition matrix T
@@ -49,11 +52,12 @@ def transition_from_adjacency(A, sub_sampling=0.1, self_loop=True):
     def _weight_node(A, sub_sampling=sub_sampling):
         z = np.array(np.abs(A).sum(1)) + 1
         weight = 1 / (z**sub_sampling)
-        return weight.T[0]
+        return weight.T
 
     def get_normalized_adjacency(A, sub_sampling=sub_sampling):
         if sub_sampling != 0:
-            D_inv = diags(_weight_node(A, sub_sampling))
+            print(_weight_node(A, sub_sampling))
+            D_inv = np.diag(_weight_node(A, sub_sampling))
             A = A.dot(D_inv)
         normalize(A, norm="l1", axis=1, copy=False)
         return A
@@ -112,7 +116,7 @@ algorithm to learn node embeddings.
 Here is an example of how you could use the random_walk function
 and Word2Vec to generate cell embeddings:
 
-Copy code
+
 # Import the necessary modules
 from gensim.models import Word2Vec
 
