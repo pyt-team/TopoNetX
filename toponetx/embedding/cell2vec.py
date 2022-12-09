@@ -4,7 +4,7 @@
 """
 
 import networkx as nx
-from node2vec import Node2Vec
+from karateclub import DeepWalk, Node2Vec
 
 from toponetx.classes import (
     CellComplex,
@@ -13,6 +13,39 @@ from toponetx.classes import (
     SimplicialComplex,
 )
 from toponetx.utils.structure import sparse_array_to_neighborhood_dict
+
+# from node2vec import Node2Vec
+
+
+
+
+def _neighbohood_from_complex(
+    cmplex, neighborhood_type="adj", neighborhood_dim={"r": 0, "k": -1}
+):
+
+    if isinstance(cmplex, SimplicialComplex) or isinstance(cmplex, CellComplex):
+        if neighborhood_type == "adj":
+            ind, A = cmplex.adjacency_matrix(neighborhood_dim["r"], index=True)
+
+        else:
+            ind, A = cmplex.coadjacency_matrix(neighborhood_dim["r"], index=True)
+    elif isinstance(cmplex, CombinatorialComplex) or isinstance(
+        cmplex, DynamicCombinatorialComplex
+    ):
+        if neighborhood_type == "adj":
+            ind, A = cmplex.adjacency_matrix(
+                neighborhood_dim["r"], neighborhood_dim["k"], index=True
+            )
+        else:
+            ind, A = cmplex.coadjacency_matrix(
+                neighborhood_dim["k"], neighborhood_dim["r"], index=True
+            )
+    else:
+        ValueError(
+            "input cmplex must be SimplicialComplex,CellComplex,CombinatorialComplex, or DynamicCombinatorialComplex "
+        )
+
+    return ind, A
 
 
 class Cell2Vec(Node2Vec):
@@ -31,68 +64,148 @@ class Cell2Vec(Node2Vec):
 
     Parameters
     ==========
-    cmplex: This is the combinatorial complex data structure that the Cell2Vec class will operate on.
-        It must be an instance of one of the following classes: SimplicialComplex, CellComplex,
-        CombinatorialComplex, or DynamicCombinatorialComplex.
 
-    neighborhood_type: This parameter specifies the type of neighborhood to use when creating
-        the graph representation of the combinatorial complex. The options are 'adj' (for adjacency) and
-        'coadj' (for co-adjacency).
-
-    neighborhood_dim: This parameter specifies the dimensions of the neighborhood to use when creating
-        the graph representation of the combinatorial complex.
-        It should be a dictionary with two keys: 'r' and 'k'.
-        The values of these keys depend on the neighborhood_type parameter.
-        If neighborhood_type is 'adj', then 'r' should be set to the radius of the
-        neighborhood (an integer), and 'k' should be set to -1.
-        If neighborhood_type is 'coadj', then 'r' should be set to -1, and 'k'
-        should be set to the number of edges in the neighborhood (an integer).
-
-    dimensions: This is the number of dimensions to use for the node embeddings.
-
-    walk_length: This is the length of each random walk.
-
-    num_walks: This is the number of random walks to generate.
-
-    workers: This is the number of worker threads to use for parallel computation
     """
 
     def __init__(
         self,
-        cmplex,
-        neighborhood_type="adj",
-        neighborhood_dim={"r": 0, "k": -1},
-        dimensions=64,
-        walk_length=30,
-        num_walks=200,
-        workers=4,
+        walk_number: int = 10,
+        walk_length: int = 80,
+        p: float = 1.0,
+        q: float = 1.0,
+        dimensions: int = 128,
+        workers: int = 4,
+        window_size: int = 5,
+        epochs: int = 1,
+        learning_rate: float = 0.05,
+        min_count: int = 1,
+        seed: int = 42,
     ):
-        if isinstance(cmplex, SimplicialComplex) or isinstance(cmplex, CellComplex):
-            if neighborhood_type == "adj":
-                A = cmplex.adjacency_matrix(neighborhood_dim["r"])
-            else:
-                A = cmplex.coadjacency_matrix(neighborhood_dim["r"])
-        elif isinstance(cmplex, CombinatorialComplex) or isinstance(
-            cmplex, DynamicCombinatorialComplex
-        ):
-            if neighborhood_type == "adj":
-                A = cmplex.adjacency_matrix(
-                    neighborhood_dim["r"], neighborhood_dim["k"]
-                )
-            else:
-                A = cmplex.coadjacency_matrix(
-                    neighborhood_dim["k"], neighborhood_dim["r"]
-                )
-        else:
-            ValueError(
-                "input cmplex must be SimplicialComplex,CellComplex,CombinatorialComplex, or DynamicCombinatorialComplex "
-            )
-        G = nx.from_numpy_matrix(A)
-        Node2Vec.__init__(
-            self,
-            graph=G,
-            dimensions=dimensions,
+
+        super().__init__(
+            walk_number=walk_number,
             walk_length=walk_length,
-            num_walks=num_walks,
+            p=p,
+            q=q,
+            dimensions=dimensions,
             workers=workers,
+            window_size=window_size,
+            epochs=epochs,
+            learning_rate=learning_rate,
+            min_count=min_count,
+            seed=seed,
         )
+
+        self.A = []
+        self.ind = []
+
+    def fit(self, cmplex, neighborhood_type="adj", neighborhood_dim={"r": 0, "k": -1}):
+
+        self.ind, self.A = _neighbohood_from_complex(
+            cmplex, neighborhood_type, neighborhood_dim
+        )
+
+        g = nx.from_numpy_matrix(self.A)
+
+        super(Cell2Vec, self).fit(g)
+
+    def get_embedding(self, get_dic=False):
+        emb = super(Cell2Vec, self).get_embedding()
+        if get_dic:
+            return dict(zip(self.ind, emb))
+        else:
+            return emb
+
+
+class DeepCell(DeepWalk):
+    """
+
+    Parameters
+    ==========
+
+    """
+
+    def __init__(
+        self,
+        walk_number: int = 10,
+        walk_length: int = 80,
+        dimensions: int = 128,
+        workers: int = 4,
+        window_size: int = 5,
+        epochs: int = 1,
+        learning_rate: float = 0.05,
+        min_count: int = 1,
+        seed: int = 42,
+    ):
+
+        super().__init__(
+            walk_number=walk_number,
+            walk_length=walk_length,
+            dimensions=dimensions,
+            workers=workers,
+            window_size=window_size,
+            epochs=epochs,
+            learning_rate=learning_rate,
+            min_count=min_count,
+            seed=seed,
+        )
+
+        self.A = []
+        self.ind = []
+
+    def fit(self, cmplex, neighborhood_type="adj", neighborhood_dim={"r": 0, "k": -1}):
+        self.ind, self.A = _neighbohood_from_complex(
+            cmplex, neighborhood_type, neighborhood_dim
+        )
+
+        g = nx.from_numpy_matrix(self.A)
+
+        super(DeepCell, self).fit(g)
+
+    def get_embedding(self, get_dic=False):
+        emb = super(DeepCell, self).get_embedding()
+        if get_dic:
+            return dict(zip(self.ind, emb))
+        else:
+            return emb
+
+
+class HigherOrderLaplacianEigenmaps(LaplacianEigenmaps):
+    """
+
+    Parameters
+    ==========
+
+    """
+
+    def __init__(
+        self,
+        dimensions: int = 128,
+        maximum_number_of_iterations: int = 100,
+        seed: int = 42,
+    ):
+
+        super().__init__(
+            dimensions=dimensions,
+            maximum_number_of_iterations=maximum_number_of_iterations,
+            seed=seed,
+        )
+
+        self.A = []
+        self.ind = []
+
+    def fit(self, cmplex, neighborhood_type="adj", neighborhood_dim={"r": 0, "k": -1}):
+        self.ind, self.A = _neighbohood_from_complex(
+            cmplex, neighborhood_type, neighborhood_dim
+        )
+
+        g = nx.from_numpy_matrix(self.A)
+
+        super(DeepCell, self).fit(g)
+
+    def get_embedding(self, get_dic=False):
+        emb = super(DeepCell, self).get_embedding()
+        if get_dic:
+            return dict(zip(self.ind, emb))
+        else:
+            return emb
