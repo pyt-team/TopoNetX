@@ -141,6 +141,31 @@ B02 = cc.incidence_matrix(0,2)
 # incidence between 0 and 3 cells
 
 B03 = cc.incidence_matrix(0,3)
+```
+
+## Getting Started : simplicia/cellular/combinatorial representation learning
+
+```ruby
+import toponetx as tnx
+
+# create a cell complex object with a few cells
+cx = tnx.CellComplex([[1, 2, 3, 4], [3,4,5,6,7,8]],ranks=2)
+
+# create a model
+
+model = Cell2Vec()
+
+# fit the model
+
+model.fit(cx,neighborhood_type="adj", neighborhood_dim={"r": 1, "k": -1})
+# here neighborhood_dim={"r": 1, "k": -1} specifies the dimension for which the cell embeddings are going to be computed. 
+# r=1 means that the embeddings will be computed for the first dimension. The integer 'k' is ignored and only considered
+# when the input complex is a combinatorial complex.
+
+
+# get the embeddings:
+
+embeddings = model.get_embedding() 
 
 ```
 
