@@ -53,6 +53,8 @@ New Features of Version 1.0
 
 9. Boundary operator and Hodge Laplacian computation: TopoNetX provides methods for computing boundary operators and Hodge Laplacians on simplicial complexes.
 
+10. Support of higher order represenation learning algorithsm such as DeepCell, Cell2Vec, Higher Order Laplacian Eigenmaps and Higher Order Geometric Laplacian Eigenmaps for various complexes supported in TopoNetX (simplicial, cellular, combinatorial).
+
 
 Installing TopoNetX
 ====================
