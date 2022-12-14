@@ -10,7 +10,7 @@ of shapes and spaces. With its dynamic construction capabilities and support for
 attributes and data, TopoNetX allows users to easily explore the topological structure
 of their data and gain insights into its underlying geometric and algebraic properties.
 From computing boundary operators and Hodge Laplacians on simplicial complexes,
-to performing higher-order adjacency calculations
+to performing higher-order adjacency calculations.
 
 TopoNetX is similar to NetworkX, a popular graph package, but extends its capabilities to support a
 wider range of mathematical structures, including cell complexes, simplicial complexes, and
