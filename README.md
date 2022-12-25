@@ -10,7 +10,7 @@ of shapes and spaces. With its dynamic construction capabilities and support for
 attributes and data, TopoNetX allows users to easily explore the topological structure
 of their data and gain insights into its underlying geometric and algebraic properties.
 From computing boundary operators and Hodge Laplacians on simplicial complexes,
-to performing higher-order adjacency calculations
+to performing higher-order adjacency calculations.
 
 TopoNetX is similar to NetworkX, a popular graph package, but extends its capabilities to support a
 wider range of mathematical structures, including cell complexes, simplicial complexes, and
@@ -52,6 +52,8 @@ New Features of Version 1.0
 8. Support for arbitrary attributes and data: users can attach arbitrary attributes and data to cells, edges, and vertices in the complex.
 
 9. Boundary operator and Hodge Laplacian computation: TopoNetX provides methods for computing boundary operators and Hodge Laplacians on simplicial complexes.
+
+10. Support of higher order represenation learning algorithsm such as DeepCell, Cell2Vec, Higher Order Laplacian Eigenmaps and Higher Order Geometric Laplacian Eigenmaps for various complexes supported in TopoNetX (simplicial, cellular, combinatorial).
 
 
 Installing TopoNetX
@@ -139,6 +141,33 @@ B02 = cc.incidence_matrix(0,2)
 # incidence between 0 and 3 cells
 
 B03 = cc.incidence_matrix(0,3)
+```
+
+## Getting Started : simplicia/cellular/combinatorial representation learning
+
+```ruby
+import toponetx as tnx
+
+# create a cell complex object with a few cells
+cx = tnx.CellComplex([[1, 2, 3, 4], [3,4,5,6,7,8]],ranks=2)
+
+# create a model
+
+model = Cell2Vec()
+
+# fit the model
+
+model.fit(cx,neighborhood_type="adj", neighborhood_dim={"r": 1, "k": -1})
+# here neighborhood_dim={"r": 1, "k": -1} specifies the dimension for
+# which the cell embeddings are going to be computed. 
+# r=1 means that the embeddings will be computed for the first dimension.
+# The integer 'k' is ignored and only considered
+# when the input complex is a combinatorial complex.
+
+
+# get the embeddings:
+
+embeddings = model.get_embedding() 
 
 ```
 
