@@ -215,7 +215,9 @@ class SimplexView:
                 if simplex in self.faces_dict[len(simplex) - 1]:
                     self.faces_dict[len(simplex) - 1].update(attr)
                 else:
-                    raise KeyError(f"cell {simplex} is not in the simplex dictionary")
+                    raise KeyError(
+                        f"simplex {simplex} is not in the simplex dictionary"
+                    )
             elif isinstance(simplex, Hashable):
                 if frozenset({simplex}) in self:
                     self.faces_dict[0].update(attr)
@@ -331,13 +333,11 @@ class SimplexView:
                     [frozenset(s) for s in cofaces if len(s) == max_simplex_length]
                 )
                 self.faces_dict[k - 1][frozenset(sorted(simplex))] = {
-                    "id": len(self.faces_dict[k - 1]),
                     "is_maximal": False,
                     "membership": max_simplices,
                 }
             else:
                 self.faces_dict[k - 1][frozenset(sorted(simplex))] = {
-                    "id": len(self.faces_dict[k - 1]),
                     "is_maximal": True,
                     "membership": set(),
                 }
@@ -373,20 +373,20 @@ class SimplexView:
         k = len(face)
         if frozenset(sorted(face)) not in self.faces_dict[k - 1]:
             if len(face) == len(simplex_):
+
                 self.faces_dict[k - 1][frozenset(sorted(face))] = {
-                    "id": len(self.faces_dict[k - 1]),
                     "is_maximal": True,
                     "membership": set(),
                 }
             else:
                 self.faces_dict[k - 1][frozenset(sorted(face))] = {
-                    "id": len(self.faces_dict[k - 1]),
                     "is_maximal": False,
                     "membership": set({simplex_}),
                 }
         else:
             if len(face) != len(simplex_):
                 if self.faces_dict[k - 1][frozenset(sorted(face))]["is_maximal"]:
+
                     maximal_faces.add(frozenset(sorted(face)))
                     self.faces_dict[k - 1][frozenset(sorted(face))][
                         "is_maximal"
@@ -415,12 +415,62 @@ class SimplexView:
             else:
                 self.faces_dict[k - 1][simplex_].update(attr)
 
+    def insert_node(self, simplex, **attr):
+
+        if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
+            self.insert_simplex(simplex, **attr)
+            return
+
+        if isinstance(simplex, Iterable) or isinstance(simplex, Simplex):
+
+            if not isinstance(simplex, Simplex):
+
+                simplex_ = frozenset(sorted((simplex,)))
+
+            else:
+                simplex_ = simplex.nodes
+            self._update_faces_dict_length(simplex_)
+
+            if (
+                simplex_ in self.faces_dict[0]
+            ):  # simplex is already in the complex, just update the properties if needed
+                self.faces_dict[0][simplex_].update(attr)
+                return
+
+            if self.max_dim < len(simplex) - 1:
+                self.max_dim = len(simplex) - 1
+
+            if simplex_ not in self.faces_dict[0]:
+
+                self.faces_dict[0][simplex_] = {
+                    "is_maximal": True,
+                    "membership": set(),
+                }
+            else:
+                self.faces_dict[0][simplex_] = {"is_maximal": False}
+
+            if isinstance(simplex, Simplex):
+
+                self.faces_dict[0][simplex_].update(simplex.properties)
+            else:
+                self.faces_dict[0][simplex_].update(attr)
+        else:
+            raise TypeError("input type must be iterable, or Simplex")
+
     def insert_simplex(self, simplex, **attr):
 
         if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
             simplex = [simplex]
+        if isinstance(simplex, str):
+            simplex = [simplex]
         if isinstance(simplex, Iterable) or isinstance(simplex, Simplex):
+
             if not isinstance(simplex, Simplex):
+
+                for x in simplex:
+                    if not isinstance(x, Hashable):
+                        raise ValueError("all element of simplex must be hashable")
+
                 simplex_ = frozenset(
                     sorted(simplex)
                 )  # put the simplex in cananical order
@@ -432,7 +482,7 @@ class SimplexView:
 
             if (
                 simplex_ in self.faces_dict[len(simplex_) - 1]
-            ):  # simplex is already in the complex
+            ):  # simplex is already in the complex, just update the properties if needed
                 self.faces_dict[len(simplex_) - 1][simplex_].update(attr)
                 return
 
@@ -443,7 +493,6 @@ class SimplexView:
             maximal_faces = set()
 
             for r in range(numnodes, 0, -1):
-
                 for face in combinations(simplex_, r):
                     self._update_faces_dict_entry(face, simplex_, maximal_faces, **attr)
             if isinstance(simplex, Simplex):

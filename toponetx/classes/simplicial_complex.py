@@ -256,7 +256,8 @@ class SimplicialComplex:
         set of simplices of dimesnsion n
         """
         if n < len(self._simplex_set.faces_dict):
-            return list(self._simplex_set.faces_dict[n].keys())
+            return sorted(tuple(i) for i in self._simplex_set.faces_dict[n].keys())
+            # return list(self._simplex_set.faces_dict[n].keys())
         elif n < 0:
             raise ValueError(f"input must be a postive integer, got {n}")
         else:
@@ -375,7 +376,7 @@ class SimplicialComplex:
         self._simplex_set.remove_maximal_simplex(simplex)
 
     def add_node(self, node, **attr):
-        self.add_simplex(node, **attr)
+        self._simplex_set.insert_node(node, **attr)
 
     def add_simplex(self, simplex, **attr):
         self._simplex_set.insert_simplex(simplex, **attr)
@@ -498,13 +499,10 @@ class SimplicialComplex:
 
     def get_node_attributes(self, name):
         """Get node attributes from combintorial complex
-
         Parameters
         ----------
-
         name : string
            Attribute name
-
         Returns
         -------
         Dictionary of attributes keyed by node.
@@ -600,6 +598,13 @@ class SimplicialComplex:
 
         """
 
+        if d <= 0:
+            raise ValueError(f"input dimension d must be larger than zero, got {d}")
+        if d > self.dim:
+            raise ValueError(
+                f"input dimenion cannat be larger than the dimension of the complex, got {d}"
+            )
+
         if d == 0:
             boundary = dok_matrix(
                 (1, len(self._simplex_set.faces_dict[d].items())), dtype=np.float32
@@ -608,21 +613,17 @@ class SimplicialComplex:
             return boundary.tocsr()
         idx_simplices, idx_faces, values = [], [], []
 
-        simplex_dict_d = {
-            simplex: i
-            for i, simplex in enumerate(self._simplex_set.faces_dict[d].keys())
-        }
+        simplex_dict_d = {simplex: i for i, simplex in enumerate(self.skeleton(d))}
         simplex_dict_d_minus_1 = {
-            simplex: i
-            for i, simplex in enumerate(self._simplex_set.faces_dict[d - 1].keys())
+            simplex: i for i, simplex in enumerate(self.skeleton(d - 1))
         }
         for simplex, idx_simplex in simplex_dict_d.items():
             # for simplex, idx_simplex in self._simplex_set.faces_dict[d].items():
             for i, left_out in enumerate(np.sort(list(simplex))):
                 idx_simplices.append(idx_simplex)
                 values.append((-1) ** i)
-                face = simplex.difference({left_out})
-                idx_faces.append(simplex_dict_d_minus_1[face])
+                face = frozenset(simplex).difference({left_out})
+                idx_faces.append(simplex_dict_d_minus_1[tuple(face)])
         assert len(values) == (d + 1) * len(simplex_dict_d)
         boundary = coo_matrix(
             (values, (idx_faces, idx_simplices)),

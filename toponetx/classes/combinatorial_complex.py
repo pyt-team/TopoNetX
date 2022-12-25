@@ -975,6 +975,7 @@ class CombinatorialComplex:
         Example
 
         """
+        raise NotImplementedError
 
         # RNS = self.cells.restrict_to(element_subset=cellset, name=name)
         # return NestedCombinatorialComplex(cells=RNS, name=name)
@@ -996,6 +997,7 @@ class CombinatorialComplex:
         new Combinatorial Complex : NestedCombinatorialComplex
 
         """
+        raise NotImplementedError
 
     def from_networkx_graph(self, G):
         """
@@ -1046,7 +1048,9 @@ class CombinatorialComplex:
 
             >>> CC = CombinatorialComplex(cells=E)
             >>> HG = CC.to_hypergraph()
+
         """
+        raise NotImplementedError
 
     def is_connected(self, s=1, cells=False):
         """

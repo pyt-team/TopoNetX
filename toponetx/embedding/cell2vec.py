@@ -17,8 +17,6 @@ from toponetx.utils.structure import sparse_array_to_neighborhood_dict
 # from node2vec import Node2Vec
 
 
-
-
 def _neighbohood_from_complex(
     cmplex, neighborhood_type="adj", neighborhood_dim={"r": 0, "k": -1}
 ):
@@ -147,47 +145,6 @@ class DeepCell(DeepWalk):
             epochs=epochs,
             learning_rate=learning_rate,
             min_count=min_count,
-            seed=seed,
-        )
-
-        self.A = []
-        self.ind = []
-
-    def fit(self, cmplex, neighborhood_type="adj", neighborhood_dim={"r": 0, "k": -1}):
-        self.ind, self.A = _neighbohood_from_complex(
-            cmplex, neighborhood_type, neighborhood_dim
-        )
-
-        g = nx.from_numpy_matrix(self.A)
-
-        super(DeepCell, self).fit(g)
-
-    def get_embedding(self, get_dic=False):
-        emb = super(DeepCell, self).get_embedding()
-        if get_dic:
-            return dict(zip(self.ind, emb))
-        else:
-            return emb
-
-
-class HigherOrderLaplacianEigenmaps(LaplacianEigenmaps):
-    """
-
-    Parameters
-    ==========
-
-    """
-
-    def __init__(
-        self,
-        dimensions: int = 128,
-        maximum_number_of_iterations: int = 100,
-        seed: int = 42,
-    ):
-
-        super().__init__(
-            dimensions=dimensions,
-            maximum_number_of_iterations=maximum_number_of_iterations,
             seed=seed,
         )
 

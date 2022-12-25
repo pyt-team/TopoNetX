@@ -12,11 +12,6 @@ from toponetx.classes import (
     DynamicCombinatorialComplex,
     SimplicialComplex,
 )
-from toponetx.utils.structure import sparse_array_to_neighborhood_dict
-
-# from node2vec import Node2Vec
-
-
 
 
 def _neighbohood_from_complex(
