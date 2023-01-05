@@ -176,7 +176,8 @@ embeddings = model.get_embedding()
 
 TopoNetX is built with the help of several open source packages. All of these are listed in setup.py. Some of these packages include:
 
-NetworkX https://networkx.org/
-HyperNetX https://pnnl.github.io/HyperNetX/build/index.html
+- NetworkX https://networkx.org/
+
+- HyperNetX https://pnnl.github.io/HyperNetX/build/index.html
 
    
