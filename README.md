@@ -43,17 +43,9 @@ New Features of Version 1.0
 3. Support for attaching arbitrary attributes and data to cells, simplices, and other entities in the complex, allowing users to store and manipulate additional information about these objects.
 4. Computation of boundary operators, Hodge Laplacians, and higher-order adjacency
      operators on the complex, enabling users to study the topological properties of the space.
-5. Efficient storage and manipulation of complex data structures, using advanced
-     data structures such as sparse matrices and hypergraphs.
-6. Support for different computational modes, including "normal" and "gudhi",
-    allowing users to choose the mode that best fits their needs.
-7. Robust error handling and validation of input data, ensuring that the package is
+6. Robust error handling and validation of input data, ensuring that the package is
     reliable and easy to use.
-8. Support for arbitrary attributes and data: users can attach arbitrary attributes and data to cells, edges, and vertices in the complex.
-
-9. Boundary operator and Hodge Laplacian computation: TopoNetX provides methods for computing boundary operators and Hodge Laplacians on simplicial complexes.
-
-10. Support of higher order represenation learning algorithsm such as DeepCell, Cell2Vec, Higher Order Laplacian Eigenmaps and Higher Order Geometric Laplacian Eigenmaps for various complexes supported in TopoNetX (simplicial, cellular, combinatorial).
+7. Support of higher order represenation learning algorithsm such as DeepCell, Cell2Vec, Higher Order Laplacian Eigenmaps and Higher Order Geometric Laplacian Eigenmaps for various complexes supported in TopoNetX (simplicial, cellular, combinatorial).
 
 
 Installing TopoNetX
