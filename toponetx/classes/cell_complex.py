@@ -1667,54 +1667,54 @@ class CellComplex:
         else:
             return np.power(Ad, k) @ BTd + np.power(coAd, k) @ BTd
 
-    def adjacency_matrix(self, d, signed=True, weight=None, index=False):
-        """
-        The sparse weighted :term:`s-adjacency matrix`
+    # def adjacency_matrix(self, d, signed=True, weight=None, index=False):
+    #     """
+    #     The sparse weighted :term:`s-adjacency matrix`
 
-        Parameters
-        ----------
-        r,k : two ranks for skeletons in the input cell complex, such that r<k
+    #     Parameters
+    #     ----------
+    #     r,k : two ranks for skeletons in the input cell complex, such that r<k
 
-        s : int, optional, default: 1
+    #     s : int, optional, default: 1
 
-        index: boolean, optional, default: False
-            if True, will return a rowdict of row to node uid
+    #     index: boolean, optional, default: False
+    #         if True, will return a rowdict of row to node uid
 
-        weight: bool, default=True
-            If False all nonzero entries are 1.
-            If True adjacency matrix will depend on weighted incidence matrix,
-        index : book, default=False
-            indicate weather to return the indices of the adjacency matrix.
+    #     weight: bool, default=True
+    #         If False all nonzero entries are 1.
+    #         If True adjacency matrix will depend on weighted incidence matrix,
+    #     index : book, default=False
+    #         indicate weather to return the indices of the adjacency matrix.
 
-        Returns
-        -------
-        If index is True
-            adjacency_matrix : scipy.sparse.csr.csr_matrix
+    #     Returns
+    #     -------
+    #     If index is True
+    #         adjacency_matrix : scipy.sparse.csr.csr_matrix
 
-            row dictionary : dict
+    #         row dictionary : dict
 
-        If index if False
+    #     If index if False
 
-            adjacency_matrix : scipy.sparse.csr.csr_matrix
-        >>> CX = CellComplex()
-        >>> CX.add_cell([1,2,3],rank=2)
-        >>> CX.add_cell([1,4],rank=1)
-        >>> A0 = CX.adjacency_matrix(0)
+    #         adjacency_matrix : scipy.sparse.csr.csr_matrix
+    #     >>> CX = CellComplex()
+    #     >>> CX.add_cell([1,2,3],rank=2)
+    #     >>> CX.add_cell([1,4],rank=1)
+    #     >>> A0 = CX.adjacency_matrix(0)
 
-        """
+    #     """
 
-        if index:
-            MP, row, col = self.incidence_matrix(
-                d, signed=False, weight=weight, index=index
-            )
-        else:
-            MP = self.incidence_matrix(d + 1, signed=False, weight=weight, index=index)
-        weight = False  ## currently weighting is not supported
-        A = self._incidence_to_adjacency(MP, weight=weight)
-        if index:
-            return A, row
-        else:
-            return A
+    #     if index:
+    #         MP, row, col = self.incidence_matrix(
+    #             d+1, signed=False, weight=weight, index=index
+    #         )
+    #     else:
+    #         MP = self.incidence_matrix(d + 1, signed=False, weight=weight, index=index)
+    #     weight = False  ## currently weighting is not supported
+    #     A = self._incidence_to_adjacency(MP, weight=weight)
+    #     if index:
+    #         return A, row
+    #     else:
+    #         return A
 
     def cell_adjacency_matrix(self, signed=True, weight=None, index=False):
         """
