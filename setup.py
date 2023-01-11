@@ -23,6 +23,7 @@ install_requires = [
     "pre-commit",
     "scipy",
     "trimesh",
+    "karateclub"
 ]
 
 full_requires = []
