@@ -53,13 +53,13 @@ class TestSimplicialComplex(unittest.TestCase):
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 
         # compute the incidence matrix using the boundary_matrix() method
-        inc_matrix_d2 = sc.incidence_matrix(d=2)
+        inc_2 = sc.incidence_matrix(rank=2)
 
-        assert inc_matrix_d2.shape == (6, 2)
+        assert inc_2.shape == (6, 2)
 
         # assert that the incidence matrix is correct
         np.testing.assert_array_equal(
-            inc_matrix_d2.toarray(),
+            inc_2.toarray(),
             np.array([[0, 1, -1, 1, 0, 0], [0, 0, 0, 1, -1, 1]]).T,
         )
 
@@ -69,7 +69,7 @@ class TestSimplicialComplex(unittest.TestCase):
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 
         # compute the Hodge Laplacian using the hodge_laplacian_matrix() method
-        hl = sc.hodge_laplacian_matrix(d=0)
+        hl = sc.hodge_laplacian_matrix(rank=0)
 
         assert hl.shape == (5, 5)
 
@@ -92,7 +92,7 @@ class TestSimplicialComplex(unittest.TestCase):
         # create a SimplicialComplex object with a few simplices
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 
-        adj_matrix = sc.adjacency_matrix(d=0)
+        adj_matrix = sc.adjacency_matrix(rank=0)
 
         assert adj_matrix.shape == (5, 5)
 
