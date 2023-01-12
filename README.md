@@ -5,14 +5,14 @@ TopoNetX
 =========
 
 
-TopoNetX is a powerful and versatile package for studying the topological properties
+TopoNetX (TNX) is a package for studying the topological properties
 of shapes and spaces. With its dynamic construction capabilities and support for arbitrary
 attributes and data, TopoNetX allows users to easily explore the topological structure
 of their data and gain insights into its underlying geometric and algebraic properties.
-From computing boundary operators and Hodge Laplacians on simplicial complexes,
+From computing boundary operators and Hodge Laplacians on simplicial/cell/combinatorial complexes
 to performing higher-order adjacency calculations.
 
-TopoNetX is similar to NetworkX, a popular graph package, but extends its capabilities to support a
+TNX is similar to NetworkX, a popular graph package, but extends its capabilities to support a
 wider range of mathematical structures, including cell complexes, simplicial complexes, and
 combinatorial complexes. The TNX library provides classes and methods for modeling the entities and relationships
 found in higher order networks such as simplicial, cellular, CW and combinatorial complexes.
@@ -20,7 +20,7 @@ This library serves as a repository of the methods and algorithms we find most u
 as we explore what higher order networks can tell us.
 
 
-The package supports the construction many topological structures including the CellComplex, SimplicialComplex, and CombinatorialComplex classes.
+TNX supports the construction many topological structures including the CellComplex, SimplicialComplex, and CombinatorialComplex classes.
  The classes provide methods for computing boundary operators, Hodge Laplacians,
  and higher-order adjacency operators on the cell, simplicial, and combinatorial complexes,
   respectively. The classes are used in many areas of mathematics and computer science,
@@ -45,7 +45,6 @@ New Features of Version 1.0
      operators on the complex, enabling users to study the topological properties of the space.
 6. Robust error handling and validation of input data, ensuring that the package is
     reliable and easy to use.
-7. Support of higher order represenation learning algorithsm such as DeepCell, Cell2Vec, Higher Order Laplacian Eigenmaps and Higher Order Geometric Laplacian Eigenmaps for various complexes supported in TopoNetX (simplicial, cellular, combinatorial).
 
 
 Installing TopoNetX
