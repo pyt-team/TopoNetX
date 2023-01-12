@@ -84,38 +84,38 @@ class CellComplex:
 
         #Example 0
             >>> # Cell Complex can be empty
-            >>> CC = CellComplex( )
+            >>> cx = CellComplex()
         #Example 1
-            >>> CX = CellComplex()
-            >>> CX.add_cell([1,2,3,4],rank=2)
-            >>> CX.add_cell([2,3,4,5],rank=2)
-            >>> CX.add_cell([5,6,7,8],rank=2)
+            >>> cx = CellComplex()
+            >>> cx.add_cell([1, 2, 3, 4], rank=2)
+            >>> cx.add_cell([2, 3, 4, 5], rank=2)
+            >>> cx.add_cell([5, 6, 7, 8], rank=2)
         #Example 2
-            >>> c1= Cell( (1,2,3)) # a cell here is always assumed to be 2d
-            >>> c2= Cell( (1,2,3,4) )
-            >>> CX = CellComplex( [c1,c2] )
+            >>> c1 = Cell((1, 2, 3)) # a cell here is always assumed to be 2d
+            >>> c2 = Cell((1, 2, 3, 4))
+            >>> cx = CellComplex([c1, c2])
         #Example 3
-            >>> G= Graph()
-            >>> G.add_edge(1,0)
-            >>> G.add_edge(2,0)
-            >>> G.add_edge(1,2)
-            >>> CX = CellComplex(G)
-            >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
-            >>> CX.cells
+            >>> g = Graph()
+            >>> g.add_edge(1, 0)
+            >>> g.add_edge(2, 0)
+            >>> g.add_edge(1, 2)
+            >>> cx = CellComplex(g)
+            >>> cx.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
+            >>> cx.cells
         #Example 4
             >>> # non-regular cell complex
-            >>> CX = CellComplex(regular=False)
-            >>> CX.add_cell([1,2,3,4],rank=2,)
-            >>> CX.add_cell([2,3,4,5,2,3,4,5],rank=2) #non-regular 2-cell
-            >>> c1=Cell((1,2,3,4,5,1,2,3,4,5),regular=False)
-            >>> CX.add_cell(c1)
-            >>> CX.add_cell([5,6,7,8],rank=2)
-            >>> CX.is_regular
+            >>> cx = CellComplex(regular=False)
+            >>> cx.add_cell([1, 2, 3, 4], rank=2)
+            >>> cx.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
+            >>> c1 = Cell((1, 2, 3, 4, 5, 1, 2, 3, 4, 5), regular=False)
+            >>> cx.add_cell(c1)
+            >>> cx.add_cell([5, 6, 7, 8],rank=2)
+            >>> cx.is_regular
         #Example 5
-            >>> CX = CellComplex()
-            >>> CX.add_cell([1,2,3,4],rank=2, weight = 5)
-            >>> CX.add_cell([2,3,4,5],rank=2,  weight = 10)
-            >>> CX.add_cell([5,6,7,8],rank=2,  weight = 13)
+            >>> cx = CellComplex()
+            >>> cx.add_cell([1, 2, 3, 4], rank=2, weight=5)
+            >>> cx.add_cell([2, 3, 4, 5], rank=2, weight=10)
+            >>> cx.add_cell([5, 6, 7, 8], rank=2, weight=13)
 
     """
 
@@ -189,15 +189,13 @@ class CellComplex:
 
     @property
     def maxdim(self):
-
         if len(self.nodes) == 0:
             return 0
-        elif len(self.edges) == 0:
+        if len(self.edges) == 0:
             return 0
-        elif len(self.cells) == 0:
+        if len(self.cells) == 0:
             return 1
-        else:
-            return 2
+        return 2
 
     @property
     def dim(self):
@@ -234,13 +232,13 @@ class CellComplex:
 
         Example
         -------
-            >>> CX = CellComplex(regular=False)
-            >>> CX.add_cell([1,2,3,4],rank=2)
-            >>> CX.add_cell([2,3,4,5,2,3,4,5],rank=2) #non-regular 2-cell
-            >>> c1=Cell((1,2,3,4,5,1,2,3,4,5),regular=False)
-            >>> CX.add_cell(c1)
-            >>> CX.add_cell([5,6,7,8],rank=2)
-            >>> CX.is_regular
+            >>> cx = CellComplex(regular=False)
+            >>> cx.add_cell([1, 2, 3, 4], rank=2)
+            >>> cx.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
+            >>> c1 = Cell((1, 2, 3, 4, 5, 1, 2, 3, 4, 5),regular=False)
+            >>> cx.add_cell(c1)
+            >>> cx.add_cell([5, 6, 7, 8], rank=2)
+            >>> cx.is_regular
         """
 
         for c in self.cells:
@@ -414,7 +412,7 @@ class CellComplex:
         number_of_cells : int
         """
         if cellset:
-            return len([e for e in self.cells if e in cellset])
+            return len([c for c in self.cells if c in cellset])
         else:
             return len(self.cells)
 
@@ -509,7 +507,6 @@ class CellComplex:
         # Remove any cells that contain the node
         for cell in self.cells:
             if node in cell:
-
                 self.remove_cell(cell)
 
     def remove_nodes(self, node_set):
@@ -523,7 +520,7 @@ class CellComplex:
 
         Returns
         -------
-        cell complex : CombinatorialComplex
+        cell complex : Cell Complex
 
         """
         for n in node_set:
@@ -567,21 +564,19 @@ class CellComplex:
 
         Example
         -------
-        >>> CX = CellComplex()
-        >>> c1 = Cell((2,3,4), color = 'black' )
-        >>> CX.add_cell(c1,weight=3)
-        >>> CX.add_cell([1,2,3,4],rank=2,color='red')
-        >>> CX.add_cell([2,3,4,5],rank=2,color='blue')
-        >>> CX.add_cell([5,6,7,8],rank=2,color='green')
-        >>> CX.cells[(1,2,3,4)]['color']
+        >>> cx = CellComplex()
+        >>> c1 = Cell((2, 3, 4), color='black')
+        >>> cx.add_cell(c1, weight=3)
+        >>> cx.add_cell([1, 2, 3, 4], rank=2, color='red')
+        >>> cx.add_cell([2, 3, 4, 5], rank=2, color='blue')
+        >>> cx.add_cell([5, 6, 7, 8], rank=2, color='green')
+        >>> cx.cells[(1, 2, 3, 4)]['color']
         'red'
 
 
         Notes
         -----
         - Rank must be 0,1,2
-
-
         """
         if isinstance(cell, Cell):  # rank check will be ignored, cells by default
             # are assumed to be of rank 2
@@ -1694,7 +1689,7 @@ class CellComplex:
             A = CC._incidence_to_adjacency(M, s=s)
             return A
 
-    def restrict_to_cells(self, cellset, name=None):
+    def restrict_to_cells(self, cell_set, name=None):
         """
         Constructs a cell complex using a subset of the cells in cell complex
 
@@ -1711,29 +1706,29 @@ class CellComplex:
 
         Example
 
-        >>> CX = CellComplex()
-        >>> c1= Cell((1,2,3))
-        >>> c2= Cell((1,2,4))
-        >>> c3= Cell((1,2,5))
-        >>> CX = CellComplex([c1,c2,c3])
-        >>> CX.add_edge(1,0)
-        >>> CX1= CX.restrict_to_cells([c1, (0,1) ])
-        >>> CX1.cells
+        >>> cx = CellComplex()
+        >>> c1 = Cell((1, 2, 3))
+        >>> c2 = Cell((1, 2, 4))
+        >>> c3 = Cell((1, 2, 5))
+        >>> cx = CellComplex([c1, c2, c3])
+        >>> cx.add_edge(1, 0)
+        >>> cx1= cx.restrict_to_cells([c1, (0, 1)])
+        >>> cx1.cells
         CellView([Cell(1, 2, 3)])
 
         """
-        RNS = []
+        rns = []
         edges = []
-        for i in cellset:
+        for i in cell_set:
             if i in self.cells:
-                RNS.append(i)
+                rns.append(i)
             elif i in self.edges:
                 edges.append(i)
 
-        CX = CellComplex(cells=RNS, name=name)
+        cx = CellComplex(cells=rns, name=name)
         for i in edges:
-            CX.add_edge(i[0], i[1])
-        return CX
+            cx.add_edge(i[0], i[1])
+        return cx
 
     def restrict_to_nodes(self, nodeset, name=None):
         """
@@ -1752,14 +1747,13 @@ class CellComplex:
         new Cell Complex : Cellcomplex
 
         Example
-        >>> CX = CellComplex()
-        >>> c1= Cell((1,2,3))
-        >>> c2= Cell((1,2,4))
-        >>> c3= Cell((1,2,5))
-        >>> CX = CellComplex([c1,c2,c3])
-        >>> CX.add_edge(1,0)
-        >>> CX.restrict_to_nodes([1,2,3,0])
-
+        >>> cx = CellComplex()
+        >>> c1 = Cell((1, 2, 3))
+        >>> c2 = Cell((1, 2, 4))
+        >>> c3 = Cell((1, 2, 5))
+        >>> cx = CellComplex([c1, c2, c3])
+        >>> cx.add_edge(1, 0)
+        >>> cx.restrict_to_nodes([1, 2, 3, 0])
         """
 
         _G = Graph(self._G.subgraph(nodeset))
