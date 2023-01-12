@@ -215,12 +215,12 @@ class CellComplex:
         """
         return len(self.nodes), len(self.edges), len(self.cells)
 
-    def skeleton(self, k):
-        if k == 0:
+    def skeleton(self, rank):
+        if rank == 0:
             return self.nodes
-        if k == 1:
+        if rank == 1:
             return self.edges
-        if k == 2:
+        if rank == 2:
             return self.cells
         raise TopoNetXError("Only dimensions 0,1, and 2 are supported.")
 
