@@ -226,9 +226,7 @@ class CellComplex:
 
     @property
     def is_regular(self):
-
-        """
-        Checking the regularity condition of the cell complex
+        """Check the regularity condition of the cell complex.
 
         Returns
         -------
@@ -487,8 +485,7 @@ class CellComplex:
         raise NotImplementedError
 
     def remove_node(self, node):
-
-        """Removes the given node from the cell complex.
+        """Remove the given node from the cell complex.
 
         This method removes the given node from the cell complex, along with any
         cells that contain the node.
@@ -555,9 +552,7 @@ class CellComplex:
         self._G.add_edge_from(ebunch_to_add, **attr)
 
     def add_cell(self, cell, rank=None, check_skeleton=False, **attr):
-        """
-
-        Adds a single cells to cell complex.
+        """Add a single cell to cell complex.
 
         Parameters
         ----------
@@ -565,8 +560,6 @@ class CellComplex:
             If hashable the cell returned will be empty.
         uid : unique identifier that identifies the cell
         rank : rank of a cell, supported ranks is 1 or 2
-
-
 
         Returns
         -------
