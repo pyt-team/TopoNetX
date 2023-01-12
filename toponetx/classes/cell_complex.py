@@ -452,7 +452,7 @@ class CellComplex:
 
 
         """
-        if not node in self.nodes:
+        if node not in self.nodes:
             print(f"Node is not in cell complex {self.name}.")
             return
 
@@ -1126,7 +1126,7 @@ class CellComplex:
             if len(set(cell)) != len(cell):
                 if warnings_dis:
                     warnings.warn(
-                        f"repeating nodes invalidates the 2-cell regular condition"
+                        "repeating nodes invalidates the 2-cell regular condition"
                     )
                 return False
         if check_skeleton:
@@ -1216,8 +1216,6 @@ class CellComplex:
             >>> print(B1.todense())
 
         """
-        weight = None  # not supported at this version
-
         import scipy as sp
         import scipy.sparse
 
@@ -1339,16 +1337,15 @@ class CellComplex:
         """
 
         M = csr_matrix(M)
-        weight = False  ## currently weighting is not supported
+        weight = False  # currently weighting is not supported
         M = abs(M)  # make sure the incidence matrix has only positive entries
-        if weight == False:
+        if weight is False:
             A = M.dot(M.transpose())
             A.setdiag(0)
         return A
 
     def hodge_laplacian_matrix(self, d, signed=True, weight=None, index=False):
-        """
-        An hodge-laplacian matrix for the CC
+        """Compute the hodge-laplacian matrix for the CC.
 
         Parameters
         ----------
@@ -1706,7 +1703,7 @@ class CellComplex:
             )
         else:
             MP = self.incidence_matrix(d + 1, signed=False, weight=weight, index=index)
-        weight = False  ## currently weighting is not supported
+        weight = False  # currently weighting is not supported
         A = self._incidence_to_adjacency(MP, weight=weight)
         if index:
             return A, row
@@ -1724,7 +1721,6 @@ class CellComplex:
         """
 
         CC = self.to_combinatorial_complex()
-        weight = False  ## Currently default weight are not supported
 
         M = CC.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
@@ -1739,7 +1735,6 @@ class CellComplex:
     def node_adjacency_matrix(self, index=False, s=1, weight=False):
 
         CC = self.to_combinatorial_complex()
-        weight = False  ## Currently default weight are not supported
 
         M = CC.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
@@ -2268,7 +2263,7 @@ class CellComplex:
         try:
             path = nx.shortest_path_length(g, rkey[source], rkey[target])
             return path
-        except:
+        except Exception:
             warnings.warn(f"No {s}-path between {source} and {target}")
             return np.inf
 
@@ -2322,7 +2317,7 @@ class CellComplex:
         try:
             path = nx.shortest_path_length(g, ckey[source], ckey[target])
             return path
-        except:
+        except Exception:
             warnings.warn(f"No {s}-path between {source} and {target}")
             return np.inf
 
