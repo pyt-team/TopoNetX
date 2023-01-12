@@ -1,8 +1,8 @@
 """
-
-Simplicial Complex Class
-
+Class for creation and manipulation of simplicial complexes.
+The class also supports attaching arbitrary attributes and data to cells.
 """
+
 
 try:
     from collections.abc import Iterable
@@ -50,7 +50,9 @@ __all__ = ["SimplicialComplex"]
 
 
 class SimplicialComplex:
-    """Class for construction boundary operators, Hodge Laplacians,
+    """Class representing a simplicial complex.
+
+    Class for construction boundary operators, Hodge Laplacians,
     higher order (co)adjacency operators from collection of
     simplices.
 
@@ -68,7 +70,6 @@ class SimplicialComplex:
     in a specific way. For example, a 2-dimensional simplicial complex could be a collection of
     triangles that are connected to each other to form a surface, while a 3-dimensional simplicial
     complex could be a collection of tetrahedra that are connected to each other to form a solid object.
-
 
     The SimplicialComplex class is a class for representing simplicial complexes,
     which are a type of topological space constructed by "gluing together" points, line segments,
