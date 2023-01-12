@@ -319,6 +319,17 @@ class TestCellComplex(unittest.TestCase):
         expected = (inc_matrix_d2.T).dot(inc_matrix_d2)
         np.testing.assert_array_equal(down_lap_d2.toarray(), expected.toarray())
 
+    def test_hodge_laplacian_and_up_down_laplacians(self):
+        cx = CellComplex()
+        cx.add_cell([2, 3, 4], rank=2)
+        cx.add_cell([1, 3, 4], rank=2)
+
+        up_lap_d1 = cx.up_laplacian_matrix(d=1)
+        down_lap_d1 = cx.down_laplacian_matrix(d=1)
+        hodge_lap_d1 = cx.hodge_laplacian_matrix(d=1)
+        expected = up_lap_d1 + down_lap_d1
+        np.testing.assert_array_equal(hodge_lap_d1.toarray(), expected.toarray())
+
 
 if __name__ == "__main__":
     unittest.main()
