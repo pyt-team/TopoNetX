@@ -204,7 +204,7 @@ class CellComplex:
     @property
     def shape(self):
         """
-        (number of cells[i], for i in range(0,dim(CC))  )
+        (number of cells[i], for i in range(0,dim(cc))  )
 
         Returns
         -------
@@ -337,10 +337,10 @@ class CellComplex:
         """
         return self._G.degree[node]
 
-    def size(self, cell, nodeset=None):
+    def size(self, cell, node_set=None):
         """
-        The number of nodes in nodeset that belong to cell.
-        If nodeset is None then returns the size of cell
+        The number of nodes in node_set that belong to cell.
+        If node_set is None then returns the size of cell
 
         Parameters
         ----------
@@ -352,8 +352,8 @@ class CellComplex:
         size : int
 
         """
-        if nodeset:
-            return len(set(nodeset).intersection(set(self.cells[cell])))
+        if node_set:
+            return len(set(node_set).intersection(set(self.cells[cell])))
         else:
             if cell in self.cells:
 
@@ -361,13 +361,13 @@ class CellComplex:
             else:
                 raise KeyError(f" the key {cell} is not a key for an existing cell ")
 
-    def number_of_nodes(self, nodeset=None):
+    def number_of_nodes(self, node_set=None):
         """
-        The number of nodes in nodeset belonging to cell complex.
+        The number of nodes in node_set belonging to cell complex.
 
         Parameters
         ----------
-        nodeset : an interable of nodes, optional, default: None
+        node_set : an interable of nodes, optional, default: None
             If None, then return the number of nodes in cell complex.
 
         Returns
@@ -375,8 +375,8 @@ class CellComplex:
         number_of_nodes : int
 
         """
-        if nodeset:
-            return len([n for n in self.nodes if n in nodeset])
+        if node_set:
+            return len([n for n in self.nodes if n in node_set])
         else:
             return len(self.nodes)
 
@@ -418,7 +418,7 @@ class CellComplex:
 
     def order(self):
         """
-        The number of nodes in CC.
+        The number of nodes in cc.
 
         Returns
         -------
@@ -474,7 +474,7 @@ class CellComplex:
         """
         """
         if not cell in self.cells:
-            print(f"cell is not in CC {self.name}.")
+            print(f"cell is not in cc {self.name}.")
 
 
         node = self.cells[cell].uid
@@ -516,7 +516,7 @@ class CellComplex:
         Parameters
         ----------
         node_set : an iterable of hashables or Entities
-            Nodes in CC
+            Nodes in cc
 
         Returns
         -------
@@ -745,10 +745,10 @@ class CellComplex:
         Example
         -------
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> cc = CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
 
-        >>> CC.set_filtration(d, "f")
+        >>> cc.set_filtration(d, "f")
 
         """
         import numbers
@@ -779,10 +779,10 @@ class CellComplex:
         Note : this is equivalent to getting a feature defined on the entire cell complex
 
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> cc = CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
-        >>> CC.set_filtration(d, "f")
-        >>> CC.get_filtration("f")
+        >>> cc.set_filtration(d, "f")
+        >>> cc.get_filtration("f")
 
         {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
 
@@ -813,9 +813,9 @@ class CellComplex:
         Example
         -------
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> cc = CellComplex(G)
         >>> d = {0: {'color': 'red', 'attr2': 1 }, 1: {'color': 'blue', 'attr2': 3}}
-        >>> CC.set_node_attributes(d)
+        >>> cc.set_node_attributes(d)
 
         """
 
@@ -852,9 +852,9 @@ class CellComplex:
         -------
 
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> cc = CellComplex(G)
         >>> d={ (0,1) : {'color':'red','attr2':1 },(1,2): {'color':'blue','attr2':3 } }
-        >>> CC.set_edge_attributes(d)
+        >>> cc.set_edge_attributes(d)
 
         """
 
@@ -912,13 +912,13 @@ class CellComplex:
             to assign a cell attribute to store the value of that property for
             each cell:
 
-            >>> CC = CellComplex()
-            >>> CC.add_cell([1,2,3,4], rank=2)
-            >>> CC.add_cell([1,2,4], rank=2,)
-            >>> CC.add_cell([3,4,8], rank=2)
+            >>> cc = CellComplex()
+            >>> cc.add_cell([1,2,3,4], rank=2)
+            >>> cc.add_cell([1,2,4], rank=2,)
+            >>> cc.add_cell([3,4,8], rank=2)
             >>> d={(1,2,3,4):'red',(1,2,4):'blue'}
-            >>> CC.set_cell_attributes(rank,name='color')
-            >>> CC.cells[(1,2,3,4)]['color']
+            >>> cc.set_cell_attributes(rank,name='color')
+            >>> cc.cells[(1,2,3,4)]['color']
             'red'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -927,14 +927,14 @@ class CellComplex:
             Examples
             --------
             >>> G = nx.path_graph(3)
-            >>> CC = CellComplex(G)
-            >>> CC.add_cell([1,2,3,4], rank=2)
-            >>> CC.add_cell([1,2,3,4], rank=2)
-            >>> CC.add_cell([1,2,4], rank=2,)
-            >>> CC.add_cell([3,4,8], rank=2)
+            >>> cc = CellComplex(G)
+            >>> cc.add_cell([1,2,3,4], rank=2)
+            >>> cc.add_cell([1,2,3,4], rank=2)
+            >>> cc.add_cell([1,2,4], rank=2,)
+            >>> cc.add_cell([3,4,8], rank=2)
             >>> d={ (1,2,3,4): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
-            >>> CC.set_cell_attributes(d)
-            >>> CC.cells[(1,2,3,4)][0]['color']
+            >>> cc.set_cell_attributes(d)
+            >>> cc.cells[(1,2,3,4)][0]['color']
             'red'
 
         Note : If the dict contains cells that are not in `self.cells`, they are
@@ -1005,16 +1005,16 @@ class CellComplex:
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> cc = CellComplex(G)
         >>> d={0: {'color':'red','attr2':1 },1: {'color':'blue','attr2':3 } }
-        >>> CC.set_node_attributes(d)
-        >>> CC.get_node_attributes('color')
+        >>> cc.set_node_attributes(d)
+        >>> cc.get_node_attributes('color')
         {0: 'red', 1: 'blue'}
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CC = CellComplex(G)
-        >>> nodes_color = CC.get_node_attributes('color')
+        >>> cc = CellComplex(G)
+        >>> nodes_color = cc.get_node_attributes('color')
         >>> nodes_color[1]
         'blue'
 
@@ -1041,13 +1041,13 @@ class CellComplex:
         >>> G = nx.path_graph(3)
 
         >>> d={ ((1,2,3,4),0): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
-        >>> CC = CellComplex(G)
-        >>> CC.add_cell([1,2,3,4], rank=2)
-        >>> CC.add_cell([1,2,3,4], rank=2)
-        >>> CC.add_cell([1,2,4], rank=2,)
-        >>> CC.add_cell([3,4,8], rank=2)
-        >>> CC.set_cell_attributes(d)
-        >>> cell_color=CC.get_cell_attributes('color',2)
+        >>> cc = CellComplex(G)
+        >>> cc.add_cell([1,2,3,4], rank=2)
+        >>> cc.add_cell([1,2,3,4], rank=2)
+        >>> cc.add_cell([1,2,4], rank=2,)
+        >>> cc.add_cell([3,4,8], rank=2)
+        >>> cc.set_cell_attributes(d)
+        >>> cell_color=cc.get_cell_attributes('color',2)
         >>> cell_color
         '{((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
         """
@@ -1091,13 +1091,13 @@ class CellComplex:
          -------
             >>> import networkx as nx
             >>> G = nx.path_graph(3)
-            >>> CC = CellComplex(G)
-            >>> CC.add_cell([1,2,3,4], rank=2)
-            >>> CC.add_cell([1,2,3,4], rank=2)
-            >>> CC.add_cell([2,3,4,1], rank=2)
-            >>> CC.add_cell([1,2,4], rank=2,)
-            >>> CC.add_cell([3,4,8], rank=2)
-            >>> CC.remove_equivalent_cells()
+            >>> cc = CellComplex(G)
+            >>> cc.add_cell([1,2,3,4], rank=2)
+            >>> cc.add_cell([1,2,3,4], rank=2)
+            >>> cc.add_cell([2,3,4,1], rank=2)
+            >>> cc.add_cell([1,2,4], rank=2,)
+            >>> cc.add_cell([3,4,8], rank=2)
+            >>> cc.remove_equivalent_cells()
 
         """
         self.cells.remove_equivalent_cells()
@@ -1131,7 +1131,7 @@ class CellComplex:
 
     def incidence_matrix(self, rank, signed=True, weight=None, index=False):
         """
-        An incidence matrix for the CC indexed by nodes x cells.
+        An incidence matrix for the cc indexed by nodes x cells.
 
         Parameters
         ----------
@@ -1273,7 +1273,7 @@ class CellComplex:
 
                     A[ei, celli] = edge_visiting_dic[
                         ei
-                    ]  # this will update everytime we visit this edge for non-regular CC
+                    ]  # this will update everytime we visit this edge for non-regular cc
                     # the regular case can be handled more efficiently :
                     # if edge in edge_index:
                     #    A[ei, celli] = 1
@@ -1333,7 +1333,7 @@ class CellComplex:
         return A
 
     def hodge_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
-        """Compute the hodge-laplacian matrix for the CC.
+        """Compute the hodge-laplacian matrix for the cc.
 
         Parameters
         ----------
@@ -1570,13 +1570,13 @@ class CellComplex:
         -------
           >>> import networkx as nx
           >>> G = nx.path_graph(3)
-          >>> CC = CellComplex(G)
-          >>> CC.add_cell([1,2,3,4], rank=2)
-          >>> CC.add_cell([1,2,3,4], rank=2)
-          >>> CC.add_cell([2,3,4,1], rank=2)
-          >>> CC.add_cell([1,2,4], rank=2,)
-          >>> CC.add_cell([3,4,8], rank=2)
-          >>> CC.down_laplacian_matrix(2)
+          >>> cc = CellComplex(G)
+          >>> cc.add_cell([1,2,3,4], rank=2)
+          >>> cc.add_cell([1,2,3,4], rank=2)
+          >>> cc.add_cell([2,3,4,1], rank=2)
+          >>> cc.add_cell([1,2,4], rank=2,)
+          >>> cc.add_cell([3,4,8], rank=2)
+          >>> cc.down_laplacian_matrix(2)
 
 
         """
@@ -1663,30 +1663,30 @@ class CellComplex:
 
         """
 
-        CC = self.to_combinatorial_complex()
+        cc = self.to_combinatorial_complex()
 
-        M = CC.incidence_matrix(0, None, incidence_type="up", index=index)
+        M = cc.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
 
-            A = CC._incidence_to_adjacency(M[0].transpose())
+            A = cc._incidence_to_adjacency(M[0].transpose())
 
             return A, M[2]
         else:
-            A = CC._incidence_to_adjacency(M.transpose())
+            A = cc._incidence_to_adjacency(M.transpose())
             return A
 
     def node_adjacency_matrix(self, index=False, s=1, weight=False):
 
-        CC = self.to_combinatorial_complex()
+        cc = self.to_combinatorial_complex()
 
-        M = CC.incidence_matrix(0, None, incidence_type="up", index=index)
+        M = cc.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
 
-            A = CC._incidence_to_adjacency(M[0], s=s)
+            A = cc._incidence_to_adjacency(M[0], s=s)
 
             return A, M[1]
         else:
-            A = CC._incidence_to_adjacency(M, s=s)
+            A = cc._incidence_to_adjacency(M, s=s)
             return A
 
     def restrict_to_cells(self, cell_set, name=None):
@@ -1719,25 +1719,25 @@ class CellComplex:
         """
         rns = []
         edges = []
-        for i in cell_set:
-            if i in self.cells:
-                rns.append(i)
-            elif i in self.edges:
-                edges.append(i)
+        for cell in cell_set:
+            if cell in self.cells:
+                rns.append(cell)
+            elif edge in self.edges:
+                edges.append(edge)
 
         cx = CellComplex(cells=rns, name=name)
-        for i in edges:
-            cx.add_edge(i[0], i[1])
+        for edge in edges:
+            cx.add_edge(edge[0], edge[1])
         return cx
 
-    def restrict_to_nodes(self, nodeset, name=None):
+    def restrict_to_nodes(self, node_set, name=None):
         """
         Constructs a new cell complex  by restricting the cells in the cell complex to
-        the nodes referenced by nodeset.
+        the nodes referenced by node_set.
 
         Parameters
         ----------
-        nodeset: iterable of hashables
+        node_set: iterable of hashables
             References a subset of elements of self.nodes
 
         name: string, optional, default: None
@@ -1756,7 +1756,7 @@ class CellComplex:
         >>> cx.restrict_to_nodes([1, 2, 3, 0])
         """
 
-        _G = Graph(self._G.subgraph(nodeset))
+        _G = Graph(self._G.subgraph(node_set))
         cx = CellComplex(_G)
         cells = []
         for cell in self.cells:
@@ -1764,8 +1764,8 @@ class CellComplex:
                 cells.append(cell)
         cx = CellComplex(_G)
 
-        for e in cells:
-            cx.add_cell(e)
+        for cell in cells:
+            cx.add_cell(cell)
         return cx
 
     def to_combinatorial_complex(self):
@@ -1779,8 +1779,8 @@ class CellComplex:
         >>> cx.add_cell([1,2,3,4],rank=2)
         >>> cx.add_cell([2,3,4,5],rank=2)
         >>> cx.add_cell([5,6,7,8],rank=2)
-        >>> CC= cx.to_combinatorial_complex()
-        >>> CC.cells
+        >>> cc= cx.to_combinatorial_complex()
+        >>> cc.cells
         """
         all_cells = []
 
@@ -1914,7 +1914,7 @@ class CellComplex:
         An s-cell-component has the property that for any two cells e1 and e2
         there is a sequence of cells starting with e1 and ending with e2
         such that pairwise adjacent cells in the sequence intersect in at least
-        s nodes. If s=1 these are the path components of the CC.
+        s nodes. If s=1 these are the path components of the cc.
 
         If cells=False this method returns s-node-connected components.
         A list of sets of uids of the nodes which are s-walk connected.
@@ -1931,7 +1931,7 @@ class CellComplex:
         ------
         s_connected_components : iterator
             Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
-            components of CC.
+            components of cc.
 
         """
 
@@ -1962,7 +1962,7 @@ class CellComplex:
 
         cells : boolean, optional, cells=False
             Determines if cell or node components are desired. Returns
-            subgraphs equal to the CC restricted to each set of nodes(cells) in the
+            subgraphs equal to the cc restricted to each set of nodes(cells) in the
             s-connected components or s-cell-connected components
         return_singletons : bool, optional
 
@@ -2062,7 +2062,7 @@ class CellComplex:
     def cell_diameters(self, s=1):
         """
         Returns the cell diameters of the s_cell_connected component subgraphs
-        in CC.
+        in cc.
 
         Parameters
         ----------
@@ -2073,7 +2073,7 @@ class CellComplex:
         maximum diameter : int
 
         list of diameters : list
-            List of cell_diameters for s-cell component subgraphs in CC
+            List of cell_diameters for s-cell component subgraphs in cc
 
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
@@ -2109,7 +2109,7 @@ class CellComplex:
         Raises
         ------
         TopoNetXError
-            If CC is not s-cell-connected
+            If cc is not s-cell-connected
 
         Notes
         -----
@@ -2125,7 +2125,7 @@ class CellComplex:
         if nx.is_connected(G):
             return nx.diameter(G)
         else:
-            raise TopoNetXError(f"CC is not s-connected. s={s}")
+            raise TopoNetXError(f"cc is not s-connected. s={s}")
 
     def cell_diameter(self, s=1):
         """
@@ -2167,10 +2167,10 @@ class CellComplex:
         Parameters
         ----------
         source : node.uid or node
-            a node in the CC
+            a node in the cc
 
         target : node.uid or node
-            a node in the CC
+            a node in the cc
 
         s : positive integer
             the number of cells
