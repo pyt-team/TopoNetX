@@ -751,9 +751,9 @@ class CellComplex:
         -------
         >>> G = nx.path_graph(3)
         >>> CC = CellComplex(G)
-        >>> d={0: 1, 1: 0,2:2, (0,1) : 1 ,(1,2) : 3}
+        >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
 
-        >>> CC.set_filtration(d,"f")
+        >>> CC.set_filtration(d, "f")
 
         """
         import numbers
@@ -785,8 +785,8 @@ class CellComplex:
 
         >>> G = nx.path_graph(3)
         >>> CC = CellComplex(G)
-        >>> d={0: 1, 1: 0,2:2, (0,1) : 1 ,(1,2) : 3}
-        >>> CC.set_filtration(d,"f")
+        >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
+        >>> CC.set_filtration(d, "f")
         >>> CC.get_filtration("f")
 
         {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
@@ -819,7 +819,7 @@ class CellComplex:
         -------
         >>> G = nx.path_graph(3)
         >>> CC = CellComplex(G)
-        >>> d={0: {'color':'red','attr2':1 },1: {'color':'blue','attr2':3 } }
+        >>> d = {0: {'color': 'red', 'attr2': 1 }, 1: {'color': 'blue', 'attr2': 3}}
         >>> CC.set_node_attributes(d)
 
         """
@@ -922,7 +922,7 @@ class CellComplex:
             >>> CC.add_cell([1,2,4], rank=2,)
             >>> CC.add_cell([3,4,8], rank=2)
             >>> d={(1,2,3,4):'red',(1,2,4):'blue'}
-            >>> CC.set_cell_attributes(d,name='color')
+            >>> CC.set_cell_attributes(rank,name='color')
             >>> CC.cells[(1,2,3,4)]['color']
             'red'
 
@@ -1134,7 +1134,7 @@ class CellComplex:
                     return False
         return True
 
-    def incidence_matrix(self, d, signed=True, weight=None, index=False):
+    def incidence_matrix(self, rank, signed=True, weight=None, index=False):
         """
         An incidence matrix for the CC indexed by nodes x cells.
 
@@ -1212,7 +1212,7 @@ class CellComplex:
         import scipy as sp
         import scipy.sparse
 
-        if d == 0:
+        if rank == 0:
             A = sp.sparse.lil_matrix((1, len(self._G.nodes)))
             for i in range(0, len(self._G.nodes)):
                 A[0, i] = 1
@@ -1228,7 +1228,7 @@ class CellComplex:
                 else:
                     return abs(A.asformat("csc"))
 
-        elif d == 1:
+        elif rank == 1:
             nodelist = sorted(
                 self._G.nodes
             )  # always output boundary matrix in dictionary order
@@ -1252,7 +1252,7 @@ class CellComplex:
                     return A.asformat("csc")
                 else:
                     return abs(A.asformat("csc"))
-        elif d == 2:
+        elif rank == 2:
             edgelist = sorted([sorted(e) for e in self._G.edges])
 
             A = sp.sparse.lil_matrix((len(edgelist), len(self.cells)))
@@ -1337,7 +1337,7 @@ class CellComplex:
             A.setdiag(0)
         return A
 
-    def hodge_laplacian_matrix(self, d, signed=True, weight=None, index=False):
+    def hodge_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
         """Compute the hodge-laplacian matrix for the CC.
 
         Parameters
@@ -1408,10 +1408,10 @@ class CellComplex:
 
         """
 
-        if d == 0:  # return L0, the unit graph laplacian
+        if rank == 0:  # return L0, the unit graph laplacian
             if index:
                 nodelist, _, B_next = self.incidence_matrix(
-                    d + 1, weight=weight, index=True
+                    rank + 1, weight=weight, index=True
                 )
                 L = B_next @ B_next.transpose()
                 if signed:
@@ -1419,19 +1419,19 @@ class CellComplex:
                 else:
                     return nodelist, abs(L)
             else:
-                B_next = self.incidence_matrix(d + 1, weight=weight)
+                B_next = self.incidence_matrix(rank + 1, weight=weight)
                 L = B_next @ B_next.transpose()
                 if signed:
                     return L
                 else:
                     return abs(L)
-        elif d < 2:  # d == 1, return L1
+        elif rank < 2:  # rank == 1, return L1
 
             if self.maxdim == 2:
                 edge_list, cell_list, B_next = self.incidence_matrix(
-                    d + 1, weight=weight, index=True
+                    rank + 1, weight=weight, index=True
                 )
-                B = self.incidence_matrix(d, weight=weight, index=False)
+                B = self.incidence_matrix(rank, weight=weight, index=False)
                 L = B_next @ B_next.transpose() + B.transpose() @ B
             else:
                 L = B.transpose() @ B
@@ -1442,10 +1442,10 @@ class CellComplex:
             else:
                 return L
 
-        elif d == 2 and self.maxdim == 2:
+        elif rank == 2 and self.maxdim == 2:
 
             edge_list, cell_list, B = self.incidence_matrix(
-                d, weight=weight, index=True
+                rank, weight=weight, index=True
             )
             L = B.transpose() @ B
             if not signed:
@@ -1455,7 +1455,7 @@ class CellComplex:
                 return cell_list, L
             else:
                 return L
-        elif d == 2 and self.maxdim != 2:
+        elif rank == 2 and self.maxdim != 2:
             raise ValueError(
                 f"the input complex does not have cells of dim 2, max cell dim is {self.maxdim} (maximal dimension cells), got {d}"
             )
@@ -1464,7 +1464,7 @@ class CellComplex:
                 f"d should be larger than 0 and <= {self.maxdim} (maximal dimension cells), got {d}"
             )
 
-    def up_laplacian_matrix(self, d, signed=True, weight=None, index=False):
+    def up_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
         """
 
         Parameters
@@ -1517,11 +1517,15 @@ class CellComplex:
 
         weight = None  # this feature is not supported in this version
 
-        if d == 0:
-            row, col, B_next = self.incidence_matrix(d + 1, weight=weight, index=True)
+        if rank == 0:
+            row, col, B_next = self.incidence_matrix(
+                rank + 1, weight=weight, index=True
+            )
             L_up = B_next @ B_next.transpose()
-        elif d < self.maxdim:
-            row, col, B_next = self.incidence_matrix(d + 1, weight=weight, index=True)
+        elif rank < self.maxdim:
+            row, col, B_next = self.incidence_matrix(
+                rank + 1, weight=weight, index=True
+            )
             L_up = B_next @ B_next.transpose()
         else:
 
@@ -1536,7 +1540,7 @@ class CellComplex:
         else:
             return L_up
 
-    def down_laplacian_matrix(self, d, signed=True, weight=None, index=False):
+    def down_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
         """
 
         Parameters
@@ -1583,8 +1587,8 @@ class CellComplex:
         """
         weight = None  # this feature is not supported in this version
 
-        if d <= self.maxdim and d > 0:
-            row, column, B = self.incidence_matrix(d, weight=weight, index=True)
+        if rank <= self.maxdim and rank > 0:
+            row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
@@ -1597,12 +1601,12 @@ class CellComplex:
         else:
             return L_down
 
-    def adjacency_matrix(self, d, signed=False, weight=None, index=False):
+    def adjacency_matrix(self, rank, signed=False, weight=None, index=False):
 
         weight = None  # this feature is not supported in this version
 
         ind, L_up = self.up_laplacian_matrix(
-            d, signed=signed, weight=weight, index=True
+            rank, signed=signed, weight=weight, index=True
         )
         L_up.setdiag(0)
 
@@ -1613,12 +1617,12 @@ class CellComplex:
         else:
             return L_up
 
-    def coadjacency_matrix(self, d, signed=False, weight=None, index=False):
+    def coadjacency_matrix(self, rank, signed=False, weight=None, index=False):
 
         weight = None  # this feature is not supported in this version
 
         ind, L_down = self.down_laplacian_matrix(
-            d, signed=signed, weight=weight, index=True
+            rank, signed=signed, weight=weight, index=True
         )
         L_down.setdiag(0)
         if not signed:
@@ -1628,28 +1632,28 @@ class CellComplex:
         else:
             return L_down
 
-    def k_hop_incidence_matrix(self, d, k):
-        Bd = self.incidence_matrix(d, signed=True)
-        if d < self.maxdim and d >= 0:
-            Ad = self.adjacency_matrix(d, signed=True)
-        if d <= self.maxdim and d > 0:
-            coAd = self.coadjacency_matrix(d, signed=True)
-        if d == self.maxdim:
+    def k_hop_incidence_matrix(self, rank, k):
+        Bd = self.incidence_matrix(rank, signed=True)
+        if rank < self.maxdim and rank >= 0:
+            Ad = self.adjacency_matrix(rank, signed=True)
+        if rank <= self.maxdim and rank > 0:
+            coAd = self.coadjacency_matrix(rank, signed=True)
+        if rank == self.maxdim:
             return Bd @ np.power(coAd, k)
-        elif d == 0:
+        elif rank == 0:
             return Bd @ np.power(Ad, k)
         else:
             return Bd @ np.power(Ad, k) + Bd @ np.power(coAd, k)
 
-    def k_hop_coincidence_matrix(self, d, k):
-        BTd = self.coincidence_matrix(d, signed=True)
-        if d < self.maxdim and d >= 0:
-            Ad = self.adjacency_matrix(d, signed=True)
-        if d <= self.maxdim and d > 0:
-            coAd = self.coadjacency_matrix(d, signed=True)
-        if d == self.maxdim:
+    def k_hop_coincidence_matrix(self, rank, k):
+        BTd = self.coincidence_matrix(rank, signed=True)
+        if rank < self.maxdim and rank >= 0:
+            Ad = self.adjacency_matrix(rank, signed=True)
+        if rank <= self.maxdim and rank > 0:
+            coAd = self.coadjacency_matrix(rank, signed=True)
+        if rank == self.maxdim:
             return np.power(coAd, k) @ BTd
-        elif d == 0:
+        elif rank == 0:
             return np.power(Ad, k) @ BTd
         else:
             return np.power(Ad, k) @ BTd + np.power(coAd, k) @ BTd
