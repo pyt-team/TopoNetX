@@ -1,3 +1,5 @@
+"""Unit tests for the combinatorial complex class."""
+
 import unittest
 
 import networkx as nx

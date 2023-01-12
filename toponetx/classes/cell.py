@@ -15,17 +15,17 @@ __all__ = ["Cell", "CellView"]
 
 
 class Cell:
-    """A 2d cell class. The elementry building block used
-        to build a 2d cell complex (regular or non-regular).
-    Parameters
-    ==========
+    """Class representing a 2d cell.
 
-    elements: any iterable of hashables.
+    A 2d cell is the elementry building block used
+    to build a 2d cell complex (regular or non-regular).
+
+    Parameters
+    ----------
+    elements : any iterable of hashables.
         Elements order is important and defines the 2
         cell up to cyclic permutation.
-
-    name : str
-
+    name : str, optional, default: None
     is_regular : bool
         checks for regularity conditions of the cell. Raises ValueError when
         the True and when the input elements do not satisfy the regullarity condition
@@ -33,8 +33,8 @@ class Cell:
         properties belonging to cell added as key=value pairs.
         Both key and value must be hashable.
 
-    Note
-    ------
+    Notes
+    -----
     - a cell is defined as an ordered sequence of nodes (n1,...,nk)
       each two consequitive nodes (ni,n_{i+1}) define an edge in the boundary of the cell
       note that the last edge (n_k,n1) is also included in the boundary of the cell
@@ -54,7 +54,6 @@ class Cell:
     """
 
     def __init__(self, elements, name=None, regular=True, **attr):
-
         if name is None:
             self.name = "_"
         else:
@@ -167,18 +166,12 @@ class Cell:
         return self.nodes
 
     def reverse(self):
-        """
+        """Reverse the sequence of nodes that defines the cell.
 
-        reverse the sequnce of nodes that define the cell and return a new cell with the new reversed elements
-
-
-        Paramters:
-        ---------
-         None
+        This returns a new cell with the new reversed elements.
 
         Return : Cell
         ------
-
         """
         c = Cell(self.nodes[::-1], name=self.name, regular=self._regular)
         c.properties = self.properties
@@ -256,9 +249,11 @@ class Cell:
 
 class CellView:
     """A CellView class for cells of a CellComplex
+
     Parameters
     ----------
     name : str
+
     Examples
     --------
          >>> CV = CellView()
