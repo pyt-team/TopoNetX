@@ -18,17 +18,11 @@ import numpy as np
 from hypernetx import Hypergraph
 from hypernetx.classes.entity import Entity
 from networkx import Graph
-from networkx.algorithms import bipartite
 from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell, CellView
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
-from toponetx.classes.ranked_entity import (
-    DynamicCell,
-    Node,
-    RankedEntity,
-    RankedEntitySet,
-)
+from toponetx.classes.ranked_entity import DynamicCell, Node, RankedEntitySet
 from toponetx.exception import TopoNetXError
 
 __all__ = ["CellComplex"]
@@ -1583,8 +1577,8 @@ class CellComplex:
         weight = None  # this feature is not supported in this version
 
         if rank <= self.maxdim and rank > 0:
-            row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
-            L_down = B.transpose() @ B
+            row, column, inc = self.incidence_matrix(rank, weight=weight, index=True)
+            L_down = inc.transpose() @ inc
         else:
             raise ValueError(
                 f"d should be larger than 1 and <= {self.maxdim} (maximal dimension cells), got {d}."
@@ -1597,7 +1591,7 @@ class CellComplex:
             return L_down
 
     def adjacency_matrix(self, rank, signed=False, weight=None, index=False):
-
+        """Compute adjacency matrix for a given rank."""
         weight = None  # this feature is not supported in this version
 
         ind, L_up = self.up_laplacian_matrix(
@@ -1613,7 +1607,7 @@ class CellComplex:
             return L_up
 
     def coadjacency_matrix(self, rank, signed=False, weight=None, index=False):
-
+        """Compute coadjacency matrix for a given rank."""
         weight = None  # this feature is not supported in this version
 
         ind, L_down = self.down_laplacian_matrix(
@@ -1628,30 +1622,31 @@ class CellComplex:
             return L_down
 
     def k_hop_incidence_matrix(self, rank, k):
-        Bd = self.incidence_matrix(rank, signed=True)
+        """Compute k-hop incidence matrix for a given rank."""
+        inc = self.incidence_matrix(rank, signed=True)
         if rank < self.maxdim and rank >= 0:
-            Ad = self.adjacency_matrix(rank, signed=True)
+            adj = self.adjacency_matrix(rank, signed=True)
         if rank <= self.maxdim and rank > 0:
-            coAd = self.coadjacency_matrix(rank, signed=True)
+            coadj = self.coadjacency_matrix(rank, signed=True)
         if rank == self.maxdim:
-            return Bd @ np.power(coAd, k)
+            return inc @ np.power(coadj, k)
         elif rank == 0:
-            return Bd @ np.power(Ad, k)
+            return inc @ np.power(adj, k)
         else:
-            return Bd @ np.power(Ad, k) + Bd @ np.power(coAd, k)
+            return inc @ np.power(adj, k) + inc @ np.power(coadj, k)
 
     def k_hop_coincidence_matrix(self, rank, k):
-        BTd = self.coincidence_matrix(rank, signed=True)
+        coinc = self.coincidence_matrix(rank, signed=True)
         if rank < self.maxdim and rank >= 0:
-            Ad = self.adjacency_matrix(rank, signed=True)
+            adj = self.adjacency_matrix(rank, signed=True)
         if rank <= self.maxdim and rank > 0:
-            coAd = self.coadjacency_matrix(rank, signed=True)
+            coadj = self.coadjacency_matrix(rank, signed=True)
         if rank == self.maxdim:
-            return np.power(coAd, k) @ BTd
+            return np.power(coadj, k) @ coinc
         elif rank == 0:
-            return np.power(Ad, k) @ BTd
+            return np.power(adj, k) @ coinc
         else:
-            return np.power(Ad, k) @ BTd + np.power(coAd, k) @ BTd
+            return np.power(adj, k) @ coinc + np.power(coadj, k) @ coinc
 
     def cell_adjacency_matrix(self, signed=True, weight=None, index=False):
         """
@@ -1665,29 +1660,29 @@ class CellComplex:
 
         cc = self.to_combinatorial_complex()
 
-        M = cc.incidence_matrix(0, None, incidence_type="up", index=index)
+        inc = cc.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
 
-            A = cc._incidence_to_adjacency(M[0].transpose())
+            adj = cc._incidence_to_adjacency(inc[0].transpose())
 
-            return A, M[2]
+            return adj, inc[2]
         else:
-            A = cc._incidence_to_adjacency(M.transpose())
-            return A
+            adj = cc._incidence_to_adjacency(inc.transpose())
+            return adj
 
     def node_adjacency_matrix(self, index=False, s=1, weight=False):
 
         cc = self.to_combinatorial_complex()
 
-        M = cc.incidence_matrix(0, None, incidence_type="up", index=index)
+        inc = cc.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
 
-            A = cc._incidence_to_adjacency(M[0], s=s)
+            adj = cc._incidence_to_adjacency(inc[0], s=s)
 
-            return A, M[1]
+            return adj, inc[1]
         else:
-            A = cc._incidence_to_adjacency(M, s=s)
-            return A
+            adj = cc._incidence_to_adjacency(inc, s=s)
+            return adj
 
     def restrict_to_cells(self, cell_set, name=None):
         """
