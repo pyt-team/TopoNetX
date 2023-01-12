@@ -35,6 +35,14 @@ class TestCellComplex(unittest.TestCase):
         assert len(cx.nodes) == 4
         assert len(cx.edges) == 5
 
+    def test_nodes_and_edges(self):
+        """Test cell complex with cells."""
+        c1 = Cell([1, 3, 4])
+        c2 = Cell([2, 3, 4])
+        cx = CellComplex([c1, c2])
+        assert set(cx.nodes) == {1, 2, 3, 4}
+        assert set(cx.edges) == {(1, 3), (1, 4), (3, 2), (3, 4), (4, 2)}
+
     def test_init_networkx_graph(self):
         """Test cell complex with networkx graph as input."""
         gr = nx.Graph()
