@@ -50,7 +50,7 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell(c1)
         CX.add_cell([5, 6, 7, 8], rank=2)
 
-        assert CX.is_regular == False
+        assert CX.is_regular is False
 
     def test_CellComplex_add_cell(self):
         # Test adding a single cell
@@ -100,7 +100,7 @@ class TestCellComplex(unittest.TestCase):
         assert len(cx.cells) == 0
         assert len(cx.nodes) == 0
         assert len(cx.edges) == 0
-        assert cx.is_regular == True
+        assert cx.is_regular
 
     # Test adding cells to CellComplex
     def test_add_cells_to_cell_complex(self):
