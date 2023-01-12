@@ -35,9 +35,7 @@ __all__ = ["CellComplex"]
 
 
 class CellComplex:
-
-    """
-    A class representing a cell complex.
+    """Class representing a cell complex.
 
     In mathematics, a cell complex is a space that is constructed by attaching lower-dimensional
     cells to a topological space to form a new space. The cells are attached to the space in a specific way,
@@ -220,12 +218,11 @@ class CellComplex:
     def skeleton(self, k):
         if k == 0:
             return self.nodes
-        elif k == 1:
+        if k == 1:
             return self.edges
-        elif k == 2:
+        if k == 2:
             return self.cells
-        else:
-            raise TopoNetXError("Only dimensions 0,1, and 2 are supported.")
+        raise TopoNetXError("Only dimensions 0,1, and 2 are supported.")
 
     @property
     def is_regular(self):

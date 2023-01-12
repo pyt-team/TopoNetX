@@ -8,7 +8,8 @@ from toponetx.classes.cell_complex import CellComplex
 
 
 class TestCellComplex(unittest.TestCase):
-    def test_cell_complex_initialization(self):
+    def test_init(self):
+        """Test empty cell complex and cell complex with cells."""
         # Test empty cell complex
         cx = CellComplex()
         self.assertEqual(len(cx.cells), 0)
@@ -16,7 +17,6 @@ class TestCellComplex(unittest.TestCase):
         self.assertEqual(cx.dim, 0)
 
         # Test cell complex with cells
-
         c1 = Cell([1, 2, 3])
         c2 = Cell([1, 2, 3, 4])
         cx = CellComplex([c1, c2])
@@ -24,15 +24,17 @@ class TestCellComplex(unittest.TestCase):
         assert c2 in cx.cells
         self.assertEqual(cx.dim, 2)
 
-        # Test cell complex with graph
-
-        G = nx.Graph()
-        G.add_edge(1, 0)
-        G.add_edge(2, 0)
-        G.add_edge(1, 2)
-        cx = CellComplex(G)
+    def test_init_with_nx_graph(self):
+        """Test cell complex with networkx graph as input."""
+        gr = nx.Graph()
+        gr.add_edge(1, 0)
+        gr.add_edge(2, 0)
+        gr.add_edge(1, 2)
+        cx = CellComplex(gr)
         self.assertEqual(cx.dim, 1)
 
+    def test_is_regular_property(self):
+        """Test is_regular property."""
         # Test non-regular cell complex
         # allows for constructions of non-regular cells
         cx = CellComplex(regular=False)
