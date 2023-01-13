@@ -1336,7 +1336,7 @@ class CellComplex:
 
         Parameters
         ----------
-        d : int, dimension of the Laplacian matrix.
+        rank : int, dimension of the Laplacian matrix.
             Supported dimension are 0,1 and 2
 
         signed : bool, is true return absolute value entry of the Laplacian matrix
