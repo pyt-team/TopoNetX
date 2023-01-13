@@ -1,3 +1,4 @@
+.DS_Store
 .pytest_cache/
 .eggs/
 *.egg-info/
@@ -14,4 +15,4 @@ coverage.xml
 **/__pycache__/**
 __pycache__/
 docs/build/
-
+toponetx/.DS_Store
