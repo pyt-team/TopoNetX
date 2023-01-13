@@ -74,9 +74,11 @@ import toponetx as tnx
 
 sc = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 
-# Compute the incidence matrices 
+# Compute the incidence matrix between 1-skeleton and 0-skeleton
 
 B1 = sc.incidence_matrix(1)
+
+# Compute the incidence matrix between 2-skeleton and 1-skeleton
 
 B2 = sc.incidence_matrix(2)
 
@@ -95,9 +97,11 @@ cx = tnx.CellComplex([[1, 2, 3, 4], [3, 4, 5, 6, 7, 8]],ranks=2)
 
 cx.add_edge(0, 1)
 
-# Compute the Hodge Laplacian matrices 
+# Compute the Hodge Laplacian matrix of dimension 1
 
 L1 = cx.hodge_laplacian_matrix(1)
+
+# Compute the Hodge Laplacian matrix of dimension 2
 
 L2 = cx.hodge_laplacian_matrix(2)
 ```
@@ -117,11 +121,11 @@ cc.add_cell([1, 2, 3], rank=2)
 cc.add_cell([3, 4, 5], rank=2)
 cc.add_cells_from([[2, 3, 4, 5], [3, 4, 5, 6, 7]], ranks=3)
 
-# Compute incidence between 0 and 2 cells
+# Compute the incidence matrix between cells of rank 0 and 2
 
 B02 = cc.incidence_matrix(0, 2) 
 
-# Computer incidence between 0 and 3 cells
+# Compute the incidence matrix between cells of rank 0 and 3
 
 B03 = cc.incidence_matrix(0, 3)
 ```
@@ -133,3 +137,5 @@ All of these are listed in setup.py.
 Some of these packages include:
 - [`NetworkX`](https://networkx.org/)
 - [`HyperNetX`](https://pnnl.github.io/HyperNetX/build/index.html)
+- [`gudhi`](https://gudhi.inria.fr/python/latest/)
+- [`trimesh`](https://trimsh.org/index.html)
