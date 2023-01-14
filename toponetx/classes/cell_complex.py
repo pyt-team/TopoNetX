@@ -50,21 +50,17 @@ class CellComplex:
     such as algebraic topology and geometry, where they can be used to study the structure and
     properties of these objects.
 
-
     This class represents a cell complex, which is a space constructed by
     attaching cells of different dimensions to a topological space.
-
 
     In TNX the class CellComplex supports building a regular or non-regular
     2d cell complex. The class CellComplex only supports the construction
     of 2d cell complexes. If higher order constructions are desired
     then one should utilize the class CombinatorialComplex.
 
-
     In TNX cell complexes are implementes to be dynamic in the sense that
     they can change by adding or subtracting objects (nodes, edges, cells)
     from them.
-
 
     1. Dynamic construction of cell complexes, allowing users to add or remove objects from these
         structures after their initial creation.
