@@ -1,9 +1,7 @@
 """
-# --------------------------------------------------------
-# Class supporting basic functions and constructions methods over Combinatorial Complex
-# --------------------------------------------------------
+Class for creation and manipulation of a combinatorial complex.
+The class also supports basic functions.
 """
-
 
 import collections
 import warnings

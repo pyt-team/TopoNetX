@@ -1,5 +1,5 @@
 """
-Class for creation and manipulation of 2d Cell Complex.
+Class for creation and manipulation of a 2d cell complex.
 The class also supports attaching arbitrary attributes and data to cells.
 """
 
