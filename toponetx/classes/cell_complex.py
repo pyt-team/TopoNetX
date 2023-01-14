@@ -1290,7 +1290,7 @@ class CellComplex:
                 else:
                     return abs(A.asformat("csc"))
         else:
-            raise ValueError(f"Only dimension 0,1 and 2 are supported, got {d}")
+            raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
 
     @staticmethod
     def _incidence_to_adjacency(inc, weight=False):
@@ -1451,11 +1451,12 @@ class CellComplex:
                 return lap
         elif rank == 2 and self.maxdim != 2:
             raise ValueError(
-                f"the input complex does not have cells of dim 2, max cell dim is {self.maxdim} (maximal dimension cells), got {d}"
+                "The input complex does not have cells of dim 2. "
+                f"The maximal cell dimension is {self.maxdim}, got {rank}"
             )
         else:
             raise ValueError(
-                f"d should be larger than 0 and <= {self.maxdim} (maximal dimension cells), got {d}"
+                f"Rank should be larger than 0 and <= {self.maxdim} (maximal dimension cells), got {rank}."
             )
 
     def up_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
@@ -1524,7 +1525,7 @@ class CellComplex:
         else:
 
             raise ValueError(
-                f"d should larger than 0 and <= {self.maxdim-1} (maximal dimension cells-1), got {d}"
+                f"Rank should larger than 0 and <= {self.maxdim-1} (maximal dimension cells-1), got {rank}."
             )
         if not signed:
             lap_up = abs(lap_up)
@@ -1722,8 +1723,8 @@ class CellComplex:
         for cell in cell_set:
             if cell in self.cells:
                 rns.append(cell)
-            elif edge in self.edges:
-                edges.append(edge)
+            elif cell in self.edges:
+                edges.append(cell)
 
         cx = CellComplex(cells=rns, name=name)
         for edge in edges:
