@@ -18,8 +18,9 @@ from hypernetx import Hypergraph
 from networkx import Graph
 from scipy.sparse import coo_matrix, dok_matrix
 
-from toponetx.classes.node_view import NodeView
-from toponetx.classes.ranked_entity import DynamicCell, RankedEntitySet
+from toponetx.classes.dynamic_cell import DynamicCell
+from toponetx.classes.node import NodeView
+from toponetx.classes.ranked_entity import RankedEntitySet
 from toponetx.classes.simplex import Simplex, SimplexView
 from toponetx.exception import TopoNetXError
 

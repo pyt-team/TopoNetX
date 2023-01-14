@@ -19,7 +19,7 @@ from networkx import Graph
 from scipy.sparse import csr_matrix
 
 from toponetx.classes.abstract_cell import AbstractCell, AbstractCellView
-from toponetx.classes.node_view import NodeView
+from toponetx.classes.node import NodeView
 from toponetx.classes.ranked_entity import RankedEntity
 from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import sparse_array_to_neighborhood_dict

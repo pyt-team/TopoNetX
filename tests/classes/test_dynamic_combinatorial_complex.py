@@ -2,17 +2,14 @@ import unittest
 
 import networkx as nx
 
+from toponetx.classes.dynamic_cell import DynamicCell
 from toponetx.classes.dynamic_combinatorial_complex import DynamicCombinatorialComplex
-from toponetx.classes.ranked_entity import (
-    DynamicCell,
-    Node,
-    RankedEntity,
-    RankedEntitySet,
-)
+from toponetx.classes.node import Node
+from toponetx.classes.ranked_entity import RankedEntity, RankedEntitySet
 
 
 class TestDynamicCombinatorialComplex(unittest.TestCase):
-    def test_dynnamic_combinatorial_complex_ranks(self):
+    def test_dynamic_combinatorial_complex_ranks(self):
         x1 = Node(1)
         x2 = Node(2)
         y1 = DynamicCell(elements=[x1, x2], rank=1)
@@ -20,7 +17,7 @@ class TestDynamicCombinatorialComplex(unittest.TestCase):
         self.assertEqual(x2.rank, 0)
         self.assertEqual(y1.rank, 1)
 
-    def test_dynnamic_combinatorial_complex_skeleton(self):
+    def test_dynamic_combinatorial_complex_skeleton(self):
         x1 = RankedEntity("x1", rank=0)
         x2 = RankedEntity("x2", rank=0)
         x3 = RankedEntity("x3", rank=0)

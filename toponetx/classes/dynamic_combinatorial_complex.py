@@ -22,22 +22,18 @@ from networkx import Graph
 from networkx.algorithms import bipartite
 from scipy.sparse import csr_matrix
 
-from toponetx.classes.ranked_entity import (
-    DynamicCell,
-    Node,
-    RankedEntity,
-    RankedEntitySet,
-)
+from toponetx.classes.dynamic_cell import DynamicCell
+from toponetx.classes.node import Node
+from toponetx.classes.ranked_entity import RankedEntity, RankedEntitySet
 from toponetx.exception import TopoNetXError
 
 __all__ = ["DynamicCombinatorialComplex"]
 
 
 class DynamicCombinatorialComplex:
+    """Class for (Dynamic) Combinatorial Complex.
 
-    """
-    Class for Combintorial Complex.
-    A Combintorial Complex (CC) is a triple CC=(S,X,i) where S is an abstract set of entities,
+    A Combinatorial Complex (CC) is a triple CC=(S, X, i) where S is an abstract set of entities,
     X a subset of the power set of X and i is the a rank function that associates for every
     set x in X a rank.
 
@@ -57,27 +53,25 @@ class DynamicCombinatorialComplex:
     It is used in many areas of mathematics, such as graph theory, algebraic topology,
     and discrete geometry.
 
-
     In a CC each cell is instantiated as an RankedEntity (see the ranked_entity.py)
     and given an identifier or uid. Ranked Entities
     keep track of inclusion and ranking relationships and can be Dynamic.
 
     Mathematical example
     ---------------------
-    Let S = {1,2,3,4} be a set of entities.
-    Let X = {{1,2}, {1,2,3}, {1,3}, {1,4}} be a subset of the power set of S.
+    Let S = {1, 2, 3, 4} be a set of entities.
+    Let X = {{1, 2}, {1, 2, 3}, {1, 3}, {1, 4}} be a subset of the power set of S.
     Let i be the ranking function that assigns the
-    length of a set as its rank, i.e. i({1,2}) = 2, i({1,2,3}) = 3, etc.
+    length of a set as its rank, i.e. i({1, 2}) = 2, i({1, 2, 3}) = 3, etc.
 
-    Then, (S,X,i) is a combinatorial complex.
-
+    Then, (S, X, i) is a combinatorial complex.
 
     Example 0
         >>> # DynamicCombinatorialComplex can be empty
         >>> CC = DynamicCombinatorialComplex( )
     Example 1
         >>> # from the constructor pass a list of cells and a list of correponding ranks
-        >>> CC = DynamicCombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
+        >>> CC = DynamicCombinatorialComplex(cells=[[1, 2, 3],[2,3], [0] ],ranks=[2,1,0] )
     Example 2
         >>> # create a collection of Node objects and a collection of DynamicCells
         >>> # and pass them to RankedEntitySet which is then passed to DynamicCombinatorialComplex
@@ -138,10 +132,8 @@ class DynamicCombinatorialComplex:
         >>> G.add_edge(0,1)
         >>> G.add_edge(0,3)
         >>> G.add_edge(0,4)
-        >>> G.add_edge(1,4)
+        >>> G.add_edge(1, 4)
         >>> CC = DynamicCombinatorialComplex(cells=G)
-
-
 
     Parameters
     ----------
@@ -696,10 +688,10 @@ class DynamicCombinatorialComplex:
             each cell:
 
             >>> CC = DynamicCombinatorialComplex()
-            >>> CC.add_cell([1,2,3,4], rank=2)
-            >>> CC.add_cell([1,2,4], rank=2,)
+            >>> CC.add_cell([1, 2, 3, 4], rank=2)
+            >>> CC.add_cell([1, 2,4], rank=2,)
             >>> CC.add_cell([3,4], rank=2)
-            >>> d={(1,2,3,4):'red',(1,2,3):'blue',(3,4):'green'}
+            >>> d={(1, 2, 3, 4):'red',(1, 2, 3):'blue',(3,4):'green'}
             >>> CC.set_cell_attributes(d,name='color')
             >>> CC.cells[(3,4)].properties['color']
             'green'
@@ -711,7 +703,7 @@ class DynamicCombinatorialComplex:
             --------
             >>> G = nx.path_graph(3)
             >>> CC = DynamicCombinatorialComplex(G)
-            >>> d={(1,2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
+            >>> d={(1, 2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
             >>> CC.set_cell_attributes(d)
             >>> CC.cells[(0,1)].properties['color']
             'blue'
@@ -794,7 +786,7 @@ class DynamicCombinatorialComplex:
         --------
         >>> G = nx.path_graph(3)
         >>> CC = DynamicCombinatorialComplex(G)
-        >>> d={(1,2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
+        >>> d={(1, 2): {'color':'red','attr2':1 },(0,1): {'color':'blue','attr2':3 } }
         >>> CC.set_cell_attributes(d)
         >>> cell_color=CC.get_cell_attributes('color')
         >>> cell_color[frozenset({0, 1})]
@@ -1116,7 +1108,7 @@ class DynamicCombinatorialComplex:
         >>> G.add_edge(0,1)
         >>> G.add_edge(0,3)
         >>> G.add_edge(0,4)
-        >>> G.add_edge(1,4)
+        >>> G.add_edge(1, 4)
         >>> CC = DynamicCombinatorialComplex(cells=G)
         >>> CC.adjacency_matrix(0,1)
         """

@@ -1,4 +1,4 @@
-"""Classes representing cells."""
+"""Cell and CellView classes."""
 
 try:
     from collections.abc import Iterable
@@ -15,7 +15,7 @@ __all__ = ["Cell", "CellView"]
 class Cell:
     """Class representing a 2d cell.
 
-    A 2d cell is the elementry building block used
+    A 2d cell is the elementary building block used
     to build a 2d cell complex (regular or non-regular).
 
     Parameters

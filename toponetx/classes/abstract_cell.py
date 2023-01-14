@@ -1,3 +1,5 @@
+"""AbstractCell and AbstractCellView classes."""
+
 import numpy as np
 
 try:
@@ -13,11 +15,12 @@ __all__ = ["AbstractCell", "AbstractCellView"]
 
 
 class AbstractCell:
-    """
-    A class representing an abstract cell in a combinatorial complex or a cell complex.
+    """Class for an abstract cell in a combinatorial complex or a cell complex.
 
-    This class represents an abstract cell in a combinatorial complex, which is a set of nodes with optional attributes and a rank.
-    The nodes in a cell must be hashable and unique, and the cell itself is immutable.
+    This class represents an abstract cell in a combinatorial complex,
+    which is a set of nodes with optional attributes and a rank.
+    The nodes in a cell must be hashable and unique,
+    and the cell itself is immutable.
 
 
     :param elements: The nodes in the cell.
@@ -29,11 +32,11 @@ class AbstractCell:
     :param **attr: Additional attributes of the cell, as keyword arguments.
 
     Examples
-    ========
-        >>> ac1 = AbstractCell ( (1,2,3) )
-        >>> ac2 = AbstractCell ( (1,2,4,5) )
-        >>> ac3 = AbstractCell ( ("a","b","c") )
-        >>> ac3 = AbstractCell ( ("a","b","c"), rank = 10)
+    --------
+    >>> ac1 = AbstractCell ( (1,2,3) )
+    >>> ac2 = AbstractCell ( (1,2,4,5) )
+    >>> ac3 = AbstractCell ( ("a","b","c") )
+    >>> ac3 = AbstractCell ( ("a","b","c"), rank = 10)
     """
 
     def __init__(self, elements, rank=None, name=None, **attr):

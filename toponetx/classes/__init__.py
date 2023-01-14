@@ -1,4 +1,5 @@
 from .ranked_entity import *
+from .dynamic_cell import *
 from .cell import *
 from .simplex import *
 from .abstract_cell import *
@@ -7,4 +8,4 @@ from .cell_complex import *
 from .dynamic_combinatorial_complex import *
 from .combinatorial_complex import *
 from .cell_complex import *
-from .node_view import *
+from .node import *

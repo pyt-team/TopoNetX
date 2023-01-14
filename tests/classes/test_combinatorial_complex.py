@@ -96,7 +96,7 @@ class TestCombinatorialComplex(unittest.TestCase):
         """Test generating an incidence matrix."""
         CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
 
-        B = CC.incidence_matrix(0, 2)
+        B = CC.incidence_matrix(rank=0, to_rank=2)
         assert B.shape == (4, 2)
         assert (B.T[0].todense() == [1, 1, 1, 0]).all()
         assert (B.T[1].todense() == [0, 1, 1, 1]).all()
