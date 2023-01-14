@@ -183,7 +183,6 @@ class TestCellComplex(unittest.TestCase):
 
     def test_incidence_matrix_cell_complex_with_multiple_cells(self):
         """Test the incidence matrix for a cell complex with multiple cells."""
-        # Test cell complex with multiple cells
         CX = CellComplex()
         CX.add_cell([2, 3, 4], rank=2)
         CX.add_cell([1, 3, 4], rank=2)
@@ -209,32 +208,32 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([3, 4, 5], rank=2)
 
         # Test the incidence matrix for the full cell complex
-        inc_2 = CX.incidence_matrix(rank=2, signed=False)
-        assert inc_2.shape == (7, 3)
-        assert (inc_2[:, 0].T.toarray()[0] == np.array([1, 1, 1, 0, 0, 0, 0])).all()
-        assert (inc_2[:, 1].T.toarray()[0] == np.array([0, 0, 1, 1, 1, 0, 0])).all()
-        assert (inc_2[:, 2].T.toarray()[0] == np.array([0, 0, 0, 0, 1, 1, 1])).all()
+        B2 = CX.incidence_matrix(rank=2, signed=False)
+        assert B2.shape == (7, 3)
+        assert (B2[:, 0].T.toarray()[0] == np.array([1, 1, 1, 0, 0, 0, 0])).all()
+        assert (B2[:, 1].T.toarray()[0] == np.array([0, 0, 1, 1, 1, 0, 0])).all()
+        assert (B2[:, 2].T.toarray()[0] == np.array([0, 0, 0, 0, 1, 1, 1])).all()
 
         # Test the incidence matrix for the full cell complex
-        inc_1 = CX.incidence_matrix(rank=1, signed=False)
-        assert inc_1.shape == (5, 7)
-        assert (inc_1[:, 0].T.toarray()[0] == np.array([1, 1, 0, 0, 0])).all()
-        assert (inc_1[:, 1].T.toarray()[0] == np.array([1, 0, 1, 0, 0])).all()
-        assert (inc_1[:, 2].T.toarray()[0] == np.array([0, 1, 1, 0, 0])).all()
+        B1 = CX.incidence_matrix(rank=1, signed=False)
+        assert B1.shape == (5, 7)
+        assert (B1[:, 0].T.toarray()[0] == np.array([1, 1, 0, 0, 0])).all()
+        assert (B1[:, 1].T.toarray()[0] == np.array([1, 0, 1, 0, 0])).all()
+        assert (B1[:, 2].T.toarray()[0] == np.array([0, 1, 1, 0, 0])).all()
 
-        inc_2_signed = CX.incidence_matrix(rank=2, signed=True)
-        inc_1_signed = CX.incidence_matrix(rank=1, signed=True)
+        B2_signed = CX.incidence_matrix(rank=2, signed=True)
+        B1_signed = CX.incidence_matrix(rank=1, signed=True)
 
         # B1 * B2 == 0
-        assert np.sum(inc_1_signed.dot(inc_2_signed).toarray()) == 0.0
+        assert np.sum(B1_signed.dot(B2_signed).toarray()) == 0.0
 
         CX = CellComplex()
-        inc_1 = CX.incidence_matrix(rank=1)
-        assert inc_1.shape == (0, 0)
+        B1 = CX.incidence_matrix(rank=1)
+        assert B1.shape == (0, 0)
 
         CX = CellComplex()
-        inc_2 = CX.incidence_matrix(rank=2)
-        assert inc_2.shape == (0, 0)
+        B2 = CX.incidence_matrix(rank=2)
+        assert B2.shape == (0, 0)
 
     def test_clear(self):
         """Test the clear method of the cell complex."""
@@ -296,41 +295,41 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([2, 3, 4], rank=2)
         CX.add_cell([1, 3, 4], rank=2)
 
-        inc_1 = CX.incidence_matrix(rank=1)
-        up_lap_0 = CX.up_laplacian_matrix(rank=0)
-        expected = inc_1.dot(inc_1.T)
-        np.testing.assert_array_equal(up_lap_0.toarray(), expected.toarray())
+        B1 = CX.incidence_matrix(rank=1)
+        L0_up = CX.up_laplacian_matrix(rank=0)
+        expected = B1.dot(B1.T)
+        np.testing.assert_array_equal(L0_up.toarray(), expected.toarray())
 
-        inc_2 = CX.incidence_matrix(rank=2)
-        up_lap_1 = CX.up_laplacian_matrix(rank=1)
-        expected = inc_2.dot(inc_2.T)
-        np.testing.assert_array_equal(up_lap_1.toarray(), expected.toarray())
+        B2 = CX.incidence_matrix(rank=2)
+        L1_up = CX.up_laplacian_matrix(rank=1)
+        expected = B2.dot(B2.T)
+        np.testing.assert_array_equal(L1_up.toarray(), expected.toarray())
 
     def test_down_laplacian_matrix_and_incidence_matrix(self):
         CX = CellComplex()
         CX.add_cell([2, 3, 4], rank=2)
         CX.add_cell([1, 3, 4], rank=2)
 
-        inc_1 = CX.incidence_matrix(rank=1)
-        down_lap_1 = CX.down_laplacian_matrix(rank=1)
-        expected = (inc_1.T).dot(inc_1)
-        np.testing.assert_array_equal(down_lap_1.toarray(), expected.toarray())
+        B1 = CX.incidence_matrix(rank=1)
+        L1_down = CX.down_laplacian_matrix(rank=1)
+        expected = (B1.T).dot(B1)
+        np.testing.assert_array_equal(L1_down.toarray(), expected.toarray())
 
-        inc_2 = CX.incidence_matrix(rank=2)
-        down_lap_2 = CX.down_laplacian_matrix(rank=2)
-        expected = (inc_2.T).dot(inc_2)
-        np.testing.assert_array_equal(down_lap_2.toarray(), expected.toarray())
+        B2 = CX.incidence_matrix(rank=2)
+        L2_down = CX.down_laplacian_matrix(rank=2)
+        expected = (B2.T).dot(B2)
+        np.testing.assert_array_equal(L2_down.toarray(), expected.toarray())
 
     def test_hodge_laplacian_and_up_down_laplacians(self):
         CX = CellComplex()
         CX.add_cell([2, 3, 4], rank=2)
         CX.add_cell([1, 3, 4], rank=2)
 
-        up_lap_1 = CX.up_laplacian_matrix(rank=1)
-        down_lap_1 = CX.down_laplacian_matrix(rank=1)
-        hodge_lap_1 = CX.hodge_laplacian_matrix(rank=1)
-        expected = up_lap_1 + down_lap_1
-        np.testing.assert_array_equal(hodge_lap_1.toarray(), expected.toarray())
+        L1_up = CX.up_laplacian_matrix(rank=1)
+        L1_down = CX.down_laplacian_matrix(rank=1)
+        L1_hodge = CX.hodge_laplacian_matrix(rank=1)
+        expected = L1_up + L1_down
+        np.testing.assert_array_equal(L1_hodge.toarray(), expected.toarray())
 
 
 if __name__ == "__main__":
