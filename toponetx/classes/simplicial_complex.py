@@ -14,20 +14,12 @@ from warnings import warn
 
 import networkx as nx
 import numpy as np
-import scipy.sparse.linalg as spl
 from hypernetx import Hypergraph
 from networkx import Graph
-from scipy.linalg import fractional_matrix_power
-from scipy.sparse import coo_matrix, csr_matrix, diags, dok_matrix, eye
-from sklearn.preprocessing import normalize
+from scipy.sparse import coo_matrix, dok_matrix
 
 from toponetx.classes.node_view import NodeView
-from toponetx.classes.ranked_entity import (
-    DynamicCell,
-    Node,
-    RankedEntity,
-    RankedEntitySet,
-)
+from toponetx.classes.ranked_entity import DynamicCell, RankedEntitySet
 from toponetx.classes.simplex import Simplex, SimplexView
 from toponetx.exception import TopoNetXError
 
@@ -766,7 +758,6 @@ class SimplicialComplex:
         """
         import numpy as np
         import scipy as sp
-        import scipy.sparse  # call as sp.sparse
 
         hodge_lap = self.hodge_laplacian_matrix(rank)
         m, n = hodge_lap.shape
