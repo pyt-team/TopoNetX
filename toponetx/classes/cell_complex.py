@@ -738,7 +738,7 @@ class CellComplex:
         Example
         -------
         >>> G = nx.path_graph(3)
-        >>> cx = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
 
         >>> CX.set_filtration(d, "f")
@@ -772,7 +772,7 @@ class CellComplex:
         Note : this is equivalent to getting a feature defined on the entire cell complex
 
         >>> G = nx.path_graph(3)
-        >>> cx = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
         >>> CX.set_filtration(d, "f")
         >>> CX.get_filtration("f")
@@ -806,7 +806,7 @@ class CellComplex:
         Example
         -------
         >>> G = nx.path_graph(3)
-        >>> cx = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d = {0: {'color': 'red', 'attr2': 1 }, 1: {'color': 'blue', 'attr2': 3}}
         >>> CX.set_node_attributes(d)
 
@@ -845,7 +845,7 @@ class CellComplex:
         -------
 
         >>> G = nx.path_graph(3)
-        >>> cx = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d={ (0,1) : {'color':'red','attr2':1 },(1,2): {'color':'blue','attr2':3 } }
         >>> CX.set_edge_attributes(d)
 
@@ -909,7 +909,7 @@ class CellComplex:
             to assign a cell attribute to store the value of that property for
             each cell:
 
-            >>> cx = CellComplex()
+            >>> CX = CellComplex()
             >>> CX.add_cell([1,2,3,4], rank=2)
             >>> CX.add_cell([1,2,4], rank=2,)
             >>> CX.add_cell([3,4,8], rank=2)
@@ -924,7 +924,7 @@ class CellComplex:
             Examples
             --------
             >>> G = nx.path_graph(3)
-            >>> cx = CellComplex(G)
+            >>> CX = CellComplex(G)
             >>> CX.add_cell([1,2,3,4], rank=2)
             >>> CX.add_cell([1,2,3,4], rank=2)
             >>> CX.add_cell([1,2,4], rank=2,)
@@ -1002,7 +1002,7 @@ class CellComplex:
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> cx = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d={0: {'color':'red','attr2':1 },1: {'color':'blue','attr2':3 } }
         >>> CX.set_node_attributes(d)
         >>> CX.get_node_attributes('color')
@@ -1010,7 +1010,7 @@ class CellComplex:
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> cx = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> nodes_color = CX.get_node_attributes('color')
         >>> nodes_color[1]
         'blue'
@@ -1042,7 +1042,7 @@ class CellComplex:
         >>> G = nx.path_graph(3)
 
         >>> d={ ((1,2,3,4),0): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
-        >>> cx = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> CX.add_cell([1,2,3,4], rank=2)
         >>> CX.add_cell([1,2,3,4], rank=2)
         >>> CX.add_cell([1,2,4], rank=2,)
@@ -1090,7 +1090,7 @@ class CellComplex:
          -------
             >>> import networkx as nx
             >>> G = nx.path_graph(3)
-            >>> cx = CellComplex(G)
+            >>> CX = CellComplex(G)
             >>> CX.add_cell([1,2,3,4], rank=2)
             >>> CX.add_cell([1,2,3,4], rank=2)
             >>> CX.add_cell([2,3,4,1], rank=2)
@@ -1570,7 +1570,7 @@ class CellComplex:
         -------
           >>> import networkx as nx
           >>> G = nx.path_graph(3)
-          >>> cx = CellComplex(G)
+          >>> CX = CellComplex(G)
           >>> CX.add_cell([1,2,3,4], rank=2)
           >>> CX.add_cell([1,2,3,4], rank=2)
           >>> CX.add_cell([2,3,4,1], rank=2)
@@ -1664,7 +1664,7 @@ class CellComplex:
         >>> CX.add_cell([1,4],rank=1)
         >>> A = CX.cell_adjacency_matrix()
         """
-        cx = self.to_combinatorial_complex()
+        CX = self.to_combinatorial_complex()
 
         B = CX.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
@@ -1678,7 +1678,7 @@ class CellComplex:
 
     def node_adjacency_matrix(self, index=False, s=1, weight=False):
 
-        cx = self.to_combinatorial_complex()
+        CX = self.to_combinatorial_complex()
 
         B = CX.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
@@ -1729,7 +1729,7 @@ class CellComplex:
         CX = CellComplex(cells=rns, name=name)
         for edge in edges:
             CX.add_edge(edge[0], edge[1])
-        return cx
+        return CX
 
     def restrict_to_nodes(self, node_set, name=None):
         """Restrict cell complex to nodes.
@@ -1768,7 +1768,7 @@ class CellComplex:
 
         for cell in cells:
             CX.add_cell(cell)
-        return cx
+        return CX
 
     def to_combinatorial_complex(self):
         """Convert to combinatorial complex.
@@ -2317,7 +2317,7 @@ class CellComplex:
                 name="position",
             )
 
-        return cx
+        return CX
 
     @staticmethod
     def load_mesh(file_path, process=False, force=None):
