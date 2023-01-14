@@ -73,7 +73,7 @@ class TestSimplicialComplex(unittest.TestCase):
 
         assert L_hodge.shape == (5, 5)
 
-        deg = np.diag([1, 3, 3, 3, 2])
+        D = np.diag([1, 3, 3, 3, 2])
         A = np.array(
             [
                 [0.0, 1.0, 0.0, 0.0, 0.0],
@@ -84,19 +84,16 @@ class TestSimplicialComplex(unittest.TestCase):
             ]
         )
 
-        # assert that the Hodge Laplacian is correct
-        np.testing.assert_array_equal(L_hodge.toarray(), deg - A)
+        np.testing.assert_array_equal(L_hodge.toarray(), D - A)
 
     def test_adjacency_matrix(self):
         """Test adjacency_matrix shape and values."""
-        # create a SimplicialComplex object with a few simplices
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 
         A = SC.adjacency_matrix(rank=0)
 
         assert A.shape == (5, 5)
 
-        # assert that the higher-order Aacency matrix is correct
         np.testing.assert_array_equal(
             A.toarray(),
             np.array(
