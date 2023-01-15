@@ -38,7 +38,6 @@ dev_requires = test_requires + [
     "yapf",
     "black==22.6.0",
     "black[jupyter]",
-    # "flake8-docstrings",  # flake8-docstrings causes flake8 to change behaviour for tests; removed it
     "isort==5.10.1",
     "codecov",
     "coverage",

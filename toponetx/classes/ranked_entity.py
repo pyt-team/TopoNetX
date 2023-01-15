@@ -11,8 +11,6 @@ import numpy as np
 from hypernetx.classes.entity import Entity
 
 from toponetx import TopoNetXError
-from toponetx.classes.dynamic_cell import DynamicCell
-from toponetx.classes.node import Node
 
 __all__ = ["RankedEntity", "RankedEntitySet"]
 
@@ -495,11 +493,7 @@ class RankedEntity(Entity):
         not unique to their entities.
         Is not transitive.
         """
-        if (
-            isinstance(item, RankedEntity)
-            or isinstance(item, Node)
-            or isinstance(item, DynamicCell)
-        ):
+        if isinstance(item, RankedEntity):
             return item.uid in self._elements
         else:
             return (
@@ -1203,11 +1197,7 @@ class RankedEntitySet(RankedEntity):
         self : RankedEntitySet
         """
         for item in args:
-            if (
-                isinstance(item, RankedEntity)
-                or isinstance(item, Node)
-                or isinstance(item, DynamicCell)
-            ):
+            if isinstance(item, RankedEntity):
                 self._all_ranks = self._all_ranks.union(item._all_ranks)
                 if safe_insert:
                     self.add_element(item, check_CC_condition=True)
