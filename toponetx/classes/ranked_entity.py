@@ -8,11 +8,11 @@ except ImportError:
 from collections import OrderedDict, defaultdict
 
 import numpy as np
-from hypernetx.classes.dynamic_cell import DynamicCell
 from hypernetx.classes.entity import Entity
-from hypernetx.classes.node import Node
 
 from toponetx import TopoNetXError
+from toponetx.classes.dynamic_cell import DynamicCell
+from toponetx.classes.node import Node
 
 __all__ = ["RankedEntity", "RankedEntitySet"]
 

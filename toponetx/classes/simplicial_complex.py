@@ -749,8 +749,8 @@ class SimplicialComplex:
         Example 1
         ---------
         >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
-        >>> norm_lap1 = SC.normalized_laplacian_matrix(1)
-        >>> norm_lap1
+        >>> L1_norm = SC.normalized_laplacian_matrix(1)
+        >>> L1_norm
         """
         import numpy as np
         import scipy as sp
