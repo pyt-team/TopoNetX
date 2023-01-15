@@ -731,7 +731,7 @@ class CombinatorialComplex:
             A = (A >= s) * 1
         return A
 
-    def adjacency_matrix(self, rank, to_rank, s=1, weight=False, index=False):
+    def adjacency_matrix(self, rank, via_rank, s=1, weight=False, index=False):
         """
         The sparse weighted :term:`s-adjacency matrix`
 
@@ -774,13 +774,15 @@ class CombinatorialComplex:
         >>> CC.adjacency_matrix(0, 1)
         """
 
-        if to_rank is not None:
-            assert rank < to_rank
+        if via_rank is not None:
+            assert rank < via_rank
         if index:
-            B, row, col = self.incidence_matrix(rank, to_rank, sparse=True, index=index)
+            B, row, col = self.incidence_matrix(
+                rank, via_rank, sparse=True, index=index
+            )
         else:
             B = self.incidence_matrix(
-                rank, to_rank, incidence_type="up", sparse=True, index=index
+                rank, via_rank, incidence_type="up", sparse=True, index=index
             )
         weight = False  # currently weighting is not supported
         A = self._incidence_to_adjacency(B, s=s, weight=weight)
@@ -823,7 +825,7 @@ class CombinatorialComplex:
         A = self._incidence_to_adjacency(B, s=s)
         return A
 
-    def coadjacency_matrix(self, rank, to_rank, s=1, weight=False, index=False):
+    def coadjacency_matrix(self, rank, via_rank, s=1, weight=False, index=False):
         """Compute the coadjacency matrix.
 
         The sparse weighted :term:`s-coadjacency matrix`
@@ -855,15 +857,15 @@ class CombinatorialComplex:
 
             coadjacency_matrix : scipy.sparse.csr.csr_matrix
         """
-        if to_rank is not None:
-            assert rank > to_rank
+        if via_rank is not None:
+            assert rank > via_rank
         if index:
             B, row, col = self.incidence_matrix(
-                to_rank, rank, incidence_type="down", sparse=True, index=index
+                via_rank, rank, incidence_type="down", sparse=True, index=index
             )
         else:
             B = self.incidence_matrix(
-                rank, to_rank, incidence_type="down", sparse=True, index=index
+                rank, via_rank, incidence_type="down", sparse=True, index=index
             )
         weight = False  # Currently weighting is not supported
         if weight is False:

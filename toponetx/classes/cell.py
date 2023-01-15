@@ -313,7 +313,7 @@ class CellView:
                 raise KeyError(f"cell {cell} is not in the cell dictionary")
 
         else:
-            raise KeyError(f"input must be a tuple, list or a cell")
+            raise KeyError("input must be a tuple, list or a cell")
 
     # Set methods
     def __len__(self):

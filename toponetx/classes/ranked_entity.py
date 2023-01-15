@@ -8,7 +8,9 @@ except ImportError:
 from collections import OrderedDict, defaultdict
 
 import numpy as np
+from hypernetx.classes.dynamic_cell import DynamicCell
 from hypernetx.classes.entity import Entity
+from hypernetx.classes.node import Node
 
 from toponetx import TopoNetXError
 
@@ -28,9 +30,8 @@ def _keyfunc(item):
 
 class RankedEntity(Entity):
     """
-     Base class for objects used in building ranked cell objects including cell complexes,
-     simplicial complexes and combinatorial complexes.
-
+    Base class for objects used in building ranked cell objects including cell complexes,
+    simplicial complexes and combinatorial complexes.
 
     Parameters
     ----------
@@ -76,51 +77,47 @@ class RankedEntity(Entity):
     - :func:`RankedEntity.children` are registered in the :func:`RankedEntity.registry`.
     - All descendents of RankedEntity are registered in :func:`RankedEntity.fullregistry()`.
 
-     Examples
-     --------
+    Examples
+    --------
+    >>> x1 = RankedEntity('x1',rank = 0)
+    >>> x2 = RankedEntity('x2',rank = 0)
+    >>> x3 = RankedEntity('x3',rank = 0)
+    >>> y1 = RankedEntity('y1',[x1], rank = 1)
+    >>> y2 = RankedEntity('y2',[y1,x2], rank = 2)
+    >>> y3 = RankedEntity('y3',[x2,x3], rank = 1)
+    >>> z = RankedEntity('z',[x1,x2,y2,y3],rank = 3)
+    #>>> EE = RankedEntitySet("",z.incidence_dict)
+    >>> z
+    RankedEntity(z,['y1', 'y3', 'x1', 'x2'],2,{'weight': 1.0})
 
+    >>> x1 = RankedEntity(0,rank = 0)
+    >>> x2 = RankedEntity(1,rank = 0)
+    >>> x3 = RankedEntity(2,rank = 0)
+    >>> x4 = RankedEntity(3,rank = 0)
+    >>> y1 = RankedEntity(elements=[x1,x2], rank = 1)
+    >>> y2 = RankedEntity(elements=[x2,x3], rank = 1)
+    >>> y3 = RankedEntity(elements=[x3,x4], rank = 1)
+    >>> y4 = RankedEntity(elements=[x4,x1], rank = 1)
+    >>> z = RankedEntity(elements=[y1,y2,y3,y4],rank = 2)
+    >>> w = RankedEntity(elements=[z],rank = 3)
+    # d={'0': ([1, 2, 3], 2), '1': ([2, 4], 1)}
 
-         >>> x1 = RankedEntity('x1',rank = 0)
-         >>> x2 = RankedEntity('x2',rank = 0)
-         >>> x3 = RankedEntity('x3',rank = 0)
-         >>> y1 = RankedEntity('y1',[x1], rank = 1)
-         >>> y2 = RankedEntity('y2',[y1,x2], rank = 2)
-         >>> y3 = RankedEntity('y3',[x2,x3], rank = 1)
-         >>> z = RankedEntity('z',[x1,x2,y2,y3],rank = 3)
-         #>>> EE=RankedEntitySet("",z.incidence_dict)
-         >>> z
-         RankedEntity(z,['y1', 'y3', 'x1', 'x2'],2,{'weight': 1.0})
+    >>> d= {'y1': {'elements': [1, 2], 'rank': 1},
+    'y2': {'elements': [1, 2, 3], 'rank': 1}}
+    >>> z = RankedEntity('z',d,rank = 3)
 
+    >>> d = {}
+    >>> d['x1'] = RankedEntity('x1',rank = 0)
+    >>> d['x2'] = RankedEntity('x2',rank = 0)
+    >>> d['x3'] = RankedEntity('x3',rank = 0)
+    >>> d['y1'] = RankedEntity('y1',[x1], rank = 1)
+    >>> d['y2'] = RankedEntity('y2',[y1,x2], rank = 2)
+    >>> d['y3'] = RankedEntity('y3',[x2,x3], rank = 1)
+    >>> z = RankedEntity('z',d,rank = 3)
 
-         >>> x1 = RankedEntity(0,rank = 0)
-         >>> x2 = RankedEntity(1,rank = 0)
-         >>> x3 = RankedEntity(2,rank = 0)
-         >>> x4 = RankedEntity(3,rank = 0)
-         >>> y1 = RankedEntity(elements=[x1,x2], rank = 1)
-         >>> y2 = RankedEntity(elements=[x2,x3], rank = 1)
-         >>> y3 = RankedEntity(elements=[x3,x4], rank = 1)
-         >>> y4 = RankedEntity(elements=[x4,x1], rank = 1)
-         >>> z = RankedEntity(elements=[y1,y2,y3,y4],rank = 2)
-         >>> w = RankedEntity(elements=[z],rank = 3)
-         # d={'0': ([1, 2, 3], 2), '1': ([2, 4], 1)}
-
-         >>> d= {'y1': {'elements': [1, 2], 'rank': 1},
-          'y2': {'elements': [1, 2, 3], 'rank': 1}}
-         >>> z = RankedEntity('z',d,rank = 3)
-
-
-         >>> d = {}
-         >>> d['x1'] = RankedEntity('x1',rank = 0)
-         >>> d['x2'] = RankedEntity('x2',rank = 0)
-         >>> d['x3'] = RankedEntity('x3',rank = 0)
-         >>> d['y1'] = RankedEntity('y1',[x1], rank = 1)
-         >>> d['y2'] = RankedEntity('y2',[y1,x2], rank = 2)
-         >>> d['y3'] = RankedEntity('y3',[x2,x3], rank = 1)
-         >>> z = RankedEntity('z',d,rank = 3)
-
-     See Also
-     --------
-     RankedEntitySet
+    See Also
+    --------
+    RankedEntitySet
     """
 
     def __init__(
@@ -137,7 +134,7 @@ class RankedEntity(Entity):
             raise TopoNetXError(f"safe_insert must be bool, got {type(safe_insert)}")
         self._all_ranks = set()
         if isinstance(rankedentity, RankedEntity):
-            if rank == None:
+            if rank is None:
                 self._rank = rankedentity._rank
             else:
                 self._rank = max(rankedentity._rank, rank)
@@ -252,7 +249,7 @@ class RankedEntity(Entity):
         return self._rank
 
     @staticmethod
-    def _exrect_unique_uid_from_elements(elements):
+    def _extract_unique_uid_from_elements(elements):
         """
         Parameters
         ----------
@@ -261,12 +258,11 @@ class RankedEntity(Entity):
         Returns
         -------
         TYPE
-            tuple : canonical uid that is extracted from  elements
+            tuple : canonical uid that is extracted from elements
 
         """
 
         def _keyfunc(item):
-
             if isinstance(item, tuple):
                 return item
             elif isinstance(item, Hashable):
@@ -278,7 +274,7 @@ class RankedEntity(Entity):
                 _uid.append(i.uid)
             else:  # must be hashable
                 _uid.append(i)
-        return tuple(sorted(_uid, key=_keyfunc))  # set cananical order for key
+        return tuple(sorted(_uid, key=_keyfunc))  # set canonical order for key
 
     def _get_frozenset_uid_from_elements(elements):
         """
@@ -286,24 +282,20 @@ class RankedEntity(Entity):
         ----------
         elements : RankedEntity or hashable
 
-
         Returns
         -------
         TYPE
-            tuple : canonical uid that is extracted from  elements
-
+            tuple : canonical uid that is extracted from elements
         """
-
         _uid = []
         for i in elements:
             if isinstance(i, RankedEntity):
                 _uid.append(i.uid)
             else:  # must be hashable
                 _uid.append(i)
-        return frozenset(_uid)  # set cananical uid
+        return frozenset(_uid)  # set canonical uid
 
     def set_safe_insert(self, value):
-
         if not isinstance(value, bool):
             raise TopoNetXError(f" value must be of type bool got {type(value)}.")
         self._safe_insert = value
@@ -327,7 +319,6 @@ class RankedEntity(Entity):
         using the item's uid. It is assumed that the user will only use the same uid
         for identical instances within the entities registry.
         """
-
         checkelts = self.complete_registry()
 
         if isinstance(item, RankedEntity):
@@ -452,14 +443,14 @@ class RankedEntity(Entity):
 
         return self
 
-    def skeleton(self, k, includeself=True):
+    def skeleton(self, rank, includeself=True):
         out = []
         if includeself:
-            if self.rank == k:
+            if self.rank == rank:
                 out.append(self)
         d = self.fullregistry()
-        out = out + [d[key] for key in d.keys() if d[key].rank == k]
-        return RankedEntitySet("X" + str(k), elements=out, safe_insert=False)
+        out = out + [d[key] for key in d.keys() if d[key].rank == rank]
+        return RankedEntitySet("X" + str(rank), elements=out, safe_insert=False)
 
     def add(self, *args, safe_insert=True):
         """
@@ -666,19 +657,19 @@ class RankedEntity(Entity):
             if v.uidset == item.uidset:  # item == v and rank(v)!=rank(item)
                 if v.rank != item.rank:
                     raise TopoNetXError(
-                        f"Error: entity uidset exists within the entity with different rank."
+                        "Error: entity uidset exists within the entity with different rank."
                         f"inserted entity has rank {item.rank} and existing entity has rank {v.rank} ."
                     )
 
             elif v.uidset.issubset(item.uidset):  # item => v and rank(item) < rank(v)
                 if v.rank > item.rank:
                     raise TopoNetXError(
-                        f"Error: Fails the CC condition for Ranked EntitySet."
+                        "Error: Fails the CC condition for Ranked EntitySet."
                     )
             elif item.uidset.issubset(v.uidset):  # item <= v and rank(item) > rank(v)
                 if v.rank < item.rank:
                     raise TopoNetXError(
-                        f"Error: Fails the CC condition for Ranked EntitySet."
+                        "Error: Fails the CC condition for Ranked EntitySet."
                     )
             return True
 
@@ -697,19 +688,19 @@ class RankedEntity(Entity):
             if v.uidset == item.uidset:  # item == v and rank(v)!=rank(item)
                 if v.rank != item.rank:
                     raise TopoNetXError(
-                        f"Error: entity uidset exists within the entity with different rank."
+                        "Error: entity uidset exists within the entity with different rank."
                         f"inserted entity has rank {item.rank} and existing entity has rank {v.rank} ."
                     )
 
             elif v.uidset.issubset(item.uidset):  # item => v and rank(item) < rank(v)
                 if v.rank > item.rank:
                     raise TopoNetXError(
-                        f"Error: Fails the CC condition for Ranked EntitySet."
+                        "Error: Fails the CC condition for Ranked EntitySet."
                     )
             elif item.uidset.issubset(v.uidset):  # item <= v and rank(item) > rank(v)
                 if v.rank < item.rank:
                     raise TopoNetXError(
-                        f"Error: Fails the CC condition for Ranked EntitySet."
+                        "Error: Fails the CC condition for Ranked EntitySet."
                     )
             return True
 
@@ -834,39 +825,39 @@ class RankedEntitySet(RankedEntity):
             uid=uid, elements=elements, rank=np.inf, safe_insert=safe_insert, **props
         )
 
-    def skeleton(self, k, name=None, safe_insert=False, level=None):
+    def skeleton(self, rank, name=None, safe_insert=False, level=None):
         d = self.ranked_complete_registry()
 
         if name is None and level is None:
-            name = "X" + str(k)
+            name = "X" + str(rank)
         elif name is None and level == "equal":
-            name = "X" + str(k)
+            name = "X" + str(rank)
         elif name is None and level == "upper":
-            name = "X>=" + str(k)
+            name = "X>=" + str(rank)
         elif name is None and level == "up":
-            name = "X>=" + str(k)
+            name = "X>=" + str(rank)
         elif name is None and level == "lower":
-            name = "X<=" + str(k)
+            name = "X<=" + str(rank)
         elif name is None and level == "down":
-            name = "X<=" + str(k)
+            name = "X<=" + str(rank)
         else:
             assert isinstance(name, str)
         if level is None or level == "equal":
             return RankedEntitySet(
                 name,
-                elements=[d[key] for key in d.keys() if d[key].rank == k],
+                elements=[d[key] for key in d.keys() if d[key].rank == rank],
                 safe_insert=safe_insert,
             )
         elif level == "upper":
             return RankedEntitySet(
                 name,
-                elements=[d[key] for key in d.keys() if d[key].rank >= k],
+                elements=[d[key] for key in d.keys() if d[key].rank >= rank],
                 safe_insert=safe_insert,
             )
         elif level == "lower":
             return RankedEntitySet(
                 name,
-                elements=[d[key] for key in d.keys() if d[key].rank <= k],
+                elements=[d[key] for key in d.keys() if d[key].rank <= rank],
                 safe_insert=safe_insert,
             )
         else:
@@ -923,28 +914,27 @@ class RankedEntitySet(RankedEntity):
                             data.append(1)
                             rows.append(ndict[n])
                             cols.append(edict[e])
-                MP = csr_matrix(
+                B = csr_matrix(
                     (data, (rows, cols)), shape=(len(r_cell_dict), len(k_cell_dict))
                 )
             else:
                 # Create an np.matrix
-                MP = np.zeros((len(children), len(uidset)), dtype=int)
+                B = np.zeros((len(children), len(uidset)), dtype=int)
                 for e in k_cell_dict:
                     for n in r_cell_dict:
                         if r_cell_dict[n] <= k_cell_dict[e]:
-                            MP[ndict[n], edict[e]] = 1
+                            B[ndict[n], edict[e]] = 1
             if index:
-                return MP, rowdict, coldict
+                return B, rowdict, coldict
             else:
-                return MP
+                return B
         else:
             if index:
                 return np.zeros(1), {}, {}
-            else:
-                return np.zeros(1)
+            return np.zeros(1)
 
     def incidence_matrix(
-        self, r, k, incidence_type="up", weight=None, sparse=True, index=False
+        self, rank, to_rank, incidence_type="up", weight=None, sparse=True, index=False
     ):
         """
         An incidence matrix for the RankedEntitySet indexed by r-ranked entities k-ranked entities
@@ -971,78 +961,75 @@ class RankedEntitySet(RankedEntity):
         column dictionary : dict
             Dictionary identifying column with item in entityset's uidset
 
-        Notes
-        -----
 
-        Examples:
-        ---------
-                # example_1
-                >>> a = RankedEntity('a',[1,2,3],1)
-                >>> b = RankedEntity('b',[2,3],1)
-                >>> c = RankedEntity('c',[1,5],1)
-                >>> # define the Ranked Entity Set
-                >>> E = RankedEntitySet('E',[a,b,c] )
-                >>> # check the incidence matrices
-                >>> E.incidence_matrix(0,1,sparse=False, index=True)
+        Examples
+        --------
+        # example_1
+        >>> a = RankedEntity('a',[1,2,3],1)
+        >>> b = RankedEntity('b',[2,3],1)
+        >>> c = RankedEntity('c',[1,5],1)
+        >>> # define the Ranked Entity Set
+        >>> E = RankedEntitySet('E',[a,b,c] )
+        >>> # check the incidence matrices
+        >>> E.incidence_matrix(0,1,sparse=False, index=True)
 
-                    (array([[1, 0, 1],
-                            [1, 1, 0],
-                            [1, 1, 0],
-                            [0, 0, 1]]),
-                     {0: 1, 1: 2, 2: 3, 3: 4},
-                     {0: 'a', 1: 'b', 2: 'c'})
+            (array([[1, 0, 1],
+                    [1, 1, 0],
+                    [1, 1, 0],
+                    [0, 0, 1]]),
+                {0: 1, 1: 2, 2: 3, 3: 4},
+                {0: 'a', 1: 'b', 2: 'c'})
 
-                # example_2
-                >>> x1 = RankedEntity('x1',rank = 0)
-                >>> x2 = RankedEntity('x2',rank = 0)
-                >>> x3 = RankedEntity('x3',rank = 0)
-                >>> x4 = RankedEntity('x4',rank = 0)
-                >>> x5 = RankedEntity('x5',rank = 0)
-                >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
-                >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
-                >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
-                >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-                >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-                >>> z = RankedEntity('z',[x1,x2,x3,x4],rank = 2)
-                >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
-                >>> # define the Ranked Entity Set
-                >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,z,w] )
+        # example_2
+        >>> x1 = RankedEntity('x1',rank = 0)
+        >>> x2 = RankedEntity('x2',rank = 0)
+        >>> x3 = RankedEntity('x3',rank = 0)
+        >>> x4 = RankedEntity('x4',rank = 0)
+        >>> x5 = RankedEntity('x5',rank = 0)
+        >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
+        >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
+        >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
+        >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
+        >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
+        >>> z = RankedEntity('z',[x1,x2,x3,x4],rank = 2)
+        >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
+        >>> # define the Ranked Entity Set
+        >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,z,w] )
 
-                >>> # check the incidence matrices
-                >>> E.incidence_matrix(0,1,sparse=False, index=True)
-                >>> E.incidence_matrix(1,2,sparse=False, index=True)
-                >>> E.incidence_matrix(0,2,sparse=False, index=True)
+        >>> # check the incidence matrices
+        >>> E.incidence_matrix(0,1,sparse=False, index=True)
+        >>> E.incidence_matrix(1,2,sparse=False, index=True)
+        >>> E.incidence_matrix(0,2,sparse=False, index=True)
         """
-        weight = None  # weight is not supported in this version
-        assert r != k  # r and k must be different
-        if k is None:
+        assert rank != to_rank  # r and k must be different
+        if to_rank is None:
             if incidence_type == "up":
-                children = self.skeleton(r)
-                uidset = self.skeleton(r + 1, level="upper")
+                children = self.skeleton(rank)
+                uidset = self.skeleton(rank + 1, level="upper")
             elif incidence_type == "down":
-                uidset = self.skeleton(r)
-                children = self.skeleton(r - 1, level="lower")
+                uidset = self.skeleton(rank)
+                children = self.skeleton(rank - 1, level="lower")
             else:
                 raise TopoNetXError("incidence_type must be 'up' or 'down' ")
         else:
             assert (
-                r != k
+                rank != to_rank
             )  # incidence is defined between two skeletons of different ranks
             if (
-                r < k
+                rank < to_rank
             ):  # up incidence is defined between two skeletons of different ranks
-                children = self.skeleton(r)
-                uidset = self.skeleton(k)
+                children = self.skeleton(rank)
+                uidset = self.skeleton(to_rank)
 
             elif (
-                r > k
+                rank > to_rank
             ):  # up incidence is defined between two skeletons of different ranks
-                children = self.skeleton(k)
-                uidset = self.skeleton(r)
+                children = self.skeleton(to_rank)
+                uidset = self.skeleton(rank)
 
         return self._incidence_matrix_helper(children, uidset, sparse, index)
 
-    def adjacency_matrix(self, r, k, s=1, weights=False, index=False):
+    def adjacency_matrix(self, rank, via_rank, s=1, weights=False, index=False):
         """
         A adjacency matrix for the RankedEntitySet of the r-ranked considering thier adjacency with respect to k-ranked entities
         r < k
@@ -1064,61 +1051,57 @@ class RankedEntitySet(RankedEntity):
         column dictionary : dict
             Dictionary identifying column with item in entityset's uidset
 
-        Notes
-        -----
 
         Examples:
         ---------
-                # example_1
-                >>> a = RankedEntity('a',[1,2,3],1)
-                >>> b = RankedEntity('b',[2,3],1)
-                >>> c = RankedEntity('c',[1,5],1)
-                >>> # define the Ranked Entity Set
-                >>> E = RankedEntitySet('E',[a,b,c] )
-                >>> # check the incidence matrices
-                >>> E.incidence_matrix(0,1,sparse=False, index=True)
+        # example_1
+        >>> a = RankedEntity('a',[1,2,3],1)
+        >>> b = RankedEntity('b',[2,3],1)
+        >>> c = RankedEntity('c',[1,5],1)
+        >>> # define the Ranked Entity Set
+        >>> E = RankedEntitySet('E',[a,b,c] )
+        >>> # check the incidence matrices
+        >>> E.incidence_matrix(0,1,sparse=False, index=True)
 
 
-                # example_2
-                >>> x1 = RankedEntity('x1',rank = 0)
-                >>> x2 = RankedEntity('x2',rank = 0)
-                >>> x3 = RankedEntity('x3',rank = 0)
-                >>> x4 = RankedEntity('x4',rank = 0)
-                >>> x5 = RankedEntity('x5',rank = 0)
-                >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
-                >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
-                >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
-                >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-                >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-                >>> z = RankedEntity('z',[x1,x2,x3,x4],rank = 2)
-                >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
-                >>> # define the Ranked Entity Set
-                >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,z,w] )
+        # example_2
+        >>> x1 = RankedEntity('x1',rank = 0)
+        >>> x2 = RankedEntity('x2',rank = 0)
+        >>> x3 = RankedEntity('x3',rank = 0)
+        >>> x4 = RankedEntity('x4',rank = 0)
+        >>> x5 = RankedEntity('x5',rank = 0)
+        >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
+        >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
+        >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
+        >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
+        >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
+        >>> z = RankedEntity('z',[x1,x2,x3,x4],rank = 2)
+        >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
+        >>> # define the Ranked Entity Set
+        >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,z,w] )
 
-                >>> # check the incidence matrices
-                >>> E.adjacency_matrix(0,1)
-                >>> E.adjacency_matrix(1,2)
-                >>> E.adjacency_matrix(0,2)
+        >>> # check the incidence matrices
+        >>> E.adjacency_matrix(0,1)
+        >>> E.adjacency_matrix(1,2)
+        >>> E.adjacency_matrix(0,2)
 
 
         """
-
-        if k is not None:
-            assert r < k  # rank k must be smaller than rank r
+        if via_rank is not None:
+            assert rank < via_rank  # rank k must be smaller than rank r
 
         if index:
-
-            MP, row, col = self.incidence_matrix(
-                r, k, incidence_type="up", sparse=True, index=index
+            B, row, col = self.incidence_matrix(
+                rank, via_rank, incidence_type="up", sparse=True, index=index
             )
         else:
-            MP = self.incidence_matrix(
-                r, k, incidence_type="up", sparse=True, index=index
+            B = self.incidence_matrix(
+                rank, via_rank, incidence_type="up", sparse=True, index=index
             )
 
-        weights = False  ## currently weighting is not supported
-        if weights == False:
-            A = MP.dot(MP.transpose())
+        weights = False  # Currently weighting is not supported
+        if weights is False:
+            A = B.dot(B.transpose())
             A.setdiag(0)
             A = (A >= s) * 1
         if index:
@@ -1126,7 +1109,7 @@ class RankedEntitySet(RankedEntity):
         else:
             return A
 
-    def coadjacency_matrix(self, r, k, s=1, weights=False, index=False):
+    def coadjacency_matrix(self, rank, via_rank, s=1, weights=False, index=False):
         """
         A coadjacency matrix for the RankedEntitySet of the r-ranked considering thier adjacency with respect to k-ranked entities
         r > k
@@ -1146,71 +1129,64 @@ class RankedEntitySet(RankedEntity):
         column dictionary of the associted incidence matrix : dict
             Dictionary identifying column with item in entityset's uidset
 
-        Notes
-        -----
-
         Example:
         ---------
-                # example_1
-                >>> a = RankedEntity('a',[1,2,3],1)
-                >>> b = RankedEntity('b',[2,3],1)
-                >>> c = RankedEntity('c',[1,5],1)
-                >>> # define the Ranked Entity Set
-                >>> E = RankedEntitySet('E',[a,b,c] )
-                >>> # check the incidence matrices
-                >>> E.incidence_matrix(0,1,sparse=False, index=True)
+        # example_1
+        >>> a = RankedEntity('a',[1,2,3],1)
+        >>> b = RankedEntity('b',[2,3],1)
+        >>> c = RankedEntity('c',[1,5],1)
+        >>> # define the Ranked Entity Set
+        >>> E = RankedEntitySet('E',[a,b,c] )
+        >>> # check the incidence matrices
+        >>> E.incidence_matrix(0,1,sparse=False, index=True)
 
-                    (array([[1, 0, 1],
-                            [1, 1, 0],
-                            [1, 1, 0],
-                            [0, 0, 1]]),
-                     {0: 1, 1: 2, 2: 3, 3: 4},
-                     {0: 'a', 1: 'b', 2: 'c'})
+            (array([[1, 0, 1],
+                    [1, 1, 0],
+                    [1, 1, 0],
+                    [0, 0, 1]]),
+                {0: 1, 1: 2, 2: 3, 3: 4},
+                {0: 'a', 1: 'b', 2: 'c'})
 
-                # example_2
-                >>> x1 = RankedEntity('x1',rank = 0)
-                >>> x2 = RankedEntity('x2',rank = 0)
-                >>> x3 = RankedEntity('x3',rank = 0)
-                >>> x4 = RankedEntity('x4',rank = 0)
-                >>> x5 = RankedEntity('x5',rank = 0)
-                >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
-                >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
-                >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
-                >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-                >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-                >>> z = RankedEntity('z',[x1,x2,x3,x4],rank = 2)
-                >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
-                >>> x = RankedEntity('x',[x2,x3],rank = 2)
-                >>> # define the Ranked Entity Set
-                >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,x,z,w] )
+        # example_2
+        >>> x1 = RankedEntity('x1',rank = 0)
+        >>> x2 = RankedEntity('x2',rank = 0)
+        >>> x3 = RankedEntity('x3',rank = 0)
+        >>> x4 = RankedEntity('x4',rank = 0)
+        >>> x5 = RankedEntity('x5',rank = 0)
+        >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
+        >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
+        >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
+        >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
+        >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
+        >>> z = RankedEntity('z',[x1,x2,x3,x4],rank = 2)
+        >>> w = RankedEntity('w',[x4,x5,x1],rank = 2)
+        >>> x = RankedEntity('x',[x2,x3],rank = 2)
+        >>> # define the Ranked Entity Set
+        >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,x,z,w] )
 
-                >>> # check the incidence matrices
-                >>> E.coadjacency_matrix(0,1)
-                >>> E.coadjacency_matrix(1,2)
-                >>> E.coadjacency_matrix(0,2)
-
-
+        >>> # check the incidence matrices
+        >>> E.coadjacency_matrix(0,1)
+        >>> E.coadjacency_matrix(1,2)
+        >>> E.coadjacency_matrix(0,2)
         """
         # TODO : None case
-        assert r < k  # rank k must be larger than rank r
+        assert rank < via_rank  # rank k must be larger than rank r
         if index:
-
-            MP, row, col = self.incidence_matrix(
-                r, k, incidence_type="down", sparse=True, index=index
+            B, row, col = self.incidence_matrix(
+                rank, via_rank, incidence_type="down", sparse=True, index=index
             )
         else:
-            MP = self.incidence_matrix(
-                k, r, incidence_type="down", sparse=True, index=index
+            B = self.incidence_matrix(
+                via_rank, rank, incidence_type="down", sparse=True, index=index
             )
-        weights = False  ## currently weighting is not supported
-        if weights == False:
-            A = MP.T.dot(MP)
+        weights = False  # Currently weighting is not supported
+        if weights is False:
+            A = B.T.dot(B)
             A.setdiag(0)
             A = (A >= s) * 1
         if index:
             return A, col
-        else:
-            return A
+        return A
 
     def add(self, *args, safe_insert=True):
         """
@@ -1225,11 +1201,8 @@ class RankedEntitySet(RankedEntity):
         Returns
         -------
         self : RankedEntitySet
-
         """
-
         for item in args:
-
             if (
                 isinstance(item, RankedEntity)
                 or isinstance(item, Node)
@@ -1244,7 +1217,7 @@ class RankedEntitySet(RankedEntity):
                     self.add_element(item, safe_insert=False, check_CC_condition=False)
 
             else:
-                if not item in self.children:
+                if item not in self.children:
                     self.add_element(item, check_CC_condition=True)
                 else:
                     raise TopoNetXError(
@@ -1280,40 +1253,39 @@ class RankedEntitySet(RankedEntity):
         If use_reps is set to True a representative element of the equivalence class is
         used as identifier instead of the frozenset.
 
-        Examples:
-            >>> x1 = RankedEntity('x1',rank = 0)
-            >>> x2 = RankedEntity('x2',rank = 0)
-            >>> x3 = RankedEntity('x3',rank = 0)
-            >>> x4 = RankedEntity('x4',rank = 0)
-            >>> x5 = RankedEntity('x5',rank = 0)
-            >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
-            >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
-            >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
-            >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
-            >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
-            >>> y6 = RankedEntity('y6',[x4,x5], rank = 1)
-            >>> z = RankedEntity('z',[y6,x2,x3,x4],rank = 2)
-            >>> w = RankedEntity('w',[y4,x5,x1],rank = 2)
-            >>> # define the Ranked Entity Set
-            >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,z,w] )
+        Examples
+        --------
+        >>> x1 = RankedEntity('x1',rank = 0)
+        >>> x2 = RankedEntity('x2',rank = 0)
+        >>> x3 = RankedEntity('x3',rank = 0)
+        >>> x4 = RankedEntity('x4',rank = 0)
+        >>> x5 = RankedEntity('x5',rank = 0)
+        >>> y1 = RankedEntity('y1',[x1,x2], rank = 1)
+        >>> y2 = RankedEntity('y2',[x2,x3], rank = 1)
+        >>> y3 = RankedEntity('y3',[x3,x4], rank = 1)
+        >>> y4 = RankedEntity('y4',[x4,x1], rank = 1)
+        >>> y5 = RankedEntity('y5',[x4,x5], rank = 1)
+        >>> y6 = RankedEntity('y6',[x4,x5], rank = 1)
+        >>> z = RankedEntity('z',[y6,x2,x3,x4],rank = 2)
+        >>> w = RankedEntity('w',[y4,x5,x1],rank = 2)
+        >>> # define the Ranked Entity Set
+        >>> E = RankedEntitySet('E',[y1,y2,y3,y4,y5,z,w] )
 
-            >>> E.collapse_identical_elements("")
-            # note that y5 is collapsed with y6 on all levels
-
+        >>> E.collapse_identical_elements("")
+        # note that y5 is collapsed with y6 on all levels
         """
-
         shared_children = defaultdict(set)  # rank zero entities
         skeleton = self.skeleton(1, level="upper")
         for e in skeleton.__call__():
             shared_children[frozenset(e.uidset)].add(e.uid)
 
-        uniqe_reps = (
+        unique_reps = (
             {}
         )  # fix the reps across, this will be used when returning the RankedEntitySet
         for _, v in shared_children.items():
             e, *_ = v  # pick arbitrary rep of the set v --> e
-            for l in v:
-                uniqe_reps[l] = e
+            for one_v in v:
+                unique_reps[one_v] = e
 
         new_entity_dict = dict()
         for k, v in shared_children.items():
@@ -1321,8 +1293,8 @@ class RankedEntitySet(RankedEntity):
             new_entity_dict[e] = {}
             lst = []
             for i in k:
-                if i in uniqe_reps:
-                    lst.append(uniqe_reps[i])
+                if i in unique_reps:
+                    lst.append(unique_reps[i])
                 else:
                     lst.append(i)
             new_entity_dict[e]["elements"] = frozenset(lst)
