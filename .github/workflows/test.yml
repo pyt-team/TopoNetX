@@ -49,3 +49,5 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
+        run: |
+          bash <(curl -s https://codecov.io/bash)
