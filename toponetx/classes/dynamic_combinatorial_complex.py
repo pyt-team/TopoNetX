@@ -591,7 +591,7 @@ class DynamicCombinatorialComplex:
         CC.remove_node(x1)
 
         """
-        if not node in self._nodes:
+        if node not in self._nodes:
             return self
 
         if not isinstance(node, RankedEntity):
@@ -1044,7 +1044,7 @@ class DynamicCombinatorialComplex:
         B = csr_matrix(B)
         weight = False  # Currently weighting is not supported
 
-        if weight == False:
+        if weight is False:
             A = B.dot(B.transpose())
             A.setdiag(0)
             A = (A >= s) * 1

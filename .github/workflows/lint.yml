@@ -30,3 +30,4 @@ jobs:
         run: |
           black . --check --extend-exclude 'examples'
           isort --profile black --check .
+          flake8 .
