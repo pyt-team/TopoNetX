@@ -70,7 +70,6 @@ class CombinatorialComplex:
 
     Then, (S, X, i) is a combinatorial complex.
 
-
     Examples
     ---------
         >>> # define an empty Combinatorial Complex
@@ -79,7 +78,6 @@ class CombinatorialComplex:
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([1, 2, 4], rank=2)
         >>> CC.add_cell([3, 4], rank=2)
-
     """
 
     def __init__(
@@ -292,7 +290,7 @@ class CombinatorialComplex:
                     if e in self.cells and self.cells[e].rank == rank
                 )
             )
-        if rank == None:
+        if rank is None:
             return len(memberships)
         raise TopoNetXError("Rank must be non-negative integer")
 
@@ -567,11 +565,11 @@ class CombinatorialComplex:
             if rank == 1:
                 if not isinstance(cell, Iterable):
                     TopoNetXError(
-                        f" rank 1 cells in graph-based CombinatorialComplex must be Iterable."
+                        "Rank 1 cells in graph-based CombinatorialComplex must be Iterable."
                     )
                 if len(cell) != 2:
                     TopoNetXError(
-                        f"rank 1 cells in graph-based CombinatorialComplex must have size equalt to 1 got {cell}."
+                        f"Rank 1 cells in graph-based CombinatorialComplex must have size equalt to 1 got {cell}."
                     )
 
         self._complex_set.add_cell(cell, rank, **attr)
@@ -695,8 +693,6 @@ class CombinatorialComplex:
             Dictionary identifying columns with cells
 
         """
-        weight = False  # not implemented at this moment
-
         return self._complex_set.incidence_matrix(
             rank, to_rank, incidence_type=incidence_type, sparse=sparse, index=index
         )
@@ -727,9 +723,9 @@ class CombinatorialComplex:
 
         """
         B = csr_matrix(B)
-        weight = False  ## currently weighting is not supported
+        weight = False  # currently weighting is not supported
 
-        if weight == False:
+        if weight is False:
             A = B.dot(B.transpose())
             A.setdiag(0)
             A = (A >= s) * 1
@@ -786,12 +782,11 @@ class CombinatorialComplex:
             B = self.incidence_matrix(
                 rank, to_rank, incidence_type="up", sparse=True, index=index
             )
-        weight = False  ## currently weighting is not supported
+        weight = False  # currently weighting is not supported
         A = self._incidence_to_adjacency(B, s=s, weight=weight)
         if index:
             return A, row
-        else:
-            return A
+        return A
 
     def cell_adjacency_matrix(self, index=False, s=1, weight=False):
         """Compute the cell adjacency matrix.
@@ -806,10 +801,9 @@ class CombinatorialComplex:
           all cells adjacency_matrix : scipy.sparse.csr.csr_matrix
 
         """
-
-        weight = False  ## Currently default weight are not supported
-
-        B = self.incidence_matrix(0, None, incidence_type="up", index=index)
+        B = self.incidence_matrix(
+            rank=0, to_rank=None, incidence_type="up", index=index
+        )
         if index:
 
             A = self._incidence_to_adjacency(B[0].transpose(), s=s)
@@ -820,9 +814,9 @@ class CombinatorialComplex:
 
     def node_adjacency_matrix(self, index=False, s=1, weight=False):
         """Compute the node adjacency matrix."""
-        weight = False  ## Currently default weight are not supported
-
-        B = self.incidence_matrix(0, None, incidence_type="up", index=index)
+        B = self.incidence_matrix(
+            rank=0, to_rank=None, incidence_type="up", index=index
+        )
         if index:
             A = self._incidence_to_adjacency(B[0], s=s)
             return A, B[1]
@@ -871,8 +865,8 @@ class CombinatorialComplex:
             B = self.incidence_matrix(
                 rank, to_rank, incidence_type="down", sparse=True, index=index
             )
-        weight = False  ## currently weighting is not supported
-        if weight == False:
+        weight = False  # Currently weighting is not supported
+        if weight is False:
             A = B.T.dot(B)
             A.setdiag(0)
             A = (A >= s) * 1
@@ -1387,7 +1381,7 @@ class CombinatorialComplex:
         try:
             path = nx.shortest_path_length(G, rkey[source], rkey[target])
             return path
-        except:
+        except Exception:
             warnings.warn(f"No {s}-path between {source} and {target}")
             return np.inf
 
@@ -1437,7 +1431,7 @@ class CombinatorialComplex:
         try:
             path = nx.shortest_path_length(G, ckey[source], ckey[target])
             return path
-        except:
+        except Exception:
             warnings.warn(f"No {s}-path between {source} and {target}")
             return np.inf
 
