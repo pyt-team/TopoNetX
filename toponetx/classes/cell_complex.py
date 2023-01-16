@@ -1,6 +1,10 @@
 """
-Class for creation and manipulation of 2d Cell Complex.
+Class for creation and manipulation of a 2d cell complex.
 The class also supports attaching arbitrary attributes and data to cells.
+
+A cell complex is abbreviated in CX.
+
+We reserve the notation CC for a combinatorial complex.
 """
 
 
@@ -22,7 +26,9 @@ from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell, CellView
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
-from toponetx.classes.ranked_entity import DynamicCell, Node, RankedEntitySet
+from toponetx.classes.dynamic_cell import DynamicCell
+from toponetx.classes.node import Node
+from toponetx.classes.ranked_entity import RankedEntitySet
 from toponetx.exception import TopoNetXError
 
 __all__ = ["CellComplex"]
@@ -50,21 +56,17 @@ class CellComplex:
     such as algebraic topology and geometry, where they can be used to study the structure and
     properties of these objects.
 
-
     This class represents a cell complex, which is a space constructed by
     attaching cells of different dimensions to a topological space.
-
 
     In TNX the class CellComplex supports building a regular or non-regular
     2d cell complex. The class CellComplex only supports the construction
     of 2d cell complexes. If higher order constructions are desired
     then one should utilize the class CombinatorialComplex.
 
-
     In TNX cell complexes are implementes to be dynamic in the sense that
     they can change by adding or subtracting objects (nodes, edges, cells)
     from them.
-
 
     1. Dynamic construction of cell complexes, allowing users to add or remove objects from these
         structures after their initial creation.
@@ -78,38 +80,38 @@ class CellComplex:
 
         #Example 0
             >>> # Cell Complex can be empty
-            >>> cx = CellComplex()
+            >>> CX = CellComplex()
         #Example 1
-            >>> cx = CellComplex()
-            >>> cx.add_cell([1, 2, 3, 4], rank=2)
-            >>> cx.add_cell([2, 3, 4, 5], rank=2)
-            >>> cx.add_cell([5, 6, 7, 8], rank=2)
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1, 2, 3, 4], rank=2)
+            >>> CX.add_cell([2, 3, 4, 5], rank=2)
+            >>> CX.add_cell([5, 6, 7, 8], rank=2)
         #Example 2
             >>> c1 = Cell((1, 2, 3)) # a cell here is always assumed to be 2d
             >>> c2 = Cell((1, 2, 3, 4))
-            >>> cx = CellComplex([c1, c2])
+            >>> CX = CellComplex([c1, c2])
         #Example 3
-            >>> g = Graph()
-            >>> g.add_edge(1, 0)
-            >>> g.add_edge(2, 0)
-            >>> g.add_edge(1, 2)
-            >>> cx = CellComplex(g)
-            >>> cx.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
-            >>> cx.cells
+            >>> G = Graph()
+            >>> G.add_edge(1, 0)
+            >>> G.add_edge(2, 0)
+            >>> G.add_edge(1, 2)
+            >>> CX = CellComplex(g)
+            >>> CX.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
+            >>> CX.cells
         #Example 4
             >>> # non-regular cell complex
-            >>> cx = CellComplex(regular=False)
-            >>> cx.add_cell([1, 2, 3, 4], rank=2)
-            >>> cx.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
+            >>> CX = CellComplex(regular=False)
+            >>> CX.add_cell([1, 2, 3, 4], rank=2)
+            >>> CX.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
             >>> c1 = Cell((1, 2, 3, 4, 5, 1, 2, 3, 4, 5), regular=False)
-            >>> cx.add_cell(c1)
-            >>> cx.add_cell([5, 6, 7, 8],rank=2)
-            >>> cx.is_regular
+            >>> CX.add_cell(c1)
+            >>> CX.add_cell([5, 6, 7, 8],rank=2)
+            >>> CX.is_regular
         #Example 5
-            >>> cx = CellComplex()
-            >>> cx.add_cell([1, 2, 3, 4], rank=2, weight=5)
-            >>> cx.add_cell([2, 3, 4, 5], rank=2, weight=10)
-            >>> cx.add_cell([5, 6, 7, 8], rank=2, weight=13)
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1, 2, 3, 4], rank=2, weight=5)
+            >>> CX.add_cell([2, 3, 4, 5], rank=2, weight=10)
+            >>> CX.add_cell([5, 6, 7, 8], rank=2, weight=13)
 
     """
 
@@ -226,13 +228,13 @@ class CellComplex:
 
         Example
         -------
-            >>> cx = CellComplex(regular=False)
-            >>> cx.add_cell([1, 2, 3, 4], rank=2)
-            >>> cx.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
+            >>> CX = CellComplex(regular=False)
+            >>> CX.add_cell([1, 2, 3, 4], rank=2)
+            >>> CX.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
             >>> c1 = Cell((1, 2, 3, 4, 5, 1, 2, 3, 4, 5),regular=False)
-            >>> cx.add_cell(c1)
-            >>> cx.add_cell([5, 6, 7, 8], rank=2)
-            >>> cx.is_regular
+            >>> CX.add_cell(c1)
+            >>> CX.add_cell([5, 6, 7, 8], rank=2)
+            >>> CX.is_regular
         """
         for cell in self.cells:
             if not cell.is_regular:
@@ -411,7 +413,7 @@ class CellComplex:
 
     def order(self):
         """
-        The number of nodes in cc.
+        The number of nodes in CX.
 
         Returns
         -------
@@ -467,7 +469,7 @@ class CellComplex:
         """
         """
         if not cell in self.cells:
-            print(f"cell is not in cc {self.name}.")
+            print(f"cell is not in cx {self.name}.")
 
 
         node = self.cells[cell].uid
@@ -510,7 +512,7 @@ class CellComplex:
         Parameters
         ----------
         node_set : an iterable of hashables or Entities
-            Nodes in cc
+            Nodes in CX
 
         Returns
         -------
@@ -557,13 +559,13 @@ class CellComplex:
 
         Example
         -------
-        >>> cx = CellComplex()
+        >>> CX = CellComplex()
         >>> c1 = Cell((2, 3, 4), color='black')
-        >>> cx.add_cell(c1, weight=3)
-        >>> cx.add_cell([1, 2, 3, 4], rank=2, color='red')
-        >>> cx.add_cell([2, 3, 4, 5], rank=2, color='blue')
-        >>> cx.add_cell([5, 6, 7, 8], rank=2, color='green')
-        >>> cx.cells[(1, 2, 3, 4)]['color']
+        >>> CX.add_cell(c1, weight=3)
+        >>> CX.add_cell([1, 2, 3, 4], rank=2, color='red')
+        >>> CX.add_cell([2, 3, 4, 5], rank=2, color='blue')
+        >>> CX.add_cell([5, 6, 7, 8], rank=2, color='green')
+        >>> CX.cells[(1, 2, 3, 4)]['color']
         'red'
 
 
@@ -738,10 +740,10 @@ class CellComplex:
         Example
         -------
         >>> G = nx.path_graph(3)
-        >>> cc = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
 
-        >>> cc.set_filtration(d, "f")
+        >>> CX.set_filtration(d, "f")
 
         """
         import numbers
@@ -772,10 +774,10 @@ class CellComplex:
         Note : this is equivalent to getting a feature defined on the entire cell complex
 
         >>> G = nx.path_graph(3)
-        >>> cc = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
-        >>> cc.set_filtration(d, "f")
-        >>> cc.get_filtration("f")
+        >>> CX.set_filtration(d, "f")
+        >>> CX.get_filtration("f")
 
         {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
 
@@ -806,9 +808,9 @@ class CellComplex:
         Example
         -------
         >>> G = nx.path_graph(3)
-        >>> cc = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d = {0: {'color': 'red', 'attr2': 1 }, 1: {'color': 'blue', 'attr2': 3}}
-        >>> cc.set_node_attributes(d)
+        >>> CX.set_node_attributes(d)
 
         """
 
@@ -845,9 +847,9 @@ class CellComplex:
         -------
 
         >>> G = nx.path_graph(3)
-        >>> cc = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d={ (0,1) : {'color':'red','attr2':1 },(1,2): {'color':'blue','attr2':3 } }
-        >>> cc.set_edge_attributes(d)
+        >>> CX.set_edge_attributes(d)
 
         """
 
@@ -909,13 +911,13 @@ class CellComplex:
             to assign a cell attribute to store the value of that property for
             each cell:
 
-            >>> cc = CellComplex()
-            >>> cc.add_cell([1,2,3,4], rank=2)
-            >>> cc.add_cell([1,2,4], rank=2,)
-            >>> cc.add_cell([3,4,8], rank=2)
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4], rank=2)
+            >>> CX.add_cell([1,2,4], rank=2,)
+            >>> CX.add_cell([3,4,8], rank=2)
             >>> d={(1,2,3,4):'red',(1,2,4):'blue'}
-            >>> cc.set_cell_attributes(rank,name='color')
-            >>> cc.cells[(1,2,3,4)]['color']
+            >>> CX.set_cell_attributes(rank,name='color')
+            >>> CX.cells[(1,2,3,4)]['color']
             'red'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -924,14 +926,14 @@ class CellComplex:
             Examples
             --------
             >>> G = nx.path_graph(3)
-            >>> cc = CellComplex(G)
-            >>> cc.add_cell([1,2,3,4], rank=2)
-            >>> cc.add_cell([1,2,3,4], rank=2)
-            >>> cc.add_cell([1,2,4], rank=2,)
-            >>> cc.add_cell([3,4,8], rank=2)
+            >>> CX = CellComplex(G)
+            >>> CX.add_cell([1,2,3,4], rank=2)
+            >>> CX.add_cell([1,2,3,4], rank=2)
+            >>> CX.add_cell([1,2,4], rank=2,)
+            >>> CX.add_cell([3,4,8], rank=2)
             >>> d={ (1,2,3,4): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
-            >>> cc.set_cell_attributes(d)
-            >>> cc.cells[(1,2,3,4)][0]['color']
+            >>> CX.set_cell_attributes(d)
+            >>> CX.cells[(1,2,3,4)][0]['color']
             'red'
 
         Note : If the dict contains cells that are not in `self.cells`, they are
@@ -1002,16 +1004,16 @@ class CellComplex:
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> cc = CellComplex(G)
+        >>> CX = CellComplex(G)
         >>> d={0: {'color':'red','attr2':1 },1: {'color':'blue','attr2':3 } }
-        >>> cc.set_node_attributes(d)
-        >>> cc.get_node_attributes('color')
+        >>> CX.set_node_attributes(d)
+        >>> CX.get_node_attributes('color')
         {0: 'red', 1: 'blue'}
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> cc = CellComplex(G)
-        >>> nodes_color = cc.get_node_attributes('color')
+        >>> CX = CellComplex(G)
+        >>> nodes_color = CX.get_node_attributes('color')
         >>> nodes_color[1]
         'blue'
 
@@ -1042,12 +1044,12 @@ class CellComplex:
         >>> G = nx.path_graph(3)
 
         >>> d={ ((1,2,3,4),0): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
-        >>> cc = CellComplex(G)
-        >>> cc.add_cell([1,2,3,4], rank=2)
-        >>> cc.add_cell([1,2,3,4], rank=2)
-        >>> cc.add_cell([1,2,4], rank=2,)
-        >>> cc.add_cell([3,4,8], rank=2)
-        >>> cc.set_cell_attributes(d)
+        >>> CX = CellComplex(G)
+        >>> CX.add_cell([1,2,3,4], rank=2)
+        >>> CX.add_cell([1,2,3,4], rank=2)
+        >>> CX.add_cell([1,2,4], rank=2,)
+        >>> CX.add_cell([3,4,8], rank=2)
+        >>> CX.set_cell_attributes(d)
         >>> cell_color=cc.get_cell_attributes('color',2)
         >>> cell_color
         '{((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
@@ -1090,13 +1092,13 @@ class CellComplex:
          -------
             >>> import networkx as nx
             >>> G = nx.path_graph(3)
-            >>> cc = CellComplex(G)
-            >>> cc.add_cell([1,2,3,4], rank=2)
-            >>> cc.add_cell([1,2,3,4], rank=2)
-            >>> cc.add_cell([2,3,4,1], rank=2)
-            >>> cc.add_cell([1,2,4], rank=2,)
-            >>> cc.add_cell([3,4,8], rank=2)
-            >>> cc.remove_equivalent_cells()
+            >>> CX = CellComplex(G)
+            >>> CX.add_cell([1,2,3,4], rank=2)
+            >>> CX.add_cell([1,2,3,4], rank=2)
+            >>> CX.add_cell([2,3,4,1], rank=2)
+            >>> CX.add_cell([1,2,4], rank=2,)
+            >>> CX.add_cell([3,4,8], rank=2)
+            >>> CX.remove_equivalent_cells()
 
         """
         self.cells.remove_equivalent_cells()
@@ -1130,7 +1132,7 @@ class CellComplex:
 
     def incidence_matrix(self, rank, signed=True, weight=None, index=False):
         """
-        An incidence matrix for the cc indexed by nodes x cells.
+        An incidence matrix for the cx indexed by nodes x cells.
 
         Parameters
         ----------
@@ -1156,12 +1158,12 @@ class CellComplex:
             order of the column of the matrix
         Example1
         -------
-            >>> cx = CellComplex()
-            >>> cx.add_cell([1,2,3,4],rank=2)
-            >>> cx.add_cell([3,4,5],rank=2)
-            >>> B0 = cx.incidence_matrix(0)
-            >>> B1 = cx.incidence_matrix(1)
-            >>> B2 = cx.incidence_matrix(2)
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> B0 = CX.incidence_matrix(0)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
             >>> B1.dot(B2).todense()
             >>> B0.dot(B1).todense()
 
@@ -1172,32 +1174,32 @@ class CellComplex:
             ## they are incident to
             >>> import networkx as nx
             >>> G = nx.path_graph(3)
-            >>> cx = CellComplex(G)
-            >>> cx.add_cell([1,2,3,4], rank=2)
-            >>> cx.add_cell([4,3,2,1], rank=2)
-            >>> cx.add_cell([2,3,4,1], rank=2)
-            >>> cx.add_cell([1,2,4], rank=2,)
-            >>> cx.add_cell([3,4,8], rank=2)
-            >>> B1 = cx.incidence_matrix(1)
-            >>> B2 = cx.incidence_matrix(2)
+            >>> CX = CellComplex(G)
+            >>> CX.add_cell([1,2,3,4], rank=2)
+            >>> CX.add_cell([4,3,2,1], rank=2)
+            >>> CX.add_cell([2,3,4,1], rank=2)
+            >>> CX.add_cell([1,2,4], rank=2,)
+            >>> CX.add_cell([3,4,8], rank=2)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
             >>> B1.dot(B2).todense()
 
         Example3
         -------
             # non-regular complex example
-            >>> cx = CellComplex(regular=False)
-            >>> cx.add_cell([1,2,3,2],rank=2)
-            >>> cx.add_cell([3,4,5,3,4,5],rank=2)
-            >>> B1 = cx.incidence_matrix(1)
-            >>> B2 = cx.incidence_matrix(2)
+            >>> CX = CellComplex(regular=False)
+            >>> CX.add_cell([1,2,3,2],rank=2)
+            >>> CX.add_cell([3,4,5,3,4,5],rank=2)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
             >>> print(B2.todense()) # observe the non-unit entries
             >>> B1.dot(B2).todense()
         Example4
         -------
-            >>> cx = CellComplex()
-            >>> cx.add_cell([1,2,3,4],rank=2)
-            >>> cx.add_cell([3,4,5],rank=2)
-            >>> row,column,B1 = cx.incidence_matrix(1,index=True)
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> row,column,B1 = CX.incidence_matrix(1,index=True)
             >>> print(row)
             >>> print(column)
             >>> print(B1.todense())
@@ -1272,7 +1274,7 @@ class CellComplex:
 
                     A[ei, celli] = edge_visiting_dic[
                         ei
-                    ]  # this will update everytime we visit this edge for non-regular cc
+                    ]  # this will update everytime we visit this edge for non-regular CX
                     # the regular case can be handled more efficiently :
                     # if edge in edge_index:
                     #    A[ei, celli] = 1
@@ -1290,10 +1292,10 @@ class CellComplex:
                 else:
                     return abs(A.asformat("csc"))
         else:
-            raise ValueError(f"Only dimension 0,1 and 2 are supported, got {d}")
+            raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
 
     @staticmethod
-    def _incidence_to_adjacency(inc, weight=False):
+    def _incidence_to_adjacency(B, weight=False):
         """
         Helper method to obtain adjacency matrix from
         boolean incidence matrix for s-metrics.
@@ -1302,7 +1304,7 @@ class CellComplex:
 
         Parameters
         ----------
-        inc : scipy.sparse.csr.csr_matrix
+        B : scipy.sparse.csr.csr_matrix
             incidence matrix of 0's and 1's
 
 
@@ -1314,25 +1316,25 @@ class CellComplex:
         -------
         a matrix : scipy.sparse.csr.csr_matrix
 
-        >>> cx = CellComplex()
-        >>> cx.add_cell([1,2,3,5,6],rank=2)
-        >>> cx.add_cell([1,2,4,5,3,0],rank=2)
-        >>> cx.add_cell([1,2,4,9,3,0],rank=2)
-        >>> B1 = cx.incidence_matrix(1,signed = False)
-        >>> A1 = cx._incidence_to_adjacency(B1)
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1, 2, 3, 5, 6], rank=2)
+        >>> CX.add_cell([1, 2, 4, 5, 3, 0], rank=2)
+        >>> CX.add_cell([1, 2, 4, 9, 3, 0], rank=2)
+        >>> B1 = CX.incidence_matrix(1, signed=False)
+        >>> A1 = CX._incidence_to_adjacency(B1)
 
         """
 
-        inc = csr_matrix(inc)
+        B = csr_matrix(B)
         weight = False  # currently weighting is not supported
-        inc = abs(inc)  # make sure the incidence matrix has only positive entries
+        B = abs(B)  # make sure the incidence matrix has only positive entries
         if weight is False:
-            adj = inc.dot(inc.transpose())
-            adj.setdiag(0)
-        return adj
+            A = B.dot(B.transpose())
+            A.setdiag(0)
+        return A
 
     def hodge_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
-        """Compute the hodge-laplacian matrix for the cc.
+        """Compute the hodge-laplacian matrix for the CX.
 
         Parameters
         ----------
@@ -1361,16 +1363,16 @@ class CellComplex:
         when index is true:
             return also a list : list
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
-            dependeing on the input dimension
+            depending on the input dimension
 
 
 
         Example1
         -------
-            >>> cx = CellComplex()
-            >>> cx.add_cell([1,2,3,4],rank=2)
-            >>> cx.add_cell([3,4,5],rank=2)
-            >>> L1 = cx.hodge_laplacian_matrix(1)
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> L1 = CX.hodge_laplacian_matrix(1)
 
 
         Example2
@@ -1380,82 +1382,83 @@ class CellComplex:
             ## they are incident to
             >>> import networkx as nx
             >>> G = nx.path_graph(3)
-            >>> cx = CellComplex(G)
-            >>> cx.add_cell([1,2,3,4], rank=2)
-            >>> cx.add_cell([4,3,2,1], rank=2)
-            >>> cx.add_cell([2,3,4,1], rank=2)
-            >>> cx.add_cell([1,2,4], rank=2,)
-            >>> cx.add_cell([3,4,8], rank=2)
-            >>> B1 = cx.incidence_matrix(1)
-            >>> B2 = cx.incidence_matrix(2)
+            >>> CX = CellComplex(G)
+            >>> CX.add_cell([1,2,3,4], rank=2)
+            >>> CX.add_cell([4,3,2,1], rank=2)
+            >>> CX.add_cell([2,3,4,1], rank=2)
+            >>> CX.add_cell([1,2,4], rank=2,)
+            >>> CX.add_cell([3,4,8], rank=2)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
             >>> B1.dot(B2).todense()
 
         Example3
         -------
             # non-regular complex example
-            >>> cx = CellComplex(regular=False)
-            >>> cx.add_cell([1,2,3,2],rank=2)
-            >>> cx.add_cell([3,4,5,3,4,5],rank=2)
-            >>> B1 = cx.incidence_matrix(1)
-            >>> B2 = cx.incidence_matrix(2)
+            >>> CX = CellComplex(regular=False)
+            >>> CX.add_cell([1,2,3,2],rank=2)
+            >>> CX.add_cell([3,4,5,3,4,5],rank=2)
+            >>> B1 = CX.incidence_matrix(1)
+            >>> B2 = CX.incidence_matrix(2)
             >>> B1.dot(B2).todense()
 
         """
 
         if rank == 0:  # return L0, the unit graph laplacian
             if index:
-                nodelist, _, inc_next = self.incidence_matrix(
+                nodelist, _, B_next = self.incidence_matrix(
                     rank + 1, weight=weight, index=True
                 )
-                lap = inc_next @ inc_next.transpose()
+                L_hodge = B_next @ B_next.transpose()
                 if signed:
-                    return nodelist, lap
+                    return nodelist, L_hodge
                 else:
-                    return nodelist, abs(lap)
+                    return nodelist, abs(L_hodge)
             else:
-                inc_next = self.incidence_matrix(rank + 1, weight=weight)
-                lap = inc_next @ inc_next.transpose()
+                B_next = self.incidence_matrix(rank + 1, weight=weight)
+                L_hodge = B_next @ B_next.transpose()
                 if signed:
-                    return lap
+                    return L_hodge
                 else:
-                    return abs(lap)
+                    return abs(L_hodge)
         elif rank < 2:  # rank == 1, return L1
 
             if self.maxdim == 2:
-                edge_list, cell_list, inc_next = self.incidence_matrix(
+                edge_list, cell_list, B_next = self.incidence_matrix(
                     rank + 1, weight=weight, index=True
                 )
-                inc = self.incidence_matrix(rank, weight=weight, index=False)
-                lap = inc_next @ inc_next.transpose() + inc.transpose() @ inc
+                B = self.incidence_matrix(rank, weight=weight, index=False)
+                L_hodge = B_next @ B_next.transpose() + B.transpose() @ B
             else:
-                lap = inc.transpose() @ inc
+                L_hodge = B.transpose() @ B
             if not signed:
-                lap = abs(lap)
+                L_hodge = abs(L_hodge)
             if index:
-                return edge_list, lap
+                return edge_list, L_hodge
             else:
-                return lap
+                return L_hodge
 
         elif rank == 2 and self.maxdim == 2:
 
-            edge_list, cell_list, inc = self.incidence_matrix(
+            edge_list, cell_list, B = self.incidence_matrix(
                 rank, weight=weight, index=True
             )
-            lap = inc.transpose() @ inc
+            L_hodge = B.transpose() @ B
             if not signed:
-                lap = abs(lap)
+                L_hodge = abs(L_hodge)
 
             if index:
-                return cell_list, lap
+                return cell_list, L_hodge
             else:
-                return lap
+                return L_hodge
         elif rank == 2 and self.maxdim != 2:
             raise ValueError(
-                f"the input complex does not have cells of dim 2, max cell dim is {self.maxdim} (maximal dimension cells), got {d}"
+                "The input complex does not have cells of dim 2. "
+                f"The maximal cell dimension is {self.maxdim}, got {rank}"
             )
         else:
             raise ValueError(
-                f"d should be larger than 0 and <= {self.maxdim} (maximal dimension cells), got {d}"
+                f"Rank should be larger than 0 and <= {self.maxdim} (maximal dimension cells), got {rank}."
             )
 
     def up_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
@@ -1492,17 +1495,17 @@ class CellComplex:
 
         Example1
         -------
-            >>> cx = CellComplex()
-            >>> cx.add_cell([1,2,3,4],rank=2)
-            >>> cx.add_cell([3,4,5],rank=2)
-            >>> L1_up = cx.up_laplacian_matrix(1)
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> L1_up = CX.up_laplacian_matrix(1)
 
         Example2
         -------
-            >>> cx = CellComplex()
-            >>> cx.add_cell([1,2,3],rank=2)
-            >>> cx.add_cell([3,4,5],rank=2)
-            >>> index , L1_up = cx.up_laplacian_matrix(1,index=True)
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3],rank=2)
+            >>> CX.add_cell([3,4,5],rank=2)
+            >>> index , L1_up = CX.up_laplacian_matrix(1,index=True)
             >>> print(index)
             >>> print(L1_up)
 
@@ -1512,27 +1515,27 @@ class CellComplex:
         weight = None  # this feature is not supported in this version
 
         if rank == 0:
-            row, col, inc_next = self.incidence_matrix(
+            row, col, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
-            lap_up = inc_next @ inc_next.transpose()
+            L_up = B_next @ B_next.transpose()
         elif rank < self.maxdim:
-            row, col, inc_next = self.incidence_matrix(
+            row, col, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
-            lap_up = inc_next @ inc_next.transpose()
+            L_up = B_next @ B_next.transpose()
         else:
 
             raise ValueError(
-                f"d should larger than 0 and <= {self.maxdim-1} (maximal dimension cells-1), got {d}"
+                f"Rank should larger than 0 and <= {self.maxdim-1} (maximal dimension cells-1), got {rank}."
             )
         if not signed:
-            lap_up = abs(lap_up)
+            L_up = abs(L_up)
 
         if index:
-            return row, lap_up
+            return row, L_up
         else:
-            return lap_up
+            return L_up
 
     def down_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
         """
@@ -1569,125 +1572,125 @@ class CellComplex:
         -------
           >>> import networkx as nx
           >>> G = nx.path_graph(3)
-          >>> cc = CellComplex(G)
-          >>> cc.add_cell([1,2,3,4], rank=2)
-          >>> cc.add_cell([1,2,3,4], rank=2)
-          >>> cc.add_cell([2,3,4,1], rank=2)
-          >>> cc.add_cell([1,2,4], rank=2,)
-          >>> cc.add_cell([3,4,8], rank=2)
-          >>> cc.down_laplacian_matrix(2)
+          >>> CX = CellComplex(G)
+          >>> CX.add_cell([1,2,3,4], rank=2)
+          >>> CX.add_cell([1,2,3,4], rank=2)
+          >>> CX.add_cell([2,3,4,1], rank=2)
+          >>> CX.add_cell([1,2,4], rank=2,)
+          >>> CX.add_cell([3,4,8], rank=2)
+          >>> CX.down_laplacian_matrix(2)
 
 
         """
         weight = None  # this feature is not supported in this version
 
         if rank <= self.maxdim and rank > 0:
-            row, column, inc = self.incidence_matrix(rank, weight=weight, index=True)
-            lap_down = inc.transpose() @ inc
+            row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
+            L_down = B.transpose() @ B
         else:
             raise ValueError(
                 f"Rank should be larger than 1 and <= {self.maxdim} (maximal dimension cells), got {rank}."
             )
         if not signed:
-            lap_down = abs(lap_down)
+            L_down = abs(L_down)
         if index:
-            return row, lap_down
+            return row, L_down
         else:
-            return lap_down
+            return L_down
 
     def adjacency_matrix(self, rank, signed=False, weight=None, index=False):
         """Compute adjacency matrix for a given rank."""
         weight = None  # this feature is not supported in this version
 
-        ind, lap_up = self.up_laplacian_matrix(
+        ind, L_up = self.up_laplacian_matrix(
             rank, signed=signed, weight=weight, index=True
         )
-        lap_up.setdiag(0)
+        L_up.setdiag(0)
 
         if not signed:
-            lap_up = abs(lap_up)
+            L_up = abs(L_up)
         if index:
-            return ind, lap_up
+            return ind, L_up
         else:
-            return lap_up
+            return L_up
 
     def coadjacency_matrix(self, rank, signed=False, weight=None, index=False):
         """Compute coadjacency matrix for a given rank."""
         weight = None  # this feature is not supported in this version
 
-        ind, lap_down = self.down_laplacian_matrix(
+        ind, L_down = self.down_laplacian_matrix(
             rank, signed=signed, weight=weight, index=True
         )
-        lap_down.setdiag(0)
+        L_down.setdiag(0)
         if not signed:
-            lap_down = abs(lap_down)
+            L_down = abs(L_down)
         if index:
-            return ind, lap_down
+            return ind, L_down
         else:
-            return lap_down
+            return L_down
 
     def k_hop_incidence_matrix(self, rank, k):
         """Compute k-hop incidence matrix for a given rank."""
-        inc = self.incidence_matrix(rank, signed=True)
+        B = self.incidence_matrix(rank, signed=True)
         if rank < self.maxdim and rank >= 0:
-            adj = self.adjacency_matrix(rank, signed=True)
+            A = self.adjacency_matrix(rank, signed=True)
         if rank <= self.maxdim and rank > 0:
-            coadj = self.coadjacency_matrix(rank, signed=True)
+            coA = self.coadjacency_matrix(rank, signed=True)
         if rank == self.maxdim:
-            return inc @ np.power(coadj, k)
+            return B @ np.power(coA, k)
         elif rank == 0:
-            return inc @ np.power(adj, k)
+            return B @ np.power(A, k)
         else:
-            return inc @ np.power(adj, k) + inc @ np.power(coadj, k)
+            return B @ np.power(A, k) + B @ np.power(coA, k)
 
     def k_hop_coincidence_matrix(self, rank, k):
-        coinc = self.coincidence_matrix(rank, signed=True)
+        coB = self.coincidence_matrix(rank, signed=True)
         if rank < self.maxdim and rank >= 0:
-            adj = self.adjacency_matrix(rank, signed=True)
+            A = self.adjacency_matrix(rank, signed=True)
         if rank <= self.maxdim and rank > 0:
-            coadj = self.coadjacency_matrix(rank, signed=True)
+            coA = self.coadjacency_matrix(rank, signed=True)
         if rank == self.maxdim:
-            return np.power(coadj, k) @ coinc
+            return np.power(coA, k) @ coB
         elif rank == 0:
-            return np.power(adj, k) @ coinc
+            return np.power(A, k) @ coB
         else:
-            return np.power(adj, k) @ coinc + np.power(coadj, k) @ coinc
+            return np.power(A, k) @ coB + np.power(coA, k) @ coB
 
     def cell_adjacency_matrix(self, signed=True, weight=None, index=False):
         """Compute adjacency matrix.
 
         Example
         -------
-        >>> cx = CellComplex()
-        >>> cx.add_cell([1,2,3],rank=2)
-        >>> cx.add_cell([1,4],rank=1)
-        >>> A = cx.cell_adjacency_matrix()
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1,2,3],rank=2)
+        >>> CX.add_cell([1,4],rank=1)
+        >>> A = CX.cell_adjacency_matrix()
         """
-        cc = self.to_combinatorial_complex()
+        CX = self.to_combinatorial_complex()
 
-        inc = cc.incidence_matrix(0, None, incidence_type="up", index=index)
+        B = CX.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
 
-            adj = cc._incidence_to_adjacency(inc[0].transpose())
+            A = CX._incidence_to_adjacency(B[0].transpose())
 
-            return adj, inc[2]
+            return A, B[2]
         else:
-            adj = cc._incidence_to_adjacency(inc.transpose())
-            return adj
+            A = CX._incidence_to_adjacency(B.transpose())
+            return A
 
     def node_adjacency_matrix(self, index=False, s=1, weight=False):
 
-        cc = self.to_combinatorial_complex()
+        CX = self.to_combinatorial_complex()
 
-        inc = cc.incidence_matrix(0, None, incidence_type="up", index=index)
+        B = CX.incidence_matrix(0, None, incidence_type="up", index=index)
         if index:
 
-            adj = cc._incidence_to_adjacency(inc[0], s=s)
+            A = CX._incidence_to_adjacency(B[0], s=s)
 
-            return adj, inc[1]
+            return A, B[1]
         else:
-            adj = cc._incidence_to_adjacency(inc, s=s)
-            return adj
+            A = CX._incidence_to_adjacency(B, s=s)
+            return A
 
     def restrict_to_cells(self, cell_set, name=None):
         """
@@ -1706,13 +1709,13 @@ class CellComplex:
 
         Example
 
-        >>> cx = CellComplex()
+        >>> CX = CellComplex()
         >>> c1 = Cell((1, 2, 3))
         >>> c2 = Cell((1, 2, 4))
         >>> c3 = Cell((1, 2, 5))
-        >>> cx = CellComplex([c1, c2, c3])
-        >>> cx.add_edge(1, 0)
-        >>> cx1 = cx.restrict_to_cells([c1, (0, 1)])
+        >>> CX = CellComplex([c1, c2, c3])
+        >>> CX.add_edge(1, 0)
+        >>> cx1 = CX.restrict_to_cells([c1, (0, 1)])
         >>> cx1.cells
         CellView([Cell(1, 2, 3)])
 
@@ -1722,13 +1725,13 @@ class CellComplex:
         for cell in cell_set:
             if cell in self.cells:
                 rns.append(cell)
-            elif edge in self.edges:
-                edges.append(edge)
+            elif cell in self.edges:
+                edges.append(cell)
 
-        cx = CellComplex(cells=rns, name=name)
+        CX = CellComplex(cells=rns, name=name)
         for edge in edges:
-            cx.add_edge(edge[0], edge[1])
-        return cx
+            CX.add_edge(edge[0], edge[1])
+        return CX
 
     def restrict_to_nodes(self, node_set, name=None):
         """Restrict cell complex to nodes.
@@ -1748,26 +1751,26 @@ class CellComplex:
         new Cell Complex : Cellcomplex
 
         Example
-        >>> cx = CellComplex()
+        >>> CX = CellComplex()
         >>> c1 = Cell((1, 2, 3))
         >>> c2 = Cell((1, 2, 4))
         >>> c3 = Cell((1, 2, 5))
-        >>> cx = CellComplex([c1, c2, c3])
-        >>> cx.add_edge(1, 0)
-        >>> cx.restrict_to_nodes([1, 2, 3, 0])
+        >>> CX = CellComplex([c1, c2, c3])
+        >>> CX.add_edge(1, 0)
+        >>> CX.restrict_to_nodes([1, 2, 3, 0])
         """
 
         _G = Graph(self._G.subgraph(node_set))
-        cx = CellComplex(_G)
+        CX = CellComplex(_G)
         cells = []
         for cell in self.cells:
-            if cx.is_insertable_cycle(cell, True):
+            if CX.is_insertable_cycle(cell, True):
                 cells.append(cell)
-        cx = CellComplex(_G)
+        CX = CellComplex(_G)
 
         for cell in cells:
-            cx.add_cell(cell)
-        return cx
+            CX.add_cell(cell)
+        return CX
 
     def to_combinatorial_complex(self):
         """Convert to combinatorial complex.
@@ -1778,12 +1781,12 @@ class CellComplex:
 
         Example
         -------
-        >>> cx = CellComplex()
-        >>> cx.add_cell([1,2,3,4],rank=2)
-        >>> cx.add_cell([2,3,4,5],rank=2)
-        >>> cx.add_cell([5,6,7,8],rank=2)
-        >>> cc= cx.to_combinatorial_complex()
-        >>> cc.cells
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1,2,3,4],rank=2)
+        >>> CX.add_cell([2,3,4,5],rank=2)
+        >>> CX.add_cell([5,6,7,8],rank=2)
+        >>> CX= CX.to_combinatorial_complex()
+        >>> CX.cells
         """
         all_cells = []
 
@@ -1805,11 +1808,11 @@ class CellComplex:
 
         Example
         -------
-        >>> cx = CellComplex()
-        >>> cx.add_cell([1,2,3,4],rank=2)
-        >>> cx.add_cell([2,3,4,5],rank=2)
-        >>> cx.add_cell([5,6,7,8],rank=2)
-        >>> HG = cx.to_hypergraph()
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1,2,3,4],rank=2)
+        >>> CX.add_cell([2,3,4,5],rank=2)
+        >>> CX.add_cell([5,6,7,8],rank=2)
+        >>> HG = CX.to_hypergraph()
         >>> HG
 
         """
@@ -1867,13 +1870,13 @@ class CellComplex:
         singles : list
             A list of cells uids.
 
-            >>> cx = CellComplex()
-            >>> cx.add_cell([1,2,3,4],rank=2)
-            >>> cx.add_cell([2,3,4,5],rank=2)
-            >>> cx.add_cell([5,6,7,8],rank=2)
-            >>> cx.add_node(0)
-            >>> cx.add_node(10)
-            >>> cx.singletons()
+            >>> CX = CellComplex()
+            >>> CX.add_cell([1,2,3,4],rank=2)
+            >>> CX.add_cell([2,3,4,5],rank=2)
+            >>> CX.add_cell([5,6,7,8],rank=2)
+            >>> CX.add_node(0)
+            >>> CX.add_node(10)
+            >>> CX.singletons()
 
         """
 
@@ -1917,7 +1920,7 @@ class CellComplex:
         An s-cell-component has the property that for any two cells e1 and e2
         there is a sequence of cells starting with e1 and ending with e2
         such that pairwise adjacent cells in the sequence intersect in at least
-        s nodes. If s=1 these are the path components of the cc.
+        s nodes. If s=1 these are the path components of the CX.
 
         If cells=False this method returns s-node-connected components.
         A list of sets of uids of the nodes which are s-walk connected.
@@ -1934,22 +1937,22 @@ class CellComplex:
         ------
         s_connected_components : iterator
             Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
-            components of cc.
+            components of CX.
 
         """
 
         if cells:
-            adj, coldict = self.cell_adjacency_matrix(s=s, index=True)
-            graph = nx.from_scipy_sparse_matrix(adj)
+            A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+            G = nx.from_scipy_sparse_matrix(A)
 
-            for c in nx.connected_components(graph):
+            for c in nx.connected_components(G):
                 if not return_singletons and len(c) == 1:
                     continue
                 yield {coldict[n] for n in c}
         else:
-            adj, rowdict = self.node_adjacency_matrix(s=s, index=True)
-            graph = nx.from_scipy_sparse_matrix(adj)
-            for c in nx.connected_components(graph):
+            A, rowdict = self.node_adjacency_matrix(s=s, index=True)
+            G = nx.from_scipy_sparse_matrix(A)
+            for c in nx.connected_components(G):
                 if not return_singletons:
                     if len(c) == 1:
                         continue
@@ -1965,7 +1968,7 @@ class CellComplex:
 
         cells : boolean, optional, cells=False
             Determines if cell or node components are desired. Returns
-            subgraphs equal to the cc restricted to each set of nodes(cells) in the
+            subgraphs equal to the cx restricted to each set of nodes(cells) in the
             s-connected components or s-cell-connected components
         return_singletons : bool, optional
 
@@ -2048,12 +2051,12 @@ class CellComplex:
         list of the s-component nodes
         """
 
-        adj, coldict = self.node_adjacency_matrix(s=s, index=True)
-        graph = nx.from_scipy_sparse_matrix(adj)
+        A, coldict = self.node_adjacency_matrix(s=s, index=True)
+        G = nx.from_scipy_sparse_matrix(A)
         diams = []
         comps = []
-        for c in nx.connected_components(graph):
-            diamc = nx.diameter(graph.subgraph(c))
+        for c in nx.connected_components(G):
+            diamc = nx.diameter(G.subgraph(c))
             temp = set()
             for e in c:
                 temp.add(coldict[e])
@@ -2065,7 +2068,7 @@ class CellComplex:
     def cell_diameters(self, s=1):
         """
         Returns the cell diameters of the s_cell_connected component subgraphs
-        in cc.
+        in CX.
 
         Parameters
         ----------
@@ -2076,19 +2079,19 @@ class CellComplex:
         maximum diameter : int
 
         list of diameters : list
-            List of cell_diameters for s-cell component subgraphs in cc
+            List of cell_diameters for s-cell component subgraphs in CX
 
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
 
         """
 
-        adj, coldict = self.cell_adjacency_matrix(s=s, index=True)
-        graph = nx.from_scipy_sparse_matrix(adj)
+        A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+        G = nx.from_scipy_sparse_matrix(A)
         diams = []
         comps = []
-        for c in nx.connected_components(graph):
-            diamc = nx.diameter(graph.subgraph(c))
+        for c in nx.connected_components(G):
+            diamc = nx.diameter(G.subgraph(c))
             temp = set()
             for e in c:
                 temp.add(coldict[e])
@@ -2112,7 +2115,7 @@ class CellComplex:
         Raises
         ------
         TopoNetXError
-            If cc is not s-cell-connected
+            If cx is not s-cell-connected
 
         Notes
         -----
@@ -2122,10 +2125,10 @@ class CellComplex:
         are s-adjacent. If the graph is not connected, an error will be raised.
 
         """
-        adj = self.node_adjacency_matrix(s=s)
-        graph = nx.from_scipy_sparse_matrix(adj)
-        if nx.is_connected(graph):
-            return nx.diameter(graph)
+        A = self.node_adjacency_matrix(s=s)
+        G = nx.from_scipy_sparse_matrix(A)
+        if nx.is_connected(G):
+            return nx.diameter(G)
         raise TopoNetXError(f"cc is not s-connected. s={s}")
 
     def cell_diameter(self, s=1):
@@ -2154,10 +2157,10 @@ class CellComplex:
 
         """
 
-        adj = self.cell_adjacency_matrix(s=s)
-        graph = nx.from_scipy_sparse_matrix(adj)
-        if nx.is_connected(graph):
-            return nx.diameter(graph)
+        A = self.cell_adjacency_matrix(s=s)
+        G = nx.from_scipy_sparse_matrix(A)
+        if nx.is_connected(G):
+            return nx.diameter(G)
         raise TopoNetXError(f"cell complex is not s-connected. s={s}")
 
     def distance(self, source, target, s=1):
@@ -2167,10 +2170,10 @@ class CellComplex:
         Parameters
         ----------
         source : node.uid or node
-            a node in the cc
+            a node in the CX
 
         target : node.uid or node
-            a node in the cc
+            a node in the CX
 
         s : positive integer
             the number of cells
@@ -2199,11 +2202,11 @@ class CellComplex:
             source = source.uid
         if isinstance(target, Cell):
             target = target.uid
-        adj, rowdict = self.node_adjacency_matrix(s=s, index=True)
-        graph = nx.from_scipy_sparse_matrix(adj)
+        A, rowdict = self.node_adjacency_matrix(s=s, index=True)
+        G = nx.from_scipy_sparse_matrix(A)
         rkey = {v: k for k, v in rowdict.items()}
         try:
-            path = nx.shortest_path_length(graph, rkey[source], rkey[target])
+            path = nx.shortest_path_length(G, rkey[source], rkey[target])
             return path
         except Exception:
             warnings.warn(f"No {s}-path between {source} and {target}")
@@ -2253,11 +2256,11 @@ class CellComplex:
             source = source.uid
         if isinstance(target, Cell):
             target = target.uid
-        adj, coldict = self.cell_adjacency_matrix(s=s, index=True)
-        graph = nx.from_scipy_sparse_matrix(adj)
+        A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+        G = nx.from_scipy_sparse_matrix(A)
         ckey = {v: k for k, v in coldict.items()}
         try:
-            path = nx.shortest_path_length(graph, ckey[source], ckey[target])
+            path = nx.shortest_path_length(G, ckey[source], ckey[target])
             return path
         except Exception:
             warnings.warn(f"No {s}-path between {source} and {target}")
@@ -2267,15 +2270,15 @@ class CellComplex:
         """
         add edges and nodes from a a graph G to self
 
-        >>> cx = CellComplex()
-        >>> cx.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
+        >>> CX = CellComplex()
+        >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
 
         >>> G= Graph()
         >>> G.add_edge(1,0)
         >>> G.add_edge(2,0)
         >>> G.add_edge(1,2)
-        >>> cx.from_networkx_graph(G)
-        >>> cx.edges
+        >>> CX.from_networkx_graph(G)
+        >>> CX.edges
         """
 
         for edge in G.edges:
@@ -2290,33 +2293,33 @@ class CellComplex:
         >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
                                faces=[[0, 1, 2]],
                                process=False)
-        >>> cx = CellComplex.from_trimesh(mesh)
-        >>> print(cx.nodes)
-        >>> print(cx.cells)
-        >>> cx.nodes[0]['position']
+        >>> CX = CellComplex.from_trimesh(mesh)
+        >>> print(CX.nodes)
+        >>> print(CX.cells)
+        >>> CX.nodes[0]['position']
 
         """
         # try to see the index of the first vertex
 
-        cx = CellComplex(mesh.faces)
+        CX = CellComplex(mesh.faces)
 
         first_ind = np.min(mesh.faces)
 
         if first_ind == 0:
 
-            cx.set_node_attributes(
+            CX.set_node_attributes(
                 dict(zip(range(len(mesh.vertices)), mesh.vertices)), name="position"
             )
         else:  # first index starts at 1.
 
-            cx.set_node_attributes(
+            CX.set_node_attributes(
                 dict(
                     zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
                 ),
                 name="position",
             )
 
-        return cx
+        return CX
 
     @staticmethod
     def load_mesh(file_path, process=False, force=None):
@@ -2330,9 +2333,9 @@ class CellComplex:
                      None : will not force the above.
         Note:
             file supported : obj, off, glb
-        >>> cx = CellComplex.load_mesh("bunny.obj")
+        >>> CX = CellComplex.load_mesh("bunny.obj")
 
-        >>> cx.nodes
+        >>> CX.nodes
 
         """
         import trimesh

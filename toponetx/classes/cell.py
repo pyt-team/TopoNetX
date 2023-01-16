@@ -1,11 +1,9 @@
-"""
+"""Cell and CellView classes."""
 
-
-"""
 try:
-    from collections.abc import Hashable, Iterable
+    from collections.abc import Iterable
 except ImportError:
-    from collections import Iterable, Hashable
+    from collections import Iterable
 from collections import Counter, defaultdict, deque
 from itertools import zip_longest
 
@@ -17,7 +15,7 @@ __all__ = ["Cell", "CellView"]
 class Cell:
     """Class representing a 2d cell.
 
-    A 2d cell is the elementry building block used
+    A 2d cell is the elementary building block used
     to build a 2d cell complex (regular or non-regular).
 
     Parameters
@@ -39,7 +37,7 @@ class Cell:
       each two consequitive nodes (ni,n_{i+1}) define an edge in the boundary of the cell
       note that the last edge (n_k,n1) is also included in the boundary of the cell
       and it is used to close the cell
-      so a Cell that is defined as c = Cell((1,2,3))
+      so a Cell that is defined as c = Cell((1, 2, 3))
       will have a c.boundary = [(1, 2), (2, 3), (3, 1)] which consists of three edges.
 
     - The regularity condition of a 2d cell :
@@ -48,9 +46,9 @@ class Cell:
             by default Cell is assumed to be regular unless otherwise specified.
             self loops are not allowed in the boundary of the edge
     Examples
-        >>> cell1 = Cell ( (1,2,3) )
-        >>> cell2 = Cell ( (1,2,4,5),weight = 1 )
-        >>> cell3 = Cell ( ("a","b","c") )
+        >>> cell1 = Cell((1, 2, 3))
+        >>> cell2 = Cell((1, 2, 4, 5), weight=1)
+        >>> cell3 = Cell(("a", "b", "c"))
     """
 
     def __init__(self, elements, name=None, regular=True, **attr):
@@ -179,13 +177,14 @@ class Cell:
 
     def is_homotopic_to(self, cell):
         """
-        Paramters:
-        ---------
+        Parameters
+        ----------
         cell : tuple, list or Cell
 
-        Return : bool
+        Return
         ------
-            return True is self is homotopic to input cell and False otherwise.
+        _ : bool
+            Return True is self is homotopic to input cell and False otherwise.
         """
 
         return Cell._are_homotopic(self, cell) or Cell._are_homotopic(
@@ -195,7 +194,7 @@ class Cell:
     @staticmethod
     def _are_homotopic(cell1, cell):
         """
-        Paramters:
+        Parameters:
         ---------
         cell1 : Cell
         cell : tuple, list or Cell
@@ -314,7 +313,7 @@ class CellView:
                 raise KeyError(f"cell {cell} is not in the cell dictionary")
 
         else:
-            raise KeyError(f"input must be a tuple, list or a cell")
+            raise KeyError("input must be a tuple, list or a cell")
 
     # Set methods
     def __len__(self):

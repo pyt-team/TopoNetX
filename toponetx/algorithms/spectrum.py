@@ -6,16 +6,14 @@ from numpy import linalg as LA
 from scipy.sparse import diags
 from scipy.sparse.linalg import eigsh
 
-from toponetx.classes.algorithms.eigen_align import *
+from toponetx.classes.algorithms.eigen_align import align_eigenvectors_kl
 from toponetx.classes.cell_complex import CellComplex
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = [
     "_sparse_spectral",
     "hodge_laplacian_eigenvectors",
     "set_hodge_laplacian_eigenvector_attrs",
-    "compute_spectral_embedding",
     "set_spectral_embedding_attr",
     "set_spectral_embedding_attr_list_of_complexes",
     "normalize",

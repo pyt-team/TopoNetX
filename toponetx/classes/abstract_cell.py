@@ -1,3 +1,5 @@
+"""AbstractCell and AbstractCellView classes."""
+
 import numpy as np
 
 try:
@@ -13,11 +15,12 @@ __all__ = ["AbstractCell", "AbstractCellView"]
 
 
 class AbstractCell:
-    """
-    A class representing an abstract cell in a combinatorial complex or a cell complex.
+    """Class for an abstract cell in a combinatorial complex or a cell complex.
 
-    This class represents an abstract cell in a combinatorial complex, which is a set of nodes with optional attributes and a rank.
-    The nodes in a cell must be hashable and unique, and the cell itself is immutable.
+    This class represents an abstract cell in a combinatorial complex,
+    which is a set of nodes with optional attributes and a rank.
+    The nodes in a cell must be hashable and unique,
+    and the cell itself is immutable.
 
 
     :param elements: The nodes in the cell.
@@ -29,11 +32,11 @@ class AbstractCell:
     :param **attr: Additional attributes of the cell, as keyword arguments.
 
     Examples
-    ========
-        >>> ac1 = AbstractCell ( (1,2,3) )
-        >>> ac2 = AbstractCell ( (1,2,4,5) )
-        >>> ac3 = AbstractCell ( ("a","b","c") )
-        >>> ac3 = AbstractCell ( ("a","b","c"), rank = 10)
+    --------
+    >>> ac1 = AbstractCell ( (1,2,3) )
+    >>> ac2 = AbstractCell ( (1,2,4,5) )
+    >>> ac3 = AbstractCell ( ("a","b","c") )
+    >>> ac3 = AbstractCell ( ("a","b","c"), rank = 10)
     """
 
     def __init__(self, elements, rank=None, name=None, **attr):
@@ -226,43 +229,43 @@ class AbstractCellView:
 
             return False
 
-    def skeleton(self, k, name=None, level=None):
+    def skeleton(self, rank, name=None, level=None):
 
         if name is None and level is None:
-            name = "X" + str(k)
+            name = "X" + str(rank)
         elif name is None and level == "equal":
-            name = "X" + str(k)
+            name = "X" + str(rank)
         elif name is None and level == "upper":
-            name = "X>=" + str(k)
+            name = "X>=" + str(rank)
         elif name is None and level == "up":
-            name = "X>=" + str(k)
+            name = "X>=" + str(rank)
         elif name is None and level == "lower":
-            name = "X<=" + str(k)
+            name = "X<=" + str(rank)
         elif name is None and level == "down":
-            name = "X<=" + str(k)
+            name = "X<=" + str(rank)
         else:
             assert isinstance(name, str)
         if level is None or level == "equal":
             elements = []
-            if k in self.allranks:
+            if rank in self.allranks:
 
-                return list(self.cell_dict[k].keys())
+                return list(self.cell_dict[rank].keys())
             else:
                 return []
 
         elif level == "upper" or level == "up":
             elements = []
-            for l in self.allranks:
-                if l >= k:
+            for rank in self.allranks:
+                if rank >= rank:
 
-                    elements = elements + list(self.cell_dict[l].keys())
+                    elements = elements + list(self.cell_dict[rank].keys())
             return elements
 
         elif level == "lower" or level == "down":
             elements = []
-            for l in self.allranks:
-                if l <= k:
-                    elements = elements + list(self.cell_dict[l].keys())
+            for rank in self.allranks:
+                if rank <= rank:
+                    elements = elements + list(self.cell_dict[rank].keys())
             return elements
         else:
             raise TopoNetXError(
@@ -620,7 +623,7 @@ class AbstractCellView:
                 return np.zeros(1)
 
     def incidence_matrix(
-        self, r, k, incidence_type="up", weight=None, sparse=True, index=False
+        self, rank, to_rank, incidence_type="up", weight=None, sparse=True, index=False
     ):
         """
         An incidence matrix indexed by r-ranked cells k-ranked cells
@@ -665,47 +668,43 @@ class AbstractCellView:
         the AbstractCellView instance, and for each cell, it checks which faces it contains.
         For each face that the cell contains, the method increments the corresponding entry
         in the matrix. Finally, the method returns the completed incidence matrix.
-
-
         """
-        weight = None  # weight is not supported in this version
-        if r == k:
+        if rank == to_rank:
             raise ValueError("incidence must be computed for k!=r, got equal r and k.")
-        if k is None:
+        if to_rank is None:
             if incidence_type == "up":
-                children = self.skeleton(r)
-                uidset = self.skeleton(r + 1, level="upper")
+                children = self.skeleton(rank)
+                uidset = self.skeleton(rank + 1, level="upper")
             elif incidence_type == "down":
-                uidset = self.skeleton(r)
-                children = self.skeleton(r - 1, level="lower")
-            else:
-                raise TopoNetXError("incidence_type must be 'up' or 'down' ")
+                uidset = self.skeleton(rank)
+                children = self.skeleton(rank - 1, level="lower")
+            raise TopoNetXError("incidence_type must be 'up' or 'down' ")
         else:
             assert (
-                r != k
+                rank != to_rank
             )  # incidence is defined between two skeletons of different ranks
             if (
-                r < k
+                rank < to_rank
             ):  # up incidence is defined between two skeletons of different ranks
-                children = self.skeleton(r)
-                uidset = self.skeleton(k)
+                children = self.skeleton(rank)
+                uidset = self.skeleton(to_rank)
 
             elif (
-                r > k
+                rank > to_rank
             ):  # up incidence is defined between two skeletons of different ranks
-                children = self.skeleton(k)
-                uidset = self.skeleton(r)
+                children = self.skeleton(to_rank)
+                uidset = self.skeleton(rank)
         return self._incidence_matrix_helper(children, uidset, sparse, index)
 
-    def adjacency_matrix(self, r, k, s=1, weights=False, index=False):
-        """
-        A adjacency matrix for the RankedEntitySet of the r-ranked considering thier adjacency with respect to k-ranked entities
-        r < k
+    def adjacency_matrix(self, rank, via_rank, s=1, weights=False, index=False):
+        """Compute the adjacency matrix.
+
+        An adjacency matrix for the RankedEntitySet of the rank-ranked considering
+        their adjacency with respect to via_rank-ranked entities rank < via_rank
 
         Parameters
         ----------
         sparse : boolean, optional, default: True
-
         index : boolean, optional, default : False
             If True return will include a dictionary of uid : row number
 
@@ -718,41 +717,34 @@ class AbstractCellView:
 
         column dictionary : dict
             Dictionary identifying column with item in entityset's uidset
-
-        Notes
-        -----
-
-
-
         """
-
-        if k is not None:
-            assert r < k  # rank k must be smaller than rank r
+        if via_rank is not None:
+            assert rank < via_rank  # rank k must be smaller than rank r
 
         if index:
-
-            MP, row, col = self.incidence_matrix(
-                r, k, incidence_type="up", sparse=True, index=index
+            B, row, col = self.incidence_matrix(
+                rank, via_rank, incidence_type="up", sparse=True, index=index
             )
         else:
-            MP = self.incidence_matrix(
-                r, k, incidence_type="up", sparse=True, index=index
+            B = self.incidence_matrix(
+                rank, via_rank, incidence_type="up", sparse=True, index=index
             )
 
-        weights = False  ## currently weighting is not supported
-        if weights == False:
-            A = MP.dot(MP.transpose())
+        weights = False  # Currently weighting is not supported
+        if weights is False:
+            A = B.dot(B.transpose())
             A.setdiag(0)
             A = (A >= s) * 1
         if index:
             return A, row
-        else:
-            return A
+        return A
 
-    def coadjacency_matrix(self, r, k, s=1, weights=False, index=False):
-        """
-        A coadjacency matrix for the RankedEntitySet of the r-ranked considering thier adjacency with respect to k-ranked entities
-        r > k
+    def coadjacency_matrix(self, rank, via_rank, s=1, weights=False, index=False):
+        """Compute the coadjacency matrix.
+
+        A coadjacency matrix for the RankedEntitySet of the rank-ranked considering
+        their adjacency with respect to via-rank ranked entities
+        rank > via_rank
 
         Parameters
         ----------
@@ -768,32 +760,25 @@ class AbstractCellView:
 
         column dictionary of the associted incidence matrix : dict
             Dictionary identifying column with item in entityset's uidset
-
-        Notes
-        -----
-
-
         """
         # TODO : None case
-        assert r < k  # rank k must be larger than rank r
+        assert rank < via_rank  # rank k must be larger than rank r
         if index:
-
-            MP, row, col = self.incidence_matrix(
-                r, k, incidence_type="down", sparse=True, index=index
+            B, row, col = self.incidence_matrix(
+                rank, via_rank, incidence_type="down", sparse=True, index=index
             )
         else:
-            MP = self.incidence_matrix(
-                k, r, incidence_type="down", sparse=True, index=index
+            B = self.incidence_matrix(
+                via_rank, rank, incidence_type="down", sparse=True, index=index
             )
-        weights = False  ## currently weighting is not supported
-        if weights == False:
-            A = MP.T.dot(MP)
+        weights = False  # Currently weighting is not supported
+        if weights is False:
+            A = B.T.dot(B)
             A.setdiag(0)
             A = (A >= s) * 1
         if index:
             return A, col
-        else:
-            return A
+        return A
 
     def _restrict_to(self, element_subset, name=None):
         """

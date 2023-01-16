@@ -1,13 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  6 17:14:07 2022
-
-@author: Mustafa Hajij
-"""
-
-"""
-Abstract class for complexes
-"""
+"""Abstract class for complexes."""
 
 
 from abc import ABC, abstractmethod
@@ -61,7 +52,7 @@ class Complex(ABC):
         pass
 
     @abstractmethod
-    def skeleton(self, k):
+    def skeleton(self, rank):
         pass
 
     @abstractmethod

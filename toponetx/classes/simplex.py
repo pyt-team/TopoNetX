@@ -1,7 +1,5 @@
-"""
-Simplex and SimplexView Classes
+"""Simplex and SimplexView Classes."""
 
-"""
 try:
     from collections.abc import Hashable, Iterable
 except ImportError:
