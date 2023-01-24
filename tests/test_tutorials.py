@@ -8,6 +8,7 @@ import tempfile
 
 import pytest
 
+
 def _exec_tutorial(path):
 
     file_name = tempfile.NamedTemporaryFile(suffix=".ipynb").name
@@ -24,6 +25,7 @@ def _exec_tutorial(path):
         path,
     ]
     subprocess.check_call(args)
+
 
 TUTORIALS_DIR = "tutorials"
 paths = sorted(glob.glob(f"{TUTORIALS_DIR}/*.ipynb"))
