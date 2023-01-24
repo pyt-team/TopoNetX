@@ -33,7 +33,4 @@ paths = sorted(glob.glob(f"{TUTORIALS_DIR}/*.ipynb"))
 
 @pytest.mark.parametrize("path", paths)
 def test_tutorial(path):
-    with open(path, "r") as file:
-        metadata = json.load(file).get("metadata")
-
     _exec_tutorial(path)
