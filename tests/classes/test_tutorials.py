@@ -8,9 +8,6 @@ import tempfile
 
 import pytest
 
-BACKEND = os.environ.get("TOPONETX_BACKEND", "numpy")
-ALL_BACKENDS = ["numpy"]
-
 def _exec_tutorial(path):
 
     file_name = tempfile.NamedTemporaryFile(suffix=".ipynb").name
@@ -36,9 +33,5 @@ paths = sorted(glob.glob(f"{TUTORIALS_DIR}/*.ipynb"))
 def test_tutorial(path):
     with open(path, "r") as file:
         metadata = json.load(file).get("metadata")
-
-    backends = metadata.get("backends", ALL_BACKENDS)
-    if BACKEND not in backends:
-        pytest.skip()
 
     _exec_tutorial(path)
