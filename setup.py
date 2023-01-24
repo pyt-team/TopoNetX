@@ -30,6 +30,7 @@ full_requires = []
 test_requires = [
     "pytest",
     "pytest-cov",
+    "jupyter"
 ]
 
 dev_requires = test_requires + [
