@@ -27,10 +27,7 @@ install_requires = [
 
 full_requires = []
 
-test_requires = [
-    "pytest",
-    "pytest-cov",
-]
+test_requires = ["pytest", "pytest-cov", "jupyter"]
 
 dev_requires = test_requires + [
     "pre-commit",
