@@ -1281,7 +1281,7 @@ class CellComplex:
                     # else:
                     #    A[ei, celli] = -1
             if index:
-                cell_index = {cell.elements: i for i, c in enumerate(self.cells)}
+                cell_index = {c.elements: i for i, c in enumerate(self.cells)}
                 if signed:
                     return edge_index, cell_index, A.asformat("csc")
                 else:
