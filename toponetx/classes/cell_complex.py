@@ -37,33 +37,28 @@ __all__ = ["CellComplex"]
 class CellComplex:
     """Class representing a cell complex.
 
-    In mathematics, a cell complex is a space that is constructed by attaching lower-dimensional
-    cells to a topological space to form a new space. The cells are attached to the space in a specific way,
-    and the resulting space has a well-defined structure.
-
-    For example, a cell complex can be used to represent a simplicial complex,
-    which is a collection of points, line segments, triangles, and higher-dimensional
-    simplices that are connected in a specific way. Each simplex in the simplicial complex
-    is called a cell, and the cell complex consists of all of these cells and the way they are connected.
-
-    A cell complex is a mathematical structure consisting of a
-    set of points (called vertices or 0-cells), a set of line segments
-    (called edges or 1-cells), and a set of polygons (called faces or 2-cells),
-    such that the vertices, edges, and faces are connected in a consistent way.
+    A cell complex is a mathematical structure that is built up from simple building blocks called cells. 
+    These cells can be thought of as generalized versions of familiar shapes, such as points, line segments,
+    triangles, and disks. By gluing these cells together in a prescribed way, one can create complex 
+    geometrical objects that are of interest in topology and geometry.
 
     Cell complexes can be used to represent various mathematical objects, such as graphs,
     manifolds, and discrete geometric shapes. They are useful in many areas of mathematics,
     such as algebraic topology and geometry, where they can be used to study the structure and
     properties of these objects.
 
-    This class represents a cell complex, which is a space constructed by
-    attaching cells of different dimensions to a topological space.
 
     In TNX the class CellComplex supports building a regular or non-regular
     2d cell complex. The class CellComplex only supports the construction
-    of 2d cell complexes. If higher order constructions are desired
+    of 2d cell complexes. If higher dimensional cell complexes are desired
     then one should utilize the class CombinatorialComplex.
-
+    
+    Mathtmatically, in TNX a cell complex it a triplet (V, E, C) 
+    where V is a set of nodes, E is a set of edges and C is a set of 2-cells.
+    In TNX each 2-cell C is consists of a finite sequence of nodes C=(n1,...,nk,n1) with k>=2.
+    All edges between two consecutive nodes in C belong to  E.
+    Regular cells have unique nodes in C whereas non-regular cells allow for duplication.
+    
     In TNX cell complexes are implementes to be dynamic in the sense that
     they can change by adding or subtracting objects (nodes, edges, cells)
     from them.
