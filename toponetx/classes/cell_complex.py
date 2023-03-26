@@ -15,6 +15,7 @@ try:
 except ImportError:
     from collections import Iterable, Hashable
 
+from collections import defaultdict
 from itertools import zip_longest
 
 import networkx as nx
@@ -24,11 +25,12 @@ from hypernetx.classes.entity import Entity
 from networkx import Graph
 from scipy.sparse import csr_matrix
 
-from toponetx.classes.cell import Cell, CellView
+from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.dynamic_cell import DynamicCell
 from toponetx.classes.node import Node
 from toponetx.classes.ranked_entity import RankedEntitySet
+from toponetx.classes.reportview import CellView
 from toponetx.exception import TopoNetXError
 
 __all__ = ["CellComplex"]
@@ -308,6 +310,116 @@ class CellComplex:
         """
         return self.neighbors(node)
 
+    # -------------------#
+
+    def _insert_cell(self, cell, **attr):
+        # input must be list, tuple or Cell type
+        if isinstance(cell, tuple) or isinstance(cell, list) or isinstance(cell, Cell):
+            if isinstance(cell, tuple) or isinstance(cell, list):
+                cell = Cell(elements=cell, name=str(len(self._cells)), **attr)
+            elif isinstance(cell, Cell):
+                cell.properties.update(attr)
+
+            if cell.elements not in self._cells:
+                self._cells._cells[cell.elements] = {0: cell}
+            else:
+                self._cells._cells[cell.elements][
+                    len(self._cells[cell.elements])
+                ] = cell
+        else:
+            raise ValueError("input must be list, tuple or Cell type")
+
+    def _delete_cell(self, cell, key=None):
+
+        if isinstance(cell, Cell):
+            cell = cell.elements
+        if cell in self._cells:
+            if key is None:
+                del self._cells._cells[cell]
+            elif key in self._cells[cell]:
+                del self._cells._cells[cell][key]
+            else:
+                raise KeyError(f"cell with key {key} is not in the complex ")
+        else:
+            raise KeyError(f"cell {cell} is not in the complex")
+
+    def _cell_equivelance_class(self):
+        """
+
+
+        Returns
+        -------
+        equiv : TYPE
+            DESCRIPTION.
+
+
+        Example
+        ------
+         >>> CV = CellView()
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (2,3,4,1) )
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (1,2,3,6) )
+         >>> CV.insert_cell ( (3,4,1,2) )
+         >>> CV.insert_cell ( (4,3,2,1) )
+         >>> CV.insert_cell ( (1,2,7,3) )
+         >>> c1=Cell((1,2,3,4,5))
+         >>> CV.insert_cell(c1)
+         >>> d = CV._cell_equivelance_class()
+         >>> d
+
+        """
+        equiv_classes = defaultdict(set)
+        all_inserted_cells = set()
+        for i, c1 in enumerate(self):
+            for j, c2 in enumerate(self):
+                if i == j:
+                    if j not in all_inserted_cells:
+                        equiv_classes[c1].add(j)
+                elif i > j:
+                    continue
+                elif j in all_inserted_cells:
+                    continue
+                else:
+                    if c1.is_homotopic_to(c2):
+                        equiv_classes[c1].add(j)
+                        all_inserted_cells.add(j)
+        return equiv_classes
+
+    def _remove_equivalent_cells(self):
+        """
+        Example:
+        ---------
+         >>> CV = CellView()
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (2,3,4,1) )
+         >>> CV.insert_cell ( (1,2,3,4) )
+         >>> CV.insert_cell ( (1,2,3,6) )
+         >>> CV.insert_cell ( (3,4,1,2) )
+         >>> CV.insert_cell ( (4,3,2,1) )
+         >>> CV.insert_cell ( (1,2,7,3) )
+         >>> c1=Cell((1,2,3,4,5))
+         >>> CV.insert_cell(c1)
+         >>> CV.remove_equivalent_cells()
+         >>> CV
+
+
+        """
+        equiv_classes = self._cell_equivelance_class()
+        for c in list(self):
+            if c not in equiv_classes:
+                d = self._cells[c.elements]
+                if len(d) == 1:
+                    self.delete_cell(c)
+                else:
+                    for k, v in d.items():
+                        if len(d) == 1:
+                            break
+                    else:
+                        self.delete_cell(c, k)
+
+    # -------------------#
+
     def degree(self, node, rank=1):
         """
         The number of cells of certain rank that contain node.
@@ -576,13 +688,13 @@ class CellComplex:
                     self._G.add_edge(edge[0], edge[1])
                 if self._regular:
                     if cell.is_regular:
-                        self._cells.insert_cell(cell, **attr)
+                        self._insert_cell(cell, **attr)
                     else:
                         raise TopoNetXError(
                             "input cell violates the regularity condition."
                         )
                 else:
-                    self._cells.insert_cell(cell, **attr)
+                    self._insert_cell(cell, **attr)
             else:
                 print(
                     "Invalid cycle condition, the input cell cannot be inserted to the cell complex"
@@ -612,9 +724,7 @@ class CellComplex:
                         edges_cell = set(zip_longest(cell, cell[1:] + [cell[0]]))
                         for edge in edges_cell:
                             self._G.add_edges_from(edges_cell)
-                        self._cells.insert_cell(
-                            Cell(cell, regular=self._regular), **attr
-                        )
+                        self._insert_cell(Cell(cell, regular=self._regular), **attr)
                     else:
                         print(
                             "Invalid cycle condition, check if edges of the input cells are in the 1-skeleton."
@@ -672,11 +782,11 @@ class CellComplex:
 
         """
         if isinstance(cell, Cell):
-            self._cells.delete_cell(cell.elements)
+            self._delete_cell(cell.elements)
         elif isinstance(cell, Iterable):
             if not isinstance(cell, tuple):
                 cell = tuple(cell)
-            self._cells.delete_cell(cell)
+            self._delete_cell(cell)
         return self
 
     def remove_cells(self, cell_set):

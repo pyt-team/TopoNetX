@@ -16,7 +16,7 @@ class TestCellComplex(unittest.TestCase):
         assert len(CX.cells) == 0
         assert len(CX.nodes) == 0
         assert len(CX.edges) == 0
-        self.assertEqual(CX.dim, 0)
+        assert CX.dim == 0
         assert CX.is_regular
 
     def test_init_cell_complex_with_list_of_cells(self):
@@ -26,7 +26,7 @@ class TestCellComplex(unittest.TestCase):
         CX = CellComplex([c1, c2])
         assert c1 in CX.cells
         assert c2 in CX.cells
-        self.assertEqual(CX.dim, 2)
+        assert CX.dim == 2
 
         c1 = Cell((1, 2, 3))
         c2 = Cell((1, 2, 3, 4))

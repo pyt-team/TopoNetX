@@ -7,12 +7,13 @@ from toponetx.exception import (
 from .classes.ranked_entity import RankedEntity, RankedEntitySet
 from .classes.dynamic_cell import DynamicCell
 from .classes.simplicial_complex import SimplicialComplex
-from .classes.simplex import Simplex, SimplexView
+from .classes.simplex import Simplex
 from .classes.cell_complex import CellComplex
 from .classes.dynamic_combinatorial_complex import DynamicCombinatorialComplex
 from .classes.combinatorial_complex import CombinatorialComplex
-from .classes.abstract_cell import AbstractCell, AbstractCellView
-from .classes.cell import Cell, CellView
+from .classes.hyperedge import HyperEdge
+from .classes.cell import Cell
+from .classes.reportview import CellView, HyperEdgeView, SimplexView
 from .classes.node import Node, NodeView
 
 from .utils.structure import (

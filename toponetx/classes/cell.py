@@ -4,7 +4,7 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
-from collections import Counter, defaultdict, deque
+from collections import Counter, deque
 from itertools import zip_longest
 
 import numpy as np
@@ -13,42 +13,49 @@ __all__ = ["Cell", "CellView"]
 
 
 class Cell:
-    """Class representing a 2d cell.
+    r"""Class representing a 2D cell.
 
-    A 2d cell is the elementary building block used
-    to build a 2d cell complex (regular or non-regular).
+     A 2D cell is an elementary building block used to build a 2D cell complex, whether regular or non-regular.
 
-    Parameters
-    ----------
-    elements : any iterable of hashables.
-        Elements order is important and defines the 2
-        cell up to cyclic permutation.
-    name : str, optional, default: None
-    is_regular : bool
-        checks for regularity conditions of the cell. Raises ValueError when
-        the True and when the input elements do not satisfy the regullarity condition
-    attr : keyword arguments, optional, default: {}
-        properties belonging to cell added as key=value pairs.
-        Both key and value must be hashable.
+     Parameters
+     ----------
+     elements : iterable of hashable objects
+         An iterable that contains hashable objects representing the nodes of the cell. The order of the elements is important
+         and defines the cell up to cyclic permutation.
+     name : str, optional
+         A string representing the name of the cell. The default value is None.
+     regular : bool, optional
+         A boolean indicating whether the cell satisfies the regularity condition. The default value is True.
+         A 2D cell is regular if and only if there is no repetition in the boundary edges that define the cell.
+         By default, the cell is assumed to be regular unless otherwise specified. Self-loops are not allowed in the boundary
+         of the cell. If a cell violates the cell complex regularity condition, a ValueError is raised.
+     **attr : keyword arguments, optional
+         Properties belonging to the cell can be added as key-value pairs. Both the key and value must be hashable.
 
-    Notes
-    -----
-    - a cell is defined as an ordered sequence of nodes (n1,...,nk)
-      each two consequitive nodes (ni,n_{i+1}) define an edge in the boundary of the cell
-      note that the last edge (n_k,n1) is also included in the boundary of the cell
-      and it is used to close the cell
-      so a Cell that is defined as c = Cell((1, 2, 3))
-      will have a c.boundary = [(1, 2), (2, 3), (3, 1)] which consists of three edges.
-
-    - The regularity condition of a 2d cell :
-            a 2d cell is regular if and only if there is no
-            repeatition in the boundary edges that define the cell
-            by default Cell is assumed to be regular unless otherwise specified.
-            self loops are not allowed in the boundary of the edge
-    Examples
-        >>> cell1 = Cell((1, 2, 3))
-        >>> cell2 = Cell((1, 2, 4, 5), weight=1)
-        >>> cell3 = Cell(("a", "b", "c"))
+     Notes
+     -----
+     - A cell is defined as an ordered sequence of nodes (n1, ..., nk), where each two consecutive nodes (ni, ni+1)
+       define an edge in the boundary of the cell. Note that the last edge (nk, n1) is also included in the boundary
+       of the cell and is used to close the cell. For instance, if a Cell is defined as `c = Cell((1, 2, 3))`,
+       then `c.boundary` will return `[(1, 2), (2, 3), (3, 1)]`, which consists of three edges.
+    - When cell is created, its boundary is automatically created as a
+       set of edges that encircle the cell.
+     Examples
+     --------
+     >>> cell1 = Cell((1, 2, 3))
+     >>> cell2 = Cell((1, 2, 4, 5), weight=1)
+     >>> cell3 = Cell(("a", "b", "c"))
+     >>> # create geometric cell:
+     >>> v0 = (0, 0)
+     >>> v1 = (1, 0)
+     >>> v2 = (1, 1)
+     >>> v3 = (0, 1)
+     # create the cell with the vertices and edges
+     >>> cell = Cell([v0, v1, v2, v3],type="square")
+     >>> cell["type"]
+     >>> print(list(cell.boundary))
+     [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
+      ((0, 1), (0, 0))]
     """
 
     def __init__(self, elements, name=None, regular=True, **attr):
@@ -88,17 +95,46 @@ class Cell:
         self.properties.update(attr)
 
     def __getitem__(self, item):
+        r"""Retrieve the value associated with the given key in the properties dictionary.
+
+        Parameters
+        ----------
+        item : hashable
+            The key to retrieve from the properties dictionary.
+
+        Returns
+        -------
+        The value associated with the given key in the properties dictionary.
+
+        Raises
+        ------
+        KeyError:
+            If the given key is not in the properties dictionary.
+        """
         if item not in self.properties:
             raise KeyError(f"attr {item} is not an attr in the cell {self.name}")
         else:
             return self.properties[item]
 
     def __setitem__(self, key, item):
+        r"""Set the value associated with the given key in the properties dictionary.
+
+        Parameters
+        ----------
+        key : hashable
+            The key to set in the properties dictionary.
+        item : hashable
+            The value to associate with the given key in the properties dictionary.
+
+        Returns
+        -------
+        None
+        """
         self.properties[key] = item
 
     @property
     def is_regular(self):
-        """
+        r"""
         Returns true is the Cell is a regular cell, and False otherwise
         """
 
@@ -114,12 +150,42 @@ class Cell:
         return True
 
     def __len__(self):
+        r"""Get the number of elements in the cell.
+
+        Returns
+        -------
+        int
+            The number of elements in the cell.
+        """
         return len(self._elements)
 
     def __iter__(self):
+        r"""Iterate over the elements in the cell.
+
+        Returns
+        -------
+        iterator
+            An iterator over the elements in the cell.
+        """
         return iter(self._elements)
 
     def sign(self, edge):
+        r"""The sign method of the Cell class takes an edge as input and returns the sign of the edge with respect to the cell. If the edge is in the boundary of the cell, then the sign is 1 if the edge is in the counterclockwise direction around the cell and -1 if it is in the clockwise direction. If the edge is not in the boundary of the cell, a KeyError is raised.
+
+        Args:
+
+        edge: an iterable representing the edge whose sign with respect to the cell is to be computed.
+        Returns:
+
+        1: if the edge is in the boundary of the cell and is in the counterclockwise direction around the cell.
+        -1: if the edge is in the boundary of the cell and is in the clockwise direction around the cell.
+        Raises:
+
+        KeyError: if the input edge is not in the boundary of the cell.
+        ValueError: if the input edge is not iterable or if its length is not 2.
+
+        """
+
         if isinstance(edge, Iterable):
             if len(edge) == 2:
                 if tuple(edge) in self.boundary:
@@ -148,11 +214,8 @@ class Cell:
 
     @property
     def boundary(self):
-        """
-
+        r"""
         a 2d cell is characterized by its boundary edges
-
-
         Return
         ------
         iterator of tuple representing boundary edges given in cyclic order
@@ -247,23 +310,11 @@ class Cell:
 
 
 class CellView:
-    """A CellView class for cells of a CellComplex
-
+    r"""A CellView class for cells of a CellComplex
     Parameters
     ----------
     name : str
-
-    Examples
-    --------
-         >>> CV = CellView()
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (2,3,4,1) )
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (1,2,3,6) )
-         >>> c1=Cell((1,2,3,4,5))
-         >>> CV.insert_cell(c1)
-         >>> c1 in CV
-
+        The name of the cell view.
     """
 
     def __init__(self, name=None):
@@ -273,18 +324,29 @@ class CellView:
         else:
             self.name = name
 
+        # Initialize a dictionary to hold cells, with keys being the tuple
+        # that defines the cell, and values being dictionaries of cell objects
+        # with different properties
         self._cells = dict()
 
     def __getitem__(self, cell):
-        """
+        r"""Return the properties of a given cell.
+
         Parameters
         ----------
         cell : tuple list or cell
-            DESCRIPTION.
+            The cell of interest.
+
         Returns
         -------
-        TYPE : dict or ilst or dicts
-            return dict of properties associated with that cells
+        TYPE : dict or list of dicts
+            The properties associated with the cell.
+
+        Raises
+        ------
+        KeyError
+            If the cell is not in the cell dictionary.
+
         """
 
         if isinstance(cell, Cell):
@@ -292,14 +354,19 @@ class CellView:
             if cell.elements not in self._cells:
                 raise KeyError(f"cell {cell} is not in the cell dictionary")
 
+            # If there is only one cell with these elements, return its properties
             elif len(self._cells[cell.elements]) == 1:
                 k = next(iter(self._cells[cell.elements].keys()))
                 return self._cells[cell.elements][k].properties
+
+            # If there are multiple cells with these elements, return the properties of all cells
             else:
                 return [
                     self._cells[cell.elements][c].properties
                     for c in self._cells[cell.elements]
                 ]
+
+        # If a tuple or list is passed in, assume it represents a cell
         elif isinstance(cell, tuple) or isinstance(cell, list):
 
             cell = tuple(cell)
@@ -315,14 +382,15 @@ class CellView:
         else:
             raise KeyError("input must be a tuple, list or a cell")
 
-    # Set methods
     def __len__(self):
+        r"""Return the number of cells in the cell view."""
         if len(self._cells) == 0:
             return 0
         else:
             return np.sum([len(self._cells[cell]) for cell in self._cells])
 
     def __iter__(self):
+        r"""Iterate over all cells in the cell view."""
         return iter(
             [
                 self._cells[cell][key]
@@ -332,6 +400,19 @@ class CellView:
         )
 
     def __contains__(self, e):
+        r"""Check if a given element is in the cell view.
+
+        Parameters
+        ----------
+        e : tuple or Cell
+            The element to check.
+
+        Returns
+        -------
+        bool
+            Whether or not the element is in the cell view.
+
+        """
         if isinstance(e, tuple) or isinstance(e, list):
             return e in self._cells
 
@@ -341,129 +422,10 @@ class CellView:
             return False
 
     def __repr__(self):
-        """C
-        String representation of regular cell
-        Returns
-        -------
-        str
-        """
+        r"""Return a string representation of the cell view."""
         return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
     def __str__(self):
-        """
-        String representation of regular cell
-
-        Returns
-        -------
-        str
-        """
+        r"""Return a string representation of the cell view."""
 
         return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
-
-    def insert_cell(self, cell, **attr):
-        if isinstance(cell, tuple) or isinstance(cell, list):
-            cell = Cell(elements=cell, name=str(len(self._cells)), **attr)
-            if cell.elements not in self._cells:
-                self._cells[cell.elements] = {0: cell}
-            else:
-                self._cells[cell.elements][len(self._cells[cell.elements])] = cell
-
-        elif isinstance(cell, Cell):
-            cell.properties.update(attr)
-            if cell.elements not in self._cells:
-                self._cells[cell.elements] = {0: cell}
-            else:
-                self._cells[cell.elements][len(self._cells[cell.elements])] = cell
-
-        else:
-            raise ValueError("input must be list, tuple or Cell type")
-
-    def delete_cell(self, cell, key=None):
-
-        if isinstance(cell, Cell):
-            cell = cell.elements
-
-        if cell in self._cells:
-            if key is None:
-                del self._cells[cell]
-            elif key in self._cells[cell]:
-                del self._cells[cell][key]
-            else:
-                raise KeyError(f"cell with key {key} is not in the complex ")
-        else:
-            raise KeyError(f"cell {cell} is not in the complex")
-
-    def _cell_equivelance_class(self):
-        """
-
-
-        Returns
-        -------
-        equiv : TYPE
-            DESCRIPTION.
-
-
-        Example
-        ------
-         >>> CV = CellView()
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (2,3,4,1) )
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (1,2,3,6) )
-         >>> CV.insert_cell ( (3,4,1,2) )
-         >>> CV.insert_cell ( (4,3,2,1) )
-         >>> CV.insert_cell ( (1,2,7,3) )
-         >>> c1=Cell((1,2,3,4,5))
-         >>> CV.insert_cell(c1)
-         >>> d = CV._cell_equivelance_class()
-         >>> d
-
-        """
-        equiv_classes = defaultdict(set)
-        all_inserted_cells = set()
-        for i, c1 in enumerate(self):
-            for j, c2 in enumerate(self):
-                if i == j:
-                    if j not in all_inserted_cells:
-                        equiv_classes[c1].add(j)
-                elif i > j:
-                    continue
-                elif j in all_inserted_cells:
-                    continue
-                else:
-                    if c1.is_homotopic_to(c2):
-                        equiv_classes[c1].add(j)
-                        all_inserted_cells.add(j)
-        return equiv_classes
-
-    def remove_equivalent_cells(self):
-        """
-        Example:
-        ---------
-         >>> CV = CellView()
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (2,3,4,1) )
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (1,2,3,6) )
-         >>> CV.insert_cell ( (3,4,1,2) )
-         >>> CV.insert_cell ( (4,3,2,1) )
-         >>> CV.insert_cell ( (1,2,7,3) )
-         >>> c1=Cell((1,2,3,4,5))
-         >>> CV.insert_cell(c1)
-         >>> CV.remove_equivalent_cells()
-         >>> CV
-
-
-        """
-        equiv_classes = self._cell_equivelance_class()
-        for c in list(self):
-            if c not in equiv_classes:
-                d = self._cells[c.elements]
-                if len(d) == 1:
-                    self.delete_cell(c)
-                else:
-                    for k, v in d.items():
-                        if len(d) == 1:
-                            break
-                    else:
-                        self.delete_cell(c, k)

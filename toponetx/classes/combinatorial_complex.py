@@ -1,9 +1,6 @@
 """
-Class for creation and manipulation of a combinatorial complex.
-The class also supports basic functions.
-"""
+Class for creation and manipulation of a combinatorial complex."""
 
-import collections
 import warnings
 
 try:
@@ -18,9 +15,10 @@ from hypernetx import Hypergraph
 from networkx import Graph
 from scipy.sparse import csr_matrix
 
-from toponetx.classes.abstract_cell import AbstractCell, AbstractCellView
+from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.node import NodeView
 from toponetx.classes.ranked_entity import RankedEntity
+from toponetx.classes.reportview import HyperEdgeView
 from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import sparse_array_to_neighborhood_dict
 
@@ -28,15 +26,15 @@ __all__ = ["CombinatorialComplex"]
 
 
 class CombinatorialComplex:
-    """Class for Combinatorial Complex.
+    r"""Class for Combinatorial Complex.
 
-    A Combinatorial Complex (CC) is a triple CC = (S, X, i) where:
+    A Combinatorial Complex (CC) is a triple CC = (S, X, rk) where:
     -  S is an abstract set of entities,
     - X a subset of the power set of X, and
-    - i is the a rank function that associates for every
+    - rk is the a rank function that associates for every
     set x in X a rank, a positive integer.
 
-    The rank function i must satisfy x<=y then i(x)<=i(y).
+    The rank function i must satisfy x<=y then rk(x)<=rk(y).
     We call this condition the CC condition.
 
     A CC is a generlization of graphs, hypergraphs, cellular and simplicial complexes.
@@ -66,9 +64,9 @@ class CombinatorialComplex:
     Let S = {1, 2, 3, 4} be a set of entities.
     Let X = {{1, 2}, {1, 2, 3}, {1, 3}, {1, 4}} be a subset of the power set of S.
     Let i be the ranking function that assigns the
-    length of a set as its rank, i.e. i({1, 2}) = 2, i({1, 2, 3}) = 3, etc.
+    length of a set as its rank, i.e. rk({1, 2}) = 2, rk({1, 2, 3}) = 3, etc.
 
-    Then, (S, X, i) is a combinatorial complex.
+    Then, (S, X, rk) is a combinatorial complex.
 
     Examples
     ---------
@@ -90,7 +88,7 @@ class CombinatorialComplex:
 
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
         # if cells is None:
-        self._complex_set = AbstractCellView()
+        self._complex_set = HyperEdgeView()
         self.complex = dict()  # dictionary for combinatorial complex attributes
 
         if cells is not None:
@@ -104,12 +102,12 @@ class CombinatorialComplex:
             if not isinstance(cells, Graph):
                 if ranks is None:
                     for cell in cells:
-                        if not isinstance(cell, AbstractCell):
+                        if not isinstance(cell, HyperEdge):
                             raise ValueError(
-                                f"input must be an AbstractCell {cell} object when rank is None"
+                                f"input must be an HyperEdge {cell} object when rank is None"
                             )
                         if cell.rank is None:
-                            raise ValueError(f"input AbstractCell {cell} has None rank")
+                            raise ValueError(f"input HyperEdge {cell} has None rank")
                         self.add_cell(cell, cell.rank)
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
@@ -153,7 +151,7 @@ class CombinatorialComplex:
         RankedEntitySet
 
         """
-        return NodeView(self._complex_set.cell_dict, cell_type=AbstractCell)
+        return NodeView(self._complex_set.hyperedge_dict, cell_type=HyperEdge)
 
     @property
     def incidence_dict(self):
@@ -165,7 +163,7 @@ class CombinatorialComplex:
         dict
 
         """
-        return self._complex_set.cell_dict
+        return self._complex_set.hyperedge_dict
 
     @property
     def shape(self):
@@ -242,7 +240,7 @@ class CombinatorialComplex:
 
         Parameters
         ----------
-        item : hashable or AbstractCell
+        item : hashable or HyperEdge
 
         """
 
@@ -299,7 +297,7 @@ class CombinatorialComplex:
 
         Parameters
         ----------
-        cell : hashable or AbstractCell
+        cell : hashable or HyperEdge
 
         Returns
         -------
@@ -331,7 +329,7 @@ class CombinatorialComplex:
 
         Parameters
         ----------
-        cell_set : an interable of AbstractCell, optional, default: None
+        cell_set : an interable of HyperEdge, optional, default: None
             If None, then return the number of cells in combinatorial complex.
 
         Returns
@@ -358,7 +356,7 @@ class CombinatorialComplex:
 
         Parameters
         ----------
-        node : hashable or AbstractCell
+        node : hashable or HyperEdge
 
         Returns
         -------
@@ -553,7 +551,7 @@ class CombinatorialComplex:
 
         Parameters
         ----------
-        cell : hashable, iterable or AbstractCell
+        cell : hashable, iterable or HyperEdge
             If hashable the cell returned will be empty.
             rank : rank of a cell
 
@@ -572,7 +570,7 @@ class CombinatorialComplex:
                         f"Rank 1 cells in graph-based CombinatorialComplex must have size equalt to 1 got {cell}."
                     )
 
-        self._complex_set.add_cell(cell, rank, **attr)
+        self._complex_set.add_hyperedge(cell, rank, **attr)
         return self
 
     def add_cells_from(self, cells, ranks=None):
@@ -590,12 +588,12 @@ class CombinatorialComplex:
         """
         if ranks is None:
             for cell in cells:
-                if not isinstance(cell, AbstractCell):
+                if not isinstance(cell, HyperEdge):
                     raise ValueError(
-                        f"input must be an AbstractCell {cell} object when rank is None"
+                        f"input must be an HyperEdge {cell} object when rank is None"
                     )
                 if cell.rank is None:
-                    raise ValueError(f"input AbstractCell {cell} has None rank")
+                    raise ValueError(f"input HyperEdge {cell} has None rank")
                 self.add_cell(cell, cell.rank)
         else:
             if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
@@ -631,7 +629,7 @@ class CombinatorialComplex:
 
         """
 
-        self._complex_set.remove_cell(cell)
+        self._complex_set.remove_hyperedge(cell)
 
         return self
 
