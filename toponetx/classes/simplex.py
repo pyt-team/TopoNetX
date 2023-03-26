@@ -4,19 +4,17 @@ try:
     from collections.abc import Hashable, Iterable
 except ImportError:
     from collections import Iterable, Hashable
-
 from itertools import combinations
-
-import numpy as np
 
 __all__ = ["Simplex"]
 
 
 class Simplex:
-    """A class representing a simplex in a simplicial complex.
+    r"""
+    A class representing a simplex in a simplicial complex.
 
-    This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension.
-    The simplex is immutable, and the nodes in the simplex must be hashable and unique.
+    This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension. The simplex
+    is immutable, and the nodes in the simplex must be hashable and unique.
 
     :param elements: The nodes in the simplex.
     :type elements: any iterable of hashables
@@ -33,11 +31,10 @@ class Simplex:
         >>> # Create a 1-dimensional simplex (line segment)
         >>> s = Simplex((1, 2))
         >>> # Create a 2-dimensional simplex ( triangle )
-        >>> simplex1 = Simplex ( (1,2,3) )
-        >>> simplex2 = Simplex ( ("a","b","c") )
+        >>> simplex1 = Simplex((1, 2, 3))
+        >>> simplex2 = Simplex(("a", "b", "c"))
         >>> # Create a 3-dimensional simplex ( tetrahedron )
-        >>> simplex3 = Simplex ( (1,2,4,5),weight = 1 )
-
+        >>> simplex3 = Simplex((1, 2, 4, 5), weight=1)
     """
 
     def __init__(self, elements, name=None, construct_tree=True, **attr):
@@ -47,9 +44,10 @@ class Simplex:
         else:
             self.name = name
         self.construct_tree = construct_tree
+        # nodes in the simplex must be hashable and unique
         self.nodes = frozenset(elements)
         if len(self.nodes) != len(elements):
-            raise ValueError("a simplex cannot contain duplicate nodes")
+            raise ValueError("A simplex cannot contain duplicate nodes.")
 
         if construct_tree:
             self._faces = self.construct_simplex_tree(elements)
@@ -59,6 +57,9 @@ class Simplex:
         self.properties.update(attr)
 
     def __contains__(self, e):
+        r"""
+        Returns True if the given element is a subset of the nodes in the simplex.
+        """
         if len(self.nodes) == 0:
             return False
         if isinstance(e, Iterable):
@@ -76,6 +77,9 @@ class Simplex:
 
     @staticmethod
     def construct_simplex_tree(elements):
+        r"""
+        Returns a set of Simplex objects representing the faces of the simplex.
+        """
         faceset = set()
         numnodes = len(elements)
         for r in range(numnodes, 0, -1):
@@ -87,8 +91,8 @@ class Simplex:
 
     @property
     def boundary(self):
-        """
-        get the boundary faces of the simplex
+        r"""
+        Returns a set of Simplex objects representing the boundary faces of the simplex.
         """
         if self.construct_tree:
             return frozenset(i for i in self._faces if len(i) == len(self) - 1)
@@ -122,7 +126,7 @@ class Simplex:
         return iter(self.nodes)
 
     def __repr__(self):
-        """
+        r"""
         String representation of Simplex
         Returns
         -------
@@ -131,7 +135,7 @@ class Simplex:
         return f"Simplex{tuple(self.nodes)}"
 
     def __str__(self):
-        """
+        r"""
         String representation of a simplex
         Returns
         -------
