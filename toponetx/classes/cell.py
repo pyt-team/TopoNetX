@@ -83,7 +83,7 @@ class Cell:
                         f"self loops are not permitted, got {(e[0],e[1])} as an edge in the cell's boundary"
                     )
 
-        self.nodes = tuple(elements)
+        self._elements = tuple(elements)
         self.properties = dict()
         self.properties.update(attr)
 
@@ -114,10 +114,10 @@ class Cell:
         return True
 
     def __len__(self):
-        return len(self.nodes)
+        return len(self._elements)
 
     def __iter__(self):
-        return iter(self.nodes)
+        return iter(self._elements)
 
     def sign(self, edge):
         if isinstance(edge, Iterable):
@@ -135,7 +135,7 @@ class Cell:
         raise ValueError(f"the input {edge} must be iterable")
 
     def __contains__(self, e):
-        return e in self.nodes
+        return e in self._elements
 
     def __repr__(self):
         """
@@ -161,7 +161,7 @@ class Cell:
 
     @property
     def elements(self):
-        return self.nodes
+        return self._elements
 
     def reverse(self):
         """Reverse the sequence of nodes that defines the cell.
@@ -171,7 +171,7 @@ class Cell:
         Return : Cell
         ------
         """
-        c = Cell(self.nodes[::-1], name=self.name, regular=self._regular)
+        c = Cell(self._elements[::-1], name=self.name, regular=self._regular)
         c.properties = self.properties
         return c
 
@@ -243,7 +243,7 @@ class Cell:
         -------
         str
         """
-        return f"Nodes set:{self.nodes}, boundary edges:{self.boundary}, attrs:{self.properties}"
+        return f"Nodes set:{self._elements}, boundary edges:{self.boundary}, attrs:{self.properties}"
 
 
 class CellView:

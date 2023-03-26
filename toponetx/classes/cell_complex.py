@@ -37,9 +37,9 @@ __all__ = ["CellComplex"]
 class CellComplex:
     """Class representing a cell complex.
 
-    A cell complex is a mathematical structure that is built up from simple building blocks called cells. 
+    A cell complex is a mathematical structure that is built up from simple building blocks called cells.
     These cells can be thought of as generalized versions of familiar shapes, such as points, line segments,
-    triangles, and disks. By gluing these cells together in a prescribed way, one can create complex 
+    triangles, and disks. By gluing these cells together in a prescribed way, one can create complex
     geometrical objects that are of interest in topology and geometry.
 
     Cell complexes can be used to represent various mathematical objects, such as graphs,
@@ -52,13 +52,13 @@ class CellComplex:
     2d cell complex. The class CellComplex only supports the construction
     of 2d cell complexes. If higher dimensional cell complexes are desired
     then one should utilize the class CombinatorialComplex.
-    
-    Mathtmatically, in TNX a cell complex it a triplet (V, E, C) 
+
+    Mathtmatically, in TNX a cell complex it a triplet (V, E, C)
     where V is a set of nodes, E is a set of edges and C is a set of 2-cells.
     In TNX each 2-cell C is consists of a finite sequence of nodes C=(n1,...,nk,n1) with k>=2.
     All edges between two consecutive nodes in C belong to  E.
     Regular cells have unique nodes in C whereas non-regular cells allow for duplication.
-    
+
     In TNX cell complexes are implementes to be dynamic in the sense that
     they can change by adding or subtracting objects (nodes, edges, cells)
     from them.
@@ -301,7 +301,6 @@ class CellComplex:
         ----------
         node : Entity or hashable
             If hashable, then must be uid of node in cell complex
-
         Returns
         -------
         neighbors(node) : iterator
@@ -1577,6 +1576,7 @@ class CellComplex:
 
 
         """
+
         weight = None  # this feature is not supported in this version
 
         if rank <= self.maxdim and rank > 0:
