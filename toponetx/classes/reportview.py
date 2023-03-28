@@ -284,7 +284,7 @@ class HyperEdgeView:
             elements = []
             if rank in self.allranks:
 
-                return list(self.hyperedge_dict[rank].keys())
+                return sorted(list(self.hyperedge_dict[rank].keys()))
             else:
                 return []
 
@@ -294,14 +294,14 @@ class HyperEdgeView:
                 if rank >= rank:
 
                     elements = elements + list(self.hyperedge_dict[rank].keys())
-            return elements
+            return sorted(elements)
 
         elif level == "lower" or level == "down":
             elements = []
             for rank in self.allranks:
                 if rank <= rank:
                     elements = elements + list(self.hyperedge_dict[rank].keys())
-            return elements
+            return sorted(elements)
         else:
             raise TopoNetXError(
                 "level must be None, equal, 'upper', 'lower', 'up', or 'down' "
@@ -622,6 +622,8 @@ class HyperEdgeView:
         Notes
         -----
         """
+        from collections import OrderedDict
+        from operator import itemgetter
 
         if sparse:
             from scipy.sparse import csr_matrix
@@ -629,14 +631,24 @@ class HyperEdgeView:
         ndict = dict(zip(children, range(len(children))))
         edict = dict(zip(uidset, range(len(uidset))))
 
+        ndict = OrderedDict(sorted(ndict.items(), key=itemgetter(1)))
+        edict = OrderedDict(sorted(edict.items(), key=itemgetter(1)))
+
         r_hyperedge_dict = {j: children[j] for j in range(len(children))}
         k_hyperedge_dict = {i: uidset[i] for i in range(len(uidset))}
 
+        r_hyperedge_dict = OrderedDict(
+            sorted(r_hyperedge_dict.items(), key=itemgetter(0))
+        )
+        k_hyperedge_dict = OrderedDict(
+            sorted(k_hyperedge_dict.items(), key=itemgetter(0))
+        )
+
         if len(ndict) != 0:
 
-            if index:
-                rowdict = {v: k for k, v in ndict.items()}
-                coldict = {v: k for k, v in edict.items()}
+            # if index:
+            #     rowdict = {v: k for k, v in ndict.items()}
+            #     coldict = {v: k for k, v in edict.items()}
 
             if sparse:
                 # Create csr sparse matrix
@@ -661,7 +673,7 @@ class HyperEdgeView:
                         if r_hyperedge_dict[n] <= k_hyperedge_dict[e]:
                             MP[ndict[n], edict[e]] = 1
             if index:
-                return rowdict, coldict, MP
+                return ndict, edict, MP
             else:
                 return MP
         else:

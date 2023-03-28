@@ -73,6 +73,8 @@ class CombinatorialComplex:
         >>> # define an empty Combinatorial Complex
         >>> CC = CombinatorialComplex()
         >>> # add cells using the add_cell method
+        >>> CC.add_cell([1, 2], rank=1)
+        >>> CC.add_cell([3, 4], rank=1)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([1, 2, 4], rank=2)
         >>> CC.add_cell([3, 4], rank=2)
