@@ -21,7 +21,8 @@ from scipy.sparse import coo_matrix, dok_matrix
 from toponetx.classes.dynamic_cell import DynamicCell
 from toponetx.classes.node import NodeView
 from toponetx.classes.ranked_entity import RankedEntitySet
-from toponetx.classes.simplex import Simplex, SimplexView
+from toponetx.classes.reportview import SimplexView
+from toponetx.classes.simplex import Simplex
 from toponetx.exception import TopoNetXError
 
 try:

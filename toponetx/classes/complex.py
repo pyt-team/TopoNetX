@@ -1,12 +1,12 @@
 """Abstract class for complexes."""
 
 
-from abc import ABC, abstractmethod
+import abc
 
 __all__ = ["Complex"]
 
 
-class Complex(ABC):
+class Complex:
 
     """
     An abstract class representing a complex.
@@ -37,137 +37,92 @@ class Complex(ABC):
     and computer science, such as geometric modeling, data analysis, and machine learning.
     """
 
+    def __init__(self):
+        pass
+
     @property
-    @abstractmethod
+    @abc.abstractstaticmethod
     def nodes(self):
+        r"""return the node container."""
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractstaticmethod
     def dim(self):
+        r"""return dimension of the complex."""
         pass
 
-    @abstractmethod
+    @abc.abstractstaticmethod
     def shape(self):
+        r"""return number of cells for each rank in the complex."""
         pass
 
-    @abstractmethod
+    @abc.abstractstaticmethod
     def skeleton(self, rank):
+        r"""return dimension of the complex."""
         pass
 
-    @abstractmethod
+    @abc.abstractstaticmethod
     def __str__(self):
-        """
-        String representation of CX
+        r"""print basic information about the complex."""
 
-        Returns
-        -------
-        str
-
-        """
         pass
 
-    @abstractmethod
+    @abc.abstractstaticmethod
     def __repr__(self):
-        """
-        String representation of cell complex
+        r"""print the complex information."""
 
-        Returns
-        -------
-        str
-
-        """
         pass
 
-    @abstractmethod
+    @abc.abstractstaticmethod
     def __len__(self):
-        """
-        Number of nodes
-
-        Returns
-        -------
-        int
-
-        """
-
+        r"""return number of nodes in the complex."""
         pass
 
-    @abstractmethod
+    def _clear_cache(self):
+        r"""Clear cache."""
+        self.cache = {}
+
+    @abc.abstractmethod
+    def clone(self):
+        r"""Clone complex."""
+
+    @abc.abstractstaticmethod
     def __iter__(self):
-        """
-        Iterate over the nodes of the cell complex
-
-        Returns
-        -------
-        dict_keyiterator
-
-        """
+        r"""return an iterator over the nodes in the complex."""
         pass
 
-    @abstractmethod
+    @abc.abstractstaticmethod
     def __contains__(self, item):
-        """
-        Returns boolean indicating if item is in self.nodes
+        r""""""
+        pass
 
-        Parameters
-        ----------
-        item : hashable or RankedEntity
-
-        """
-
-        return item in self.nodes
-
-    @abstractmethod
+    @abc.abstractstaticmethod
     def __getitem__(self, node):
-        """
-        Returns the neighbors of node
+        r""""""
+        pass
 
-        Parameters
-        ----------
-        node : Entity or hashable
-            If hashable, then must be uid of node in cell complex
-
-        Returns
-        -------
-        neighbors(node) : iterator
-
-        """
-        return self.neighbors(node)
-
-    @abstractmethod
+    @abc.abstractstaticmethod
     def remove_nodes(self, node_set):
-        """
-        Removes nodes from cells and deletes references in cell complex nodes
-
-        Parameters
-        ----------
-        node_set : an iterable of hashables or Entities
-            Nodes in CC
-
-        Returns
-        -------
-        cell complex : CombinatorialComplex
-
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def add_node(self, node, **attr):
-
-        self._G.add_node(node, **attr)
-
-    @abstractmethod
-    def incidence_matrix(self, d, signed=True, weight=None, index=False):
+        r"""return dimension of the complex."""
         pass
 
-    @abstractmethod
-    def adjacency_matrix(self, d, signed=False, weight=None, index=False):
+    @abc.abstractstaticmethod
+    def add_node(self, node):
+        r"""add node to the complex."""
         pass
 
-    @abstractmethod
-    def coadjacency_matrix(self, d, signed=False, weight=None, index=False):
+    @abc.abstractstaticmethod
+    def incidence_matrix(self):
+        r"""return incidence matrix of the complex."""
         pass
 
-    @abstractmethod
-    def node_adjacency_matrix(self, index=False, s=1, weight=False):
+    @abc.abstractstaticmethod
+    def adjacency_matrix(self):
+        r"""return adjacency matrix of the complex."""
+        pass
+
+    @abc.abstractstaticmethod
+    def coadjacency_matrix(self):
+        r"""return coadjacency matrix of the complex."""
         pass

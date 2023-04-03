@@ -4,8 +4,8 @@ import unittest
 
 import networkx as nx
 
-from toponetx.classes.abstract_cell import AbstractCell
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.hyperedge import HyperEdge
 
 
 class TestCombinatorialComplex(unittest.TestCase):
@@ -23,11 +23,11 @@ class TestCombinatorialComplex(unittest.TestCase):
 
     def test_init_from_abstract_cells(self):
         """Test creation of a CC from abstract cells."""
-        y1 = AbstractCell(elements=[1, 2], rank=1)
-        y2 = AbstractCell(elements=[2, 4], rank=1)
-        y3 = AbstractCell(elements=[3, 5], rank=1)
-        y4 = AbstractCell(elements=[4, 5], rank=1)
-        y5 = AbstractCell(elements=[5, 7], rank=1)
+        y1 = HyperEdge(elements=[1, 2], rank=1)
+        y2 = HyperEdge(elements=[2, 4], rank=1)
+        y3 = HyperEdge(elements=[3, 5], rank=1)
+        y4 = HyperEdge(elements=[4, 5], rank=1)
+        y5 = HyperEdge(elements=[5, 7], rank=1)
 
         CC = CombinatorialComplex(cells=[y1, y2, y3, y4, y5])
 

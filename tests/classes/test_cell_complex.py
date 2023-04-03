@@ -16,7 +16,7 @@ class TestCellComplex(unittest.TestCase):
         assert len(CX.cells) == 0
         assert len(CX.nodes) == 0
         assert len(CX.edges) == 0
-        self.assertEqual(CX.dim, 0)
+        assert CX.dim == 0
         assert CX.is_regular
 
     def test_init_cell_complex_with_list_of_cells(self):
@@ -26,7 +26,7 @@ class TestCellComplex(unittest.TestCase):
         CX = CellComplex([c1, c2])
         assert c1 in CX.cells
         assert c2 in CX.cells
-        self.assertEqual(CX.dim, 2)
+        assert CX.dim == 2
 
         c1 = Cell((1, 2, 3))
         c2 = Cell((1, 2, 3, 4))
@@ -330,6 +330,140 @@ class TestCellComplex(unittest.TestCase):
         L1_hodge = CX.hodge_laplacian_matrix(rank=1)
         expected = L1_up + L1_down
         np.testing.assert_array_equal(L1_hodge.toarray(), expected.toarray())
+
+    def test_init_empty_abstrcct_cell(self):
+        """Test empty cell complex."""
+        cc = CellComplex([], rank=0)
+        assert len(cc.nodes) == 0
+
+    def test_init_nonempty_abstrcct_cell(self):
+        """Test non-empty cell complex cells."""
+        cc1 = CellComplex((1, 2, 3))
+        cc2 = CellComplex(("a", "b", "c", "d"))
+        assert len(cc1.nodes) == 3
+        assert len(cc2.nodes) == 4
+
+    def test_add_single_cell(self):
+        """Test adding single cell to cell complex."""
+        cc = CellComplex()
+        cc1 = CellComplex()
+        cc.add_cell((0, 1, 2, 3, 4), rank=2)
+        cc1.add_cell(Cell((0, 1, 2, 3, 4)), rank=2)
+        assert len(cc.cells) == 1
+        assert cc.shape == (5, 5, 1)  # five nodes, five edges and one 2-cell
+
+    def test_add_many_cells(self):
+        """Test adding many cells to cell complex."""
+        cc = CellComplex()
+        cc.add_cell([1, 2, 3], rank=2)
+        cc.add_cell([2, 3, 4, 5], rank=2)
+        cc.add_cell([5, 6, 7, 8], rank=2)
+        assert len(cc.cells) == 3
+        assert cc.shape == (8, 10, 3)
+
+    def test_add_single_node(self):
+        """Test adding single node to empty cell complex."""
+        cc = CellComplex()
+        cc.add_node(1)
+        assert len(cc.cells) == 0
+        assert len(cc.nodes) == 1
+
+    def test_add_many_nodes(self):
+        """Test adding many nodes to empty cell complex."""
+        cc = CellComplex()
+        cc._add_nodes_from([1, 2, 3])
+        assert len(cc.cells) == 0
+        assert len(cc.nodes) == 3
+
+    def test_add_node_to_cell(self):
+        """Test add node multiple times to cell complex."""
+        cc = CellComplex()
+        cc.add_cell([1, 2, 3], rank=2)
+        cc.add_node(1)
+        assert len(cc.cells) == 1
+        assert len(cc.nodes) == 3
+
+    def test_remove_cell(self):
+        """Test remove cell from cell complex."""
+        cc = CellComplex()
+        cell = [1, 2, 3]
+        cc.add_cell(cell, rank=2)
+        cc.remove_cell(cell)
+        assert len(cc.cells) == 0
+        assert len(cc.nodes) == 3
+
+    def test_remove_many_cells(self):
+        """Test remove cells from cell complex."""
+        cc = CellComplex()
+        cc.add_cell([1, 2, 3, 4], rank=2)
+        cc.add_cell([2, 3, 4, 5], rank=2)
+        cc.add_cell([5, 6, 7, 8], rank=2)
+        cc.remove_cell([1, 2, 3, 4])
+        cc.remove_cell([2, 3, 4, 5])
+        assert len(cc.cells) == 1
+
+    def test_remove_node(self):
+        """Test remove node from cell complex."""
+        cc = CellComplex()
+        cell = [1, 2, 3]
+        cc.add_cell(cell, rank=2)
+        cc.remove_node(1)  # removing node removes cells attached to it.
+        assert len(cc.cells) == 0
+        assert len(cc.edges) == 1
+        assert len(cc.nodes) == 2
+
+    def test_add_cells_from_list_cells(self):
+        """Test adding cells from a list of cells or cell lists."""
+        cc = CellComplex()
+        cells = [Cell((1, 2, 3, 4)), Cell((2, 3, 4, 5))]
+        cc.add_cells_from(cells)
+        assert len(cc.cells) == 2
+
+    def test_add_cells_from_list_of_cell_lists(self):
+        """Test adding cells from a list of cell lists."""
+        cc = CellComplex()
+        cell_lists = [[1, 2, 3, 4], [2, 3, 4, 5]]
+        cc.add_cells_from(cell_lists, rank=2)
+        assert len(cc.cells) == 2
+
+    def test_add_cells_from_list_of_lists(self):
+        """Test adding cells from a list of lists."""
+        cc = CellComplex()
+        cc.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
+        assert len(cc.cells) == 2
+        assert len(cc.nodes) == 4
+
+    def test_incidence_matrix_empty_abstrcct_cell(self):
+        """Test the incidence matrix for an empty cell complex."""
+        cc = CellComplex()
+        B = cc.incidence_matrix(2)
+        np.testing.assert_array_equal(B.toarray(), np.zeros((0, 0)))
+
+    def test_incidence_matrix_abstrcct_cell_with_one_cell(self):
+        """Test the incidence matrix for abstrcct cell with only one cell."""
+        cc = CellComplex()
+        cc.add_cell([1, 2, 3], rank=2)
+        B = cc.incidence_matrix(2)
+        np.testing.assert_array_equal(B.toarray(), np.array([[1, -1, 1]]).T)
+
+    def test_adjacency_matrix_empty_abstrcct_cell(self):
+        """Test adjccency matrix for an empty cell complex."""
+        cc = CellComplex()
+        np.testing.assert_array_equal(cc.adjacency_matrix(0), np.zeros((0, 0)))
+
+    def test_adjccency_matrix_abstrcct_cell_with_one_cell(self):
+        """Test adjccency matrix for an abstrcct cell with one cell."""
+        cc = CellComplex()
+        cc.add_cell([1, 2, 3], rank=2)
+        A = np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]])
+        np.testing.assert_array_equal(cc.adjacency_matrix(0).todense(), A)
+
+    def test_coadjccency_matrix_abstrcct_cell_with_one_cell(self):
+        """Test coadjccency matrix for an abstrcct cell with one cell."""
+        cc = CellComplex()
+        cc.add_cell([1, 2, 3], rank=2)
+        A = np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]])
+        np.testing.assert_array_equal(cc.coadjacency_matrix(1).todense(), A)
 
 
 if __name__ == "__main__":
