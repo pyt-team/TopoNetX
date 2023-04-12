@@ -62,7 +62,7 @@ class CellComplex:
     Regular cells have unique nodes in C whereas non-regular cells allow for duplication.
 
     In TNX cell complexes are implementes to be dynamic in the sense that
-    they can change by adding or subtracting objects (nodes, edges, cells)
+    they can change by adding or subtracting objects (nodes, edges, 2-cells)
     from them.
 
     1. Dynamic construction of cell complexes, allowing users to add or remove objects from these
