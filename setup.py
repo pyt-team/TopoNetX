@@ -36,7 +36,6 @@ dev_requires = test_requires + [
     "black==22.6.0",
     "black[jupyter]",
     "isort==5.10.1",
-    "codecov",
     "coverage",
 ]
 
