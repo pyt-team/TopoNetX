@@ -21,6 +21,7 @@ from hypernetx.classes.entity import Entity, EntitySet
 from networkx import Graph
 from scipy.sparse import csr_matrix
 
+from toponetx.classes.complex import Complex
 from toponetx.classes.dynamic_cell import DynamicCell
 from toponetx.classes.node import Node
 from toponetx.classes.ranked_entity import RankedEntity, RankedEntitySet
@@ -29,7 +30,7 @@ from toponetx.exception import TopoNetXError
 __all__ = ["DynamicCombinatorialComplex"]
 
 
-class DynamicCombinatorialComplex:
+class DynamicCombinatorialComplex(Complex):
     """Class for (Dynamic) Combinatorial Complex.
 
     A Combinatorial Complex (CC) is a triple CC=(S, X, i) where S is an abstract set of entities,

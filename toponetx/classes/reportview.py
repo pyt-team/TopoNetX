@@ -859,25 +859,15 @@ class HyperEdgeView:
 
 class SimplexView:
     """
-    The SimplexView class is used to provide a view into a subset of the nodes
-    in a simplex, allowing for efficient computations on the subset of nodes.
+    The SimplexView class is used to provide a view/read only information
+    into a subset of the nodes in a simplex.
     These classes are used in conjunction with the SimplicialComplex class
-    to perform computations on simplicial complexes.
+    for view/read only purposes fro simplices in simplicial complexes.
 
     Parameters
     ----------
     name : str
 
-    Examples
-    --------
-         >>> SC = SimplexView()
-         >>> SC.insert_simplex ( (1,2,3,4),weight=1 )
-         >>> SC.insert_simplex ( (2,3,4,1) )
-         >>> SC.insert_simplex ( (1,2,3,4) )
-         >>> SC.insert_simplex ( (1,2,3,6) )
-         >>> c1=Simplex((1,2,3,4,5))
-         >>> SC.insert_simplex(c1)
-         #>>> c1 in CV
 
     """
 

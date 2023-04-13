@@ -27,6 +27,7 @@ from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.complex import Complex
 from toponetx.classes.dynamic_cell import DynamicCell
 from toponetx.classes.node import Node
 from toponetx.classes.ranked_entity import RankedEntitySet
@@ -36,7 +37,7 @@ from toponetx.exception import TopoNetXError
 __all__ = ["CellComplex"]
 
 
-class CellComplex:
+class CellComplex(Complex):
     """Class representing a cell complex.
 
     A cell complex is a mathematical structure that is built up from simple building blocks called cells.
@@ -81,6 +82,8 @@ class CellComplex:
         #Example 1
             >>> CX = CellComplex()
             >>> CX.add_cell([1, 2, 3, 4], rank=2)
+            >>> # the cell [1, 2, 3, 4] consists of the cycle (1,2), (2,3), (3,4), (4,5)
+            >>> # tnx creates these edges automatically if they are not inserted in the underlying graph
             >>> CX.add_cell([2, 3, 4, 5], rank=2)
             >>> CX.add_cell([5, 6, 7, 8], rank=2)
         #Example 2
@@ -88,15 +91,18 @@ class CellComplex:
             >>> c2 = Cell((1, 2, 3, 4))
             >>> CX = CellComplex([c1, c2])
         #Example 3
-            >>> G = Graph()
-            >>> G.add_edge(1, 0)
-            >>> G.add_edge(2, 0)
-            >>> G.add_edge(1, 2)
+            >>> compatablity with networkx
+            >>> import networkx as nx
+            >>> g = nx.Graph()
+            >>> g.add_edge(1, 0)
+            >>> g.add_edge(2, 0)
+            >>> g.add_edge(1, 2)
             >>> CX = CellComplex(g)
             >>> CX.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
             >>> CX.cells
         #Example 4
             >>> # non-regular cell complex
+            >>> # by default CellComplex constructor assumes regular cell complex
             >>> CX = CellComplex(regular=False)
             >>> CX.add_cell([1, 2, 3, 4], rank=2)
             >>> CX.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
@@ -316,15 +322,16 @@ class CellComplex:
         # input must be list, tuple or Cell type
         if isinstance(cell, tuple) or isinstance(cell, list) or isinstance(cell, Cell):
             if isinstance(cell, tuple) or isinstance(cell, list):
-                cell = Cell(elements=cell, name=str(len(self._cells)), **attr)
+                cell = Cell(elements=cell, name=str(len(self.cells)), **attr)
             elif isinstance(cell, Cell):
                 cell.properties.update(attr)
 
-            if cell.elements not in self._cells:
+            if cell.elements not in self._cells._cells:
                 self._cells._cells[cell.elements] = {0: cell}
             else:
+                # if cell is already in the complex, insert duplications and give it differnt key
                 self._cells._cells[cell.elements][
-                    len(self._cells[cell.elements])
+                    len(self._cells._cells[cell.elements])
                 ] = cell
         else:
             raise ValueError("input must be list, tuple or Cell type")
@@ -333,10 +340,10 @@ class CellComplex:
 
         if isinstance(cell, Cell):
             cell = cell.elements
-        if cell in self._cells:
+        if cell in self._cells._cells:
             if key is None:
                 del self._cells._cells[cell]
-            elif key in self._cells[cell]:
+            elif key in self._cells._cells[cell]:
                 del self._cells._cells[cell][key]
             else:
                 raise KeyError(f"cell with key {key} is not in the complex ")
@@ -345,8 +352,6 @@ class CellComplex:
 
     def _cell_equivelance_class(self):
         """
-
-
         Returns
         -------
         equiv : TYPE
@@ -355,24 +360,24 @@ class CellComplex:
 
         Example
         ------
-         >>> CV = CellView()
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (2,3,4,1) )
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (1,2,3,6) )
-         >>> CV.insert_cell ( (3,4,1,2) )
-         >>> CV.insert_cell ( (4,3,2,1) )
-         >>> CV.insert_cell ( (1,2,7,3) )
+         >>> cx = CellComplex()
+         >>> cx.add_cell ( (1,2,3,4),rank=2 )
+         >>> cx.add_cell ( (2,3,4,1),rank=2 )
+         >>> cx.add_cell ( (1,2,3,4),rank=2 )
+         >>> cx.add_cell ( (1,2,3,6),rank=2 )
+         >>> cx.add_cell ( (3,4,1,2),rank=2 )
+         >>> cx.add_cell ( (4,3,2,1),rank=2 )
+         >>> cx.add_cell ( (1,2,7,3),rank=2 )
          >>> c1=Cell((1,2,3,4,5))
-         >>> CV.insert_cell(c1)
-         >>> d = CV._cell_equivelance_class()
+         >>> cx.add_cell(c1,rank=2)
+         >>> d = cx._cell_equivelance_class()
          >>> d
 
         """
         equiv_classes = defaultdict(set)
         all_inserted_cells = set()
-        for i, c1 in enumerate(self):
-            for j, c2 in enumerate(self):
+        for i, c1 in enumerate(self.cells):
+            for j, c2 in enumerate(self.cells):
                 if i == j:
                     if j not in all_inserted_cells:
                         equiv_classes[c1].add(j)
@@ -381,6 +386,7 @@ class CellComplex:
                 elif j in all_inserted_cells:
                     continue
                 else:
+
                     if c1.is_homotopic_to(c2):
                         equiv_classes[c1].add(j)
                         all_inserted_cells.add(j)
@@ -388,35 +394,38 @@ class CellComplex:
 
     def _remove_equivalent_cells(self):
         """
+        remove homotopic cells from the cell complex
+
         Example:
         ---------
-         >>> CV = CellView()
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (2,3,4,1) )
-         >>> CV.insert_cell ( (1,2,3,4) )
-         >>> CV.insert_cell ( (1,2,3,6) )
-         >>> CV.insert_cell ( (3,4,1,2) )
-         >>> CV.insert_cell ( (4,3,2,1) )
-         >>> CV.insert_cell ( (1,2,7,3) )
+         >>> cx = CellComplex()
+         >>> cx.add_cell ( (1,2,3,4),rank=2 )
+         >>> cx.add_cell ( (2,3,4,1),rank=2 )
+         >>> cx.add_cell ( (1,2,3,4),rank=2 )
+         >>> cx.add_cell ( (1,2,3,6),rank=2 )
+         >>> cx.add_cell ( (3,4,1,2),rank=2 )
+         >>> cx.add_cell ( (4,3,2,1),rank=2 )
+         >>> cx.add_cell ( (1,2,7,3),rank=2 )
          >>> c1=Cell((1,2,3,4,5))
-         >>> CV.insert_cell(c1)
-         >>> CV.remove_equivalent_cells()
-         >>> CV
+         >>> cx.add_cell(c1,rank=2)
+         >>> cx._remove_equivalent_cells()
+         >>> cx
 
 
         """
         equiv_classes = self._cell_equivelance_class()
-        for c in list(self):
+        for c in list(self.cells):
             if c not in equiv_classes:
-                d = self._cells[c.elements]
+                d = self._cells._cells[c.elements]
                 if len(d) == 1:
-                    self.delete_cell(c)
+                    self._delete_cell(c)
                 else:
-                    for k, v in d.items():
+                    d_c = dict(d)
+                    for k, v in d_c.items():
                         if len(d) == 1:
                             break
-                    else:
-                        self.delete_cell(c, k)
+                        else:
+                            self._delete_cell(c, k)
 
     # -------------------#
 
@@ -673,7 +682,6 @@ class CellComplex:
         >>> CX.add_cell([5, 6, 7, 8], rank=2, color='green')
         >>> CX.cells[(1, 2, 3, 4)]['color']
         'red'
-
 
         Notes
         -----
@@ -1196,16 +1204,18 @@ class CellComplex:
          -------
             >>> import networkx as nx
             >>> G = nx.path_graph(3)
-            >>> CX = CellComplex(G)
-            >>> CX.add_cell([1,2,3,4], rank=2)
-            >>> CX.add_cell([1,2,3,4], rank=2)
-            >>> CX.add_cell([2,3,4,1], rank=2)
-            >>> CX.add_cell([1,2,4], rank=2,)
-            >>> CX.add_cell([3,4,8], rank=2)
-            >>> CX.remove_equivalent_cells()
+            >>> cx = CellComplex(G)
+            >>> cx.add_cell([1,2,3,4], rank=2)
+            >>> cx.add_cell([1,2,3,4], rank=2)
+            >>> cx.add_cell([2,3,4,1], rank=2)
+            >>> cx.add_cell([1,2,4], rank=2,)
+            >>> cx.add_cell([3,4,8], rank=2)
+            >>> print(cx.cells)
+            >>> cx.remove_equivalent_cells()
+            >>> print(cx.cells) # observe homotpic cells have been removed
 
         """
-        self.cells.remove_equivalent_cells()
+        self._remove_equivalent_cells()
 
     def is_insertable_cycle(self, cell, check_skeleton=True, warnings_dis=False):
 
@@ -1479,32 +1489,7 @@ class CellComplex:
             >>> L1 = CX.hodge_laplacian_matrix(1)
 
 
-        Example2
-        --------
-            ## note that in this example, the first three cells are
-            ## equivalent and hence they have similar incidence to lower edges
-            ## they are incident to
-            >>> import networkx as nx
-            >>> G = nx.path_graph(3)
-            >>> CX = CellComplex(G)
-            >>> CX.add_cell([1,2,3,4], rank=2)
-            >>> CX.add_cell([4,3,2,1], rank=2)
-            >>> CX.add_cell([2,3,4,1], rank=2)
-            >>> CX.add_cell([1,2,4], rank=2,)
-            >>> CX.add_cell([3,4,8], rank=2)
-            >>> B1 = CX.incidence_matrix(1)
-            >>> B2 = CX.incidence_matrix(2)
-            >>> B1.dot(B2).todense()
 
-        Example3
-        -------
-            # non-regular complex example
-            >>> CX = CellComplex(regular=False)
-            >>> CX.add_cell([1,2,3,2],rank=2)
-            >>> CX.add_cell([3,4,5,3,4,5],rank=2)
-            >>> B1 = CX.incidence_matrix(1)
-            >>> B2 = CX.incidence_matrix(2)
-            >>> B1.dot(B2).todense()
 
         """
 

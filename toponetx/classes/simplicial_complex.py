@@ -23,6 +23,7 @@ from hypernetx import Hypergraph
 from networkx import Graph
 from scipy.sparse import coo_matrix, dok_matrix
 
+from toponetx.classes.complex import Complex
 from toponetx.classes.dynamic_cell import DynamicCell
 from toponetx.classes.node import NodeView
 from toponetx.classes.ranked_entity import RankedEntitySet
@@ -43,7 +44,7 @@ except ImportError:
 __all__ = ["SimplicialComplex"]
 
 
-class SimplicialComplex:
+class SimplicialComplex(Complex):
     """Class representing a simplicial complex.
 
     Class for construction boundary operators, Hodge Laplacians,

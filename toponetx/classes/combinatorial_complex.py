@@ -15,6 +15,7 @@ from hypernetx import Hypergraph
 from networkx import Graph
 from scipy.sparse import csr_matrix
 
+from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.node import NodeView
 from toponetx.classes.ranked_entity import RankedEntity
@@ -25,7 +26,7 @@ from toponetx.utils.structure import sparse_array_to_neighborhood_dict
 __all__ = ["CombinatorialComplex"]
 
 
-class CombinatorialComplex:
+class CombinatorialComplex(Complex):
     r"""Class for Combinatorial Complex.
 
     A Combinatorial Complex (CC) is a triple CC = (S, X, rk) where:
@@ -78,6 +79,7 @@ class CombinatorialComplex:
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([1, 2, 4], rank=2)
         >>> CC.add_cell([3, 4], rank=2)
+        >>> CC.add_cell([1,2,3,4,5,6,7], rank=3)
     """
 
     def __init__(
