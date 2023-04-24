@@ -57,7 +57,7 @@ to reduce future installation issues arising from such dependencies.
 1. Clone a copy of `TopoNetX` from source:
 ```bash
 git clone https://github.com/pyt-team/TopoNetX
-cd toponetx
+cd TopoNetX
 ```
 2. If you have already cloned `TopoNetX` from source, update it:
 ```bash
