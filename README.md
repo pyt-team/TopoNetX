@@ -1,15 +1,20 @@
 [![Test](https://github.com/pyt-team/TopoNetX/actions/workflows/test.yml/badge.svg)](https://github.com/pyt-team/TopoNetX/actions/workflows/test.yml)
 [![Lint](https://github.com/pyt-team/TopoNetX/actions/workflows/lint.yml/badge.svg)](https://github.com/pyt-team/TopoNetX/actions/workflows/lint.yml)
 
-# TopoNetX: Computing on Topological Domains
+# 🌐 TopoNetX: Computing on Topological Domains 🍩
 
 ![toponetx](https://user-images.githubusercontent.com/8267869/234068354-af9480f1-1d18-4914-92f1-916d9093e44d.png)
 
+Many natural systems as diverse as social networks and proteins are characterized by relational structure. This is the structure of interactions between
+components in the system, such as social interactions between individuals or electrostatic interactions between atoms. 
 
-## Scope and functionality
+`TopoNetX` provides a unifying interface to compute with such relational data.
 
-`TopoNetX` (TNX) is a package for studying the topological properties
-of shapes and spaces. With its dynamic construction capabilities and support for arbitrary
+## 🎯 Scope and functionality
+
+`TopoNetX` (TNX) is a package for computing with topological domains and studying their properties. 
+
+With its dynamic construction capabilities and support for arbitrary
 attributes and data, `TopoNetX` allows users to easily explore the topological structure
 of their data and gain insights into its underlying geometric and algebraic properties.
 Available functionality ranges
@@ -32,7 +37,7 @@ such as algebraic topology, geometry, and data analysis.
 
 TNX was developed by the pyt-team.
 
-## Main features
+## 🛠️ Main features
 
 1. Dynamic construction of cell, simplicial and combinatorial complexes, allowing users to add or remove objects from these structures after their initial creation.
 2. Compatibility with the `NetworkX` and `gudhi` packages, enabling users to
@@ -46,7 +51,7 @@ reliable and easy to use.
 to facilitate easy installation and
 to reduce future installation issues arising from such dependencies.
 
-# Installing TopoNetX
+# 🤖 Installing TopoNetX
 
 1. Clone a copy of `TopoNetX` from source:
 ```bash
@@ -66,7 +71,7 @@ pip install -e ".[dev,full]"
 pre-commit install
 ```
 
-# Getting Started
+# 🦾 Getting Started
 
 ## Example 1: creating a simplicial complex 
 
@@ -133,7 +138,34 @@ B02 = cc.incidence_matrix(0, 2)
 B03 = cc.incidence_matrix(0, 3)
 ```
 
-# Acknowledgements
+## 🔍 References ##
+
+To learn more how topological domains are used in deep learning?
+
+- Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub. [Topological Deep Learning: Going Beyond Graph Data](https://arxiv.org/abs/2206.00606).
+```
+@misc{hajij2023topological,
+      title={Topological Deep Learning: Going Beyond Graph Data}, 
+      author={Mustafa Hajij and Ghada Zamzmi and Theodore Papamarkou and Nina Miolane and Aldo Guzmán-Sáenz and Karthikeyan Natesan Ramamurthy and Tolga Birdal and Tamal K. Dey and Soham Mukherjee and Shreyas N. Samaga and Neal Livesay and Robin Walters and Paul Rosen and Michael T. Schaub},
+      year={2023},
+      eprint={2206.00606},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
+- Mathilde Papillon, Sophia Sanborn, Mustafa Hajij, Nina Miolane. [Architectures of Topological Deep Learning: A Survey on Topological Neural Networks.](https://arxiv.org/pdf/2304.10031.pdf)
+```
+@misc{papillon2023architectures,
+      title={Architectures of Topological Deep Learning: A Survey on Topological Neural Networks}, 
+      author={Mathilde Papillon and Sophia Sanborn and Mustafa Hajij and Nina Miolane},
+      year={2023},
+      eprint={2304.10031},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
+
+# ⭐ Acknowledgements
 
 `TopoNetX` has been built with the help of several open-source packages.
 All of these are listed in setup.py.
