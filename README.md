@@ -140,7 +140,7 @@ B03 = cc.incidence_matrix(0, 3)
 
 ## 🔍 References ##
 
-To learn more how topological domains are used in deep learning:
+To learn more about how topological domains are used in deep learning:
 
 - Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub. [Topological Deep Learning: Going Beyond Graph Data](https://arxiv.org/abs/2206.00606).
 ```
