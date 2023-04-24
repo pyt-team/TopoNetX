@@ -1,7 +1,8 @@
 [![Test](https://github.com/pyt-team/TopoNetX/actions/workflows/test.yml/badge.svg)](https://github.com/pyt-team/TopoNetX/actions/workflows/test.yml)
 [![Lint](https://github.com/pyt-team/TopoNetX/actions/workflows/lint.yml/badge.svg)](https://github.com/pyt-team/TopoNetX/actions/workflows/lint.yml)
 
-# 🌐 TopoNetX: Computing on Topological Domains 🍩
+# 🌐 TopoNetX (TNX) 🍩
+# Computing on Topological Domains
 
 ![toponetx](https://user-images.githubusercontent.com/8267869/234068354-af9480f1-1d18-4914-92f1-916d9093e44d.png)
 
