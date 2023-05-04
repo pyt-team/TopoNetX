@@ -42,8 +42,7 @@ jobs:
 
       - name: Install main package [pip]
         run: |
-          pip install --upgrade pip
-          pip install -e .[full,test]
+          pip install -e .[all]
       - name: Run tests [pytest]
         run: |
           pytest --cov --cov-report=xml:coverage.xml
