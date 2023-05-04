@@ -6,7 +6,6 @@ on:
     paths-ignore:
     - 'docs/**'
     - 'README.md'
-    - 'README.rst'
     - 'LICENSE.txt'
     - '.gitignore'
 
@@ -15,7 +14,6 @@ on:
     paths-ignore:
     - 'docs/**'
     - 'README.md'
-    - 'README.rst'
     - 'LICENSE.txt'
     - '.gitignore'
 
