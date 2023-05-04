@@ -3,6 +3,7 @@
 
 import unittest
 
+import networkx as nx
 import numpy as np
 
 from toponetx import SimplicialComplex
@@ -46,6 +47,23 @@ class TestSimplicialComplex(unittest.TestCase):
 
         # check that the simplex was removed correctly (list)
         assert [2, 3, 4] not in SC.simplices
+
+    def test_skeleton_and_cliques(self):
+        G = nx.karate_club_graph()
+        cliques = list(nx.enumerate_all_cliques(G))
+
+        nodes = [i for i in cliques if len(i) == 1]
+        edges = [i for i in cliques if len(i) == 2]
+        faces = [i for i in cliques if len(i) == 3]
+        threefaces = [i for i in cliques if len(i) == 4]
+        fourfaces = [i for i in cliques if len(i) == 5]
+
+        SC = SimplicialComplex(cliques)
+        assert len(SC.skeleton(rank=0)) == len(nodes)
+        assert len(SC.skeleton(rank=1)) == len(edges)
+        assert len(SC.skeleton(rank=2)) == len(faces)
+        assert len(SC.skeleton(rank=3)) == len(threefaces)
+        assert len(SC.skeleton(rank=4)) == len(fourfaces)
 
     def test_incidence_matrix(self):
         """Test incidence_matrix shape and values."""
