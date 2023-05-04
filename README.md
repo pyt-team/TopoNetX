@@ -7,17 +7,18 @@
 ![toponetx](https://user-images.githubusercontent.com/8267869/234068354-af9480f1-1d18-4914-92f1-916d9093e44d.png)
 
 Many natural systems as diverse as social networks and proteins are characterized by relational structure. This is the structure of interactions between
-components in the system, such as social interactions between individuals or electrostatic interactions between atoms. 
+components in the system, such as social interactions between individuals or electrostatic interactions between atoms.
 
 `TopoNetX` provides a unifying interface to compute with such relational data.
 
 ## 🎯 Scope and functionality
 
-`TopoNetX` (TNX) is a package for computing with topological domains and studying their properties. 
+`TopoNetX` (TNX) is a package for computing with topological domains and studying their properties.
 
 With its dynamic construction capabilities and support for arbitrary
 attributes and data, `TopoNetX` allows users to easily explore the topological structure
 of their data and gain insights into its underlying geometric and algebraic properties.
+
 Available functionality ranges
 from computing boundary operators and Hodge Laplacians on simplicial/cell/combinatorial complexes
 to performing higher-order adjacency calculations.
@@ -74,7 +75,7 @@ pre-commit install
 
 # 🦾 Getting Started
 
-## Example 1: creating a simplicial complex 
+## Example 1: creating a simplicial complex
 
 ```python
 import toponetx as tnx
@@ -90,17 +91,16 @@ B1 = sc.incidence_matrix(1)
 # Compute the incidence matrix between 2-skeleton and 1-skeleton
 
 B2 = sc.incidence_matrix(2)
-
 ```
 
-## Example 2: creating a cell complex 
+## Example 2: creating a cell complex
 
 ```python
 import toponetx as tnx
 
 # Instantiate a CellComplex object with a few cells
 
-cx = tnx.CellComplex([[1, 2, 3, 4], [3, 4, 5, 6, 7, 8]],ranks=2)
+cx = tnx.CellComplex([[1, 2, 3, 4], [3, 4, 5, 6, 7, 8]], ranks=2)
 
 # Add an edge (cell of rank 1) after initialization
 
@@ -115,7 +115,7 @@ L1 = cx.hodge_laplacian_matrix(1)
 L2 = cx.hodge_laplacian_matrix(2)
 ```
 
-## Example 3: creating a combinatorial complex 
+## Example 3: creating a combinatorial complex
 
 ```python
 import toponetx as tnx
@@ -132,7 +132,7 @@ cc.add_cells_from([[2, 3, 4, 5], [3, 4, 5, 6, 7]], ranks=3)
 
 # Compute the incidence matrix between cells of rank 0 and 2
 
-B02 = cc.incidence_matrix(0, 2) 
+B02 = cc.incidence_matrix(0, 2)
 
 # Compute the incidence matrix between cells of rank 0 and 3
 
@@ -146,7 +146,7 @@ To learn more about how topological domains are used in deep learning:
 - Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub. [Topological Deep Learning: Going Beyond Graph Data](https://arxiv.org/abs/2206.00606).
 ```
 @misc{hajij2023topological,
-      title={Topological Deep Learning: Going Beyond Graph Data}, 
+      title={Topological Deep Learning: Going Beyond Graph Data},
       author={Mustafa Hajij and Ghada Zamzmi and Theodore Papamarkou and Nina Miolane and Aldo Guzmán-Sáenz and Karthikeyan Natesan Ramamurthy and Tolga Birdal and Tamal K. Dey and Soham Mukherjee and Shreyas N. Samaga and Neal Livesay and Robin Walters and Paul Rosen and Michael T. Schaub},
       year={2023},
       eprint={2206.00606},
@@ -157,7 +157,7 @@ To learn more about how topological domains are used in deep learning:
 - Mathilde Papillon, Sophia Sanborn, Mustafa Hajij, Nina Miolane. [Architectures of Topological Deep Learning: A Survey on Topological Neural Networks.](https://arxiv.org/pdf/2304.10031.pdf)
 ```
 @misc{papillon2023architectures,
-      title={Architectures of Topological Deep Learning: A Survey on Topological Neural Networks}, 
+      title={Architectures of Topological Deep Learning: A Survey on Topological Neural Networks},
       author={Mathilde Papillon and Sophia Sanborn and Mustafa Hajij and Nina Miolane},
       year={2023},
       eprint={2304.10031},
