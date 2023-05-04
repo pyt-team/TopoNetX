@@ -1,8 +1,6 @@
 """Unit tests for the tutorials."""
 
 import glob
-import json
-import os
 import subprocess
 import tempfile
 
