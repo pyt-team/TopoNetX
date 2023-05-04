@@ -1,4 +1,4 @@
-name: "Docs check and Deployment"
+name: "Docs: Check and Deploy"
 
 on:
   push:
@@ -39,5 +39,5 @@ jobs:
           branch: master
           folder: docs/_build
           token: ${{ secrets.DOCUMENTATION_KEY }}
-          repository-name: pyt-team/toponetx.github.io
+          repository-name: pyt-team/pyt-team.github.io
           clean: true
