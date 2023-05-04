@@ -1,4 +1,4 @@
 TopoNetX
 ========
 
-Computing on Topological Domains.
+Computing on Topological Domains. Welcome!
