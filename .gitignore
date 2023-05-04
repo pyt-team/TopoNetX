@@ -16,3 +16,6 @@ coverage.xml
 __pycache__/
 docs/build/
 toponetx/.DS_Store
+
+# Sphinx documentation
+docs/_build/
