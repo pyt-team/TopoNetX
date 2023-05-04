@@ -1,0 +1,104 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "TopoNetX"
+dynamic = ["version"]
+authors = [
+    {name = "PyT-Team Authors", email = "mustafahajij@gmail.com"}
+]
+readme = "README.md"
+description = "Computing on Topological Domains"
+license = {file = "LICENSE.txt"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10"
+]
+requires-python = ">= 3.9"
+dependencies=[
+    "gudhi",
+    "decorator",
+    "networkx",
+    "hypernetx",
+    "numpy",
+    "scipy",
+    "trimesh",
+]
+
+[project.optional-dependencies]
+doc = [
+    "jupyter",
+    "nbsphinx",
+    "nbsphinx_link",
+    "sphinx <= 5.3.0",
+    "sphinx_gallery",
+    "pydata-sphinx-theme"
+]
+lint = [
+    "black < 23.0",
+    "black[jupyter]",
+    "flake8",
+    "flake8-docstrings",
+    "Flake8-pyproject",
+    "isort",
+    "pre-commit"
+]
+test = [
+    "pytest",
+    "pytest-cov",
+    "coverage",
+    "jupyter"
+]
+
+dev = ["TopoNetX[test, lint]"]
+all = ["TopoNetX[dev]"]
+
+[project.urls]
+homepage="https://github.com/pyt-team/TopoNetX"
+repository="https://github.com/pyt-team/TopoNetX"
+
+[tool.setuptools.dynamic]
+version = {attr = "toponetx.__version__"}
+
+[tool.setuptools.packages.find]
+include = [
+    "toponetx",
+    "toponetx.*"
+]
+
+[tool.pytest.ini_options]
+addopts=--capture=no
+filterwarnings = error
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+profile = black
+skip = [".gitignore", "__init__.py"]
+
+[tool.flake8]
+application_import_names = "toponetx"
+docstring-convention = "numpy"
+exclude = examples/*.ipynb
+ignore = [
+    "E203",
+    "F811",
+    "W503",
+    "W504"
+    "W605",
+]
+import_order_style = "smarkets"
+max-line-length = 88
+extend-ignore = "E501", "F401"
+per-file-ignores = [
+    "*/__init__.py: F401,F403",
+]
