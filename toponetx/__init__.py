@@ -1,3 +1,5 @@
+__version__ = "0.0.1"
+
 from toponetx.exception import (
     TopoNetXException,
     TopoNetXError,

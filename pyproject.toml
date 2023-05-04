@@ -76,29 +76,28 @@ include = [
 ]
 
 [tool.pytest.ini_options]
-addopts=--capture=no
-filterwarnings = error
+addopts = "--capture=no"
 
 [tool.isort]
 multi_line_output = 3
 include_trailing_comma = true
-profile = black
 skip = [".gitignore", "__init__.py"]
 
 [tool.flake8]
 application_import_names = "toponetx"
 docstring-convention = "numpy"
-exclude = examples/*.ipynb
+exclude = ["examples/*.ipynb", "toponetx/__init__.py"]
 ignore = [
     "E203",
     "F811",
     "W503",
-    "W504"
-    "W605",
+    "W504",
+    "W605"
 ]
 import_order_style = "smarkets"
 max-line-length = 88
-extend-ignore = "E501", "F401"
+extend-ignore = ["E501", "F401"]
 per-file-ignores = [
-    "*/__init__.py: F401,F403",
+    "toponetx/__init__.py: F401,F403",
+    "*/__init__.py: F401,F403"
 ]
