@@ -67,7 +67,7 @@ git pull
 ```
 3. Install `TopoNetX` in editable mode:
 ```bash
-pip install -e ".[dev,full]"
+pip install -e ".[all]"
 ```
 4. Install pre-commit hooks:
 ```bash
