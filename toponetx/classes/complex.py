@@ -7,9 +7,7 @@ __all__ = ["Complex"]
 
 
 class Complex:
-
-    """
-    An abstract class representing a complex.
+    """Abstract class representing a complex.
 
     A complex is a space that is constructed by attaching lower-dimensional
     cells to a topological space to form a new space. The cells are attached to the space in a specific way,
@@ -43,23 +41,23 @@ class Complex:
     @property
     @abc.abstractstaticmethod
     def nodes(self):
-        r"""return the node container."""
+        r"""Return the node container."""
         pass
 
     @property
     @abc.abstractstaticmethod
     def dim(self):
-        r"""return dimension of the complex."""
+        r"""Return dimension of the complex."""
         pass
 
     @abc.abstractstaticmethod
     def shape(self):
-        r"""return number of cells for each rank in the complex."""
+        r"""Return number of cells for each rank in the complex."""
         pass
 
     @abc.abstractstaticmethod
     def skeleton(self, rank):
-        r"""return dimension of the complex."""
+        r"""Return dimension of the complex."""
         pass
 
     @abc.abstractstaticmethod
@@ -76,7 +74,7 @@ class Complex:
 
     @abc.abstractstaticmethod
     def __len__(self):
-        r"""return number of nodes in the complex."""
+        r"""Return number of nodes in the complex."""
         pass
 
     def _clear_cache(self):
@@ -89,7 +87,7 @@ class Complex:
 
     @abc.abstractstaticmethod
     def __iter__(self):
-        r"""return an iterator over the nodes in the complex."""
+        r"""Return an iterator over the nodes in the complex."""
         pass
 
     @abc.abstractstaticmethod
@@ -104,25 +102,25 @@ class Complex:
 
     @abc.abstractstaticmethod
     def remove_nodes(self, node_set):
-        r"""return dimension of the complex."""
+        r"""Return dimension of the complex."""
         pass
 
     @abc.abstractstaticmethod
     def add_node(self, node):
-        r"""add node to the complex."""
+        r"""Add node to the complex."""
         pass
 
     @abc.abstractstaticmethod
     def incidence_matrix(self):
-        r"""return incidence matrix of the complex."""
+        r"""Return incidence matrix of the complex."""
         pass
 
     @abc.abstractstaticmethod
     def adjacency_matrix(self):
-        r"""return adjacency matrix of the complex."""
+        r"""Return adjacency matrix of the complex."""
         pass
 
     @abc.abstractstaticmethod
     def coadjacency_matrix(self):
-        r"""return coadjacency matrix of the complex."""
+        r"""Return coadjacency matrix of the complex."""
         pass
