@@ -36,8 +36,7 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4.2.2
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'pyt-team/TopoNetX' }}
         with:
-          branch: master
+          branch: main
           folder: docs/_build
-          token: ${{ secrets.DOCUMENTATION_KEY }}
           repository-name: pyt-team/pyt-team.github.io
           clean: true
