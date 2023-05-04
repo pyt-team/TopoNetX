@@ -20,7 +20,7 @@ on:
 
 jobs:
 
-  pytest:
+  build:
     runs-on: ${{ matrix.os }}
 
     strategy:
