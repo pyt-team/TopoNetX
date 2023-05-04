@@ -38,6 +38,5 @@ jobs:
         with:
           branch: master
           folder: docs/_build
-          token: ${{ secrets.DOCUMENTATION_KEY }}
           repository-name: pyt-team/pyt-team.github.io
           clean: true
