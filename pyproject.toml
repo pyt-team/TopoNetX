@@ -60,7 +60,7 @@ test = [
 ]
 
 dev = ["TopoNetX[test, lint]"]
-all = ["TopoNetX[dev]"]
+all = ["TopoNetX[doc, dev]"]
 
 [project.urls]
 homepage="https://github.com/pyt-team/TopoNetX"
