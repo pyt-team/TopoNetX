@@ -23,6 +23,7 @@ __all__ = [
 
 
 def compute_hist(ref, test):
+    """Compute histograms."""
     r_min = min(ref.min(), test.min())
     r_max = max(ref.max(), test.max())
     params = dict(bins=100, density=True, range=(r_min, r_max))
