@@ -40,8 +40,9 @@ jobs:
           cache: "pip"
           cache-dependency-path: "pyproject.toml"
 
-      - name: Install main package
+      - name: Install main package [pip]
         run: |
+          pip install --upgrade pip
           pip install -e .[full,test]
       - name: Run tests [pytest]
         run: |
