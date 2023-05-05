@@ -47,7 +47,8 @@ master_doc = "index"
 
 language = None
 
-nbsphinx_prolog = r"""
+nbsphinx_prolog = (
+    r"""
 {% set docname = env.doc2path(env.docname, base=None) %}
 
 .. raw:: latex
@@ -55,12 +56,13 @@ nbsphinx_prolog = r"""
     \textcolor{gray}{The following section was generated from
     \sphinxcode{\sphinxupquote{\strut {{ docname | escape_latex }}}} \dotfill}}
     """
+)
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 
 pygments_style = None
 
-html_baseurl = "toponetx.github.io"
-htmlhelp_basename = "toponetxdoc"
+html_baseurl = "pyt-team.github.io"
+htmlhelp_basename = "pyt-teamdoc"
 html_last_updated_fmt = "%c"
 
 latex_elements = {}
