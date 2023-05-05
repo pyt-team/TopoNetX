@@ -8,4 +8,4 @@ Tutorials
    :maxdepth: 1
    :glob:
 
-   ../tutorials/*.ipynb
+   ../tutorials/*
