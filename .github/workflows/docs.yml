@@ -5,6 +5,8 @@ on:
     branches: [main, github-actions-test]
   pull_request:
     branches: [main]
+permissions:
+  contents: write
 
 jobs:
   build:
