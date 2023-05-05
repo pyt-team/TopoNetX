@@ -35,7 +35,7 @@ jobs:
         run: |
           sphinx-build  -b html -D version=latest -D release=latest docs docs/_build
       - name: Deployement of Docs
-        uses: JamesIves/github-pages-deploy-action@v4.2.2
+        uses: JamesIves/github-pages-deploy-action@ba1486788b0490a235422264426c45848eac35c6
         with:
           branch: main
           folder: docs/_build
