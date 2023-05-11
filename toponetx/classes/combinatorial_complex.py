@@ -514,7 +514,7 @@ class CombinatorialComplex(Complex):
         return len(self.nodes)
 
     def _remove_node(self, node):
-        self.remove_hyperedge(node)
+        self._remove_hyperedge(node)
 
     def remove_node(self, node):
         """Remove node from cells.
@@ -890,7 +890,7 @@ class CombinatorialComplex(Complex):
                     hyperedge.properties
                 )
 
-    def remove_hyperedge(self, hyperedge):
+    def _remove_hyperedge(self, hyperedge):
 
         if hyperedge not in self:
             raise KeyError(f"The hyperedge {hyperedge} is not in the complex")
@@ -1002,7 +1002,7 @@ class CombinatorialComplex(Complex):
 
         """
 
-        self._complex_set.remove_hyperedge(cell)
+        self._remove_hyperedge(cell)
 
         return self
 
