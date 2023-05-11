@@ -890,10 +890,17 @@ class CombinatorialComplex(Complex):
                     hyperedge.properties
                 )
 
+    def _add_hyperedges_from(self, hyperedges):
+        if isinstance(hyperedges, Iterable):
+            for s in hyperedges:
+                self.hyperedges(s)
+        else:
+            raise ValueError("input cells must be an iterable of HyperEdge objects")
+
     def _remove_hyperedge(self, hyperedge):
 
-        if hyperedge not in self:
-            raise KeyError(f"The hyperedge {hyperedge} is not in the complex")
+        if hyperedge not in self.cells:
+            raise KeyError(f"The cell {hyperedge} is not in the complex")
 
         if isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
             del self._complex_set.hyperedge_dict[0][hyperedge]
@@ -902,7 +909,7 @@ class CombinatorialComplex(Complex):
             hyperedge_ = hyperedge.nodes
         else:
             hyperedge_ = frozenset(hyperedge)
-        rank = self.get_rank(hyperedge_)
+        rank = self._complex_set.get_rank(hyperedge_)
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
 
         return

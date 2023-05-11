@@ -138,10 +138,10 @@ class CellView:
 
 
 class HyperEdgeView:
-    """A class for viewing the hyperedges of a combinatorial complex.
+    """A class for viewing the cells/hyperedges of a combinatorial complex.
 
-    Provides methods for accessing, manipulating, and retrieving
-    information about the hyperedges of a complex.
+    Provides methods for accessing, and retrieving
+    information about the cells/hyperedges of a complex.
 
     Parameters
     ----------
@@ -375,15 +375,6 @@ class HyperEdgeView:
     def allranks(self):
         return sorted(list(self.hyperedge_dict.keys()))
 
-    def add_hyperedges_from(self, hyperedges):
-        if isinstance(hyperedges, Iterable):
-            for s in hyperedges:
-                self.hyperedges(s)
-        else:
-            raise ValueError(
-                "input hyperedges must be an iterable of HyperEdge objects"
-            )
-
     def _get_lower_rank(self, rank):
 
         if len(self.allranks) == 0:
@@ -408,17 +399,45 @@ class SimplexView:
     The SimplexView class is used to provide a view/read only information
     into a subset of the nodes in a simplex.
     These classes are used in conjunction with the SimplicialComplex class
-    for view/read only purposes fro simplices in simplicial complexes.
+    for view/read only purposes for simplices in simplicial complexes.
 
     Parameters
     ----------
-    name : str
+    name : str, optional
+        Name of the SimplexView instance, defaults to "_".
 
+    Attributes
+    ----------
+    max_dim : int
+        Maximum dimension of the simplices in the SimplexView instance.
+    faces_dict : list of dict
+        A list containing dictionaries of faces for each dimension.
 
+    Methods
+    -------
+    __getitem__(self, simplex):
+        Returns a dictionary of properties associated with the given simplex.
+    __len__(self):
+        Returns the number of simplices in the SimplexView instance.
+    __iter__(self):
+        Returns an iterator over all simplices in the SimplexView instance.
+    __contains__(self, e):
+        Returns True if the given simplex is in the SimplexView instance.
+    __repr__(self):
+        Returns a string representation of the SimplexView instance.
+    __str__(self):
+        Returns a string representation of the SimplexView instance.
     """
 
     def __init__(self, name=None):
+        """
+        Initialize a SimplexView instance.
 
+        Parameters
+        ----------
+        name : str, optional
+            Name of the SimplexView instance, defaults to "_".
+        """
         if name is None:
             self.name = "_"
         else:
@@ -429,15 +448,17 @@ class SimplexView:
 
     def __getitem__(self, simplex):
         """
+        Get the dictionary of properties associated with the given simplex.
+
         Parameters
         ----------
-        cell : tuple list or Simplex
-            DESCRIPTION.
+        simplex : tuple, list or Simplex
+            A tuple or list of nodes representing a simplex.
+
         Returns
         -------
-        TYPE : dict or ilst or dicts
-            return dict of properties associated with that cells
-
+        dict or list or dict
+            A dictionary of properties associated with the given simplex.
         """
         if isinstance(simplex, Simplex):
             if simplex.nodes in self.faces_dict[len(simplex) - 1]:
@@ -455,27 +476,63 @@ class SimplexView:
 
                 return self.faces_dict[0][frozenset({simplex})]
 
-    # Set methods
     @property
     def shape(self):
+        """
+        Returns the number of simplices in each dimension.
+
+        Returns
+        -------
+        list
+            A list of integers representing the number of simplices in each dimension.
+        """
         if len(self.faces_dict) == 0:
             print("Complex is empty.")
         else:
             return [len(self.faces_dict[i]) for i in range(len(self.faces_dict))]
 
     def __len__(self):
+        """
+        Returns the number of simplices in the SimplexView instance.
+
+        Returns
+        -------
+        int
+            The number of simplices in the SimplexView instance.
+        """
         if len(self.faces_dict) == 0:
             return 0
         else:
             return np.sum(self.shape)
 
     def __iter__(self):
+        """
+        Return an iterator over all simplices in the simplex view
+
+        Returns
+        -------
+        iterator
+            An iterator over all simplices in the simplex view
+        """
         all_simplices = []
         for i in range(len(self.faces_dict)):
             all_simplices = all_simplices + list(self.faces_dict[i].keys())
         return iter(all_simplices)
 
     def __contains__(self, e):
+        """
+        Check if a simplex is in the simplex view
+
+        Parameters
+        ----------
+        e : Simplex or iterable or hashable
+            The simplex to be checked for membership in the simplex view
+
+        Returns
+        -------
+        bool
+            True if the simplex is in the simplex view, False otherwise
+        """
 
         if len(self.faces_dict) == 0:
             return False
@@ -508,11 +565,13 @@ class SimplexView:
             return False
 
     def __repr__(self):
-        """C
-        String representation of simplices
+        """
+        Return a string representation of the simplex view that can be used to recreate it
+
         Returns
         -------
         str
+            A string representation of the simplex view that can be used to recreate it
         """
         all_simplices = []
         for i in range(len(self.faces_dict)):
@@ -522,11 +581,12 @@ class SimplexView:
 
     def __str__(self):
         """
-        String representation of simplices
+        Return a string representation of the simplex view
 
         Returns
         -------
         str
+            A string representation of the simplex view
         """
         all_simplices = []
         for i in range(len(self.faces_dict)):
