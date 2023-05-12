@@ -1,4 +1,4 @@
-"""Test cell class."""
+"""Test Cell class."""
 
 import unittest
 

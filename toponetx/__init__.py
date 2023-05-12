@@ -1,4 +1,4 @@
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 from toponetx.exception import (
     TopoNetXException,
@@ -20,6 +20,11 @@ from .classes.cell import Cell
 
 from .classes.reportview import CellView, HyperEdgeView, SimplexView
 from .classes.node import Node, NodeView
+
+from .transform.graph_to_simplicial_complex import (
+    graph_2_neighbor_complex,
+    graph_2_clique_complex,
+)
 
 from .utils.structure import (
     sparse_array_to_neighborhood_list,
