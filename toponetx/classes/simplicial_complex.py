@@ -1548,6 +1548,32 @@ class SimplicialComplex(Complex):
             G.add_node(list(node)[0])
         return nx.is_connected(G)
 
+    @staticmethod
+    def simplicial_closure_of_hypergraph(H):
+        """Compute the simplicial complex closure of a hypergraph.
+
+         Parameters
+         ----------
+         H : hyernetx hypergraph
+             Hypergraph.
+
+         Returns
+         -------
+         _ : SimplicialComplex
+             Simplicial complex closure of the hypergraph.
+        Example
+        -------
+        >>> import hypernetx as hnx
+        >>> hg = hnx.Hypergraph( [ [1,2,3,4],[1,2,3] ], static=True)
+        >>> sc = SimplicialComplex.simplicial_closure_of_hypergraph(hg)
+        >>> print(sc.simplices)
+        """
+        edges = H.edges
+        lst = []
+        for e in edges:
+            lst.append(edges[e])
+        return SimplicialComplex(lst)
+
     def to_cell_complex(self):
         """Convert a simplicial complex to a cell complex.
 
@@ -1580,7 +1606,7 @@ class SimplicialComplex(Complex):
             G = G + edge
         return Hypergraph(G, static=True)
 
-    def to_combinatorial_complex(self, dynamic=True):
+    def to_combinatorial_complex(self, dynamic=False):
         """Convert a simplicial complex to a combinatorial complex.
 
         Parameters

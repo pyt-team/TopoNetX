@@ -40,6 +40,12 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
         assert (0, 2, 3) in sc
         assert (0, 1, 2) in sc
 
+        sc = graph_2_clique_complex(G, max_dim=2)
+
+        assert sc.dim == 1
+        assert (0, 2, 3) not in sc
+        assert (0, 1, 2) not in sc
+
         return
 
 
