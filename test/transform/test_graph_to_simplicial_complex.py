@@ -2,7 +2,7 @@ import unittest
 
 import networkx as nx
 
-from toponetx.transform.graph_2_simplcial_complex import (
+from toponetx.transform.graph_to_simplicial_complex import (
     graph_2_clique_complex,
     graph_2_neighbor_complex,
 )
