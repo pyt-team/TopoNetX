@@ -56,6 +56,9 @@ class TestStructure(unittest.TestCase):
 
         assert list(output1) == expected1
 
+        with self.assertRaises(ValueError):
+            output1 = sparse_array_to_neighborhood_list(B1, list(row.keys()))
+
     def test_neighborhood_list_to_neighborhood_dict(self):
         """
         Test the neighborhood_list_to_neighborhood_dict function.
