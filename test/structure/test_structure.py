@@ -4,7 +4,7 @@ import unittest
 from collections import defaultdict
 
 from toponetx.classes.cell_complex import CellComplex
-from toponetx.classes.utils.structure import (
+from toponetx.utils.structure import (
     neighborhood_list_to_neighborhood_dict,
     sparse_array_to_neighborhood_dict,
     sparse_array_to_neighborhood_list,
