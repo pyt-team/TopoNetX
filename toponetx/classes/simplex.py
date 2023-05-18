@@ -1,4 +1,4 @@
-"""Simplex and SimplexView Classes."""
+"""Simplex Class."""
 
 try:
     from collections.abc import Hashable, Iterable
@@ -10,7 +10,7 @@ __all__ = ["Simplex"]
 
 
 class Simplex:
-    r"""
+    """
     A class representing a simplex in a simplicial complex.
 
     This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension. The simplex
@@ -30,21 +30,19 @@ class Simplex:
         >>> s = Simplex((1,))
         >>> # Create a 1-dimensional simplex (line segment)
         >>> s = Simplex((1, 2))
-        >>> # Create a 2-dimensional simplex ( triangle )
+        >>> # Create a 2-dimensional simplex (triangle)
         >>> simplex1 = Simplex((1, 2, 3))
         >>> simplex2 = Simplex(("a", "b", "c"))
-        >>> # Create a 3-dimensional simplex ( tetrahedron )
+        >>> # Create a 3-dimensional simplex (tetrahedron)
         >>> simplex3 = Simplex((1, 2, 4, 5), weight=1)
     """
 
     def __init__(self, elements, name=None, construct_tree=True, **attr):
-
         if name is None:
             self.name = ""
         else:
             self.name = name
         self.construct_tree = construct_tree
-        # nodes in the simplex must be hashable and unique
         self.nodes = frozenset(elements)
         if len(self.nodes) != len(elements):
             raise ValueError("A simplex cannot contain duplicate nodes.")
@@ -57,13 +55,13 @@ class Simplex:
         self.properties.update(attr)
 
     def __contains__(self, e):
-        r"""
+        """
         Returns True if the given element is a subset of the nodes in the simplex.
         """
         if len(self.nodes) == 0:
             return False
         if isinstance(e, Iterable):
-            if len(e) != 1:
+            if len(e) > len(self.nodes):
                 return False
             else:
                 if isinstance(e, frozenset):
@@ -71,13 +69,13 @@ class Simplex:
                 else:
                     return frozenset(e) <= self.nodes
         elif isinstance(e, Hashable):
-            return frozenset({e}) in self.nodes
+            return frozenset({e}) <= self.nodes
         else:
             return False
 
     @staticmethod
     def construct_simplex_tree(elements):
-        r"""
+        """
         Returns a set of Simplex objects representing the faces of the simplex.
         """
         faceset = set()
@@ -91,7 +89,7 @@ class Simplex:
 
     @property
     def boundary(self):
-        r"""
+        """
         Returns a set of Simplex objects representing the boundary faces of the simplex.
         """
         if self.construct_tree:
@@ -101,44 +99,88 @@ class Simplex:
             return frozenset(i for i in faces if len(i) == len(self) - 1)
 
     def sign(self, face):
+        """
+        Calculate the sign of the simplex with respect to a given face.
+
+
+        :param face: A face of the simplex.
+        :type face: Simplex
+
+        """
         raise NotImplementedError
 
     @property
     def faces(self):
+        """
+        Get the set of faces of the simplex.
+
+        If `construct_tree` is True, return the precomputed set of faces `_faces`.
+        Otherwise, construct the simplex tree and return the set of faces.
+
+        :return: The set of faces of the simplex.
+        :rtype: frozenset[Simplex]
+        """
         if self.construct_tree:
             return self._faces
         else:
             return Simplex.construct_simplex_tree(self.nodes)
 
     def __getitem__(self, item):
+        """
+        Get the value of the attribute associated with the simplex.
+
+        :param item: The name of the attribute.
+        :type item: str
+        :return: The value of the attribute.
+        :raises KeyError: If the attribute is not found in the simplex.
+        """
         if item not in self.properties:
-            raise KeyError(f"attr {item} is not an attr in the cell {self.name}")
+            raise KeyError(f"Attribute '{item}' is not found in the simplex.")
         else:
             return self.properties[item]
 
     def __setitem__(self, key, item):
+        """
+        Set the value of an attribute associated with the simplex.
+
+        :param key: The name of the attribute.
+        :type key: str
+        :param item: The value of the attribute.
+        """
         self.properties[key] = item
 
     def __len__(self):
+        """
+        Get the number of nodes in the simplex.
+
+        :return: The number of nodes in the simplex.
+        :rtype: int
+        """
         return len(self.nodes)
 
     def __iter__(self):
+        """
+        Get an iterator over the nodes in the simplex.
+
+        :return: An iterator over the nodes in the simplex.
+        :rtype: iter
+        """
         return iter(self.nodes)
 
     def __repr__(self):
-        r"""
-        String representation of Simplex
-        Returns
-        -------
-        str
+        """
+        Get a string representation of the simplex.
+
+        :return: A string representation of the simplex.
+        :rtype: str
         """
         return f"Simplex{tuple(self.nodes)}"
 
     def __str__(self):
-        r"""
-        String representation of a simplex
-        Returns
-        -------
-        str
         """
-        return f"Nodes set:{tuple(self.nodes)}, attrs:{self.properties}"
+        Get a string representation of the simplex.
+
+        :return: A string representation of the simplex.
+        :rtype: str
+        """
+        return f"Nodes set: {tuple(self.nodes)}, attrs: {self.properties}"
