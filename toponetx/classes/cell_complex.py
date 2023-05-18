@@ -28,7 +28,6 @@ from scipy.sparse import csr_matrix
 from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
-from toponetx.classes.node import Node
 from toponetx.classes.reportview import CellView
 from toponetx.exception import TopoNetXError
 
