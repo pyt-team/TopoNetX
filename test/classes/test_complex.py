@@ -3,7 +3,7 @@
 import unittest
 from abc import ABC, abstractmethod
 
-from toponetx.classes.simplex import Complex
+from toponetx.classes.complex import Complex
 
 
 class TestComplex(unittest.TestCase):
