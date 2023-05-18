@@ -16,7 +16,7 @@ from .classes.hyperedge import HyperEdge
 from .classes.cell import Cell
 
 from .classes.reportview import CellView, HyperEdgeView, SimplexView
-from .classes.node import Node, NodeView
+from .classes.node import NodeView
 
 from .transform.graph_to_simplicial_complex import (
     graph_2_neighbor_complex,
