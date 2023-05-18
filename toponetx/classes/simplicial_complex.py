@@ -229,9 +229,9 @@ class SimplicialComplex(Complex):
         """
         return self._simplex_set
 
-    def get_simplex_id(self, simplex):
-        if simplex in self:
-            return self[simplex]["id"]
+    # def get_simplex_id(self, simplex):
+    #    if simplex in self:
+    #        return self[simplex]["id"]
 
     def is_maximal(self, simplex):
         if simplex in self:
