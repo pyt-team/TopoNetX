@@ -78,8 +78,8 @@ class Cell:
             for e in self._boundary:
                 if e[0] in _adjdict:
                     raise ValueError(
-                        f" node {e[0]} is repeated multiple times in the input cell."
-                        + " input cell violates the cell complex regularity condition."
+                        f" Node {e[0]} is repeated multiple times in the input cell."
+                        + " Input cell violates the cell complex regularity condition."
                     )
                 _adjdict[e[0]] = e[1]
         else:
