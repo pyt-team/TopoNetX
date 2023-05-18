@@ -898,14 +898,14 @@ class SimplicialComplex(Complex):
         if index:
             if signed:
                 return (
-                    list(simplex_dict_d_minus_1.keys()),
-                    list(simplex_dict_d.keys()),
+                    simplex_dict_d_minus_1,
+                    simplex_dict_d,
                     boundary,
                 )
             else:
                 return (
-                    list(simplex_dict_d_minus_1.keys()),
-                    list(simplex_dict_d.keys()),
+                    simplex_dict_d_minus_1,
+                    simplex_dict_d,
                     abs(boundary),
                 )
         else:
