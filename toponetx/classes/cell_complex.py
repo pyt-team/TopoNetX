@@ -28,9 +28,7 @@ from scipy.sparse import csr_matrix
 from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
-from toponetx.classes.dynamic_cell import DynamicCell
 from toponetx.classes.node import Node
-from toponetx.classes.ranked_entity import RankedEntitySet
 from toponetx.classes.reportview import CellView
 from toponetx.exception import TopoNetXError
 
@@ -1878,20 +1876,7 @@ class CellComplex(Complex):
         >>> CX= CX.to_combinatorial_complex()
         >>> CX.cells
         """
-        all_cells = []
-
-        for node in self.nodes:
-            all_cells.append(Node(elements=node, **self.nodes[node]))
-
-        for edge in self.edges:
-            all_cells.append(DynamicCell(elements=edge, rank=1, **self.edges[edge]))
-        for cell in self.cells:
-            all_cells.append(
-                DynamicCell(elements=cell.elements, rank=2, **self.cells[cell])
-            )
-        return CombinatorialComplex(
-            RankedEntitySet("", all_cells, safe_insert=False), name="_"
-        )
+        NotImplementedError
 
     def to_hypergraph(self):
         """Convert to hypergraph.

@@ -24,9 +24,7 @@ from networkx import Graph
 from scipy.sparse import coo_matrix, dok_matrix
 
 from toponetx.classes.complex import Complex
-from toponetx.classes.dynamic_cell import DynamicCell
 from toponetx.classes.node import NodeView
-from toponetx.classes.ranked_entity import RankedEntitySet
 from toponetx.classes.reportview import SimplexView
 from toponetx.classes.simplex import Simplex
 from toponetx.exception import TopoNetXError
@@ -1606,7 +1604,7 @@ class SimplicialComplex(Complex):
             G = G + edge
         return Hypergraph(G, static=True)
 
-    def to_combinatorial_complex(self, dynamic=False):
+    def to_combinatorial_complex(self):
         """Convert a simplicial complex to a combinatorial complex.
 
         Parameters
@@ -1627,23 +1625,9 @@ class SimplicialComplex(Complex):
         """
 
         from toponetx.classes.combinatorial_complex import CombinatorialComplex
-        from toponetx.classes.dynamic_combinatorial_complex import (
-            DynamicCombinatorialComplex,
-        )
 
-        if dynamic:
-            G = []
-            for rank in range(1, self.dim + 1):
-                edge = [
-                    DynamicCell(elements=list(cell), rank=len(cell) - 1, **self[cell])
-                    for cell in self.skeleton(rank)
-                ]
-                G = G + edge
-            res = RankedEntitySet("", G, safe_insert=False)
-            return DynamicCombinatorialComplex(res)
-        else:
-            CC = CombinatorialComplex()
-            for rank in range(1, self.dim + 1):
-                for cell in self.skeleton(rank):
-                    CC.add_cell(cell, rank=len(cell) - 1, **self[cell])
-            return CC
+        CC = CombinatorialComplex()
+        for rank in range(1, self.dim + 1):
+            for cell in self.skeleton(rank):
+                CC.add_cell(cell, rank=len(cell) - 1, **self[cell])
+        return CC
