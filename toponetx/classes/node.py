@@ -1,4 +1,4 @@
-"""Node and NodeView classes."""
+"""NodeView class."""
 
 try:
     from collections.abc import Hashable, Iterable
@@ -6,22 +6,8 @@ except ImportError:
     from collections import Hashable, Iterable
 
 from toponetx import TopoNetXError
-from toponetx.classes.ranked_entity import RankedEntity
 
-__all__ = ["Node", "NodeView"]
-
-
-class Node(RankedEntity):
-    def __init__(self, elements, weight=1.0, **props):
-        if not isinstance(elements, Hashable):
-            raise TopoNetXError(
-                f"node's elements must be hashable, got {type(elements)}"
-            )
-        super().__init__(uid=elements, elements=[], rank=0, weight=weight, **props)
-
-    def __repr__(self):
-        """Returns a string resembling the constructor for ranked entity"""
-        return f"Node({self._uid},rank={self.rank}, {self.properties})"
+__all__ = ["NodeView"]
 
 
 class NodeView:
