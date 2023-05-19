@@ -764,11 +764,13 @@ class SimplicialComplex(Complex):
             return
 
     def get_node_attributes(self, name):
-        """Get node attributes from combintorial complex
+        """Get node attributes from combinatorial complex.
+
         Parameters
         ----------
         name : string
-           Attribute name
+           Attribute name.
+
         Returns
         -------
         Dictionary of attributes keyed by node.
