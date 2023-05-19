@@ -598,6 +598,28 @@ class TestCellComplex(unittest.TestCase):
         cells = CX.skeleton(2)
         assert len(cells) == 1
 
+    def test_filtration(self):
+        CX = CellComplex([[1,2,3], [4,5]])
+        test_filtration = {3: 2, 1: 4, (2,3): 3.4,(1,2,3): 7.6}
+        CX.set_filtration(test_filtration, 'test')
+        assert CX.get_filtration('test') == test_filtration
+    
+    def test_to_hypergraph(self):
+        CX = CellComplex([[1,2,3], [4,5]])
+        hx = CX.to_hypergraph()
+        assert set(hx.nodes) == set(CX.nodes)
+        assert len(hx.edges) == len(CX.edges) + len(CX.cells)
+
+    def test_restrict_to_nodes(self):
+        CX = CellComplex([[1,2,3], [3,4,5], [1,4]])
+        CX.set_filtration({(1,2,3): 1, (3,4,5): 2, (1,4): 0, 3: 1}, 'test')
+        restricted = CX.restrict_to_nodes({1,2,3,4})
+        assert (1,2,3) in restricted.cells
+        assert (1,4) in restricted.edges
+        assert (3,4) in restricted.edges
+        assert (3,4,5) not in restricted.cells
+        assert (4,5) not in restricted.edges
+        assert restricted.get_filtration('test') == {(1,2,3): 1, (1,4): 0, 3: 1}
 
 if __name__ == "__main__":
     unittest.main()
