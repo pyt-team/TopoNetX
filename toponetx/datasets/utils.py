@@ -1,4 +1,4 @@
-"""Utils to load datasets."""
+"""Utils loading datasets."""
 
 import networkx as nx
 import numpy as np
@@ -55,7 +55,7 @@ def load_ppi():
     data = [line.split("\t") for line in lines]
     df = pd.DataFrame(data[1:-1], columns=data[0])
 
-    interactions = df[["protein_a", "protein_b", "score"]]
+    interactions = df[["preferredName_A", "preferredName_B", "score"]]
 
     G = nx.Graph(name="Protein Interaction Graph")
     interactions = np.array(interactions)
