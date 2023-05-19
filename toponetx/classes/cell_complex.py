@@ -453,6 +453,7 @@ class CellComplex(Complex):
         ----------
         cell : hashable
             The uid of an cell in the cell complex
+        node_set: an iterable of node elements
 
         Returns
         -------
@@ -460,11 +461,15 @@ class CellComplex(Complex):
 
         """
         if node_set:
-            return len(set(node_set).intersection(set(self.cells[cell])))
+            if isinstance(cell, Cell):
+                return len(set(node_set).intersection(set(cell.elements)))
+            elif isinstance(cell, Iterable):
+                return len(set(node_set).intersection(set(cell)))
+
         else:
             if cell in self.cells:
 
-                return len(self.cells[cell])
+                return len(cell)
             else:
                 raise KeyError(f" the key {cell} is not a key for an existing cell ")
 

@@ -1,6 +1,7 @@
 """Test cell complex class."""
 
 import unittest
+from collections import defaultdict
 
 import networkx as nx
 import numpy as np
@@ -464,6 +465,138 @@ class TestCellComplex(unittest.TestCase):
         cc.add_cell([1, 2, 3], rank=2)
         A = np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]])
         np.testing.assert_array_equal(cc.coadjacency_matrix(1).todense(), A)
+
+    def test_repr(self):
+        cx = CellComplex(name="test")
+        self.assertEqual(repr(cx), "CellComplex(name=test)")
+
+    def test_len(self):
+        cx = CellComplex()
+        cx.add_cell([1, 2, 3], rank=2)
+        self.assertEqual(len(cx), 3)
+
+    def test_iter(self):
+        cx = CellComplex()
+        cx.add_cell([1, 2, 3], rank=2)
+        cx.add_cell([2, 3, 4], rank=2)
+        self.assertEqual(set(iter(cx)), {1, 2, 3, 4})
+
+    def test_cell_equivalence_class(self):
+        cx = CellComplex()
+        cx.add_cell([1, 2, 3, 4], rank=2)
+        cx.add_cell([2, 3, 4, 1], rank=2)
+        cx.add_cell([1, 2, 3, 4], rank=2)
+        cx.add_cell([1, 2, 3, 6], rank=2)
+        cx.add_cell([3, 4, 1, 2], rank=2)
+        cx.add_cell([4, 3, 2, 1], rank=2)
+        cx.add_cell([1, 2, 7, 3], rank=2)
+        c1 = Cell((1, 2, 3, 4, 5))
+        cx.add_cell(c1, rank=2)
+
+        equivalence_classes = cx._cell_equivelance_class()
+
+        self.assertEqual(len(equivalence_classes), 4)
+
+    def test_remove_equivalent_cells(self):
+
+        cx = CellComplex()
+        cx.add_cell((1, 2, 3, 4), rank=2)
+        cx.add_cell((2, 3, 4, 1), rank=2)
+        cx.add_cell((1, 2, 3, 4), rank=2)
+        cx.add_cell((1, 2, 3, 6), rank=2)
+        cx.add_cell((3, 4, 1, 2), rank=2)
+        cx.add_cell((4, 3, 2, 1), rank=2)
+        cx.add_cell((1, 2, 7, 3), rank=2)
+        c1 = Cell((1, 2, 3, 4, 5))
+        cx.add_cell(c1, rank=2)
+        cx._remove_equivalent_cells()
+        assert len(cx.cells) == 4
+
+    def test_degree(self):
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([2, 3, 4, 5], rank=2)
+        CX.add_cell([5, 6, 7, 8], rank=2)
+
+        assert CX.degree(1) == 2
+        assert CX.degree(2) == 3
+        assert CX.degree(3) == 2
+        assert CX.degree(4) == 3
+        assert CX.degree(5) == 4
+        assert CX.degree(6) == 2
+        assert CX.degree(7) == 2
+        assert CX.degree(8) == 2
+
+    def test_size(self):
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([2, 3, 4, 5], rank=2)
+        CX.add_cell([5, 6, 7, 8], rank=2)
+
+        c = Cell([1, 2, 3, 4])
+        assert CX.size((1, 2, 3, 4)) == 4
+        assert CX.size((2, 3, 4, 5)) == 4
+        assert CX.size((5, 6, 7, 8)) == 4
+
+        assert CX.size((1, 2, 3, 4), node_set=[1, 2, 3]) == 3
+        assert CX.size((2, 3, 4, 5), node_set=[3, 4, 5]) == 3
+        assert CX.size((5, 6, 7, 8), node_set=[6, 7, 8]) == 3
+        assert CX.size(c, node_set=[1, 2, 3]) == 3
+
+    def test_insert_cell(self):
+        CX = CellComplex()
+        CX._insert_cell([1, 2, 3, 4], rank=2)
+        CX._insert_cell([2, 3, 4, 5], rank=2)
+        CX._insert_cell([5, 6, 7, 8], rank=2)
+
+        assert len(CX.cells) == 3
+        assert [cell.elements for cell in CX.cells] == [
+            (1, 2, 3, 4),
+            (2, 3, 4, 5),
+            (5, 6, 7, 8),
+        ]
+
+    def test_delete_cell(self):
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([2, 3, 4, 5], rank=2)
+        CX.add_cell([5, 6, 7, 8], rank=2)
+
+        CX._delete_cell((1, 2, 3, 4))
+        assert len(CX.cells) == 2
+        assert [cell.elements for cell in CX.cells] == [(2, 3, 4, 5), (5, 6, 7, 8)]
+
+        CX._delete_cell((2, 3, 4, 5))
+        assert len(CX.cells) == 1
+        assert [cell.elements for cell in CX.cells] == [(5, 6, 7, 8)]
+
+    def test_shape(self):
+        CX = CellComplex()
+        assert CX.shape == (0, 0, 0)
+
+        CX.add_node(1)
+        assert CX.shape == (1, 0, 0)
+
+        CX.add_cell([1, 2], rank=1)
+        assert CX.shape == (2, 1, 0)
+
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        assert CX.shape == (4, 4, 1)
+
+    def test_skeleton(self):
+        CX = CellComplex()
+        CX.add_node(1)
+        CX.add_cell([1, 2], rank=1)
+        CX.add_cell([1, 2, 3, 4], rank=2)
+
+        nodes = CX.skeleton(0)
+        assert len(nodes) == 4
+
+        edges = CX.skeleton(1)
+        assert len(edges) == 4
+
+        cells = CX.skeleton(2)
+        assert len(cells) == 1
 
 
 if __name__ == "__main__":
