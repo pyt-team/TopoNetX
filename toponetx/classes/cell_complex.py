@@ -900,7 +900,7 @@ class CellComplex(Complex):
         lst = [
             self.get_node_attributes(name),
             self.get_edge_attributes(name),
-            self.get_cell_attributes(name),
+            self.get_cell_attributes(name, rank=2),
         ]
         d = {}
         for i in lst:
@@ -1235,7 +1235,7 @@ class CellComplex(Complex):
                     )
                 return False
         if check_skeleton:
-            enum = zip_longest(cell, cell[1:] + [cell[0]])
+            enum = zip_longest(cell, cell[1:] + cell[:1])
             for i in enum:
                 if i not in self.edges:
                     if warnings_dis:
