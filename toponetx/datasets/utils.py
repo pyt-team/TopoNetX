@@ -1,10 +1,4 @@
-"""Loading toy datasets.
-
-Refer to notebook: `geomstats/notebooks/01_data_on_manifolds.ipynb`
-to visualize these datasets.
-
-Lead author: Nina Miolane.
-"""
+"""Utils to load datasets."""
 
 import networkx as nx
 import numpy as np
