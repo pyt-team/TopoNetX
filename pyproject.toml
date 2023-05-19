@@ -28,7 +28,7 @@ dependencies=[
     "gudhi",
     "decorator",
     "networkx",
-    "hypernetx",
+    "hypernetx < 2.0.0",
     "numpy",
     "scipy",
     "trimesh",
