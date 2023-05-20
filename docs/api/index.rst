@@ -15,3 +15,6 @@ The API reference gives an overview of `TopoNetX`, which consists of several mod
    :caption: Packages & Modules
 
    datasets
+   classes
+   transform
+   algorithms
