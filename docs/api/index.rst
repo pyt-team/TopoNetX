@@ -11,7 +11,7 @@ The API reference gives an overview of `TopoNetX`, which consists of several mod
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Packages & Modules
 
    datasets
