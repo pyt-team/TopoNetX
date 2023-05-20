@@ -30,6 +30,7 @@ dependencies=[
     "networkx",
     "hypernetx < 2.0.0",
     "numpy",
+    "requests",
     "scipy",
     "trimesh",
 ]
