@@ -41,4 +41,5 @@ jobs:
           folder: docs/_build
           token: ${{ secrets.DOCUMENTATION_KEY }}
           repository-name: pyt-team/pyt-team.github.io
+          target-folder: toponetx
           clean: true
