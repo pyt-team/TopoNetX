@@ -11,3 +11,4 @@ Welcome! Check out our tutorials to get started.
 
    api/index
    tutorials/index
+   contributing/index
