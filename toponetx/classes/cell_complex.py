@@ -266,52 +266,52 @@ class CellComplex(Complex):
         return f"CellComplex(name={self.name})"
 
     def __len__(self):
-        """
-        Number of nodes
+        """Return number of nodes.
 
         Returns
         -------
-        int
-
+        _ : int
+            Number of nodes.
         """
-
         return len(self.nodes)
 
     def __iter__(self):
-        """
-        Iterate over the nodes of the cell complex
+        """Iterate over the nodes of the cell complex.
 
         Returns
         -------
-        dict_keyiterator
-
+        _ : dict_keyiterator
+            Iterator over nodes.
         """
         return iter(self.nodes)
 
     def __contains__(self, item):
-        """
-        Returns boolean indicating if item is in self.nodes
+        """Return boolean indicating if item is in self.nodes
 
         Parameters
         ----------
         item : hashable or RankedEntity
+            Iterm.
 
+        Returns
+        -------
+        _ : bool
+            True if item is in self.nodes, False otherwise.
         """
-
         return item in self.nodes
 
     def __getitem__(self, node):
-        """
-        Returns the neighbors of node
+        """Return the neighbors of node.
 
         Parameters
         ----------
         node : Entity or hashable
-            If hashable, then must be uid of node in cell complex
+            If hashable, then must be uid of node in cell complex.
+
         Returns
         -------
         neighbors(node) : iterator
-
+            Iterator over neighbors of node.
         """
         return self.neighbors(node)
 
@@ -349,27 +349,27 @@ class CellComplex(Complex):
             raise KeyError(f"cell {cell} is not in the complex")
 
     def _cell_equivalence_class(self):
-        """
+        """Return the equivalence classes of cells in the cell complex.
+
         Returns
         -------
         equiv : TYPE
             DESCRIPTION.
 
         Example
-        ------
-         >>> cx = CellComplex()
-         >>> cx.add_cell ( (1,2,3,4),rank=2 )
-         >>> cx.add_cell ( (2,3,4,1),rank=2 )
-         >>> cx.add_cell ( (1,2,3,4),rank=2 )
-         >>> cx.add_cell ( (1,2,3,6),rank=2 )
-         >>> cx.add_cell ( (3,4,1,2),rank=2 )
-         >>> cx.add_cell ( (4,3,2,1),rank=2 )
-         >>> cx.add_cell ( (1,2,7,3),rank=2 )
-         >>> c1=Cell((1,2,3,4,5))
-         >>> cx.add_cell(c1,rank=2)
-         >>> d = cx._cell_equivalence_class()
-         >>> d
-
+        -------
+        >>> cx = CellComplex()
+        >>> cx.add_cell ( (1,2,3,4),rank=2 )
+        >>> cx.add_cell ( (2,3,4,1),rank=2 )
+        >>> cx.add_cell ( (1,2,3,4),rank=2 )
+        >>> cx.add_cell ( (1,2,3,6),rank=2 )
+        >>> cx.add_cell ( (3,4,1,2),rank=2 )
+        >>> cx.add_cell ( (4,3,2,1),rank=2 )
+        >>> cx.add_cell ( (1,2,7,3),rank=2 )
+        >>> c1=Cell((1,2,3,4,5))
+        >>> cx.add_cell(c1,rank=2)
+        >>> d = cx._cell_equivalence_class()
+        >>> d
         """
         equiv_classes = defaultdict(set)
         all_inserted_cells = set()
@@ -390,25 +390,22 @@ class CellComplex(Complex):
         return equiv_classes
 
     def _remove_equivalent_cells(self):
-        """
-        remove homotopic cells from the cell complex
+        """Remove homotopic cells from the cell complex.
 
-        Example:
-        ---------
-         >>> cx = CellComplex()
-         >>> cx.add_cell ( (1,2,3,4),rank=2 )
-         >>> cx.add_cell ( (2,3,4,1),rank=2 )
-         >>> cx.add_cell ( (1,2,3,4),rank=2 )
-         >>> cx.add_cell ( (1,2,3,6),rank=2 )
-         >>> cx.add_cell ( (3,4,1,2),rank=2 )
-         >>> cx.add_cell ( (4,3,2,1),rank=2 )
-         >>> cx.add_cell ( (1,2,7,3),rank=2 )
-         >>> c1=Cell((1,2,3,4,5))
-         >>> cx.add_cell(c1,rank=2)
-         >>> cx._remove_equivalent_cells()
-         >>> cx
-
-
+        Example
+        -------
+        >>> cx = CellComplex()
+        >>> cx.add_cell ( (1,2,3,4),rank=2 )
+        >>> cx.add_cell ( (2,3,4,1),rank=2 )
+        >>> cx.add_cell ( (1,2,3,4),rank=2 )
+        >>> cx.add_cell ( (1,2,3,6),rank=2 )
+        >>> cx.add_cell ( (3,4,1,2),rank=2 )
+        >>> cx.add_cell ( (4,3,2,1),rank=2 )
+        >>> cx.add_cell ( (1,2,7,3),rank=2 )
+        >>> c1=Cell((1,2,3,4,5))
+        >>> cx.add_cell(c1,rank=2)
+        >>> cx._remove_equivalent_cells()
+        >>> cx
         """
         equiv_classes = self._cell_equivalence_class()
         for c in list(self.cells):
@@ -425,38 +422,38 @@ class CellComplex(Complex):
                             self._delete_cell(c, k)
 
     def degree(self, node, rank=1):
-        """
-        The number of cells of certain rank that contain node.
+        """The number of cells of certain rank that contain node.
 
         Parameters
         ----------
         node : hashable
-            identifier for the node.
+            Identifier for the node.
         rank : positive integer, optional, default: 1
-            smallest size of cell to consider in degree
+            Smallest size of cell to consider in degree.
 
         Returns
         -------
-         : int
-
+        _ : int
+            Number of cells of rank at least rank that contain node.
         """
         return self._G.degree[node]
 
     def size(self, cell, node_set=None):
-        """
-        The number of nodes in node_set that belong to cell.
-        If node_set is None then returns the size of cell
+        """The number of nodes in node_set that belong to cell.
+
+        If node_set is None then returns the size of cell.
 
         Parameters
         ----------
         cell : hashable
             The uid of an cell in the cell complex
         node_set: an iterable of node elements
+            Node elements.
 
         Returns
         -------
         size : int
-
+            Number of nodes in node_set that belong to cell.
         """
         if node_set:
             if isinstance(cell, Cell):
@@ -472,8 +469,7 @@ class CellComplex(Complex):
                 raise KeyError(f" the key {cell} is not a key for an existing cell ")
 
     def number_of_nodes(self, node_set=None):
-        """
-        The number of nodes in node_set belonging to cell complex.
+        """Number of nodes in node_set belonging to cell complex.
 
         Parameters
         ----------
@@ -483,7 +479,7 @@ class CellComplex(Complex):
         Returns
         -------
         number_of_nodes : int
-
+            Number of nodes in node_set belonging to cell complex.
         """
         if node_set:
             return len([node for node in self.nodes if node in node_set])
@@ -491,8 +487,7 @@ class CellComplex(Complex):
             return len(self.nodes)
 
     def number_of_edges(self, edge_set=None):
-        """
-        The number of cells in cell_set belonging to cell complex.
+        """Number of cells in cell_set belonging to cell complex.
 
         Parameters
         ----------
@@ -502,6 +497,7 @@ class CellComplex(Complex):
         Returns
         -------
         number_of_cells : int
+            The number of edges in edge_set belonging to cell complex.
         """
         if edge_set:
             return len([edge for edge in self.cells if edge in edge_set])
@@ -509,8 +505,7 @@ class CellComplex(Complex):
             return len(self.edges)
 
     def number_of_cells(self, cell_set=None):
-        """
-        The number of cells in cell_set belonging to cell complex.
+        """Number of cells in cell_set belonging to cell complex.
 
         Parameters
         ----------
@@ -520,6 +515,7 @@ class CellComplex(Complex):
         Returns
         -------
         number_of_cells : int
+            The number of cells in cell_set belonging to cell complex.
         """
         if cell_set:
             return len([cell for cell in self.cells if cell in cell_set])
@@ -527,18 +523,17 @@ class CellComplex(Complex):
             return len(self.cells)
 
     def order(self):
-        """
-        The number of nodes in CX.
+        """Number of nodes in CX.
 
         Returns
         -------
         order : int
+            Number of nodes in CX.
         """
         return len(self.nodes)
 
     def neighbors(self, node):
-        """
-        The nodes in cell complex which share s cell(s) with node.
+        """Nodes in cell complex which share s cell(s) with node.
 
         Parameters
         ----------
@@ -550,13 +545,8 @@ class CellComplex(Complex):
 
         Returns
         -------
-         : list
-            List of neighbors
-
-        Example
-        -------
-
-
+        _ : list
+            List of neighbors.
         """
         if node not in self.nodes:
             print(f"Node is not in cell complex {self.name}.")
@@ -565,8 +555,7 @@ class CellComplex(Complex):
         return self._G[node]
 
     def cell_neighbors(self, cell, s=1):
-        """
-        The cells in cell Complex which share s nodes(s) with cells.
+        """Cells in cell complex which share s nodes(s) with cells.
 
         Parameters
         ----------
@@ -579,16 +568,7 @@ class CellComplex(Complex):
         Returns
         -------
          : list
-            List of cell neighbors
-
-        """
-        """
-        if not cell in self.cells:
-            print(f"cell is not in cx {self.name}.")
-
-
-        node = self.cells[cell].uid
-        return self.dual().neighbors(node, s=s)
+            List of cell neighbors.
         """
         raise NotImplementedError
 
@@ -607,9 +587,7 @@ class CellComplex(Complex):
         ------
         TopoNetXError
             If the given node does not exist in the cell complex.
-
         """
-
         if node not in self.nodes:
             raise TopoNetXError("The given node does not exist in the cell complex.")
         # Remove the node from the cell complex
@@ -641,13 +619,11 @@ class CellComplex(Complex):
         self._G.add_node(node, **attr)
 
     def _add_nodes_from(self, nodes):
-        """
-        Private helper method instantiates new nodes when cells added to cell complex.
+        """Instantiate new nodes when cells added to cell complex.
 
         Parameters
         ----------
         nodes : iterable of hashables or RankedEntities
-
         """
         for node in nodes:
             self.add_node(node)
@@ -750,14 +726,12 @@ class CellComplex(Complex):
         return self
 
     def add_cells_from(self, cell_set, rank=None, check_skeleton=False, **attr):
-        """
-        Add cells to cell complex .
+        """Add cells to cell complex.
 
         Parameters
         ----------
         cell_set : iterable of hashables or Cell
             For hashables the cells returned will be empty.
-
         rank : integer (optional), default is None
                when each element in cell_set is an iterable then
                rank must be a number that indicates the rank
@@ -766,16 +740,13 @@ class CellComplex(Complex):
         Returns
         -------
         Cell Complex : CellComplex
-
         """
-
         for cell in cell_set:
             self.add_cell(cell=cell, rank=rank, check_skeleton=check_skeleton, **attr)
         return self
 
     def remove_cell(self, cell):
-        """
-        Removes a single cell from Cell Complex.
+        """Remove a single cell from Cell Complex.
 
         Parameters
         ----------
@@ -787,9 +758,7 @@ class CellComplex(Complex):
 
         Notes
         -----
-
         Deletes reference to cell, keep it boundary edges in the cell complex
-
         """
         if isinstance(cell, Cell):
             self._delete_cell(cell.elements)
@@ -800,25 +769,22 @@ class CellComplex(Complex):
         return self
 
     def remove_cells(self, cell_set):
-        """
-        Removes cells from a cell complex that are in cell_set.
+        """Remove cells from a cell complex that are in cell_set.
 
         Parameters
         ----------
-        cell_set : iterable of hashables or RankedEntities
+        cell_set : iterable of hashables or RankedEntities.
 
         Returns
         -------
         cell complex : CellComplex
-
         """
         for cell in cell_set:
             self.remove_cell(cell)
         return self
 
     def clear(self):
-        """
-        Removes all cells from a cell complex.
+        """Remove all cells from a cell complex.
 
         Parameters
         ----------
@@ -827,14 +793,14 @@ class CellComplex(Complex):
         Returns
         -------
         cell complex : CellComplex
-
         """
         for cell in self.cells:
             self.remove_cell(cell)
         return self
 
     def set_filtration(self, values, name=None):
-        """
+        """Set filtration.
+
         Parameters
         ----------
         values : dic
@@ -844,23 +810,20 @@ class CellComplex(Complex):
         -------
         None
 
-        Note : this is equivalent to setting a real-valued feature defined on the entire cell complex
+        Notes
+        -----
+        This is equivalent to setting a real-valued feature defined on the entire cell complex
 
-
-        Note : If the dict contains cells that are not in `self.cells`, they are
+        If the dict contains cells that are not in `self.cells`, they are
         silently ignored.
 
-
-        Example
-        -------
+        Examples
+        --------
         >>> G = nx.path_graph(3)
         >>> CX = CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
-
         >>> CX.set_filtration(d, "f")
-
         """
-
         d_nodes, d_edges, d_cells = [{}, {}, {}]
 
         for k, v in values.items():
@@ -883,18 +846,17 @@ class CellComplex(Complex):
     def get_filtration(self, name):
         """Get filtration.
 
-        Note : this is equivalent to getting a feature defined on the entire cell complex
+        Notes
+        -----
+        This is equivalent to getting a feature defined on the entire cell complex
 
         >>> G = nx.path_graph(3)
         >>> CX = CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
         >>> CX.set_filtration(d, "f")
         >>> CX.get_filtration("f")
-
         {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
-
         """
-
         lst = [
             self.get_node_attributes(name),
             self.get_edge_attributes(name),
@@ -907,7 +869,8 @@ class CellComplex(Complex):
         return d
 
     def set_node_attributes(self, values, name=None):
-        """
+        """Set node attributes.
+
         Parameters
         ----------
         values : dic
@@ -923,9 +886,7 @@ class CellComplex(Complex):
         >>> CX = CellComplex(G)
         >>> d = {0: {'color': 'red', 'attr2': 1 }, 1: {'color': 'blue', 'attr2': 3}}
         >>> CX.set_node_attributes(d)
-
         """
-
         if name is not None:
             # if `values` is a dict using `.items()` => {cell: value}
 
@@ -944,7 +905,8 @@ class CellComplex(Complex):
             return
 
     def set_edge_attributes(self, values, name=None):
-        """
+        """Set edge attributes.
+
         Parameters
         ----------
         values : dic
@@ -954,17 +916,13 @@ class CellComplex(Complex):
         -------
         None
 
-
         Example
         -------
-
         >>> G = nx.path_graph(3)
         >>> CX = CellComplex(G)
         >>> d={ (0,1) : {'color':'red','attr2':1 },(1,2): {'color':'blue','attr2':3 } }
         >>> CX.set_edge_attributes(d)
-
         """
-
         if name is not None:
             # if `values` is a dict using `.items()` => {edge: value}
 
@@ -986,14 +944,12 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-
         name : string
            Attribute name
 
         Returns
         -------
         Dictionary of attributes keyed by edge.
-
         """
         return {
             edge: self.edges[edge][name]
@@ -1016,8 +972,7 @@ class CellComplex(Complex):
         None.
 
         Example
-        ------
-
+        -------
         After computing some property of the cell of a cell complex, you may want
         to assign a cell attribute to store the value of that property for
         each cell:
@@ -1047,11 +1002,11 @@ class CellComplex(Complex):
         >>> CX.cells[(1,2,3,4)][0]['color']
         'red'
 
-        Note : If the dict contains cells that are not in `self.cells`, they are
+        Notes
+        -----
+        If the dict contains cells that are not in `self.cells`, they are
         silently ignored.
-
         """
-
         if name is not None:
             # if `values` is a dict using `.items()` => {cell: (key,value) } or {cell:value}
 
@@ -1127,7 +1082,6 @@ class CellComplex(Complex):
         >>> nodes_color = CX.get_node_attributes('color')
         >>> nodes_color[1]
         'blue'
-
         """
         return {
             node: self.nodes[node][name]
@@ -1191,16 +1145,16 @@ class CellComplex(Complex):
         containing the same nodes and are equivalent up to cyclic
         permutation.
 
-         Note
-         ------
-         Remove all 2d- cells that are homotpic (equivalent to each other)
+        Note
+        ------
+        Remove all 2d- cells that are homotpic (equivalent to each other)
 
-         Returns
-         -------
-         None.
+        Returns
+        -------
+        None.
 
-         Example
-         -------
+        Example
+        -------
         >>> import networkx as nx
         >>> G = nx.path_graph(3)
         >>> cx = CellComplex(G)
@@ -1212,7 +1166,6 @@ class CellComplex(Complex):
         >>> print(cx.cells)
         >>> cx.remove_equivalent_cells()
         >>> print(cx.cells) # observe homotpic cells have been removed
-
         """
         self._remove_equivalent_cells()
 
@@ -1244,8 +1197,7 @@ class CellComplex(Complex):
         return True
 
     def incidence_matrix(self, rank, signed=True, weight=None, index=False):
-        """
-        An incidence matrix for the cx indexed by nodes x cells.
+        """Incidence matrix for the cx indexed by nodes x cells.
 
         Parameters
         ----------
@@ -1269,8 +1221,9 @@ class CellComplex(Complex):
         column list : list
             list of cells in the complex with the same
             order of the column of the matrix
+
         Example1
-        -------
+        --------
             >>> CX = CellComplex()
             >>> CX.add_cell([1,2,3,4],rank=2)
             >>> CX.add_cell([3,4,5],rank=2)
@@ -1298,7 +1251,7 @@ class CellComplex(Complex):
         >>> B1.dot(B2).todense()
 
         Example3
-        -------
+        --------
         # non-regular complex example
         >>> CX = CellComplex(regular=False)
         >>> CX.add_cell([1,2,3,2],rank=2)
@@ -1307,8 +1260,9 @@ class CellComplex(Complex):
         >>> B2 = CX.incidence_matrix(2)
         >>> print(B2.todense()) # observe the non-unit entries
         >>> B1.dot(B2).todense()
+
         Example4
-        -------
+        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3,4],rank=2)
         >>> CX.add_cell([3,4,5],rank=2)
@@ -1316,7 +1270,6 @@ class CellComplex(Complex):
         >>> print(row)
         >>> print(column)
         >>> print(B1.todense())
-
         """
         import scipy as sp
         import scipy.sparse
@@ -1407,35 +1360,35 @@ class CellComplex(Complex):
 
     @staticmethod
     def _incidence_to_adjacency(B, weight=False):
-        """
-        Helper method to obtain adjacency matrix from
+        """Get adjacency matrix from incidence.
+
+        Get the adjacency matrix from the
         boolean incidence matrix for s-metrics.
+
         Self loops are not supported.
         The adjacency matrix will define an s-linegraph.
 
         Parameters
         ----------
         B : scipy.sparse.csr.csr_matrix
-            incidence matrix of 0's and 1's
-
-
-        # weight : bool, dict optional, default=True
-        #     If False all nonzero entries are 1.
-        #     Otherwise, weight will be as in product.
+            Incidence matrix of 0's and 1's.
+        weight : bool, dict optional, default=True
+            If False all nonzero entries are 1.
+            Otherwise, weight will be as in product.
 
         Returns
         -------
         a matrix : scipy.sparse.csr.csr_matrix
 
+        Example
+        -------
         >>> CX = CellComplex()
         >>> CX.add_cell([1, 2, 3, 5, 6], rank=2)
         >>> CX.add_cell([1, 2, 4, 5, 3, 0], rank=2)
         >>> CX.add_cell([1, 2, 4, 9, 3, 0], rank=2)
         >>> B1 = CX.incidence_matrix(1, signed=False)
         >>> A1 = CX._incidence_to_adjacency(B1)
-
         """
-
         B = csr_matrix(B)
         weight = False  # currently weighting is not supported
         B = abs(B)  # make sure the incidence matrix has only positive entries
@@ -1451,21 +1404,17 @@ class CellComplex(Complex):
         ----------
         rank : int, dimension of the Laplacian matrix.
             Supported dimension are 0,1 and 2
-
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
                        adjacency matrices from the hodge-laplacian
                        typically higher-order adjacency matrices' entries are
                        typically positive.
-
         weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
-
         index : boolean, optional, default False
                 indicates wheather to return the indices that define the incidence matrix
-
 
         Returns
         -------
@@ -1477,13 +1426,12 @@ class CellComplex(Complex):
             depending on the input dimension
 
         Example1
-        -------
-            >>> CX = CellComplex()
-            >>> CX.add_cell([1,2,3,4],rank=2)
-            >>> CX.add_cell([3,4,5],rank=2)
-            >>> L1 = CX.hodge_laplacian_matrix(1)
+        --------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1,2,3,4],rank=2)
+        >>> CX.add_cell([3,4,5],rank=2)
+        >>> L1 = CX.hodge_laplacian_matrix(1)
         """
-
         if rank == 0:  # return L0, the unit graph laplacian
             if index:
                 nodelist, _, B_next = self.incidence_matrix(
@@ -1548,21 +1496,19 @@ class CellComplex(Complex):
         ----------
         d : int, dimension of the up Laplacian matrix.
             Supported dimension are 0,1
-
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
                        adjacency matrices from the hodge-laplacian
                        typically higher-order adjacency matrices' entries are
                        typically positive.
-
         weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
-
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             dependeing on the input dimension
+
         Returns
         -------
         up Laplacian : scipy.sparse.csr.csr_matrix
@@ -1572,25 +1518,22 @@ class CellComplex(Complex):
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             dependeing on the input dimension
 
-
         Example1
-        -------
+        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3,4],rank=2)
         >>> CX.add_cell([3,4,5],rank=2)
         >>> L1_up = CX.up_laplacian_matrix(1)
 
         Example2
-        -------
+        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3],rank=2)
         >>> CX.add_cell([3,4,5],rank=2)
         >>> index , L1_up = CX.up_laplacian_matrix(1,index=True)
         >>> print(index)
         >>> print(L1_up)
-
         """
-
         weight = None  # this feature is not supported in this version
 
         if rank == 0:
@@ -1623,18 +1566,15 @@ class CellComplex(Complex):
         ----------
         d : int, dimension of the down Laplacian matrix.
             Supported dimension are 0,1
-
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
                        adjacency matrices from the hodge-laplacian
                        typically higher-order adjacency matrices' entries are
                        typically positive.
-
         weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
-
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             dependeing on the input dimension
@@ -1659,9 +1599,7 @@ class CellComplex(Complex):
         >>> CX.add_cell([1,2,4], rank=2,)
         >>> CX.add_cell([3,4,8], rank=2)
         >>> CX.down_laplacian_matrix(2)
-
         """
-
         weight = None  # this feature is not supported in this version
 
         if rank <= self.maxdim and rank > 0:
@@ -1774,8 +1712,7 @@ class CellComplex(Complex):
             return A
 
     def restrict_to_cells(self, cell_set, name=None):
-        """
-        Constructs a cell complex using a subset of the cells in cell complex
+        """Construct cell complex using a subset of the cells in cell complex.
 
         Parameters
         ----------
@@ -1789,7 +1726,7 @@ class CellComplex(Complex):
         new cell complex : CellComplex
 
         Example
-
+        -------
         >>> CX = CellComplex()
         >>> c1 = Cell((1, 2, 3))
         >>> c2 = Cell((1, 2, 4))
@@ -1799,7 +1736,6 @@ class CellComplex(Complex):
         >>> cx1 = CX.restrict_to_cells([c1, (0, 1)])
         >>> cx1.cells
         CellView([Cell(1, 2, 3)])
-
         """
         rns = []
         edges = []
@@ -1840,7 +1776,6 @@ class CellComplex(Complex):
         >>> CX.add_edge(1, 0)
         >>> CX.restrict_to_nodes([1, 2, 3, 0])
         """
-
         _G = Graph(self._G.subgraph(node_set))
         CX = CellComplex(_G)
         cells = []
@@ -1882,7 +1817,6 @@ class CellComplex(Complex):
         >>> CX.add_cell([5,6,7,8],rank=2)
         >>> HG = CX.to_hypergraph()
         >>> HG
-
         """
         from hypernetx.classes.entity import EntitySet
 
@@ -1900,8 +1834,7 @@ class CellComplex(Complex):
         return HG
 
     def is_connected(self, s=1, cells=False):
-        """
-        Determines if cell complex is :term:`s-connected <s-connected, s-node-connected>`.
+        """Determine if cell complex is s-connected.
 
         Parameters
         ----------
@@ -1917,37 +1850,35 @@ class CellComplex(Complex):
 
         Notes
         -----
-
         A cx is s node connected if for any two nodes v0,vn
         there exists a sequence of nodes v0,v1,v2,...,v(n-1),vn
         such that every consecutive pair of nodes v(i),v(i+1)
         share at least s cell.
-
-
         """
         import networkx as nx
 
         return nx.is_connected(self._G)
 
     def singletons(self):
-        """
-        Returns a list of singleton cell. A singleton cell is a node of degree 0.
+        """Return list of singleton cell.
+
+        A singleton cell is a node of degree 0.
 
         Returns
         -------
         singles : list
             A list of cells uids.
 
-            >>> CX = CellComplex()
-            >>> CX.add_cell([1,2,3,4],rank=2)
-            >>> CX.add_cell([2,3,4,5],rank=2)
-            >>> CX.add_cell([5,6,7,8],rank=2)
-            >>> CX.add_node(0)
-            >>> CX.add_node(10)
-            >>> CX.singletons()
-
+        Examples
+        --------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1,2,3,4],rank=2)
+        >>> CX.add_cell([2,3,4,5],rank=2)
+        >>> CX.add_cell([5,6,7,8],rank=2)
+        >>> CX.add_node(0)
+        >>> CX.add_node(10)
+        >>> CX.singletons()
         """
-
         return [node for node in self.nodes if self.degree(node) == 0]
 
     def remove_singletons(self, name=None):
@@ -1963,20 +1894,15 @@ class CellComplex(Complex):
         -------
         Cell Complex : CellComplex
         """
-
         for node in self.singletons():
             self._G.remove_node(node)
 
     def s_connected_components(self, s=1, cells=True, return_singletons=False):
-        """
-        Returns a generator for the :term:`s-cell-connected components <s-cell-connected component>`
-        or the :term:`s-node-connected components <s-connected component, s-node-connected component>`
-        of the cell complex.
+        """Return generator for the s-connected components.
 
         Parameters
         ----------
         s : int, optional, default: 1
-
         cells : boolean, optional, default: True
             If True will return cell components, if False will return node components
         return_singletons : bool, optional, default : False
@@ -1997,18 +1923,12 @@ class CellComplex(Complex):
         adjacent nodes in the sequence share s cells. If s=1 these are the
         path components of the cell complex .
 
-        Example
-        -------
-
-
         Yields
         ------
         s_connected_components : iterator
             Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
             components of CX.
-
         """
-
         if cells:
             A, coldict = self.cell_adjacency_matrix(s=s, index=True)
             G = nx.from_scipy_sparse_matrix(A)
@@ -2027,13 +1947,13 @@ class CellComplex(Complex):
                 yield {rowdict[n] for n in c}
 
     def s_component_subgraphs(self, s=1, cells=True, return_singletons=False):
-        """
-        Returns a generator for the induced subgraphs of s_connected components.
+        """Return a generator for the induced subgraphs of s_connected components.
+
         Removes singletons unless return_singletons is set to True.
+
         Parameters
         ----------
         s : int, optional, default: 1
-
         cells : boolean, optional, cells=False
             Determines if cell or node components are desired. Returns
             subgraphs equal to the cx restricted to each set of nodes(cells) in the
@@ -2045,7 +1965,6 @@ class CellComplex(Complex):
         s_component_subgraphs : iterator
             Iterator returns subgraphs generated by the cells (or nodes) in the
             s-cell(node) components of cell complex.
-
         """
         for idx, c in enumerate(
             self.s_components(s=s, cells=cells, return_singletons=return_singletons)
@@ -2056,8 +1975,7 @@ class CellComplex(Complex):
                 yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
 
     def s_components(self, s=1, cells=True, return_singletons=True):
-        """
-        Same as s_connected_components
+        """Same as s_connected_components.
 
         See Also
         --------
@@ -2068,9 +1986,9 @@ class CellComplex(Complex):
         )
 
     def connected_components(self, cells=False, return_singletons=True):
-        """
-        Same as :meth:`s_connected_components` with s=1, but nodes are returned
-        by default. Return iterator.
+        """Same as s_connected_component` with s=1, but nodes returned.
+
+        Return iterator.
 
         See Also
         --------
@@ -2079,8 +1997,7 @@ class CellComplex(Complex):
         return self.s_connected_components(cells=cells, return_singletons=True)
 
     def connected_component_subgraphs(self, return_singletons=True):
-        """
-        Same as :meth:`s_component_subgraphs` with s=1. Returns iterator
+        """Same as :meth:`s_component_subgraphs` with s=1. Returns iterator.
 
         See Also
         --------
@@ -2089,9 +2006,9 @@ class CellComplex(Complex):
         return self.s_component_subgraphs(return_singletons=return_singletons)
 
     def components(self, cells=False, return_singletons=True):
-        """
-        Same as :meth:`s_connected_components` with s=1, but nodes are returned
-        by default. Return iterator.
+        """Same as :meth:`s_connected_components` with s=1.
+
+        But nodes are returned by default. Return iterator.
 
         See Also
         --------
@@ -2100,8 +2017,7 @@ class CellComplex(Complex):
         return self.s_connected_components(s=1, cells=cells)
 
     def component_subgraphs(self, return_singletons=False):
-        """
-        Same as :meth:`s_components_subgraphs` with s=1. Returns iterator.
+        """Same as :meth:`s_components_subgraphs` with s=1. Returns iterator.
 
         See Also
         --------
@@ -2110,15 +2026,13 @@ class CellComplex(Complex):
         return self.s_component_subgraphs(return_singletons=return_singletons)
 
     def node_diameters(self, s=1):
-        """
-        Returns the node diameters of the connected components in cell complex.
+        """Return the node diameters of the connected components in cell complex.
 
         Parameters
         ----------
         list of the diameters of the s-components and
         list of the s-component nodes
         """
-
         A, coldict = self.node_adjacency_matrix(s=s, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         diams = []
@@ -2134,9 +2048,7 @@ class CellComplex(Complex):
         return diams[loc], diams, comps
 
     def cell_diameters(self, s=1):
-        """
-        Returns the cell diameters of the s_cell_connected component subgraphs
-        in CX.
+        """Return the cell diameters of the s_cell_connected component subgraphs.
 
         Parameters
         ----------
@@ -2151,9 +2063,7 @@ class CellComplex(Complex):
 
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
-
         """
-
         A, coldict = self.cell_adjacency_matrix(s=s, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         diams = []
@@ -2169,8 +2079,7 @@ class CellComplex(Complex):
         return diams[loc], diams, comps
 
     def diameter(self, s=1):
-        """
-        Returns the length of the longest shortest s-walk between nodes in cell complex
+        """Return length of the longest shortest s-walk between nodes in cell complex
 
         Parameters
         ----------
@@ -2191,7 +2100,6 @@ class CellComplex(Complex):
         Two nodes v_start and v_end are s-walk connected if there is a sequence of
         nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
         are s-adjacent. If the graph is not connected, an error will be raised.
-
         """
         A = self.node_adjacency_matrix(s=s)
         G = nx.from_scipy_sparse_matrix(A)
@@ -2200,8 +2108,7 @@ class CellComplex(Complex):
         raise TopoNetXError(f"cc is not s-connected. s={s}")
 
     def cell_diameter(self, s=1):
-        """
-        Returns the length of the longest shortest s-walk between cells in cell complex
+        """Return the length of the longest shortest s-walk between cells in cell complex
 
         Parameters
         ----------
@@ -2222,9 +2129,7 @@ class CellComplex(Complex):
         Two nodes e_start and e_end are s-walk connected if there is a sequence of
         cells e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
         are s-adjacent. If the graph is not connected, an error will be raised.
-
         """
-
         A = self.cell_adjacency_matrix(s=s)
         G = nx.from_scipy_sparse_matrix(A)
         if nx.is_connected(G):
@@ -2232,17 +2137,14 @@ class CellComplex(Complex):
         raise TopoNetXError(f"cell complex is not s-connected. s={s}")
 
     def distance(self, source, target, s=1):
-        """
-        Returns the shortest s-walk distance between two nodes in the cell complex.
+        """Return shortest s-walk distance between two nodes in the cell complex.
 
         Parameters
         ----------
         source : node.uid or node
             a node in the CX
-
         target : node.uid or node
             a node in the CX
-
         s : positive integer
             the number of cells
 
@@ -2263,9 +2165,7 @@ class CellComplex(Complex):
 
         Uses the networkx shortest_path_length method on the graph
         generated by the s-adjacency matrix.
-
         """
-
         if isinstance(source, Cell):
             source = source.uid
         if isinstance(target, Cell):
@@ -2281,21 +2181,16 @@ class CellComplex(Complex):
             return np.inf
 
     def cell_distance(self, source, target, s=1):
-        """
-        Returns the shortest s-walk distance between two cells in the cell complex.
+        """Return the shortest s-walk distance between two cells in the cell complex.
 
         Parameters
         ----------
         source : cell.uid or cell
             an cell in the cell complex
-
         target : cell.uid or cell
             an cell in the cell complex
-
         s : positive integer
             the number of intersections between pairwise consecutive cells
-
-
 
         Returns
         -------
@@ -2310,16 +2205,14 @@ class CellComplex(Complex):
 
         Notes
         -----
-            The s-distance is the shortest s-walk length between the cells.
-            An s-walk between cells is a sequence of cells such that consecutive pairwise
-            cells intersect in at least s nodes. The length of the shortest s-walk is 1 less than
-            the number of cells in the path sequence.
+        The s-distance is the shortest s-walk length between the cells.
+        An s-walk between cells is a sequence of cells such that consecutive pairwise
+        cells intersect in at least s nodes. The length of the shortest s-walk is 1 less than
+        the number of cells in the path sequence.
 
-            Uses the networkx shortest_path_length method on the graph
-            generated by the s-cell_adjacency matrix.
-
+        Uses the networkx shortest_path_length method on the graph
+        generated by the s-cell_adjacency matrix.
         """
-
         if isinstance(source, Cell):
             source = source.uid
         if isinstance(target, Cell):
@@ -2335,9 +2228,10 @@ class CellComplex(Complex):
             return np.inf
 
     def from_networkx_graph(self, G):
-        """
-        add edges and nodes from a a graph G to self
+        """Add edges and nodes from a a graph G to self
 
+        Examples
+        --------
         >>> CX = CellComplex()
         >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
 
@@ -2348,7 +2242,6 @@ class CellComplex(Complex):
         >>> CX.from_networkx_graph(G)
         >>> CX.edges
         """
-
         for edge in G.edges:
             self.add_cell(edge, rank=1)
         for node in G.nodes:
@@ -2356,7 +2249,10 @@ class CellComplex(Complex):
 
     @staticmethod
     def from_trimesh(mesh):
-        """
+        """Convert from trimesh object.
+
+        Examples
+        --------
         >>> import trimesh
         >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
                                faces=[[0, 1, 2]],
@@ -2365,10 +2261,8 @@ class CellComplex(Complex):
         >>> print(CX.nodes)
         >>> print(CX.cells)
         >>> CX.nodes[0]['position']
-
         """
         # try to see the index of the first vertex
-
         CX = CellComplex(mesh.faces)
 
         first_ind = np.min(mesh.faces)
@@ -2391,20 +2285,24 @@ class CellComplex(Complex):
 
     @staticmethod
     def load_mesh(file_path, process=False, force=None):
-        """
+        """Load a mesh.
+
+        Parameters
+        ----------
         file_path: str, the file path of the data to be loadeded
-
         process : bool, trimesh will try to process the mesh before loading it.
-
         force: (str or None)
             options: 'mesh' loader will "force" the result into a mesh through concatenation
                      None : will not force the above.
-        Note:
-            file supported : obj, off, glb
+        Notes
+        -----
+        file supported : obj, off, glb
+
+        Examples
+        --------
         >>> CX = CellComplex.load_mesh("bunny.obj")
 
         >>> CX.nodes
-
         """
         import trimesh
 
