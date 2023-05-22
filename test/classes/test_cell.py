@@ -62,7 +62,7 @@ class TestCell(unittest.TestCase):
         c1 = Cell([1, 2, 3])
         c2 = Cell([2, 3, 1])
 
-        Cell._are_homotopic(c1, c2)
+        assert Cell._are_homotopic(c1, c2) is True
 
 
 if __name__ == "__main__":
