@@ -11,14 +11,7 @@ __all__ = ["NodeView"]
 
 
 class NodeView:
-    """Node view class.
-
-    Example
-    -------
-    >>> CC = AbstractCellView()
-    >>> CC.add_cell( (1,2,3,4),rank=1 )
-    >>> NV = NodeView(CC.cell_dict)
-    """
+    """Node view class."""
 
     def __init__(self, objectdict, cell_type, name=None):
         if name is None:

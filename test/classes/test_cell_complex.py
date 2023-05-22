@@ -513,7 +513,7 @@ class TestCellComplex(unittest.TestCase):
 
         self.assertEqual(len(equivalence_classes), 4)
 
-    def test_remove_equivalent_cells(self):
+    def test__remove_equivalent_cells(self):
         """Test the remove equivalent cells method."""
         cx = CellComplex()
         cx.add_cell((1, 2, 3, 4), rank=2)
@@ -527,6 +527,57 @@ class TestCellComplex(unittest.TestCase):
         cx.add_cell(c1, rank=2)
         cx._remove_equivalent_cells()
         assert len(cx.cells) == 4
+
+    def test_remove_equivalent_cells(self):
+        """Test the remove equivalent cells method."""
+        cx = CellComplex()
+        cx.add_cell((1, 2, 3, 4), rank=2)
+        cx.add_cell((2, 3, 4, 1), rank=2)
+        cx.add_cell((1, 2, 3, 4), rank=2)
+        cx.add_cell((1, 2, 3, 6), rank=2)
+        cx.add_cell((3, 4, 1, 2), rank=2)
+        cx.add_cell((4, 3, 2, 1), rank=2)
+        cx.add_cell((1, 2, 7, 3), rank=2)
+        c1 = Cell((1, 2, 3, 4, 5))
+        cx.add_cell(c1, rank=2)
+        cx.remove_equivalent_cells()
+        assert len(cx.cells) == 4
+
+    def test_get_cell_attributes(self):
+        """Test the remove equivalent cells method."""
+        import networkx as nx
+
+        G = nx.path_graph(3)
+
+        d = {
+            ((1, 2, 3, 4), 0): {"color": "red", "attr2": 1},
+            (1, 2, 4): {"color": "blue", "attr2": 3},
+        }
+        CX = CellComplex(G)
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell(
+            [1, 2, 4],
+            rank=2,
+        )
+        CX.add_cell([3, 4, 8], rank=2)
+        CX.set_cell_attributes(d)
+        cell_color = CX.get_cell_attributes("color", 2)
+        assert cell_color == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
+
+    def test_remove_cells(self):
+        """Test remove cells."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell(
+            [1, 2, 4],
+            rank=2,
+        )
+        CX.add_cell([3, 4, 8], rank=2)
+        CX.remove_cells([(1, 2, 3, 4), (1, 2, 4)])
+
+        assert len(CX.cells) == 1
 
     def test_degree(self):
         """Test the degree of the cell complex."""

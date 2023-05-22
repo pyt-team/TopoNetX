@@ -649,9 +649,10 @@ class CellComplex(Complex):
                 else:
                     self._insert_cell(cell, **attr)
             else:
-                print(
-                    "Invalid cycle condition, the input cell cannot be inserted to the cell complex"
+                raise TopoNetXError(
+                    "input cell violates the regularity condition, make sure cell is regular or change complex to non-regular"
                 )
+
         else:
             if rank == 0:
                 raise TopoNetXError(
@@ -1080,7 +1081,7 @@ class CellComplex(Complex):
         >>> CX.add_cell([1,2,4], rank=2,)
         >>> CX.add_cell([3,4,8], rank=2)
         >>> CX.set_cell_attributes(d)
-        >>> cell_color=cc.get_cell_attributes('color',2)
+        >>> cell_color=CX.get_cell_attributes('color',2)
         >>> cell_color
         '{((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
         """
