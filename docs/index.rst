@@ -78,7 +78,7 @@ To learn more about how topological domains are used in deep learning:
    }
 
 
-- Mathilde Papillon, Sophia Sanborn, Mustafa Hajij, Nina Miolane. `Architectures of Topological Deep Learning: A Survey on Topological Neural Networks. <https://arxiv.org/pdf/2304.10031.pdf>`__.
+- Mathilde Papillon, Sophia Sanborn, Mustafa Hajij, Nina Miolane. `Architectures of Topological Deep Learning: A Survey on Topological Neural Networks <https://arxiv.org/pdf/2304.10031.pdf>`__.
 
 .. code-block:: language
 
