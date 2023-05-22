@@ -48,13 +48,18 @@ TNX was developed by the pyt-team.
 ----------------
 
 1. Dynamic construction of cell, simplicial and combinatorial complexes, allowing users to add or remove objects from these structures after their initial creation.
+
 2. Compatibility with the `NetworkX` and `gudhi` packages, enabling users to
 leverage the powerful algorithms and data structures provided by these packages.
+
 3. Support for attaching arbitrary attributes and data to cells, simplices and other entities in a complex, allowing users to store and manipulate a versatile range of information about these objects.
+
 4. Computation of boundary operators, Hodge Laplacians and higher-order adjacency
 operators on a complex, enabling users to study the topological properties of the space.
+
 5. Robust error handling and validation of input data, ensuring that the package is
 reliable and easy to use.
+
 6. Package dependencies are kept to a minimum,
 to facilitate easy installation and
 to reduce future installation issues arising from such dependencies.
