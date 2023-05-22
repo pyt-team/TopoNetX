@@ -23,7 +23,7 @@ class DynamicCell(RankedEntity):
         RankedEntity.uid then the entities will not be distinguishable and error will be raised.
         The `elements` in the signature will be added to the cloned Rankedentity.
         The rank of the new ranked entity will be the max of the cloned ranked entity and the input rank.
-    safe_insert : bool, check for the combintorial complex condition when constructing the cell
+    safe_insert : bool, check for the combinatorial complex condition when constructing the cell
     weight : float, optional, default : 1
     props : keyword arguments, optional, default: {}
         properties belonging to the entity added as key=value pairs.

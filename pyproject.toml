@@ -87,16 +87,12 @@ skip = [".gitignore", "__init__.py"]
 [tool.flake8]
 application_import_names = "toponetx"
 docstring-convention = "numpy"
-exclude = ["examples/*.ipynb"]
 ignore = [
     "E203",
     "F811",
     "W503",
     "W504",
     "W605",
-    "D100",
-    "D101",
-    "D102",
     "D103",
     "D104",
     "D105",

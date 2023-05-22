@@ -1,7 +1,6 @@
 """Test cell complex class."""
 
 import unittest
-from collections import defaultdict
 
 import networkx as nx
 import numpy as np
@@ -11,6 +10,8 @@ from toponetx.classes.cell_complex import CellComplex
 
 
 class TestCellComplex(unittest.TestCase):
+    """Test cell complex class."""
+
     def test_init_empty_cell_complex(self):
         """Test empty cell complex."""
         CX = CellComplex()
@@ -292,6 +293,7 @@ class TestCellComplex(unittest.TestCase):
         np.testing.assert_array_equal(CX.up_laplacian_matrix(rank=0), np.zeros((0, 0)))
 
     def test_up_laplacian_matrix_and_incidence_matrix(self):
+        """Test up laplacian matrix and incidence matrix for a cell complex."""
         CX = CellComplex()
         CX.add_cell([2, 3, 4], rank=2)
         CX.add_cell([1, 3, 4], rank=2)
@@ -307,6 +309,7 @@ class TestCellComplex(unittest.TestCase):
         np.testing.assert_array_equal(L1_up.toarray(), expected.toarray())
 
     def test_down_laplacian_matrix_and_incidence_matrix(self):
+        """Test down laplacian matrix and incidence matrix for a cell complex."""
         CX = CellComplex()
         CX.add_cell([2, 3, 4], rank=2)
         CX.add_cell([1, 3, 4], rank=2)
@@ -322,6 +325,7 @@ class TestCellComplex(unittest.TestCase):
         np.testing.assert_array_equal(L2_down.toarray(), expected.toarray())
 
     def test_hodge_laplacian_and_up_down_laplacians(self):
+        """Test hodge laplacian matrix and up and down laplacians for a cell complex."""
         CX = CellComplex()
         CX.add_cell([2, 3, 4], rank=2)
         CX.add_cell([1, 3, 4], rank=2)
@@ -467,21 +471,25 @@ class TestCellComplex(unittest.TestCase):
         np.testing.assert_array_equal(cc.coadjacency_matrix(1).todense(), A)
 
     def test_repr(self):
+        """Test the string representation of the cell complex."""
         cx = CellComplex(name="test")
         self.assertEqual(repr(cx), "CellComplex(name=test)")
 
     def test_len(self):
+        """Test the length of the cell complex."""
         cx = CellComplex()
         cx.add_cell([1, 2, 3], rank=2)
         self.assertEqual(len(cx), 3)
 
     def test_iter(self):
+        """Test the iterator of the cell complex."""
         cx = CellComplex()
         cx.add_cell([1, 2, 3], rank=2)
         cx.add_cell([2, 3, 4], rank=2)
         self.assertEqual(set(iter(cx)), {1, 2, 3, 4})
 
     def test_cell_equivalence_class(self):
+        """Test the cell equivalence class method."""
         cx = CellComplex()
         cx.add_cell([1, 2, 3, 4], rank=2)
         cx.add_cell([2, 3, 4, 1], rank=2)
@@ -493,11 +501,12 @@ class TestCellComplex(unittest.TestCase):
         c1 = Cell((1, 2, 3, 4, 5))
         cx.add_cell(c1, rank=2)
 
-        equivalence_classes = cx._cell_equivelance_class()
+        equivalence_classes = cx._cell_equivalence_class()
 
         self.assertEqual(len(equivalence_classes), 4)
 
     def test_remove_equivalent_cells(self):
+        """Test the remove equivalent cells method."""
 
         cx = CellComplex()
         cx.add_cell((1, 2, 3, 4), rank=2)
@@ -513,6 +522,7 @@ class TestCellComplex(unittest.TestCase):
         assert len(cx.cells) == 4
 
     def test_degree(self):
+        """Test the degree of the cell complex."""
         CX = CellComplex()
         CX.add_cell([1, 2, 3, 4], rank=2)
         CX.add_cell([2, 3, 4, 5], rank=2)
@@ -528,6 +538,7 @@ class TestCellComplex(unittest.TestCase):
         assert CX.degree(8) == 2
 
     def test_size(self):
+        """Test the size of the cell complex."""
         CX = CellComplex()
         CX.add_cell([1, 2, 3, 4], rank=2)
         CX.add_cell([2, 3, 4, 5], rank=2)
@@ -544,6 +555,7 @@ class TestCellComplex(unittest.TestCase):
         assert CX.size(c, node_set=[1, 2, 3]) == 3
 
     def test_insert_cell(self):
+        """Test inserting a cell into the cell complex."""
         CX = CellComplex()
         CX._insert_cell([1, 2, 3, 4], rank=2)
         CX._insert_cell([2, 3, 4, 5], rank=2)
@@ -557,6 +569,7 @@ class TestCellComplex(unittest.TestCase):
         ]
 
     def test_delete_cell(self):
+        """Test deleting a cell from the cell complex."""
         CX = CellComplex()
         CX.add_cell([1, 2, 3, 4], rank=2)
         CX.add_cell([2, 3, 4, 5], rank=2)
@@ -571,6 +584,7 @@ class TestCellComplex(unittest.TestCase):
         assert [cell.elements for cell in CX.cells] == [(5, 6, 7, 8)]
 
     def test_shape(self):
+        """Test the shape of the cell complex."""
         CX = CellComplex()
         assert CX.shape == (0, 0, 0)
 
@@ -584,6 +598,7 @@ class TestCellComplex(unittest.TestCase):
         assert CX.shape == (4, 4, 1)
 
     def test_skeleton(self):
+        """Test the skeleton of the cell complex."""
         CX = CellComplex()
         CX.add_node(1)
         CX.add_cell([1, 2], rank=1)
@@ -599,18 +614,21 @@ class TestCellComplex(unittest.TestCase):
         assert len(cells) == 1
 
     def test_filtration(self):
+        """Test the filtration of the cell complex."""
         CX = CellComplex([[1, 2, 3], [4, 5]])
         test_filtration = {3: 2, 1: 4, (2, 3): 3.4, (1, 2, 3): 7.6}
         CX.set_filtration(test_filtration, "test")
         assert CX.get_filtration("test") == test_filtration
 
     def test_to_hypergraph(self):
+        """Test the conversion of a cell complex to a hypergraph."""
         CX = CellComplex([[1, 2, 3], [4, 5]])
         hx = CX.to_hypergraph()
         assert set(hx.nodes) == set(CX.nodes)
         assert len(hx.edges) == len(CX.edges) + len(CX.cells)
 
     def test_restrict_to_nodes(self):
+        """Test restricting a cell complex to a subset of nodes."""
         CX = CellComplex([[1, 2, 3], [3, 4, 5], [1, 4]])
         CX.set_filtration({(1, 2, 3): 1, (3, 4, 5): 2, (1, 4): 0, 3: 1}, "test")
         restricted = CX.restrict_to_nodes({1, 2, 3, 4})

@@ -1,3 +1,8 @@
+"""Module with views, including:
+
+"HyperEdgeView", "CellView", "SimplexView"
+"""
+
 import numpy as np
 
 try:
@@ -5,7 +10,6 @@ try:
 except ImportError:
     from collections import Iterable, Hashable
 
-from itertools import combinations
 
 from toponetx import TopoNetXError
 from toponetx.classes.cell import Cell
@@ -198,6 +202,7 @@ class HyperEdgeView:
     # Set methods
     @property
     def shape(self):
+        """Shape of the complex."""
         if len(self.hyperedge_dict) == 0:
             print("Complex is empty.")
         else:
@@ -282,7 +287,7 @@ class HyperEdgeView:
         return f"HyperEdgeView({all_hyperedges}) "
 
     def skeleton(self, rank, name=None, level=None):
-
+        """Skeleton of the complex."""
         if name is None and level is None:
             name = "X" + str(rank)
         elif name is None and level == "equal":
@@ -373,6 +378,7 @@ class HyperEdgeView:
 
     @property
     def allranks(self):
+        """All ranks."""
         return sorted(list(self.hyperedge_dict.keys()))
 
     def _get_lower_rank(self, rank):

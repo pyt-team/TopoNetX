@@ -6,6 +6,8 @@ from toponetx.classes.cell import Cell
 
 
 class TestCell(unittest.TestCase):
+    """Test Cell class."""
+
     def test_elements_and_nodes(self):
         """Test elements attributes of a cell."""
         cell = Cell([1, 2, 3])

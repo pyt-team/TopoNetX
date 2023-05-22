@@ -1,3 +1,5 @@
+"""Test graph to simplicial complex transformation."""
+
 import unittest
 
 import networkx as nx
@@ -9,8 +11,10 @@ from toponetx.transform.graph_to_simplicial_complex import (
 
 
 class TestGraphToSimplicialComplex(unittest.TestCase):
-    def test_graph_2_neighbor_complex(self):
+    """Test graph to simplicial complex transformation."""
 
+    def test_graph_2_neighbor_complex(self):
+        """Test graph_2_neighbor_complex."""
         G = nx.Graph()
 
         G.add_edge(0, 1)
@@ -25,7 +29,7 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
         assert (0, 2) in sc
 
     def test_graph_2_clique_complex(self):
-
+        """Test graph_2_clique_complex."""
         G = nx.Graph()
 
         G.add_edge(0, 1)
