@@ -1,5 +1,7 @@
 """Sphinx configuration file."""
 
+import toponetx
+
 project = "TopoNetX"
 copyright = "2022-2023, PyT-Team, Inc."
 author = "PyT-Team Authors"
@@ -51,14 +53,25 @@ nbsphinx_thumbnails = {
     "tutorials/01_simplicial_complexes": "https://raw.githubusercontent.com/pyt-team/toponetx/main/tutorials/sc.png"
 }
 
-nbsphinx_prolog = r"""
+nbsphinx_prolog = (
+    r"""
 {% set docname = env.doc2path(env.docname, base=None) %}
+
+.. raw:: html
+
+    <div class="admonition note">
+      <p>Notebook source code:
+        <a class="reference external" href="https://github.com/pyt-team/"""
+    r"""TopoNetX/blob/main/{{ docname|e }}">{{ docname|e }}</a>
+      </p>
+    </div>
 
 .. raw:: latex
     \nbsphinxstartnotebook{\scriptsize\noindent\strut
     \textcolor{gray}{The following section was generated from
     \sphinxcode{\sphinxupquote{\strut {{ docname | escape_latex }}}} \dotfill}}
     """
+)
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 
 pygments_style = None
