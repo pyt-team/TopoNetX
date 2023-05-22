@@ -7,7 +7,6 @@ A cell complex is abbreviated in CX.
 We reserve the notation CC for a combinatorial complex.
 """
 
-
 import warnings
 
 try:
@@ -47,7 +46,6 @@ class CellComplex(Complex):
     such as algebraic topology and geometry, where they can be used to study the structure and
     properties of these objects.
 
-
     In TNX the class CellComplex supports building a regular or non-regular
     2d cell complex. The class CellComplex only supports the construction
     of 2d cell complexes. If higher dimensional cell complexes are desired
@@ -74,21 +72,28 @@ class CellComplex(Complex):
     5. Robust error handling and validation of input data, ensuring that the package is reliable and easy to use.
 
     # Example 0
+    -----------
     >>> # Cell Complex can be empty
     >>> CX = CellComplex()
+
     # Example 1
-     >>> CX = CellComplex()
+    -----------
+    >>> CX = CellComplex()
     >>> CX.add_cell([1, 2, 3, 4], rank=2)
     >>> # the cell [1, 2, 3, 4] consists of the cycle (1,2), (2,3), (3,4), (4,5)
     >>> # tnx creates these edges automatically if they are not inserted in the underlying graph
     >>> CX.add_cell([2, 3, 4, 5], rank=2)
     >>> CX.add_cell([5, 6, 7, 8], rank=2)
+
     # Example 2
+    -----------
     >>> c1 = Cell((1, 2, 3)) # a cell here is always assumed to be 2d
     >>> c2 = Cell((1, 2, 3, 4))
     >>> CX = CellComplex([c1, c2])
+
     # Example 3
-    >>> compatablity with networkx
+    -----------
+    >>> compatibility with networkx
     >>> import networkx as nx
     >>> g = nx.Graph()
     >>> g.add_edge(1, 0)
@@ -97,7 +102,9 @@ class CellComplex(Complex):
     >>> CX = CellComplex(g)
     >>> CX.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
     >>> CX.cells
+
     # Example 4
+    -----------
     >>> # non-regular cell complex
     >>> # by default CellComplex constructor assumes regular cell complex
     >>> CX = CellComplex(regular=False)
@@ -107,7 +114,9 @@ class CellComplex(Complex):
     >>> CX.add_cell(c1)
     >>> CX.add_cell([5, 6, 7, 8],rank=2)
     >>> CX.is_regular
+
     # Example 5
+    -----------
     >>> CX = CellComplex()
     >>> CX.add_cell([1, 2, 3, 4], rank=2, weight=5)
     >>> CX.add_cell([2, 3, 4, 5], rank=2, weight=10)
