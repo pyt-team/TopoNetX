@@ -49,10 +49,6 @@ master_doc = "index"
 
 language = None
 
-nbsphinx_thumbnails = {
-    "tutorials/01_simplicial_complexes": "https://raw.githubusercontent.com/pyt-team/toponetx/main/tutorials/sc.png"
-}
-
 nbsphinx_prolog = (
     r"""
 {% set docname = env.doc2path(env.docname, base=None) %}
