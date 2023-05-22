@@ -3,14 +3,18 @@
 Computing on Topological Domains
 ================================
 
-![toponetx](https://user-images.githubusercontent.com/8267869/234068354-af9480f1-1d18-4914-92f1-916d9093e44d.png)
+.. figure:: https://user-images.githubusercontent.com/8267869/234068354-af9480f1-1d18-4914-92f1-916d9093e44d.png
+   :alt: natural shapes
+   :class: with-shadow
+   :width: 1000px
 
 Many natural systems as diverse as social networks and proteins are characterized by relational structure. This is the structure of interactions between
 components in the system, such as social interactions between individuals or electrostatic interactions between atoms.
 
 `TopoNetX` provides a unifying interface to compute with such relational data.
 
-## 🎯 Scope and functionality
+🎯 Scope and functionality
+--------------------------
 
 `TopoNetX` (TNX) is a package for computing with topological domains and studying their properties.
 
@@ -40,7 +44,8 @@ such as algebraic topology, geometry, and data analysis.
 
 TNX was developed by the pyt-team.
 
-## 🛠️ Main features
+🛠️ Main features
+----------------
 
 1. Dynamic construction of cell, simplicial and combinatorial complexes, allowing users to add or remove objects from these structures after their initial creation.
 2. Compatibility with the `NetworkX` and `gudhi` packages, enabling users to
@@ -54,7 +59,7 @@ reliable and easy to use.
 to facilitate easy installation and
 to reduce future installation issues arising from such dependencies.
 
-Welcome! Check out our tutorials to get started.
+Want to try it yourself? Check out our tutorials to get started.
 
 .. toctree::
    :maxdepth: 1
