@@ -162,10 +162,18 @@ class TestCellComplex(unittest.TestCase):
         """Test the shape of the incidence matrix for the cell complex."""
         CX = CellComplex()
         CX.add_cells_from([[1, 2, 3, 4], [2, 3, 4, 5], [5, 6, 7, 8]], rank=2)
-        B = CX.incidence_matrix(2)
+        row_index, col_index, B = CX.incidence_matrix(2, index=True)
         assert B.shape == (10, 3)
-        B = CX.incidence_matrix(1)
+        assert len(row_index) == 10
+        assert len(col_index) == 3
+        row_index, col_index, B = CX.incidence_matrix(1, index=True)
         assert B.shape == (8, 10)
+        assert len(row_index) == 8
+        assert len(col_index) == 10
+        row_index, col_index, B = CX.incidence_matrix(0, index=True)
+        assert B.shape == (0, 8)
+        assert len(row_index) == 0
+        assert len(col_index) == 8
 
     def test_incidence_matrix_empty_cell_complex(self):
         """Test the incidence matrix for an empty cell complex."""

@@ -1325,15 +1325,13 @@ class CellComplex(Complex):
         import scipy.sparse
 
         if rank == 0:
-            A = sp.sparse.lil_matrix((1, len(self._G.nodes)))
-            for i in range(0, len(self._G.nodes)):
-                A[0, i] = 1
+            A = sp.sparse.lil_matrix((0, len(self._G.nodes)))
             if index:
                 node_index = {node: i for i, node in enumerate(sorted(self._G.nodes))}
                 if signed:
-                    return node_index, [], A.asformat("csc")
+                    return {}, node_index, A.asformat("csc")
                 else:
-                    return node_index, [], abs(A.asformat("csc"))
+                    return {}, node_index, abs(A.asformat("csc"))
             else:
                 if signed:
                     return A.asformat("csc")
