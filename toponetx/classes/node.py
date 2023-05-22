@@ -11,12 +11,13 @@ __all__ = ["NodeView"]
 
 
 class NodeView:
+    """Node view class.
 
-    """
+    Example
+    -------
     >>> CC = AbstractCellView()
     >>> CC.add_cell( (1,2,3,4),rank=1 )
     >>> NV = NodeView(CC.cell_dict)
-
     """
 
     def __init__(self, objectdict, cell_type, name=None):
@@ -35,19 +36,19 @@ class NodeView:
         self.cell_type = cell_type
 
     def __repr__(self):
-        """C
-        String representation of nodes
+        """String representation of nodes.
+
         Returns
         -------
         str
         """
-
         all_nodes = [tuple(j) for j in self.nodes.keys()]
 
         return f"NodeView({all_nodes})"
 
     def __getitem__(self, cell):
-        """
+        """Get item.
+
         Parameters
         ----------
         cell : tuple list or AbstractCell or Simplex
@@ -57,7 +58,6 @@ class NodeView:
         TYPE : dict or list or dicts
             return dict of properties associated with that cells
         """
-
         if isinstance(cell, self.cell_type):
             if cell.nodes in self.nodes:
                 return self.nodes[cell.nodes]
@@ -98,7 +98,6 @@ class NodeView:
 
     def __contains__(self, e):
         """Check if e is in the nodes."""
-
         if isinstance(e, Hashable) and not isinstance(e, self.cell_type):
             return frozenset({e}) in self.nodes
 
