@@ -1,8 +1,8 @@
 .. _contributing:
 
-==================
-Contributing Guide
-==================
+============
+Contributing
+============
 
 This is an exhaustive guide to ease the contribution
 process for both novice and experienced contributors.
