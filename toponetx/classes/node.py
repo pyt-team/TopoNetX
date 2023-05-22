@@ -75,6 +75,7 @@ class NodeView:
                 return self.nodes[frozenset({cell})]
 
     def __setitem__(self, cell, **attr):
+        """Set the attribute of the node."""
         if cell in self:
             if isinstance(cell, self.cell_type):
                 if cell.nodes in self.nodes:
@@ -92,9 +93,11 @@ class NodeView:
             raise KeyError(f"node  {cell} is not in the complex")
 
     def __len__(self):
+        """Number of nodes in the complex."""
         return len(self.nodes)
 
     def __contains__(self, e):
+        """Check if e is in the nodes."""
 
         if isinstance(e, Hashable) and not isinstance(e, self.cell_type):
             return frozenset({e}) in self.nodes

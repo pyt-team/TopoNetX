@@ -31,12 +31,15 @@ class TestComplex(unittest.TestCase):
             raise NotImplementedError
 
         def __str__(self):
+            """String representation of the complex."""
             raise NotImplementedError
 
         def __repr__(self):
+            """String representation of the complex."""
             raise NotImplementedError
 
         def __len__(self):
+            """Number of nodes in the complex."""
             raise NotImplementedError
 
         def clone(self):
@@ -44,12 +47,15 @@ class TestComplex(unittest.TestCase):
             raise NotImplementedError
 
         def __iter__(self):
+            """Iterate over the nodes of the complex."""
             raise NotImplementedError
 
         def __contains__(self, item):
+            """Check if a node is in the complex."""
             raise NotImplementedError
 
         def __getitem__(self, node):
+            """Get the node object from the complex."""
             raise NotImplementedError
 
         def remove_nodes(self, node_set):

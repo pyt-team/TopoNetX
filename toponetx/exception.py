@@ -1,9 +1,4 @@
-# Copyright © 2022 Pyt-Team
-# All rights reserved.
-
-"""
-Base classes for TopoNetX exceptions
-"""
+"""Base classes for TopoNetX exceptions."""
 
 
 class TopoNetXException(Exception):

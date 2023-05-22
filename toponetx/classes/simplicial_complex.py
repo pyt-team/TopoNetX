@@ -287,13 +287,14 @@ class SimplicialComplex(Complex):
         return np.sum(self.shape)
 
     def __getitem__(self, simplex):
+        """Get simplex."""
         if simplex in self:
             return self._simplex_set[simplex]
         else:
             raise KeyError("simplex is not in the simplicial complex")
 
     def __setitem__(self, simplex, **attr):
-
+        """Set attributes to a simplex."""
         if simplex in self._simplex_set:
 
             if isinstance(simplex, Simplex):
