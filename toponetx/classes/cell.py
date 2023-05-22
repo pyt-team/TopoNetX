@@ -171,7 +171,14 @@ class Cell:
         return iter(self._elements)
 
     def sign(self, edge):
-        r"""The sign method of the Cell class takes an edge as input and returns the sign of the edge with respect to the cell. If the edge is in the boundary of the cell, then the sign is 1 if the edge is in the counterclockwise direction around the cell and -1 if it is in the clockwise direction. If the edge is not in the boundary of the cell, a KeyError is raised.
+        r"""Compute the sign of the edge with respect to the cell.
+
+        This takes an edge as input and computes the sign of the edge with respect to the cell.
+
+        If the edge is in the boundary of the cell, then the sign is 1 if the edge is in the
+        counterclockwise direction around the cell and -1 if it is in the clockwise direction.
+
+        If the edge is not in the boundary of the cell, a KeyError is raised.
 
         Parameters
         ----------
@@ -179,7 +186,6 @@ class Cell:
 
         Returns
         -------
-
         1: if the edge is in the boundary of the cell and is in the counterclockwise direction around the cell.
         -1: if the edge is in the boundary of the cell and is in the clockwise direction around the cell.
 
@@ -207,12 +213,7 @@ class Cell:
         return e in self._elements
 
     def __repr__(self):
-        """String representation of regular cell.
-
-        Returns
-        -------
-        str
-        """
+        """Return string representation of regular cell."""
         return f"Cell{self.elements}"
 
     @property
@@ -229,16 +230,16 @@ class Cell:
 
     @property
     def elements(self):
-        """Elements of the cell."""
+        """Return elements of the cell."""
         return self._elements
 
     def reverse(self):
         """Reverse the sequence of nodes that defines the cell.
 
-        This returns a new cell with the new reversed elements.
-
-        Return : Cell
-        ------
+        Returns
+        -------
+        _ : Cell
+            New cell with the new reversed elements.
         """
         c = Cell(self._elements[::-1], name=self.name, regular=self._regular)
         c.properties = self.properties
@@ -306,10 +307,5 @@ class Cell:
         return False
 
     def __str__(self):
-        """String representation of regular cell.
-
-        Returns
-        -------
-        str
-        """
+        """Return string representation of regular cell."""
         return f"Nodes set:{self._elements}, boundary edges:{self.boundary}, attrs:{self.properties}"

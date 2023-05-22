@@ -159,41 +159,22 @@ class CellComplex(Complex):
 
     @property
     def cells(self):
-        """
-        Object associated with self._cells.
-
-        Returns
-        -------
-
-        """
+        """Return cells."""
         return self._cells
 
     @property
     def edges(self):
-        """
-        Object associated with self._edges.
-
-        Returns
-        -------
-
-        """
+        """Return edges."""
         return self._G.edges
 
     @property
     def nodes(self):
-        """
-        Object associated with self._nodes.
-
-        Returns
-        -------
-        RankedEntitySet
-
-        """
+        """Return nodes."""
         return self._G.nodes
 
     @property
     def maxdim(self):
-        """Maximum dimension of the cell complex."""
+        """Return maximum dimension."""
         if len(self.nodes) == 0:
             return 0
         if len(self.edges) == 0:
@@ -204,18 +185,15 @@ class CellComplex(Complex):
 
     @property
     def dim(self):
-        """Dimension of the cell complex."""
+        """Return dimension."""
         return self.maxdim
 
     @property
     def shape(self):
-        """
+        """Return shape.
+
+        This is:
         (number of cells[i], for i in range(0,dim(cc))  )
-
-        Returns
-        -------
-        tuple
-
         """
         return len(self.nodes), len(self.edges), len(self.cells)
 
@@ -231,11 +209,11 @@ class CellComplex(Complex):
 
     @property
     def is_regular(self):
-        """Check the regularity condition of the cell complex.
+        """Check the regularity condition.
 
         Returns
         -------
-        bool
+        _ : bool
 
         Example
         -------
@@ -253,39 +231,19 @@ class CellComplex(Complex):
         return True
 
     def __str__(self):
-        """
-        String representation of cx
-
-        Returns
-        -------
-        str
-
-        """
+        """Return detailed string representation."""
         return f"Cell Complex with {len(self.nodes)} nodes, {len(self.edges)} edges  and {len(self.cells)} 2-cells "
 
     def __repr__(self):
-        """
-        String representation of cell complex
-
-        Returns
-        -------
-        str
-
-        """
+        """Return string representation."""
         return f"CellComplex(name={self.name})"
 
     def __len__(self):
-        """Return number of nodes.
-
-        Returns
-        -------
-        _ : int
-            Number of nodes.
-        """
+        """Return number of nodes."""
         return len(self.nodes)
 
     def __iter__(self):
-        """Iterate over the nodes of the cell complex.
+        """Iterate over the nodes.
 
         Returns
         -------
@@ -295,7 +253,7 @@ class CellComplex(Complex):
         return iter(self.nodes)
 
     def __contains__(self, item):
-        """Return boolean indicating if item is in self.nodes
+        """Return boolean indicating if item is in self.nodes.
 
         Parameters
         ----------
@@ -431,7 +389,7 @@ class CellComplex(Complex):
                             self._delete_cell(c, k)
 
     def degree(self, node, rank=1):
-        """The number of cells of certain rank that contain node.
+        """Compute the number of cells of certain rank that contain node.
 
         Parameters
         ----------
@@ -448,7 +406,7 @@ class CellComplex(Complex):
         return self._G.degree[node]
 
     def size(self, cell, node_set=None):
-        """The number of nodes in node_set that belong to cell.
+        """Compute number of nodes in node_set that belong to cell.
 
         If node_set is None then returns the size of cell.
 
@@ -478,7 +436,7 @@ class CellComplex(Complex):
                 raise KeyError(f" the key {cell} is not a key for an existing cell ")
 
     def number_of_nodes(self, node_set=None):
-        """Number of nodes in node_set belonging to cell complex.
+        """Compute number of nodes in node_set belonging to cell complex.
 
         Parameters
         ----------
@@ -496,7 +454,7 @@ class CellComplex(Complex):
             return len(self.nodes)
 
     def number_of_edges(self, edge_set=None):
-        """Number of cells in cell_set belonging to cell complex.
+        """Compute number of cells in cell_set belonging to cell complex.
 
         Parameters
         ----------
@@ -514,7 +472,7 @@ class CellComplex(Complex):
             return len(self.edges)
 
     def number_of_cells(self, cell_set=None):
-        """Number of cells in cell_set belonging to cell complex.
+        """Compute number of cells in cell_set belonging to cell complex.
 
         Parameters
         ----------
@@ -532,7 +490,7 @@ class CellComplex(Complex):
             return len(self.cells)
 
     def order(self):
-        """Number of nodes in CX.
+        """Compute number of nodes in CX.
 
         Returns
         -------
@@ -949,12 +907,12 @@ class CellComplex(Complex):
             return
 
     def get_edge_attributes(self, name):
-        """Get edge attributes from cell complex
+        """Get edge attributes.
 
         Parameters
         ----------
         name : string
-           Attribute name
+           Attribute name.
 
         Returns
         -------
@@ -1064,13 +1022,12 @@ class CellComplex(Complex):
             return
 
     def get_node_attributes(self, name):
-        """Get node attributes from cell complex
+        """Get node attributes.
 
         Parameters
         ----------
-
         name : string
-           Attribute name
+           Attribute name.
 
         Returns
         -------
@@ -1099,14 +1056,14 @@ class CellComplex(Complex):
         }
 
     def get_cell_attributes(self, name, rank=None):
-        """Get node attributes from graph
+        """Get node attributes from graph.
 
         Parameters
         ----------
         name : string
            Attribute name
-
         k : integer rank of the k-cell
+
         Returns
         -------
         Dictionary of attributes keyed by cell or k-cells if k is not None
@@ -1984,7 +1941,9 @@ class CellComplex(Complex):
                 yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
 
     def s_components(self, s=1, cells=True, return_singletons=True):
-        """Same as s_connected_components.
+        """Compute s-component.
+
+        Same as s_connected_components.
 
         See Also
         --------
@@ -1995,7 +1954,9 @@ class CellComplex(Complex):
         )
 
     def connected_components(self, cells=False, return_singletons=True):
-        """Same as s_connected_component` with s=1, but nodes returned.
+        """Compute s-connected components with s=1.
+
+        Same as s_connected_component` with s=1, but nodes returned.
 
         Return iterator.
 
@@ -2006,7 +1967,9 @@ class CellComplex(Complex):
         return self.s_connected_components(cells=cells, return_singletons=True)
 
     def connected_component_subgraphs(self, return_singletons=True):
-        """Same as :meth:`s_component_subgraphs` with s=1. Returns iterator.
+        """Compute connected component subgraphs with s=1.
+
+        Same as :meth:`s_component_subgraphs` with s=1. Returns iterator.
 
         See Also
         --------
@@ -2015,7 +1978,9 @@ class CellComplex(Complex):
         return self.s_component_subgraphs(return_singletons=return_singletons)
 
     def components(self, cells=False, return_singletons=True):
-        """Same as :meth:`s_connected_components` with s=1.
+        """Compute s-component with s=1.
+
+        Same as :meth:`s_connected_components` with s=1.
 
         But nodes are returned by default. Return iterator.
 
@@ -2026,7 +1991,9 @@ class CellComplex(Complex):
         return self.s_connected_components(s=1, cells=cells)
 
     def component_subgraphs(self, return_singletons=False):
-        """Same as :meth:`s_components_subgraphs` with s=1. Returns iterator.
+        """Compute s-component subgraphs with s=1.
+
+        Same as :meth:`s_components_subgraphs` with s=1. Returns iterator.
 
         See Also
         --------
@@ -2088,7 +2055,7 @@ class CellComplex(Complex):
         return diams[loc], diams, comps
 
     def diameter(self, s=1):
-        """Return length of the longest shortest s-walk between nodes in cell complex
+        """Return length of the longest shortest s-walk between nodes.
 
         Parameters
         ----------
@@ -2117,7 +2084,7 @@ class CellComplex(Complex):
         raise TopoNetXError(f"cc is not s-connected. s={s}")
 
     def cell_diameter(self, s=1):
-        """Return the length of the longest shortest s-walk between cells in cell complex
+        """Return the length of the longest shortest s-walk between cells.
 
         Parameters
         ----------
@@ -2237,7 +2204,7 @@ class CellComplex(Complex):
             return np.inf
 
     def from_networkx_graph(self, G):
-        """Add edges and nodes from a a graph G to self
+        """Add edges and nodes from a a graph G to self.
 
         Examples
         --------
@@ -2302,7 +2269,8 @@ class CellComplex(Complex):
         process : bool, trimesh will try to process the mesh before loading it.
         force: (str or None)
             options: 'mesh' loader will "force" the result into a mesh through concatenation
-                     None : will not force the above.
+            None : will not force the above.
+
         Notes
         -----
         file supported : obj, off, glb
@@ -2310,7 +2278,6 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CX = CellComplex.load_mesh("bunny.obj")
-
         >>> CX.nodes
         """
         import trimesh

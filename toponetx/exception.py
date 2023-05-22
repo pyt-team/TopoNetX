@@ -6,7 +6,7 @@ class TopoNetXException(Exception):
 
 
 class TopoNetXError(TopoNetXException):
-    """Exception for a serious error in TopoNetX"""
+    """Exception for a serious error in TopoNetX."""
 
 
 class TopoNetXNotImplementedError(TopoNetXError):

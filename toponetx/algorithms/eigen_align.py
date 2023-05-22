@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 24 16:29:54 2022
+"""Utilities related to eigen decomposition.
 
-refs:
+Reference
+---------
 https://github.com/danielegrattarola/GINR/blob/master/src/utils/eigenvectors.py
 """
 

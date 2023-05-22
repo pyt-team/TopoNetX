@@ -1,6 +1,7 @@
-"""Module with views, including:
+"""Module with views.
 
-"HyperEdgeView", "CellView", "SimplexView"
+Such as:
+HyperEdgeView, CellView, SimplexView.
 """
 
 import numpy as np
@@ -194,17 +195,16 @@ class HyperEdgeView:
         rank = self.get_rank(hyperedge_)
         return self.hyperedge_dict[rank][hyperedge_]
 
-    # Set methods
     @property
     def shape(self):
-        """Shape of the complex."""
+        """Compute shape."""
         if len(self.hyperedge_dict) == 0:
             print("Complex is empty.")
         else:
             return [len(self.hyperedge_dict[i]) for i in self.allranks]
 
     def __len__(self):
-        """Number of nodes in the complex."""
+        """Compute number of nodes."""
         if len(self.hyperedge_dict) == 0:
             return 0
         else:
@@ -251,7 +251,7 @@ class HyperEdgeView:
             return False
 
     def __repr__(self):
-        """String representation of hyperedges.
+        """Return string representation of hyperedges.
 
         Returns
         -------
@@ -265,7 +265,7 @@ class HyperEdgeView:
         return f"CellView({all_hyperedges}) "
 
     def __str__(self):
-        """String representation of hyperedges.
+        """Return string representation of hyperedges.
 
         Returns
         -------
@@ -429,8 +429,7 @@ class SimplexView:
     """
 
     def __init__(self, name=None):
-        """
-        Initialize a SimplexView instance.
+        """Initialize a SimplexView instance.
 
         Parameters
         ----------
@@ -446,8 +445,7 @@ class SimplexView:
         self.faces_dict = []
 
     def __getitem__(self, simplex):
-        """
-        Get the dictionary of properties associated with the given simplex.
+        """Get the dictionary of properties associated with the given simplex.
 
         Parameters
         ----------
@@ -477,8 +475,7 @@ class SimplexView:
 
     @property
     def shape(self):
-        """
-        Returns the number of simplices in each dimension.
+        """Return the number of simplices in each dimension.
 
         Returns
         -------
@@ -491,35 +488,21 @@ class SimplexView:
             return [len(self.faces_dict[i]) for i in range(len(self.faces_dict))]
 
     def __len__(self):
-        """
-        Returns the number of simplices in the SimplexView instance.
-
-        Returns
-        -------
-        int
-            The number of simplices in the SimplexView instance.
-        """
+        """Return the number of simplices in the SimplexView instance."""
         if len(self.faces_dict) == 0:
             return 0
         else:
             return np.sum(self.shape)
 
     def __iter__(self):
-        """
-        Return an iterator over all simplices in the simplex view
-
-        Returns
-        -------
-        iterator
-            An iterator over all simplices in the simplex view
-        """
+        """Return an iterator over all simplices in the simplex view."""
         all_simplices = []
         for i in range(len(self.faces_dict)):
             all_simplices = all_simplices + list(self.faces_dict[i].keys())
         return iter(all_simplices)
 
     def __contains__(self, e):
-        """Check if a simplex is in the simplex view
+        """Check if a simplex is in the simplex view.
 
         Parameters
         ----------
@@ -562,14 +545,7 @@ class SimplexView:
             return False
 
     def __repr__(self):
-        """
-        Return a string representation of the simplex view that can be used to recreate it
-
-        Returns
-        -------
-        str
-            A string representation of the simplex view that can be used to recreate it
-        """
+        """Return string representation that can be used to recreate it."""
         all_simplices = []
         for i in range(len(self.faces_dict)):
             all_simplices = all_simplices + [tuple(j) for j in self.faces_dict[i]]
@@ -577,14 +553,7 @@ class SimplexView:
         return f"SimplexView({all_simplices})"
 
     def __str__(self):
-        """
-        Return a string representation of the simplex view
-
-        Returns
-        -------
-        str
-            A string representation of the simplex view
-        """
+        """Return detailed string representation of the simplex view."""
         all_simplices = []
         for i in range(len(self.faces_dict)):
             all_simplices = all_simplices + [tuple(j) for j in self.faces_dict[i]]

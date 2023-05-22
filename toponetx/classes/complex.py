@@ -52,7 +52,7 @@ class Complex:
 
     @abc.abstractstaticmethod
     def shape(self):
-        r"""Return number of cells for each rank in the complex."""
+        r"""Return number of cells for each rank."""
         pass
 
     @abc.abstractstaticmethod
@@ -62,17 +62,17 @@ class Complex:
 
     @abc.abstractstaticmethod
     def __str__(self):
-        r"""print basic information about the complex."""
+        r"""Print basic string representation."""
         pass
 
     @abc.abstractstaticmethod
     def __repr__(self):
-        r"""print the complex information."""
+        r"""Print detailed string representation."""
         pass
 
     @abc.abstractstaticmethod
     def __len__(self):
-        r"""Return number of nodes in the complex."""
+        r"""Return number of nodes."""
         pass
 
     def _clear_cache(self):
@@ -85,17 +85,17 @@ class Complex:
 
     @abc.abstractstaticmethod
     def __iter__(self):
-        r"""Return an iterator over the nodes in the complex."""
+        r"""Return an iterator over the nodes."""
         pass
 
     @abc.abstractstaticmethod
     def __contains__(self, item):
-        r""""""
+        r"""Check whether the complex contains an item."""
         pass
 
     @abc.abstractstaticmethod
     def __getitem__(self, node):
-        r""""""
+        r"""Get item."""
         pass
 
     @abc.abstractstaticmethod

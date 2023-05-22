@@ -28,29 +28,29 @@ class TestCell(unittest.TestCase):
         assert cell_reverse.elements == expected.elements
 
     def test_self_loop_irregular(self):
-        """Test loop irregular"""
+        """Test loop irregular."""
         with self.assertRaises(ValueError):
             Cell([1, 1, 2], regular=False)
 
     def test___setitem__(self):
-        """Test __setitem__"""
+        """Test __setitem__."""
         c = Cell([1, 2, 3])
         c["weight"] = 1
         assert c.properties["weight"] == 1
 
     def test___iter__(self):
-        """Test __iter__"""
+        """Test __iter__."""
         c = Cell([1, 2, 3])
         for i in c:
             pass
 
     def test___repr__(self):
-        """Test __repr__"""
+        """Test __repr__."""
         c = Cell([1, 2, 3])
         print(c)
 
     def test_is_homotopic_to(self):
-        """Test is_homotopic_to"""
+        """Test is_homotopic_to."""
         c = Cell([1, 2, 3])
 
         assert c.is_homotopic_to(Cell([1, 2, 3])) is True
@@ -58,7 +58,7 @@ class TestCell(unittest.TestCase):
         assert c.is_homotopic_to(Cell([2, 4, 1])) is False
 
     def test_are_homotopic(self):
-        """Test _are_homotopic"""
+        """Test _are_homotopic."""
         c1 = Cell([1, 2, 3])
         c2 = Cell([2, 3, 1])
 

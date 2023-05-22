@@ -30,7 +30,6 @@ class DynamicCell(RankedEntity):
 
     Notes
     -----
-
     This class inherets from RankedEntity
     the same properties but it does autmatically assigns a uid to the initiated cell.
 
@@ -80,5 +79,5 @@ class DynamicCell(RankedEntity):
         )
 
     def __repr__(self):
-        """Returns a string resembling the constructor for ranked entity"""
+        """Return a string resembling the constructor for ranked entity."""
         return f"DynamicCell({self._uid},elements={list(self.uidset)},rank={self.rank}, {self.properties})"

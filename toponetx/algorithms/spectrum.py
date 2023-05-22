@@ -175,7 +175,7 @@ def set_laplacian_beltrami_eigenvectors(cmplex):
 
 
 def laplacian_spectrum(matrix, weight="weight"):
-    """Return eigenvalues of the Laplacian matrix
+    """Return eigenvalues of the Laplacian matrix.
 
     Parameters
     ----------
@@ -187,13 +187,7 @@ def laplacian_spectrum(matrix, weight="weight"):
     Returns
     -------
     evals : NumPy array
-      Eigenvalues
-
-    Notes
-    -----
-
-    See Also
-    --------
+        Eigenvalues.
     """
     import scipy as sp
     import scipy.linalg  # call as sp.linalg
@@ -202,33 +196,27 @@ def laplacian_spectrum(matrix, weight="weight"):
 
 
 def cell_complex_hodge_laplacian_spectrum(CX: CellComplex, rank: int, weight="weight"):
-    """Returns eigenvalues of the Laplacian of G
+    """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
     matrix : scipy sparse matrix
 
     weight : string or None, optional (default='weight')
-       If None, then each cell has weight 1.
+        If None, then each cell has weight 1.
 
     Returns
     -------
     evals : NumPy array
-      Eigenvalues
+        Eigenvalues.
 
-    Notes
-    -----
-
-    Examples
-    --------
-            >>> CX = CellComplex()
-            >>> CX.add_cell([1,2,3,4],rank=2)
-            >>> CX.add_cell([2,3,4,5],rank=2)
-            >>> CX.add_cell([5,6,7,8],rank=2)
-            >>> cell_complex_hodge_laplacian_spectrum(CX,1)
-
-    See Also
-    --------
+    Example
+    -------
+    >>> CX = CellComplex()
+    >>> CX.add_cell([1,2,3,4],rank=2)
+    >>> CX.add_cell([2,3,4,5],rank=2)
+    >>> CX.add_cell([5,6,7,8],rank=2)
+    >>> cell_complex_hodge_laplacian_spectrum(CX,1)
     """
     return laplacian_spectrum(CX.hodge_laplacian_matrix(rank=rank, weight=weight))
 
@@ -236,36 +224,30 @@ def cell_complex_hodge_laplacian_spectrum(CX: CellComplex, rank: int, weight="we
 def simplicial_complex_hodge_laplacian_spectrum(
     SC: SimplicialComplex, rank, weight="weight"
 ):
-    """Returns eigenvalues of the Laplacian of G
+    """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
     matrix : scipy sparse matrix
 
     weight : string or None, optional (default='weight')
-       If None, then each cell has weight 1.
+        If None, then each cell has weight 1.
 
     Returns
     -------
     evals : NumPy array
-      Eigenvalues
-
-    Notes
-    -----
+        Eigenvalues.
 
     Example
-    ======
-        >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
-        >>> spectrum=simplicial_complex_hodge_laplacian_spectrum(SC,1)
-
-    See Also
     --------
+    >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
+    >>> spectrum=simplicial_complex_hodge_laplacian_spectrum(SC,1)
     """
     return laplacian_spectrum(SC.hodge_laplacian_matrix(rank=rank))
 
 
 def cell_complex_adjacency_spectrum(CX: CellComplex, rank, weight="weight"):
-    """Returns eigenvalues of the Laplacian of G
+    """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
@@ -279,19 +261,13 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank, weight="weight"):
     evals : NumPy array
       Eigenvalues
 
-    Notes
-    -----
-
     Example
-    =======
-            >>> CX = CellComplex()
-            >>> CX.add_cell([1,2,3,4],rank=2)
-            >>> CX.add_cell([2,3,4,5],rank=2)
-            >>> CX.add_cell([5,6,7,8],rank=2)
-            >>> cell_complex_adjacency_spectrum(CX,1)
-
-    See Also
-    --------
+    -------
+    >>> CX = CellComplex()
+    >>> CX.add_cell([1,2,3,4],rank=2)
+    >>> CX.add_cell([2,3,4,5],rank=2)
+    >>> CX.add_cell([5,6,7,8],rank=2)
+    >>> cell_complex_adjacency_spectrum(CX,1)
     """
     return laplacian_spectrum(CX.adjacency_matrix(rank=rank, weight=weight))
 
@@ -299,53 +275,41 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank, weight="weight"):
 def simplicial_complex_adjacency_spectrum(
     SC: SimplicialComplex, dim: int, weight="weight"
 ):
-    """Returns eigenvalues of the Laplacian of G
+    """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
     matrix : scipy sparse matrix
 
     weight : string or None, optional (default='weight')
-       If None, then each cell has weight 1.
+        If None, then each cell has weight 1.
 
     Returns
     -------
     evals : NumPy array
-      Eigenvalues
-
-    Notes
-    -----
-
-    See Also
-    --------
+        Eigenvalues.
     """
     return laplacian_spectrum(SC.adjacency_matrix(rank=dim, weight=weight))
 
 
 def combinatorial_complex_adjacency_spectrum(CC, r, k, weight="weight"):
-    """Returns eigenvalues of the Laplacian of G
+    """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
     matrix : scipy sparse matrix
 
     weight : string or None, optional (default='weight')
-       If None, then each cell has weight 1.
+        If None, then each cell has weight 1.
 
     Returns
     -------
     evals : NumPy array
-      Eigenvalues
-
-    Notes
-    -----
+        Eigenvalues
 
     Example
-    ======
-        >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
-        >>> s= laplacian_spectrum( CC.adjacency_matrix( 0,2) )
-
-    See Also
-    --------
+    -------
+    >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
+    >>> s = laplacian_spectrum( CC.adjacency_matrix( 0,2) )
     """
     return laplacian_spectrum(CC.adjacency_matrix(r, k, weight=weight))

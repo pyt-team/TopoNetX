@@ -160,7 +160,7 @@ class Simplex:
         return iter(self.nodes)
 
     def __repr__(self):
-        """String representation of the simplex.
+        """Return string representation of the simplex.
 
         :return: A string representation of the simplex.
         :rtype: str
@@ -168,7 +168,7 @@ class Simplex:
         return f"Simplex{tuple(self.nodes)}"
 
     def __str__(self):
-        """String representation of the simplex.
+        """Return string representation of the simplex.
 
         :return: A string representation of the simplex.
         :rtype: str
