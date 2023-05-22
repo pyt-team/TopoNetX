@@ -96,6 +96,7 @@ class HyperEdge:
 
     @property
     def rank(self):
+        """The rank of the hyperedge."""
         if self._rank is not None:
             return self._rank
         else:

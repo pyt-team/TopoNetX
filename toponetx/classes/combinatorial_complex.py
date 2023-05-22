@@ -1,5 +1,4 @@
-"""
-Class for creation and manipulation of a combinatorial complex."""
+"""Creation and manipulation of a combinatorial complex."""
 
 import warnings
 
@@ -73,15 +72,15 @@ class CombinatorialComplex(Complex):
 
     Examples
     ---------
-        >>> # define an empty Combinatorial Complex
-        >>> CC = CombinatorialComplex()
-        >>> # add cells using the add_cell method
-        >>> CC.add_cell([1, 2], rank=1)
-        >>> CC.add_cell([3, 4], rank=1)
-        >>> CC.add_cell([1, 2, 3, 4], rank=2)
-        >>> CC.add_cell([1, 2, 4], rank=2)
-        >>> CC.add_cell([3, 4], rank=2)
-        >>> CC.add_cell([1,2,3,4,5,6,7], rank=3)
+    >>> # define an empty Combinatorial Complex
+    >>> CC = CombinatorialComplex()
+    >>> # add cells using the add_cell method
+    >>> CC.add_cell([1, 2], rank=1)
+    >>> CC.add_cell([3, 4], rank=1)
+    >>> CC.add_cell([1, 2, 3, 4], rank=2)
+    >>> CC.add_cell([1, 2, 4], rank=2)
+    >>> CC.add_cell([3, 4], rank=2)
+    >>> CC.add_cell([1,2,3,4,5,6,7], rank=3)
     """
 
     def __init__(
@@ -94,7 +93,7 @@ class CombinatorialComplex(Complex):
 
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
 
-        # we define a combintorial complex as the closure of a simplicial complex
+        # we define a combinatorial complex as the closure of a simplicial complex
         # this gives fast insertion time because the condition x<y implies rk(x)<rk(x)
         # for a new to be inserted cell x can be checked only with
         # the maximal simplex that contains x
@@ -336,14 +335,17 @@ class CombinatorialComplex(Complex):
         return self._complex_set.shape
 
     def skeleton(self, rank):
+        """Skeleton"""
         return self._complex_set.skeleton(rank)
 
     @property
     def ranks(self):
+        """Ranks."""
         return sorted(self._complex_set.allranks)
 
     @property
     def dim(self):
+        """Dimension."""
         return max(list(self._complex_set.allranks))
 
     def __str__(self):
@@ -550,12 +552,15 @@ class CombinatorialComplex(Complex):
         return self
 
     def _add_node(self, node, **attr):
+        """Add one node as hyperedge."""
         self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
     def add_node(self, node, **attr):
+        """Add a node."""
         self._add_node(node, **attr)
 
     def set_node_attributes(self, values, name=None):
+        """Set node attributes."""
         if name is not None:
             for cell, value in values.items():
                 try:
@@ -878,7 +883,7 @@ class CombinatorialComplex(Complex):
                         rr = self._aux_complex[f]["r"]
                         # all supersets in a CC must have ranks that is larger than or equal to input ranked hyperedge
                         raise ValueError(
-                            "violation of the combintorial complex condition : "
+                            "violation of the combinatorial complex condition : "
                             + f"the hyperedge {f} in the complex has rank {rr} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
                         )
             self._aux_complex[hyperedge_]["r"] = rank
@@ -1013,12 +1018,15 @@ class CombinatorialComplex(Complex):
         return self
 
     def get_incidence_structure_dict(self, i, j):
+        """Get incidence structure dictionary."""
         return sparse_array_to_neighborhood_dict(self.incidence_matrix(i, j))
 
     def get_adjacency_structure_dict(self, i, j):
+        """Get adjacency structure dictionary."""
         return sparse_array_to_neighborhood_dict(self.adjacency_matrix(i, j))
 
     def get_all_incidence_structure_dict(self):
+        """Get all incidence structure dictionary."""
         d = {}
         for r in range(1, self.dim):
             B0r = sparse_array_to_neighborhood_dict(

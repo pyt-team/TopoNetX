@@ -1,6 +1,5 @@
 """Test simplicial complex class."""
 
-
 import unittest
 
 import networkx as nx
@@ -10,22 +9,28 @@ from toponetx import Simplex, SimplicialComplex
 
 
 class TestSimplicialComplex(unittest.TestCase):
+    """Test SimplicialComplex class."""
+
     def test_shape_property(self):
+        """Test shape property."""
         # Test the shape property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         self.assertEqual(sc.shape, [5, 6, 2])
 
     def test_dim_property(self):
+        """Test dim property."""
         # Test the dim property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         self.assertEqual(sc.dim, 2)
 
     def test_maxdim_property(self):
+        """Test maxdim property."""
         # Test the maxdim property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         self.assertEqual(sc.maxdim, 2)
 
     def test_nodes_property(self):
+        """Test nodes property."""
         # Test the nodes property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         nodes = sc.nodes
@@ -34,6 +39,7 @@ class TestSimplicialComplex(unittest.TestCase):
         self.assertNotIn([8], nodes)
 
     def test_simplices_property(self):
+        """Test simplices property."""
         # Test the simplices property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         simplices = sc.simplices
@@ -44,6 +50,7 @@ class TestSimplicialComplex(unittest.TestCase):
         # ... add more assertions based on the expected simplices
 
     def test_is_maximal(self):
+        """Test is_maximal method."""
         # Test the is_maximal method of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         is_maximal = sc.is_maximal([1, 2, 3])
@@ -88,6 +95,7 @@ class TestSimplicialComplex(unittest.TestCase):
         assert [2, 3, 4] not in SC.simplices
 
     def test_skeleton_and_cliques(self):
+        """Test skeleton and cliques methods."""
         G = nx.karate_club_graph()
         cliques = list(nx.enumerate_all_cliques(G))
 
@@ -165,7 +173,7 @@ class TestSimplicialComplex(unittest.TestCase):
         )
 
     def test_remove_maximal_simplex(self):
-        # Test the _remove_maximal_simplex method of the SimplicialComplex class
+        """Test the _remove_maximal_simplex method."""
         SC = SimplicialComplex()
         SC.add_simplex((1, 2, 3, 4), weight=1)
         c1 = Simplex((1, 2, 3, 4, 5))
@@ -174,7 +182,7 @@ class TestSimplicialComplex(unittest.TestCase):
         self.assertNotIn((1, 2, 3, 4, 5), SC)
 
     def test_get_boundaries(self):
-        # Test the get_boundaries method of the SimplicialComplex class
+        """Test the get_boundaries method."""
         simplices = [(1, 2, 3), (2, 3, 4), (0, 1)]
         boundaries = SimplicialComplex.get_boundaries(simplices)
         self.assertIn(frozenset((1, 2)), boundaries)
@@ -183,7 +191,7 @@ class TestSimplicialComplex(unittest.TestCase):
         # ... add more assertions based on the expected boundaries
 
     def test_get_cofaces(self):
-        # Test the get_cofaces method of the SimplicialComplex class
+        """Test the get_cofaces method."""
         SC = SimplicialComplex()
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 4])
@@ -194,7 +202,7 @@ class TestSimplicialComplex(unittest.TestCase):
         # ... add more assertions based on the expected cofaces
 
     def test_get_star(self):
-        # Test the get_star method of the SimplicialComplex class
+        """Test the get_star method."""
         SC = SimplicialComplex()
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 4])
@@ -205,7 +213,7 @@ class TestSimplicialComplex(unittest.TestCase):
         # ... add more assertions based on the expected star
 
     def test_set_simplex_attributes(self):
-        # Test the set_simplex_attributes method of the SimplicialComplex class
+        """Test the set_simplex_attributes method."""
         SC = SimplicialComplex()
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 4])

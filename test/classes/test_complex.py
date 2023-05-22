@@ -1,4 +1,4 @@
-"""Test Cell class."""
+"""Test Complex class."""
 
 import unittest
 from abc import ABC, abstractmethod
@@ -7,27 +7,27 @@ from toponetx.classes.complex import Complex
 
 
 class TestComplex(unittest.TestCase):
-    """
-    A unittest class for testing the Complex abstract class.
-    """
+    """Test the Complex abstract class."""
 
     class ConcreteComplex(Complex):
-        """
-        A concrete implementation of the Complex abstract class for testing purposes.
-        """
+        """Concrete implementation of the Complex abstract class for tests."""
 
         @property
         def nodes(self):
+            """Nodes of the complex."""
             raise NotImplementedError
 
         @property
         def dim(self):
+            """Dimension of the complex."""
             raise NotImplementedError
 
         def shape(self):
+            """Shape of the complex."""
             raise NotImplementedError
 
         def skeleton(self, rank):
+            """Rank-skeleton of the complex."""
             raise NotImplementedError
 
         def __str__(self):
@@ -40,6 +40,7 @@ class TestComplex(unittest.TestCase):
             raise NotImplementedError
 
         def clone(self):
+            """Clone the complex."""
             raise NotImplementedError
 
         def __iter__(self):
@@ -52,24 +53,27 @@ class TestComplex(unittest.TestCase):
             raise NotImplementedError
 
         def remove_nodes(self, node_set):
+            """Remove nodes from the complex."""
             raise NotImplementedError
 
         def add_node(self, node):
+            """Add a node to the complex."""
             raise NotImplementedError
 
         def incidence_matrix(self):
+            """Compute the incidence matrix of the complex."""
             raise NotImplementedError
 
         def adjacency_matrix(self):
+            """Compute the adjacency matrix of the complex."""
             raise NotImplementedError
 
         def coadjacency_matrix(self):
+            """Compute the coadjacency matrix of the complex."""
             raise NotImplementedError
 
     def test_abstract_methods(self):
-        """
-        Test that all abstract methods in the Complex class raise NotImplementedError.
-        """
+        """Test that abstract methods raise NotImplementedError."""
         complex_obj = self.ConcreteComplex()
 
         with self.assertRaises(NotImplementedError):
@@ -121,9 +125,7 @@ class TestComplex(unittest.TestCase):
             complex_obj.coadjacency_matrix()
 
     def test_clear_cache(self):
-        """
-        Test the _clear_cache method of the Complex class.
-        """
+        """Test the _clear_cache method."""
         complex_obj = self.ConcreteComplex()
 
         with self.assertRaises(AttributeError):

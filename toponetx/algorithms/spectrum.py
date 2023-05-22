@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
+"""Module to compute spectra."""
 
 import numpy as np
 import scipy.sparse as sparse
 from numpy import linalg as LA
 from scipy.sparse import diags
-from scipy.sparse.linalg import eigsh
-from sklearn.manifold import spectral_embedding
 
-from toponetx.algorithms.eigen_align import align_eigenvectors_kl
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
@@ -21,7 +18,7 @@ __all__ = [
     "simplicial_complex_hodge_laplacian_spectrum",
     "cell_complex_adjacency_spectrum",
     "simplicial_complex_adjacency_spectrum",
-    "combintorial_complex_adjacency_spectrum",
+    "combinatorial_complex_adjacency_spectrum",
 ]
 
 
@@ -44,7 +41,6 @@ def _normalize(f):
 
 
 def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
-
     """
     Input
     ======
@@ -311,7 +307,7 @@ def simplicial_complex_adjacency_spectrum(
     return laplacian_spectrum(SC.adjacency_matrix(rank=dim, weight=weight))
 
 
-def combintorial_complex_adjacency_spectrum(CC, r, k, weight="weight"):
+def combinatorial_complex_adjacency_spectrum(CC, r, k, weight="weight"):
     """Returns eigenvalues of the Laplacian of G
 
     Parameters

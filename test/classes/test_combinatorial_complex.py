@@ -9,6 +9,8 @@ from toponetx.classes.hyperedge import HyperEdge
 
 
 class TestCombinatorialComplex(unittest.TestCase):
+    """Test CombinatorialComplex class."""
+
     def test_init_empty_cc(self):
         """Test creation of an empty CC."""
         CC = CombinatorialComplex()

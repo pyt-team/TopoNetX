@@ -218,6 +218,7 @@ class SimplicialComplex(Complex):
 
     @property
     def nodes(self):
+        """Nodes."""
         return NodeView(self._simplex_set.faces_dict, cell_type=Simplex)
 
     @property
@@ -232,10 +233,12 @@ class SimplicialComplex(Complex):
     #        return self[simplex]["id"]
 
     def is_maximal(self, simplex):
+        """Check if simplex is maximal."""
         if simplex in self:
             return self[simplex]["is_maximal"]
 
     def get_maximal_simplices_of_simplex(self, simplex):
+        """Get maximal simplices of simplex."""
         return self[simplex]["membership"]
 
     def skeleton(self, rank):
@@ -639,15 +642,19 @@ class SimplicialComplex(Complex):
         return face_set
 
     def remove_maximal_simplex(self, simplex):
+        """Remove maximal simplex from simplicial complex."""
         self._remove_maximal_simplex(simplex)
 
     def add_node(self, node, **attr):
+        """Add node to simplicial complex."""
         self._insert_node(node, **attr)
 
     def add_simplex(self, simplex, **attr):
+        """Add simplex to simplicial complex."""
         self._add_simplex(simplex, **attr)
 
     def add_simplices_from(self, simplices):
+        """Add simplices from iterable to simplicial complex."""
         for s in simplices:
             self.add_simplex(s)
 
@@ -1222,6 +1229,7 @@ class SimplicialComplex(Complex):
         return np.power(A, k) @ coB + np.power(coA, k) @ coB
 
     def add_elements_from_nx_graph(self, G):
+        """Add elements from networkx graph to simplicial complex."""
         _simplices = []
         for edge in G.edges:
             _simplices.append(edge)
@@ -1432,6 +1440,7 @@ class SimplicialComplex(Complex):
         return SimplicialComplex.from_trimesh(mesh)
 
     def is_triangular_mesh(self):
+        """Check if the simplicial complex is a triangular mesh."""
 
         if self.dim <= 2:
 
@@ -1444,7 +1453,7 @@ class SimplicialComplex(Complex):
             return False
 
     def to_trimesh(self, vertex_position_name="position"):
-
+        """Convert simplicial complex to trimesh object."""
         import trimesh
 
         if not self.is_triangular_mesh():

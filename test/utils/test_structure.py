@@ -12,6 +12,8 @@ from toponetx.utils.structure import (
 
 
 class TestStructure(unittest.TestCase):
+    """Test structure module."""
+
     def test_sparse_array_to_neighborhood_list(self):
         """Test the sparse_array_to_neighborhood_list function."""
         c = CellComplex()

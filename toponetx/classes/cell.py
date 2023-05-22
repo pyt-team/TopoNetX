@@ -224,6 +224,7 @@ class Cell:
 
     @property
     def elements(self):
+        """Elements of the cell."""
         return self._elements
 
     def reverse(self):
