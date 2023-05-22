@@ -36,7 +36,7 @@ class NodeView:
         self.cell_type = cell_type
 
     def __repr__(self):
-        """String representation of nodes.
+        """Return string representation of nodes.
 
         Returns
         -------
@@ -52,11 +52,12 @@ class NodeView:
         Parameters
         ----------
         cell : tuple list or AbstractCell or Simplex
-            DESCRIPTION.
+            A cell.
+
         Returns
         -------
-        TYPE : dict or list or dicts
-            return dict of properties associated with that cells
+        _ : dict or list or dicts
+            Dict of properties associated with that cells.
         """
         if isinstance(cell, self.cell_type):
             if cell.nodes in self.nodes:
@@ -93,7 +94,7 @@ class NodeView:
             raise KeyError(f"node  {cell} is not in the complex")
 
     def __len__(self):
-        """Number of nodes in the complex."""
+        """Compute number of nodes."""
         return len(self.nodes)
 
     def __contains__(self, e):

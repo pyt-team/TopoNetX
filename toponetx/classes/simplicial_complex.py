@@ -249,25 +249,15 @@ class SimplicialComplex(Complex):
         raise ValueError(f"input {rank} exceeds max dim")
 
     def __str__(self):
-        """String representation.
-
-        Returns
-        -------
-        str
-        """
+        """Return detailed string representation."""
         return f"Simplicial Complex with shape {self.shape} and dimension {self.dim}"
 
     def __repr__(self):
-        """String representation.
-
-        Returns
-        -------
-        str
-        """
+        """Return string representation."""
         return f"SimplicialComplex(name={self.name})"
 
     def __len__(self):
-        """Number of simplices.
+        """Compute number of simplices.
 
         Returns
         -------
@@ -315,7 +305,7 @@ class SimplicialComplex(Complex):
         return iter(all_simplices)
 
     def __contains__(self, item):
-        """Returns boolean indicating if item is in self.face_set.
+        """Return boolean indicating if item is in self.face_set.
 
         Parameters
         ----------
@@ -381,7 +371,7 @@ class SimplicialComplex(Complex):
         ----------
         face :  an iterable, typically a list, tuple, set or a Simplex
         simplex : an iterable, typically a list, tuple, set or a Simplex
-        **attr : attrs assocaited with the input simplex
+        **attr : attrs associated with the input simplex
 
         Notes
         -----
@@ -778,7 +768,7 @@ class SimplicialComplex(Complex):
         return {tuple(n): self[n][name] for n in self.skeleton(0) if name in self[n]}
 
     def get_simplex_attributes(self, name, rank=None):
-        """Get node attributes from simplical complex
+        """Get node attributes from simplical complex.
 
         Parameters
         ----------
@@ -915,27 +905,23 @@ class SimplicialComplex(Complex):
             ).T
 
     def hodge_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
-        """Compute hodge-laplacian matrix for the simplicial complex
+        """Compute hodge-laplacian matrix for the simplicial complex.
 
         Parameters
         ----------
         d : int, dimension of the Laplacian matrix.
-
         signed : bool, is true return absolute value entry of the Laplacian matrix
-                       this is useful when one needs to obtain higher-order
-                       adjacency matrices from the hodge-laplacian
-                       typically higher-order adjacency matrices' entries are
-                       typically positive.
-
+            This is useful when one needs to obtain higher-order
+            adjacency matrices from the hodge-laplacian
+            typically higher-order adjacency matrices' entries are
+            typically positive.
         weight : bool, default=False
-
         index : boolean, optional, default False
-                indicates wheather to return the indices that define the incidence matrix
+            Indicates wheather to return the indices that define the incidence matrix.
 
         Returns
         -------
         Laplacian : scipy.sparse.csr.csr_matrix
-
         when index is true:
             return also a list : list
 

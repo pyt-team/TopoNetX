@@ -70,7 +70,7 @@ class HyperEdge:
         self.properties[key] = item
 
     def __len__(self):
-        """Number of nodes in the hyperedge."""
+        """Compute number of nodes in the hyperedge."""
         return len(self.nodes)
 
     def __iter__(self):
@@ -82,7 +82,7 @@ class HyperEdge:
         return e in self.nodes
 
     def __repr__(self):
-        """String representation of Hyperedge.
+        """Return string representation of Hyperedge.
 
         Returns
         -------
@@ -91,7 +91,7 @@ class HyperEdge:
         return f"HyperEdge{tuple(self.nodes)}"
 
     def __str__(self):
-        """String representation of a HyperEdge.
+        """Return string representation of a HyperEdge.
 
         Returns
         -------
