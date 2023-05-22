@@ -94,6 +94,14 @@ class TestSimplicialComplex(unittest.TestCase):
         # check that the simplex was removed correctly (list)
         assert [2, 3, 4] not in SC.simplices
 
+        # check after the add_simplex method
+        SC = SimplicialComplex()
+        SC.add_simplex((1, 2, 3, 4), weight=1)
+        c1 = Simplex((1, 2, 3, 4, 5))
+        SC.add_simplex(c1)
+        SC.remove_maximal_simplex((1, 2, 3, 4, 5))
+        self.assertNotIn((1, 2, 3, 4, 5), SC)
+
     def test_skeleton_and_cliques(self):
         """Test skeleton and cliques methods."""
         G = nx.karate_club_graph()
@@ -171,15 +179,6 @@ class TestSimplicialComplex(unittest.TestCase):
                 ]
             ),
         )
-
-    def test_remove_maximal_simplex(self):
-        """Test the _remove_maximal_simplex method."""
-        SC = SimplicialComplex()
-        SC.add_simplex((1, 2, 3, 4), weight=1)
-        c1 = Simplex((1, 2, 3, 4, 5))
-        SC.add_simplex(c1)
-        SC.remove_maximal_simplex((1, 2, 3, 4, 5))
-        self.assertNotIn((1, 2, 3, 4, 5), SC)
 
     def test_get_boundaries(self):
         """Test the get_boundaries method."""

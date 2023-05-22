@@ -87,16 +87,9 @@ skip = [".gitignore", "__init__.py"]
 [tool.flake8]
 application_import_names = "toponetx"
 docstring-convention = "numpy"
-ignore = [
-    "E203",
-    "F811",
-    "W503",
-    "W504",
-    "W605",
-]
 import_order_style = "smarkets"
 max-line-length = 88
-extend-ignore = ["E501", "F401"]
+extend-ignore = ["E501", "F401", "E203"]
 per-file-ignores = [
     "*/__init__.py: F401,F403,D104"
 ]

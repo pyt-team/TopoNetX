@@ -4,21 +4,13 @@ The class also supports attaching arbitrary attributes and data to cells.
 """
 
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
-
-try:
-    from collections.abc import Hashable, Iterable
-except ImportError:
-    from collections import Iterable, Hashable
-
+from collections.abc import Hashable, Iterable
 from itertools import combinations
 from warnings import warn
 
 import networkx as nx
 import numpy as np
+from gudhi import SimplexTree
 from hypernetx import Hypergraph
 from networkx import Graph
 from scipy.sparse import coo_matrix, dok_matrix
@@ -28,16 +20,6 @@ from toponetx.classes.node import NodeView
 from toponetx.classes.reportview import SimplexView
 from toponetx.classes.simplex import Simplex
 from toponetx.exception import TopoNetXError
-
-try:
-    from gudhi import SimplexTree
-except ImportError:
-    warn(
-        "gudhi library is not installed."
-        + " Default computing protocol will be set for 'normal'.\n"
-        + " gudhi can be installed using: 'pip install gudhi'",
-        stacklevel=2,
-    )
 
 __all__ = ["SimplicialComplex"]
 
@@ -152,16 +134,6 @@ class SimplicialComplex(Complex):
             for simplex in _simplices:
                 s1 = Simplex(simplex[0], **simplex[1])
                 simplices.append(s1)
-
-        if self.mode == "gudhi":
-            try:
-                from gudhi import SimplexTree
-            except ImportError:
-                warn(
-                    "gudhi library is not installed."
-                    + "normal mode will be used for computations",
-                    stacklevel=2,
-                )
 
         if self.mode == "normal":
             if simplices is not None:
