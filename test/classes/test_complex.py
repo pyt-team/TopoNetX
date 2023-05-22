@@ -14,32 +14,32 @@ class TestComplex(unittest.TestCase):
 
         @property
         def nodes(self):
-            """Nodes of the complex."""
+            """Nodes."""
             raise NotImplementedError
 
         @property
         def dim(self):
-            """Dimension of the complex."""
+            """Dimension."""
             raise NotImplementedError
 
         def shape(self):
-            """Shape of the complex."""
+            """Compute shape."""
             raise NotImplementedError
 
         def skeleton(self, rank):
-            """Rank-skeleton of the complex."""
+            """Compute rank-skeleton."""
             raise NotImplementedError
 
         def __str__(self):
-            """String representation of the complex."""
+            """Compute string representation."""
             raise NotImplementedError
 
         def __repr__(self):
-            """String representation of the complex."""
+            """Compute string representation."""
             raise NotImplementedError
 
         def __len__(self):
-            """Number of nodes in the complex."""
+            """Compute number of nodes."""
             raise NotImplementedError
 
         def clone(self):
@@ -47,7 +47,7 @@ class TestComplex(unittest.TestCase):
             raise NotImplementedError
 
         def __iter__(self):
-            """Iterate over the nodes of the complex."""
+            """Iterate over the nodes."""
             raise NotImplementedError
 
         def __contains__(self, item):
@@ -67,15 +67,15 @@ class TestComplex(unittest.TestCase):
             raise NotImplementedError
 
         def incidence_matrix(self):
-            """Compute the incidence matrix of the complex."""
+            """Compute the incidence matrix."""
             raise NotImplementedError
 
         def adjacency_matrix(self):
-            """Compute the adjacency matrix of the complex."""
+            """Compute the adjacency matrix."""
             raise NotImplementedError
 
         def coadjacency_matrix(self):
-            """Compute the coadjacency matrix of the complex."""
+            """Compute the coadjacency matrix."""
             raise NotImplementedError
 
     def test_abstract_methods(self):
