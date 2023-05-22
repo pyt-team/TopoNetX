@@ -209,12 +209,14 @@ class HyperEdgeView:
             return [len(self.hyperedge_dict[i]) for i in self.allranks]
 
     def __len__(self):
+        """Number of nodes in the complex."""
         if len(self.hyperedge_dict) == 0:
             return 0
         else:
             return np.sum(self.shape)
 
     def __iter__(self):
+        """Iterate over the hyperedges."""
         all_hyperedges = []
         for i in sorted(list(self.allranks)):
             all_hyperedges = all_hyperedges + [
@@ -223,7 +225,7 @@ class HyperEdgeView:
         return iter(all_hyperedges)
 
     def __contains__(self, e):
-
+        """Check if e is in the hyperedges."""
         if len(self.hyperedge_dict) == 0:
             return False
 
@@ -237,7 +239,6 @@ class HyperEdgeView:
                 return False
 
         elif isinstance(e, HyperEdge):
-
             if len(e) == 0:
                 return False
             else:
@@ -248,7 +249,6 @@ class HyperEdgeView:
                 return False
 
         elif isinstance(e, Hashable):
-
             return frozenset({e}) in self.hyperedge_dict[0]
 
         else:

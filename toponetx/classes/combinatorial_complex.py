@@ -406,7 +406,7 @@ class CombinatorialComplex(Complex):
         return item in self.nodes
 
     def __setitem__(self, hyperedge, item):
-
+        """Set the attributes of a hyperedge."""
         hyperedge_ = HyperEdgeView._to_frozen_set(hyperedge)
         rank = self.get_rank(hyperedge_)
         self.hyperedge_dict[rank][hyperedge_] = item

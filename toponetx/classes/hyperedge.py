@@ -59,21 +59,26 @@ class HyperEdge:
         self.properties.update(attr)
 
     def __getitem__(self, item):
+        """Get the attribute of the hyperedge."""
         if item not in self.properties:
             raise KeyError(f"attr {item} is not an attr in the hyperedge {self.name}")
         else:
             return self.properties[item]
 
     def __setitem__(self, key, item):
+        """Set the attribute of the hyperedge."""
         self.properties[key] = item
 
     def __len__(self):
+        """Number of nodes in the hyperedge."""
         return len(self.nodes)
 
     def __iter__(self):
+        """Iterate over the nodes of the hyperedge."""
         return iter(self.nodes)
 
     def __contains__(self, e):
+        """Check if e is in the nodes."""
         return e in self.nodes
 
     def __repr__(self):

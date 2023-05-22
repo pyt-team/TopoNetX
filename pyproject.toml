@@ -93,10 +93,6 @@ ignore = [
     "W503",
     "W504",
     "W605",
-    "D103",
-    "D104",
-    "D105",
-    "D106",
     "D200",
     "D201",
     "D202",
@@ -125,5 +121,5 @@ import_order_style = "smarkets"
 max-line-length = 88
 extend-ignore = ["E501", "F401"]
 per-file-ignores = [
-    "*/__init__.py: F401,F403"
+    "*/__init__.py: F401,F403,D104"
 ]

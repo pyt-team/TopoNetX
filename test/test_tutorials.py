@@ -31,4 +31,5 @@ paths = sorted(glob.glob(f"{TUTORIALS_DIR}/*.ipynb"))
 
 @pytest.mark.parametrize("path", paths)
 def test_tutorial(path):
+    """Test the tutorials."""
     _exec_tutorial(path)

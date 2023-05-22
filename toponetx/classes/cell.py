@@ -201,6 +201,7 @@ class Cell:
         raise ValueError(f"the input {edge} must be iterable")
 
     def __contains__(self, e):
+        """Check if the complex contains e."""
         return e in self._elements
 
     def __repr__(self):

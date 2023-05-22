@@ -37,16 +37,19 @@ def compute_hist(ref, test):
 
 
 def compute_kl(ref, test):
+    """Compute KL divergence."""
     h_ref, h_test = compute_hist(ref, test)
     return entropy(h_ref, h_test)
 
 
 def compute_js(ref, test):
+    """Compute JS divergence."""
     h_ref, h_test = compute_hist(ref, test)
     return jensenshannon(h_ref, h_test)
 
 
 def compute_alignment(u1, u2):
+    """Compute alignment matrix."""
     k = u1.shape[1]
     alignment = np.zeros((k, k))
     for i, j in itertools.product(range(k), range(k)):
@@ -57,6 +60,7 @@ def compute_alignment(u1, u2):
 
 
 def align_eigenvectors_kl(u_ref, u_test):
+    """Align eigenvectors using KL divergence."""
     switch = []
     # Take care of first eigv manually
     switch.append(np.sign(u_ref[0, 0]) != np.sign(u_test[0, 0]))
