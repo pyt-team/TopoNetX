@@ -57,7 +57,7 @@ class TestSimplicialComplex(unittest.TestCase):
         self.assertTrue(is_maximal)
 
     def test_add_simplex(self):
-        """ "Test add_simplex method."""
+        """Test add_simplex method."""
         # create a SimplicialComplex object with no simplices
         SC = SimplicialComplex()
 
@@ -75,7 +75,7 @@ class TestSimplicialComplex(unittest.TestCase):
         assert (3,) in SC.simplices
 
     def test_remove_maximal_simplex(self):
-        """ "Test remove_maximal_simplex method."""
+        """Test remove_maximal_simplex method."""
         # create a SimplicialComplex object with a few simplices
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 

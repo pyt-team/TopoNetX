@@ -62,9 +62,7 @@ class TestStructure(unittest.TestCase):
             output1 = sparse_array_to_neighborhood_list(B1, list(row.keys()))
 
     def test_neighborhood_list_to_neighborhood_dict(self):
-        """
-        Test the neighborhood_list_to_neighborhood_dict function.
-        """
+        """Test the neighborhood_list_to_neighborhood_dict function."""
         neighborhood_list = [
             (0, 0),
             (1, 0),
@@ -88,9 +86,7 @@ class TestStructure(unittest.TestCase):
         assert out == d
 
     def test_sparse_array_to_neighborhood_dict(self):
-        """
-        Test the sparse_array_to_neighborhood_dict function.
-        """
+        """Test the sparse_array_to_neighborhood_dict function."""
         c = CellComplex()
         c.add_cells_from([[1, 2, 3], [4, 5, 6]], rank=2)
         row, col, B1 = c.incidence_matrix(1, index=True)
