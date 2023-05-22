@@ -1,5 +1,7 @@
 """Sphinx configuration file."""
 
+import toponetx
+
 project = "TopoNetX"
 copyright = "2022-2023, PyT-Team, Inc."
 author = "PyT-Team Authors"
@@ -53,6 +55,15 @@ nbsphinx_thumbnails = {
 
 nbsphinx_prolog = r"""
 {% set docname = env.doc2path(env.docname, base=None) %}
+
+.. raw:: html
+
+    <div class="admonition note">
+      <p>Notebook source code:
+        <a class="reference external" href="https://github.com/pyt-team/"""
+    r"""TopoNetX/blob/main/{{ docname|e }}">{{ docname|e }}</a>
+      </p>
+    </div>
 
 .. raw:: latex
     \nbsphinxstartnotebook{\scriptsize\noindent\strut
