@@ -20,7 +20,8 @@ __all__ = ["HyperEdgeView", "CellView", "SimplexView"]
 
 
 class CellView:
-    r"""A CellView class for cells of a CellComplex
+    r"""A CellView class for cells of a CellComplex.
+
     Parameters
     ----------
     name : str
@@ -28,7 +29,6 @@ class CellView:
     """
 
     def __init__(self, name=None):
-
         if name is None:
             self.name = "_"
         else:
@@ -56,9 +56,7 @@ class CellView:
         ------
         KeyError
             If the cell is not in the cell dictionary.
-
         """
-
         if isinstance(cell, Cell):
 
             if cell.elements not in self._cells:
@@ -121,7 +119,6 @@ class CellView:
         -------
         bool
             Whether or not the element is in the cell view.
-
         """
         if isinstance(e, tuple) or isinstance(e, list):
             return e in self._cells
@@ -137,7 +134,6 @@ class CellView:
 
     def __str__(self):
         r"""Return a string representation of the cell view."""
-
         return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
 
@@ -154,9 +150,7 @@ class HyperEdgeView:
 
     Examples
     --------
-         >>> hev = HyperEdgeView()
-
-
+    >>> hev = HyperEdgeView()
     """
 
     def __init__(self, name=None):
@@ -184,16 +178,17 @@ class HyperEdgeView:
         return hyperedge_
 
     def __getitem__(self, hyperedge):
-        """
+        """Get item.
+
         Parameters
         ----------
         hyperedge : Hashable or HyperEdge
             DESCRIPTION.
+
         Returns
         -------
         TYPE : dict or list or dicts
             return dict of properties associated with that hyperedges
-
         """
         hyperedge_ = HyperEdgeView._to_frozen_set(hyperedge)
         rank = self.get_rank(hyperedge_)
@@ -256,8 +251,8 @@ class HyperEdgeView:
             return False
 
     def __repr__(self):
-        """C
-        String representation of hyperedges
+        """String representation of hyperedges.
+
         Returns
         -------
         str
@@ -270,8 +265,7 @@ class HyperEdgeView:
         return f"CellView({all_hyperedges}) "
 
     def __str__(self):
-        """
-        String representation of hyperedges
+        """String representation of hyperedges.
 
         Returns
         -------
@@ -330,7 +324,8 @@ class HyperEdgeView:
             )
 
     def get_rank(self, e):
-        """
+        """Get rank.
+
         Parameters
         ----------
         e : Iterable, Hashable or HyperEdge
@@ -338,10 +333,7 @@ class HyperEdgeView:
         Returns
         -------
         int, the rank of the hyperedge e
-
-
         """
-
         if isinstance(e, Iterable):
             if len(e) == 0:
                 return 0
@@ -401,7 +393,8 @@ class HyperEdgeView:
 
 
 class SimplexView:
-    """
+    """Simplex View class.
+
     The SimplexView class is used to provide a view/read only information
     into a subset of the nodes in a simplex.
     These classes are used in conjunction with the SimplicialComplex class
@@ -526,8 +519,7 @@ class SimplexView:
         return iter(all_simplices)
 
     def __contains__(self, e):
-        """
-        Check if a simplex is in the simplex view
+        """Check if a simplex is in the simplex view
 
         Parameters
         ----------
@@ -539,7 +531,6 @@ class SimplexView:
         bool
             True if the simplex is in the simplex view, False otherwise
         """
-
         if len(self.faces_dict) == 0:
             return False
 

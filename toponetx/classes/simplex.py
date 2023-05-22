@@ -55,9 +55,7 @@ class Simplex:
         self.properties.update(attr)
 
     def __contains__(self, e):
-        """
-        Returns True if the given element is a subset of the nodes in the simplex.
-        """
+        """Return True if the given element is a subset of the nodes."""
         if len(self.nodes) == 0:
             return False
         if isinstance(e, Iterable):
@@ -75,9 +73,7 @@ class Simplex:
 
     @staticmethod
     def construct_simplex_tree(elements):
-        """
-        Returns a set of Simplex objects representing the faces of the simplex.
-        """
+        """Return set of Simplex objects representing the faces."""
         faceset = set()
         numnodes = len(elements)
         for r in range(numnodes, 0, -1):
@@ -89,9 +85,7 @@ class Simplex:
 
     @property
     def boundary(self):
-        """
-        Returns a set of Simplex objects representing the boundary faces of the simplex.
-        """
+        """Return a set of Simplex objects representing the boundary faces."""
         if self.construct_tree:
             return frozenset(i for i in self._faces if len(i) == len(self) - 1)
         else:
@@ -99,26 +93,26 @@ class Simplex:
             return frozenset(i for i in faces if len(i) == len(self) - 1)
 
     def sign(self, face):
-        """
-        Calculate the sign of the simplex with respect to a given face.
+        """Calculate the sign of the simplex with respect to a given face.
 
-
-        :param face: A face of the simplex.
-        :type face: Simplex
-
+        Parameters
+        ----------
+        face : Simplex
+            A face of the simplex.
         """
         raise NotImplementedError
 
     @property
     def faces(self):
-        """
-        Get the set of faces of the simplex.
+        """Get the set of faces of the simplex.
 
         If `construct_tree` is True, return the precomputed set of faces `_faces`.
         Otherwise, construct the simplex tree and return the set of faces.
 
-        :return: The set of faces of the simplex.
-        :rtype: frozenset[Simplex]
+        Returns
+        -------
+        _ : frozenset[Simplex]
+            The set of faces of the simplex.
         """
         if self.construct_tree:
             return self._faces
@@ -126,7 +120,8 @@ class Simplex:
             return Simplex.construct_simplex_tree(self.nodes)
 
     def __getitem__(self, item):
-        """
+        """Get item.
+
         Get the value of the attribute associated with the simplex.
 
         :param item: The name of the attribute.
@@ -140,8 +135,7 @@ class Simplex:
             return self.properties[item]
 
     def __setitem__(self, key, item):
-        """
-        Set the value of an attribute associated with the simplex.
+        """Set the value of an attribute associated with the simplex.
 
         :param key: The name of the attribute.
         :type key: str
@@ -150,8 +144,7 @@ class Simplex:
         self.properties[key] = item
 
     def __len__(self):
-        """
-        Get the number of nodes in the simplex.
+        """Get the number of nodes in the simplex.
 
         :return: The number of nodes in the simplex.
         :rtype: int
@@ -159,8 +152,7 @@ class Simplex:
         return len(self.nodes)
 
     def __iter__(self):
-        """
-        Get an iterator over the nodes in the simplex.
+        """Get an iterator over the nodes in the simplex.
 
         :return: An iterator over the nodes in the simplex.
         :rtype: iter
@@ -168,8 +160,7 @@ class Simplex:
         return iter(self.nodes)
 
     def __repr__(self):
-        """
-        Get a string representation of the simplex.
+        """String representation of the simplex.
 
         :return: A string representation of the simplex.
         :rtype: str
@@ -177,8 +168,7 @@ class Simplex:
         return f"Simplex{tuple(self.nodes)}"
 
     def __str__(self):
-        """
-        Get a string representation of the simplex.
+        """String representation of the simplex.
 
         :return: A string representation of the simplex.
         :rtype: str

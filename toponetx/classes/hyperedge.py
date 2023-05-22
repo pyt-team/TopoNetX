@@ -82,8 +82,8 @@ class HyperEdge:
         return e in self.nodes
 
     def __repr__(self):
-        """
-        String representation of HyperEdge
+        """String representation of Hyperedge.
+
         Returns
         -------
         str
@@ -91,8 +91,8 @@ class HyperEdge:
         return f"HyperEdge{tuple(self.nodes)}"
 
     def __str__(self):
-        """
-        String representation of a HyperEdge
+        """String representation of a HyperEdge.
+
         Returns
         -------
         str
@@ -101,7 +101,7 @@ class HyperEdge:
 
     @property
     def rank(self):
-        """The rank of the hyperedge."""
+        """Rank of the hyperedge."""
         if self._rank is not None:
             return self._rank
         else:

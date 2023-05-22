@@ -63,13 +63,11 @@ class Complex:
     @abc.abstractstaticmethod
     def __str__(self):
         r"""print basic information about the complex."""
-
         pass
 
     @abc.abstractstaticmethod
     def __repr__(self):
         r"""print the complex information."""
-
         pass
 
     @abc.abstractstaticmethod

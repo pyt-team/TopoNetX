@@ -20,7 +20,6 @@ the sparse array to a neighborhood list, and then converts the
 neighborhood list to a neighborhood dictionary. Like the first
 function, it also allows for optional dictionaries that map the
 indices in S and T to other values.
-
 """
 
 from collections import defaultdict
@@ -31,13 +30,17 @@ def sparse_array_to_neighborhood_list(
     sparse_array, src_dict=None, dst_dict=None
 ) -> zip:
     r"""Convert sparse array to neighborhood list for arbitrary higher order structures.
-    .. note::
-        neighborhood list is a list of tuples such that each tuple has the form (s,t), s and t
+
+    Notes
+    -----
+    neighborhood list is a list of tuples such that each tuple has the form (s,t), s and t
         are indices representing a cell in a higher order structure.
         this structure can be converted to a matrix of size |S|X|T| where |S| is
         the size of the source cells and |T| is the size of the target cells.
-    Args:
-        ``sparse_array``:  sparse array representing the higher order structure between S and T cells
+
+    Parameters
+    ----------
+    ``sparse_array``:  sparse array representing the higher order structure between S and T cells
     """
     src_idx, dst_idx = sparse_array.nonzero()
 
@@ -55,9 +58,13 @@ def neighborhood_list_to_neighborhood_dict(
     n_list: List[Tuple[int, int]], src_dict=None, dst_dict=None
 ) -> Dict[int, List[int]]:
     r"""Convert neighborhood list to neighborhood dictionary for arbitrary higher order structures.
-    .. note::
-        for every cell i, neighborhood_dict[i] is describe all cells j that are in the neighborhood to j
-    Args:
+
+    Notes
+    -----
+        for every cell i, neighborhood_dict[i] is describe all cells j that are in the neighborhood to j.
+
+    Parameters
+    ----------
         ``n_list`` (``List[Tuple[int, int]]``): neighborhood list.
     """
     if src_dict is None and dst_dict is None:
@@ -77,12 +84,16 @@ def sparse_array_to_neighborhood_dict(
     sparse_array, src_dict=None, dst_dict=None
 ) -> Dict[int, List[int]]:
     r"""Convert sparse array to neighborhood dictionary for arbitrary higher order structures.
-    .. note::
+
+    Notes
+    -----
         neighborhood list is a list of tuples such that each tuple has the form (s,t), s and t
         are indices representing a cell in a higher order structure.
         this structure can be converted to a matrix of size |S|X|T| where |S| is
         the size of the source cells and |T| is the size of the target cells.
-    Args:
+
+    Parameters
+    ----------
         ``sparse_array``:  sparse array representing the higher order structure between S and T cells
     """
     return neighborhood_list_to_neighborhood_dict(

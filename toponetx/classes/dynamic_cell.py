@@ -7,17 +7,16 @@ __all__ = ["DynamicCell"]
 
 
 class DynamicCell(RankedEntity):
-    """
-     Base class for objects used in building ranked cell objects including cell complexes,
-     simplicial complexes and combinatorial complexes.
+    """Class for Dynamic Cell.
+
+    Base class for objects used in building ranked cell objects including cell complexes,
+    simplicial complexes and combinatorial complexes.
 
     Parameters
     ----------
-
     elements : list or dict, optional, default: None
         a list of entities with identifiers different than uid and/or
         hashables different than uid, see `Honor System`_
-
     rankedentity : RankedEntity
         a RankedEntity object to be cloned into a new RankedEntity with uid. If the uid is the same as
         RankedEntity.uid then the entities will not be distinguishable and error will be raised.
@@ -29,14 +28,18 @@ class DynamicCell(RankedEntity):
         properties belonging to the entity added as key=value pairs.
         Both key and value must be hashable.
 
-     Notes:
+    Notes
+    -----
 
-     -This class inherets from RankedEntity
-     the same properties but it does autmatically assigns a uid to the initiated cell.
+    This class inherets from RankedEntity
+    the same properties but it does autmatically assigns a uid to the initiated cell.
 
-     - A dynamic cell is completely determined by its elements, a list of iterables or other dynamic cells.
-     - A dynamic cell may contain other cells, in a nested fashion.
+    A dynamic cell is completely determined by its elements, a list of iterables
+    or other dynamic cells.
+    A dynamic cell may contain other cells, in a nested fashion.
 
+    Examples
+    --------
     >>> x1 = Node(1)
     >>> x2 = Node(2)
     >>> x3 = Node(3)
@@ -49,7 +52,6 @@ class DynamicCell(RankedEntity):
     >>> y5 = DynamicCell([x4,x5], rank = 1)
     >>> y6 = DynamicCell([x4,x5], rank = 1)
     >>> z = DynamicCell([y6,x2,x3,x4],rank = 2)
-
     """
 
     def __init__(

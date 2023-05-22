@@ -23,9 +23,17 @@ __all__ = [
 
 
 def _normalize(f):
-    """
-    input f ascalar function on nodes of a graph
-    output a  normalized copy of f between [0,1].
+    """Normalize.
+
+    Parameters
+    ----------
+    f : callable
+        A scalar function on nodes of a graph.
+
+    Returns
+    -------
+    f_normalized : callable
+        A normalized copy of f between [0,1].
     """
     minf = min(f.values())
     maxf = max(f.values())
@@ -41,24 +49,27 @@ def _normalize(f):
 
 
 def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
-    """
-    Input
-    ======
-        hodge laplacian : scipy sparse matrix representing the hodge laplacian
-        n_components : int, the number of eigenvectors one needs to output, if
-            laplacian.shape[0]<=10, then all eigenvectors will be returned
-    output:
-    =======
-        first k eigevals and eigenvec associated with the hodge laplacian matrix.
-    example
-    ========
+    """Compute the first k eigenvectors of the hodge laplacian matrix.
+
+    Parameters
+    ----------
+    hodge laplacian : scipy sparse matrix
+        Hodge laplacian.
+    n_components : int
+        Number of eigenvectors one needs to output, if
+        laplacian.shape[0]<=10, then all eigenvectors will be returned
+
+    Returns
+    -------
+        First k eigevals and eigenvec associated with the hodge laplacian matrix.
+
+    Examples
+    --------
     >>> SC = SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> row,column,B1 = SC.incidence_matrix(1,index=True)
     >>> L1 = SC.hodge_laplacian_matrix(1)
     >>> vals,vecs = hodge_laplacian_eigenvectors(L1,2)
-
     """
-
     Diag = diags(hodge_laplacian.diagonal())
     if Diag.shape[0] > 10:
         vals, vect = sparse.linalg.eigs(
@@ -84,19 +95,24 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
 def set_hodge_laplacian_eigenvector_attrs(
     cmplex, dim, n_components, laplacian_type="hodge", normalized=True
 ):
-    """
-    input
-    =====
-        cmplex : a SimplialComplex/CellComplex object
-        dim : int, the dimension of the hodge laplacian to be computed
-        n_components : int, the number of eigenvectors to be computed
-        laplacian_type : str, type of hodge matrix to be computed,
-                        options : up, down, hodge
-        normalized: bool, normalize the eigenvector or not.
+    """Set the hodge laplacian eigenvectors as simplex attributes.
 
+    Parameters
+    ----------
+    cmplex : a SimplialComplex/CellComplex object
+        Complex.
+    dim : int
+        Dimension of the hodge laplacian to be computed.
+    n_components : int
+        The number of eigenvectors to be computed
+    laplacian_type : str
+        Rype of hodge matrix to be computed,
+        options : up, down, hodge
+    normalized : bool
+        Normalize the eigenvector or not.
 
-    example
-    ========
+    Examples
+    --------
     >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> SC = set_hodge_laplacian_eigenvector_attrs(SC,1,2,"down")
     >>> SC.get_simplex_attributes("0.th_eigen", 1)
@@ -122,12 +138,13 @@ def set_hodge_laplacian_eigenvector_attrs(
 
 
 def laplacian_beltrami_eigenvectors(SC, mode="fem"):
+    """Compute the first k eigenvectors of the laplacian beltrami matrix.
 
-    """
+    Examples
+    --------
     >>> SC = SimplicialComplex.load_mesh("path_to_mesh/bunny.obj")
     >>> eigenvectors, eigenvalues = laplacian_beltrami_eigenvectors(SC)
     """
-
     import spharapy.spharabasis as sb
 
     mesh = SC.to_spharapy()
@@ -137,17 +154,19 @@ def laplacian_beltrami_eigenvectors(SC, mode="fem"):
 
 
 def set_laplacian_beltrami_eigenvectors(cmplex):
-    """
-    input
-    =====
-        cmplex : a SimplialComplex object
-    example
-    ========
+    """Set the laplacian beltrami eigenvectors as simplex attributes.
+
+    Parameters
+    ----------
+    cmplex : a SimplialComplex object
+        Complex.
+
+    Examples
+    --------
     >>> SC = SimplicialComplex.load_mesh("C:/Users/musta/OneDrive/Desktop/bunny.obj")
     >>> set_laplacian_beltrami_eigenvectors(SC)
     >>> vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
     """
-
     index = cmplex.skeleton(0)
     vect, vals = laplacian_beltrami_eigenvectors(cmplex)
     for i in range(len(vect)):
@@ -155,11 +174,8 @@ def set_laplacian_beltrami_eigenvectors(cmplex):
         cmplex.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
 
 
-# ---------------- laplacian spectrum for various complexes ---------------#
-
-
 def laplacian_spectrum(matrix, weight="weight"):
-    """Returns eigenvalues of the Laplacian matrix
+    """Return eigenvalues of the Laplacian matrix
 
     Parameters
     ----------
@@ -203,8 +219,8 @@ def cell_complex_hodge_laplacian_spectrum(CX: CellComplex, rank: int, weight="we
     Notes
     -----
 
-    Example
-    =======
+    Examples
+    --------
             >>> CX = CellComplex()
             >>> CX.add_cell([1,2,3,4],rank=2)
             >>> CX.add_cell([2,3,4,5],rank=2)
@@ -214,7 +230,6 @@ def cell_complex_hodge_laplacian_spectrum(CX: CellComplex, rank: int, weight="we
     See Also
     --------
     """
-
     return laplacian_spectrum(CX.hodge_laplacian_matrix(rank=rank, weight=weight))
 
 

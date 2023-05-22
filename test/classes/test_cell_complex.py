@@ -515,7 +515,6 @@ class TestCellComplex(unittest.TestCase):
 
     def test_remove_equivalent_cells(self):
         """Test the remove equivalent cells method."""
-
         cx = CellComplex()
         cx.add_cell((1, 2, 3, 4), rank=2)
         cx.add_cell((2, 3, 4, 1), rank=2)
