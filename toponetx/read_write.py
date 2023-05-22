@@ -1,3 +1,5 @@
+"""Read/write utilities."""
+
 import pickle
 
 

@@ -1,7 +1,4 @@
-from collections import defaultdict
-from typing import Dict, List, Tuple, Union
-
-"""
+"""Utilities on structures.
 
 The first function, sparse_array_to_neighborhood_list, takes a sparse array
 representing a higher order structure between two sets of
@@ -25,6 +22,9 @@ function, it also allows for optional dictionaries that map the
 indices in S and T to other values.
 
 """
+
+from collections import defaultdict
+from typing import Dict, List, Tuple
 
 
 def sparse_array_to_neighborhood_list(
