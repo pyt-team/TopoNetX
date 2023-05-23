@@ -807,9 +807,9 @@ class CellComplex(Complex):
                 d_edges[k] = v
             elif isinstance(k, Iterable) and len(k) != 2:  # cell
                 d_cells[k] = v
-        self.set_node_attributes(d_nodes, name)
-        self.set_edge_attributes(d_edges, name)
-        self.set_cell_attributes(d_cells, name)
+        self.set_cell_attributes(d_nodes, name=name, rank=0)
+        self.set_cell_attributes(d_edges, name=name, rank=1)
+        self.set_cell_attributes(d_cells, name=name, rank=2)
 
     def get_filtration(self, name):
         """Get filtration.
@@ -832,84 +832,16 @@ class CellComplex(Complex):
                 d.update(i)
         return d
 
-    def set_node_attributes(self, values, name=None):
-        """Set node attributes.
-
-        Parameters
-        ----------
-        values : dic
-        name : str
-
-        Returns
-        -------
-        None
-
-        Example
-        -------
-        >>> G = nx.path_graph(3)
-        >>> CX = CellComplex(G)
-        >>> d = {0: {'color': 'red', 'attr2': 1 }, 1: {'color': 'blue', 'attr2': 3}}
-        >>> CX.set_node_attributes(d)
-        """
-        if name is not None:
-            # if `values` is a dict using `.items()` => {cell: value}
-
-            for cell, value in values.items():
-                try:
-                    self.nodes[cell][name] = value
-                except KeyError:
-                    pass
-        else:
-
-            for cell, d in values.items():
-                try:
-                    self.nodes[cell].update(d)
-                except KeyError:
-                    pass
-            return
-
-    def set_edge_attributes(self, values, name=None):
-        """Set edge attributes.
-
-        Parameters
-        ----------
-        values : dic
-        name : str
-
-        Returns
-        -------
-        None
-
-        Example
-        -------
-        >>> G = nx.path_graph(3)
-        >>> CX = CellComplex(G)
-        >>> d={ (0,1) : {'color':'red','attr2':1 },(1,2): {'color':'blue','attr2':3 } }
-        >>> CX.set_edge_attributes(d)
-        """
-        if name is not None:
-            # if `values` is a dict using `.items()` => {edge: value}
-
-            for cell, value in values.items():
-                try:
-                    self.edges[cell][name] = value
-                except KeyError:
-                    pass
-        else:
-            for cell, d in values.items():
-                try:
-                    self.edges[cell].update(d)
-                except KeyError:
-                    pass
-            return
-
-    def set_cell_attributes(self, values, name=None):
+    def set_cell_attributes(self, values, rank: int, name=None):
         """Set cell attributes.
 
         Parameters
         ----------
         values : TYPE
             DESCRIPTION.
+        rank : int
+            0 for nodes, 1 for edges, 2 for 2-cells.
+            ranks > 2 are currently not supported.
         name : TYPE, optional
             DESCRIPTION. The default is None.
 
@@ -928,12 +860,12 @@ class CellComplex(Complex):
         >>> CX.add_cell([1,2,4], rank=2,)
         >>> CX.add_cell([3,4,8], rank=2)
         >>> d={(1,2,3,4):'red',(1,2,4):'blue'}
-        >>> CX.set_cell_attributes(rank,name='color')
+        >>> CX.set_cell_attributes(d,name='color',rank=2)
         >>> CX.cells[(1,2,3,4)]['color']
         'red'
 
         If you provide a dictionary of dictionaries as the second argument,
-        the entire dictionary will be used to update edge attributes::
+        the entire dictionary will be used to update cell attributes::
 
         Examples
         --------
@@ -953,52 +885,59 @@ class CellComplex(Complex):
         If the dict contains cells that are not in `self.cells`, they are
         silently ignored.
         """
-        if name is not None:
-            # if `values` is a dict using `.items()` => {cell: (key,value) } or {cell:value}
+        if rank == 0:
+            nx.set_node_attributes(self._G, values, name)
+        elif rank == 1:
+            nx.set_edge_attributes(self._G, values, name)
+        elif rank == 2:
+            if name is not None:
+                # if `values` is a dict using `.items()` => {cell: (key,value) } or {cell:value}
 
-            for cell, value in values.items():
-                try:
-                    if len(cell) == 2:
-                        if isinstance(cell[0], Iterable) and isinstance(
-                            cell[1], int
-                        ):  # input cell has cell key
-                            self.cells[cell][cell[0]][name] = value
+                for cell, value in values.items():
+                    try:
+                        if len(cell) == 2:
+                            if isinstance(cell[0], Iterable) and isinstance(
+                                cell[1], int
+                            ):  # input cell has cell key
+                                self.cells[cell][cell[0]][name] = value
+                            else:
+                                self.cells[cell][name] = value
+                        elif isinstance(
+                            self.cells[cell], list
+                        ):  # all cells with same key get same attrs
+                            for i in range(len(self.cells[cell])):
+                                self.cells[cell][i][name] = value
                         else:
                             self.cells[cell][name] = value
-                    elif isinstance(
-                        self.cells[cell], list
-                    ):  # all cells with same key get same attrs
-                        for i in range(len(self.cells[cell])):
-                            self.cells[cell][i][name] = value
-                    else:
-                        self.cells[cell][name] = value
 
-                except KeyError:
-                    pass
+                    except KeyError:
+                        pass
 
-        else:
+            else:
 
-            for cell, d in values.items():
-                try:
+                for cell, d in values.items():
+                    try:
 
-                    if len(cell) == 2:
-                        if isinstance(cell[0], Iterable) and isinstance(
-                            cell[1], int
-                        ):  # input cell has cell key
-                            self.cells[cell[0]][cell[1]].update(d)
-                        else:  # length of cell is 2
+                        if len(cell) == 2:
+                            if isinstance(cell[0], Iterable) and isinstance(
+                                cell[1], int
+                            ):  # input cell has cell key
+                                self.cells[cell[0]][cell[1]].update(d)
+                            else:  # length of cell is 2
+                                self.cells[cell].update(d)
+                        elif isinstance(
+                            self.cells[cell], list
+                        ):  # all cells with same key get same attrs
+                            for i in range(len(self.cells[cell])):
+
+                                self.cells[cell][i].update(d)
+                        else:
                             self.cells[cell].update(d)
-                    elif isinstance(
-                        self.cells[cell], list
-                    ):  # all cells with same key get same attrs
-                        for i in range(len(self.cells[cell])):
-
-                            self.cells[cell][i].update(d)
-                    else:
-                        self.cells[cell].update(d)
-                except KeyError:
-                    pass
-            return
+                    except KeyError:
+                        pass
+                return
+        else:
+            raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
     def get_cell_attributes(self, name, rank: int):
         """Get node attributes from graph.

@@ -561,7 +561,7 @@ class TestCellComplex(unittest.TestCase):
             rank=2,
         )
         CX.add_cell([3, 4, 8], rank=2)
-        CX.set_cell_attributes(d)
+        CX.set_cell_attributes(d, rank=2)
         cell_color = CX.get_cell_attributes("color", 2)
         assert cell_color == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
 
