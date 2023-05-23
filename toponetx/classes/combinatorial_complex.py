@@ -1,12 +1,7 @@
 """Creation and manipulation of a combinatorial complex."""
 
 import warnings
-
-try:
-    from collections.abc import Hashable, Iterable
-except ImportError:
-    from collections import Iterable
-    from collections import Hashable
+from collections.abc import Hashable, Iterable
 
 import networkx as nx
 import numpy as np

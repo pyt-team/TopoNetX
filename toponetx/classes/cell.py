@@ -1,10 +1,7 @@
 """Cell and CellView classes."""
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
 from collections import Counter, deque
+from collections.abc import Iterable
 from itertools import zip_longest
 
 import numpy as np

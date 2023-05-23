@@ -8,13 +8,8 @@ We reserve the notation CC for a combinatorial complex.
 """
 
 import warnings
-
-try:
-    from collections.abc import Hashable, Iterable
-except ImportError:
-    from collections import Iterable, Hashable
-
 from collections import defaultdict
+from collections.abc import Hashable, Iterable
 from itertools import zip_longest
 
 import networkx as nx
