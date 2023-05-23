@@ -124,6 +124,8 @@ class CellComplex(Complex):
     """
 
     def __init__(self, cells=None, name=None, regular=True, **attr):
+        super().__init__()
+
         if not name:
             self.name = ""
         else:
