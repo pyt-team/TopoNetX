@@ -7,6 +7,7 @@ from scipy.sparse import diags
 
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
+from toponetx.datasets.mesh_complex import stanford_bunny
 
 __all__ = [
     "hodge_laplacian_eigenvectors",
@@ -142,7 +143,7 @@ def laplacian_beltrami_eigenvectors(SC, mode="fem"):
 
     Examples
     --------
-    >>> SC = SimplicialComplex.load_mesh("path_to_mesh/bunny.obj")
+    >>> SC = stanford_bunny()
     >>> eigenvectors, eigenvalues = laplacian_beltrami_eigenvectors(SC)
     """
     import spharapy.spharabasis as sb
@@ -163,7 +164,7 @@ def set_laplacian_beltrami_eigenvectors(cmplex):
 
     Examples
     --------
-    >>> SC = SimplicialComplex.load_mesh("C:/Users/musta/OneDrive/Desktop/bunny.obj")
+    >>> SC = SimplicialComplex.load_mesh("bunny.obj")
     >>> set_laplacian_beltrami_eigenvectors(SC)
     >>> vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
     """
