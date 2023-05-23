@@ -1,9 +1,6 @@
 """NodeView class."""
 
-try:
-    from collections.abc import Hashable, Iterable
-except ImportError:
-    from collections import Hashable, Iterable
+from collections.abc import Hashable, Iterable
 
 from toponetx import TopoNetXError
 
@@ -49,7 +46,7 @@ class NodeView:
 
         Returns
         -------
-        _ : dict or list or dicts
+        dict or list
             Dict of properties associated with that cells.
         """
         if isinstance(cell, self.cell_type):
