@@ -247,13 +247,17 @@ def simplicial_complex_hodge_laplacian_spectrum(
 
 
 def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
-    """Return eigenvalues of the Laplacian of G.
+    """Return eigenvalues of the adjacency matrix of CX.
 
     Parameters
     ----------
-    matrix : scipy sparse matrix
-    up : bool, default False
-        whether to take the upper or lower adjacency
+    CX : CellComplex
+    rank : int
+        rank of the cells to take the adjacency from:
+        - 0-cells are nodes
+        - 1-cells are edges
+        - 2-cells are polygons
+        currently, no cells of rank > 2 are supported.
 
     Returns
     -------
