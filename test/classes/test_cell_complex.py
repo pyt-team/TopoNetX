@@ -275,7 +275,7 @@ class TestCellComplex(unittest.TestCase):
         CX = CellComplex()
         CX.add_cell([1, 2, 3], rank=2)
         A = np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]])
-        np.testing.assert_array_equal(CX.adjacency_matrix(0).todense(), A)
+        np.testing.assert_array_equal(CX.adjacency_matrix(0, up=True).todense(), A)
 
     def test_adjacency_matrix_cell_complex_with_multiple_cell(self):
         """Test adjacency matrix for a cell complex with multiple cells."""
@@ -293,7 +293,7 @@ class TestCellComplex(unittest.TestCase):
                 [0.0, 0.0, 0.0, 1.0, 1.0, 0.0],
             ]
         )
-        np.testing.assert_array_equal(CX.adjacency_matrix(rank=0).toarray(), A)
+        np.testing.assert_array_equal(CX.adjacency_matrix(rank=0, up=True).toarray(), A)
 
     def test_up_laplacian_matrix_empty_cell_complex(self):
         """Test up laplacian matrix for an empty cell complex."""
@@ -469,7 +469,7 @@ class TestCellComplex(unittest.TestCase):
         cc = CellComplex()
         cc.add_cell([1, 2, 3], rank=2)
         A = np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]])
-        np.testing.assert_array_equal(cc.adjacency_matrix(0).todense(), A)
+        np.testing.assert_array_equal(cc.adjacency_matrix(0, up=True).todense(), A)
 
     def test_coadjccency_matrix_abstrcct_cell_with_one_cell(self):
         """Test coadjccency matrix for an abstrcct cell with one cell."""

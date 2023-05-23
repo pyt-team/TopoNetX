@@ -2,12 +2,14 @@
 
 import unittest
 from collections import defaultdict
+from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.utils.structure import (
     neighborhood_list_to_neighborhood_dict,
     sparse_array_to_neighborhood_dict,
     sparse_array_to_neighborhood_list,
+    incidence_to_adjacency,
 )
 
 
@@ -96,6 +98,34 @@ class TestStructure(unittest.TestCase):
             list, {0: [0, 1], 1: [0, 2], 2: [1, 2], 3: [3, 4], 4: [3, 5], 5: [4, 5]}
         )
         assert output == d
+
+    def test_incidence_to_adjacency(self):
+        """
+        Tests incidence to adjacency
+        uses transposed of cell-edge incidence for cell complex [(1,2,3,4), (1,2,4,3)]
+        """
+        incidence = csr_matrix([[1, 0, -1, 1, 0, 1], [1, -1, 0, 0, 1, -1]]) # already transposed (check for upper adj.)
+        adj = incidence_to_adjacency(incidence)
+        expected_adj = csr_matrix(
+            [
+                [
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                ],  # (1,2) and (3,4) are upper-adjacent in both 2-cells
+                [1, 0, 0, 0, 1, 1],
+                [1, 0, 0, 1, 0, 1],
+                [1, 0, 1, 0, 0, 1],
+                [1, 1, 0, 0, 0, 1],
+                [2, 1, 1, 1, 1, 0],
+            ]
+        )
+        assert (
+            adj != expected_adj
+        ).nnz == 0  # tests sparsity of difference -> if the difference has no non-zero entries, it is the same
 
 
 if __name__ == "__main__":
