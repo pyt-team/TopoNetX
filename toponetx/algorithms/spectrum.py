@@ -248,7 +248,7 @@ def simplicial_complex_hodge_laplacian_spectrum(
     return laplacian_spectrum(SC.hodge_laplacian_matrix(rank=rank))
 
 
-def cell_complex_adjacency_spectrum(CX: CellComplex, rank, up=False):
+def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
     """Return eigenvalues of the Laplacian of G.
 
     Parameters
@@ -271,7 +271,7 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank, up=False):
     >>> CX.add_cell([5,6,7,8],rank=2)
     >>> cell_complex_adjacency_spectrum(CX,1)
     """
-    return laplacian_spectrum(CX.adjacency_matrix(rank=rank, up=up))
+    return laplacian_spectrum(CX.adjacency_matrix(rank=rank))
 
 
 def simplicial_complex_adjacency_spectrum(

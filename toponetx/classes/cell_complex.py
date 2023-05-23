@@ -1545,42 +1545,33 @@ class CellComplex(Complex):
         else:
             return L_down
 
-    def adjacency_matrix(self, rank, up=False, index=False):
+    def adjacency_matrix(self, rank, signed=False, index=False):
         """Compute adjacency matrix for a given rank."""
-        if up:
-            rank += 1
-
         if index:
-            lower_ind, ind, incidence = self.incidence_matrix(
-                rank, signed=False, index=True
+            ind, _, incidence = self.incidence_matrix(
+                rank + 1, signed=signed, index=True
             )
         else:
-            incidence = self.incidence_matrix(rank, signed=False)
+            incidence = self.incidence_matrix(rank + 1, signed=signed)
 
-        if up:
-            incidence = incidence.T
-            if index:
-                ind = lower_ind
+        incidence = incidence.T
 
         if index:
             return ind, incidence_to_adjacency(incidence)
         else:
             return incidence_to_adjacency(incidence)
 
-    def coadjacency_matrix(self, rank, signed=False, weight=None, index=False):
+    def coadjacency_matrix(self, rank, signed=False, index=False):
         """Compute coadjacency matrix for a given rank."""
-        weight = None  # this feature is not supported in this version
-
-        ind, L_down = self.down_laplacian_matrix(
-            rank, signed=signed, weight=weight, index=True
-        )
-        L_down.setdiag(0)
-        if not signed:
-            L_down = abs(L_down)
         if index:
-            return ind, L_down
+            _, ind, incidence = self.incidence_matrix(rank, signed=signed, index=True)
         else:
-            return L_down
+            incidence = self.incidence_matrix(rank, signed=signed)
+
+        if index:
+            return ind, incidence_to_adjacency(incidence)
+        else:
+            return incidence_to_adjacency(incidence)
 
     def k_hop_incidence_matrix(self, rank, k):
         """Compute k-hop incidence matrix for a given rank."""
@@ -1829,7 +1820,7 @@ class CellComplex(Complex):
             components of CX.
         """
         if cells:
-            A, coldict = self.adjacency_matrix(rank=2, index=True)
+            A, coldict = self.coadjacency_matrix(rank=2, index=True)
             G = nx.from_scipy_sparse_matrix(A)
 
             for c in nx.connected_components(G):
@@ -1837,7 +1828,7 @@ class CellComplex(Complex):
                     continue
                 yield {coldict[n] for n in c}
         else:
-            A, rowdict = self.adjacency_matrix(rank=0, up=True, index=True)
+            A, rowdict = self.adjacency_matrix(rank=0, index=True)
             G = nx.from_scipy_sparse_matrix(A)
             for c in nx.connected_components(G):
                 if not return_singletons:
@@ -1942,7 +1933,7 @@ class CellComplex(Complex):
         list of the diameters of the s-components and
         list of the s-component nodes
         """
-        A, coldict = self.adjacency_matrix(rank=0, up=True, index=True)
+        A, coldict = self.adjacency_matrix(rank=0, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         diams = []
         comps = []
@@ -1973,7 +1964,7 @@ class CellComplex(Complex):
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
         """
-        A, coldict = self.adjacency_matrix(rank=2, index=True)
+        A, coldict = self.coadjacency_matrix(rank=2, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         diams = []
         comps = []
@@ -2010,7 +2001,7 @@ class CellComplex(Complex):
         nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
         are s-adjacent. If the graph is not connected, an error will be raised.
         """
-        A = self.adjacency_matrix(rank=0, up=True)
+        A = self.adjacency_matrix(rank=0)
         G = nx.from_scipy_sparse_matrix(A)
         if nx.is_connected(G):
             return nx.diameter(G)
@@ -2039,7 +2030,7 @@ class CellComplex(Complex):
         cells e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
         are s-adjacent. If the graph is not connected, an error will be raised.
         """
-        A = self.adjacency_matrix(rank=2, up=False)
+        A = self.coadjacency_matrix(rank=2)
         G = nx.from_scipy_sparse_matrix(A)
         if nx.is_connected(G):
             return nx.diameter(G)
@@ -2079,7 +2070,7 @@ class CellComplex(Complex):
             source = source.uid
         if isinstance(target, Cell):
             target = target.uid
-        A, rowdict = self.adjacency_matrix(rank=0, up=True, index=True)
+        A, rowdict = self.adjacency_matrix(rank=0, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         rkey = {v: k for k, v in rowdict.items()}
         try:
@@ -2126,7 +2117,7 @@ class CellComplex(Complex):
             source = source.uid
         if isinstance(target, Cell):
             target = target.uid
-        A, coldict = self.adjacency_matrix(rank=2, index=True)
+        A, coldict = self.coadjacency_matrix(rank=2, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         ckey = {v: k for k, v in coldict.items()}
         try:

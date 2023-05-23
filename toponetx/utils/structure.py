@@ -103,7 +103,7 @@ def sparse_array_to_neighborhood_dict(
     )
 
 
-def incidence_to_adjacency(B, s: int | None = None):
+def incidence_to_adjacency(B, s: int | None = None, signed=False):
     """Get adjacency matrix from boolean incidence matrix for s-metrics.
 
     Self loops are not supported.
@@ -121,7 +121,8 @@ def incidence_to_adjacency(B, s: int | None = None):
     A : scipy.sparse.csr.csr_matrix
     """
     B = csr_matrix(B)
-    B = abs(B)  # make sure the incidence matrix has only positive entries
+    if not signed:
+        B = abs(B)  # make sure the incidence matrix has only positive entries
 
     A = B.T @ B
     A.setdiag(0)
