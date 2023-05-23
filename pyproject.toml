@@ -33,6 +33,7 @@ dependencies=[
     "requests",
     "scipy",
     "trimesh",
+     "spharapy",
 ]
 
 [project.optional-dependencies]
