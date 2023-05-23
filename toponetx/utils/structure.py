@@ -23,7 +23,7 @@ indices in S and T to other values.
 """
 
 from collections import defaultdict
-from typing import Dict, List, Tuple
+from typing import Dict, Iterable, List, Tuple
 
 from scipy.sparse import csr_matrix
 
@@ -31,7 +31,7 @@ from scipy.sparse import csr_matrix
 def sparse_array_to_neighborhood_list(
     sparse_array, src_dict=None, dst_dict=None
 ) -> zip:
-    r"""Convert sparse array to neighborhood list for arbitrary higher order structures.
+    """Convert sparse array to neighborhood list for arbitrary higher order structures.
 
     Notes
     -----
@@ -57,9 +57,9 @@ def sparse_array_to_neighborhood_list(
 
 
 def neighborhood_list_to_neighborhood_dict(
-    n_list: List[Tuple[int, int]], src_dict=None, dst_dict=None
+    n_list: Iterable[Tuple[int, int]], src_dict=None, dst_dict=None
 ) -> Dict[int, List[int]]:
-    r"""Convert neighborhood list to neighborhood dictionary for arbitrary higher order structures.
+    """Convert neighborhood list to neighborhood dictionary for arbitrary higher order structures.
 
     Notes
     -----
@@ -69,8 +69,8 @@ def neighborhood_list_to_neighborhood_dict(
     ----------
         ``n_list`` (``List[Tuple[int, int]]``): neighborhood list.
     """
+    neighborhood_dict = defaultdict(list)
     if src_dict is None and dst_dict is None:
-        neighborhood_dict = defaultdict(list)
         for src_idx, dst_idx in n_list:
             neighborhood_dict[src_idx].append(dst_idx)
         return neighborhood_dict
@@ -85,7 +85,7 @@ def neighborhood_list_to_neighborhood_dict(
 def sparse_array_to_neighborhood_dict(
     sparse_array, src_dict=None, dst_dict=None
 ) -> Dict[int, List[int]]:
-    r"""Convert sparse array to neighborhood dictionary for arbitrary higher order structures.
+    """Convert sparse array to neighborhood dictionary for arbitrary higher order structures.
 
     Notes
     -----

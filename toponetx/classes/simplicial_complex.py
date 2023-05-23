@@ -70,7 +70,7 @@ class SimplicialComplex(Complex):
         list of maximal simplices that define the simplicial complex
     name : hashable, optional, default: None
         If None then a placeholder '' will be inserted as name
-    mode : string, optional, default 'normal'.
+    mode : str, optional, default 'normal'.
         computational mode, available options are "normal" or "gudhi".
         default is 'normal'.
 
@@ -88,10 +88,12 @@ class SimplicialComplex(Complex):
 
     Examples
     --------
-    # defining a simplicial complex using a set of maximal simplices.
+    Define a simplicial complex using a set of maximal simplices:
+
     >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
 
-    # compatabiltiy with networkx
+    TopoNetX is also compatible with NetworkX, allowing users to create a simplicial complex from a NetworkX graph:
+
     >>> G = Graph() # networkx G
     >>> G.add_edge(0, 1, weight=4)
     >>> G.add_edge(0, 3)
@@ -103,6 +105,7 @@ class SimplicialComplex(Complex):
     """
 
     def __init__(self, simplices=None, name=None, mode="normal", **attr):
+        super().__init__()
 
         self.mode = mode
         if name is None:
@@ -233,7 +236,7 @@ class SimplicialComplex(Complex):
 
         Returns
         -------
-        _ : int
+        int
             Total number of simplices in all dimensions.
         """
         return np.sum(self.shape)
@@ -496,10 +499,10 @@ class SimplicialComplex(Complex):
         Examples
         --------
         >>> SC = SimplexView()
-        >>> SC.insert_simplex ( (1,2,3,4),weight=1 )
-        >>> c1=Simplex((1,2,3,4,5))
+        >>> SC.insert_simplex((1, 2, 3, 4), weight=1)
+        >>> c1=Simplex((1, 2, 3, 4, 5))
         >>> SC.insert_simplex(c1)
-        >>> SC.remove_maximal_simplex((1,2,3,4,5))
+        >>> SC.remove_maximal_simplex((1, 2, 3, 4, 5))
         """
         if isinstance(simplex, Iterable):
             if not isinstance(simplex, Simplex):
@@ -616,7 +619,7 @@ class SimplicialComplex(Complex):
 
         Returns
         -------
-        _ : list of tuples(simplex).
+        list of tuples(simplex).
         """
         entire_tree = self.get_boundaries(
             self.get_maximal_simplices_of_simplex(simplex)
@@ -660,9 +663,8 @@ class SimplicialComplex(Complex):
         -------
         None.
 
-        Example 1
-        ---------
-
+        Examples
+        --------
         After computing some property of the simplex of a simplicial complex, you may want
         to assign a simplex attribute to store the value of that property for
         each simplex:
@@ -677,10 +679,8 @@ class SimplicialComplex(Complex):
         'red'
 
         If you provide a dictionary of dictionaries as the second argument,
-        the entire dictionary will be used to update simplex attributes::
+        the entire dictionary will be used to update simplex attributes:
 
-        Example 2
-        ---------
         >>> SC = SimplicialComplex()
         >>> SC.add_simplex([1, 3, 4])
         >>> SC.add_simplex([1, 2, 3])
@@ -718,7 +718,7 @@ class SimplicialComplex(Complex):
 
         Parameters
         ----------
-        name : string
+        name : str
            Attribute name.
 
         Returns
@@ -734,7 +734,6 @@ class SimplicialComplex(Complex):
         >>> d = {(1): 'red', (2): 'blue', (3): 'black'}
         >>> SC.set_simplex_attributes(d, name='color')
         >>> SC.get_node_attributes('color')
-        >>>
         'blue'
         """
         return {tuple(n): self[n][name] for n in self.skeleton(0) if name in self[n]}
@@ -744,9 +743,10 @@ class SimplicialComplex(Complex):
 
         Parameters
         ----------
-        name : string
+        name : str
            Attribute name
-        rank : integer rank of the cell
+        rank : int
+            rank of the cell
 
         Returns
         -------
@@ -798,8 +798,8 @@ class SimplicialComplex(Complex):
 
         Getting the matrix that correpodnds to the boundary matrix of the input SC.
 
-        Example
-        -------
+        Examples
+        --------
         >>> SC = SimplicialComplex()
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
@@ -928,7 +928,6 @@ class SimplicialComplex(Complex):
                 return column, L_hodge
             else:
                 return L_hodge
-
         elif rank == self.dim:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_hodge = B.transpose() @ B
@@ -938,7 +937,6 @@ class SimplicialComplex(Complex):
                 return column, L_hodge
             else:
                 return L_hodge
-
         else:
             raise ValueError(
                 f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
@@ -949,7 +947,7 @@ class SimplicialComplex(Complex):
             return abs(L_hodge)
 
     def normalized_laplacian_matrix(self, rank, weight=None):
-        r"""Return the normalized hodge Laplacian matrix of G.
+        """Return the normalized hodge Laplacian matrix of G.
 
         The normalized hodge Laplacian is the matrix
 
@@ -963,20 +961,19 @@ class SimplicialComplex(Complex):
         ----------
         rank : int
             Rank of the hodge laplacian matrix
-        weight : string or None, optional (default='weight')
+        weight : str or None, optional (default='weight')
             The edge data key used to compute each value in the matrix.
             If None, then each edge has weight 1.
 
         Returns
         -------
-        _ : Scipy sparse matrix
+        Scipy sparse matrix
             The normalized hodge Laplacian matrix.
 
-        Example 1
-        ---------
+        Examples
+        --------
         >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
-        >>> L1_norm = SC.normalized_laplacian_matrix(1)
-        >>> L1_norm
+        >>> SC.normalized_laplacian_matrix(1)
         """
         import numpy as np
         import scipy as sp
@@ -1185,14 +1182,14 @@ class SimplicialComplex(Complex):
         -------
         new simplicial Complex : SimplicialComplex
 
-        Example
-        -------
+        Examples
+        --------
         >>> c1 = Simplex((1, 2, 3))
         >>> c2 = Simplex((1, 2, 4))
         >>> c3 = Simplex((1, 2, 5))
         >>> SC = SimplicialComplex([c1, c2, c3])
         >>> SC1 = SC.restrict_to_simplices([c1, (2, 4)])
-        >>> new_sc = SC1.simplices
+        >>> SC1.simplices
         """
         rns = []
         for cell in cell_set:
@@ -1212,20 +1209,20 @@ class SimplicialComplex(Complex):
         ----------
         node_set: iterable of hashables
             References a subset of elements of self.nodes
-
-        name: string, optional, default: None
+        name: str, optional
+            The name of the new simplicial complex.
 
         Returns
         -------
         new Simplicial Complex : SimplicialComplex
 
-        Example
-        -------
+        Examples
+        --------
         >>> c1 = Simplex((1, 2, 3))
         >>> c2 = Simplex((1, 2, 4))
         >>> c3 = Simplex((1, 2, 5))
         >>> SC = SimplicialComplex([c1, c2, c3])
-        >>> new_sc = SC.restrict_to_nodes([1, 2, 3, 4])
+        >>> SC.restrict_to_nodes([1, 2, 3, 4])
         """
         simplices = []
         node_set = set(node_set)
@@ -1242,8 +1239,8 @@ class SimplicialComplex(Complex):
     def get_all_maximal_simplices(self):
         """Get all maximal simplices.
 
-        Example
-        -------
+        Examples
+        --------
         >>> c1 = Simplex((1, 2, 3))
         >>> c2 = Simplex((1, 2, 4))
         >>> c3 = Simplex((2, 5))
@@ -1293,8 +1290,8 @@ class SimplicialComplex(Complex):
     def from_gudhi(tree):
         """Import from gudhi.
 
-        Example
-        -------
+        Examples
+        --------
         >>> from gudhi import SimplexTree
         >>> tree = SimplexTree()
         >>> tree.insert([1,2,3,5])
@@ -1308,8 +1305,8 @@ class SimplicialComplex(Complex):
     def from_trimesh(mesh):
         """Import from trimesh.
 
-        Example
-        -------
+        Examples
+        --------
         >>> import trimesh
         >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
                                faces=[[0, 1, 2]],
@@ -1408,8 +1405,8 @@ class SimplicialComplex(Complex):
     def to_spharapy(self, vertex_position_name="position"):
         """Convert to sharapy.
 
-        Example
-        -------
+        Examples
+        --------
         >>> import spharapy.trimesh as tm
         >>> import spharapy.spharabasis as sb
         >>> import spharapy.datasets as sd
@@ -1471,10 +1468,11 @@ class SimplicialComplex(Complex):
         Examples
         --------
         >>> G = nx.Graph()  # or DiGraph, MultiGraph, MultiDiGraph, etc
-        >>> G.add_edge('1', '2', weight=2)
-        >>> G.add_edge('3', '4', weight=4)
+        >>> G.add_edge(1, 2, weight=2)
+        >>> G.add_edge(3, 4, weight=4)
         >>> SC = SimplicialComplex.from_nx_graph(G)
-        >>> SC[('1','2')]['weight']
+        >>> SC[(1, 2)]["weight"]
+        2
         """
         return SimplicialComplex(G, name=G.name)
 
@@ -1504,15 +1502,15 @@ class SimplicialComplex(Complex):
 
         Returns
         -------
-        _ : SimplicialComplex
-        Simplicial complex closure of the hypergraph.
+        SimplicialComplex
+            Simplicial complex closure of the hypergraph.
 
-        Example
-        -------
+        Examples
+        --------
         >>> import hypernetx as hnx
-        >>> hg = hnx.Hypergraph( [ [1,2,3,4],[1,2,3] ], static=True)
+        >>> hg = hnx.Hypergraph([[1, 2, 3, 4], [1, 2, 3]], static=True)
         >>> sc = SimplicialComplex.simplicial_closure_of_hypergraph(hg)
-        >>> print(sc.simplices)
+        >>> sc.simplices
         """
         edges = H.edges
         lst = []
@@ -1523,8 +1521,8 @@ class SimplicialComplex(Complex):
     def to_cell_complex(self):
         """Convert a simplicial complex to a cell complex.
 
-        Example
-        -------
+        Examples
+        --------
         >>> c1 = Simplex((1, 2, 3))
         >>> c2 = Simplex((1, 2, 4))
         >>> c3 = Simplex((2, 5))
@@ -1538,8 +1536,8 @@ class SimplicialComplex(Complex):
     def to_hypergraph(self):
         """Convert a simplicial complex to a hyperG.
 
-        Example
-        -------
+        Examples
+        --------
         >>> c1 = Simplex((1, 2, 3))
         >>> c2 = Simplex((1, 2, 4))
         >>> c3 = Simplex((2, 5))
@@ -1561,13 +1559,11 @@ class SimplicialComplex(Complex):
             when True returns DynamicCombinatorialComplex
             when False returns CombinatorialComplex
 
-        Example
-        -------
+        Examples
+        --------
         >>> c1 = Simplex((1, 2, 3))
         >>> c2 = Simplex((1, 2, 3))
-
         >>> c3 = Simplex((1, 2, 4))
-        >>> c4 = Simplex((2, 5))
         >>> SC = SimplicialComplex([c1, c2, c3])
         >>> CC = SC.to_combinatorial_complex()
         """

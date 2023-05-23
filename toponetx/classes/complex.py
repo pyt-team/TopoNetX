@@ -41,84 +41,84 @@ class Complex:
     @property
     @abc.abstractmethod
     def nodes(self):
-        r"""Return the node container."""
+        """Return the node container."""
         pass
 
     @property
     @abc.abstractmethod
     def dim(self):
-        r"""Return dimension of the complex."""
+        """Return dimension of the complex."""
         pass
 
     @abc.abstractmethod
     def shape(self):
-        r"""Return number of cells for each rank."""
+        """Return number of cells for each rank."""
         pass
 
     @abc.abstractmethod
     def skeleton(self, rank):
-        r"""Return dimension of the complex."""
+        """Return dimension of the complex."""
         pass
 
     @abc.abstractmethod
     def __str__(self):
-        r"""Print basic string representation."""
+        """Print basic string representation."""
         pass
 
     @abc.abstractmethod
     def __repr__(self):
-        r"""Print detailed string representation."""
+        """Print detailed string representation."""
         pass
 
     @abc.abstractmethod
     def __len__(self):
-        r"""Return number of nodes."""
+        """Return number of nodes."""
         pass
 
     def _clear_cache(self):
-        r"""Clear cache."""
+        """Clear cache."""
         self.cache = {}
 
     @abc.abstractmethod
     def clone(self):
-        r"""Clone complex."""
+        """Clone complex."""
 
     @abc.abstractmethod
     def __iter__(self):
-        r"""Return an iterator over the nodes."""
+        """Return an iterator over the nodes."""
         pass
 
     @abc.abstractmethod
     def __contains__(self, item):
-        r"""Check whether the complex contains an item."""
+        """Check whether the complex contains an item."""
         pass
 
     @abc.abstractmethod
     def __getitem__(self, node):
-        r"""Get item."""
+        """Get item."""
         pass
 
     @abc.abstractmethod
     def remove_nodes(self, node_set):
-        r"""Return dimension of the complex."""
+        """Return dimension of the complex."""
         pass
 
     @abc.abstractmethod
     def add_node(self, node):
-        r"""Add node to the complex."""
+        """Add node to the complex."""
         pass
 
     @abc.abstractmethod
     def incidence_matrix(self):
-        r"""Return incidence matrix of the complex."""
+        """Return incidence matrix of the complex."""
         pass
 
     @abc.abstractmethod
     def adjacency_matrix(self):
-        r"""Return adjacency matrix of the complex."""
+        """Return adjacency matrix of the complex."""
         pass
 
     @abc.abstractmethod
     def coadjacency_matrix(self):
-        r"""Return coadjacency matrix of the complex."""
+        """Return coadjacency matrix of the complex."""
         pass

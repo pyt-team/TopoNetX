@@ -183,7 +183,7 @@ def laplacian_spectrum(matrix, weight="weight"):
     ----------
     matrix : scipy sparse matrix
 
-    weight : string or None, optional (default='weight')
+    weight : str or None, optional (default='weight')
        If None, then each cell has weight 1.
 
     Returns
@@ -203,8 +203,7 @@ def cell_complex_hodge_laplacian_spectrum(CX: CellComplex, rank: int, weight="we
     Parameters
     ----------
     matrix : scipy sparse matrix
-
-    weight : string or None, optional (default='weight')
+    weight : str or None, optional (default='weight')
         If None, then each cell has weight 1.
 
     Returns
@@ -212,8 +211,8 @@ def cell_complex_hodge_laplacian_spectrum(CX: CellComplex, rank: int, weight="we
     evals : NumPy array
         Eigenvalues.
 
-    Example
-    -------
+    Examples
+    --------
     >>> CX = CellComplex()
     >>> CX.add_cell([1,2,3,4],rank=2)
     >>> CX.add_cell([2,3,4,5],rank=2)
@@ -231,8 +230,7 @@ def simplicial_complex_hodge_laplacian_spectrum(
     Parameters
     ----------
     matrix : scipy sparse matrix
-
-    weight : string or None, optional (default='weight')
+    weight : str or None, optional (default='weight')
         If None, then each cell has weight 1.
 
     Returns
@@ -240,7 +238,7 @@ def simplicial_complex_hodge_laplacian_spectrum(
     evals : NumPy array
         Eigenvalues.
 
-    Example
+    Examples
     --------
     >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> spectrum=simplicial_complex_hodge_laplacian_spectrum(SC,1)
@@ -254,7 +252,6 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
     Parameters
     ----------
     matrix : scipy sparse matrix
-
     up : bool, default False
         whether to take the upper or lower adjacency
 
@@ -263,8 +260,8 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
     evals : NumPy array
       Eigenvalues
 
-    Example
-    -------
+    Examples
+    --------
     >>> CX = CellComplex()
     >>> CX.add_cell([1,2,3,4],rank=2)
     >>> CX.add_cell([2,3,4,5],rank=2)
@@ -282,8 +279,7 @@ def simplicial_complex_adjacency_spectrum(
     Parameters
     ----------
     matrix : scipy sparse matrix
-
-    weight : string or None, optional (default='weight')
+    weight : str or None, optional (default='weight')
         If None, then each cell has weight 1.
 
     Returns
@@ -300,8 +296,7 @@ def combinatorial_complex_adjacency_spectrum(CC: CombinatorialComplex, r, k):
     Parameters
     ----------
     matrix : scipy sparse matrix
-
-    weight : string or None, optional (default='weight')
+    weight : str or None, default='weight'
         If None, then each cell has weight 1.
 
     Returns
@@ -309,8 +304,8 @@ def combinatorial_complex_adjacency_spectrum(CC: CombinatorialComplex, r, k):
     evals : NumPy array
         Eigenvalues
 
-    Example
-    -------
+    Examples
+    --------
     >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
     >>> s = laplacian_spectrum( CC.adjacency_matrix( 0,2) )
     """

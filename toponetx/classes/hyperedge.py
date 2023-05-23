@@ -1,11 +1,7 @@
 """HyperEdge classes."""
 
 
-try:
-    from collections.abc import Hashable, Iterable
-except ImportError:
-    from collections import Hashable, Iterable
-
+from collections.abc import Hashable, Iterable
 
 __all__ = ["HyperEdge"]
 
