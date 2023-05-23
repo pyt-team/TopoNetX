@@ -21,7 +21,7 @@ def graph_2_neighbor_complex(G):
 
     Returns
     -------
-    _ : SimplicialComplex
+    SimplicialComplex
         The neighbor complex of the graph.
 
     Notes
@@ -51,7 +51,7 @@ def graph_2_clique_complex(G, max_dim=None):
 
     Returns
     -------
-    _ : SimplicialComplex
+    SimplicialComplex
         The clique simplicial complex of dimension dim of the graph G.
     """
     if max_dim is None:

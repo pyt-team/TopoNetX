@@ -10,7 +10,7 @@ __all__ = ["Cell"]
 
 
 class Cell:
-    r"""Class representing a 2D cell.
+    """Class representing a 2D cell.
 
     A 2D cell is an elementary building block used to build a 2D cell complex, whether regular or non-regular.
 
@@ -93,7 +93,7 @@ class Cell:
         self.properties.update(attr)
 
     def __getitem__(self, item):
-        r"""Retrieve the value associated with the given key in the properties dictionary.
+        """Retrieve the value associated with the given key in the properties dictionary.
 
         Parameters
         ----------
@@ -115,7 +115,7 @@ class Cell:
             return self.properties[item]
 
     def __setitem__(self, key, item):
-        r"""Set the value associated with the given key in the properties dictionary.
+        """Set the value associated with the given key in the properties dictionary.
 
         Parameters
         ----------
@@ -132,7 +132,7 @@ class Cell:
 
     @property
     def is_regular(self):
-        r"""Check if a cell is regular.
+        """Check if a cell is regular.
 
         Return true is the Cell is a regular cell, and False otherwise
         """
@@ -148,7 +148,7 @@ class Cell:
         return True
 
     def __len__(self):
-        r"""Get the number of elements in the cell.
+        """Get the number of elements in the cell.
 
         Returns
         -------
@@ -158,7 +158,7 @@ class Cell:
         return len(self._elements)
 
     def __iter__(self):
-        r"""Iterate over the elements in the cell.
+        """Iterate over the elements in the cell.
 
         Returns
         -------
@@ -168,7 +168,7 @@ class Cell:
         return iter(self._elements)
 
     def sign(self, edge):
-        r"""Compute the sign of the edge with respect to the cell.
+        """Compute the sign of the edge with respect to the cell.
 
         This takes an edge as input and computes the sign of the edge with respect to the cell.
 
@@ -215,7 +215,7 @@ class Cell:
 
     @property
     def boundary(self):
-        r"""Boundary.
+        """Boundary.
 
         A 2d cell is characterized by its boundary edges.
 
@@ -235,7 +235,7 @@ class Cell:
 
         Returns
         -------
-        _ : Cell
+        Cell
             New cell with the new reversed elements.
         """
         c = Cell(self._elements[::-1], name=self.name, regular=self._regular)
@@ -251,7 +251,7 @@ class Cell:
 
         Returns
         -------
-        _ : bool
+        bool
             Return True is self is homotopic to input cell and False otherwise.
         """
         return Cell._are_homotopic(self, cell) or Cell._are_homotopic(

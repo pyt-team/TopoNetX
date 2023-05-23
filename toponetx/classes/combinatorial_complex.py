@@ -23,7 +23,7 @@ __all__ = ["CombinatorialComplex"]
 
 
 class CombinatorialComplex(Complex):
-    r"""Class for Combinatorial Complex.
+    """Class for Combinatorial Complex.
 
     A Combinatorial Complex (CC) is a triple CC = (S, X, rk) where:
     -  S is an abstract set of entities,
@@ -387,12 +387,12 @@ class CombinatorialComplex(Complex):
         ----------
         node : hashable
             Identifier for the node.
-        rank : positive integer, optional, default: 1
+        rank : int, optional, default: 1
             Smallest size of cell to consider in degree
 
         Returns
         -------
-        _ : int
+        int
             Number of cells of certain rank that contain node.
         """
         if node in self.nodes:
@@ -543,9 +543,8 @@ class CombinatorialComplex(Complex):
         -------
         None.
 
-        Example
-        ------
-
+        Examples
+        --------
         After computing some property of the cell of a combinatorial complex, you may want
         to assign a cell attribute to store the value of that property for
         each cell:
@@ -560,10 +559,8 @@ class CombinatorialComplex(Complex):
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
-        the entire dictionary will be used to update edge attributes::
+        the entire dictionary will be used to update edge attributes:
 
-        Examples
-        --------
         >>> G = nx.path_graph(3)
         >>> CC = NestedCombinatorialComplex(G)
         >>> d = {(1, 2): {'color': 'red','attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3}}
@@ -594,7 +591,7 @@ class CombinatorialComplex(Complex):
 
         Parameters
         ----------
-        name : string
+        name : str
            Attribute name
 
         Returns
@@ -628,9 +625,10 @@ class CombinatorialComplex(Complex):
 
         Parameters
         ----------
-        name : string
+        name : str
            Attribute name.
-        rank : integer rank of the k-cell
+        rank : int
+            rank of the k-cell
 
         Returns
         -------
@@ -1080,7 +1078,7 @@ class CombinatorialComplex(Complex):
         If index if False
             adjacency_matrix : scipy.sparse.csr.csr_matrix
 
-        Example
+        Examples
         --------
         >>> G = Graph() # networkx graph
         >>> G.add_edge(0, 1)
@@ -1238,7 +1236,7 @@ class CombinatorialComplex(Complex):
         node_set: iterable of hashables
             References a subset of elements of self.nodes
 
-        name: string, optional, default: None
+        name: str, optional
 
         Returns
         -------
@@ -1260,8 +1258,8 @@ class CombinatorialComplex(Complex):
         CC such that the edges of the graph are ranked 1
         and the nodes are ranked 0.
 
-        Example
-        ------
+        Examples
+        --------
         >>> from networkx import Graph
         >>> G = Graph()
         >>> G.add_edge(0, 1)
@@ -1281,8 +1279,8 @@ class CombinatorialComplex(Complex):
     def to_hypergraph(self):
         """Convert a combinatorial complex to a hypergraph.
 
-        Example
-        -------
+        Examples
+        --------
         >>> CC = CombinatorialComplex(cells=E)
         >>> HG = CC.to_hypergraph()
         """
@@ -1311,8 +1309,8 @@ class CombinatorialComplex(Complex):
         such that every consecutive pair of nodes v(i),v(i+1)
         share at least s cell.
 
-        Example
-        -------
+        Examples
+        --------
         >>> CC = CombinatorialComplex(cells=E)
         """
         B = self.incidence_matrix(rank=0, to_rank=None, incidence_type="up")
@@ -1630,7 +1628,7 @@ class CombinatorialComplex(Complex):
             a node in the CC
         target : node.uid or node
             a node in the CC
-        s : positive integer
+        s : int
             the number of cells
 
         Returns
@@ -1661,11 +1659,9 @@ class CombinatorialComplex(Complex):
         ----------
         source : cell.uid or cell
             an cell in the combinatorial complex
-
         target : cell.uid or cell
             an cell in the combinatorial complex
-
-        s : positive integer
+        s : int
             the number of intersections between pairwise consecutive cells
 
         Returns

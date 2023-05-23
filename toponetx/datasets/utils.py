@@ -17,7 +17,7 @@ def load_ppi():
 
     Returns
     -------
-    _ : networkx.Graph
+    networkx.Graph
         Graph with nodes that are proteins and edges corresponding to their
         chemical interactions.
     """

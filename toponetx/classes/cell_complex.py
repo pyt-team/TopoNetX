@@ -66,13 +66,10 @@ class CellComplex(Complex):
         such as sparse matrices.
     5. Robust error handling and validation of input data, ensuring that the package is reliable and easy to use.
 
-    # Example 0
-    -----------
-    >>> # Cell Complex can be empty
-    >>> CX = CellComplex()
+    Examples
+    --------
+    Iteratively construct a cell complex:
 
-    # Example 1
-    -----------
     >>> CX = CellComplex()
     >>> CX.add_cell([1, 2, 3, 4], rank=2)
     >>> # the cell [1, 2, 3, 4] consists of the cycle (1,2), (2,3), (3,4), (4,5)
@@ -80,15 +77,14 @@ class CellComplex(Complex):
     >>> CX.add_cell([2, 3, 4, 5], rank=2)
     >>> CX.add_cell([5, 6, 7, 8], rank=2)
 
-    # Example 2
-    -----------
+    You can also pass a list of cells to the constructor:
+
     >>> c1 = Cell((1, 2, 3)) # a cell here is always assumed to be 2d
     >>> c2 = Cell((1, 2, 3, 4))
     >>> CX = CellComplex([c1, c2])
 
-    # Example 3
-    -----------
-    >>> compatibility with networkx
+    TopoNetX is also compatible with NetworkX, allowing users to create a cell complex from a NetworkX graph:
+
     >>> import networkx as nx
     >>> g = nx.Graph()
     >>> g.add_edge(1, 0)
@@ -98,8 +94,9 @@ class CellComplex(Complex):
     >>> CX.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
     >>> CX.cells
 
-    # Example 4
-    -----------
+    By default, a regular cell complex is constructed. You can change this behaviour using the
+    `regular` parameter when constructing the complex.
+
     >>> # non-regular cell complex
     >>> # by default CellComplex constructor assumes regular cell complex
     >>> CX = CellComplex(regular=False)
@@ -107,15 +104,8 @@ class CellComplex(Complex):
     >>> CX.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
     >>> c1 = Cell((1, 2, 3, 4, 5, 1, 2, 3, 4, 5), regular=False)
     >>> CX.add_cell(c1)
-    >>> CX.add_cell([5, 6, 7, 8],rank=2)
+    >>> CX.add_cell([5, 6, 7, 8], rank=2)
     >>> CX.is_regular
-
-    # Example 5
-    -----------
-    >>> CX = CellComplex()
-    >>> CX.add_cell([1, 2, 3, 4], rank=2, weight=5)
-    >>> CX.add_cell([2, 3, 4, 5], rank=2, weight=10)
-    >>> CX.add_cell([5, 6, 7, 8], rank=2, weight=13)
     """
 
     def __init__(self, cells=None, name=None, regular=True, **attr):
@@ -210,10 +200,10 @@ class CellComplex(Complex):
 
         Returns
         -------
-        _ : bool
+        bool
 
-        Example
-        -------
+        Examples
+        --------
         >>> CX = CellComplex(regular=False)
         >>> CX.add_cell([1, 2, 3, 4], rank=2)
         >>> CX.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
@@ -244,7 +234,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        _ : dict_keyiterator
+        dict_keyiterator
             Iterator over nodes.
         """
         return iter(self.nodes)
@@ -259,7 +249,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        _ : bool
+        bool
             True if item is in self.nodes, False otherwise.
         """
         return item in self.nodes
@@ -320,8 +310,8 @@ class CellComplex(Complex):
         equiv : TYPE
             DESCRIPTION.
 
-        Example
-        -------
+        Examples
+        --------
         >>> cx = CellComplex()
         >>> cx.add_cell ( (1,2,3,4),rank=2 )
         >>> cx.add_cell ( (2,3,4,1),rank=2 )
@@ -356,8 +346,8 @@ class CellComplex(Complex):
     def _remove_equivalent_cells(self):
         """Remove homotopic cells from the cell complex.
 
-        Example
-        -------
+        Examples
+        --------
         >>> cx = CellComplex()
         >>> cx.add_cell ( (1,2,3,4),rank=2 )
         >>> cx.add_cell ( (2,3,4,1),rank=2 )
@@ -397,7 +387,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        _ : int
+        int
             Number of cells of rank at least rank that contain node.
         """
         return self._G.degree[node]
@@ -455,8 +445,8 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        cell_set : an interable of RankedEntities, optional, default: None
-            If None, then return the number of cells in cell complex.
+        edge_set : an iterable of RankedEntities, optional, default: None
+            If None, then return the number of edges in cell complex.
 
         Returns
         -------
@@ -504,12 +494,9 @@ class CellComplex(Complex):
         node : hashable or Entity
             uid for a node in cell complex or the node Entity
 
-        s : int, list, optional, default : 1
-            Minimum rank of cells shared by neighbors with node.
-
         Returns
         -------
-        _ : list
+        list
             List of neighbors.
         """
         if node not in self.nodes:
@@ -607,15 +594,17 @@ class CellComplex(Complex):
         ----------
         cell : hashable or RankedEntity
             If hashable the cell returned will be empty.
-        uid : unique identifier that identifies the cell
-        rank : rank of a cell, supported ranks is 1 or 2
+        rank : int
+            rank of a cell, supported ranks is 1 or 2
+        check_skeleton : bool, default=False
+            If true, this function checks the skeleton whether the given cell can be added.
 
         Returns
         -------
         Cell Complex : CellComplex
 
-        Example
-        -------
+        Examples
+        --------
         >>> CX = CellComplex()
         >>> c1 = Cell((2, 3, 4), color='black')
         >>> CX.add_cell(c1, weight=3)
@@ -697,10 +686,12 @@ class CellComplex(Complex):
         ----------
         cell_set : iterable of hashables or Cell
             For hashables the cells returned will be empty.
-        rank : integer (optional), default is None
+        rank : int (optional), default is None
                when each element in cell_set is an iterable then
                rank must be a number that indicates the rank
                of the added cells.
+        check_skeleton : bool
+            If true, this function checks the skeleton whether the given cell can be added.
 
         Returns
         -------
@@ -750,10 +741,6 @@ class CellComplex(Complex):
 
     def clear(self):
         """Remove all cells from a cell complex.
-
-        Parameters
-        ----------
-        cell_set : iterable of hashables or RankedEntities
 
         Returns
         -------
@@ -845,8 +832,8 @@ class CellComplex(Complex):
         -------
         None
 
-        Example
-        -------
+        Examples
+        --------
         >>> G = nx.path_graph(3)
         >>> CX = CellComplex(G)
         >>> d = {0: {'color': 'red', 'attr2': 1 }, 1: {'color': 'blue', 'attr2': 3}}
@@ -881,8 +868,8 @@ class CellComplex(Complex):
         -------
         None
 
-        Example
-        -------
+        Examples
+        --------
         >>> G = nx.path_graph(3)
         >>> CX = CellComplex(G)
         >>> d={ (0,1) : {'color':'red','attr2':1 },(1,2): {'color':'blue','attr2':3 } }
@@ -909,7 +896,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        name : string
+        name : str
            Attribute name.
 
         Returns
@@ -936,8 +923,8 @@ class CellComplex(Complex):
         -------
         None.
 
-        Example
-        -------
+        Examples
+        --------
         After computing some property of the cell of a cell complex, you may want
         to assign a cell attribute to store the value of that property for
         each cell:
@@ -1024,7 +1011,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        name : string
+        name : str
            Attribute name.
 
         Returns
@@ -1058,9 +1045,10 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        name : string
+        name : str
            Attribute name
-        k : integer rank of the k-cell
+        rank : int
+            rank of the k-cell
 
         Returns
         -------
@@ -1117,8 +1105,8 @@ class CellComplex(Complex):
         -------
         None.
 
-        Example
-        -------
+        Examples
+        --------
         >>> import networkx as nx
         >>> G = nx.path_graph(3)
         >>> cx = CellComplex(G)
@@ -1165,11 +1153,14 @@ class CellComplex(Complex):
 
         Parameters
         ----------
+        rank : int
+            The rank for which an incidence matrix should be computed.
+        signed : bool, default=True
+            Whether the returned incidence matrix should be signed (i.e., respect orientations) or unsigned.
         weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
-
         index : boolean, optional, default False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
@@ -1186,22 +1177,20 @@ class CellComplex(Complex):
             list of cells in the complex with the same
             order of the column of the matrix
 
-        Example1
+        Examples
         --------
-            >>> CX = CellComplex()
-            >>> CX.add_cell([1,2,3,4],rank=2)
-            >>> CX.add_cell([3,4,5],rank=2)
-            >>> B0 = CX.incidence_matrix(0)
-            >>> B1 = CX.incidence_matrix(1)
-            >>> B2 = CX.incidence_matrix(2)
-            >>> B1.dot(B2).todense()
-            >>> B0.dot(B1).todense()
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([3, 4, 5], rank=2)
+        >>> B0 = CX.incidence_matrix(0)
+        >>> B1 = CX.incidence_matrix(1)
+        >>> B2 = CX.incidence_matrix(2)
+        >>> B1.dot(B2).todense()
+        >>> B0.dot(B1).todense()
 
-        Example2
-        --------
-        ## note that in this example, the first three cells are
-        ## equivalent and hence they have similar incidence to lower edges
-        ## they are incident to
+        Note that in this example, the first three cells are equivalent and hence they have similar incidence to lower
+        edges they are incident to.
+
         >>> import networkx as nx
         >>> G = nx.path_graph(3)
         >>> CX = CellComplex(G)
@@ -1214,9 +1203,8 @@ class CellComplex(Complex):
         >>> B2 = CX.incidence_matrix(2)
         >>> B1.dot(B2).todense()
 
-        Example3
-        --------
-        # non-regular complex example
+        Non-regular cell complex example:
+
         >>> CX = CellComplex(regular=False)
         >>> CX.add_cell([1,2,3,2],rank=2)
         >>> CX.add_cell([3,4,5,3,4,5],rank=2)
@@ -1225,8 +1213,6 @@ class CellComplex(Complex):
         >>> print(B2.todense()) # observe the non-unit entries
         >>> B1.dot(B2).todense()
 
-        Example4
-        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3,4],rank=2)
         >>> CX.add_cell([3,4,5],rank=2)
@@ -1344,8 +1330,8 @@ class CellComplex(Complex):
         -------
         a matrix : scipy.sparse.csr.csr_matrix
 
-        Example
-        -------
+        Examples
+        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1, 2, 3, 5, 6], rank=2)
         >>> CX.add_cell([1, 2, 4, 5, 3, 0], rank=2)
@@ -1367,7 +1353,7 @@ class CellComplex(Complex):
         Parameters
         ----------
         rank : int, dimension of the Laplacian matrix.
-            Supported dimension are 0,1 and 2
+            Supported dimension are 0, 1 and 2
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
                        adjacency matrices from the hodge-laplacian
@@ -1389,12 +1375,12 @@ class CellComplex(Complex):
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
 
-        Example1
+        Examples
         --------
         >>> CX = CellComplex()
-        >>> CX.add_cell([1,2,3,4],rank=2)
-        >>> CX.add_cell([3,4,5],rank=2)
-        >>> L1 = CX.hodge_laplacian_matrix(1)
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([3, 4, 5], rank=2)
+        >>> CX.hodge_laplacian_matrix(1)
         """
         if rank == 0:  # return L0, the unit graph laplacian
             if index:
@@ -1482,7 +1468,7 @@ class CellComplex(Complex):
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             dependeing on the input dimension
 
-        Example1
+        Examples
         --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3,4],rank=2)
@@ -1552,8 +1538,8 @@ class CellComplex(Complex):
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             dependeing on the input dimension
 
-        Example
-        -------
+        Examples
+        --------
         >>> import networkx as nx
         >>> G = nx.path_graph(3)
         >>> CX = CellComplex(G)
@@ -1642,8 +1628,8 @@ class CellComplex(Complex):
     def cell_adjacency_matrix(self, signed=True, weight=None, index=False):
         """Compute adjacency matrix.
 
-        Example
-        -------
+        Examples
+        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3],rank=2)
         >>> CX.add_cell([1,4],rank=1)
@@ -1689,8 +1675,8 @@ class CellComplex(Complex):
         -------
         new cell complex : CellComplex
 
-        Example
-        -------
+        Examples
+        --------
         >>> CX = CellComplex()
         >>> c1 = Cell((1, 2, 3))
         >>> c2 = Cell((1, 2, 4))
@@ -1725,13 +1711,14 @@ class CellComplex(Complex):
         node_set: iterable of hashables
             References a subset of elements of self.nodes
 
-        name: string, optional, default: None
+        name: str, optional
 
         Returns
         -------
         new Cell Complex : Cellcomplex
 
-        Example
+        Examples
+        --------
         >>> CX = CellComplex()
         >>> c1 = Cell((1, 2, 3))
         >>> c2 = Cell((1, 2, 4))
@@ -1759,8 +1746,8 @@ class CellComplex(Complex):
         The rank of an element in a cell complex is its dimension, so vertices have rank 0,
         edges have rank 1, and faces have rank 2.
 
-        Example
-        -------
+        Examples
+        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3,4],rank=2)
         >>> CX.add_cell([2,3,4,5],rank=2)
@@ -1773,8 +1760,8 @@ class CellComplex(Complex):
     def to_hypergraph(self):
         """Convert to hypergraph.
 
-        Example
-        -------
+        Examples
+        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3,4],rank=2)
         >>> CX.add_cell([2,3,4,5],rank=2)
@@ -2119,7 +2106,7 @@ class CellComplex(Complex):
             a node in the CX
         target : node.uid or node
             a node in the CX
-        s : positive integer
+        s : int
             the number of cells
 
         Returns
@@ -2163,7 +2150,7 @@ class CellComplex(Complex):
             an cell in the cell complex
         target : cell.uid or cell
             an cell in the cell complex
-        s : positive integer
+        s : int
             the number of intersections between pairwise consecutive cells
 
         Returns
