@@ -313,17 +313,16 @@ class CellComplex(Complex):
         Examples
         --------
         >>> cx = CellComplex()
-        >>> cx.add_cell ( (1,2,3,4),rank=2 )
-        >>> cx.add_cell ( (2,3,4,1),rank=2 )
-        >>> cx.add_cell ( (1,2,3,4),rank=2 )
-        >>> cx.add_cell ( (1,2,3,6),rank=2 )
-        >>> cx.add_cell ( (3,4,1,2),rank=2 )
-        >>> cx.add_cell ( (4,3,2,1),rank=2 )
-        >>> cx.add_cell ( (1,2,7,3),rank=2 )
-        >>> c1=Cell((1,2,3,4,5))
-        >>> cx.add_cell(c1,rank=2)
-        >>> d = cx._cell_equivalence_class()
-        >>> d
+        >>> cx.add_cell((1, 2, 3, 4), rank=2)
+        >>> cx.add_cell((2, 3, 4, 1), rank=2)
+        >>> cx.add_cell((1, 2, 3, 4), rank=2)
+        >>> cx.add_cell((1, 2, 3, 6), rank=2)
+        >>> cx.add_cell((3, 4, 1, 2), rank=2)
+        >>> cx.add_cell((4, 3, 2, 1), rank=2)
+        >>> cx.add_cell((1, 2, 7, 3), rank=2)
+        >>> c1 = Cell((1, 2, 3, 4, 5))
+        >>> cx.add_cell(c1, rank=2)
+        >>> cx._cell_equivalence_class()
         """
         equiv_classes = defaultdict(set)
         all_inserted_cells = set()
@@ -941,17 +940,15 @@ class CellComplex(Complex):
         --------
         >>> import networkx as nx
         >>> G = nx.path_graph(3)
-
-        >>> d={ ((1,2,3,4),0): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
+        >>> d = {((1, 2, 3, 4), 0): {'color': 'red', 'attr2': 1}, (1, 2, 4): {'color': 'blue', 'attr2': 3 }}
         >>> CX = CellComplex(G)
-        >>> CX.add_cell([1,2,3,4], rank=2)
-        >>> CX.add_cell([1,2,3,4], rank=2)
-        >>> CX.add_cell([1,2,4], rank=2,)
-        >>> CX.add_cell([3,4,8], rank=2)
-        >>> CX.set_cell_attributes(d)
-        >>> cell_color=CX.get_cell_attributes('color',2)
-        >>> cell_color
-        '{((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([1, 2, 4], rank=2,)
+        >>> CX.add_cell([3, 4, 8], rank=2)
+        >>> CX.set_cell_attributes(d, 2)
+        >>> CX.get_cell_attributes('color', 2)
+        {((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
         """
         if rank == 0:
             return nx.get_node_attributes(self._G, name)
@@ -1357,12 +1354,10 @@ class CellComplex(Complex):
         >>> CX.add_cell([3,4,5],rank=2)
         >>> L1_up = CX.up_laplacian_matrix(1)
 
-        Example2
-        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3],rank=2)
         >>> CX.add_cell([3,4,5],rank=2)
-        >>> index , L1_up = CX.up_laplacian_matrix(1,index=True)
+        >>> index, L1_up = CX.up_laplacian_matrix(1, index=True)
         >>> print(index)
         >>> print(L1_up)
         """
@@ -1513,8 +1508,8 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CX = CellComplex()
-        >>> CX.add_cell([1,2,3],rank=2)
-        >>> CX.add_cell([1,4],rank=1)
+        >>> CX.add_cell([1, 2, 3], rank=2)
+        >>> CX.add_cell([1, 4], rank=1)
         >>> A = CX.cell_adjacency_matrix()
         """
         CX = self.to_combinatorial_complex()
@@ -2029,9 +2024,9 @@ class CellComplex(Complex):
         Parameters
         ----------
         source : cell.uid or cell
-            an cell in the cell complex
+            a cell in the cell complex
         target : cell.uid or cell
-            an cell in the cell complex
+            a cell in the cell complex
         s : int
             the number of intersections between pairwise consecutive cells
 
@@ -2071,14 +2066,13 @@ class CellComplex(Complex):
             return np.inf
 
     def from_networkx_graph(self, G):
-        """Add edges and nodes from a a graph G to self.
+        """Add edges and nodes from a graph G to self.
 
         Examples
         --------
         >>> CX = CellComplex()
         >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
-
-        >>> G= Graph()
+        >>> G = Graph()
         >>> G.add_edge(1,0)
         >>> G.add_edge(2,0)
         >>> G.add_edge(1,2)
