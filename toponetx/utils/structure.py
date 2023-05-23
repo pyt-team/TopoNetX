@@ -23,7 +23,7 @@ indices in S and T to other values.
 """
 
 from collections import defaultdict
-from typing import Dict, List, Tuple
+from typing import Dict, Iterable, List, Tuple
 
 
 def sparse_array_to_neighborhood_list(
@@ -55,7 +55,7 @@ def sparse_array_to_neighborhood_list(
 
 
 def neighborhood_list_to_neighborhood_dict(
-    n_list: List[Tuple[int, int]], src_dict=None, dst_dict=None
+    n_list: Iterable[Tuple[int, int]], src_dict=None, dst_dict=None
 ) -> Dict[int, List[int]]:
     r"""Convert neighborhood list to neighborhood dictionary for arbitrary higher order structures.
 
@@ -67,8 +67,8 @@ def neighborhood_list_to_neighborhood_dict(
     ----------
         ``n_list`` (``List[Tuple[int, int]]``): neighborhood list.
     """
+    neighborhood_dict = defaultdict(list)
     if src_dict is None and dst_dict is None:
-        neighborhood_dict = defaultdict(list)
         for src_idx, dst_idx in n_list:
             neighborhood_dict[src_idx].append(dst_idx)
         return neighborhood_dict
