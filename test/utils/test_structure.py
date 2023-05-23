@@ -113,8 +113,7 @@ class TestStructure(unittest.TestCase):
         assert output == d
 
     def test_incidence_to_adjacency(self):
-        """
-        Tests incidence to adjacency.
+        """Test incidence to adjacency.
 
         uses transposed of cell-edge incidence for cell complex [(1,2,3,4), (1,2,4,3)]
         """
