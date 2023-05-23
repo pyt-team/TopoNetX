@@ -49,7 +49,7 @@ class NodeView:
 
         Returns
         -------
-        _ : dict or list or dicts
+        dict or list
             Dict of properties associated with that cells.
         """
         if isinstance(cell, self.cell_type):

@@ -21,7 +21,7 @@ __all__ = ["HyperEdgeView", "CellView", "SimplexView"]
 
 
 class CellView:
-    r"""A CellView class for cells of a CellComplex.
+    """A CellView class for cells of a CellComplex.
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ class CellView:
         self._cells = dict()
 
     def __getitem__(self, cell):
-        r"""Return the properties of a given cell.
+        """Return the properties of a given cell.
 
         Parameters
         ----------
@@ -92,14 +92,14 @@ class CellView:
             raise KeyError("input must be a tuple, list or a cell")
 
     def __len__(self):
-        r"""Return the number of cells in the cell view."""
+        """Return the number of cells in the cell view."""
         if len(self._cells) == 0:
             return 0
         else:
             return np.sum([len(self._cells[cell]) for cell in self._cells])
 
     def __iter__(self):
-        r"""Iterate over all cells in the cell view."""
+        """Iterate over all cells in the cell view."""
         return iter(
             [
                 self._cells[cell][key]
@@ -109,7 +109,7 @@ class CellView:
         )
 
     def __contains__(self, e):
-        r"""Check if a given element is in the cell view.
+        """Check if a given element is in the cell view.
 
         Parameters
         ----------
@@ -130,11 +130,11 @@ class CellView:
             return False
 
     def __repr__(self):
-        r"""Return a string representation of the cell view."""
+        """Return a string representation of the cell view."""
         return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
     def __str__(self):
-        r"""Return a string representation of the cell view."""
+        """Return a string representation of the cell view."""
         return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
 

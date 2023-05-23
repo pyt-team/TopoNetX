@@ -13,28 +13,31 @@ class Simplex:
     """
     A class representing a simplex in a simplicial complex.
 
-    This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension. The simplex
-    is immutable, and the nodes in the simplex must be hashable and unique.
+    This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension. The
+    simplex is immutable, and the nodes in the simplex must be hashable and unique.
 
-    :param elements: The nodes in the simplex.
-    :type elements: any iterable of hashables
-    :param name: A name for the simplex, default is None.
-    :type name: str, optional
-    :param construct_tree: If True, construct the entire simplicial tree for the simplex. Default is True.
-    :type construct_tree: bool, optional
-    :param attr: Additional attributes to be associated with the simplex.
-    :type attr: keyword arguments, optional
+    Parameters
+    ----------
+    elements: Iterable
+        The nodes in the simplex.
+    name : str, optional
+        A name for the simplex.
+    construct_tree : bool, default=True
+        If True, construct the entire simplicial tree for the simplex.
+    attr : keyword arguments, optional
+        Additional attributes to be associated with the simplex.
 
-    :Example:
-        >>> # Create a 0-dimensional simplex (point)
-        >>> s = Simplex((1,))
-        >>> # Create a 1-dimensional simplex (line segment)
-        >>> s = Simplex((1, 2))
-        >>> # Create a 2-dimensional simplex (triangle)
-        >>> simplex1 = Simplex((1, 2, 3))
-        >>> simplex2 = Simplex(("a", "b", "c"))
-        >>> # Create a 3-dimensional simplex (tetrahedron)
-        >>> simplex3 = Simplex((1, 2, 4, 5), weight=1)
+    Examples
+    --------
+    >>> # Create a 0-dimensional simplex (point)
+    >>> s = Simplex((1,))
+    >>> # Create a 1-dimensional simplex (line segment)
+    >>> s = Simplex((1, 2))
+    >>> # Create a 2-dimensional simplex (triangle)
+    >>> simplex1 = Simplex((1, 2, 3))
+    >>> simplex2 = Simplex(("a", "b", "c"))
+    >>> # Create a 3-dimensional simplex (tetrahedron)
+    >>> simplex3 = Simplex((1, 2, 4, 5), weight=1)
     """
 
     def __init__(self, elements, name=None, construct_tree=True, **attr):
@@ -111,7 +114,7 @@ class Simplex:
 
         Returns
         -------
-        _ : frozenset[Simplex]
+        frozenset[Simplex]
             The set of faces of the simplex.
         """
         if self.construct_tree:

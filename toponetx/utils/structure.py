@@ -29,7 +29,7 @@ from typing import Dict, List, Tuple
 def sparse_array_to_neighborhood_list(
     sparse_array, src_dict=None, dst_dict=None
 ) -> zip:
-    r"""Convert sparse array to neighborhood list for arbitrary higher order structures.
+    """Convert sparse array to neighborhood list for arbitrary higher order structures.
 
     Notes
     -----
@@ -57,7 +57,7 @@ def sparse_array_to_neighborhood_list(
 def neighborhood_list_to_neighborhood_dict(
     n_list: List[Tuple[int, int]], src_dict=None, dst_dict=None
 ) -> Dict[int, List[int]]:
-    r"""Convert neighborhood list to neighborhood dictionary for arbitrary higher order structures.
+    """Convert neighborhood list to neighborhood dictionary for arbitrary higher order structures.
 
     Notes
     -----
@@ -83,7 +83,7 @@ def neighborhood_list_to_neighborhood_dict(
 def sparse_array_to_neighborhood_dict(
     sparse_array, src_dict=None, dst_dict=None
 ) -> Dict[int, List[int]]:
-    r"""Convert sparse array to neighborhood dictionary for arbitrary higher order structures.
+    """Convert sparse array to neighborhood dictionary for arbitrary higher order structures.
 
     Notes
     -----
