@@ -102,6 +102,7 @@ class SimplicialComplex(Complex):
     >>> SC = SimplicialComplex(simplices=G)
     >>> SC.add_simplex([1, 2, 3])
     >>> SC.simplices
+    SimplexView([(0,), (1,), (3,), (4,), (2,), (0, 1), (0, 3), (0, 4), (1, 4), (1, 2), (1, 3), (2, 3), (1, 2, 3)])
     """
 
     def __init__(self, simplices=None, name=None, mode="normal", **attr):
@@ -490,20 +491,6 @@ class SimplicialComplex(Complex):
             raise TypeError("input type must be iterable, or Simplex")
 
     def _remove_maximal_simplex(self, simplex):
-        """Remove maximal simplex from simplicial complex.
-
-        Note
-        -----
-        Only maximal simplices are allowed to be deleted. Otherwise raise ValueError
-
-        Examples
-        --------
-        >>> SC = SimplexView()
-        >>> SC.insert_simplex((1, 2, 3, 4), weight=1)
-        >>> c1=Simplex((1, 2, 3, 4, 5))
-        >>> SC.insert_simplex(c1)
-        >>> SC.remove_maximal_simplex((1, 2, 3, 4, 5))
-        """
         if isinstance(simplex, Iterable):
             if not isinstance(simplex, Simplex):
                 simplex_ = frozenset(
@@ -591,7 +578,19 @@ class SimplicialComplex(Complex):
         return face_set
 
     def remove_maximal_simplex(self, simplex):
-        """Remove maximal simplex from simplicial complex."""
+        """Remove maximal simplex from simplicial complex.
+
+        Note
+        -----
+        Only maximal simplices are allowed to be deleted. Otherwise, raise ValueError
+
+        Examples
+        --------
+        >>> SC = SimplicialComplex()
+        >>> SC.add_simplex((1, 2, 3, 4), weight=1)
+        >>> SC.add_simplex((1, 2, 3, 4, 5))
+        >>> SC.remove_maximal_simplex((1, 2, 3, 4, 5))
+        """
         self._remove_maximal_simplex(simplex)
 
     def add_node(self, node, **attr):
@@ -731,10 +730,9 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
-        >>> d = {(1): 'red', (2): 'blue', (3): 'black'}
-        >>> SC.set_simplex_attributes(d, name='color')
-        >>> SC.get_node_attributes('color')
-        'blue'
+        >>> SC.set_simplex_attributes({1: "red", 2: "blue", 3: "black"}, name="color")
+        >>> SC.get_node_attributes("color")
+        {(1,): 'red', (2,): 'blue', (3,): 'black'}
         """
         return {tuple(n): self[n][name] for n in self.skeleton(0) if name in self[n]}
 
@@ -758,9 +756,10 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
-        >>> d={(1,2):'red',(2,3):'blue',(3,4):"black"}
-        >>> SC.set_simplex_attributes(d,name='color')
-        >>> SC.get_simplex_attributes('color')
+        >>> d={(1, 2): "red", (2, 3): "blue", (3, 4): "black"}
+        >>> SC.set_simplex_attributes(d, name="color")
+        >>> SC.get_simplex_attributes("color")
+        {frozenset({1, 2}): 'red', frozenset({2, 3}): 'blue', frozenset({3, 4}): 'black'}
         """
         if rank is None:
             return {n: self[n][name] for n in self if name in self[n]}
@@ -1190,6 +1189,7 @@ class SimplicialComplex(Complex):
         >>> SC = SimplicialComplex([c1, c2, c3])
         >>> SC1 = SC.restrict_to_simplices([c1, (2, 4)])
         >>> SC1.simplices
+        SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (2, 3), (2, 4), (1, 2, 3)])
         """
         rns = []
         for cell in cell_set:
@@ -1222,7 +1222,9 @@ class SimplicialComplex(Complex):
         >>> c2 = Simplex((1, 2, 4))
         >>> c3 = Simplex((1, 2, 5))
         >>> SC = SimplicialComplex([c1, c2, c3])
-        >>> SC.restrict_to_nodes([1, 2, 3, 4])
+        >>> new_complex = SC.restrict_to_nodes([1, 2, 3, 4])
+        >>> new_complex.simplices
+        SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (1, 2, 3), (1, 2, 4)])
         """
         simplices = []
         node_set = set(node_set)
@@ -1241,17 +1243,19 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
+        >>> c0 = Simplex((1, 2))
         >>> c1 = Simplex((1, 2, 3))
         >>> c2 = Simplex((1, 2, 4))
         >>> c3 = Simplex((2, 5))
         >>> SC = SimplicialComplex([c1, c2, c3])
         >>> SC.get_all_maximal_simplices()
+        [(2, 5), (1, 2, 3), (1, 2, 4)]
         """
-        maxmimals = []
+        maximals = []
         for s in self:
             if self.is_maximal(s):
-                maxmimals.append(tuple(s))
-        return maxmimals
+                maximals.append(tuple(s))
+        return maximals
 
     @staticmethod
     def from_spharpy(mesh):
@@ -1511,6 +1515,7 @@ class SimplicialComplex(Complex):
         >>> hg = hnx.Hypergraph([[1, 2, 3, 4], [1, 2, 3]], static=True)
         >>> sc = SimplicialComplex.simplicial_closure_of_hypergraph(hg)
         >>> sc.simplices
+        SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4), (1, 2, 3), (1, 2, 4), (1, 3, 4), (2, 3, 4), (1, 2, 3, 4)])
         """
         edges = H.edges
         lst = []
@@ -1543,6 +1548,7 @@ class SimplicialComplex(Complex):
         >>> c3 = Simplex((2, 5))
         >>> SC = SimplicialComplex([c1, c2, c3])
         >>> SC.to_hypergraph()
+        Hypergraph({'e0': [1, 2], 'e1': [1, 3], 'e2': [1, 4], 'e3': [2, 3], 'e4': [2, 4], 'e5': [2, 5], 'e6': [1, 2, 3], 'e7': [1, 2, 4]},name=)
         """
         G = []
         for rank in range(1, self.dim + 1):

@@ -75,7 +75,7 @@ class CombinatorialComplex(Complex):
     >>> CC.add_cell([1, 2, 3, 4], rank=2)
     >>> CC.add_cell([1, 2, 4], rank=2)
     >>> CC.add_cell([3, 4], rank=2)
-    >>> CC.add_cell([1,2,3,4,5,6,7], rank=3)
+    >>> CC.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
     """
 
     def __init__(
@@ -1197,11 +1197,9 @@ class CombinatorialComplex(Complex):
         Examples
         --------
         >>> import trimesh
-        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
-                               faces=[[0, 1, 2]],
-                               process=False)
+        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]], faces=[[0, 1, 2]], process=False)
         >>> CC = CombinatorialComplex.from_trimesh(mesh)
-        >>> print(CC.nodes)
+        >>> CC.nodes
         """
         CC = CombinatorialComplex()
         return CC
@@ -1265,7 +1263,8 @@ class CombinatorialComplex(Complex):
         >>> G.add_edge(0, 1)
         >>> G.add_edge(0,4)
         >>> G.add_edge(0,7)
-        >>> CX = CombinatorialComplex.from_networkx_graph(G)
+        >>> CX = CombinatorialComplex()
+        >>> CX.from_networkx_graph(G)
         >>> CX.nodes
         RankedEntitySet(:Nodes,[0, 1, 4, 7],{'weight': 1.0})
         >>> CX.cells
@@ -1312,6 +1311,7 @@ class CombinatorialComplex(Complex):
         Examples
         --------
         >>> CC = CombinatorialComplex(cells=E)
+        >>> CC.is_connected()
         """
         B = self.incidence_matrix(rank=0, to_rank=None, incidence_type="up")
         if cells:
