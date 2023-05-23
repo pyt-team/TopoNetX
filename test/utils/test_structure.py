@@ -6,10 +6,10 @@ from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.utils.structure import (
+    incidence_to_adjacency,
     neighborhood_list_to_neighborhood_dict,
     sparse_array_to_neighborhood_dict,
     sparse_array_to_neighborhood_list,
-    incidence_to_adjacency,
 )
 
 
