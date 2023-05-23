@@ -103,6 +103,7 @@ class SimplicialComplex(Complex):
     """
 
     def __init__(self, simplices=None, name=None, mode="normal", **attr):
+        super().__init__()
 
         self.mode = mode
         if name is None:

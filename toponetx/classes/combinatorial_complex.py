@@ -86,6 +86,8 @@ class CombinatorialComplex(Complex):
     def __init__(
         self, cells=None, name=None, ranks=None, weight=None, graph_based=False, **attr
     ):
+        super().__init__()
+
         if not name:
             self.name = ""
         else:
