@@ -101,7 +101,8 @@ class TestStructure(unittest.TestCase):
 
     def test_incidence_to_adjacency(self):
         """
-        Tests incidence to adjacency
+        Tests incidence to adjacency.
+
         uses transposed of cell-edge incidence for cell complex [(1,2,3,4), (1,2,4,3)]
         """
         incidence = csr_matrix(

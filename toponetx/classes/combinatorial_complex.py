@@ -151,9 +151,6 @@ class CombinatorialComplex(Complex):
         from collections import OrderedDict
         from operator import itemgetter
 
-        if sparse:
-            from scipy.sparse import csr_matrix
-
         ndict = dict(zip(children, range(len(children))))
         edict = dict(zip(uidset, range(len(uidset))))
 

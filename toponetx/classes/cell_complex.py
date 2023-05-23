@@ -2014,7 +2014,7 @@ class CellComplex(Complex):
         G = nx.from_scipy_sparse_matrix(A)
         if nx.is_connected(G):
             return nx.diameter(G)
-        raise TopoNetXError(f"cc is not s-connected. s={s}")
+        raise TopoNetXError("cc is not connected.")
 
     def cell_diameter(self, s=1):
         """Return the length of the longest shortest s-walk between cells.
