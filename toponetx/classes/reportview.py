@@ -3,14 +3,9 @@
 Such as:
 HyperEdgeView, CellView, SimplexView.
 """
+from collections.abc import Hashable, Iterable
 
 import numpy as np
-
-try:
-    from collections.abc import Hashable, Iterable
-except ImportError:
-    from collections import Iterable, Hashable
-
 
 from toponetx import TopoNetXError
 from toponetx.classes.cell import Cell

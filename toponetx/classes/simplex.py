@@ -1,9 +1,6 @@
 """Simplex Class."""
 
-try:
-    from collections.abc import Hashable, Iterable
-except ImportError:
-    from collections import Iterable, Hashable
+from collections.abc import Hashable, Iterable
 from itertools import combinations
 
 __all__ = ["Simplex"]
