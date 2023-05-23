@@ -84,16 +84,18 @@ class TestStructure(unittest.TestCase):
             list, {0: [0, 1], 1: [0, 2], 2: [1, 2], 3: [3, 4], 4: [3, 5], 5: [4, 5]}
         )
         assert out == d
-    
+
     def test_neighborhood_list_to_neighborhood_with_dict(self):
         """Test that neighborhood_list_to_neighborhood_dict works correctly with specified node dictionary."""
-        node_dict = { 1: 'a', 2: 'b', 3: 'c'}
-        neigh_list = [(1,2), (2,1), (2,3), (3,2)]
-        neigh_dict = neighborhood_list_to_neighborhood_dict(neigh_list, node_dict, node_dict)
+        node_dict = {1: "a", 2: "b", 3: "c"}
+        neigh_list = [(1, 2), (2, 1), (2, 3), (3, 2)]
+        neigh_dict = neighborhood_list_to_neighborhood_dict(
+            neigh_list, node_dict, node_dict
+        )
         assert len(neigh_dict) == 3
-        assert neigh_dict['a'] == ['b']
-        assert set(neigh_dict['b']) == {'a', 'c'} # order irrelevant
-        assert neigh_dict['c'] == ['b']
+        assert neigh_dict["a"] == ["b"]
+        assert set(neigh_dict["b"]) == {"a", "c"}  # order irrelevant
+        assert neigh_dict["c"] == ["b"]
 
     def test_sparse_array_to_neighborhood_dict(self):
         """Test the sparse_array_to_neighborhood_dict function."""
