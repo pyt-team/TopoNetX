@@ -104,7 +104,9 @@ class TestStructure(unittest.TestCase):
         Tests incidence to adjacency
         uses transposed of cell-edge incidence for cell complex [(1,2,3,4), (1,2,4,3)]
         """
-        incidence = csr_matrix([[1, 0, -1, 1, 0, 1], [1, -1, 0, 0, 1, -1]]) # already transposed (check for upper adj.)
+        incidence = csr_matrix(
+            [[1, 0, -1, 1, 0, 1], [1, -1, 0, 0, 1, -1]]
+        )  # already transposed (check for upper adj.)
         adj = incidence_to_adjacency(incidence)
         expected_adj = csr_matrix(
             [

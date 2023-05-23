@@ -5,8 +5,8 @@ import scipy.sparse as sparse
 from numpy import linalg as LA
 from scipy.sparse import diags
 
-from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes import CombinatorialComplex
+from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.datasets.mesh_complex import stanford_bunny
 
