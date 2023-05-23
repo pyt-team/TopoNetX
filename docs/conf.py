@@ -49,6 +49,10 @@ master_doc = "index"
 
 language = None
 
+nbsphinx_thumbnails = {
+    "notebooks/01_simplicial_complexes": "notebooks/sc.png",
+}
+
 nbsphinx_prolog = (
     r"""
 {% set docname = env.doc2path(env.docname, base=None) %}
