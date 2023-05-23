@@ -50,7 +50,7 @@ master_doc = "index"
 language = None
 
 nbsphinx_thumbnails = {
-    "tutorials/01_simplicial_complexes": "notebooks/sc.png",
+    "notebooks/01_simplicial_complexes": "notebooks/sc.png",
 }
 
 nbsphinx_prolog = (
