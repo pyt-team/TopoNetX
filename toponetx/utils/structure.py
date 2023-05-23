@@ -23,7 +23,7 @@ indices in S and T to other values.
 """
 
 from collections import defaultdict
-from typing import Dict, List, Tuple, Iterable
+from typing import Dict, Iterable, List, Tuple
 
 
 def sparse_array_to_neighborhood_list(
