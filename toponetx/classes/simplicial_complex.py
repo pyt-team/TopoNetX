@@ -664,7 +664,6 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-
         After computing some property of the simplex of a simplicial complex, you may want
         to assign a simplex attribute to store the value of that property for
         each simplex:

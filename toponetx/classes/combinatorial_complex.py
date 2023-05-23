@@ -547,7 +547,7 @@ class CombinatorialComplex(Complex):
         None.
 
         Examples
-        -------
+        --------
         After computing some property of the cell of a combinatorial complex, you may want
         to assign a cell attribute to store the value of that property for
         each cell:
