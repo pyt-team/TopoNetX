@@ -825,11 +825,7 @@ class CellComplex(Complex):
         >>> CX.get_filtration("f")
         {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
         """
-        lst = [
-            self.get_node_attributes(name),
-            self.get_edge_attributes(name),
-            self.get_cell_attributes(name, rank=2),
-        ]
+        lst = [self.get_cell_attributes(name, rank=r) for r in range(3)]
         d = {}
         for i in lst:
             if i is not None:
@@ -906,24 +902,6 @@ class CellComplex(Complex):
                 except KeyError:
                     pass
             return
-
-    def get_edge_attributes(self, name):
-        """Get edge attributes.
-
-        Parameters
-        ----------
-        name : string
-           Attribute name.
-
-        Returns
-        -------
-        Dictionary of attributes keyed by edge.
-        """
-        return {
-            edge: self.edges[edge][name]
-            for edge in self.edges
-            if name in self.edges[edge]
-        }
 
     def set_cell_attributes(self, values, name=None):
         """Set cell attributes.
@@ -1022,41 +1000,7 @@ class CellComplex(Complex):
                     pass
             return
 
-    def get_node_attributes(self, name):
-        """Get node attributes.
-
-        Parameters
-        ----------
-        name : string
-           Attribute name.
-
-        Returns
-        -------
-        Dictionary of attributes keyed by node.
-
-        Examples
-        --------
-        >>> G = nx.path_graph(3)
-        >>> CX = CellComplex(G)
-        >>> d={0: {'color':'red','attr2':1 },1: {'color':'blue','attr2':3 } }
-        >>> CX.set_node_attributes(d)
-        >>> CX.get_node_attributes('color')
-        {0: 'red', 1: 'blue'}
-
-        >>> G = nx.Graph()
-        >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CX = CellComplex(G)
-        >>> nodes_color = CX.get_node_attributes('color')
-        >>> nodes_color[1]
-        'blue'
-        """
-        return {
-            node: self.nodes[node][name]
-            for node in self.nodes
-            if name in self.nodes[node]
-        }
-
-    def get_cell_attributes(self, name, rank=None):
+    def get_cell_attributes(self, name, rank: int):
         """Get node attributes from graph.
 
         Parameters
@@ -1085,24 +1029,23 @@ class CellComplex(Complex):
         >>> cell_color
         '{((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
         """
-        if rank is not None:
-            if rank == 0:
-                return self.get_cell_attributes(name)
-            if rank == 1:
-                return nx.get_edge_attributes(self._G, name)
-            if rank == 2:
-                d = {}
-                for n in self.cells:
-                    if isinstance(self.cells[n.elements], list):  # multiple cells
-                        for i in range(len(self.cells[n.elements])):
-                            if name in self.cells[n.elements][i]:
-                                d[(n.elements, i)] = self.cells[n.elements][i][name]
-                    else:
-                        if name in self.cells[n.elements]:
-                            d[n.elements] = self.cells[n.elements][name]
+        if rank == 0:
+            return nx.get_node_attributes(self._G, name)
+        if rank == 1:
+            return nx.get_edge_attributes(self._G, name)
+        if rank == 2:
+            d = {}
+            for n in self.cells:
+                if isinstance(self.cells[n.elements], list):  # multiple cells
+                    for i in range(len(self.cells[n.elements])):
+                        if name in self.cells[n.elements][i]:
+                            d[(n.elements, i)] = self.cells[n.elements][i][name]
+                else:
+                    if name in self.cells[n.elements]:
+                        d[n.elements] = self.cells[n.elements][name]
 
-                return d
-            raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
+            return d
+        raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
     def remove_equivalent_cells(self):
         """Remove equivalent cells.
