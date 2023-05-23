@@ -54,6 +54,37 @@ class HyperEdgeTestCase(unittest.TestCase):
         expected_str = f"Nodes set:{elements}, attrs:{attributes}"
         self.assertEqual(str(hyperedge), expected_str)
 
+    def test_set_get_method(self):
+        """Test set get methods."""
+        hyperedge = HyperEdge((1, 2, 3))
+        hyperedge["weight"] = 1
+        assert hyperedge["weight"] == 1
+
+    def test_rank(self):
+        """Test rank."""
+        he = HyperEdge([1, 4, 2], rank=4)
+        assert he.rank == 4
+        he = HyperEdge([1, 5, 2])
+        assert he.rank is None
+
+    def test_name(self):
+        """Test name."""
+        he = HyperEdge([1, 4, 2], rank=4)
+        assert he.name == ""
+
+        he = HyperEdge([1, 4, 2], name="A")
+        assert he.name == "A"
+
+    def test_inite_method_non_hashabe(self):
+        """Test non hashable."""
+        with self.assertRaises(ValueError):
+            HyperEdge([1, [1], 2], rank=4)
+
+    def test_duplicates_elements(self):
+        """Test duplicates_elements."""
+        with self.assertRaises(ValueError):
+            HyperEdge([1, 1, 2], rank=4)
+
 
 if __name__ == "__main__":
     unittest.main()
