@@ -2,6 +2,7 @@
 
 import unittest
 from collections import defaultdict
+
 from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell_complex import CellComplex
