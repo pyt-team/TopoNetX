@@ -16,8 +16,7 @@ from networkx import Graph
 from scipy.sparse import coo_matrix, dok_matrix
 
 from toponetx.classes.complex import Complex
-from toponetx.classes.node import NodeView
-from toponetx.classes.reportview import SimplexView
+from toponetx.classes.reportviews import NodeView, SimplexView
 from toponetx.classes.simplex import Simplex
 from toponetx.exception import TopoNetXError
 
@@ -806,8 +805,8 @@ class SimplicialComplex(Complex):
         >>> B1 = SC.incidence_matrix(1)
         >>> B2 = SC.incidence_matrix(2)
         """
-        if rank <= 0:
-            raise ValueError(f"input dimension d must be larger than zero, got {rank}")
+        if rank < 0:
+            raise ValueError(f"input dimension d must be positive integer, got {rank}")
         if rank > self.dim:
             raise ValueError(
                 f"input dimenion cannat be larger than the dimension of the complex, got {rank}"
@@ -867,12 +866,12 @@ class SimplicialComplex(Complex):
         """
         if index:
             idx_faces, idx_simplices, boundary = self.incidence_matrix(
-                rank, signed=signed, weight=weight, index=index
-            ).T
+                rank, signed=signed, weight=weight, index=True
+            )
             return idx_faces, idx_simplices, boundary.T
         else:
             return self.incidence_matrix(
-                rank, signed=signed, weight=weight, index=index
+                rank, signed=signed, weight=weight, index=False
             ).T
 
     def hodge_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
