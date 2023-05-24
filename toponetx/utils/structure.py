@@ -25,6 +25,8 @@ indices in S and T to other values.
 from collections import defaultdict
 from typing import Dict, Iterable, List, Tuple
 
+from scipy.sparse import csr_matrix
+
 
 def sparse_array_to_neighborhood_list(
     sparse_array, src_dict=None, dst_dict=None
@@ -99,3 +101,32 @@ def sparse_array_to_neighborhood_dict(
     return neighborhood_list_to_neighborhood_dict(
         sparse_array_to_neighborhood_list(sparse_array, src_dict, dst_dict)
     )
+
+
+def incidence_to_adjacency(B, s: int | None = None, signed=False):
+    """Get adjacency matrix from boolean incidence matrix for s-metrics.
+
+    Self loops are not supported.
+    The adjacency matrix will define an s-linegraph.
+
+    Parameters
+    ----------
+    B : scipy.sparse.csr.csr_matrix
+        incidence matrix of 0's and 1's
+    s : int, list, optional, default : 1
+        Minimum number of edges shared by neighbors with node.
+
+    Returns
+    -------
+    A : scipy.sparse.csr.csr_matrix
+    """
+    B = csr_matrix(B)
+    if not signed:
+        B = abs(B)  # make sure the incidence matrix has only positive entries
+
+    A = B.T @ B
+    A.setdiag(0)
+    if s is not None:
+        A = (A >= s) * 1
+
+    return A

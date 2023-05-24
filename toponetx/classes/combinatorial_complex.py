@@ -17,7 +17,10 @@ from toponetx.classes.reportview import HyperEdgeView
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
-from toponetx.utils.structure import sparse_array_to_neighborhood_dict
+from toponetx.utils.structure import (
+    incidence_to_adjacency,
+    sparse_array_to_neighborhood_dict,
+)
 
 __all__ = ["CombinatorialComplex"]
 
@@ -144,9 +147,6 @@ class CombinatorialComplex(Complex):
         """Help compute the incidence matrix."""
         from collections import OrderedDict
         from operator import itemgetter
-
-        if sparse:
-            from scipy.sparse import csr_matrix
 
         ndict = dict(zip(children, range(len(children))))
         edict = dict(zip(uidset, range(len(uidset))))
@@ -1022,37 +1022,7 @@ class CombinatorialComplex(Complex):
             rank, to_rank, incidence_type=incidence_type, sparse=sparse, index=index
         )
 
-    @staticmethod
-    def _incidence_to_adjacency(B, s=1, weight=False):
-        """Get adjacency matrix from boolean incidence matrix for s-metrics.
-
-        Self loops are not supported.
-        The adjacency matrix will define an s-linegraph.
-
-        Parameters
-        ----------
-        B : scipy.sparse.csr.csr_matrix
-            incidence matrix of 0's and 1's
-        s : int, list, optional, default : 1
-            Minimum number of edges shared by neighbors with node.
-        weight : bool, dict optional, default=True
-            If False all nonzero entries are 1.
-            Otherwise, weight will be as in product.
-
-        Returns
-        -------
-        A : scipy.sparse.csr.csr_matrix
-        """
-        B = csr_matrix(B)
-        weight = False  # currently weighting is not supported
-
-        if weight is False:
-            A = B.dot(B.transpose())
-            A.setdiag(0)
-            A = (A >= s) * 1
-        return A
-
-    def adjacency_matrix(self, rank, via_rank, s=1, weight=False, index=False):
+    def adjacency_matrix(self, rank, via_rank, s=1, index=False):
         """Sparse weighted :term:`s-adjacency matrix`.
 
         Parameters
@@ -1063,9 +1033,6 @@ class CombinatorialComplex(Complex):
             Minimum number of edges shared by neighbors with node.
         index: boolean, optional, default: False
             If True, will return a rowdict of row to node uid
-        weight: bool, default=True
-            If False all nonzero entries are 1.
-            If True adjacency matrix will depend on weighted incidence matrix,
         index : book, default=False
             indicate weather to return the indices of the adjacency matrix.
 
@@ -1098,13 +1065,12 @@ class CombinatorialComplex(Complex):
             B = self.incidence_matrix(
                 rank, via_rank, incidence_type="up", sparse=True, index=index
             )
-        weight = False  # currently weighting is not supported
-        A = self._incidence_to_adjacency(B, s=s, weight=weight)
+        A = incidence_to_adjacency(B.T, s=s)
         if index:
             return A, row
         return A
 
-    def cell_adjacency_matrix(self, index=False, s=1, weight=False):
+    def cell_adjacency_matrix(self, index=False, s=1):
         """Compute the cell adjacency matrix.
 
         Parameters
@@ -1122,24 +1088,24 @@ class CombinatorialComplex(Complex):
         )
         if index:
 
-            A = self._incidence_to_adjacency(B[0].transpose(), s=s)
+            A = incidence_to_adjacency(B[0].transpose(), s=s)
 
             return A, B[2]
-        A = self._incidence_to_adjacency(B.transpose(), s=s)
+        A = incidence_to_adjacency(B.transpose(), s=s)
         return A
 
-    def node_adjacency_matrix(self, index=False, s=1, weight=False):
+    def node_adjacency_matrix(self, index=False, s=1):
         """Compute the node adjacency matrix."""
         B = self.incidence_matrix(
             rank=0, to_rank=None, incidence_type="up", index=index
         )
         if index:
-            A = self._incidence_to_adjacency(B[0], s=s)
+            A = incidence_to_adjacency(B[0], s=s)
             return A, B[1]
-        A = self._incidence_to_adjacency(B, s=s)
+        A = incidence_to_adjacency(B, s=s)
         return A
 
-    def coadjacency_matrix(self, rank, via_rank, s=1, weight=False, index=False):
+    def coadjacency_matrix(self, rank, via_rank, s=1, index=False):
         """Compute the coadjacency matrix.
 
         The sparse weighted :term:`s-coadjacency matrix`
@@ -1181,11 +1147,7 @@ class CombinatorialComplex(Complex):
             B = self.incidence_matrix(
                 rank, via_rank, incidence_type="down", sparse=True, index=index
             )
-        weight = False  # Currently weighting is not supported
-        if weight is False:
-            A = B.T.dot(B)
-            A.setdiag(0)
-            A = (A >= s) * 1
+        A = incidence_to_adjacency(B.T)
         if index:
             return A, col
         return A
@@ -1315,9 +1277,9 @@ class CombinatorialComplex(Complex):
         """
         B = self.incidence_matrix(rank=0, to_rank=None, incidence_type="up")
         if cells:
-            A = self._incidence_to_adjacency(B, s=s)
+            A = incidence_to_adjacency(B, s=s)
         else:
-            A = self._incidence_to_adjacency(B.transpose(), s=s)
+            A = incidence_to_adjacency(B.transpose(), s=s)
         G = nx.from_scipy_sparse_matrix(A)
         return nx.is_connected(G)
 

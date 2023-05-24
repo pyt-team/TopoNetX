@@ -24,6 +24,7 @@ from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportview import CellView
 from toponetx.exception import TopoNetXError
+from toponetx.utils import incidence_to_adjacency
 
 __all__ = ["CellComplex"]
 
@@ -1187,45 +1188,6 @@ class CellComplex(Complex):
         else:
             raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
 
-    @staticmethod
-    def _incidence_to_adjacency(B, weight=False):
-        """Get adjacency matrix from incidence.
-
-        Get the adjacency matrix from the
-        boolean incidence matrix for s-metrics.
-
-        Self loops are not supported.
-        The adjacency matrix will define an s-linegraph.
-
-        Parameters
-        ----------
-        B : scipy.sparse.csr.csr_matrix
-            Incidence matrix of 0's and 1's.
-        weight : bool, dict optional, default=True
-            If False all nonzero entries are 1.
-            Otherwise, weight will be as in product.
-
-        Returns
-        -------
-        a matrix : scipy.sparse.csr.csr_matrix
-
-        Examples
-        --------
-        >>> CX = CellComplex()
-        >>> CX.add_cell([1, 2, 3, 5, 6], rank=2)
-        >>> CX.add_cell([1, 2, 4, 5, 3, 0], rank=2)
-        >>> CX.add_cell([1, 2, 4, 9, 3, 0], rank=2)
-        >>> B1 = CX.incidence_matrix(1, signed=False)
-        >>> A1 = CX._incidence_to_adjacency(B1)
-        """
-        B = csr_matrix(B)
-        weight = False  # currently weighting is not supported
-        B = abs(B)  # make sure the incidence matrix has only positive entries
-        if weight is False:
-            A = B.dot(B.transpose())
-            A.setdiag(0)
-        return A
-
     def hodge_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
         """Compute the hodge-laplacian matrix for the CX.
 
@@ -1443,36 +1405,33 @@ class CellComplex(Complex):
         else:
             return L_down
 
-    def adjacency_matrix(self, rank, signed=False, weight=None, index=False):
+    def adjacency_matrix(self, rank, signed=False, index=False):
         """Compute adjacency matrix for a given rank."""
-        weight = None  # this feature is not supported in this version
-
-        ind, L_up = self.up_laplacian_matrix(
-            rank, signed=signed, weight=weight, index=True
-        )
-        L_up.setdiag(0)
-
-        if not signed:
-            L_up = abs(L_up)
         if index:
-            return ind, L_up
+            ind, _, incidence = self.incidence_matrix(
+                rank + 1, signed=signed, index=True
+            )
         else:
-            return L_up
+            incidence = self.incidence_matrix(rank + 1, signed=signed)
 
-    def coadjacency_matrix(self, rank, signed=False, weight=None, index=False):
+        incidence = incidence.T
+
+        if index:
+            return ind, incidence_to_adjacency(incidence)
+        else:
+            return incidence_to_adjacency(incidence)
+
+    def coadjacency_matrix(self, rank, signed=False, index=False):
         """Compute coadjacency matrix for a given rank."""
-        weight = None  # this feature is not supported in this version
-
-        ind, L_down = self.down_laplacian_matrix(
-            rank, signed=signed, weight=weight, index=True
-        )
-        L_down.setdiag(0)
-        if not signed:
-            L_down = abs(L_down)
         if index:
-            return ind, L_down
+            _, ind, incidence = self.incidence_matrix(rank, signed=signed, index=True)
         else:
-            return L_down
+            incidence = self.incidence_matrix(rank, signed=signed)
+
+        if index:
+            return ind, incidence_to_adjacency(incidence)
+        else:
+            return incidence_to_adjacency(incidence)
 
     def k_hop_incidence_matrix(self, rank, k):
         """Compute k-hop incidence matrix for a given rank."""
@@ -1501,42 +1460,6 @@ class CellComplex(Complex):
             return np.power(A, k) @ coB
         else:
             return np.power(A, k) @ coB + np.power(coA, k) @ coB
-
-    def cell_adjacency_matrix(self, signed=True, weight=None, index=False):
-        """Compute adjacency matrix.
-
-        Examples
-        --------
-        >>> CX = CellComplex()
-        >>> CX.add_cell([1, 2, 3], rank=2)
-        >>> CX.add_cell([1, 4], rank=1)
-        >>> A = CX.cell_adjacency_matrix()
-        """
-        CX = self.to_combinatorial_complex()
-
-        B = CX.incidence_matrix(0, None, incidence_type="up", index=index)
-        if index:
-
-            A = CX._incidence_to_adjacency(B[0].transpose())
-
-            return A, B[2]
-        else:
-            A = CX._incidence_to_adjacency(B.transpose())
-            return A
-
-    def node_adjacency_matrix(self, index=False, s=1, weight=False):
-        """Compute node adjacency matrix."""
-        CX = self.to_combinatorial_complex()
-
-        B = CX.incidence_matrix(0, None, incidence_type="up", index=index)
-        if index:
-
-            A = CX._incidence_to_adjacency(B[0], s=s)
-
-            return A, B[1]
-        else:
-            A = CX._incidence_to_adjacency(B, s=s)
-            return A
 
     def restrict_to_cells(self, cell_set, name=None):
         """Construct cell complex using a subset of the cells in cell complex.
@@ -1758,7 +1681,7 @@ class CellComplex(Complex):
             components of CX.
         """
         if cells:
-            A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+            A, coldict = self.coadjacency_matrix(rank=2, index=True)
             G = nx.from_scipy_sparse_matrix(A)
 
             for c in nx.connected_components(G):
@@ -1766,7 +1689,7 @@ class CellComplex(Complex):
                     continue
                 yield {coldict[n] for n in c}
         else:
-            A, rowdict = self.node_adjacency_matrix(s=s, index=True)
+            A, rowdict = self.adjacency_matrix(rank=0, index=True)
             G = nx.from_scipy_sparse_matrix(A)
             for c in nx.connected_components(G):
                 if not return_singletons:
@@ -1863,7 +1786,7 @@ class CellComplex(Complex):
         """
         return self.s_component_subgraphs(return_singletons=return_singletons)
 
-    def node_diameters(self, s=1):
+    def node_diameters(self):
         """Return the node diameters of the connected components in cell complex.
 
         Parameters
@@ -1871,7 +1794,7 @@ class CellComplex(Complex):
         list of the diameters of the s-components and
         list of the s-component nodes
         """
-        A, coldict = self.node_adjacency_matrix(s=s, index=True)
+        A, coldict = self.adjacency_matrix(rank=0, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         diams = []
         comps = []
@@ -1902,7 +1825,7 @@ class CellComplex(Complex):
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
         """
-        A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+        A, coldict = self.coadjacency_matrix(rank=2, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         diams = []
         comps = []
@@ -1916,7 +1839,7 @@ class CellComplex(Complex):
         loc = np.argmax(diams)
         return diams[loc], diams, comps
 
-    def diameter(self, s=1):
+    def diameter(self):
         """Return length of the longest shortest s-walk between nodes.
 
         Parameters
@@ -1939,11 +1862,11 @@ class CellComplex(Complex):
         nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
         are s-adjacent. If the graph is not connected, an error will be raised.
         """
-        A = self.node_adjacency_matrix(s=s)
+        A = self.adjacency_matrix(rank=0)
         G = nx.from_scipy_sparse_matrix(A)
         if nx.is_connected(G):
             return nx.diameter(G)
-        raise TopoNetXError(f"cc is not s-connected. s={s}")
+        raise TopoNetXError("cc is not connected.")
 
     def cell_diameter(self, s=1):
         """Return the length of the longest shortest s-walk between cells.
@@ -1968,7 +1891,7 @@ class CellComplex(Complex):
         cells e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
         are s-adjacent. If the graph is not connected, an error will be raised.
         """
-        A = self.cell_adjacency_matrix(s=s)
+        A = self.coadjacency_matrix(rank=2)
         G = nx.from_scipy_sparse_matrix(A)
         if nx.is_connected(G):
             return nx.diameter(G)
@@ -2008,7 +1931,7 @@ class CellComplex(Complex):
             source = source.uid
         if isinstance(target, Cell):
             target = target.uid
-        A, rowdict = self.node_adjacency_matrix(s=s, index=True)
+        A, rowdict = self.adjacency_matrix(rank=0, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         rkey = {v: k for k, v in rowdict.items()}
         try:
@@ -2055,7 +1978,7 @@ class CellComplex(Complex):
             source = source.uid
         if isinstance(target, Cell):
             target = target.uid
-        A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+        A, coldict = self.coadjacency_matrix(rank=2, index=True)
         G = nx.from_scipy_sparse_matrix(A)
         ckey = {v: k for k, v in coldict.items()}
         try:

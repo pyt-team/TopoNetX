@@ -5,6 +5,7 @@ import scipy.sparse as sparse
 from numpy import linalg as LA
 from scipy.sparse import diags
 
+from toponetx.classes import CombinatorialComplex
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.datasets.mesh_complex import stanford_bunny
@@ -245,14 +246,18 @@ def simplicial_complex_hodge_laplacian_spectrum(
     return laplacian_spectrum(SC.hodge_laplacian_matrix(rank=rank))
 
 
-def cell_complex_adjacency_spectrum(CX: CellComplex, rank, weight="weight"):
-    """Return eigenvalues of the Laplacian of G.
+def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
+    """Return eigenvalues of the adjacency matrix of CX.
 
     Parameters
     ----------
-    matrix : scipy sparse matrix
-    weight : str or None, optional (default='weight')
-       If None, then each cell has weight 1.
+    CX : CellComplex
+    rank : int
+        rank of the cells to take the adjacency from:
+        - 0-cells are nodes
+        - 1-cells are edges
+        - 2-cells are polygons
+        currently, no cells of rank > 2 are supported.
 
     Returns
     -------
@@ -267,7 +272,7 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank, weight="weight"):
     >>> CX.add_cell([5,6,7,8],rank=2)
     >>> cell_complex_adjacency_spectrum(CX,1)
     """
-    return laplacian_spectrum(CX.adjacency_matrix(rank=rank, weight=weight))
+    return laplacian_spectrum(CX.adjacency_matrix(rank=rank))
 
 
 def simplicial_complex_adjacency_spectrum(
@@ -289,8 +294,8 @@ def simplicial_complex_adjacency_spectrum(
     return laplacian_spectrum(SC.adjacency_matrix(rank=dim, weight=weight))
 
 
-def combinatorial_complex_adjacency_spectrum(CC, r, k, weight="weight"):
-    """Return eigenvalues of the Laplacian of G.
+def combinatorial_complex_adjacency_spectrum(CC: CombinatorialComplex, r, k):
+    """Return eigenvalues of the adjacency matrix of CC.
 
     Parameters
     ----------
@@ -308,4 +313,4 @@ def combinatorial_complex_adjacency_spectrum(CC, r, k, weight="weight"):
     >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
     >>> s = laplacian_spectrum( CC.adjacency_matrix( 0,2) )
     """
-    return laplacian_spectrum(CC.adjacency_matrix(r, k, weight=weight))
+    return laplacian_spectrum(CC.adjacency_matrix(r, k))
