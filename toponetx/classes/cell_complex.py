@@ -139,7 +139,7 @@ class CellComplex(Complex):
                             self.add_cell(cell, rank=2)
 
             else:
-                raise ValueError(
+                raise TypeError(
                     f"cells must be iterable, networkx graph or None, got {type(cells)}"
                 )
         self.complex = dict()  # dictionary for cell complex attributes
@@ -287,7 +287,7 @@ class CellComplex(Complex):
                     len(self._cells._cells[cell.elements])
                 ] = cell
         else:
-            raise ValueError("input must be list, tuple or Cell type")
+            raise TypeError("input must be list, tuple or Cell type")
 
     def _delete_cell(self, cell, key=None):
         """Delete cell."""

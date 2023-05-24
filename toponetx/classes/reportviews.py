@@ -84,7 +84,7 @@ class CellView:
                 raise KeyError(f"cell {cell} is not in the cell dictionary")
 
         else:
-            raise KeyError("input must be a tuple, list or a cell")
+            raise TypeError("Input must be a tuple, list or a cell.")
 
     def __len__(self):
         """Return the number of cells in the cell view."""

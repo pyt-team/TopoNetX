@@ -44,7 +44,7 @@ class HyperEdge:
         if elements is not None:
             for i in elements:
                 if not isinstance(i, Hashable):
-                    raise ValueError("Every element of HyperEdge must be hashable.")
+                    raise TypeError("Every element of HyperEdge must be hashable.")
 
         self.nodes = frozenset(list(elements))
         self._rank = rank

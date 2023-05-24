@@ -401,7 +401,7 @@ class SimplicialComplex(Complex):
 
                 for x in simplex:
                     if not isinstance(x, Hashable):
-                        raise ValueError("all element of simplex must be hashable")
+                        raise TypeError("all element of simplex must be hashable")
 
                 simplex_ = frozenset(
                     sorted(simplex)
