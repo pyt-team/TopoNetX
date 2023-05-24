@@ -12,8 +12,7 @@ from scipy.sparse import csr_matrix
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
-from toponetx.classes.node import NodeView
-from toponetx.classes.reportview import HyperEdgeView
+from toponetx.classes.reportview import HyperEdgeView, NodeView
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
@@ -361,11 +360,32 @@ class CombinatorialComplex(Complex):
         """
         return item in self.nodes
 
-    def __setitem__(self, hyperedge, item):
-        """Set the attributes of a hyperedge."""
-        hyperedge_ = HyperEdgeView._to_frozen_set(hyperedge)
-        rank = self.get_rank(hyperedge_)
-        self.hyperedge_dict[rank][hyperedge_] = item
+    def __setitem__(self, cell, attr):
+        """Set the attributes of a hyperedge or node in the CC."""
+        if cell in self:
+            if isinstance(cell, self.cell_type):
+                if cell.nodes in self.nodes:
+                    self.nodes.update(attr)
+            elif isinstance(cell, Iterable):
+                cell = frozenset(cell)
+                if cell in self.nodes:
+                    self.nodes.update(attr)
+                else:
+                    raise KeyError(f"node {cell} is not in complex")
+            elif isinstance(cell, Hashable):
+                if frozenset({cell}) in self:
+                    self.nodes.update(attr)
+                    return
+        # we now check if the input is a cell in
+        elif cell in self.cells:
+
+            hyperedge_ = HyperEdgeView._to_frozen_set(cell)
+            rank = self.get_rank(hyperedge_)
+
+            if hyperedge_ in self.hyperedge_dict[rank]:
+                self.hyperedge_dict[rank][hyperedge_] = attr
+            else:
+                raise KeyError(f"input {cell} is not in the complex")
 
     def __getitem__(self, node):
         """Return the attrs of a node.
