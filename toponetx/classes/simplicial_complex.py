@@ -396,7 +396,7 @@ class SimplicialComplex(Complex):
             else:
                 self._simplex_set.faces_dict[k - 1][simplex_].update(attr)
 
-    def _insert_node(self, simplex, **attr):
+    def _add_node(self, simplex, **attr):
 
         if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
             self.insert_simplex(simplex, **attr)
@@ -495,11 +495,13 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplexView()
-        >>> SC.insert_simplex ( (1,2,3,4),weight=1 )
+        >>> from toponetx import SimplicialComplex
+        >>> SC = SimplicialComplex()
+        >>> SC._add_simplex ( (1,2,3,4),weight=1 )
         >>> c1=Simplex((1,2,3,4,5))
-        >>> SC.insert_simplex(c1)
-        >>> SC.remove_maximal_simplex((1,2,3,4,5))
+        >>> SC._add_simplex(c1)
+        >>> SC._remove_maximal_simplex((1,2,3,4,5))
+        >>> SC[(1,2,3,4)] #  {'is_maximal': True, 'membership': set(), 'weight': 1}
         """
         if isinstance(simplex, Iterable):
             if not isinstance(simplex, Simplex):
@@ -593,7 +595,7 @@ class SimplicialComplex(Complex):
 
     def add_node(self, node, **attr):
         """Add node to simplicial complex."""
-        self._insert_node(node, **attr)
+        self._add_node(node, **attr)
 
     def add_simplex(self, simplex, **attr):
         """Add simplex to simplicial complex."""
@@ -807,7 +809,7 @@ class SimplicialComplex(Complex):
         >>> B1 = SC.incidence_matrix(1)
         >>> B2 = SC.incidence_matrix(2)
         """
-        if rank <= 0:
+        if rank < 0:
             raise ValueError(f"input dimension d must be larger than zero, got {rank}")
         if rank > self.dim:
             raise ValueError(
@@ -868,12 +870,12 @@ class SimplicialComplex(Complex):
         """
         if index:
             idx_faces, idx_simplices, boundary = self.incidence_matrix(
-                rank, signed=signed, weight=weight, index=index
-            ).T
+                rank, signed=signed, weight=weight, index=True
+            )
             return idx_faces, idx_simplices, boundary.T
         else:
             return self.incidence_matrix(
-                rank, signed=signed, weight=weight, index=index
+                rank, signed=signed, weight=weight, index=False
             ).T
 
     def hodge_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
@@ -1470,6 +1472,8 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
+        >>> import networkx as nx
+        >>> from toponetx import SimplicialComplex
         >>> G = nx.Graph()  # or DiGraph, MultiGraph, MultiDiGraph, etc
         >>> G.add_edge('1', '2', weight=2)
         >>> G.add_edge('3', '4', weight=4)

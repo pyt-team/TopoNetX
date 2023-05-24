@@ -120,7 +120,7 @@ class TestSimplicialComplex(unittest.TestCase):
         assert len(SC.skeleton(rank=3)) == len(threefaces)
         assert len(SC.skeleton(rank=4)) == len(fourfaces)
 
-    def test_incidence_matrix(self):
+    def test_incidence_matrix_1(self):
         """Test incidence_matrix shape and values."""
         # create a SimplicialComplex object with a few simplices
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
@@ -221,6 +221,50 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.set_simplex_attributes(d, name="color")
         self.assertEqual(SC[(1, 2, 3)]["color"], "red")
         # ... add more assertions based on the expected simplex attributes
+
+    def test_incidence_matrix(self):
+        """Test incidence matrix."""
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3, 4])
+        SC.add_simplex([1, 2, 5])
+        B1 = SC.incidence_matrix(1)
+        B2 = SC.incidence_matrix(2)
+        assert B1.shape == tuple(SC.shape[:2])
+        assert B2.shape == tuple(SC.shape[1:3])
+        # B1 : 1->0
+        # B2 : 2->1
+        assert np.sum(abs(B1.dot(B2))) == 0  # boundary of boundary = 0
+        # for the last to be true, order of bases must be canonical in both matrices
+
+        row, col, B1 = SC.incidence_matrix(1, index=True)
+
+        assert (len(row), len(col)) == B1.shape
+
+        B0 = SC.incidence_matrix(0)
+        assert B0.shape[-1] == len(SC.skeleton(0))
+
+        assert np.sum(B0.dot(B1)) == 0  # boundary of boundary = 0
+
+    def test_coincidence_matrix_2(self):
+        """Test coincidence matrix."""
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3, 4])
+        SC.add_simplex([1, 2, 4])
+        B1T = SC.coincidence_matrix(1)
+        B2T = SC.coincidence_matrix(2)
+        assert B1T.shape == tuple(SC.shape[:2][::-1])
+        assert B2T.shape == tuple(SC.shape[1:3][::-1])
+        # B1T : 0->1
+        # B2T : 1->2
+        assert np.sum(abs(B2T.dot(B1T))) == 0  # coboundary of coboundary = 0
+        # for the last to be true, order of bases must be canonical in both matrices
+
+        row, col, B1T = SC.coincidence_matrix(1, index=True)
+
+        assert (len(col), len(row)) == B1T.shape
+
+        B0 = SC.coincidence_matrix(0)
+        assert B0.shape[0] == len(SC.skeleton(0))
 
 
 if __name__ == "__main__":
