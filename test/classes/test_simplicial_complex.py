@@ -95,6 +95,7 @@ class TestSimplicialComplex(unittest.TestCase):
         G.add_edge(5, 4, weight=5)
         SC = SimplicialComplex(G, name="graph complex")
         assert (repr(SC)) == "SimplicialComplex(name=graph complex)"
+        assert SC.name == "graph complex"
 
     def test_get_and_set(self):
         """Test __getitem__ and __setitem__ methods."""
@@ -128,6 +129,24 @@ class TestSimplicialComplex(unittest.TestCase):
         with self.assertRaises(ValueError):
             SC = SimplicialComplex()
             SC._add_simplices_from(4)
+
+    def test__insert_node(self):
+        """Test _insert_node."""
+        SC = SimplicialComplex()
+        SC._insert_node(9)
+        assert 9 in SC
+        with self.assertRaises(ValueError):
+            SC._insert_node((1, 2))
+
+        with self.assertRaises(ValueError):
+            s = Simplex((1, 2, 3, 4))
+            SC._insert_node(s)
+
+        SC = SimplicialComplex()
+        assert SC.maxdim == -1
+        SC._insert_node(9)
+        assert SC.maxdim == 0
+        assert SC[9]["is_maximal"] is True
 
     def test_add_simplex(self):
         """Test add_simplex method."""
