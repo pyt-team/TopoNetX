@@ -17,7 +17,7 @@ from scipy.sparse import coo_matrix, dok_matrix
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.node import NodeView
-from toponetx.classes.reportview import SimplexView
+from toponetx.classes.reportviews import SimplexView
 from toponetx.classes.simplex import Simplex
 from toponetx.exception import TopoNetXError
 

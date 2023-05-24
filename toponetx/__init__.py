@@ -15,7 +15,7 @@ from .classes.simplex import Simplex
 from .classes.hyperedge import HyperEdge
 from .classes.cell import Cell
 
-from .classes.reportview import CellView, HyperEdgeView, SimplexView
+from .classes.reportviews import CellView, HyperEdgeView, SimplexView
 from .classes.node import NodeView
 
 
