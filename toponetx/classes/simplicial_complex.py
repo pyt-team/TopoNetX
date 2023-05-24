@@ -201,7 +201,7 @@ class SimplicialComplex(Complex):
         -------
         Set of simplices of dimension n.
         """
-        if rank < len(self._simplex_set.faces_dict):
+        if rank < len(self._simplex_set.faces_dict) and rank >= 0:
             return sorted(tuple(i) for i in self._simplex_set.faces_dict[rank].keys())
             # return list(self._simplex_set.faces_dict[n].keys())
         if rank < 0:
@@ -235,22 +235,15 @@ class SimplicialComplex(Complex):
 
     def __setitem__(self, simplex, **attr):
         """Set attributes to a simplex."""
-        if simplex in self._simplex_set:
-
-            if isinstance(simplex, Simplex):
-                if simplex.nodes in self.faces_dict[len(simplex) - 1]:
-                    self.faces_dict[len(simplex) - 1].update(attr)
-            elif isinstance(simplex, Iterable):
-                simplex = frozenset(simplex)
-                if simplex in self.faces_dict[len(simplex) - 1]:
-                    self.faces_dict[len(simplex) - 1].update(attr)
-                else:
-                    raise KeyError(
-                        f"simplex {simplex} is not in the simplex dictionary, add simplex using add_simplex."
-                    )
-            elif isinstance(simplex, Hashable):
-                if frozenset({simplex}) in self:
-                    self.faces_dict[0].update(attr)
+        if isinstance(simplex, Simplex):
+            if simplex.nodes in self.faces_dict[len(simplex) - 1]:
+                self.faces_dict[len(simplex) - 1].update(attr)
+        elif isinstance(simplex, Iterable):
+            simplex = frozenset(simplex)
+            self.faces_dict[len(simplex) - 1].update(attr)
+        elif isinstance(simplex, Hashable):
+            if frozenset({simplex}) in self:
+                self.faces_dict[0].update(attr)
 
     def __iter__(self):
         """Iterate over all faces of the simplicial complex.
