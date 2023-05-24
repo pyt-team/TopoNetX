@@ -104,10 +104,9 @@ class SimplicialComplex(Complex):
     SimplexView([(0,), (1,), (3,), (4,), (2,), (0, 1), (0, 3), (0, 4), (1, 4), (1, 2), (1, 3), (2, 3), (1, 2, 3)])
     """
 
-    def __init__(self, simplices=None, name=None, mode="normal", **attr):
+    def __init__(self, simplices=None, name=None, **attr):
         super().__init__()
 
-        self.mode = mode
         if name is None:
             self.name = ""
         else:
@@ -138,23 +137,9 @@ class SimplicialComplex(Complex):
                 s1 = Simplex(simplex[0], **simplex[1])
                 simplices.append(s1)
 
-        if self.mode == "normal":
-            if simplices is not None:
-                if isinstance(simplices, Iterable):
-                    self._add_simplices_from(simplices)
-
-        elif self.mode == "gudhi":
-
-            self.st = SimplexTree()
-            if simplices is not None:
-
-                if isinstance(simplices, Iterable):
-                    for simplex in simplices:
-                        self.st.insert(simplex)
-                    self._build_faces_dict_from_gudhi_tree(self.st)
-
-        else:
-            raise ValueError(f" Import modes must be 'normal' and 'gudhi', got {mode}")
+        if simplices is not None:
+            if isinstance(simplices, Iterable):
+                self._add_simplices_from(simplices)
 
     @property
     def shape(self):
@@ -287,43 +272,6 @@ class SimplicialComplex(Complex):
         item : tuple, list
         """
         return item in self._simplex_set
-
-    def _build_faces_dict_from_gudhi_tree(self, simplex_tree):
-        """Extract skeletons from gudhi simples tree.
-
-        Notes
-        -----
-        faces_dict[i] = X^i where X^i is the ith skeleton of the input SC X.
-        """
-        if self._simplex_set.faces_dict != []:
-            raise ValueError(
-                "self.faces_dict is not empty, this method should "
-                + "only called with empty faces_dict"
-            )
-
-        self._simplex_set.faces_dict = [
-            dict() for _ in range(simplex_tree.dimension() + 1)
-        ]
-
-        for simplex, _ in simplex_tree.get_skeleton(simplex_tree.dimension()):
-            if self._simplex_set.max_dim < len(simplex) - 1:
-                self._simplex_set.max_dim = len(simplex) - 1
-            k = len(simplex)
-            if len(simplex_tree.get_cofaces(simplex, 0)) != 0:
-                cofaces = [s[0] for s in simplex_tree.get_cofaces(simplex, 0)]
-                max_simplex_length = len(max(cofaces, key=len))
-                max_simplices = set(
-                    [frozenset(s) for s in cofaces if len(s) == max_simplex_length]
-                )
-                self._simplex_set.faces_dict[k - 1][frozenset(sorted(simplex))] = {
-                    "is_maximal": False,
-                    "membership": max_simplices,
-                }
-            else:
-                self._simplex_set.faces_dict[k - 1][frozenset(sorted(simplex))] = {
-                    "is_maximal": True,
-                    "membership": set(),
-                }
 
     def _add_simplices_from(self, simplices):
         if isinstance(simplices, Iterable):
