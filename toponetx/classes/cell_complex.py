@@ -314,17 +314,16 @@ class CellComplex(Complex):
         Examples
         --------
         >>> cx = CellComplex()
-        >>> cx.add_cell ( (1,2,3,4),rank=2 )
-        >>> cx.add_cell ( (2,3,4,1),rank=2 )
-        >>> cx.add_cell ( (1,2,3,4),rank=2 )
-        >>> cx.add_cell ( (1,2,3,6),rank=2 )
-        >>> cx.add_cell ( (3,4,1,2),rank=2 )
-        >>> cx.add_cell ( (4,3,2,1),rank=2 )
-        >>> cx.add_cell ( (1,2,7,3),rank=2 )
-        >>> c1=Cell((1,2,3,4,5))
-        >>> cx.add_cell(c1,rank=2)
-        >>> d = cx._cell_equivalence_class()
-        >>> d
+        >>> cx.add_cell((1, 2, 3, 4), rank=2)
+        >>> cx.add_cell((2, 3, 4, 1), rank=2)
+        >>> cx.add_cell((1, 2, 3, 4), rank=2)
+        >>> cx.add_cell((1, 2, 3, 6), rank=2)
+        >>> cx.add_cell((3, 4, 1, 2), rank=2)
+        >>> cx.add_cell((4, 3, 2, 1), rank=2)
+        >>> cx.add_cell((1, 2, 7, 3), rank=2)
+        >>> c1 = Cell((1, 2, 3, 4, 5))
+        >>> cx.add_cell(c1, rank=2)
+        >>> cx._cell_equivalence_class()
         """
         equiv_classes = defaultdict(set)
         all_inserted_cells = set()
@@ -792,9 +791,9 @@ class CellComplex(Complex):
                 d_edges[k] = v
             elif isinstance(k, Iterable) and len(k) != 2:  # cell
                 d_cells[k] = v
-        self.set_node_attributes(d_nodes, name)
-        self.set_edge_attributes(d_edges, name)
-        self.set_cell_attributes(d_cells, name)
+        self.set_cell_attributes(d_nodes, name=name, rank=0)
+        self.set_cell_attributes(d_edges, name=name, rank=1)
+        self.set_cell_attributes(d_cells, name=name, rank=2)
 
     def get_filtration(self, name):
         """Get filtration.
@@ -810,113 +809,23 @@ class CellComplex(Complex):
         >>> CX.get_filtration("f")
         {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
         """
-        lst = [
-            self.get_node_attributes(name),
-            self.get_edge_attributes(name),
-            self.get_cell_attributes(name, rank=2),
-        ]
+        lst = [self.get_cell_attributes(name, rank=r) for r in range(3)]
         d = {}
         for i in lst:
             if i is not None:
                 d.update(i)
         return d
 
-    def set_node_attributes(self, values, name=None):
-        """Set node attributes.
-
-        Parameters
-        ----------
-        values : dic
-        name : str
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> G = nx.path_graph(3)
-        >>> CX = CellComplex(G)
-        >>> d = {0: {'color': 'red', 'attr2': 1 }, 1: {'color': 'blue', 'attr2': 3}}
-        >>> CX.set_node_attributes(d)
-        """
-        if name is not None:
-            # if `values` is a dict using `.items()` => {cell: value}
-
-            for cell, value in values.items():
-                try:
-                    self.nodes[cell][name] = value
-                except KeyError:
-                    pass
-        else:
-
-            for cell, d in values.items():
-                try:
-                    self.nodes[cell].update(d)
-                except KeyError:
-                    pass
-            return
-
-    def set_edge_attributes(self, values, name=None):
-        """Set edge attributes.
-
-        Parameters
-        ----------
-        values : dic
-        name : str
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        >>> G = nx.path_graph(3)
-        >>> CX = CellComplex(G)
-        >>> d={ (0,1) : {'color':'red','attr2':1 },(1,2): {'color':'blue','attr2':3 } }
-        >>> CX.set_edge_attributes(d)
-        """
-        if name is not None:
-            # if `values` is a dict using `.items()` => {edge: value}
-
-            for cell, value in values.items():
-                try:
-                    self.edges[cell][name] = value
-                except KeyError:
-                    pass
-        else:
-            for cell, d in values.items():
-                try:
-                    self.edges[cell].update(d)
-                except KeyError:
-                    pass
-            return
-
-    def get_edge_attributes(self, name):
-        """Get edge attributes.
-
-        Parameters
-        ----------
-        name : str
-           Attribute name.
-
-        Returns
-        -------
-        Dictionary of attributes keyed by edge.
-        """
-        return {
-            edge: self.edges[edge][name]
-            for edge in self.edges
-            if name in self.edges[edge]
-        }
-
-    def set_cell_attributes(self, values, name=None):
+    def set_cell_attributes(self, values, rank: int, name=None):
         """Set cell attributes.
 
         Parameters
         ----------
         values : TYPE
             DESCRIPTION.
+        rank : int
+            0 for nodes, 1 for edges, 2 for 2-cells.
+            ranks > 2 are currently not supported.
         name : TYPE, optional
             DESCRIPTION. The default is None.
 
@@ -935,12 +844,12 @@ class CellComplex(Complex):
         >>> CX.add_cell([1,2,4], rank=2,)
         >>> CX.add_cell([3,4,8], rank=2)
         >>> d={(1,2,3,4):'red',(1,2,4):'blue'}
-        >>> CX.set_cell_attributes(rank,name='color')
+        >>> CX.set_cell_attributes(d,name='color',rank=2)
         >>> CX.cells[(1,2,3,4)]['color']
         'red'
 
         If you provide a dictionary of dictionaries as the second argument,
-        the entire dictionary will be used to update edge attributes::
+        the entire dictionary will be used to update cell attributes::
 
         Examples
         --------
@@ -960,88 +869,61 @@ class CellComplex(Complex):
         If the dict contains cells that are not in `self.cells`, they are
         silently ignored.
         """
-        if name is not None:
-            # if `values` is a dict using `.items()` => {cell: (key,value) } or {cell:value}
+        if rank == 0:
+            nx.set_node_attributes(self._G, values, name)
+        elif rank == 1:
+            nx.set_edge_attributes(self._G, values, name)
+        elif rank == 2:
+            if name is not None:
+                # if `values` is a dict using `.items()` => {cell: (key,value) } or {cell:value}
 
-            for cell, value in values.items():
-                try:
-                    if len(cell) == 2:
-                        if isinstance(cell[0], Iterable) and isinstance(
-                            cell[1], int
-                        ):  # input cell has cell key
-                            self.cells[cell][cell[0]][name] = value
+                for cell, value in values.items():
+                    try:
+                        if len(cell) == 2:
+                            if isinstance(cell[0], Iterable) and isinstance(
+                                cell[1], int
+                            ):  # input cell has cell key
+                                self.cells[cell][cell[0]][name] = value
+                            else:
+                                self.cells[cell][name] = value
+                        elif isinstance(
+                            self.cells[cell], list
+                        ):  # all cells with same key get same attrs
+                            for i in range(len(self.cells[cell])):
+                                self.cells[cell][i][name] = value
                         else:
                             self.cells[cell][name] = value
-                    elif isinstance(
-                        self.cells[cell], list
-                    ):  # all cells with same key get same attrs
-                        for i in range(len(self.cells[cell])):
-                            self.cells[cell][i][name] = value
-                    else:
-                        self.cells[cell][name] = value
 
-                except KeyError:
-                    pass
+                    except KeyError:
+                        pass
 
-        else:
+            else:
 
-            for cell, d in values.items():
-                try:
+                for cell, d in values.items():
+                    try:
 
-                    if len(cell) == 2:
-                        if isinstance(cell[0], Iterable) and isinstance(
-                            cell[1], int
-                        ):  # input cell has cell key
-                            self.cells[cell[0]][cell[1]].update(d)
-                        else:  # length of cell is 2
+                        if len(cell) == 2:
+                            if isinstance(cell[0], Iterable) and isinstance(
+                                cell[1], int
+                            ):  # input cell has cell key
+                                self.cells[cell[0]][cell[1]].update(d)
+                            else:  # length of cell is 2
+                                self.cells[cell].update(d)
+                        elif isinstance(
+                            self.cells[cell], list
+                        ):  # all cells with same key get same attrs
+                            for i in range(len(self.cells[cell])):
+
+                                self.cells[cell][i].update(d)
+                        else:
                             self.cells[cell].update(d)
-                    elif isinstance(
-                        self.cells[cell], list
-                    ):  # all cells with same key get same attrs
-                        for i in range(len(self.cells[cell])):
+                    except KeyError:
+                        pass
+                return
+        else:
+            raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
-                            self.cells[cell][i].update(d)
-                    else:
-                        self.cells[cell].update(d)
-                except KeyError:
-                    pass
-            return
-
-    def get_node_attributes(self, name):
-        """Get node attributes.
-
-        Parameters
-        ----------
-        name : str
-           Attribute name.
-
-        Returns
-        -------
-        Dictionary of attributes keyed by node.
-
-        Examples
-        --------
-        >>> G = nx.path_graph(3)
-        >>> CX = CellComplex(G)
-        >>> d={0: {'color':'red','attr2':1 },1: {'color':'blue','attr2':3 } }
-        >>> CX.set_node_attributes(d)
-        >>> CX.get_node_attributes('color')
-        {0: 'red', 1: 'blue'}
-
-        >>> G = nx.Graph()
-        >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CX = CellComplex(G)
-        >>> nodes_color = CX.get_node_attributes('color')
-        >>> nodes_color[1]
-        'blue'
-        """
-        return {
-            node: self.nodes[node][name]
-            for node in self.nodes
-            if name in self.nodes[node]
-        }
-
-    def get_cell_attributes(self, name, rank=None):
+    def get_cell_attributes(self, name, rank: int):
         """Get node attributes from graph.
 
         Parameters
@@ -1059,36 +941,33 @@ class CellComplex(Complex):
         --------
         >>> import networkx as nx
         >>> G = nx.path_graph(3)
-
-        >>> d={ ((1,2,3,4),0): { 'color':'red','attr2':1 },(1,2,4): {'color':'blue','attr2':3 } }
+        >>> d = {((1, 2, 3, 4), 0): {'color': 'red', 'attr2': 1}, (1, 2, 4): {'color': 'blue', 'attr2': 3 }}
         >>> CX = CellComplex(G)
-        >>> CX.add_cell([1,2,3,4], rank=2)
-        >>> CX.add_cell([1,2,3,4], rank=2)
-        >>> CX.add_cell([1,2,4], rank=2,)
-        >>> CX.add_cell([3,4,8], rank=2)
-        >>> CX.set_cell_attributes(d)
-        >>> cell_color=CX.get_cell_attributes('color',2)
-        >>> cell_color
-        '{((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([1, 2, 4], rank=2,)
+        >>> CX.add_cell([3, 4, 8], rank=2)
+        >>> CX.set_cell_attributes(d, 2)
+        >>> CX.get_cell_attributes('color', 2)
+        {((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
         """
-        if rank is not None:
-            if rank == 0:
-                return self.get_cell_attributes(name)
-            if rank == 1:
-                return nx.get_edge_attributes(self._G, name)
-            if rank == 2:
-                d = {}
-                for n in self.cells:
-                    if isinstance(self.cells[n.elements], list):  # multiple cells
-                        for i in range(len(self.cells[n.elements])):
-                            if name in self.cells[n.elements][i]:
-                                d[(n.elements, i)] = self.cells[n.elements][i][name]
-                    else:
-                        if name in self.cells[n.elements]:
-                            d[n.elements] = self.cells[n.elements][name]
+        if rank == 0:
+            return nx.get_node_attributes(self._G, name)
+        if rank == 1:
+            return nx.get_edge_attributes(self._G, name)
+        if rank == 2:
+            d = {}
+            for n in self.cells:
+                if isinstance(self.cells[n.elements], list):  # multiple cells
+                    for i in range(len(self.cells[n.elements])):
+                        if name in self.cells[n.elements][i]:
+                            d[(n.elements, i)] = self.cells[n.elements][i][name]
+                else:
+                    if name in self.cells[n.elements]:
+                        d[n.elements] = self.cells[n.elements][name]
 
-                return d
-            raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
+            return d
+        raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
     def remove_equivalent_cells(self):
         """Remove equivalent cells.
@@ -1437,12 +1316,10 @@ class CellComplex(Complex):
         >>> CX.add_cell([3,4,5],rank=2)
         >>> L1_up = CX.up_laplacian_matrix(1)
 
-        Example2
-        --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1,2,3],rank=2)
         >>> CX.add_cell([3,4,5],rank=2)
-        >>> index , L1_up = CX.up_laplacian_matrix(1,index=True)
+        >>> index, L1_up = CX.up_laplacian_matrix(1, index=True)
         >>> print(index)
         >>> print(L1_up)
         """
@@ -2070,9 +1947,9 @@ class CellComplex(Complex):
         Parameters
         ----------
         source : cell.uid or cell
-            an cell in the cell complex
+            a cell in the cell complex
         target : cell.uid or cell
-            an cell in the cell complex
+            a cell in the cell complex
         s : int
             the number of intersections between pairwise consecutive cells
 
@@ -2112,14 +1989,13 @@ class CellComplex(Complex):
             return np.inf
 
     def from_networkx_graph(self, G):
-        """Add edges and nodes from a a graph G to self.
+        """Add edges and nodes from a graph G to self.
 
         Examples
         --------
         >>> CX = CellComplex()
         >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
-
-        >>> G= Graph()
+        >>> G = Graph()
         >>> G.add_edge(1,0)
         >>> G.add_edge(2,0)
         >>> G.add_edge(1,2)
