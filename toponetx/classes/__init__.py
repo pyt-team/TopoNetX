@@ -2,9 +2,8 @@ from .cell import *
 from .simplex import *
 from .hyperedge import *
 
-from .node import *
 
-from .reportview import *
+from .reportviews import *
 
 from .complex import *
 from .simplicial_complex import *
