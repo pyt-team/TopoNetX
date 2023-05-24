@@ -188,22 +188,25 @@ class Cell:
 
         Raises
         ------
-        KeyError: if the input edge is not in the boundary of the cell.
-        ValueError: if the input edge is not iterable or if its length is not 2.
+        KeyError
+            If the input edge is not in the boundary of the cell.
+        ValueError
+            If the input edge is not valid.
+        TypeError
+            If the input edge is not an iterable.
         """
-        if isinstance(edge, Iterable):
-            if len(edge) == 2:
-                if tuple(edge) in self.boundary:
-                    return 1
-                elif tuple(edge)[::-1] in self.boundary:
-                    return -1
-                else:
-                    raise KeyError(
-                        f"the input {edge} is not in the boundary of the cell"
-                    )
+        if not isinstance(edge, Iterable):
+            raise TypeError(f"The input {edge} must be iterable.")
 
-            raise ValueError(f"the input {edge} is not a valud edge")
-        raise ValueError(f"the input {edge} must be iterable")
+        if len(edge) == 2:
+            if tuple(edge) in self.boundary:
+                return 1
+            elif tuple(edge)[::-1] in self.boundary:
+                return -1
+            else:
+                raise KeyError(f"the input {edge} is not in the boundary of the cell")
+
+        raise ValueError(f"The input {edge} is not a valid edge")
 
     def __contains__(self, e):
         """Check if the complex contains e."""
@@ -282,8 +285,8 @@ class Cell:
         elif isinstance(cell, Cell):
             seq = cell.elements
         else:
-            raise ValueError(
-                "input type must be a tuple/list of nodes defining a cell or Cell"
+            raise TypeError(
+                "Input type must be a tuple/list of nodes defining a cell or Cell"
             )
 
         if len(cell1) != len(cell):

@@ -93,7 +93,7 @@ class HyperEdgeTestCase(unittest.TestCase):
 
     def test_inite_method_non_hashabe(self):
         """Test non hashable."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             HyperEdge([1, [1], 2], rank=4)
 
     def test_duplicates_elements(self):
