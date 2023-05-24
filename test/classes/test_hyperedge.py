@@ -16,6 +16,22 @@ class HyperEdgeTestCase(unittest.TestCase):
         self.assertEqual(len(hyperedge), 3)
         self.assertEqual(tuple(hyperedge), elements)
 
+        elements = (1,)
+        hyperedge = HyperEdge(elements)
+        assert len(hyperedge) == 1
+        assert tuple(hyperedge) == elements
+
+        hyperedge = HyperEdge(1)
+        assert len(hyperedge) == 1
+        assert tuple(hyperedge) == (1,)
+
+    def test_getitem_(self):
+        """Test getitem method."""
+        hyperedge = HyperEdge(1)
+        hyperedge["weight"] = 1
+        with self.assertRaises(KeyError):
+            hyperedge["weightss"]
+
     def test_hyperedge_with_rank_and_attributes(self):
         """Test creating a HyperEdge object with rank and attributes."""
         elements = ("a", "b", "c")
