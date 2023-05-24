@@ -103,7 +103,7 @@ def sparse_array_to_neighborhood_dict(
     )
 
 
-def incidence_to_adjacency(B, s: int | None = None, signed=False):
+def incidence_to_adjacency(B, s=None, signed=False):
     """Get adjacency matrix from boolean incidence matrix for s-metrics.
 
     Self loops are not supported.
