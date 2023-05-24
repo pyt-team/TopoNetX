@@ -2,7 +2,6 @@ from .cell import *
 from .simplex import *
 from .hyperedge import *
 
-from .node import *
 
 from .reportviews import *
 
