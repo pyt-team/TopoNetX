@@ -12,8 +12,7 @@ from scipy.sparse import csr_matrix
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
-from toponetx.classes.node import NodeView
-from toponetx.classes.reportviews import HyperEdgeView
+from toponetx.classes.reportviews import HyperEdgeView, NodeView
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError

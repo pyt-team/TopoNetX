@@ -15,8 +15,7 @@ from .classes.simplex import Simplex
 from .classes.hyperedge import HyperEdge
 from .classes.cell import Cell
 
-from .classes.reportviews import CellView, HyperEdgeView, SimplexView
-from .classes.node import NodeView
+from .classes.reportviews import CellView, HyperEdgeView, SimplexView, NodeView
 
 
 from .datasets.mesh_complex import stanford_bunny
