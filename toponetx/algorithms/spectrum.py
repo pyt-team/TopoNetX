@@ -67,6 +67,7 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
 
     Examples
     --------
+    >>> from toponetx import SimplicialComplex
     >>> SC = SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> row,column,B1 = SC.incidence_matrix(1,index=True)
     >>> L1 = SC.hodge_laplacian_matrix(1)
@@ -115,6 +116,7 @@ def set_hodge_laplacian_eigenvector_attrs(
 
     Examples
     --------
+    >>> from toponetx import SimplicialComplex
     >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> SC = set_hodge_laplacian_eigenvector_attrs(SC,1,2,"down")
     >>> SC.get_simplex_attributes("0.th_eigen", 1)
@@ -165,6 +167,7 @@ def set_laplacian_beltrami_eigenvectors(cmplex):
 
     Examples
     --------
+    >>> from toponetx import SimplicialComplex
     >>> SC = SimplicialComplex.load_mesh("bunny.obj")
     >>> set_laplacian_beltrami_eigenvectors(SC)
     >>> vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
@@ -213,6 +216,7 @@ def cell_complex_hodge_laplacian_spectrum(CX: CellComplex, rank: int, weight="we
 
     Examples
     --------
+    >>> from toponetx import CellComplex
     >>> CX = CellComplex()
     >>> CX.add_cell([1,2,3,4],rank=2)
     >>> CX.add_cell([2,3,4,5],rank=2)
@@ -240,6 +244,7 @@ def simplicial_complex_hodge_laplacian_spectrum(
 
     Examples
     --------
+    >>> from toponets import SimplicialComplex
     >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> spectrum=simplicial_complex_hodge_laplacian_spectrum(SC,1)
     """
@@ -266,6 +271,7 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
 
     Examples
     --------
+    >>> from toponetx import CellComplex
     >>> CX = CellComplex()
     >>> CX.add_cell([1,2,3,4],rank=2)
     >>> CX.add_cell([2,3,4,5],rank=2)
@@ -310,6 +316,7 @@ def combinatorial_complex_adjacency_spectrum(CC: CombinatorialComplex, r, k):
 
     Examples
     --------
+    >>> from toponetx import CombinatorialComplex
     >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
     >>> s = laplacian_spectrum( CC.adjacency_matrix( 0,2) )
     """
