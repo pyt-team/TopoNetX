@@ -477,7 +477,7 @@ class SimplicialComplex(Complex):
 
             else:
                 raise ValueError(
-                    "only maximal simplices can be deleted, input simplex is not maximal"
+                    "Only maximal simplices can be deleted, input simplex is not maximal"
                 )
         else:
             raise KeyError("simplex is not a part of the simplicial complex")
