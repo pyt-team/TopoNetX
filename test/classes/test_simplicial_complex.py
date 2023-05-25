@@ -56,6 +56,108 @@ class TestSimplicialComplex(unittest.TestCase):
         is_maximal = sc.is_maximal([1, 2, 3])
         self.assertTrue(is_maximal)
 
+    def test_contructor_using_graph(self):
+        """Test input a networkx graph in the constructor."""
+        G = nx.Graph()
+        G.add_edge(0, 1)
+        G.add_edge(2, 5)
+        G.add_edge(5, 4, weight=5)
+        SC = SimplicialComplex(G)
+
+        assert (0, 1) in SC.simplices
+        assert (2, 5) in SC.simplices
+        assert (5, 4) in SC.simplices
+        assert SC.simplices[(5, 4)]["weight"] == 5
+
+    def test_skeleton_raise_errors(self):
+        """Test skeleton raises."""
+        with self.assertRaises(ValueError):
+            G = nx.Graph()
+            G.add_edge(0, 1)
+            G.add_edge(2, 5)
+            G.add_edge(5, 4, weight=5)
+            SC = SimplicialComplex(G)
+            SC.skeleton(-2)
+
+        with self.assertRaises(ValueError):
+            G = nx.Graph()
+            G.add_edge(0, 1)
+            G.add_edge(2, 5)
+            G.add_edge(5, 4, weight=5)
+            SC = SimplicialComplex(G)
+            SC.skeleton(2)
+
+    def test_rep_str(self):
+        """Test repr string."""
+        G = nx.Graph()
+        G.add_edge(0, 1)
+        G.add_edge(2, 5)
+        G.add_edge(5, 4, weight=5)
+        SC = SimplicialComplex(G, name="graph complex")
+        assert (repr(SC)) == "SimplicialComplex(name=graph complex)"
+        assert SC.name == "graph complex"
+
+    def test_getittem__(self):
+        """Test __getitem__ and __setitem__ methods."""
+        G = nx.Graph()
+        G.add_edge(0, 1)
+        G.add_edge(2, 5)
+        G.add_edge(5, 4, weight=5)
+        SC = SimplicialComplex(G, name="graph complex")
+        SC.add_simplex((1, 2, 3), heat=5)
+        # with self.assertRaises(ValueError):
+        assert SC[(1, 2, 3)]["heat"] == 5
+
+    def test_setitem__(self):
+        """Test __getitem__ and __setitem__ methods."""
+        G = nx.Graph()
+        G.add_edge(0, 1)
+        G.add_edge(2, 5)
+        G.add_edge(5, 4, weight=5)
+        SC = SimplicialComplex(G, name="graph complex")
+        SC.add_simplex((1, 2, 3), heat=5)
+        # with self.assertRaises(ValueError):
+
+        SC[(1, 2, 3)]["heat"] = 6
+
+        assert SC[(1, 2, 3)]["heat"] == 6
+
+        SC[(2, 5)]["heat"] = 1
+
+        assert SC[(2, 5)]["heat"] == 1
+
+        s = Simplex((1, 2, 3, 4), heat=1)
+        SC.add_simplex(s)
+        assert SC[(1, 2, 3, 4)]["heat"] == 1
+
+        s = Simplex(("A"), heat=1)
+        SC.add_simplex(s)
+        assert SC["A"]["heat"] == 1
+
+    def add_simplices_from(self):
+        """Test add simplices from."""
+        with self.assertRaises(ValueError):
+            SC = SimplicialComplex()
+            SC._add_simplices_from(4)
+
+    def test__insert_node(self):
+        """Test _insert_node."""
+        SC = SimplicialComplex()
+        SC._insert_node(9)
+        assert 9 in SC
+        with self.assertRaises(ValueError):
+            SC._insert_node((1, 2))
+
+        with self.assertRaises(ValueError):
+            s = Simplex((1, 2, 3, 4))
+            SC._insert_node(s)
+
+        SC = SimplicialComplex()
+        assert SC.maxdim == -1
+        SC._insert_node(9)
+        assert SC.maxdim == 0
+        assert SC[9]["is_maximal"] is True
+
     def test_add_simplex(self):
         """Test add_simplex method."""
         # create a SimplicialComplex object with no simplices

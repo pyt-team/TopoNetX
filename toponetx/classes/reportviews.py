@@ -211,8 +211,6 @@ class HyperEdgeView:
 
         self.hyperedge_dict = {}
 
-        # self._aux_complex = SimplicialComplex()  # used to track inserted elements
-
     @staticmethod
     def _to_frozen_set(hyperedge):
         if isinstance(hyperedge, Iterable):

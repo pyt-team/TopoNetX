@@ -1,12 +1,50 @@
 """Test Cell class."""
 
 import unittest
+from collections.abc import Iterable
 
 from toponetx.classes.cell import Cell
 
 
 class TestCell(unittest.TestCase):
     """Test Cell class."""
+
+    def test_create_cell_with_less_than_2_edges(self):
+        """Test creating a cell with less than 2 edges."""
+        elements = [1]
+        with self.assertRaises(ValueError):
+            Cell(elements)
+
+    def test_create_cell_with_self_loops(self):
+        """Test creating a cell with self-loops."""
+        elements = [1, 2, 3, 2]
+        with self.assertRaises(ValueError):
+            Cell(elements)
+
+    def test_sign_with_invalid_input(self):
+        """Test signing with invalid input."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        with self.assertRaises(TypeError):
+            cell.sign(123)
+        with self.assertRaises(ValueError):
+            cell.sign((1,))
+        with self.assertRaises(KeyError):
+            cell.sign((1, 4))
+
+    def test_get_item_with_invalid_key(self):
+        """Test getting an item with an invalid key."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        with self.assertRaises(KeyError):
+            cell["invalid_key"]
+
+    def test_are_homotopic_with_invalid_input(self):
+        """Test checking if cells are homotopic with invalid input."""
+        elements = [1, 2, 3]
+        cell1 = Cell(elements)
+        with self.assertRaises(TypeError):
+            Cell._are_homotopic(cell1, 123)
 
     def test_elements_and_nodes(self):
         """Test elements attributes of a cell."""
@@ -63,6 +101,84 @@ class TestCell(unittest.TestCase):
         c2 = Cell([2, 3, 1])
 
         assert Cell._are_homotopic(c1, c2) is True
+
+    def test_get_item(self):
+        """Test the __getitem__ method of Cell."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        cell["name"] = "cell1"
+        self.assertEqual(cell["name"], "cell1")
+        with self.assertRaises(KeyError):
+            cell["invalid_key"]
+
+    def test_set_item(self):
+        """Test the __setitem__ method of Cell."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        cell["name"] = "cell1"
+        self.assertEqual(cell["name"], "cell1")
+
+    def test_is_regular_property(self):
+        """Test the is_regular property of Cell."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        self.assertTrue(cell.is_regular)
+
+    def test_len(self):
+        """Test the __len__ method of Cell."""
+        elements = [1, 2, 3, 4]
+        cell = Cell(elements)
+        self.assertEqual(len(cell), 4)
+
+    def test_iter(self):
+        """Test the __iter__ method of Cell."""
+        elements = [1, 2, 3, 4]
+        cell = Cell(elements)
+        self.assertTrue(isinstance(iter(cell), Iterable))
+        self.assertEqual(list(cell), elements)
+
+    def test_sign(self):
+        """Test the sign method of Cell."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        self.assertEqual(cell.sign((1, 2)), 1)
+        self.assertEqual(cell.sign((2, 1)), -1)
+        with self.assertRaises(KeyError):
+            cell.sign((2, 4))
+        with self.assertRaises(ValueError):
+            cell.sign((1,))
+
+    def test_contains(self):
+        """Test the __contains__ method of Cell."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        self.assertTrue(1 in cell)
+        self.assertFalse(4 in cell)
+
+    def test_repr(self):
+        """Test the __repr__ method of Cell."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        self.assertEqual(repr(cell), f"Cell{cell.elements}")
+
+    def test_boundary(self):
+        """Test the boundary property of Cell."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        self.assertEqual(list(cell.boundary), [(1, 2), (2, 3), (3, 1)])
+
+    def test_elements(self):
+        """Test the elements property of Cell."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        self.assertEqual(cell.elements, tuple(elements))
+
+    def test_reverse2(self):
+        """Test the reverse method of Cell."""
+        elements = [1, 2, 3]
+        cell = Cell(elements)
+        reversed_cell = cell.reverse()
+        self.assertEqual(reversed_cell.elements, tuple(elements[::-1]))
 
 
 if __name__ == "__main__":

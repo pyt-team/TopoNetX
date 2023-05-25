@@ -521,8 +521,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        cell : hashable or RankedEntity
-            uid for a cell in cell complex or the cell RankedEntity
+        cell : Cell or Iterable representing a acell
 
         s : int, list, optional, default : 1
             Minimum number of nodes shared by neighbors cell node.
@@ -1492,34 +1491,6 @@ class CellComplex(Complex):
             return ind, incidence_to_adjacency(incidence)
         else:
             return incidence_to_adjacency(incidence)
-
-    def k_hop_incidence_matrix(self, rank, k):
-        """Compute k-hop incidence matrix for a given rank."""
-        B = self.incidence_matrix(rank, signed=True)
-        if rank < self.maxdim and rank >= 0:
-            A = self.adjacency_matrix(rank, signed=True)
-        if rank <= self.maxdim and rank > 0:
-            coA = self.coadjacency_matrix(rank, signed=True)
-        if rank == self.maxdim:
-            return B @ np.power(coA, k)
-        elif rank == 0:
-            return B @ np.power(A, k)
-        else:
-            return B @ np.power(A, k) + B @ np.power(coA, k)
-
-    def k_hop_coincidence_matrix(self, rank, k):
-        """Compute k-hop coincidence matrix for a given rank."""
-        coB = self.coincidence_matrix(rank, signed=True)
-        if rank < self.maxdim and rank >= 0:
-            A = self.adjacency_matrix(rank, signed=True)
-        if rank <= self.maxdim and rank > 0:
-            coA = self.coadjacency_matrix(rank, signed=True)
-        if rank == self.maxdim:
-            return np.power(coA, k) @ coB
-        elif rank == 0:
-            return np.power(A, k) @ coB
-        else:
-            return np.power(A, k) @ coB + np.power(coA, k) @ coB
 
     def restrict_to_cells(self, cell_set, keep_edges: bool = False, name=None):
         """Construct cell complex using a subset of the cells in cell complex.
