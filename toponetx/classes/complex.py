@@ -46,12 +46,13 @@ class Complex:
 
     @property
     @abc.abstractmethod
-    def dim(self):
+    def dim(self) -> int:
         """Return dimension of the complex."""
         pass
 
+    @property
     @abc.abstractmethod
-    def shape(self):
+    def shape(self) -> tuple:
         """Return number of cells for each rank."""
         pass
 

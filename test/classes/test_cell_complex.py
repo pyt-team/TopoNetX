@@ -754,6 +754,30 @@ class TestCellComplex(unittest.TestCase):
             [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
         )
 
+    def test_restrict_to_cells(self):
+        """Test restricting a cell complex to a subset of cells and edges."""
+        CX = CellComplex([[1, 2, 3, 4], [3, 4, 5], [1, 2, 3, 6]])
+        CX.add_cell((1, 2, 3, 4), rank=2)
+        CX.set_filtration(
+            {(1, 2, 3, 4): 1, (1, 2): 2, (3, 5): 3, (4, 5): 4, (3, 4, 5): 5}, "test"
+        )
+        restricted = CX.restrict_to_cells(
+            {(1, 2, 3, 4), (3, 5), CX.cells.raw((1, 2, 3, 6))}
+        )
+        assert len(restricted.cells[(1, 2, 3, 4)]) == 2
+        assert (1, 2, 3, 4) in restricted.cells
+        assert (1, 2, 3, 6) in restricted.cells
+        assert (3, 4, 5) not in restricted.cells
+        assert (3, 5) in restricted.edges
+        assert (4, 5) not in restricted.edges
+        assert restricted.get_filtration("test") == {
+            ((1, 2, 3, 4), 0): 1,
+            ((1, 2, 3, 4), 1): 1,
+            (2, 1): 2,
+            (3, 5): 3,
+        }
+
+
 
 if __name__ == "__main__":
     unittest.main()

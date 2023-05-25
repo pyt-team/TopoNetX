@@ -10,13 +10,15 @@ We reserve the notation CC for a combinatorial complex.
 import warnings
 from collections import defaultdict
 from collections.abc import Hashable, Iterable
-from itertools import zip_longest
+from itertools import pairwise, zip_longest
+from typing import Any, Dict, Optional, Set, Tuple
 
 import networkx as nx
 import numpy as np
 from hypernetx import Hypergraph
 from hypernetx.classes.entity import Entity
 from networkx import Graph
+from networkx.classes.reportviews import EdgeView, NodeView
 from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell
@@ -146,22 +148,22 @@ class CellComplex(Complex):
         self.complex.update(attr)
 
     @property
-    def cells(self):
+    def cells(self) -> CellView:
         """Return cells."""
         return self._cells
 
     @property
-    def edges(self):
+    def edges(self) -> EdgeView:
         """Return edges."""
         return self._G.edges
 
     @property
-    def nodes(self):
+    def nodes(self) -> NodeView:
         """Return nodes."""
         return self._G.nodes
 
     @property
-    def maxdim(self):
+    def maxdim(self) -> int:
         """Return maximum dimension."""
         if len(self.nodes) == 0:
             return 0
@@ -172,12 +174,12 @@ class CellComplex(Complex):
         return 2
 
     @property
-    def dim(self):
+    def dim(self) -> int:
         """Return dimension."""
         return self.maxdim
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, int, int]:
         """Return shape.
 
         This is:
@@ -196,7 +198,7 @@ class CellComplex(Complex):
         raise TopoNetXError("Only dimensions 0,1, and 2 are supported.")
 
     @property
-    def is_regular(self):
+    def is_regular(self) -> bool:
         """Check the regularity condition.
 
         Returns
@@ -270,7 +272,7 @@ class CellComplex(Complex):
         """
         return self.neighbors(node)
 
-    def _insert_cell(self, cell, **attr):
+    def _insert_cell(self, cell: tuple | list | Cell, **attr):
         """Insert cell."""
         # input must be list, tuple or Cell type
         if isinstance(cell, tuple) or isinstance(cell, list) or isinstance(cell, Cell):
@@ -289,7 +291,7 @@ class CellComplex(Complex):
         else:
             raise TypeError("input must be list, tuple or Cell type")
 
-    def _delete_cell(self, cell, key=None):
+    def _delete_cell(self, cell: tuple | list | Cell, key=None):
         """Delete cell."""
         if isinstance(cell, Cell):
             cell = cell.elements
@@ -303,13 +305,13 @@ class CellComplex(Complex):
         else:
             raise KeyError(f"cell {cell} is not in the complex")
 
-    def _cell_equivalence_class(self):
+    def _cell_equivalence_class(self) -> Dict[Cell, Set[Cell]]:
         """Return the equivalence classes of cells in the cell complex.
 
         Returns
         -------
-        equiv : TYPE
-            DESCRIPTION.
+        equiv : Dict[Cell, Set[Cell]]
+            Dict struture: `Cell` representing equivalence class -> Set of all `Cell`s in class
 
         Examples
         --------
@@ -375,7 +377,7 @@ class CellComplex(Complex):
                         else:
                             self._delete_cell(c, k)
 
-    def degree(self, node, rank=1):
+    def degree(self, node: Hashable, rank=1) -> int:
         """Compute the number of cells of certain rank that contain node.
 
         Parameters
@@ -390,9 +392,15 @@ class CellComplex(Complex):
         int
             Number of cells of rank at least rank that contain node.
         """
+        if rank > 1:
+            raise NotImplementedError(
+                f"Rank {rank} is currently not supported by degree."
+            )
         return self._G.degree[node]
 
-    def size(self, cell, node_set=None):
+    def size(
+        self, cell: tuple | list | Cell, node_set: Optional[Iterable[Hashable]] = None
+    ) -> int:
         """Compute number of nodes in node_set that belong to cell.
 
         If node_set is None then returns the size of cell.
@@ -422,7 +430,7 @@ class CellComplex(Complex):
             else:
                 raise KeyError(f" the key {cell} is not a key for an existing cell ")
 
-    def number_of_nodes(self, node_set=None):
+    def number_of_nodes(self, node_set: Optional[Iterable[Hashable]] = None):
         """Compute number of nodes in node_set belonging to cell complex.
 
         Parameters
@@ -440,8 +448,8 @@ class CellComplex(Complex):
         else:
             return len(self.nodes)
 
-    def number_of_edges(self, edge_set=None):
-        """Compute number of cells in cell_set belonging to cell complex.
+    def number_of_edges(self, edge_set: Optional[Iterable[tuple]] = None) -> int:
+        """Compute number of edges in edge_set belonging to cell complex.
 
         Parameters
         ----------
@@ -450,20 +458,23 @@ class CellComplex(Complex):
 
         Returns
         -------
-        number_of_cells : int
+        number_of_edges : int
             The number of edges in edge_set belonging to cell complex.
         """
         if edge_set:
-            return len([edge for edge in self.cells if edge in edge_set])
+            return len([edge for edge in self.edges if edge in edge_set])
         else:
             return len(self.edges)
 
-    def number_of_cells(self, cell_set=None):
+    def number_of_cells(
+        self, cell_set: Optional[Iterable[tuple | list | Cell]] = None
+    ) -> int:
         """Compute number of cells in cell_set belonging to cell complex.
 
         Parameters
         ----------
-        cell_set : an interable of RankedEntities, optional, default: None
+        cell_set : an interable of cells, optional, default: None
+            cells can be represented as a `tuple`, `list`, or `Cell` object
             If None, then return the number of cells in cell complex.
 
         Returns
@@ -476,7 +487,7 @@ class CellComplex(Complex):
         else:
             return len(self.cells)
 
-    def order(self):
+    def order(self) -> int:
         """Compute number of nodes in CX.
 
         Returns
@@ -521,9 +532,9 @@ class CellComplex(Complex):
          : list
             List of cell neighbors.
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
-    def remove_node(self, node):
+    def remove_node(self, node: Hashable):
         """Remove the given node from the cell complex.
 
         This method removes the given node from the cell complex, along with any
@@ -548,7 +559,7 @@ class CellComplex(Complex):
             if node in cell:
                 self.remove_cell(cell)
 
-    def remove_nodes(self, node_set):
+    def remove_nodes(self, node_set: Iterable[Hashable]):
         """Remove nodes from cells.
 
         This also deletes references in cell complex nodes.
@@ -565,29 +576,49 @@ class CellComplex(Complex):
         for node in node_set:
             self.remove_node(node)
 
-    def add_node(self, node, **attr):
+    def add_node(self, node: Hashable, **attr):
         """Add a single node to cell complex."""
         self._G.add_node(node, **attr)
 
-    def _add_nodes_from(self, nodes):
+    def _add_nodes_from(self, nodes: Iterable[Hashable]):
         """Instantiate new nodes when cells added to cell complex.
 
         Parameters
         ----------
-        nodes : iterable of hashables or RankedEntities
+        nodes : iterable of hashables
         """
         for node in nodes:
             self.add_node(node)
 
-    def add_edge(self, u_of_edge, v_of_edge, **attr):
-        """Add edge."""
+    def add_edge(self, u_of_edge: Hashable, v_of_edge: Hashable, **attr):
+        """Add edge.
+
+        Parameters
+        ----------
+        u_of_edge: Hashable, first node of edge
+        v_of_edge: Hashable, second node of edge
+        **attr: attributes to add to the edge
+        """
         self._G.add_edge(u_of_edge, v_of_edge, **attr)
 
-    def add_edges_from(self, ebunch_to_add, **attr):
-        """Add edges."""
-        self._G.add_edge_from(ebunch_to_add, **attr)
+    def add_edges_from(self, ebunch_to_add: Iterable[tuple], **attr):
+        """Add edges.
 
-    def add_cell(self, cell, rank=None, check_skeleton=False, **attr):
+        Parameters
+        ----------
+        ebunch_to_add: Iterable of edges.
+            Each edge must be given as a tuple (u,v) or (u,v,attr)
+        **attr: Attributes to add
+        """
+        self._G.add_edges_from(ebunch_to_add, **attr)
+
+    def add_cell(
+        self,
+        cell: tuple | list | Cell,
+        rank: Optional[int] = None,
+        check_skeleton=False,
+        **attr,
+    ):
         """Add a single cell to cell complex.
 
         Parameters
@@ -679,7 +710,13 @@ class CellComplex(Complex):
 
         return self
 
-    def add_cells_from(self, cell_set, rank=None, check_skeleton=False, **attr):
+    def add_cells_from(
+        self,
+        cell_set: Iterable[tuple | list | Cell],
+        rank: Optional[int] = None,
+        check_skeleton=False,
+        **attr,
+    ):
         """Add cells to cell complex.
 
         Parameters
@@ -701,7 +738,7 @@ class CellComplex(Complex):
             self.add_cell(cell=cell, rank=rank, check_skeleton=check_skeleton, **attr)
         return self
 
-    def remove_cell(self, cell):
+    def remove_cell(self, cell: tuple | list | Cell):
         """Remove a single cell from Cell Complex.
 
         Parameters
@@ -724,7 +761,7 @@ class CellComplex(Complex):
             self._delete_cell(cell)
         return self
 
-    def remove_cells(self, cell_set):
+    def remove_cells(self, cell_set: Iterable[tuple | list | Cell]):
         """Remove cells from a cell complex that are in cell_set.
 
         Parameters
@@ -750,13 +787,21 @@ class CellComplex(Complex):
             self.remove_cell(cell)
         return self
 
-    def set_filtration(self, values, name=None):
+    def set_filtration(
+        self,
+        values: Dict[Hashable | tuple | list | Cell, dict]
+        | Dict[Hashable | tuple | list | Cell, Any],
+        name: Optional[str] = None,
+    ):
         """Set filtration.
 
         Parameters
         ----------
-        values : dic
-        name : str
+        values : dict
+            either contains cell -> value (if `name` is specified)
+            or nested dict with cell -> (attribute -> value) (if `name == None`)
+            (where cell can be of any dimension)
+        name : str or None
 
         Returns
         -------
@@ -795,8 +840,16 @@ class CellComplex(Complex):
         self.set_cell_attributes(d_edges, name=name, rank=1)
         self.set_cell_attributes(d_cells, name=name, rank=2)
 
-    def get_filtration(self, name):
+    def get_filtration(self, name: str) -> Dict[Hashable | tuple, Any]:
         """Get filtration.
+
+        Parameters
+        ----------
+        name: str
+
+        Returns
+        -------
+        filtration: cell -> value, where cell is the node label or a edge / cell tuple
 
         Notes
         -----
@@ -816,18 +869,25 @@ class CellComplex(Complex):
                 d.update(i)
         return d
 
-    def set_cell_attributes(self, values, rank: int, name=None):
+    def set_cell_attributes(
+        self,
+        values: Dict[Hashable | tuple | list | Cell, dict]
+        | Dict[Hashable | tuple | list | Cell, Any],
+        rank: int,
+        name: Optional[str] = None,
+    ):
         """Set cell attributes.
 
         Parameters
         ----------
-        values : TYPE
-            DESCRIPTION.
+        values :  dict
+            either contains cell -> value (if `name` is specified)
+            or nested dict with cell -> (attribute -> value) (if `name == None`)
+            where cell is of `rank` (i.e., Hashable for nodes, 2-tuple for edges, tuple/list/Cell for 2-cells)
         rank : int
             0 for nodes, 1 for edges, 2 for 2-cells.
             ranks > 2 are currently not supported.
-        name : TYPE, optional
-            DESCRIPTION. The default is None.
+        name : str, optional
 
         Returns
         -------
@@ -923,7 +983,7 @@ class CellComplex(Complex):
         else:
             raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
-    def get_cell_attributes(self, name, rank: int):
+    def get_cell_attributes(self, name: str, rank: int) -> Dict[Hashable | tuple, Any]:
         """Get node attributes from graph.
 
         Parameters
@@ -935,7 +995,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        Dictionary of attributes keyed by cell or k-cells if k is not None
+        Dictionary of attributes keyed by node or edge / cell tuple depending on `rank`
 
         Examples
         --------
@@ -1461,13 +1521,16 @@ class CellComplex(Complex):
         else:
             return np.power(A, k) @ coB + np.power(coA, k) @ coB
 
-    def restrict_to_cells(self, cell_set, name=None):
+    def restrict_to_cells(self, cell_set, keep_edges: bool = False, name=None):
         """Construct cell complex using a subset of the cells in cell complex.
 
         Parameters
         ----------
         cell_set: iterable of hashables or Cell
-            A subset of elements of the cell complex's cells (self.cells)
+            A subset of elements of the cell complex's cells (self.cells) and edges (self.edges)
+
+        keep_edges: bool, default False
+            If False, discards edges not required by or included in `cell_set`
 
         name: str, optional
 
@@ -1487,17 +1550,42 @@ class CellComplex(Complex):
         >>> cx1.cells
         CellView([Cell(1, 2, 3)])
         """
-        rns = []
-        edges = []
+        CX = CellComplex(cells=self._G.copy(), name=name)
+
+        edges = set()
+
         for cell in cell_set:
             if cell in self.cells:
-                rns.append(cell)
-            elif cell in self.edges:
-                edges.append(cell)
+                raw_cell = self.cells.raw(cell)
+                if isinstance(raw_cell, list):
+                    for c in raw_cell:
+                        edges.update(
+                            {
+                                tuple(sorted(edge))
+                                for edge in pairwise(c.elements + c.elements[:1])
+                            }
+                        )
+                        CX.add_cell(c, rank=2)
+                else:
+                    edges.update(
+                        {
+                            tuple(sorted(edge))
+                            for edge in pairwise(
+                                raw_cell.elements + raw_cell.elements[:1]
+                            )
+                        }
+                    )
+                    CX.add_cell(raw_cell, rank=2)
+            elif len(cell) == 2 and cell in self.edges:
+                edges.add(tuple(sorted((cell[0], cell[1]))))
 
-        CX = CellComplex(cells=rns, name=name)
-        for edge in edges:
-            CX.add_edge(edge[0], edge[1])
+        if not keep_edges:
+            # remove all edges that are not included (directly or through 2-cells)
+            for edge in self._G.edges:
+                edge_tuple = tuple(sorted((edge[0], edge[1])))
+                if edge_tuple not in edges:
+                    CX._G.remove_edge(edge_tuple[0], edge_tuple[1])
+
         return CX
 
     def restrict_to_nodes(self, node_set, name=None):

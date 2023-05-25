@@ -69,15 +69,6 @@ class SimplicialComplex(Complex):
         list of maximal simplices that define the simplicial complex
     name : hashable, optional, default: None
         If None then a placeholder '' will be inserted as name
-    mode : str, optional, default 'normal'.
-        computational mode, available options are "normal" or "gudhi".
-        default is 'normal'.
-
-        Note : When ghudi is selected additioanl structure
-        obtained from the simplicial tree is stored.
-        this creates an additional reduannt storage
-        but it can be used for access the simplicial
-        tree of the complex.
 
     Notes
     -----
