@@ -3,7 +3,7 @@
 import unittest
 
 from toponetx import CellComplex, SimplicialComplex
-from toponetx.datasets.mesh_datasets import stanford_bunny
+from toponetx.datasets.mesh import stanford_bunny
 
 
 class TestMeshDatasets(unittest.TestCase):

@@ -1,2 +1,2 @@
-from .mesh_datasets import *
+from .mesh import *
 from .utils import *
