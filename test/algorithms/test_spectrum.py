@@ -51,11 +51,18 @@ class TestSpectrum(unittest.TestCase):
         assert len(eigenvaluevector) == 2
         assert len(eigenvectors) == 2
 
-    def test_set_laplacian_beltrami_eigenvectors(self):
+    def test_laplacian_beltrami_eigenvectors1(self):
         """Test test_set_laplacian_beltrami_eigenvectors."""
         sc = stanford_bunny()
         eigenvectors, eigenvalues = laplacian_beltrami_eigenvectors(sc)
         assert len(eigenvalues) == len(sc.nodes)
+
+    def test_set_laplacian_beltrami_eigenvectors2(self):
+        """Test set_laplacian_beltrami_eigenvectors."""
+        SC = stanford_bunny()
+        set_laplacian_beltrami_eigenvectors(SC)
+        vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
+        assert len(vec1) == len(SC.skeleton(0))
 
     def test_set_hodge_laplacian_eigenvector_attrs(self):
         """Test set_hodge_laplacian_eigenvector_attrs function."""

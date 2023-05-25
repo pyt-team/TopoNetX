@@ -97,7 +97,7 @@ class TestSimplicialComplex(unittest.TestCase):
         assert (repr(SC)) == "SimplicialComplex(name=graph complex)"
         assert SC.name == "graph complex"
 
-    def test_get_and_set(self):
+    def test_getittem__(self):
         """Test __getitem__ and __setitem__ methods."""
         G = nx.Graph()
         G.add_edge(0, 1)
@@ -107,6 +107,16 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex((1, 2, 3), heat=5)
         # with self.assertRaises(ValueError):
         assert SC[(1, 2, 3)]["heat"] == 5
+
+    def test_setitem__(self):
+        """Test __getitem__ and __setitem__ methods."""
+        G = nx.Graph()
+        G.add_edge(0, 1)
+        G.add_edge(2, 5)
+        G.add_edge(5, 4, weight=5)
+        SC = SimplicialComplex(G, name="graph complex")
+        SC.add_simplex((1, 2, 3), heat=5)
+        # with self.assertRaises(ValueError):
 
         SC[(1, 2, 3)]["heat"] = 6
 

@@ -391,11 +391,11 @@ class SimplicialComplex(Complex):
                     self._simplex_set.faces_dict[0][simplex_].update(attr)
             else:
                 raise ValueError(
-                    "input simplex is not a singlton, use add_simplex to insert the simplex"
+                    "input simplex is not a singleton, use add_simplex to insert the simplex"
                 )
 
         else:
-            raise TypeError("input type must be iterable, or singlton Simplex")
+            raise TypeError("input type must be iterable, or singleton Simplex")
 
     def _add_simplex(self, simplex, **attr):
 
