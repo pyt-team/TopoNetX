@@ -762,6 +762,20 @@ class TestCellComplex(unittest.TestCase):
             (3, 5): 3,
         }
 
+    def test_is_connected(self):
+        """Test is connected."""
+        # connected cell complex
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4, 5], rank=2)
+        CX.add_cell([1, 2, 7, 8], rank=2)
+        assert CX.is_connected() is True
+
+        # disconnected cell complex
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4, 5], rank=2)
+        CX.add_cell([7, 8, 9, 10], rank=2)
+        assert CX.is_connected() is False
+
 
 if __name__ == "__main__":
     unittest.main()

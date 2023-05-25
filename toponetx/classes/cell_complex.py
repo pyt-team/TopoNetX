@@ -697,9 +697,11 @@ class CellComplex(Complex):
                         self._insert_cell(Cell(cell, regular=self._regular), **attr)
                     else:
                         print(
-                            "Invalid cycle condition, check if edges of the input cells are in the 1-skeleton."
+                            f"Invalid cycle condition for cell {cell}. This input cell is not inserted, check if edges of the input cell are in the 1-skeleton."
                         )
-                        print(" To ignore this check, set check_skeleton = False.")
+                        print(
+                            "To ignore this check, set check_skeleton = False or check if the input cell is a valid 2d cell."
+                        )
                 else:
                     raise ValueError("invalid input")
             else:
@@ -1066,13 +1068,15 @@ class CellComplex(Complex):
             cell = cell.elements
         if len(cell) <= 1:
             if warnings_dis:
-                warnings.warn(f"a cell must contain at least 2 edges, got {len(cell)}")
+                warnings.warn(
+                    f"a 2d cell must contain at least 2 edges, got {len(cell)}"
+                )
             return False
         if self._regular:
             if len(set(cell)) != len(cell):
                 if warnings_dis:
                     warnings.warn(
-                        "repeating nodes invalidates the 2-cell regular condition"
+                        "repeating nodes invalidates the 2-cell regularity condition"
                     )
                 return False
         if check_skeleton:
@@ -1081,7 +1085,7 @@ class CellComplex(Complex):
                 if i not in self.edges:
                     if warnings_dis:
                         warnings.warn(
-                            f"edge {i} is not a part of the 1 skeleton of the cell complex",
+                            f"edge {i} is not a part of the 1-skeleton of the cell complex",
                             stacklevel=2,
                         )
                     return False
