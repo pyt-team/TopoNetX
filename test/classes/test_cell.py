@@ -1,7 +1,7 @@
 """Test Cell class."""
 
 import unittest
-from collections.abc import Hashable, Iterable
+from collections.abc import Iterable
 
 from toponetx.classes.cell import Cell
 

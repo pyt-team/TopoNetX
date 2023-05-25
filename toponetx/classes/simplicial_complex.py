@@ -244,6 +244,8 @@ class SimplicialComplex(Complex):
         elif isinstance(simplex, Hashable):
             if frozenset({simplex}) in self:
                 self.faces_dict[0].update(attr)
+        else:
+            raise TypeError("Input simplex must be Simplex, Iterable or Hashable.")
 
     def __iter__(self):
         """Iterate over all faces of the simplicial complex.
@@ -348,9 +350,6 @@ class SimplicialComplex(Complex):
         simplex : Hashable or Simplex
             a Hashable or singlton Simplex representing a node in a simplicial complex.
 
-        Returns
-        -------
-        None.
         """
         if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
             self.add_simplex(simplex, **attr)
