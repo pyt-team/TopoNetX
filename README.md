@@ -5,14 +5,15 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7958504.svg)](https://doi.org/10.5281/zenodo.7958504)
 
 # 🌐 TopoNetX (TNX) 🍩
-# Computing on Topological Domains
+# Computing with Relational Data abstracted as Topological Domains
 
 ![toponetx](https://user-images.githubusercontent.com/8267869/234068354-af9480f1-1d18-4914-92f1-916d9093e44d.png)
 
-Many natural systems as diverse as social networks and proteins are characterized by relational structure. This is the structure of interactions between
-components in the system, such as social interactions between individuals or electrostatic interactions between atoms.
+Many complex systems, ranging from socio-economic systems such as social networks, over to biological systems (e.g., proteins) and technical systems can be abstracted as a set of entities with are linked to each other via a set of relations.
+For instance, a social network may be abstracted as a set vertices corresponding to people linked via various social interactions, including pairwise relationships such as friendships and higher-order relationships involving multiple people.
+This *relational data* can be abstracted as a topological domain such as a graph, hypergraph, simplicial, cellular or combinatorial complex, which enables the principled analysis of such data.
 
-`TopoNetX` provides a unifying interface to compute with such relational data.
+`TopoNetX` provides a unified platform to compute with such relational data.
 
 ## 🎯 Scope and functionality
 
@@ -26,7 +27,7 @@ Available functionality ranges
 from computing boundary operators and Hodge Laplacians on simplicial/cell/combinatorial complexes
 to performing higher-order adjacency calculations.
 
-TNX is similar to `NetworkX`, a popular graph package, and extends its capabilities to support a
+TNX is similar to [`NetworkX`](https://networkx.org/), a popular graph package, and extends its capabilities to support a
 wider range of mathematical structures, including cell complexes, simplicial complexes and
 combinatorial complexes.
 The TNX library provides classes and methods for modeling the entities and relations
@@ -40,12 +41,12 @@ and higher-order adjacency operators on cell, simplicial and combinatorial compl
 respectively. The classes are used in many areas of mathematics and computer science,
 such as algebraic topology, geometry, and data analysis.
 
-TNX was developed by the pyt-team.
+TNX is developed by the [pyt-team](https://github.com/pyt-team)
 
 ## 🛠️ Main features
 
 1. Dynamic construction of cell, simplicial and combinatorial complexes, allowing users to add or remove objects from these structures after their initial creation.
-2. Compatibility with the `NetworkX` and `gudhi` packages, enabling users to
+2. Compatibility with the [`NetworkX`](https://networkx.org/) and [`gudhi`](https://gudhi.inria.fr/) packages, enabling users to
 leverage the powerful algorithms and data structures provided by these packages.
 3. Support for attaching arbitrary attributes and data to cells, simplices and other entities in a complex, allowing users to store and manipulate a versatile range of information about these objects.
 4. Computation of boundary operators, Hodge Laplacians and higher-order adjacency
@@ -144,7 +145,7 @@ B03 = cc.incidence_matrix(0, 3)
 
 ## 🔍 References ##
 
-To learn more about how topological domains are used in deep learning:
+To learn more about how topological domains, and how they can be used in deep learning:
 
 - Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub. [Topological Deep Learning: Going Beyond Graph Data](https://arxiv.org/abs/2206.00606).
 ```
