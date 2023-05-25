@@ -392,7 +392,7 @@ class CellComplex(Complex):
         int
             Number of cells of rank at least rank that contain node.
         """
-        if rank >= 1:
+        if rank > 1:
             raise NotImplementedError(
                 f"Rank {rank} is currently not supported by degree."
             )
