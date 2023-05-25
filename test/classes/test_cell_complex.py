@@ -7,6 +7,7 @@ import numpy as np
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
+from toponetx.exception import TopoNetXError
 
 
 class TestCellComplex(unittest.TestCase):
@@ -425,7 +426,7 @@ class TestCellComplex(unittest.TestCase):
         assert len(cc.edges) == 1
         assert len(cc.nodes) == 2
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(TopoNetXError):
             cc.remove_node(980)
 
     def test_add_cells_from_list_cells(self):
