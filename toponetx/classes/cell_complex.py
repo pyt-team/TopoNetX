@@ -10,7 +10,7 @@ We reserve the notation CC for a combinatorial complex.
 import warnings
 from collections import defaultdict
 from collections.abc import Hashable, Iterable
-from itertools import zip_longest
+from itertools import pairwise, zip_longest
 
 import networkx as nx
 import numpy as np
@@ -1461,13 +1461,16 @@ class CellComplex(Complex):
         else:
             return np.power(A, k) @ coB + np.power(coA, k) @ coB
 
-    def restrict_to_cells(self, cell_set, name=None):
+    def restrict_to_cells(self, cell_set, keep_edges: bool = False, name=None):
         """Construct cell complex using a subset of the cells in cell complex.
 
         Parameters
         ----------
         cell_set: iterable of hashables or Cell
-            A subset of elements of the cell complex's cells (self.cells)
+            A subset of elements of the cell complex's cells (self.cells) and edges (self.edges)
+
+        keep_edges: bool, default False
+            If False, discards edges not required by or included in `cell_set`
 
         name: str, optional
 
@@ -1487,17 +1490,42 @@ class CellComplex(Complex):
         >>> cx1.cells
         CellView([Cell(1, 2, 3)])
         """
-        rns = []
-        edges = []
+        CX = CellComplex(cells=self._G.copy(), name=name)
+
+        edges = set()
+
         for cell in cell_set:
             if cell in self.cells:
-                rns.append(cell)
-            elif cell in self.edges:
-                edges.append(cell)
+                raw_cell = self.cells.raw(cell)
+                if isinstance(raw_cell, list):
+                    for c in raw_cell:
+                        edges.update(
+                            {
+                                tuple(sorted(edge))
+                                for edge in pairwise(c.elements + c.elements[:1])
+                            }
+                        )
+                        CX.add_cell(c, rank=2)
+                else:
+                    edges.update(
+                        {
+                            tuple(sorted(edge))
+                            for edge in pairwise(
+                                raw_cell.elements + raw_cell.elements[:1]
+                            )
+                        }
+                    )
+                    CX.add_cell(raw_cell, rank=2)
+            elif len(cell) == 2 and cell in self.edges:
+                edges.add(tuple(sorted((cell[0], cell[1]))))
 
-        CX = CellComplex(cells=rns, name=name)
-        for edge in edges:
-            CX.add_edge(edge[0], edge[1])
+        if not keep_edges:
+            # remove all edges that are not included (directly or through 2-cells)
+            for edge in self._G.edges:
+                edge_tuple = tuple(sorted((edge[0], edge[1])))
+                if edge_tuple not in edges:
+                    CX._G.remove_edge(edge_tuple[0], edge_tuple[1])
+
         return CX
 
     def restrict_to_nodes(self, node_set, name=None):

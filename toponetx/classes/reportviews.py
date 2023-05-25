@@ -4,6 +4,7 @@ Such as:
 HyperEdgeView, CellView, SimplexView.
 """
 from collections.abc import Hashable, Iterable
+from typing import List
 
 import numpy as np
 
@@ -80,6 +81,58 @@ class CellView:
                     return self._cells[cell][k].properties
                 else:
                     return [self._cells[cell][c].properties for c in self._cells[cell]]
+            else:
+                raise KeyError(f"cell {cell} is not in the cell dictionary")
+
+        else:
+            raise TypeError("Input must be a tuple, list or a cell.")
+
+    def raw(self, cell: tuple | list | Cell) -> Cell | List[Cell]:
+        """Indexes the raw cell objects analogous to the overall index of CellView.
+
+        Parameters
+        ----------
+        cell : tuple, list, or cell
+            The cell of interest.
+
+        Returns
+        -------
+        TYPE : Cell or list of Cells
+            The raw Cell objects.
+            If more than one cell with the same boundary exists, returns a list;
+            otherwise a single cell.
+
+        Raises
+        ------
+        KeyError
+            If the cell is not in the cell dictionary.
+        """
+        if isinstance(cell, Cell):
+
+            if cell.elements not in self._cells:
+                raise KeyError(f"cell {cell} is not in the cell dictionary")
+
+            # If there is only one cell with these elements, return its properties
+            elif len(self._cells[cell.elements]) == 1:
+                k = next(iter(self._cells[cell.elements].keys()))
+                return self._cells[cell.elements][k]
+
+            # If there are multiple cells with these elements, return the properties of all cells
+            else:
+                return [
+                    self._cells[cell.elements][c] for c in self._cells[cell.elements]
+                ]
+
+        # If a tuple or list is passed in, assume it represents a cell
+        elif isinstance(cell, tuple) or isinstance(cell, list):
+
+            cell = tuple(cell)
+            if cell in self._cells:
+                if len(self._cells[cell]) == 1:
+                    k = next(iter(self._cells[cell].keys()))
+                    return self._cells[cell][k]
+                else:
+                    return [self._cells[cell][c] for c in self._cells[cell]]
             else:
                 raise KeyError(f"cell {cell} is not in the cell dictionary")
 
