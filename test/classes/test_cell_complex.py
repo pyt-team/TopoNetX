@@ -528,7 +528,7 @@ class TestCellComplex(unittest.TestCase):
         cx._remove_equivalent_cells()
         assert len(cx.cells) == 4
 
-    def test_remove_equivalent_cells(self):
+    def test_remove_equivalent_cells2(self):
         """Test the remove equivalent cells method."""
         cx = CellComplex()
         cx.add_cell((1, 2, 3, 4), rank=2)
@@ -543,7 +543,7 @@ class TestCellComplex(unittest.TestCase):
         cx.remove_equivalent_cells()
         assert len(cx.cells) == 4
 
-    def test_get_cell_attributes(self):
+    def test_get_cell_attributes2(self):
         """Test the remove equivalent cells method."""
         import networkx as nx
 
@@ -696,6 +696,63 @@ class TestCellComplex(unittest.TestCase):
         assert (3, 4, 5) not in restricted.cells
         assert (4, 5) not in restricted.edges
         assert restricted.get_filtration("test") == {(1, 2, 3): 1, (1, 4): 0, 3: 1}
+
+    def test_get_cell_attributes(self):
+        """Unit test for the get_cell_attributes method."""
+        CX = CellComplex()
+        d = {
+            ((1, 2, 3, 4), 0): {"color": "red", "attr2": 1},
+            (1, 2, 4): {"color": "blue", "attr2": 3},
+        }
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell(
+            [1, 2, 4],
+            rank=2,
+        )
+        CX.add_cell([3, 4, 8], rank=2)
+        CX.set_cell_attributes(d, 2)
+        attributes = CX.get_cell_attributes("color", 2)
+        self.assertEqual(attributes, {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"})
+
+    def test_remove_equivalent_cells(self):
+        """Unit test for the remove_equivalent_cells method."""
+        CX = CellComplex()
+
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([2, 3, 4, 1], rank=2)
+        CX.add_cell(
+            [1, 2, 4],
+            rank=2,
+        )
+        CX.add_cell([3, 4, 8], rank=2)
+        self.assertEqual(len(CX.cells), 5)
+        CX.remove_equivalent_cells()
+        self.assertEqual(len(CX.cells), 3)
+
+    def test_is_insertable_cycle(self):
+        """Unit test for the is_insertable_cycle method."""
+        CX = CellComplex()
+
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([3, 4, 5], rank=2)
+        self.assertTrue(CX.is_insertable_cycle([1, 2, 3, 4]))
+        self.assertFalse(CX.is_insertable_cycle([1, 2, 3, 4, 1, 2]))
+        self.assertFalse(CX.is_insertable_cycle([1, 2, 1]))
+
+    def test_incidence_matrix(self):
+        """Unit test for the incidence_matrix method."""
+        CX = CellComplex()
+
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([3, 4, 5], rank=2)
+        B1 = CX.incidence_matrix(1)
+        B2 = CX.incidence_matrix(2)
+        self.assertEqual(
+            B1.dot(B2).todense().tolist(),
+            [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
+        )
 
 
 if __name__ == "__main__":
