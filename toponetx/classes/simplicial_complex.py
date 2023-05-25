@@ -213,9 +213,9 @@ class SimplicialComplex(Complex):
         Returns
         -------
         int
-            Total number of simplices in all dimensions.
+            Number of vertices in the complex.
         """
-        return np.sum(self.shape)
+        return len(self.skeleton(0))
 
     def __getitem__(self, simplex):
         """Get simplex."""

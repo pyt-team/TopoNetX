@@ -19,7 +19,7 @@ from toponetx.algorithms.spectrum import (
 )
 from toponetx.classes.cell_complex import CellComplex, CombinatorialComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
-from toponetx.datasets.mesh_complex import stanford_bunny
+from toponetx.datasets.mesh_datasets import stanford_bunny
 
 
 class TestSpectrum(unittest.TestCase):

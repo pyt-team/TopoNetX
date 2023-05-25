@@ -8,7 +8,7 @@ from scipy.sparse import diags
 from toponetx.classes import CombinatorialComplex
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
-from toponetx.datasets.mesh_complex import stanford_bunny
+from toponetx.datasets.mesh_datasets import stanford_bunny
 
 __all__ = [
     "hodge_laplacian_eigenvectors",
