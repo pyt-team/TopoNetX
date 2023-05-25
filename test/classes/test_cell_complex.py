@@ -425,6 +425,9 @@ class TestCellComplex(unittest.TestCase):
         assert len(cc.edges) == 1
         assert len(cc.nodes) == 2
 
+        with self.assertRaises(KeyError):
+            cc.remove_node(980)
+
     def test_add_cells_from_list_cells(self):
         """Test adding cells from a list of cells or cell lists."""
         cc = CellComplex()
@@ -452,8 +455,8 @@ class TestCellComplex(unittest.TestCase):
         B = cc.incidence_matrix(2)
         np.testing.assert_array_equal(B.toarray(), np.zeros((0, 0)))
 
-    def test_incidence_matrix_abstrcct_cell_with_one_cell(self):
-        """Test the incidence matrix for abstrcct cell with only one cell."""
+    def test_incidence_matrix_abstract_cell_with_one_cell(self):
+        """Test the incidence matrix for abstract cell with only one cell."""
         cc = CellComplex()
         cc.add_cell([1, 2, 3], rank=2)
         B = cc.incidence_matrix(2)
@@ -596,6 +599,8 @@ class TestCellComplex(unittest.TestCase):
         assert CX.size((2, 3, 4, 5), node_set=[3, 4, 5]) == 3
         assert CX.size((5, 6, 7, 8), node_set=[6, 7, 8]) == 3
         assert CX.size(c, node_set=[1, 2, 3]) == 3
+        with self.assertRaises(KeyError):
+            CX.size((1, 2, 3, 4, 5, 5, 6))
 
     def test_insert_cell(self):
         """Test inserting a cell into the cell complex."""
@@ -775,6 +780,131 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([1, 2, 3, 4, 5], rank=2)
         CX.add_cell([7, 8, 9, 10], rank=2)
         assert CX.is_connected() is False
+
+    def test_singletons(self):
+        """Test singletons."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([2, 3, 4, 5], rank=2)
+        CX.add_cell([5, 6, 7, 8], rank=2)
+        CX.add_node(0)
+        CX.add_node(10)
+        assert CX.singletons() == [0, 10]
+
+    def test_remove_singletons(self):
+        """Test remove singletons."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([2, 3, 4, 5], rank=2)
+        CX.add_cell([5, 6, 7, 8], rank=2)
+        CX.add_node(0)
+        CX.add_node(10)
+        CX.remove_singletons()
+        assert CX.singletons() == []
+
+    def test_contains__(self):
+        """Test __contains__."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([2, 3, 4, 5], rank=2)
+
+        assert 1 in CX
+        assert 2 in CX
+        assert 3 in CX
+        assert 4 in CX
+        assert 5 in CX
+        assert (1, 2, 3, 4, 5) not in CX
+
+    def test_neighbors(self):
+        """Test neighbors of nodes."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([2, 3, 4, 5], rank=2)
+
+        assert list(CX.neighbors(1)) == [2, 4]
+
+    def test_insert_cell_2(self):
+        """Test for the _insert_cell method."""
+        CX = CellComplex()
+        CX._insert_cell([1, 2, 3], color="red")
+        self.assertEqual(len(CX._cells._cells), 1)
+        CX._insert_cell((1, 2, 3), attr1=5)
+        self.assertEqual(len(CX._cells._cells), 1)
+        CX._insert_cell(Cell([1, 2, 3], name="Cell 1"))
+        self.assertEqual(len(CX._cells._cells), 1)
+        CX._insert_cell([1, 2, 4])
+        self.assertEqual(len(CX._cells._cells), 2)
+
+    def test_insert_cell_invalid_input(self):
+        """Test _insert_cell method with invalid input."""
+        CX = CellComplex()
+        with self.assertRaises(TypeError):
+            CX._insert_cell("invalid_input")
+        with self.assertRaises(TypeError):
+            CX._insert_cell(123)
+        with self.assertRaises(TypeError):
+            CX._insert_cell({"elements": [1, 2, 3]})
+
+    def test_delete_cell_2(self):
+        """Test for the _delete_cell method."""
+        CX = CellComplex()
+        CX._insert_cell([1, 2, 3], color="red")
+        CX._insert_cell([4, 5, 6], color="blue")
+        CX._delete_cell((1, 2, 3))
+        self.assertEqual(len(CX._cells._cells), 1)
+        self.assertEqual(len(CX.cells), 1)
+        CX._delete_cell((4, 5, 6))
+        self.assertEqual(len(CX._cells._cells), 0)
+        self.assertEqual(len(CX.cells), 0)
+
+    def test_delete_cell_invalid_input(self):
+        """Test for the _delete_cell method with invalid input."""
+        CX = CellComplex()
+        with self.assertRaises(KeyError):
+            CX._delete_cell((1, 2, 3))
+
+    def test_number_of_nodes(self):
+        """Test for the number_of_nodes method."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3], rank=2)
+        CX.add_node(4)
+        CX.add_node(5)
+        self.assertEqual(CX.number_of_nodes(), 5)
+        self.assertEqual(CX.number_of_nodes([1, 2, 3]), 3)
+        self.assertEqual(CX.number_of_nodes([1, 6]), 1)
+
+    def test_number_of_edges(self):
+        """Test for the number_of_edges method."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3], rank=2)
+        CX.add_node(4)
+        CX.add_node(5)
+        self.assertEqual(CX.number_of_edges(), 3)
+        self.assertEqual(CX.number_of_edges([(1, 2), (2, 3)]), 2)
+        self.assertEqual(CX.number_of_edges([(4, 5), (6, 7)]), 0)
+
+    def test_number_of_cells(self):
+        """Test for the number_of_cells method."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3], rank=2)
+        CX.add_node(4)
+        CX.add_node(5)
+        self.assertEqual(CX.number_of_cells(), 1)
+        self.assertEqual(CX.number_of_cells([(4, 5), (6, 7)]), 0)
+
+    def test_order(self):
+        """Test for the order method."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3], rank=2)
+        CX.add_node(4)
+        CX.add_node(5)
+        self.assertEqual(CX.order(), 5)
+
+    def test_neighbors_error(self):
+        """Test to check for ValueError in neighbors method."""
+        CX = CellComplex()
+        with self.assertRaises(KeyError):
+            CX.neighbors(10)
 
 
 if __name__ == "__main__":

@@ -453,7 +453,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        edge_set : an iterable of RankedEntities, optional, default: None
+        edge_set : an iterable of optional, default: None
             If None, then return the number of edges in cell complex.
 
         Returns
@@ -462,7 +462,13 @@ class CellComplex(Complex):
             The number of edges in edge_set belonging to cell complex.
         """
         if edge_set:
-            return len([edge for edge in self.edges if edge in edge_set])
+            return len(
+                [
+                    edge
+                    for edge in self.edges
+                    if edge in edge_set or edge[::-1] in edge_set
+                ]
+            )
         else:
             return len(self.edges)
 
@@ -511,7 +517,7 @@ class CellComplex(Complex):
             List of neighbors.
         """
         if node not in self.nodes:
-            print(f"Node is not in cell complex {self.name}.")
+            raise KeyError(f"input {node} is not in the complex.")
             return
 
         return self._G[node]
@@ -1348,7 +1354,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        d : int, dimension of the up Laplacian matrix.
+        rank : int, dimension of the up Laplacian matrix.
             Supported dimension are 0,1
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
@@ -1416,7 +1422,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        d : int, dimension of the down Laplacian matrix.
+        rank : int, dimension of the down Laplacian matrix.
             Supported dimension are 0,1
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
@@ -1425,7 +1431,7 @@ class CellComplex(Complex):
                        typically positive.
         weight : bool, default=False
             If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
+            If True and all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
