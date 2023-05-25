@@ -453,7 +453,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        edge_set : an iterable of RankedEntities, optional, default: None
+        edge_set : an iterable of optional, default: None
             If None, then return the number of edges in cell complex.
 
         Returns
@@ -462,7 +462,13 @@ class CellComplex(Complex):
             The number of edges in edge_set belonging to cell complex.
         """
         if edge_set:
-            return len([edge for edge in self.edges if edge in edge_set])
+            return len(
+                [
+                    edge
+                    for edge in self.edges
+                    if edge in edge_set or edge[::-1] in edge_set
+                ]
+            )
         else:
             return len(self.edges)
 
@@ -511,7 +517,7 @@ class CellComplex(Complex):
             List of neighbors.
         """
         if node not in self.nodes:
-            print(f"Node is not in cell complex {self.name}.")
+            raise KeyError(f"input {node} is not in the complex.")
             return
 
         return self._G[node]
@@ -697,9 +703,11 @@ class CellComplex(Complex):
                         self._insert_cell(Cell(cell, regular=self._regular), **attr)
                     else:
                         print(
-                            "Invalid cycle condition, check if edges of the input cells are in the 1-skeleton."
+                            f"Invalid cycle condition for cell {cell}. This input cell is not inserted, check if edges of the input cell are in the 1-skeleton."
                         )
-                        print(" To ignore this check, set check_skeleton = False.")
+                        print(
+                            "To ignore this check, set check_skeleton = False or check if the input cell is a valid 2d cell."
+                        )
                 else:
                     raise ValueError("invalid input")
             else:
@@ -1066,13 +1074,15 @@ class CellComplex(Complex):
             cell = cell.elements
         if len(cell) <= 1:
             if warnings_dis:
-                warnings.warn(f"a cell must contain at least 2 edges, got {len(cell)}")
+                warnings.warn(
+                    f"a 2d cell must contain at least 2 edges, got {len(cell)}"
+                )
             return False
         if self._regular:
             if len(set(cell)) != len(cell):
                 if warnings_dis:
                     warnings.warn(
-                        "repeating nodes invalidates the 2-cell regular condition"
+                        "repeating nodes invalidates the 2-cell regularity condition"
                     )
                 return False
         if check_skeleton:
@@ -1081,7 +1091,7 @@ class CellComplex(Complex):
                 if i not in self.edges:
                     if warnings_dis:
                         warnings.warn(
-                            f"edge {i} is not a part of the 1 skeleton of the cell complex",
+                            f"edge {i} is not a part of the 1-skeleton of the cell complex",
                             stacklevel=2,
                         )
                     return False
@@ -1344,7 +1354,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        d : int, dimension of the up Laplacian matrix.
+        rank : int, dimension of the up Laplacian matrix.
             Supported dimension are 0,1
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
@@ -1412,7 +1422,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        d : int, dimension of the down Laplacian matrix.
+        rank : int, dimension of the down Laplacian matrix.
             Supported dimension are 0,1
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
@@ -1421,7 +1431,7 @@ class CellComplex(Complex):
                        typically positive.
         weight : bool, default=False
             If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
+            If True and all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
