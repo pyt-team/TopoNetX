@@ -18,7 +18,7 @@ from .classes.cell import Cell
 from .classes.reportviews import CellView, HyperEdgeView, SimplexView, NodeView
 
 
-from .datasets.mesh_complex import stanford_bunny
+from .datasets.mesh import stanford_bunny
 
 from .transform.graph_to_simplicial_complex import (
     graph_2_neighbor_complex,

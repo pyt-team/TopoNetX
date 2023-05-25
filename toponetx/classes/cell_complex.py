@@ -2088,16 +2088,19 @@ class CellComplex(Complex):
 
         if first_ind == 0:
 
-            CX.set_node_attributes(
-                dict(zip(range(len(mesh.vertices)), mesh.vertices)), name="position"
+            CX.set_cell_attributes(
+                dict(zip(range(len(mesh.vertices)), mesh.vertices)),
+                name="position",
+                rank=0,
             )
         else:  # first index starts at 1.
 
-            CX.set_node_attributes(
+            CX.set_cell_attributes(
                 dict(
                     zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
                 ),
                 name="position",
+                rank=0,
             )
 
         return CX
