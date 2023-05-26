@@ -130,6 +130,42 @@ class Cell:
         """
         self.properties[key] = item
 
+    @staticmethod
+    def is_valid_cell(elements, regular=False):
+        """Check if a 2D cell defined by a list of elements is valid.
+
+        Parameters
+        ----------
+        elements : list
+            List of elements defining the cell.
+        regular : bool, optional
+            Indicates if the cell is regular. Default is False.
+
+        Returns
+        -------
+        bool
+            True if the cell is valid, False otherwise.
+        """
+        _boundary = list(
+            zip_longest(elements, elements[1:] + [elements[0]])
+        )  # list of edges define the boundary of the 2d cell
+        if len(elements) <= 1:
+            return False
+
+        if regular:
+            _adjdict = {}
+            for e in _boundary:
+                if e[0] in _adjdict:
+                    return False
+
+                _adjdict[e[0]] = e[1]
+        else:
+
+            for e in _boundary:
+                if e[0] == e[1]:
+                    return False
+        return True
+
     @property
     def is_regular(self):
         """Check if a cell is regular.
@@ -286,8 +322,11 @@ class Cell:
             seq = cell.elements
         else:
             raise TypeError(
-                "Input type must be a tuple/list of nodes defining a cell or Cell"
+                "fInput {cell} must be a tuple/list of nodes defining a cell or Cell"
             )
+
+        if not isinstance(cell1, Cell):
+            raise TypeError("first argument cell must be a cell")
 
         if len(cell1) != len(cell):
             return False
