@@ -635,9 +635,6 @@ class CellComplex(Complex):
         check_skeleton : bool, default=False
             If true, this function checks the skeleton whether the given cell can be added.
 
-        Returns
-        -------
-        Cell Complex : CellComplex
 
         Examples
         --------
@@ -715,8 +712,6 @@ class CellComplex(Complex):
                     f"Add cell only supports adding cells of dimensions 0,1 or 2-- got {rank}",
                 )
 
-        return self
-
     def add_cells_from(
         self,
         cell_set: Iterable[tuple | list | Cell],
@@ -737,13 +732,10 @@ class CellComplex(Complex):
         check_skeleton : bool
             If true, this function checks the skeleton whether the given cell can be added.
 
-        Returns
-        -------
-        Cell Complex : CellComplex
+
         """
         for cell in cell_set:
             self.add_cell(cell=cell, rank=rank, check_skeleton=check_skeleton, **attr)
-        return self
 
     def remove_cell(self, cell: tuple | list | Cell):
         """Remove a single cell from Cell Complex.

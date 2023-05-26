@@ -102,6 +102,11 @@ class TestCell(unittest.TestCase):
 
         assert Cell._are_homotopic(c1, c2) is True
 
+        assert Cell._are_homotopic(c1, (1, 2, 3)) is True
+
+        with self.assertRaises(TypeError):
+            assert Cell._are_homotopic((1, 2, 3), c1)
+
     def test_get_item(self):
         """Test the __getitem__ method of Cell."""
         elements = [1, 2, 3]
@@ -179,6 +184,36 @@ class TestCell(unittest.TestCase):
         cell = Cell(elements)
         reversed_cell = cell.reverse()
         self.assertEqual(reversed_cell.elements, tuple(elements[::-1]))
+
+    def test_valid_regular_cell(self):
+        """Test a valid regular cell."""
+        elements = [1, 2, 3]
+        self.assertTrue(Cell.is_valid_cell(elements, regular=True))
+
+    def test_valid_irregular_cell(self):
+        """Test a valid irregular cell."""
+        elements = [1, 2, 3, 4, 1, 2, 3]
+        self.assertTrue(Cell.is_valid_cell(elements, regular=False))
+
+    def test_invalid_single_element_cell(self):
+        """Test an invalid cell with a single element."""
+        elements = [1]
+        self.assertFalse(Cell.is_valid_cell(elements, regular=True))
+
+    def test_invalid_repeated_element_cell(self):
+        """Test an invalid cell with repeated elements."""
+        elements = [1, 1, 1, 1]
+        self.assertFalse(Cell.is_valid_cell(elements, regular=False))
+
+    def test_invalid_regular_cell(self):
+        """Test an invalid regular cell."""
+        elements = [1, 2, 3, 2]
+        self.assertFalse(Cell.is_valid_cell(elements, regular=True))
+
+    def test_invalid_irregular_cell(self):
+        """Test an invalid irregular cell."""
+        elements = [1, 2, 2, 4]
+        self.assertFalse(Cell.is_valid_cell(elements, regular=False))
 
 
 if __name__ == "__main__":
