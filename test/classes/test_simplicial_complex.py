@@ -2,10 +2,12 @@
 
 import unittest
 
+import hypernetx as hnx
 import networkx as nx
 import numpy as np
+import trimesh
 
-from toponetx import Simplex, SimplicialComplex
+from toponetx import Simplex, SimplicialComplex, TopoNetXError, stanford_bunny
 
 
 class TestSimplicialComplex(unittest.TestCase):
@@ -367,6 +369,67 @@ class TestSimplicialComplex(unittest.TestCase):
 
         B0 = SC.coincidence_matrix(0)
         assert B0.shape[0] == len(SC.skeleton(0))
+
+    def test_is_triangular_mesh(self):
+        """Test is_triangular_mesh."""
+        SC = stanford_bunny()
+        self.assertTrue(SC.is_triangular_mesh())
+
+    def test_to_trimesh(self):
+        """Test to_trimesh."""
+        SC = stanford_bunny()
+        trimesh_obj = SC.to_trimesh()
+        assert len(trimesh_obj.vertices) == len(SC.skeleton(0))
+
+    def test_laplace_beltrami_operator(self):
+        """Test laplace_beltrami_operator."""
+        SC = stanford_bunny()
+
+        laplacian_matrix = SC.laplace_beltrami_operator()
+
+        self.assertIsInstance(laplacian_matrix, np.ndarray)
+
+    def test_from_nx_graph(self):
+        """Test from networkx graph."""
+        G = nx.Graph()
+        G.add_edge(1, 2, weight=2)
+        G.add_edge(3, 4, weight=4)
+        SC = SimplicialComplex.from_nx_graph(G)
+        self.assertEqual(SC[(1, 2)]["weight"], 2)
+
+    def test_is_connected(self):
+        """Test is connected."""
+        SC = stanford_bunny()
+        self.assertTrue(SC.is_connected())
+
+    def test_simplicial_closure_of_hypergraph(self):
+        """Test simplicial_closure_of_hypergraph."""
+        hg = hnx.Hypergraph([[1, 2, 3, 4], [1, 2, 3]], static=True)
+        sc = SimplicialComplex.simplicial_closure_of_hypergraph(hg)
+        expected_simplices = [
+            (1,),
+            (2,),
+            (3,),
+            (4,),
+            (1, 2),
+            (1, 3),
+            (1, 4),
+            (2, 3),
+            (2, 4),
+            (3, 4),
+            (1, 2, 3),
+            (1, 2, 4),
+            (1, 3, 4),
+            (2, 3, 4),
+            (1, 2, 3, 4),
+        ]
+        assert len(sc.simplices) == len(expected_simplices)
+
+    def test_to_cell_complex(self):
+        """Test to cell complex."""
+        SC = stanford_bunny()
+        cell_complex = SC.to_cell_complex()
+        self.assertEqual(len(cell_complex.cells), len(SC.skeleton(2)))
 
 
 if __name__ == "__main__":
