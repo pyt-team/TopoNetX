@@ -6,8 +6,15 @@ import hypernetx as hnx
 import networkx as nx
 import numpy as np
 import trimesh
+from gudhi import SimplexTree
 
-from toponetx import Simplex, SimplicialComplex, TopoNetXError, stanford_bunny
+from toponetx import (
+    CombinatorialComplex,
+    Simplex,
+    SimplicialComplex,
+    TopoNetXError,
+    stanford_bunny,
+)
 
 
 class TestSimplicialComplex(unittest.TestCase):
@@ -425,11 +432,101 @@ class TestSimplicialComplex(unittest.TestCase):
         ]
         assert len(sc.simplices) == len(expected_simplices)
 
-    def test_to_cell_complex(self):
-        """Test to cell complex."""
-        SC = stanford_bunny()
-        cell_complex = SC.to_cell_complex()
-        self.assertEqual(len(cell_complex.cells), len(SC.skeleton(2)))
+    def test_to_hypergraph(self):
+        """Convert a SimplicialComplex to a hypergraph and compare the number of edges."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        expected_result = hnx.Hypergraph(
+            {
+                "e0": [1, 2],
+                "e1": [1, 3],
+                "e2": [1, 4],
+                "e3": [2, 3],
+                "e4": [2, 4],
+                "e5": [2, 5],
+                "e6": [1, 2, 3],
+                "e7": [1, 2, 4],
+            },
+            name="",
+        )
+        result = SC.to_hypergraph()
+        assert len(result.edges) == len(expected_result.edges)
+
+    def test_to_combinatorial_complex(self):
+        """Convert a SimplicialComplex to a CombinatorialComplex and compare the number of cells and nodes."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        expected_result = CombinatorialComplex()
+        expected_result.add_cell((1, 2, 3), rank=2)
+        expected_result.add_cell((1, 2, 4), rank=2)
+        expected_result.add_cell((2, 5), rank=1)
+        expected_result.add_cell((1, 2), rank=1)
+        expected_result.add_cell((1, 3), rank=1)
+        expected_result.add_cell((1, 4), rank=1)
+        expected_result.add_cell((2, 3), rank=1)
+        expected_result.add_cell((2, 4), rank=1)
+        expected_result.add_cell((2, 5), rank=1)
+        result = SC.to_combinatorial_complex()
+        assert len(result.cells) == len(expected_result.cells)
+        assert len(result.nodes) == len(expected_result.nodes)
+
+    def test_from_gudhi(self):
+        """Create a SimplicialComplex from a Gudhi SimplexTree and compare the number of simplices."""
+        tree = SimplexTree()
+        tree.insert([1, 2, 3, 5])
+        expected_result = SimplicialComplex()
+        expected_result.add_simplex((1, 2, 3, 5))
+        result = SimplicialComplex.from_gudhi(tree)
+        assert len(result.simplices) == len(expected_result.simplices)
+
+    def test_add_elements_from_nx_graph(self):
+        """Add elements from a networkx graph to a SimplicialComplex and compare the number of simplices."""
+        c1 = Simplex((1, 2, 3))
+        c3 = Simplex((1, 2, 5))
+        SC = SimplicialComplex([c1, c3])
+        G = nx.Graph()
+        G.add_edge(4, 5)
+        expected_result = SimplicialComplex([c1, c3, Simplex((4, 5))])
+        SC.add_elements_from_nx_graph(G)
+        assert len(SC.simplices) == len(expected_result.simplices)
+
+    def test_restrict_to_nodes(self):
+        """Restrict a SimplicialComplex to the specified nodes and compare the result with the expected SimplicialComplex."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((1, 2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        node_set = [1, 2, 3, 4]
+        expected_result = SimplicialComplex(
+            [
+                Simplex((1,)),
+                Simplex((2,)),
+                Simplex((3,)),
+                Simplex((4,)),
+                Simplex((1, 2)),
+                Simplex((1, 3)),
+                Simplex((1, 4)),
+                Simplex((2, 3)),
+                Simplex((2, 4)),
+                Simplex((1, 2, 3)),
+                Simplex((1, 2, 4)),
+            ]
+        )
+        result = SC.restrict_to_nodes(node_set)
+        assert len(result.simplices) == len(expected_result.simplices)
+
+    def test_get_all_maximal_simplices(self):
+        """Retrieve all maximal simplices from a SimplicialComplex and compare the number of simplices."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((1, 2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        result = SC.get_all_maximal_simplices()
+        assert len(result) == 3
 
 
 if __name__ == "__main__":
