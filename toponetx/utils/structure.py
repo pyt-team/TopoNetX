@@ -23,7 +23,8 @@ indices in S and T to other values.
 """
 
 from collections import defaultdict
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
+from typing import Optional
 
 from scipy.sparse import csr_matrix
 
@@ -57,8 +58,8 @@ def sparse_array_to_neighborhood_list(
 
 
 def neighborhood_list_to_neighborhood_dict(
-    n_list: Iterable[Tuple[int, int]], src_dict=None, dst_dict=None
-) -> Dict[int, List[int]]:
+    n_list: Iterable[tuple[int, int]], src_dict=None, dst_dict=None
+) -> dict[int, list[int]]:
     """Convert neighborhood list to neighborhood dictionary for arbitrary higher order structures.
 
     Notes
@@ -67,7 +68,7 @@ def neighborhood_list_to_neighborhood_dict(
 
     Parameters
     ----------
-        ``n_list`` (``List[Tuple[int, int]]``): neighborhood list.
+        ``n_list`` (``list[tuple[int, int]]``): neighborhood list.
     """
     neighborhood_dict = defaultdict(list)
     if src_dict is None and dst_dict is None:
@@ -84,7 +85,7 @@ def neighborhood_list_to_neighborhood_dict(
 
 def sparse_array_to_neighborhood_dict(
     sparse_array, src_dict=None, dst_dict=None
-) -> Dict[int, List[int]]:
+) -> dict[int, list[int]]:
     """Convert sparse array to neighborhood dictionary for arbitrary higher order structures.
 
     Notes
@@ -103,7 +104,7 @@ def sparse_array_to_neighborhood_dict(
     )
 
 
-def incidence_to_adjacency(B, s=None, signed=False):
+def incidence_to_adjacency(B, s: Optional[int] = None, signed=False):
     """Get adjacency matrix from boolean incidence matrix for s-metrics.
 
     Self loops are not supported.

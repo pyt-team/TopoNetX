@@ -4,7 +4,7 @@ Such as:
 HyperEdgeView, CellView, SimplexView.
 """
 from collections.abc import Hashable, Iterable
-from typing import List
+from typing import Union
 
 import numpy as np
 
@@ -87,7 +87,7 @@ class CellView:
         else:
             raise TypeError("Input must be a tuple, list or a cell.")
 
-    def raw(self, cell: tuple | list | Cell) -> Cell | List[Cell]:
+    def raw(self, cell: Union[tuple, list, Cell]) -> Union[Cell, list[Cell]]:
         """Indexes the raw cell objects analogous to the overall index of CellView.
 
         Parameters
