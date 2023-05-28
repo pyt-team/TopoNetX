@@ -5,6 +5,7 @@ import unittest
 import hypernetx as hnx
 import networkx as nx
 import numpy as np
+import scipy
 import trimesh
 
 from toponetx import Simplex, SimplicialComplex, TopoNetXError, stanford_bunny
@@ -430,6 +431,113 @@ class TestSimplicialComplex(unittest.TestCase):
         SC = stanford_bunny()
         cell_complex = SC.to_cell_complex()
         self.assertEqual(len(cell_complex.cells), len(SC.skeleton(2)))
+
+    def test_coincidence_matrix(self):
+        """Test for coincidence matrix."""
+        SC = SimplicialComplex()
+        SC.add_simplex([0, 1, 2])
+
+        row, col, B1 = SC.coincidence_matrix(1, index=True)
+
+        assert B1.shape == (3, 3)
+        assert np.allclose(
+            B1.toarray(),
+            np.array([[-1.0, 1.0, 0.0], [-1.0, 0.0, 1.0], [0.0, -1.0, 1.0]]),
+        )
+
+        B2 = SC.coincidence_matrix(2)
+
+        assert B2.shape == (1, 3)
+        assert np.allclose(B2.toarray(), np.array([[1.0, -1.0, 1.0]]))
+
+    def test_down_laplacian_matrix(self):
+        """Test the down_laplacian_matrix method of SimplicialComplex."""
+        # Test case 1: Rank is within valid range
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3])
+        SC.add_simplex([4, 5, 6])
+        rank = 1
+        signed = True
+        weight = None
+        index = False
+
+        result = SC.down_laplacian_matrix(rank, signed, weight, index)
+
+        # Assert the result is of type scipy.sparse.csr.csr_matrix
+        assert result.shape == (6, 6)
+
+        # Test case 2: Rank is below the valid range
+        rank = 0
+
+        with self.assertRaises(ValueError):
+            SC.down_laplacian_matrix(rank, signed, weight, index)
+
+        # Test case 3: Rank is above the valid range
+        rank = 5
+
+        with self.assertRaises(ValueError):
+            SC.down_laplacian_matrix(rank, signed, weight, index)
+
+    def test_adjacency_matrix2(self):
+        """Test the adjacency_matrix method of SimplicialComplex."""
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3])
+        SC.add_simplex([4, 5, 6])
+
+        # Test case 1: Rank is within valid range
+        rank = 1
+        signed = False
+        weight = None
+        index = False
+
+        result = SC.adjacency_matrix(rank, signed, weight, index)
+
+        # Assert the result is of type scipy.sparse.csr.csr_matrix
+        assert result.shape == (6, 6)
+
+        # Test case 2: Rank is below the valid range
+        rank = -1
+
+        with self.assertRaises(ValueError):
+            SC.adjacency_matrix(rank, signed, weight, index)
+
+        # Test case 3: Rank is above the valid range
+        rank = 5
+
+        with self.assertRaises(ValueError):
+            SC.adjacency_matrix(rank, signed, weight, index)
+
+    def test_coadjacency_matrix(self):
+        """Test the coadjacency_matrix method of SimplicialComplex."""
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3])
+        SC.add_simplex([4, 5, 6])
+        # Test case 1: Rank is within valid range
+        rank = 1
+        signed = False
+        weight = None
+        index = False
+
+        result = SC.coadjacency_matrix(rank, signed, weight, index)
+
+        # Assert the result is of type scipy.sparse.csr.csr_matrix
+        assert result.shape == (6, 6)
+
+        # Test case 2: Rank is below the valid range
+        rank = 0
+
+        with self.assertRaises(ValueError):
+            SC.coadjacency_matrix(rank, signed, weight, index)
+
+        # Test case 3: Rank is above the valid range
+        rank = 5
+
+        with self.assertRaises(ValueError):
+            SC.coadjacency_matrix(rank, signed, weight, index)
+
+
+if __name__ == "__main__":
+    unittest.main()
 
 
 if __name__ == "__main__":
