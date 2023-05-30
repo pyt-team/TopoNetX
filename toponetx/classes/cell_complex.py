@@ -870,6 +870,114 @@ class CellComplex(Complex):
                 d.update(i)
         return d
 
+    def set_node_attributes(
+        self,
+        values: Union[dict[Hashable, dict], dict[Hashable, Any]],
+        name: Optional[str],
+    ):
+        """Set node attributes.
+
+        Parameters
+        ----------
+        values :  dict
+            either contains node -> value (if `name` is specified)
+            or nested dict with node -> (attribute -> value) (if `name == None`)
+        name : str, optional
+
+        Returns
+        -------
+        None.
+
+        Examples
+        --------
+        >>> G = nx.path_graph(3)
+        >>> CX = CellComplex(G)
+        >>> CX.add_cell([1,2,3,4], rank=2)
+        >>> d={ 1: { 'color':'red','attr2':1 },2: {'color':'blue','attr2':3 } }
+        >>> CX.set_node_attributes(d)
+        >>> CX.nodes[1]['color']
+        'red'
+        """
+        self.set_cell_attributes(values, rank=0, name=name)
+
+    def get_node_attributes(self, name: str) -> dict[tuple, Any]:
+        """Get node attributes.
+
+        Parameters
+        ----------
+        name : str
+
+        Returns
+        -------
+        attr :  dict of node -> value of attribute `name`
+            nodes without the given attribute are not in the dictionary.
+
+        Examples
+        --------
+        >>> G = nx.path_graph(3)
+        >>> CX = CellComplex(G)
+        >>> CX.add_cell([1,2,3,4], rank=2)
+        >>> d={ 1: { 'color':'red','attr2':1 }, 2: {'color':'blue','attr2':3 } }
+        >>> CX.set_node_attributes(d)
+        >>> CX.get_node_attributes('color')
+        {1: 'red', 2: 'blue'}
+        """
+        return self.get_cell_attributes(rank=0, name=name)
+
+    def set_edge_attributes(
+        self,
+        values: Union[dict[tuple, dict], dict[tuple, Any]],
+        name: Optional[str],
+    ):
+        """Set edge attributes.
+
+        Parameters
+        ----------
+        values :  dict
+            either contains (node1, node2) -> value (if `name` is specified)
+            or nested dict with (node1, node2) -> (attribute -> value) (if `name == None`)
+        name : str, optional
+
+        Returns
+        -------
+        None.
+
+        Examples
+        --------
+        >>> G = nx.path_graph(3)
+        >>> CX = CellComplex(G)
+        >>> CX.add_cell([1,2,3,4], rank=2)
+        >>> d={ (1,2): { 'color':'red','attr2':1 }, (2,3): {'color':'blue','attr2':3 } }
+        >>> CX.set_edge_attributes(d)
+        >>> CX.edges[(1,2)]['color']
+        'red'
+        """
+        return self.set_cell_attributes(values, rank=1, name=name)
+
+    def get_edge_attributes(self, name: str) -> dict[tuple, Any]:
+        """Get edge attributes.
+
+        Parameters
+        ----------
+        name : str
+
+        Returns
+        -------
+        attr :  dict of edge (as tuple (node1, node2)) -> value of attribute `name`
+            edges without the given attribute are not in the dictionary.
+
+        Examples
+        --------
+        >>> G = nx.path_graph(3)
+        >>> CX = CellComplex(G)
+        >>> CX.add_cell([1,2,3,4], rank=2)
+        >>> d={ (1,2): { 'color':'red','attr2':1 }, (2,3): {'color':'blue','attr2':3 } }
+        >>> CX.set_edge_attributes(d)
+        >>> CX.get_edge_attributes('color')
+        {(1,2): 'red', (2,3): 'blue'}
+        """
+        self.get_cell_attributes(rank=1, name=name)
+
     def set_cell_attributes(
         self,
         values: Union[
