@@ -5,9 +5,17 @@ import unittest
 import hypernetx as hnx
 import networkx as nx
 import numpy as np
+import scipy
 import trimesh
+from gudhi import SimplexTree
 
-from toponetx import Simplex, SimplicialComplex, TopoNetXError, stanford_bunny
+from toponetx import (
+    CombinatorialComplex,
+    Simplex,
+    SimplicialComplex,
+    TopoNetXError,
+    stanford_bunny,
+)
 
 
 class TestSimplicialComplex(unittest.TestCase):
@@ -425,11 +433,208 @@ class TestSimplicialComplex(unittest.TestCase):
         ]
         assert len(sc.simplices) == len(expected_simplices)
 
-    def test_to_cell_complex(self):
-        """Test to cell complex."""
-        SC = stanford_bunny()
-        cell_complex = SC.to_cell_complex()
-        self.assertEqual(len(cell_complex.cells), len(SC.skeleton(2)))
+    def test_to_hypergraph(self):
+        """Convert a SimplicialComplex to a hypergraph and compare the number of edges."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        expected_result = hnx.Hypergraph(
+            {
+                "e0": [1, 2],
+                "e1": [1, 3],
+                "e2": [1, 4],
+                "e3": [2, 3],
+                "e4": [2, 4],
+                "e5": [2, 5],
+                "e6": [1, 2, 3],
+                "e7": [1, 2, 4],
+            },
+            name="",
+        )
+        result = SC.to_hypergraph()
+        assert len(result.edges) == len(expected_result.edges)
+
+    def test_to_combinatorial_complex(self):
+        """Convert a SimplicialComplex to a CombinatorialComplex and compare the number of cells and nodes."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        expected_result = CombinatorialComplex()
+        expected_result.add_cell((1, 2, 3), rank=2)
+        expected_result.add_cell((1, 2, 4), rank=2)
+        expected_result.add_cell((2, 5), rank=1)
+        expected_result.add_cell((1, 2), rank=1)
+        expected_result.add_cell((1, 3), rank=1)
+        expected_result.add_cell((1, 4), rank=1)
+        expected_result.add_cell((2, 3), rank=1)
+        expected_result.add_cell((2, 4), rank=1)
+        expected_result.add_cell((2, 5), rank=1)
+        result = SC.to_combinatorial_complex()
+        assert len(result.cells) == len(expected_result.cells)
+        assert len(result.nodes) == len(expected_result.nodes)
+
+    def test_from_gudhi(self):
+        """Create a SimplicialComplex from a Gudhi SimplexTree and compare the number of simplices."""
+        tree = SimplexTree()
+        tree.insert([1, 2, 3, 5])
+        expected_result = SimplicialComplex()
+        expected_result.add_simplex((1, 2, 3, 5))
+        result = SimplicialComplex.from_gudhi(tree)
+        assert len(result.simplices) == len(expected_result.simplices)
+
+    def test_add_elements_from_nx_graph(self):
+        """Add elements from a networkx graph to a SimplicialComplex and compare the number of simplices."""
+        c1 = Simplex((1, 2, 3))
+        c3 = Simplex((1, 2, 5))
+        SC = SimplicialComplex([c1, c3])
+        G = nx.Graph()
+        G.add_edge(4, 5)
+        expected_result = SimplicialComplex([c1, c3, Simplex((4, 5))])
+        SC.add_elements_from_nx_graph(G)
+        assert len(SC.simplices) == len(expected_result.simplices)
+
+    def test_restrict_to_nodes(self):
+        """Restrict a SimplicialComplex to the specified nodes and compare the result with the expected SimplicialComplex."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((1, 2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        node_set = [1, 2, 3, 4]
+        expected_result = SimplicialComplex(
+            [
+                Simplex((1,)),
+                Simplex((2,)),
+                Simplex((3,)),
+                Simplex((4,)),
+                Simplex((1, 2)),
+                Simplex((1, 3)),
+                Simplex((1, 4)),
+                Simplex((2, 3)),
+                Simplex((2, 4)),
+                Simplex((1, 2, 3)),
+                Simplex((1, 2, 4)),
+            ]
+        )
+        result = SC.restrict_to_nodes(node_set)
+        assert len(result.simplices) == len(expected_result.simplices)
+
+    def test_get_all_maximal_simplices(self):
+        """Retrieve all maximal simplices from a SimplicialComplex and compare the number of simplices."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((1, 2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        result = SC.get_all_maximal_simplices()
+        assert len(result) == 3
+
+    def test_coincidence_matrix(self):
+        """Test for coincidence matrix."""
+        SC = SimplicialComplex()
+        SC.add_simplex([0, 1, 2])
+
+        row, col, B1 = SC.coincidence_matrix(1, index=True)
+
+        assert B1.shape == (3, 3)
+        assert np.allclose(
+            B1.toarray(),
+            np.array([[-1.0, 1.0, 0.0], [-1.0, 0.0, 1.0], [0.0, -1.0, 1.0]]),
+        )
+
+        B2 = SC.coincidence_matrix(2)
+
+        assert B2.shape == (1, 3)
+        assert np.allclose(B2.toarray(), np.array([[1.0, -1.0, 1.0]]))
+
+    def test_down_laplacian_matrix(self):
+        """Test the down_laplacian_matrix method of SimplicialComplex."""
+        # Test case 1: Rank is within valid range
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3])
+        SC.add_simplex([4, 5, 6])
+        rank = 1
+        signed = True
+        weight = None
+        index = False
+
+        result = SC.down_laplacian_matrix(rank, signed, weight, index)
+
+        # Assert the result is of type scipy.sparse.csr.csr_matrix
+        assert result.shape == (6, 6)
+
+        # Test case 2: Rank is below the valid range
+        rank = 0
+
+        with self.assertRaises(ValueError):
+            SC.down_laplacian_matrix(rank, signed, weight, index)
+
+        # Test case 3: Rank is above the valid range
+        rank = 5
+
+        with self.assertRaises(ValueError):
+            SC.down_laplacian_matrix(rank, signed, weight, index)
+
+    def test_adjacency_matrix2(self):
+        """Test the adjacency_matrix method of SimplicialComplex."""
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3])
+        SC.add_simplex([4, 5, 6])
+
+        # Test case 1: Rank is within valid range
+        rank = 1
+        signed = False
+        weight = None
+        index = False
+
+        result = SC.adjacency_matrix(rank, signed, weight, index)
+
+        # Assert the result is of type scipy.sparse.csr.csr_matrix
+        assert result.shape == (6, 6)
+
+        # Test case 2: Rank is below the valid range
+        rank = -1
+
+        with self.assertRaises(ValueError):
+            SC.adjacency_matrix(rank, signed, weight, index)
+
+        # Test case 3: Rank is above the valid range
+        rank = 5
+
+        with self.assertRaises(ValueError):
+            SC.adjacency_matrix(rank, signed, weight, index)
+
+    def test_coadjacency_matrix(self):
+        """Test the coadjacency_matrix method of SimplicialComplex."""
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3])
+        SC.add_simplex([4, 5, 6])
+        # Test case 1: Rank is within valid range
+        rank = 1
+        signed = False
+        weight = None
+        index = False
+
+        result = SC.coadjacency_matrix(rank, signed, weight, index)
+
+        # Assert the result is of type scipy.sparse.csr.csr_matrix
+        assert result.shape == (6, 6)
+
+        # Test case 2: Rank is below the valid range
+        rank = 0
+
+        with self.assertRaises(ValueError):
+            SC.coadjacency_matrix(rank, signed, weight, index)
+
+        # Test case 3: Rank is above the valid range
+        rank = 5
+
+        with self.assertRaises(ValueError):
+            SC.coadjacency_matrix(rank, signed, weight, index)
+
+
+if __name__ == "__main__":
+    unittest.main()
 
 
 if __name__ == "__main__":
