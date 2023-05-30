@@ -68,9 +68,9 @@ cd TopoNetX
 ```bash
 git pull
 ```
-3. Install `TopoNetX` in editable mode:
+3. Install `TopoNetX` in editable mode (requires pip ≥ 21.3 for [PEP 660](https://peps.python.org/pep-0610/) support):
 ```bash
-pip install -e .[all]
+pip install -e '.[all]'
 ```
 4. Install pre-commit hooks:
 ```bash
