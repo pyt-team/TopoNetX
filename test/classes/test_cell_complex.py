@@ -907,6 +907,27 @@ class TestCellComplex(unittest.TestCase):
         with self.assertRaises(KeyError):
             CX.neighbors(10)
 
+    def test_node_attributes(self):
+        """Test the setting and retrieval of node attributes."""
+        G = nx.path_graph(3)
+        CX = CellComplex(G)
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        d = {1: {"color": "red", "attr2": 1}, 2: {"color": "blue", "attr2": 3}}
+        CX.set_node_attributes(d)
+        assert CX.get_node_attributes("color") == {1: "red", 2: "blue"}
+
+    def test_edge_attributes(self):
+        """Test the setting and retrieval of edge attributes."""
+        G = nx.path_graph(3)
+        CX = CellComplex(G)
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        d = {
+            (1, 2): {"color": "red", "attr2": 1},
+            (2, 3): {"color": "blue", "attr2": 3},
+        }
+        CX.set_edge_attributes(d)
+        assert CX.get_edge_attributes("color") == {(1, 2): "red", (2, 3): "blue"}
+
 
 if __name__ == "__main__":
     unittest.main()

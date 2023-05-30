@@ -873,7 +873,7 @@ class CellComplex(Complex):
     def set_node_attributes(
         self,
         values: Union[dict[Hashable, dict], dict[Hashable, Any]],
-        name: Optional[str],
+        name: Optional[str] = None,
     ):
         """Set node attributes.
 
@@ -927,7 +927,7 @@ class CellComplex(Complex):
     def set_edge_attributes(
         self,
         values: Union[dict[tuple, dict], dict[tuple, Any]],
-        name: Optional[str],
+        name: Optional[str] = None,
     ):
         """Set edge attributes.
 
@@ -976,7 +976,7 @@ class CellComplex(Complex):
         >>> CX.get_edge_attributes('color')
         {(1,2): 'red', (2,3): 'blue'}
         """
-        self.get_cell_attributes(rank=1, name=name)
+        return self.get_cell_attributes(rank=1, name=name)
 
     def set_cell_attributes(
         self,
