@@ -1076,34 +1076,8 @@ class SimplicialComplex(Complex):
             return ind, L_down
         return L_down
 
-    def k_hop_incidence_matrix(self, rank, k):
-        """Compute the k-hop incidence matrix of the simplicial complex."""
-        B = self.incidence_matrix(rank, signed=True)
-        if rank < self.dim and rank >= 0:
-            A = self.adjacency_matrix(rank, signed=True)
-        if rank <= self.dim and rank > 0:
-            coA = self.coadjacency_matrix(rank, signed=True)
-        if rank == self.dim:
-            return B @ np.power(coA, k)
-        if rank == 0:
-            return B @ np.power(A, k)
-        return B @ np.power(A, k) + B @ np.power(coA, k)
-
-    def k_hop_coincidence_matrix(self, rank, k):
-        """Compute the k-hop coincidence matrix of the simplicial complex."""
-        coB = self.coincidence_matrix(rank, signed=True)
-        if rank < self.dim and rank >= 0:
-            A = self.adjacency_matrix(rank, signed=True)
-        if rank <= self.dim and rank > 0:
-            coA = self.coadjacency_matrix(rank, signed=True)
-        if rank == self.dim:
-            return np.power(coA, k) @ coB
-        if rank == 0:
-            return np.power(A, k) @ coB
-        return np.power(A, k) @ coB + np.power(coA, k) @ coB
-
     def add_elements_from_nx_graph(self, G):
-        """Add elements from networkx graph to simplicial complex."""
+        """Add elements from a networkx graph to self."""
         _simplices = []
         for edge in G.edges:
             _simplices.append(edge)
@@ -1247,7 +1221,8 @@ class SimplicialComplex(Complex):
         >>> SC = SimplicialComplex.from_gudhi(tree)
         """
         SC = SimplicialComplex()
-        SC._simplex_set.build_faces_dict_from_gudhi_tree(tree)
+        for simplex, _ in tree.get_skeleton(tree.dimension()):
+            SC.add_simplex(simplex)
         return SC
 
     @staticmethod
