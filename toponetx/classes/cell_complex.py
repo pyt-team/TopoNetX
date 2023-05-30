@@ -791,7 +791,7 @@ class CellComplex(Complex):
             dict[Union[Hashable, tuple, list, Cell], Any],
         ],
         name: Optional[str] = None,
-    ):
+    ) -> None:
         """Set filtration.
 
         Parameters
@@ -801,10 +801,6 @@ class CellComplex(Complex):
             or nested dict with cell -> (attribute -> value) (if `name == None`)
             (where cell can be of any dimension)
         name : str or None
-
-        Returns
-        -------
-        None
 
         Notes
         -----
@@ -874,7 +870,7 @@ class CellComplex(Complex):
         self,
         values: Union[dict[Hashable, dict], dict[Hashable, Any]],
         name: Optional[str] = None,
-    ):
+    ) -> None:
         """Set node attributes.
 
         Parameters
@@ -883,10 +879,6 @@ class CellComplex(Complex):
             either contains node -> value (if `name` is specified)
             or nested dict with node -> (attribute -> value) (if `name == None`)
         name : str, optional
-
-        Returns
-        -------
-        None.
 
         Examples
         --------
@@ -909,7 +901,8 @@ class CellComplex(Complex):
 
         Returns
         -------
-        attr :  dict of node -> value of attribute `name`
+        attr :  dict
+            contents: node -> value of attribute `name`
             nodes without the given attribute are not in the dictionary.
 
         Examples
@@ -928,7 +921,7 @@ class CellComplex(Complex):
         self,
         values: Union[dict[tuple, dict], dict[tuple, Any]],
         name: Optional[str] = None,
-    ):
+    ) -> None:
         """Set edge attributes.
 
         Parameters
@@ -937,10 +930,6 @@ class CellComplex(Complex):
             either contains (node1, node2) -> value (if `name` is specified)
             or nested dict with (node1, node2) -> (attribute -> value) (if `name == None`)
         name : str, optional
-
-        Returns
-        -------
-        None.
 
         Examples
         --------
@@ -963,7 +952,8 @@ class CellComplex(Complex):
 
         Returns
         -------
-        attr :  dict of edge (as tuple (node1, node2)) -> value of attribute `name`
+        dict
+            format: edge (as tuple (node1, node2)) -> value of attribute `name`
             edges without the given attribute are not in the dictionary.
 
         Examples
@@ -986,7 +976,7 @@ class CellComplex(Complex):
         ],
         rank: int,
         name: Optional[str] = None,
-    ):
+    ) -> None:
         """Set cell attributes.
 
         Parameters
@@ -999,10 +989,6 @@ class CellComplex(Complex):
             0 for nodes, 1 for edges, 2 for 2-cells.
             ranks > 2 are currently not supported.
         name : str, optional
-
-        Returns
-        -------
-        None.
 
         Examples
         --------
