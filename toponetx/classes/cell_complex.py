@@ -11,7 +11,7 @@ import warnings
 from collections import defaultdict
 from collections.abc import Hashable, Iterable
 from itertools import pairwise, zip_longest
-from typing import Any, Dict, Optional, Set, Tuple
+from typing import Any, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -179,7 +179,7 @@ class CellComplex(Complex):
         return self.maxdim
 
     @property
-    def shape(self) -> Tuple[int, int, int]:
+    def shape(self) -> tuple[int, int, int]:
         """Return shape.
 
         This is:
@@ -272,7 +272,7 @@ class CellComplex(Complex):
         """
         return self.neighbors(node)
 
-    def _insert_cell(self, cell: tuple | list | Cell, **attr):
+    def _insert_cell(self, cell: Union[tuple, list, Cell], **attr):
         """Insert cell."""
         # input must be list, tuple or Cell type
         if isinstance(cell, tuple) or isinstance(cell, list) or isinstance(cell, Cell):
@@ -291,7 +291,7 @@ class CellComplex(Complex):
         else:
             raise TypeError("input must be list, tuple or Cell type")
 
-    def _delete_cell(self, cell: tuple | list | Cell, key=None):
+    def _delete_cell(self, cell: Union[tuple, list, Cell], key=None):
         """Delete cell."""
         if isinstance(cell, Cell):
             cell = cell.elements
@@ -305,12 +305,12 @@ class CellComplex(Complex):
         else:
             raise KeyError(f"cell {cell} is not in the complex")
 
-    def _cell_equivalence_class(self) -> Dict[Cell, Set[Cell]]:
+    def _cell_equivalence_class(self) -> dict[Cell, set[Cell]]:
         """Return the equivalence classes of cells in the cell complex.
 
         Returns
         -------
-        equiv : Dict[Cell, Set[Cell]]
+        equiv : dict[Cell, set[Cell]]
             Dict struture: `Cell` representing equivalence class -> Set of all `Cell`s in class
 
         Examples
@@ -399,7 +399,9 @@ class CellComplex(Complex):
         return self._G.degree[node]
 
     def size(
-        self, cell: tuple | list | Cell, node_set: Optional[Iterable[Hashable]] = None
+        self,
+        cell: Union[tuple, list, Cell],
+        node_set: Optional[Iterable[Hashable]] = None,
     ) -> int:
         """Compute number of nodes in node_set that belong to cell.
 
@@ -473,7 +475,7 @@ class CellComplex(Complex):
             return len(self.edges)
 
     def number_of_cells(
-        self, cell_set: Optional[Iterable[tuple | list | Cell]] = None
+        self, cell_set: Optional[Iterable[Union[tuple, list, Cell]]] = None
     ) -> int:
         """Compute number of cells in cell_set belonging to cell complex.
 
@@ -619,7 +621,7 @@ class CellComplex(Complex):
 
     def add_cell(
         self,
-        cell: tuple | list | Cell,
+        cell: Union[tuple, list, Cell],
         rank: Optional[int] = None,
         check_skeleton=False,
         **attr,
@@ -630,8 +632,8 @@ class CellComplex(Complex):
         ----------
         cell : hashable or RankedEntity
             If hashable the cell returned will be empty.
-        rank : int
-            rank of a cell, supported ranks is 1 or 2
+        rank : {0, 1, 2}
+            Rank of the cell to be added.
         check_skeleton : bool, default=False
             If true, this function checks the skeleton whether the given cell can be added.
 
@@ -646,10 +648,6 @@ class CellComplex(Complex):
         >>> CX.add_cell([5, 6, 7, 8], rank=2, color='green')
         >>> CX.cells[(1, 2, 3, 4)]['color']
         'red'
-
-        Notes
-        -----
-        - Rank must be 0,1,2
         """
         if isinstance(cell, Cell):  # rank check will be ignored, cells by default
             # are assumed to be of rank 2
@@ -714,7 +712,7 @@ class CellComplex(Complex):
 
     def add_cells_from(
         self,
-        cell_set: Iterable[tuple | list | Cell],
+        cell_set: Iterable[Union[tuple, list, Cell]],
         rank: Optional[int] = None,
         check_skeleton=False,
         **attr,
@@ -737,7 +735,7 @@ class CellComplex(Complex):
         for cell in cell_set:
             self.add_cell(cell=cell, rank=rank, check_skeleton=check_skeleton, **attr)
 
-    def remove_cell(self, cell: tuple | list | Cell):
+    def remove_cell(self, cell: Union[tuple, list, Cell]):
         """Remove a single cell from Cell Complex.
 
         Parameters
@@ -760,7 +758,7 @@ class CellComplex(Complex):
             self._delete_cell(cell)
         return self
 
-    def remove_cells(self, cell_set: Iterable[tuple | list | Cell]):
+    def remove_cells(self, cell_set: Iterable[Union[tuple, list, Cell]]):
         """Remove cells from a cell complex that are in cell_set.
 
         Parameters
@@ -788,8 +786,10 @@ class CellComplex(Complex):
 
     def set_filtration(
         self,
-        values: Dict[Hashable | tuple | list | Cell, dict]
-        | Dict[Hashable | tuple | list | Cell, Any],
+        values: Union[
+            dict[Union[Hashable, tuple, list, Cell], dict],
+            dict[Union[Hashable, tuple, list, Cell], Any],
+        ],
         name: Optional[str] = None,
     ):
         """Set filtration.
@@ -839,7 +839,7 @@ class CellComplex(Complex):
         self.set_cell_attributes(d_edges, name=name, rank=1)
         self.set_cell_attributes(d_cells, name=name, rank=2)
 
-    def get_filtration(self, name: str) -> Dict[Hashable | tuple, Any]:
+    def get_filtration(self, name: str) -> dict[Union[Hashable, tuple], Any]:
         """Get filtration.
 
         Parameters
@@ -854,6 +854,8 @@ class CellComplex(Complex):
         -----
         This is equivalent to getting a feature defined on the entire cell complex
 
+        Examples
+        --------
         >>> G = nx.path_graph(3)
         >>> CX = CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
@@ -870,8 +872,10 @@ class CellComplex(Complex):
 
     def set_cell_attributes(
         self,
-        values: Dict[Hashable | tuple | list | Cell, dict]
-        | Dict[Hashable | tuple | list | Cell, Any],
+        values: Union[
+            dict[Union[Hashable, tuple, list, Cell], dict],
+            dict[Union[Hashable, tuple, list, Cell], Any],
+        ],
         rank: int,
         name: Optional[str] = None,
     ):
@@ -982,7 +986,9 @@ class CellComplex(Complex):
         else:
             raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
-    def get_cell_attributes(self, name: str, rank: int) -> Dict[Hashable | tuple, Any]:
+    def get_cell_attributes(
+        self, name: str, rank: int
+    ) -> dict[Union[Hashable, tuple], Any]:
         """Get node attributes from graph.
 
         Parameters
