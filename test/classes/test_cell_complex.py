@@ -58,6 +58,17 @@ class TestCellComplex(unittest.TestCase):
         assert len(CX.nodes) == 3
         assert len(CX.edges) == 3
 
+    def test_clone(self):
+        """Test CellComplex.clone()."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2, color="blue")
+        CX2 = CX.clone()
+        assert CX2 is not CX
+        assert CX2.cells[(1, 2, 3, 4)] is not CX.cells[(1, 2, 3, 4)]
+        CX2.remove_node(1)
+        assert 1 in CX.nodes
+        assert [1, 2, 3, 4] in CX.cells
+
     def test_is_regular(self):
         """Test is_regular property."""
         # Test non-regular cell complex

@@ -169,7 +169,9 @@ class CellView:
         bool
             Whether or not the element is in the cell view.
         """
-        if isinstance(e, tuple) or isinstance(e, list):
+        if isinstance(e, list):
+            e = tuple(e)
+        if isinstance(e, tuple):
             return e in self._cells
 
         elif isinstance(e, Cell):
