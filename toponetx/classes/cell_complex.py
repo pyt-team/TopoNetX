@@ -10,7 +10,7 @@ We reserve the notation CC for a combinatorial complex.
 import warnings
 from collections import defaultdict
 from collections.abc import Hashable, Iterable
-from itertools import pairwise, zip_longest
+from itertools import zip_longest
 from typing import Any, Literal, Optional, Union
 
 import networkx as nx
@@ -1836,24 +1836,10 @@ class CellComplex(Complex):
             CX.add_cell(cell)
         return CX
 
-    def remove_singletons(self, name: Optional[str] = None) -> "CellComplex":
-        """Remove singletons.
-
-        This constructs clone of cell complex with singleton cells removed.
-
-        Parameters
-        ----------
-        name: str, optional, default: None
-
-        Returns
-        -------
-        CellComplex
-        """
-        result = self.clone()
+    def remove_singletons(self) -> "CellComplex":
+        """Remove singleton nodes (see `CellComplex.singletons()`)."""
         for node in self.singletons():
-            result._G.remove_node(node)
-        result.name = name if name is not None else ""
-        return result
+            self._G.remove_node(node)
 
     def s_connected_components(self, s=1, cells=True, return_singletons=False):
         """Return generator for the s-connected components.
