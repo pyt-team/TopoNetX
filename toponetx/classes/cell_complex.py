@@ -10,7 +10,7 @@ We reserve the notation CC for a combinatorial complex.
 import warnings
 from collections import defaultdict
 from collections.abc import Hashable, Iterable
-from itertools import pairwise, zip_longest
+from itertools import zip_longest
 from typing import Any, Optional, Union
 
 import networkx as nx
@@ -19,6 +19,7 @@ from hypernetx import Hypergraph
 from hypernetx.classes.entity import Entity
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
+from networkx.utils import pairwise
 from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell
