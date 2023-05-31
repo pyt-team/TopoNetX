@@ -11,18 +11,18 @@ import warnings
 from collections import defaultdict
 from collections.abc import Hashable, Iterable
 from itertools import pairwise, zip_longest
-from typing import Any, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 import networkx as nx
 import numpy as np
+import scipy as sp
+import scipy.sparse
 from hypernetx import Hypergraph
 from hypernetx.classes.entity import Entity
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
-from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import CellView
 from toponetx.exception import TopoNetXError
@@ -985,7 +985,7 @@ class CellComplex(Complex):
             either contains cell -> value (if `name` is specified)
             or nested dict with cell -> (attribute -> value) (if `name == None`)
             where cell is of `rank` (i.e., Hashable for nodes, 2-tuple for edges, tuple/list/Cell for 2-cells)
-        rank : int
+        rank : {0, 1, 2}
             0 for nodes, 1 for edges, 2 for 2-cells.
             ranks > 2 are currently not supported.
         name : str, optional
@@ -1160,8 +1160,33 @@ class CellComplex(Complex):
         """
         self._remove_equivalent_cells()
 
-    def is_insertable_cycle(self, cell, check_skeleton=True, warnings_dis=False):
-        """Determine if a cycle is insertable to the cell complex."""
+    def is_insertable_cycle(
+        self,
+        cell: Union[Cell, tuple, list],
+        check_skeleton: bool = True,
+        warnings_dis: bool = False,
+    ) -> bool:
+        """Determine if a cycle is insertable to the cell complex.
+
+        Checks regularity if this CellComplex is regular,
+        existence of required edges if `check_skeleton` is True,
+        and that the cell has a minimum length of 2.
+
+        Parameters
+        ----------
+        cell : Cell | tuple | list
+            cell object or nodes representing the cell
+        check_skeleton : bool, default True
+            Whether to check that all edges induced by the cell are part of the underlying graph.
+            If False, missing edges will be ignored.
+        warnings_dis : bool, default False
+            Whether to print a warning with the reason why the cell is not insertable.
+
+        Returns
+        -------
+        bool
+            True if the cell can be inserted, otherwise False.
+        """
         if isinstance(cell, Cell):
             cell = cell.elements
         if len(cell) <= 1:
@@ -1189,7 +1214,9 @@ class CellComplex(Complex):
                     return False
         return True
 
-    def incidence_matrix(self, rank, signed=True, weight=None, index=False):
+    def incidence_matrix(
+        self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
+    ) -> Union[scipy.sparse.csc_matrix, tuple[dict, dict, scipy.sparse.csc_matrix]]:
         """Incidence matrix for the cx indexed by nodes x cells.
 
         Parameters
@@ -1208,15 +1235,10 @@ class CellComplex(Complex):
 
         Returns
         -------
-        incidence_matrix : scipy.sparse.csr.csr_matrix
-
-        row list : list
-            list of cells in the complex with the same
-            order of the row of the matrix
-
-        column list : list
-            list of cells in the complex with the same
-            order of the column of the matrix
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The indicendence matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, incidence matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
 
         Examples
         --------
@@ -1262,9 +1284,6 @@ class CellComplex(Complex):
         >>> print(column)
         >>> print(B1.todense())
         """
-        import scipy as sp
-        import scipy.sparse
-
         if rank == 0:
             A = sp.sparse.lil_matrix((0, len(self._G.nodes)))
             if index:
@@ -1349,33 +1368,34 @@ class CellComplex(Complex):
         else:
             raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
 
-    def hodge_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
+    def hodge_laplacian_matrix(
+        self, rank: int, signed=True, weight: bool = False, index: bool = False
+    ) -> Union[scipy.sparse.csc_matrix, tuple[dict, dict, scipy.sparse.csc_matrix]]:
         """Compute the hodge-laplacian matrix for the CX.
 
         Parameters
         ----------
-        rank : int, dimension of the Laplacian matrix.
-            Supported dimension are 0, 1 and 2
-        signed : bool, is true return absolute value entry of the Laplacian matrix
-                       this is useful when one needs to obtain higher-order
-                       adjacency matrices from the hodge-laplacian
-                       typically higher-order adjacency matrices' entries are
-                       typically positive.
+        rank : {0, 1, 2}
+            dimension of the Laplacian matrix.
+        signed : bool
+            If True return absolute value entry of the Laplacian matrix
+            this is useful when one needs to obtain higher-order
+            adjacency matrices from the hodge-laplacian
+            higher-order adjacency matrices' entries are
+            typically positive.
         weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
-                indicates wheather to return the indices that define the incidence matrix
+        index : boolean, default False
+            indicates wheather to return the indices that define the Laplacian matrix
 
         Returns
         -------
-        Laplacian : scipy.sparse.csr.csr_matrix
-
-        when index is true:
-            return also a list : list
-            list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
-            depending on the input dimension
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The Laplacian matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, Laplacian matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
 
         Examples
         --------
@@ -1441,13 +1461,15 @@ class CellComplex(Complex):
                 f"Rank should be larger than 0 and <= {self.maxdim} (maximal dimension cells), got {rank}."
             )
 
-    def up_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
+    def up_laplacian_matrix(
+        self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
+    ):
         """Compute up laplacian.
 
         Parameters
         ----------
-        rank : int, dimension of the up Laplacian matrix.
-            Supported dimension are 0,1
+        rank : {0, 1}
+            dimension of the up Laplacian matrix.
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
                        adjacency matrices from the hodge-laplacian
@@ -1509,13 +1531,15 @@ class CellComplex(Complex):
         else:
             return L_up
 
-    def down_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
+    def down_laplacian_matrix(
+        self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
+    ):
         """Compute down laplacian.
 
         Parameters
         ----------
-        rank : int, dimension of the down Laplacian matrix.
-            Supported dimension are 0,1
+        rank : {0, 1}
+            Dimension of the down Laplacian matrix.
         signed : bool, is true return absolute value entry of the Laplacian matrix
                        this is useful when one needs to obtain higher-order
                        adjacency matrices from the hodge-laplacian
@@ -1566,7 +1590,7 @@ class CellComplex(Complex):
         else:
             return L_down
 
-    def adjacency_matrix(self, rank, signed=False, index=False):
+    def adjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
         """Compute adjacency matrix for a given rank."""
         if index:
             ind, _, incidence = self.incidence_matrix(
@@ -1582,7 +1606,7 @@ class CellComplex(Complex):
         else:
             return incidence_to_adjacency(incidence)
 
-    def coadjacency_matrix(self, rank, signed=False, index=False):
+    def coadjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
         """Compute coadjacency matrix for a given rank."""
         if index:
             _, ind, incidence = self.incidence_matrix(rank, signed=signed, index=True)
@@ -1594,16 +1618,23 @@ class CellComplex(Complex):
         else:
             return incidence_to_adjacency(incidence)
 
-    def restrict_to_cells(self, cell_set, keep_edges: bool = False, name=None):
+    def restrict_to_cells(
+        self,
+        cell_set: Iterable[Union[Cell, tuple]],
+        keep_edges: bool = False,
+        name: Optional[str] = None,
+    ):
         """Construct cell complex using a subset of the cells in cell complex.
 
         Parameters
         ----------
-        cell_set: iterable of hashables or Cell
-            A subset of elements of the cell complex's cells (self.cells) and edges (self.edges)
+        cell_set: Iterable[Union[Cell, tuple]]
+            A subset of elements of the cell complex's cells (self.cells) and edges (self.edges).
+            Cells can be represented as Cell objects or tuples with length > 2.
 
         keep_edges: bool, default False
             If False, discards edges not required by or included in `cell_set`
+            If True, all previous edges are kept.
 
         name: str, optional
 
@@ -1661,7 +1692,9 @@ class CellComplex(Complex):
 
         return CX
 
-    def restrict_to_nodes(self, node_set, name=None):
+    def restrict_to_nodes(
+        self, node_set: Iterable[Hashable], name: Optional[str] = None
+    ):
         """Restrict cell complex to nodes.
 
         This constructs a new cell complex  by restricting the cells in the cell complex to
@@ -1689,7 +1722,7 @@ class CellComplex(Complex):
         >>> CX.restrict_to_nodes([1, 2, 3, 0])
         """
         _G = Graph(self._G.subgraph(node_set))
-        CX = CellComplex(_G)
+        CX = CellComplex(_G, name)
         cells = []
         for cell in self.cells:
             if CX.is_insertable_cycle(cell, True):
@@ -1716,7 +1749,7 @@ class CellComplex(Complex):
         >>> CX= CX.to_combinatorial_complex()
         >>> CX.cells
         """
-        NotImplementedError
+        raise NotImplementedError()
 
     def to_hypergraph(self):
         """Convert to hypergraph.
@@ -1793,7 +1826,15 @@ class CellComplex(Complex):
         """
         return [node for node in self.nodes if self.degree(node) == 0]
 
-    def remove_singletons(self, name=None):
+    def clone(self) -> "CellComplex":
+        """Create a clone of the CellComplex."""
+        _G = self._G.copy()
+        CX = CellComplex(_G, self.name)
+        for cell in self.cells:
+            CX.add_cell(cell)
+        return CX
+
+    def remove_singletons(self, name: Optional[str] = None) -> "CellComplex":
         """Remove singletons.
 
         This constructs clone of cell complex with singleton cells removed.
@@ -1804,10 +1845,13 @@ class CellComplex(Complex):
 
         Returns
         -------
-        Cell Complex : CellComplex
+        CellComplex
         """
+        result = self.clone()
         for node in self.singletons():
-            self._G.remove_node(node)
+            result._G.remove_node(node)
+        result.name = name if name is not None else ""
+        return result
 
     def s_connected_components(self, s=1, cells=True, return_singletons=False):
         """Return generator for the s-connected components.
