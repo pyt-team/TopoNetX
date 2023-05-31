@@ -1833,7 +1833,7 @@ class CellComplex(Complex):
         _G = self._G.copy()
         CX = CellComplex(_G, self.name)
         for cell in self.cells:
-            CX.add_cell(cell)
+            CX.add_cell(cell.clone())
         return CX
 
     def remove_singletons(self) -> "CellComplex":

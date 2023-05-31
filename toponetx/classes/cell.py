@@ -130,6 +130,12 @@ class Cell:
         """
         self.properties[key] = item
 
+    def clone(self) -> "Cell":
+        """Clone the Cell with all properties."""
+        clone_cell = Cell(self.elements, self.name, self._regular)
+        clone_cell.properties.update(self.properties)
+        return clone_cell
+
     @staticmethod
     def is_valid_cell(elements, regular=False):
         """Check if a 2D cell defined by a list of elements is valid.
