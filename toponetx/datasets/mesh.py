@@ -12,14 +12,14 @@ __all__ = ["stanford_bunny"]
 DIR = os.path.dirname(__file__)
 
 
-def stanford_bunny(cmplex_type="simplicial complex"):
+def stanford_bunny(domain="simplicial"):
     """Load the Stanford Bunny mesh as a complex.
 
     Parameters
     ----------
-    cmplex_type : str, optional
+    domain : str, optional
         The type of complex to load. Supported values are
-        "simplicial complex" and "cell complex".
+        "simplicial" and "cellular".
         The default is "simplicial complex".
 
     Returns
@@ -30,13 +30,13 @@ def stanford_bunny(cmplex_type="simplicial complex"):
     Raises
     ------
     ValueError
-        If cmplex_type is not one of the supported values.
+        If domain is not one of the supported values.
     """
-    if cmplex_type == "simplicial complex":
+    if domain == "simplicial":
         cpx = SimplicialComplex.load_mesh(DIR + "/bunny.obj")
         return cpx
-    elif cmplex_type == "cell complex":
+    elif domain == "cellular":
         cpx = CellComplex.load_mesh(DIR + "/bunny.obj")
         return cpx
     else:
-        raise ValueError("cmplex_type must be 'simplicial complex' or 'cell complex'")
+        raise ValueError("domain must be 'simplicial complex' or 'cellular'")
