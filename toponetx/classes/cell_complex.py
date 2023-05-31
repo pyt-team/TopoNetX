@@ -21,6 +21,8 @@ from hypernetx import Hypergraph
 from hypernetx.classes.entity import Entity
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
+from networkx.utils import pairwise
+from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.complex import Complex
