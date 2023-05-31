@@ -800,7 +800,7 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([5, 6, 7, 8], rank=2)
         CX.add_node(0)
         CX.add_node(10)
-        CX.remove_singletons()
+        CX = CX.remove_singletons()
         assert CX.singletons() == []
 
     def test_contains__(self):
