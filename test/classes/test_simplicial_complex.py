@@ -191,6 +191,18 @@ class TestSimplicialComplex(unittest.TestCase):
         assert SC.maxdim == 0
         assert SC[9]["is_maximal"] is True
 
+    def test_add_node(self):
+        """Test add node."""
+        SC = SimplicialComplex()
+        SC.add_node(9)
+        assert 9 in SC
+        with self.assertRaises(ValueError):
+            SC.add_node((1, 2))
+
+        with self.assertRaises(ValueError):
+            s = Simplex((1, 2, 3, 4))
+            SC.add_node(s)
+
     def test_add_simplex(self):
         """Test add_simplex method."""
         # create a SimplicialComplex object with no simplices
@@ -208,6 +220,24 @@ class TestSimplicialComplex(unittest.TestCase):
         assert (1,) in SC.simplices
         assert (2,) in SC.simplices
         assert (3,) in SC.simplices
+
+        SC.add_simplex((4, 5, 6), heat=5)
+        assert (4, 5, 6) in SC.simplices
+        assert [4, 5, 6] in SC.simplices
+        assert (4, 5) in SC.simplices
+        assert (4, 6) in SC.simplices
+        assert (5, 6) in SC.simplices
+        assert (4,) in SC.simplices
+        assert (5,) in SC.simplices
+        assert (6,) in SC.simplices
+
+        # simplex cannot contain unhashable elements
+        with self.assertRaises(TypeError):
+            SC.add_simplex([[1, 2], [2, 3]])
+
+        # simplex cannot contain duplicate nodes
+        with self.assertRaises(ValueError):
+            SC.add_simplex((1, 2, 2))
 
     def test_remove_maximal_simplex(self):
         """Test remove_maximal_simplex method."""
@@ -236,6 +266,26 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex(c1)
         SC.remove_maximal_simplex((1, 2, 3, 4, 5))
         self.assertNotIn((1, 2, 3, 4, 5), SC)
+
+        # check removal with Simplex
+        SC = SimplicialComplex()
+        SC.add_simplex((1, 2, 3, 4), weight=1)
+        c1 = Simplex((1, 2, 3, 4, 5))
+        SC.add_simplex(c1)
+        SC.remove_maximal_simplex(c1)
+        self.assertNotIn((1, 2, 3, 4, 5), SC)
+
+        # check error when simplex not in complex
+        with self.assertRaises(KeyError):
+            SC = SimplicialComplex()
+            SC.add_simplex((1, 2, 3, 4), weight=1)
+            SC.remove_maximal_simplex([5, 6, 7])
+
+        # only maximal simplices can be removed
+        with self.assertRaises(ValueError):
+            SC = SimplicialComplex()
+            SC.add_simplex((1, 2, 3, 4), weight=1)
+            SC.remove_maximal_simplex((1, 2, 3))
 
     def test_skeleton_and_cliques(self):
         """Test skeleton and cliques methods."""
@@ -318,11 +368,36 @@ class TestSimplicialComplex(unittest.TestCase):
     def test_get_boundaries(self):
         """Test the get_boundaries method."""
         simplices = [(1, 2, 3), (2, 3, 4), (0, 1)]
+        with self.assertRaises(TypeError):
+            SimplicialComplex.get_boundaries(1)
+
         boundaries = SimplicialComplex.get_boundaries(simplices)
         self.assertIn(frozenset((1, 2)), boundaries)
         self.assertIn(frozenset((1, 3)), boundaries)
         self.assertIn(frozenset((2, 3)), boundaries)
-        # ... add more assertions based on the expected boundaries
+
+        # test for min dim/max dim combinations
+        boundaries = SimplicialComplex.get_boundaries(simplices, min_dim=2)
+        assert boundaries == {frozenset({1, 2, 3}), frozenset({2, 3, 4})}
+
+        boundaries = SimplicialComplex.get_boundaries(simplices, min_dim=1, max_dim=1)
+        assert boundaries == {
+            frozenset({3, 4}),
+            frozenset({2, 3}),
+            frozenset({1, 2}),
+            frozenset({0, 1}),
+            frozenset({2, 4}),
+            frozenset({1, 3}),
+        }
+
+        boundaries = SimplicialComplex.get_boundaries(simplices, max_dim=0)
+        assert boundaries == {
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({1}),
+            frozenset({4}),
+            frozenset({0}),
+        }
 
     def test_get_cofaces(self):
         """Test the get_cofaces method."""
@@ -355,13 +430,31 @@ class TestSimplicialComplex(unittest.TestCase):
         d = {(1, 2, 3): "red", (1, 2, 4): "blue"}
         SC.set_simplex_attributes(d, name="color")
         self.assertEqual(SC[(1, 2, 3)]["color"], "red")
-        # ... add more assertions based on the expected simplex attributes
+
+        # test for non-existing simplex
+        d = {(3, 4, 5): "Nope"}
+        SC.set_simplex_attributes(d, name="color")  # should not raise an error
+        SC.set_simplex_attributes(d)  # should not raise an error
+
+    def test_get_edges_from_matrix(self):
+        """Test the get_edges_from_matrix method."""
+        matrix = np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]])
+        expected_edges = [(0, 1), (1, 0), (1, 2), (2, 1)]
+
+        edges = SimplicialComplex().get_edges_from_matrix(matrix)
+
+        self.assertEqual(set(edges), set(expected_edges))
 
     def test_incidence_matrix(self):
         """Test incidence matrix."""
         SC = SimplicialComplex()
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 5])
+        with self.assertRaises(ValueError):
+            SC.incidence_matrix(10)
+        with self.assertRaises(ValueError):
+            SC.incidence_matrix(-1)
+
         B1 = SC.incidence_matrix(1)
         B2 = SC.incidence_matrix(2)
         assert B1.shape == tuple(SC.shape[:2])
@@ -406,11 +499,26 @@ class TestSimplicialComplex(unittest.TestCase):
         SC = stanford_bunny()
         self.assertTrue(SC.is_triangular_mesh())
 
+        # test for non triangular mesh
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3, 4])
+        SC.add_simplex([1, 2, 4])
+        SC.add_simplex([3, 4, 8])
+        self.assertFalse(SC.is_triangular_mesh())
+
     def test_to_trimesh(self):
         """Test to_trimesh."""
         SC = stanford_bunny()
         trimesh_obj = SC.to_trimesh()
         assert len(trimesh_obj.vertices) == len(SC.skeleton(0))
+
+        # test for non triangular mesh
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3, 4])
+        SC.add_simplex([1, 2, 4])
+        SC.add_simplex([3, 4, 8])
+        with self.assertRaises(TopoNetXError):
+            SC.to_trimesh()
 
     def test_laplace_beltrami_operator(self):
         """Test laplace_beltrami_operator."""
@@ -654,6 +762,26 @@ class TestSimplicialComplex(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             SC.coadjacency_matrix(rank, signed, weight, index)
+
+    def test_restrict_to_simplices(self):
+        """Test the restrict_to_simplices method of SimplicialComplex."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((1, 2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        SC1 = SC.restrict_to_simplices([c1, (2, 4)])
+        assert len(SC1.simplices) == 9
+        assert Simplex((1, 2, 3)) in SC1.simplices
+        assert Simplex((2, 4)) in SC1.simplices
+        assert Simplex((1, 2)) in SC1.simplices
+        assert Simplex((1, 3)) in SC1.simplices
+        assert Simplex((2, 3)) in SC1.simplices
+        assert Simplex((1,)) in SC1.simplices
+        assert Simplex((2,)) in SC1.simplices
+        assert Simplex((3,)) in SC1.simplices
+        assert Simplex((4,)) in SC1.simplices
+        assert Simplex((1, 2, 3, 4)) not in SC1.simplices
+        assert Simplex((1, 2, 5)) not in SC1.simplices
 
 
 if __name__ == "__main__":
