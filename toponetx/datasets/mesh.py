@@ -2,7 +2,6 @@
 
 import os
 import os.path
-import urllib.request
 
 import numpy as np
 
