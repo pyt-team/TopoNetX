@@ -77,4 +77,4 @@ def shrec_16():
         print("done!")
         return shrec_training, shrec_testing
     else:
-        raise ValueError("Files are on the HD, fail to load the dataset.")
+        raise ValueError(f"Files couldn't be found in folder {DIR}, fail to load the dataset.")
