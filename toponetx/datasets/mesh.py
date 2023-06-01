@@ -46,8 +46,13 @@ def stanford_bunny(complex_type="simplicial complex"):
         raise ValueError("cmplex_type must be 'simplicial complex' or 'cell complex'")
 
 
-def shrec_16():
+def shrec_16(size="full"):
     """Load training/testing shrec 16 datasets".
+
+    Parameters
+    ----------
+    size : str, optional
+        options are "full" or "small"
 
     Returns
     -------
@@ -84,23 +89,36 @@ def shrec_16():
 
     """
     url = "https://github.com/mhajij/shrec_16/raw/main/shrec.zip"
+    url_small = "https://github.com/mhajij/shrec_16/raw/main/small_shrec.zip"
+    if size == "full":
+        if not os.path.isfile(DIR + "/shrec.zip"):
+            print("downloading dataset...\n")
+            wget.download(url, DIR + "/shrec.zip")
+        print("unzipping the files...\n")
+        with zipfile.ZipFile(DIR + "/shrec.zip", "r") as zip_ref:
+            zip_ref.extractall(DIR)
+        print("done!")
+    elif size == "small":
+        if not os.path.isfile(DIR + "/small_shrec.zip"):
+            print("downloading dataset...\n")
+            wget.download(url_small, DIR + "/small_shrec.zip")
+        print("unzipping the files...\n")
+        with zipfile.ZipFile(DIR + "/small_shrec.zip", "r") as zip_ref:
+            zip_ref.extractall(DIR)
+    else:
+        raise ValueError(f"size must be 'full' or 'small' got {size}.")
+    if size == "full":
+        training = DIR + "/shrec_training.npz"
+        testing = DIR + "/shrec_testing.npz"
 
-    if not os.path.isfile(DIR + "/shrec.zip"):
-        print("downloading dataset...\n")
-        wget.download(url, DIR + "/shrec.zip")
-    print("unzipping the files...\n")
-    with zipfile.ZipFile(DIR + "/shrec.zip", "r") as zip_ref:
-        zip_ref.extractall(DIR)
-    # if not os.path.isfile(DIR + "/shrec_testing.npz"):
-    #    wget.download(url_testing, DIR + "/shrec_testing.npz")
-    print("done!")
+    elif size == "small":
+        training = DIR + "/small_shrec_training.npz"
+        testing = DIR + "/small_shrec_testing.npz"
 
-    if os.path.isfile(DIR + "/shrec_training.npz") and os.path.isfile(
-        DIR + "/shrec_testing.npz"
-    ):
+    if os.path.isfile(training) and os.path.isfile(testing):
         print("Loading dataset...\n")
-        shrec_training = np.load(DIR + "/shrec_training.npz", allow_pickle=True)
-        shrec_testing = np.load(DIR + "/shrec_testing.npz", allow_pickle=True)
+        shrec_training = np.load(training, allow_pickle=True)
+        shrec_testing = np.load(testing, allow_pickle=True)
         print("done!")
         return shrec_training, shrec_testing
     else:
