@@ -21,11 +21,21 @@ from toponetx import (
 class TestSimplicialComplex(unittest.TestCase):
     """Test SimplicialComplex class."""
 
+    def test_iterable_simplices(self):
+        """Test TypeError for simplices not iterable."""
+        with self.assertRaises(TypeError):
+            SimplicialComplex(simplices=1)
+
     def test_shape_property(self):
         """Test shape property."""
         # Test the shape property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         self.assertEqual(sc.shape, [5, 6, 2])
+
+    def test_shape_empty(self):
+        """Test shape property when Simplicial Complex is Empty."""
+        sc = SimplicialComplex()
+        self.assertEqual(sc.shape, None)
 
     def test_dim_property(self):
         """Test dim property."""
@@ -97,6 +107,17 @@ class TestSimplicialComplex(unittest.TestCase):
             SC = SimplicialComplex(G)
             SC.skeleton(2)
 
+    def test_str(self):
+        """Test str method."""
+        G = nx.Graph()
+        G.add_edge(0, 1)
+        G.add_edge(2, 5)
+        G.add_edge(5, 4, weight=5)
+        SC = SimplicialComplex(G, name="graph complex")
+        assert (
+            str(SC)
+        ) == f"Simplicial Complex with shape {SC.shape} and dimension {SC.dim}"
+
     def test_rep_str(self):
         """Test repr string."""
         G = nx.Graph()
@@ -117,6 +138,8 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex((1, 2, 3), heat=5)
         # with self.assertRaises(ValueError):
         assert SC[(1, 2, 3)]["heat"] == 5
+        with self.assertRaises(KeyError):
+            SC[(1, 2, 3, 4, 5)]["heat"]
 
     def test_setitem__(self):
         """Test __getitem__ and __setitem__ methods."""
