@@ -209,6 +209,24 @@ class TestSimplicialComplex(unittest.TestCase):
         assert (2,) in SC.simplices
         assert (3,) in SC.simplices
 
+        SC.add_simplex((4, 5, 6), heat=5)
+        assert (4, 5, 6) in SC.simplices
+        assert [4, 5, 6] in SC.simplices
+        assert (4, 5) in SC.simplices
+        assert (4, 6) in SC.simplices
+        assert (5, 6) in SC.simplices
+        assert (4,) in SC.simplices
+        assert (5,) in SC.simplices
+        assert (6,) in SC.simplices
+
+        # simplex cannot contain unhashable elements
+        with self.assertRaises(TypeError):
+            SC.add_simplex([[1, 2], [2, 3]])
+
+        # simplex cannot contain duplicate nodes
+        with self.assertRaises(ValueError):
+            SC.add_simplex((1, 2, 2))
+
     def test_remove_maximal_simplex(self):
         """Test remove_maximal_simplex method."""
         # create a SimplicialComplex object with a few simplices
@@ -236,6 +254,26 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex(c1)
         SC.remove_maximal_simplex((1, 2, 3, 4, 5))
         self.assertNotIn((1, 2, 3, 4, 5), SC)
+
+        # check removal with Simplex
+        SC = SimplicialComplex()
+        SC.add_simplex((1, 2, 3, 4), weight=1)
+        c1 = Simplex((1, 2, 3, 4, 5))
+        SC.add_simplex(c1)
+        SC.remove_maximal_simplex(c1)
+        self.assertNotIn((1, 2, 3, 4, 5), SC)
+
+        # check error when simplex not in complex
+        with self.assertRaises(KeyError):
+            SC = SimplicialComplex()
+            SC.add_simplex((1, 2, 3, 4), weight=1)
+            SC.remove_maximal_simplex([5, 6, 7])
+
+        # only maximal simplices can be removed
+        with self.assertRaises(ValueError):
+            SC = SimplicialComplex()
+            SC.add_simplex((1, 2, 3, 4), weight=1)
+            SC.remove_maximal_simplex((1, 2, 3))
 
     def test_skeleton_and_cliques(self):
         """Test skeleton and cliques methods."""
