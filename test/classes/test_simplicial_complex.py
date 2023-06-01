@@ -191,6 +191,18 @@ class TestSimplicialComplex(unittest.TestCase):
         assert SC.maxdim == 0
         assert SC[9]["is_maximal"] is True
 
+    def test_add_node(self):
+        """Test add node."""
+        SC = SimplicialComplex()
+        SC.add_node(9)
+        assert 9 in SC
+        with self.assertRaises(ValueError):
+            SC.add_node((1, 2))
+
+        with self.assertRaises(ValueError):
+            s = Simplex((1, 2, 3, 4))
+            SC.add_node(s)
+
     def test_add_simplex(self):
         """Test add_simplex method."""
         # create a SimplicialComplex object with no simplices
@@ -356,11 +368,36 @@ class TestSimplicialComplex(unittest.TestCase):
     def test_get_boundaries(self):
         """Test the get_boundaries method."""
         simplices = [(1, 2, 3), (2, 3, 4), (0, 1)]
+        with self.assertRaises(TypeError):
+            SimplicialComplex.get_boundaries(1)
+
         boundaries = SimplicialComplex.get_boundaries(simplices)
         self.assertIn(frozenset((1, 2)), boundaries)
         self.assertIn(frozenset((1, 3)), boundaries)
         self.assertIn(frozenset((2, 3)), boundaries)
-        # ... add more assertions based on the expected boundaries
+
+        # test for min dim/max dim combinations
+        boundaries = SimplicialComplex.get_boundaries(simplices, min_dim=2)
+        assert boundaries == {frozenset({1, 2, 3}), frozenset({2, 3, 4})}
+
+        boundaries = SimplicialComplex.get_boundaries(simplices, min_dim=1, max_dim=1)
+        assert boundaries == {
+            frozenset({3, 4}),
+            frozenset({2, 3}),
+            frozenset({1, 2}),
+            frozenset({0, 1}),
+            frozenset({2, 4}),
+            frozenset({1, 3}),
+        }
+
+        boundaries = SimplicialComplex.get_boundaries(simplices, max_dim=0)
+        assert boundaries == {
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({1}),
+            frozenset({4}),
+            frozenset({0}),
+        }
 
     def test_get_cofaces(self):
         """Test the get_cofaces method."""
@@ -393,13 +430,31 @@ class TestSimplicialComplex(unittest.TestCase):
         d = {(1, 2, 3): "red", (1, 2, 4): "blue"}
         SC.set_simplex_attributes(d, name="color")
         self.assertEqual(SC[(1, 2, 3)]["color"], "red")
-        # ... add more assertions based on the expected simplex attributes
+
+        # test for non-existing simplex
+        d = {(3, 4, 5): "Nope"}
+        SC.set_simplex_attributes(d, name="color")  # should not raise an error
+        SC.set_simplex_attributes(d)  # should not raise an error
+
+    def test_get_edges_from_matrix(self):
+        """Test the get_edges_from_matrix method."""
+        matrix = np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]])
+        expected_edges = [(0, 1), (1, 0), (1, 2), (2, 1)]
+
+        edges = SimplicialComplex().get_edges_from_matrix(matrix)
+
+        self.assertEqual(set(edges), set(expected_edges))
 
     def test_incidence_matrix(self):
         """Test incidence matrix."""
         SC = SimplicialComplex()
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 5])
+        with self.assertRaises(ValueError):
+            SC.incidence_matrix(10)
+        with self.assertRaises(ValueError):
+            SC.incidence_matrix(-1)
+
         B1 = SC.incidence_matrix(1)
         B2 = SC.incidence_matrix(2)
         assert B1.shape == tuple(SC.shape[:2])
