@@ -23,7 +23,7 @@ class TestMeshDatasets(unittest.TestCase):
             stanford_bunny("polyhedral complex")
 
     def test_shrec_16(self):
-        """Test shrec16."""
+        """Test shrec_16."""
         shrec_training, shrec_testing = shrec_16()
 
         assert len(shrec_training["complexes"]) == 480
