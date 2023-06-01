@@ -36,6 +36,7 @@ dependencies=[
      "spharapy",
      "wget",
      "zipfile",
+
 ]
 
 [project.optional-dependencies]
