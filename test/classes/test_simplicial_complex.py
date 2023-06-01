@@ -499,11 +499,26 @@ class TestSimplicialComplex(unittest.TestCase):
         SC = stanford_bunny()
         self.assertTrue(SC.is_triangular_mesh())
 
+        # test for non triangular mesh
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3, 4])
+        SC.add_simplex([1, 2, 4])
+        SC.add_simplex([3, 4, 8])
+        self.assertFalse(SC.is_triangular_mesh())
+
     def test_to_trimesh(self):
         """Test to_trimesh."""
         SC = stanford_bunny()
         trimesh_obj = SC.to_trimesh()
         assert len(trimesh_obj.vertices) == len(SC.skeleton(0))
+
+        # test for non triangular mesh
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3, 4])
+        SC.add_simplex([1, 2, 4])
+        SC.add_simplex([3, 4, 8])
+        with self.assertRaises(TopoNetXError):
+            SC.to_trimesh()
 
     def test_laplace_beltrami_operator(self):
         """Test laplace_beltrami_operator."""
@@ -747,6 +762,26 @@ class TestSimplicialComplex(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             SC.coadjacency_matrix(rank, signed, weight, index)
+
+    def test_restrict_to_simplices(self):
+        """Test the restrict_to_simplices method of SimplicialComplex."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((1, 2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        SC1 = SC.restrict_to_simplices([c1, (2, 4)])
+        assert len(SC1.simplices) == 9
+        assert Simplex((1, 2, 3)) in SC1.simplices
+        assert Simplex((2, 4)) in SC1.simplices
+        assert Simplex((1, 2)) in SC1.simplices
+        assert Simplex((1, 3)) in SC1.simplices
+        assert Simplex((2, 3)) in SC1.simplices
+        assert Simplex((1,)) in SC1.simplices
+        assert Simplex((2,)) in SC1.simplices
+        assert Simplex((3,)) in SC1.simplices
+        assert Simplex((4,)) in SC1.simplices
+        assert Simplex((1, 2, 3, 4)) not in SC1.simplices
+        assert Simplex((1, 2, 5)) not in SC1.simplices
 
 
 if __name__ == "__main__":
