@@ -34,6 +34,8 @@ dependencies=[
     "scipy",
     "trimesh",
      "spharapy",
+     "wget",
+     "zipfile",
 ]
 
 [project.optional-dependencies]
