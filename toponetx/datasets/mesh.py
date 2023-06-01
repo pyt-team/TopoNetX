@@ -51,7 +51,7 @@ def shrec_16():
     -------
     tuple of length 2 npz files
         The npz files store the training/testing complexes of shrec 16 dataset along
-        with thier nodes, edges and faces features.
+        with their nodes, edges and faces features.
 
     Notes
     -----
