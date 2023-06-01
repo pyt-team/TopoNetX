@@ -56,7 +56,7 @@ def shrec_16():
 
     Notes
     -----
-    Each npz file stores 5 keys
+    Each npz file stores 5 keys:
     "complexes",label","node_feat","edge_feat" and "face_feat".
 
     Example
