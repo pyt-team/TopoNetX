@@ -92,7 +92,7 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
     finaleigenvectors = []
     for val in eigenvaluevector:
         finaleigenvectors.append(mydict[val])
-    return [eigenvaluevector, finaleigenvectors]
+    return [np.array(eigenvaluevector), np.array(finaleigenvectors)]
 
 
 def set_hodge_laplacian_eigenvector_attrs(
@@ -118,7 +118,7 @@ def set_hodge_laplacian_eigenvector_attrs(
     --------
     >>> from toponetx import SimplicialComplex
     >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
-    >>> SC = set_hodge_laplacian_eigenvector_attrs(SC,1,2,"down")
+    >>> set_hodge_laplacian_eigenvector_attrs(SC,1,2,"down")
     >>> SC.get_simplex_attributes("0.th_eigen", 1)
     """
     index = cmplex.skeleton(dim)

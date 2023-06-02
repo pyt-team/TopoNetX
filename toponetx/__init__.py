@@ -18,12 +18,16 @@ from .classes.cell import Cell
 from .classes.reportviews import CellView, HyperEdgeView, SimplexView, NodeView
 
 
-from .datasets.mesh import stanford_bunny
+from .datasets.mesh import stanford_bunny, shrec_16
+from .datasets.graph import karate_club_complex
 
 from .transform.graph_to_simplicial_complex import (
     graph_2_neighbor_complex,
     graph_2_clique_complex,
 )
+
+from .transform.graph_to_cell_complex import homology_cycle_cell_complex
+
 
 from .utils.structure import (
     sparse_array_to_neighborhood_list,
