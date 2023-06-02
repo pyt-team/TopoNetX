@@ -13,7 +13,7 @@ from toponetx.transform.graph_to_simplicial_complex import graph_2_clique_comple
 __all__ = ["karate_club_complex"]
 
 
-def karate_club_complex(complex_type="simplicial complex"):
+def karate_club_complex(complex_type="simplicial"):
     """Load the karate club as complex.
 
         simplicial complex is returned as the clique complex of the graph
@@ -36,7 +36,7 @@ def karate_club_complex(complex_type="simplicial complex"):
     ValueError
         If complex_type is not one of the supported values.
     """
-    if complex_type == "simplicial complex":
+    if complex_type == "simplicial":
         g = nx.karate_club_graph()
         sc = graph_2_clique_complex(g)  # lift to sc
 
@@ -54,7 +54,7 @@ def karate_club_complex(complex_type="simplicial complex"):
         }
         return data
 
-    elif complex_type == "cell complex":
+    elif complex_type == "cell":
         g = nx.karate_club_graph()
         cycles = nx.cycle_basis(g)
         cx = CellComplex(g)  # lift to graph
@@ -73,4 +73,6 @@ def karate_club_complex(complex_type="simplicial complex"):
         return data
 
     else:
-        raise ValueError("cmplex_type must be 'simplicial complex' or 'cell complex'")
+        raise ValueError(
+            f"cmplex_type must be 'simplicial' or 'cell' got {complex_type}"
+        )

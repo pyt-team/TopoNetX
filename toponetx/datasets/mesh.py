@@ -10,16 +10,15 @@ from toponetx import CellComplex, CombinatorialComplex, SimplicialComplex
 __all__ = ["stanford_bunny", "shrec_16"]
 
 #: the absolute path repr the directory containing this file
-# DIR = os.path.abspath(os.getcwd())
 DIR = os.path.dirname(__file__)
 
 
-def stanford_bunny(complex_type="simplicial complex"):
+def stanford_bunny(complex_type="simplicial"):
     """Load the Stanford Bunny mesh as a complex.
 
     Parameters
     ----------
-    cmplex_type : str, optional
+    complex_type : str, optional
         The type of complex to load. Supported values are
         "simplicial complex" and "cell complex".
         The default is "simplicial complex".
@@ -34,14 +33,14 @@ def stanford_bunny(complex_type="simplicial complex"):
     ValueError
         If cmplex_type is not one of the supported values.
     """
-    if complex_type == "simplicial complex":
+    if complex_type == "simplicial":
         cpx = SimplicialComplex.load_mesh(DIR + "/bunny.obj")
         return cpx
-    elif complex_type == "cell complex":
+    elif complex_type == "cell":
         cpx = CellComplex.load_mesh(DIR + "/bunny.obj")
         return cpx
     else:
-        raise ValueError("cmplex_type must be 'simplicial complex' or 'cell complex'")
+        raise ValueError("complex_type must be 'simplicial' or 'cell'")
 
 
 def shrec_16():
@@ -77,4 +76,6 @@ def shrec_16():
         print("done!")
         return shrec_training, shrec_testing
     else:
-        raise ValueError(f"Files couldn't be found in folder {DIR}, fail to load the dataset.")
+        raise ValueError(
+            f"Files couldn't be found in folder {DIR}, fail to load the dataset."
+        )
