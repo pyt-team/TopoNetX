@@ -88,32 +88,31 @@ def shrec_16(size="full"):
     >>> testing_face_feat = shrec_testing["face_feat"]
 
     """
-    url = "https://github.com/mhajij/shrec_16/raw/main/shrec.zip"
-    url_small = "https://github.com/mhajij/shrec_16/raw/main/small_shrec.zip"
-    if size == "full":
-        if not os.path.isfile(os.path.join(DIR, "shrec.zip")):
-            print("downloading dataset...\n")
-            wget.download(url, os.path.join(DIR, "shrec.zip"))
-        print("unzipping the files...\n")
-        with zipfile.ZipFile(DIR + "/shrec.zip", "r") as zip_ref:
-            zip_ref.extractall(DIR)
-        print("done!")
-    elif size == "small":
-        if not os.path.isfile(DIR + "/small_shrec.zip"):
-            print("downloading dataset...\n")
-            wget.download(url_small, os.path.join(DIR, "small_shrec.zip"))
-        print("unzipping the files...\n")
-        with zipfile.ZipFile(DIR + "/small_shrec.zip", "r") as zip_ref:
-            zip_ref.extractall(DIR)
-    else:
+    DS_MAP = {
+        "full": ("shrec", "https://github.com/mhajij/shrec_16/raw/main/shrec.zip"),
+        "small": (
+            "small_shrec",
+            "https://github.com/mhajij/shrec_16/raw/main/small_shrec.zip",
+        ),
+    }
+    if size not in DS_MAP:
         raise ValueError(f"size must be 'full' or 'small' got {size}.")
-    if size == "full":
-        training = os.path.join(DIR, "shrec_training.npz")
-        testing = os.path.join(DIR, "shrec_testing.npz")
+    ds_name, url = DS_MAP[size]
 
-    elif size == "small":
-        training = os.path.join(DIR, "small_shrec_training.npz")
-        testing = os.path.join(DIR, "small_shrec_testing.npz")
+    zip_file = os.path.join(DIR, f"{ds_name}.zip")
+    training = os.path.join(DIR, f"{ds_name}_training.npz")
+    testing = os.path.join(DIR, f"{ds_name}_testing.npz")
+
+    if not os.path.isfile(training):
+        print("downloading dataset...\n")
+        wget.download(url, DIR)
+        with zipfile.ZipFile(zip_file, "r") as zip_ref:
+            zip_ref.extractall(DIR)
+    if not os.path.isfile(testing):
+        wget.download(url, DIR)
+        with zipfile.ZipFile(zip_file, "r") as zip_ref:
+            zip_ref.extractall(DIR)
+    print("done!")
 
     if os.path.isfile(training) and os.path.isfile(testing):
         print("Loading dataset...\n")
