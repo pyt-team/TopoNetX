@@ -8,7 +8,7 @@ class TestGraph:
     """Test datasets utils."""
 
     def test_karate_club(self):
-        """Test stanford_bunny."""
+        """Test karate_club."""
         simplicial_karate_club_data = karate_club("simplicial")
 
         assert "node_feat" in simplicial_karate_club_data
