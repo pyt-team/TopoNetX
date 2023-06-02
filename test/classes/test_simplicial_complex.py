@@ -47,7 +47,7 @@ class TestSimplicialComplex(unittest.TestCase):
         """Test maxdim property."""
         # Test the maxdim property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        self.assertEqual(sc.maxdim, 2)
+        self.assertEqual(sc.dim, 2)
 
     def test_nodes_property(self):
         """Test nodes property."""
@@ -186,9 +186,9 @@ class TestSimplicialComplex(unittest.TestCase):
             SC._insert_node(s)
 
         SC = SimplicialComplex()
-        assert SC.maxdim == -1
+        assert SC.dim == -1
         SC._insert_node(9)
-        assert SC.maxdim == 0
+        assert SC.dim == 0
         assert SC[9]["is_maximal"] is True
 
     def test_add_node(self):
