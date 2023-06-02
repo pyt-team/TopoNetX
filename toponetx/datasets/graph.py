@@ -10,10 +10,10 @@ from toponetx.algorithms.spectrum import (
 )
 from toponetx.transform.graph_to_simplicial_complex import graph_2_clique_complex
 
-__all__ = ["karate_club_complex"]
+__all__ = ["karate_club"]
 
 
-def karate_club_complex(complex_type="simplicial"):
+def karate_club(complex_type="simplicial"):
     """Load the karate club as complex.
 
         simplicial complex is returned as the clique complex of the graph
@@ -74,5 +74,5 @@ def karate_club_complex(complex_type="simplicial"):
 
     else:
         raise ValueError(
-            f"cmplex_type must be 'simplicial' or 'cell' got {complex_type}"
+            f"complex_type must be 'simplicial' or 'cell' got {complex_type}"
         )

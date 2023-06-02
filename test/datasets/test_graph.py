@@ -9,7 +9,7 @@ from toponetx.datasets.graph import karate_club_complex
 class TestMeshDatasets(unittest.TestCase):
     """Test datasets utils."""
 
-    def test_karate_club_complex(self):
+    def test_karate_club(self):
         """Test stanford_bunny."""
         simplicial_karate_club_data = karate_club_complex("simplicial")
 

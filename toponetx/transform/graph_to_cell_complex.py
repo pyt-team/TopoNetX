@@ -11,7 +11,7 @@ from toponetx import CellComplex
 
 
 def homology_cycle_cell_complex(G):
-    """Get the neighbor complex of a graph.
+    """Get the cell complex obtained by adding homology cycles of a graph.
 
     Parameters
     ----------

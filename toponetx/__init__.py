@@ -19,7 +19,7 @@ from .classes.reportviews import CellView, HyperEdgeView, SimplexView, NodeView
 
 
 from .datasets.mesh import stanford_bunny, shrec_16
-from .datasets.graph import karate_club_complex
+from .datasets.graph import karate_club
 
 from .transform.graph_to_simplicial_complex import (
     graph_2_neighbor_complex,
