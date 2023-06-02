@@ -36,11 +36,11 @@ def stanford_bunny(complex_type="simplicial"):
         If complex_type is not one of the supported values.
     """
     if complex_type == "simplicial":
-        cpx = SimplicialComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
-        return cpx
+        out_complex = SimplicialComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
+        return out_complex
     elif complex_type == "cell":
-        cpx = CellComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
-        return cpx
+        out_complex = CellComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
+        return out_complex
     else:
         raise ValueError("complex_type must be 'simplicial' or 'cell'")
 
