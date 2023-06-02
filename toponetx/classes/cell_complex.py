@@ -12,6 +12,7 @@ from collections import defaultdict
 from collections.abc import Hashable, Iterable
 from itertools import zip_longest
 from typing import Any, Literal, Optional, Union
+from warnings import warn
 
 import networkx as nx
 import numpy as np
@@ -167,6 +168,16 @@ class CellComplex(Complex):
     @property
     def maxdim(self) -> int:
         """Return maximum dimension."""
+        warn(
+            "`CellComplex.maxdim` is deprecated and will be removed in the future, use `CellComplex.dim` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.dim
+
+    @property
+    def dim(self) -> int:
+        """Return maximum dimension."""
         if len(self.nodes) == 0:
             return 0
         if len(self.edges) == 0:
@@ -174,11 +185,6 @@ class CellComplex(Complex):
         if len(self.cells) == 0:
             return 1
         return 2
-
-    @property
-    def dim(self) -> int:
-        """Return dimension."""
-        return self.maxdim
 
     @property
     def shape(self) -> tuple[int, int, int]:
@@ -1425,7 +1431,7 @@ class CellComplex(Complex):
                     return abs(L_hodge)
         elif rank < 2:  # rank == 1, return L1
 
-            if self.maxdim == 2:
+            if self.dim == 2:
                 edge_list, cell_list, B_next = self.incidence_matrix(
                     rank + 1, weight=weight, index=True
                 )
@@ -1440,7 +1446,7 @@ class CellComplex(Complex):
             else:
                 return L_hodge
 
-        elif rank == 2 and self.maxdim == 2:
+        elif rank == 2 and self.dim == 2:
 
             edge_list, cell_list, B = self.incidence_matrix(
                 rank, weight=weight, index=True
@@ -1453,14 +1459,14 @@ class CellComplex(Complex):
                 return cell_list, L_hodge
             else:
                 return L_hodge
-        elif rank == 2 and self.maxdim != 2:
+        elif rank == 2 and self.dim != 2:
             raise ValueError(
                 "The input complex does not have cells of dim 2. "
-                f"The maximal cell dimension is {self.maxdim}, got {rank}"
+                f"The maximal cell dimension is {self.dim}, got {rank}"
             )
         else:
             raise ValueError(
-                f"Rank should be larger than 0 and <= {self.maxdim} (maximal dimension cells), got {rank}."
+                f"Rank should be larger than 0 and <= {self.dim} (maximal dimension cells), got {rank}."
             )
 
     def up_laplacian_matrix(
@@ -1515,7 +1521,7 @@ class CellComplex(Complex):
                 rank + 1, weight=weight, index=True
             )
             L_up = B_next @ B_next.transpose()
-        elif rank < self.maxdim:
+        elif rank < self.dim:
             row, col, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
@@ -1523,7 +1529,7 @@ class CellComplex(Complex):
         else:
 
             raise ValueError(
-                f"Rank should larger than 0 and <= {self.maxdim-1} (maximal dimension cells-1), got {rank}."
+                f"Rank should larger than 0 and <= {self.dim - 1} (maximal dimension cells-1), got {rank}."
             )
         if not signed:
             L_up = abs(L_up)
@@ -1578,12 +1584,12 @@ class CellComplex(Complex):
         """
         weight = None  # this feature is not supported in this version
 
-        if rank <= self.maxdim and rank > 0:
+        if rank <= self.dim and rank > 0:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
-                f"Rank should be larger than 1 and <= {self.maxdim} (maximal dimension cells), got {rank}."
+                f"Rank should be larger than 1 and <= {self.dim} (maximal dimension cells), got {rank}."
             )
         if not signed:
             L_down = abs(L_down)

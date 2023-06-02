@@ -18,7 +18,7 @@ class TestComplex(unittest.TestCase):
             raise NotImplementedError
 
         @property
-        def dim(self):
+        def dim(self) -> int:
             """Dimension."""
             raise NotImplementedError
 
