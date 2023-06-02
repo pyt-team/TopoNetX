@@ -1,4 +1,4 @@
-"""Test mesh dataset."""
+"""Test graph dataset."""
 
 import unittest
 
@@ -6,7 +6,7 @@ from toponetx import CellComplex, SimplicialComplex
 from toponetx.datasets.graph import karate_club
 
 
-class TestMeshDatasets(unittest.TestCase):
+class TestGraph(unittest.TestCase):
     """Test datasets utils."""
 
     def test_karate_club(self):
