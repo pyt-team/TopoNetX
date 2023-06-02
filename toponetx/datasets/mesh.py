@@ -36,10 +36,10 @@ def stanford_bunny(complex_type="simplicial"):
         If complex_type is not one of the supported values.
     """
     if complex_type == "simplicial":
-        cpx = SimplicialComplex.load_mesh(DIR + "/bunny.obj")
+        cpx = SimplicialComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
         return cpx
     elif complex_type == "cell":
-        cpx = CellComplex.load_mesh(DIR + "/bunny.obj")
+        cpx = CellComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
         return cpx
     else:
         raise ValueError("complex_type must be 'simplicial' or 'cell'")
@@ -91,9 +91,9 @@ def shrec_16(size="full"):
     url = "https://github.com/mhajij/shrec_16/raw/main/shrec.zip"
     url_small = "https://github.com/mhajij/shrec_16/raw/main/small_shrec.zip"
     if size == "full":
-        if not os.path.isfile(DIR + "/shrec.zip"):
+        if not os.path.isfile(os.path.join(DIR, "shrec.zip")):
             print("downloading dataset...\n")
-            wget.download(url, DIR + "/shrec.zip")
+            wget.download(url, os.path.join(DIR, "shrec.zip"))
         print("unzipping the files...\n")
         with zipfile.ZipFile(DIR + "/shrec.zip", "r") as zip_ref:
             zip_ref.extractall(DIR)
@@ -101,19 +101,19 @@ def shrec_16(size="full"):
     elif size == "small":
         if not os.path.isfile(DIR + "/small_shrec.zip"):
             print("downloading dataset...\n")
-            wget.download(url_small, DIR + "/small_shrec.zip")
+            wget.download(url_small, os.path.join(DIR, "small_shrec.zip"))
         print("unzipping the files...\n")
         with zipfile.ZipFile(DIR + "/small_shrec.zip", "r") as zip_ref:
             zip_ref.extractall(DIR)
     else:
         raise ValueError(f"size must be 'full' or 'small' got {size}.")
     if size == "full":
-        training = DIR + "/shrec_training.npz"
-        testing = DIR + "/shrec_testing.npz"
+        training = os.path.join(DIR, "shrec_training.npz")
+        testing = os.path.join(DIR, "shrec_testing.npz")
 
     elif size == "small":
-        training = DIR + "/small_shrec_training.npz"
-        testing = DIR + "/small_shrec_testing.npz"
+        training = os.path.join(DIR, "small_shrec_training.npz")
+        testing = os.path.join(DIR, "small_shrec_testing.npz")
 
     if os.path.isfile(training) and os.path.isfile(testing):
         print("Loading dataset...\n")

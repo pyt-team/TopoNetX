@@ -57,8 +57,8 @@ def karate_club(complex_type="simplicial"):
     elif complex_type == "cell":
         g = nx.karate_club_graph()
         cycles = nx.cycle_basis(g)
-        cx = CellComplex(g)  # lift to graph
-        cx.add_cells_from(cycles, rank=2)  # add basis cycles
+        cx = CellComplex(g)
+        cx.add_cells_from(cycles, rank=2)
 
         _, nodes_feat = hodge_laplacian_eigenvectors(cx.hodge_laplacian_matrix(0), 2)
         _, edges_feat = hodge_laplacian_eigenvectors(cx.hodge_laplacian_matrix(1), 2)
