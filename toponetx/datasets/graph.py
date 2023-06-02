@@ -13,7 +13,7 @@ from toponetx.transform.graph_to_simplicial_complex import graph_2_clique_comple
 __all__ = ["karate_club"]
 
 
-def karate_club(complex_type="simplicial"):
+def karate_club(complex_type="simplicial", feat_dim=2):
     """Load the karate club as complex.
 
         simplicial complex is returned as the clique complex of the graph
@@ -40,10 +40,18 @@ def karate_club(complex_type="simplicial"):
         g = nx.karate_club_graph()
         sc = graph_2_clique_complex(g)
 
-        _, nodes_feat = hodge_laplacian_eigenvectors(sc.hodge_laplacian_matrix(0), 2)
-        _, edges_feat = hodge_laplacian_eigenvectors(sc.hodge_laplacian_matrix(1), 2)
-        _, faces_feat = hodge_laplacian_eigenvectors(sc.hodge_laplacian_matrix(2), 2)
-        _, tet_feat = hodge_laplacian_eigenvectors(sc.hodge_laplacian_matrix(3), 2)
+        _, nodes_feat = hodge_laplacian_eigenvectors(
+            sc.hodge_laplacian_matrix(0), feat_dim
+        )
+        _, edges_feat = hodge_laplacian_eigenvectors(
+            sc.hodge_laplacian_matrix(1), feat_dim
+        )
+        _, faces_feat = hodge_laplacian_eigenvectors(
+            sc.hodge_laplacian_matrix(2), feat_dim
+        )
+        _, tet_feat = hodge_laplacian_eigenvectors(
+            sc.hodge_laplacian_matrix(3), feat_dim
+        )
 
         data = {
             "complex": sc,
@@ -60,9 +68,15 @@ def karate_club(complex_type="simplicial"):
         cx = CellComplex(g)
         cx.add_cells_from(cycles, rank=2)
 
-        _, nodes_feat = hodge_laplacian_eigenvectors(cx.hodge_laplacian_matrix(0), 2)
-        _, edges_feat = hodge_laplacian_eigenvectors(cx.hodge_laplacian_matrix(1), 2)
-        _, cells_feat = hodge_laplacian_eigenvectors(cx.hodge_laplacian_matrix(2), 2)
+        _, nodes_feat = hodge_laplacian_eigenvectors(
+            cx.hodge_laplacian_matrix(0), feat_dim
+        )
+        _, edges_feat = hodge_laplacian_eigenvectors(
+            cx.hodge_laplacian_matrix(1), feat_dim
+        )
+        _, cells_feat = hodge_laplacian_eigenvectors(
+            cx.hodge_laplacian_matrix(2), feat_dim
+        )
 
         data = {
             "complex": cx,
