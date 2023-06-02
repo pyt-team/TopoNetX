@@ -2,7 +2,6 @@
 
 import os
 import os.path
-import urllib.request
 
 import numpy as np
 
@@ -52,7 +51,7 @@ def shrec_16():
     -------
     tuple of length 2 npz files
         The npz files store the training/testing complexes of shrec 16 dataset along
-        with thier nodes, edges and faces features.
+        with their nodes, edges and faces features.
 
     Notes
     -----
@@ -78,4 +77,4 @@ def shrec_16():
         print("done!")
         return shrec_training, shrec_testing
     else:
-        raise ValueError("Files are on the HD, fail to load the dataset.")
+        raise ValueError(f"Files couldn't be found in folder {DIR}, fail to load the dataset.")
