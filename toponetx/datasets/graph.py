@@ -38,7 +38,7 @@ def karate_club(complex_type="simplicial"):
     """
     if complex_type == "simplicial":
         g = nx.karate_club_graph()
-        sc = graph_2_clique_complex(g)  # lift to sc
+        sc = graph_2_clique_complex(g)
 
         _, nodes_feat = hodge_laplacian_eigenvectors(sc.hodge_laplacian_matrix(0), 2)
         _, edges_feat = hodge_laplacian_eigenvectors(sc.hodge_laplacian_matrix(1), 2)
