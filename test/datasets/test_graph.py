@@ -1,12 +1,10 @@
 """Test graph dataset."""
 
-import unittest
-
 from toponetx import CellComplex, SimplicialComplex
 from toponetx.datasets.graph import karate_club
 
 
-class TestGraph(unittest.TestCase):
+class TestGraph:
     """Test datasets utils."""
 
     def test_karate_club(self):
@@ -23,7 +21,3 @@ class TestGraph(unittest.TestCase):
         assert "node_feat" in cell_karate_club_data
         assert "edge_feat" in cell_karate_club_data
         assert "cell_feat" in cell_karate_club_data
-
-
-if __name__ == "__main__":
-    unittest.main()

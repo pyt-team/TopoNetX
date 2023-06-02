@@ -41,8 +41,8 @@ def stanford_bunny(complex_type="simplicial"):
     elif complex_type == "cell":
         out_complex = CellComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
         return out_complex
-    else:
-        raise ValueError("complex_type must be 'simplicial' or 'cell'")
+
+    raise ValueError("complex_type must be 'simplicial' or 'cell'")
 
 
 def shrec_16(size="full"):
@@ -121,7 +121,7 @@ def shrec_16(size="full"):
         shrec_testing = np.load(testing, allow_pickle=True)
         print("done!")
         return shrec_training, shrec_testing
-    else:
-        raise ValueError(
-            f"Files couldn't be found in folder {DIR}, fail to load the dataset."
-        )
+
+    raise ValueError(
+        f"Files couldn't be found in folder {DIR}, fail to load the dataset."
+    )

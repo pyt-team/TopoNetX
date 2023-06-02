@@ -1,12 +1,10 @@
 """Test mesh dataset."""
 
-import unittest
-
 from toponetx import CellComplex, SimplicialComplex
 from toponetx.datasets.mesh import shrec_16, stanford_bunny
 
 
-class TestMeshDatasets(unittest.TestCase):
+class TestMeshDatasets:
     """Test datasets utils."""
 
     def test_stanford_bunny(self):
@@ -36,7 +34,3 @@ class TestMeshDatasets(unittest.TestCase):
         assert len(shrec_testing["edge_feat"]) == 20
         assert len(shrec_training["face_feat"]) == 100
         assert len(shrec_testing["face_feat"]) == 20
-
-
-if __name__ == "__main__":
-    unittest.main()

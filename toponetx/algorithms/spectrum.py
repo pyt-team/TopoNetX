@@ -117,7 +117,7 @@ def set_hodge_laplacian_eigenvector_attrs(
     Examples
     --------
     >>> from toponetx import SimplicialComplex
-    >>> SC=SimplicialComplex([[1, 2, 3],[2, 3, 5],[0, 1]])
+    >>> SC = SimplicialComplex([[1, 2, 3],[2, 3, 5],[0, 1]])
     >>> set_hodge_laplacian_eigenvector_attrs(SC, 1, 2, "down")
     >>> SC.get_simplex_attributes("0.th_eigen", 1)
     """
