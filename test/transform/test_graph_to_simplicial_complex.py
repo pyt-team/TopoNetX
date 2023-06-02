@@ -7,7 +7,7 @@ import networkx as nx
 from toponetx.transform.graph_to_simplicial_complex import (
     graph_2_clique_complex,
     graph_2_neighbor_complex,
-    weighted_graph_to_Vietoris_Rips_complex
+    weighted_graph_2_Vietoris_Rips_complex
 )
 
 
@@ -53,8 +53,8 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
 
         return
 
-    def test_weighted_graph_to_Vietoris_Rips_complex(self):
-        """Test weighted_graph_to_Vietoris_Rips_complex"""
+    def test_weighted_graph_2_Vietoris_Rips_complex(self):
+        """Test weighted_graph_2_Vietoris_Rips_complex"""
 
         def generate_weighted_graph_for_Vietoris_Rips():
             """Creates a weighted graph in networkx used to test the lift from
@@ -140,7 +140,7 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
         # associated graph.
         weighted_graph = generate_weighted_graph_for_Vietoris_Rips()
         for radius in radii_to_check:
-            sc = weighted_graph_to_Vietoris_Rips_complex(weighted_graph, radius)
+            sc = weighted_graph_2_Vietoris_Rips_complex(weighted_graph, radius)
             expected_simplices, non_expected_simplices = generate_expected_simplices_for_Vietoris_Rips_complex(radius)
             for simplex in expected_simplices:
                 assert simplex in sc

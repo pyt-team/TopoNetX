@@ -3,7 +3,7 @@
 __all__ = [
     "graph_2_clique_complex",
     "graph_2_neighbor_complex",
-    "weighted_graph_to_Vietoris_Rips_complex"
+    "weighted_graph_2_Vietoris_Rips_complex"
 ]
 
 import itertools
@@ -64,7 +64,7 @@ def graph_2_clique_complex(G, max_dim=None):
     return SimplicialComplex(list(lst))
 
 
-def weighted_graph_to_Vietoris_Rips_complex(G, r, max_dim=None):
+def weighted_graph_2_Vietoris_Rips_complex(G, r, max_dim=None):
     """Get the Vietoris-Rips complex of radius r of a weighted undirected graph. The Vietoris-Rips complex of radius
     r is the clique complex given by the cliques of G whose nodes have pairwise distances less or equal than r. All
     vertices are added to the Vietoris-Rips complex regardless the radius introduced. If G is a clique weighted by a
