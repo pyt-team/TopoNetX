@@ -22,9 +22,9 @@ def karate_club(
 
     Parameters
     ----------
-    complex_type : {'simplicial','cell'} , default='simplicial'
+    complex_type : {'simplicial','cell'}, default='simplicial'
         The type of complex to loaded.
-    feat_dim : int, optional
+    feat_dim : int, default=2
         The number of eigenvectors to be attached to the simplices/cells of the output complex.
 
     Returns
