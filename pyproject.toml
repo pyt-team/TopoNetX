@@ -34,6 +34,8 @@ dependencies=[
     "scipy",
     "trimesh",
      "spharapy",
+     "wget",
+
 ]
 
 [project.optional-dependencies]
@@ -83,7 +85,7 @@ addopts = "--capture=no"
 [tool.isort]
 multi_line_output = 3
 include_trailing_comma = true
-skip = [".gitignore", "__init__.py", ".venv"]
+skip = [".gitignore", ".venv"]
 
 [tool.flake8]
 application_import_names = "toponetx"
