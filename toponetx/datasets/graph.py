@@ -1,5 +1,7 @@
 """Various examples of named graphs represented as complexes."""
 
+from typing import Optional
+
 import networkx as nx
 import numpy as np
 
@@ -13,15 +15,15 @@ from toponetx.transform.graph_to_simplicial_complex import graph_2_clique_comple
 __all__ = ["karate_club"]
 
 
-def karate_club(complex_type="simplicial", feat_dim=2):
+def karate_club(
+    complex_type: Optional[str] = "simplicial", feat_dim: Optional[str] = 2
+):
     """Load the karate club as featured cell/simplicial complex.
 
     Parameters
     ----------
-    complex_type : str, optional
-        The type of complex to load. Supported values are
-        "simplicial" and "cell".
-        The default is "simplicial".
+    complex_type : {'simplicial','cell'} , default='simplicial'
+        The type of complex to loaded.
     feat_dim : int, optional
         The number of eigenvectors to be attached to the simplices/cells of the output complex.
 
