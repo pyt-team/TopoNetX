@@ -331,7 +331,7 @@ class CombinatorialComplex(Complex):
         return sorted(self._complex_set.allranks)
 
     @property
-    def dim(self):
+    def dim(self) -> int:
         """Return dimension."""
         return max(list(self._complex_set.allranks))
 

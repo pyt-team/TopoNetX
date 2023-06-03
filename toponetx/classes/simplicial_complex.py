@@ -151,7 +151,7 @@ class SimplicialComplex(Complex):
             ]
 
     @property
-    def dim(self):
+    def dim(self) -> int:
         """Dimension.
 
         This is the highest dimension of any simplex in the complex.
@@ -159,11 +159,16 @@ class SimplicialComplex(Complex):
         return self._simplex_set.max_dim
 
     @property
-    def maxdim(self):
+    def maxdim(self) -> int:
         """Maximum dimension.
 
         This is the highest dimension of any simplex in the complex
         """
+        warn(
+            "`SimplicialComplex.maxdim` is deprecated and will be removed in the future, use `SimplicialComplex.max_dim` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self._simplex_set.max_dim
 
     @property
@@ -970,14 +975,14 @@ class SimplicialComplex(Complex):
                 rank + 1, weight=weight, index=True
             )
             L_up = B_next @ B_next.transpose()
-        elif rank < self.maxdim:
+        elif rank < self.dim:
             row, col, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
             L_up = B_next @ B_next.transpose()
         else:
             raise ValueError(
-                f"Rank should larger than 0 and <= {self.maxdim-1} (maximal dimension cells-1), got {rank}"
+                f"Rank should larger than 0 and <= {self.dim - 1} (maximal dimension cells-1), got {rank}"
             )
         if not signed:
             L_up = abs(L_up)
@@ -1018,12 +1023,12 @@ class SimplicialComplex(Complex):
         """
         weight = None  # this feature is not supported in this version
 
-        if rank <= self.maxdim and rank > 0:
+        if rank <= self.dim and rank > 0:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
-                f"Rank should be larger than 1 and <= {self.maxdim} (maximal dimension cells), got {rank}."
+                f"Rank should be larger than 1 and <= {self.dim} (maximal dimension cells), got {rank}."
             )
         if not signed:
             L_down = abs(L_down)
