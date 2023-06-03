@@ -7,12 +7,18 @@ import zipfile
 import numpy as np
 import wget
 
-from toponetx import CellComplex, CombinatorialComplex, SimplicialComplex
+from toponetx import CellComplex, SimplicialComplex
 
 __all__ = ["stanford_bunny", "shrec_16"]
 
-#: the absolute path repr the directory containing this file
 DIR = os.path.dirname(__file__)
+DS_MAP = {
+    "full": ("shrec", "https://github.com/mhajij/shrec_16/raw/main/shrec.zip"),
+    "small": (
+        "small_shrec",
+        "https://github.com/mhajij/shrec_16/raw/main/small_shrec.zip",
+    ),
+}
 
 
 def stanford_bunny(complex_type="simplicial"):
@@ -38,7 +44,7 @@ def stanford_bunny(complex_type="simplicial"):
     if complex_type == "simplicial":
         out_complex = SimplicialComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
         return out_complex
-    elif complex_type == "cell":
+    if complex_type == "cell":
         out_complex = CellComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
         return out_complex
 
@@ -51,7 +57,7 @@ def shrec_16(size="full"):
     Parameters
     ----------
     size : str, optional
-        options are "full" or "small"
+        Dataset size. Options are "full" or "small".
 
     Returns
     -------
@@ -88,13 +94,6 @@ def shrec_16(size="full"):
     >>> testing_face_feat = shrec_testing["face_feat"]
 
     """
-    DS_MAP = {
-        "full": ("shrec", "https://github.com/mhajij/shrec_16/raw/main/shrec.zip"),
-        "small": (
-            "small_shrec",
-            "https://github.com/mhajij/shrec_16/raw/main/small_shrec.zip",
-        ),
-    }
     if size not in DS_MAP:
         raise ValueError(f"size must be 'full' or 'small' got {size}.")
     ds_name, url = DS_MAP[size]
