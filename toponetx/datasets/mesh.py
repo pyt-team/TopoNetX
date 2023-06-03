@@ -42,11 +42,9 @@ def stanford_bunny(complex_type="simplicial"):
         If complex_type is not one of the supported values.
     """
     if complex_type == "simplicial":
-        out_complex = SimplicialComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
-        return out_complex
+        return SimplicialComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
     if complex_type == "cell":
-        out_complex = CellComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
-        return out_complex
+        return CellComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
 
     raise ValueError("complex_type must be 'simplicial' or 'cell'")
 
@@ -84,15 +82,12 @@ def shrec_16(size="full"):
     >>> training_node_feat = shrec_training["node_feat"]
     >>> training_edge_feat = shrec_training["edge_feat"]
     >>> training_face_feat = shrec_training["face_feat"]
-
-
     >>> # testing dataset
     >>> testing_complexes = shrec_testing["complexes"]
     >>> testing_labels = shrec_testing["label"]
     >>> testing_node_feat = shrec_testing["node_feat"]
     >>> testing_edge_feat = shrec_testing["edge_feat"]
     >>> testing_face_feat = shrec_testing["face_feat"]
-
     """
     if size not in DS_MAP:
         raise ValueError(f"size must be 'full' or 'small' got {size}.")

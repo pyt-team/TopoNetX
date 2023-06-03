@@ -35,7 +35,7 @@ def karate_club(complex_type: Literal["simplicial", "cell"], feat_dim: int = 2):
             - its value is the first feat_dim Hodge Laplacian eigenvectors attached to edges.
         "face_feat":
             - its value is the first feat_dim Hodge Laplacian eigenvectors attached to faces.
-        "tet_feat": the first feat_dim Hodge Laplacian eigenvectors attached to tetrahedron.
+        "tetrahedron_feat": the first feat_dim Hodge Laplacian eigenvectors attached to tetrahedron.
     When input is "cell":
         A python dictionary with the following keys :
         "complex":
@@ -72,7 +72,7 @@ def karate_club(complex_type: Literal["simplicial", "cell"], feat_dim: int = 2):
         _, faces_feat = hodge_laplacian_eigenvectors(
             sc.hodge_laplacian_matrix(2), feat_dim
         )
-        _, tet_feat = hodge_laplacian_eigenvectors(
+        _, tetrahedron_feat = hodge_laplacian_eigenvectors(
             sc.hodge_laplacian_matrix(3), feat_dim
         )
 
@@ -81,7 +81,7 @@ def karate_club(complex_type: Literal["simplicial", "cell"], feat_dim: int = 2):
             "node_feat": np.array(nodes_feat),
             "edge_feat": np.array(edges_feat),
             "face_feat": np.array(faces_feat),
-            "tet_feat": np.array(tet_feat),
+            "tetrahedron_feat": np.array(tetrahedron_feat),
         }
         return data
 
