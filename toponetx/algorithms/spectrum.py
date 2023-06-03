@@ -1,14 +1,15 @@
 """Module to compute spectra."""
 
 import numpy as np
+import scipy as sp
 import scipy.sparse as sparse
+import spharapy.spharabasis as sb
 from numpy import linalg as LA
 from scipy.sparse import diags
 
 from toponetx.classes import CombinatorialComplex
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
-from toponetx.datasets.mesh import stanford_bunny
 
 __all__ = [
     "hodge_laplacian_eigenvectors",
@@ -41,7 +42,6 @@ def _normalize(f):
     maxf = max(f.values())
     f_normalized = {}
     for v in f.keys():
-
         if minf == maxf:
             f_normalized[v] = 0
         else:
@@ -68,10 +68,10 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
     Examples
     --------
     >>> from toponetx import SimplicialComplex
-    >>> SC = SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
-    >>> row,column,B1 = SC.incidence_matrix(1,index=True)
+    >>> SC = SimplicialComplex([[ 1, 2, 3], [2, 3, 5], [0, 1]])
+    >>> row, column, B1 = SC.incidence_matrix(1, index=True)
     >>> L1 = SC.hodge_laplacian_matrix(1)
-    >>> vals,vecs = hodge_laplacian_eigenvectors(L1,2)
+    >>> vals, vecs = hodge_laplacian_eigenvectors(L1, 2)
     """
     Diag = diags(hodge_laplacian.diagonal())
     if Diag.shape[0] > 10:
@@ -96,13 +96,13 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
 
 
 def set_hodge_laplacian_eigenvector_attrs(
-    cmplex, dim, n_components, laplacian_type="hodge", normalized=True
+    complex, dim, n_components, laplacian_type="hodge", normalized=True
 ):
     """Set the hodge laplacian eigenvectors as simplex attributes.
 
     Parameters
     ----------
-    cmplex : a SimplialComplex/CellComplex object
+    complex : a SimplialComplex/CellComplex object
         Complex.
     dim : int
         Dimension of the hodge laplacian to be computed.
@@ -121,24 +121,24 @@ def set_hodge_laplacian_eigenvector_attrs(
     >>> set_hodge_laplacian_eigenvector_attrs(SC, 1, 2, "down")
     >>> SC.get_simplex_attributes("0.th_eigen", 1)
     """
-    index = cmplex.skeleton(dim)
+    index = complex.skeleton(dim)
     if laplacian_type == "hodge":
-        L = cmplex.hodge_laplacian_matrix(dim)
+        L = complex.hodge_laplacian_matrix(dim)
     elif laplacian_type == "up":
-        L = cmplex.up_laplacian_matrix(dim)
+        L = complex.up_laplacian_matrix(dim)
     elif laplacian_type == "down":
-        L = cmplex.up_laplacian_matrix(dim)
+        L = complex.up_laplacian_matrix(dim)
     else:
         raise ValueError(
             f"laplacian_type must be up, down or hodge, got {laplacian_type}"
         )
-    vals, vect = hodge_laplacian_eigenvectors(L, n_components)
+    _, vect = hodge_laplacian_eigenvectors(L, n_components)
 
     for i in range(len(vect)):
         d = dict(zip(index, vect[i]))
         if normalized:
             d = _normalize(d)
-        cmplex.set_simplex_attributes(d, str(i) + ".th_eigen")
+        complex.set_simplex_attributes(d, str(i) + ".th_eigen")
 
 
 def laplacian_beltrami_eigenvectors(SC, mode="fem"):
@@ -149,20 +149,18 @@ def laplacian_beltrami_eigenvectors(SC, mode="fem"):
     >>> SC = stanford_bunny()
     >>> eigenvectors, eigenvalues = laplacian_beltrami_eigenvectors(SC)
     """
-    import spharapy.spharabasis as sb
-
     mesh = SC.to_spharapy()
     sphara_basis = sb.SpharaBasis(mesh, mode=mode)
     eigenvectors, eigenvalues = sphara_basis.basis()
     return eigenvectors, eigenvalues
 
 
-def set_laplacian_beltrami_eigenvectors(cmplex):
+def set_laplacian_beltrami_eigenvectors(complex):
     """Set the laplacian beltrami eigenvectors as simplex attributes.
 
     Parameters
     ----------
-    cmplex : a SimplialComplex object
+    complex : a SimplialComplex object
         Complex.
 
     Examples
@@ -172,11 +170,11 @@ def set_laplacian_beltrami_eigenvectors(cmplex):
     >>> set_laplacian_beltrami_eigenvectors(SC)
     >>> vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
     """
-    index = cmplex.skeleton(0)
-    vect, vals = laplacian_beltrami_eigenvectors(cmplex)
+    index = complex.skeleton(0)
+    vect, _ = laplacian_beltrami_eigenvectors(complex)
     for i in range(len(vect)):
         d = dict(zip(index, vect[:, i]))
-        cmplex.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
+        complex.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
 
 
 def laplacian_spectrum(matrix, weight="weight"):
@@ -194,9 +192,6 @@ def laplacian_spectrum(matrix, weight="weight"):
     evals : NumPy array
         Eigenvalues.
     """
-    import scipy as sp
-    import scipy.linalg  # call as sp.linalg
-
     return sp.linalg.eigvalsh(matrix.todense())
 
 

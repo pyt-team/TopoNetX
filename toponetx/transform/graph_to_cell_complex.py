@@ -24,6 +24,6 @@ def homology_cycle_cell_complex(G):
         the cell complex obtained by adding the homology cycles of the graph
     """
     cycles = nx.cycle_basis(G)
-    cx = CellComplex(G)  # lift to graph
-    cx.add_cells_from(cycles, rank=2)  # add basis cycles
+    cx = CellComplex(G)
+    cx.add_cells_from(cycles, rank=2)
     return cx

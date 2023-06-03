@@ -14,7 +14,7 @@ class TestGraph:
         assert "node_feat" in simplicial_karate_club_data
         assert "edge_feat" in simplicial_karate_club_data
         assert "face_feat" in simplicial_karate_club_data
-        assert "tet_feat" in simplicial_karate_club_data
+        assert "tetrahedron_feat" in simplicial_karate_club_data
 
         cell_karate_club_data = karate_club("cell")
 
