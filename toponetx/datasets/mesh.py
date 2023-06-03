@@ -103,16 +103,12 @@ def shrec_16(size="full"):
     training = os.path.join(DIR, f"{ds_name}_training.npz")
     testing = os.path.join(DIR, f"{ds_name}_testing.npz")
 
-    if not os.path.isfile(training):
+    if not os.path.isfile(training) or not os.path.isfile(testing):
         print("downloading dataset...\n")
         wget.download(url, DIR)
         with zipfile.ZipFile(zip_file, "r") as zip_ref:
             zip_ref.extractall(DIR)
-    if not os.path.isfile(testing):
-        wget.download(url, DIR)
-        with zipfile.ZipFile(zip_file, "r") as zip_ref:
-            zip_ref.extractall(DIR)
-    print("done!")
+        print("done!")
 
     if os.path.isfile(training) and os.path.isfile(testing):
         print("Loading dataset...\n")
