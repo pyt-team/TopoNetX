@@ -7,7 +7,7 @@ import networkx as nx
 from toponetx.transform.graph_to_simplicial_complex import (
     graph_2_clique_complex,
     graph_2_neighbor_complex,
-    weighted_graph_2_Vietoris_Rips_complex
+    weighted_graph_2_vietoris_rips_complex,
 )
 
 
@@ -53,12 +53,11 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
 
         return
 
-    def test_weighted_graph_2_Vietoris_Rips_complex(self):
-        """Test weighted_graph_2_Vietoris_Rips_complex"""
+    def test_weighted_graph_2_vietoris_rips_complex(self):
+        """Test weighted_graph_2_vietoris_rips_complex."""
 
-        def generate_weighted_graph_for_Vietoris_Rips():
-            """Creates a weighted graph in networkx used to test the lift from
-            undirected weighted graphs to Vietoris-Rips simplicial complexes.
+        def generate_weighted_graph_for_vietoris_rips():
+            """Create a weighted graph in networkx to test the Vietoris-Rips simplicial complex lift.
 
             Returns
             -------
@@ -86,10 +85,12 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
             G.add_edge(6, 7, weight=4.0)
             return G
 
-        def generate_expected_simplices_for_Vietoris_Rips_complex(r):
-            """Generates a pair of lists of tuples containing the expected and non-expected simplices of the
+        def generate_expected_simplices_for_vietoris_rips_complex(r):
+            """Generate expected and unexpected simplices for the Vietoris-Rips complex of the test.
+
+            This function returns a pair of lists of tuples containing the expected and unexpected simplices of the
             Vietoris-Rips persistence diagram of the graph generated with the function
-            generate_weighted_graph_for_Vietoris_Rips depending on the radius r.
+            generate_weighted_graph_for_vietoris_rips depending on the radius r.
 
             Parameters
             ----------
@@ -97,54 +98,70 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
                 Radius of the Vietoris-Rips complex
 
             Returns
-            ----------
-            (list[tuple], list[tuple])
-                A tuple containing the lists of the expected simplices (first list) and non-expected elements (second
-                list) for the Vietoris-Rips complex.
+            -------
+            expected_and_unexpected_simplices: tuple[list[tuple], list[tuple]]
+                A tuple containing the lists of the expected and unexpected simplices (first and second lists,
+                respectively) for the Vietoris-Rips complex.
             """
             expected_vertices = [i for i in range(7)]
             expected_edges = []
-            non_expected_edges = []
+            unexpected_edges = []
             expected_triangles = []
-            non_expected_triangles = []
+            unexpected_triangles = []
             expected_tetrahedra = []
-            non_expected_tetrahedra = []
+            unexpected_tetrahedra = []
             # Now, for each radius, we include or exclude simplices depending on its value.
             # Radius 1
-            edges = expected_edges if 1 <= r else non_expected_edges
-            triangles = expected_triangles if 1 <= r else non_expected_triangles
-            tetrahedra = expected_tetrahedra if 1 <= r else non_expected_tetrahedra
+            edges = expected_edges if 1 <= r else unexpected_edges
+            triangles = expected_triangles if 1 <= r else unexpected_triangles
+            tetrahedra = expected_tetrahedra if 1 <= r else unexpected_tetrahedra
             edges.extend([(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)])
             triangles.extend([(0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)])
             tetrahedra.append((0, 1, 2, 3))
             # Radius 2
-            edges = expected_edges if 2 <= r else non_expected_edges
-            triangles = expected_triangles if 2 <= r else non_expected_triangles
+            edges = expected_edges if 2 <= r else unexpected_edges
+            triangles = expected_triangles if 2 <= r else unexpected_triangles
             edges.extend([(4, 5), (4, 6), (5, 6)])
             triangles.append((4, 5, 6))
             # Radius 3
-            edges = expected_edges if 3 <= r else non_expected_edges
+            edges = expected_edges if 3 <= r else unexpected_edges
             edges.append((3, 4))
             # Radius 4
-            edges = expected_edges if 4 <= r else non_expected_edges
-            triangles = expected_triangles if 4 <= r else non_expected_triangles
-            tetrahedra = expected_tetrahedra if 4 <= r else non_expected_tetrahedra
+            edges = expected_edges if 4 <= r else unexpected_edges
+            triangles = expected_triangles if 4 <= r else unexpected_triangles
+            tetrahedra = expected_tetrahedra if 4 <= r else unexpected_tetrahedra
             edges.extend([(4, 7), (5, 7), (6, 7)])
             triangles.extend([(4, 5, 7), (4, 6, 7), (5, 6, 7)])
             tetrahedra.append((4, 5, 6, 7))
-            expected_simplices = expected_vertices + expected_edges + expected_triangles + expected_tetrahedra
-            non_expected_simplices = non_expected_edges + non_expected_triangles + non_expected_tetrahedra
-            return expected_simplices, non_expected_simplices
+            expected_simplices = (
+                expected_vertices
+                + expected_edges
+                + expected_triangles
+                + expected_tetrahedra
+            )
+            unexpected_simplices = (
+                unexpected_edges + unexpected_triangles + unexpected_tetrahedra
+            )
+            return expected_simplices, unexpected_simplices
 
-        radii_to_check = [0, 1, 2, 3, 4] # Four possible different configurations for the Vietoris-Rips complex of the
+        radii_to_check = [
+            0,
+            1,
+            2,
+            3,
+            4,
+        ]  # Four possible different configurations for the Vietoris-Rips complex of the
         # associated graph.
-        weighted_graph = generate_weighted_graph_for_Vietoris_Rips()
+        weighted_graph = generate_weighted_graph_for_vietoris_rips()
         for radius in radii_to_check:
-            sc = weighted_graph_2_Vietoris_Rips_complex(weighted_graph, radius)
-            expected_simplices, non_expected_simplices = generate_expected_simplices_for_Vietoris_Rips_complex(radius)
+            sc = weighted_graph_2_vietoris_rips_complex(weighted_graph, radius)
+            (
+                expected_simplices,
+                unexpected_simplices,
+            ) = generate_expected_simplices_for_vietoris_rips_complex(radius)
             for simplex in expected_simplices:
                 assert simplex in sc
-            for simplex in non_expected_simplices:
+            for simplex in unexpected_simplices:
                 assert simplex not in sc
 
 
