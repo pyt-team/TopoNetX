@@ -12,7 +12,9 @@ from toponetx.transform.graph_to_simplicial_complex import graph_2_clique_comple
 __all__ = ["karate_club"]
 
 
-def karate_club(complex_type: Literal["simplicial", "cell"], feat_dim: int = 2):
+def karate_club(
+    complex_type: Literal["simplicial", "cell"] = "simplicial", feat_dim: int = 2
+):
     """Load the karate club as featured cell/simplicial complex.
 
     Parameters
@@ -26,9 +28,7 @@ def karate_club(complex_type: Literal["simplicial", "cell"], feat_dim: int = 2):
     Returns
     -------
     When input is "simplicial":
-        A python dictionary with the following keys :
-        "complex":
-            - its value is a SimplicialComplex obtained from karate club.
+           a SimplicialComplex obtained from karate club with the following features
         "node_feat":
             - its value is the first feat_dim Hodge Laplacian eigenvectors attached to nodes.
         "edge_feat":
@@ -37,9 +37,7 @@ def karate_club(complex_type: Literal["simplicial", "cell"], feat_dim: int = 2):
             - its value is the first feat_dim Hodge Laplacian eigenvectors attached to faces.
         "tetrahedron_feat": the first feat_dim Hodge Laplacian eigenvectors attached to tetrahedron.
     When input is "cell":
-        A python dictionary with the following keys :
-        "complex":
-            - its value is a CellComplex obtained from karate club.
+            a CellComplex obtained from karate club with the following features
         "node_feat":
             - its value is the first feat_dim Hodge Laplacian eigenvectors attached to nodes.
         "edge_feat":
@@ -76,14 +74,21 @@ def karate_club(complex_type: Literal["simplicial", "cell"], feat_dim: int = 2):
             sc.hodge_laplacian_matrix(3), feat_dim
         )
 
-        data = {
-            "complex": sc,
-            "node_feat": np.array(nodes_feat),
-            "edge_feat": np.array(edges_feat),
-            "face_feat": np.array(faces_feat),
-            "tetrahedron_feat": np.array(tetrahedron_feat),
-        }
-        return data
+        sc.set_simplex_attributes(
+            dict(zip(sc.skeleton(0), np.array(nodes_feat))), name="node_feat"
+        )
+        sc.set_simplex_attributes(
+            dict(zip(sc.skeleton(1), np.array(edges_feat))), name="edge_feat"
+        )
+        sc.set_simplex_attributes(
+            dict(zip(sc.skeleton(2), np.array(faces_feat))), name="face_feat"
+        )
+        sc.set_simplex_attributes(
+            dict(zip(sc.skeleton(3), np.array(tetrahedron_feat))),
+            name="tetrahedron_feat",
+        )
+
+        return sc
 
     if complex_type == "cell":
         g = nx.karate_club_graph()
@@ -101,12 +106,15 @@ def karate_club(complex_type: Literal["simplicial", "cell"], feat_dim: int = 2):
             cx.hodge_laplacian_matrix(2), feat_dim
         )
 
-        data = {
-            "complex": cx,
-            "node_feat": np.array(nodes_feat),
-            "edge_feat": np.array(edges_feat),
-            "cell_feat": np.array(cells_feat),
-        }
-        return data
+        cx.set_cell_attributes(
+            dict(zip(cx.skeleton(0), np.array(nodes_feat))), name="node_feat", rank=0
+        )
+        cx.set_cell_attributes(
+            dict(zip(cx.skeleton(1), np.array(edges_feat))), name="edge_feat", rank=1
+        )
+        cx.set_cell_attributes(
+            dict(zip(cx.skeleton(2), np.array(cells_feat))), name="cell_feat", rank=2
+        )
+        return cx
 
     raise ValueError(f"complex_type must be 'simplicial' or 'cell' got {complex_type}")
