@@ -92,7 +92,7 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
     finaleigenvectors = []
     for val in eigenvaluevector:
         finaleigenvectors.append(mydict[val])
-    return [np.array(eigenvaluevector), np.array(finaleigenvectors)]
+    return [np.array(eigenvaluevector).T, np.array(finaleigenvectors).T]
 
 
 def set_hodge_laplacian_eigenvector_attrs(
