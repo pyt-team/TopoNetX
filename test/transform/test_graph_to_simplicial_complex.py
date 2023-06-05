@@ -1,21 +1,20 @@
 """Test graph to simplicial complex transformation."""
 
-import unittest
 
 import networkx as nx
 
 from toponetx.transform.graph_to_simplicial_complex import (
-    graph_2_clique_complex,
-    graph_2_neighbor_complex,
-    weighted_graph_2_vietoris_rips_complex,
+    graph_to_clique_complex,
+    graph_to_neighbor_complex,
+    weighted_graph_to_vietoris_rips_complex,
 )
 
 
-class TestGraphToSimplicialComplex(unittest.TestCase):
+class TestGraphToSimplicialComplex:
     """Test graph to simplicial complex transformation."""
 
-    def test_graph_2_neighbor_complex(self):
-        """Test graph_2_neighbor_complex."""
+    def test_graph_to_neighbor_complex(self):
+        """Test graph_to_neighbor_complex."""
         G = nx.Graph()
 
         G.add_edge(0, 1)
@@ -23,14 +22,14 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
         G.add_edge(2, 3)
         G.add_edge(3, 0)
 
-        sc = graph_2_neighbor_complex(G)
+        sc = graph_to_neighbor_complex(G)
 
         assert sc.dim == 2
         assert (0, 1) in sc
         assert (0, 2) in sc
 
-    def test_graph_2_clique_complex(self):
-        """Test graph_2_clique_complex."""
+    def test_graph_to_clique_complex(self):
+        """Test graph_to_clique_complex."""
         G = nx.Graph()
 
         G.add_edge(0, 1)
@@ -39,13 +38,13 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
         G.add_edge(2, 3)
         G.add_edge(3, 0)
 
-        sc = graph_2_clique_complex(G)
+        sc = graph_to_clique_complex(G)
 
         assert sc.dim == 2
         assert (0, 2, 3) in sc
         assert (0, 1, 2) in sc
 
-        sc = graph_2_clique_complex(G, max_dim=2)
+        sc = graph_to_clique_complex(G, max_dim=2)
 
         assert sc.dim == 1
         assert (0, 2, 3) not in sc
@@ -53,8 +52,8 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
 
         return
 
-    def test_weighted_graph_2_vietoris_rips_complex(self):
-        """Test weighted_graph_2_vietoris_rips_complex."""
+    def test_weighted_graph_to_vietoris_rips_complex(self):
+        """Test weighted_graph_to_vietoris_rips_complex."""
 
         def generate_weighted_graph_for_vietoris_rips():
             """Create a weighted graph in networkx to test the Vietoris-Rips simplicial complex lift.
@@ -154,7 +153,7 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
         # associated graph.
         weighted_graph = generate_weighted_graph_for_vietoris_rips()
         for radius in radii_to_check:
-            sc = weighted_graph_2_vietoris_rips_complex(weighted_graph, radius)
+            sc = weighted_graph_to_vietoris_rips_complex(weighted_graph, radius)
             (
                 expected_simplices,
                 unexpected_simplices,
@@ -163,7 +162,3 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
                 assert simplex in sc
             for simplex in unexpected_simplices:
                 assert simplex not in sc
-
-
-if __name__ == "__main__":
-    unittest.main()

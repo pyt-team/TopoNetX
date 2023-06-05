@@ -1,9 +1,9 @@
 """Methods to lift a graph to a simplicial complex."""
 
 __all__ = [
-    "graph_2_clique_complex",
-    "graph_2_neighbor_complex",
-    "weighted_graph_2_vietoris_rips_complex",
+    "graph_to_clique_complex",
+    "graph_to_neighbor_complex",
+    "weighted_graph_to_vietoris_rips_complex",
 ]
 
 import itertools
@@ -13,7 +13,7 @@ import networkx as nx
 from toponetx import SimplicialComplex
 
 
-def graph_2_neighbor_complex(G):
+def graph_to_neighbor_complex(G):
     """Get the neighbor complex of a graph.
 
     Parameters
@@ -39,7 +39,7 @@ def graph_2_neighbor_complex(G):
     return SimplicialComplex(neighbors)
 
 
-def graph_2_clique_complex(G, max_dim=None):
+def graph_to_clique_complex(G, max_dim=None):
     """Get the clique complex of a graph.
 
     Parameters
@@ -64,7 +64,7 @@ def graph_2_clique_complex(G, max_dim=None):
     return SimplicialComplex(list(lst))
 
 
-def weighted_graph_2_vietoris_rips_complex(G, r, max_dim=None):
+def weighted_graph_to_vietoris_rips_complex(G, r, max_dim=None):
     """Get the Vietoris-Rips complex of radius r of a weighted undirected graph.
 
     The Vietoris-Rips complex of radius

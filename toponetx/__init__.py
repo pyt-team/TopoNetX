@@ -16,9 +16,9 @@ from .classes.simplex import Simplex
 from .classes.simplicial_complex import SimplicialComplex
 from .datasets.mesh import stanford_bunny
 from .transform.graph_to_simplicial_complex import (
-    graph_2_clique_complex,
-    graph_2_neighbor_complex,
-    weighted_graph_2_vietoris_rips_complex,
+    graph_to_clique_complex,
+    graph_to_neighbor_complex,
+    weighted_graph_to_vietoris_rips_complex,
 )
 from .utils.structure import (
     neighborhood_list_to_neighborhood_dict,
