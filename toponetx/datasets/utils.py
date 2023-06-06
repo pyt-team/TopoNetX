@@ -44,11 +44,7 @@ def load_ppi():
         "GABBR1",
     ]
     proteins = "%0d".join(protein_list)
-    url = (
-        "https://string-db.org/api/tsv/network?identifiers="
-        + proteins
-        + "&species=9606"
-    )
+    url = f"https://string-db.org/api/tsv/network?identifiers={proteins}&species=9606"
     r = requests.get(url)
 
     lines = r.text.split("\n")

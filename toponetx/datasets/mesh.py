@@ -3,6 +3,7 @@
 import os
 import os.path
 import zipfile
+from typing import Literal, Union, overload
 
 import numpy as np
 import wget
@@ -21,12 +22,24 @@ DS_MAP = {
 }
 
 
-def stanford_bunny(complex_type="simplicial"):
+@overload
+def stanford_bunny(complex_type: Literal["cell"] = ...) -> CellComplex:
+    ...
+
+
+@overload
+def stanford_bunny(complex_type: Literal["simplicial"] = ...) -> SimplicialComplex:
+    ...
+
+
+def stanford_bunny(
+    complex_type: Literal["cell", "simplicial"] = "simplicial"
+) -> Union[CellComplex, SimplicialComplex]:
     """Load the Stanford Bunny mesh as a complex.
 
     Parameters
     ----------
-    complex_type : str, optional
+    complex_type : {'cell', 'simplicial'}, default='simplicial'
         The type of complex to load. Supported values are
         "simplicial complex" and "cell complex".
         The default is "simplicial complex".
@@ -49,12 +62,12 @@ def stanford_bunny(complex_type="simplicial"):
     raise ValueError("complex_type must be 'simplicial' or 'cell'")
 
 
-def shrec_16(size="full"):
+def shrec_16(size: Literal["full", "small"] = "full"):
     """Load training/testing shrec 16 datasets".
 
     Parameters
     ----------
-    size : str, optional
+    size : {'full', 'small'}, default='full'
         Dataset size. Options are "full" or "small".
 
     Returns
