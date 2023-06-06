@@ -75,7 +75,7 @@ def shrec_16(size="full"):
 
     Example
     -------
-    >>> shrec_training, shrec_testing = shrec16()
+    >>> shrec_training, shrec_testing = shrec_16()
     >>> # training dataset
     >>> training_complexes = shrec_training["complexes"]
     >>> training_labels = shrec_training["label"]
