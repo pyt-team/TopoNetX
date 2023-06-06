@@ -1,8 +1,7 @@
 """Various examples of named meshes represented as complexes."""
 
-import os
-import os.path
 import zipfile
+from pathlib import Path
 
 import numpy as np
 import wget
@@ -11,7 +10,7 @@ from toponetx import CellComplex, SimplicialComplex
 
 __all__ = ["stanford_bunny", "shrec_16"]
 
-DIR = os.path.dirname(__file__)
+DIR = Path(__file__).parent
 DS_MAP = {
     "full": ("shrec", "https://github.com/mhajij/shrec_16/raw/main/shrec.zip"),
     "small": (
@@ -42,9 +41,9 @@ def stanford_bunny(complex_type="simplicial"):
         If complex_type is not one of the supported values.
     """
     if complex_type == "simplicial":
-        return SimplicialComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
+        return SimplicialComplex.load_mesh(DIR / "bunny.obj")
     if complex_type == "cell":
-        return CellComplex.load_mesh(os.path.join(DIR, "bunny.obj"))
+        return CellComplex.load_mesh(DIR / "bunny.obj")
 
     raise ValueError("complex_type must be 'simplicial' or 'cell'")
 
@@ -93,18 +92,18 @@ def shrec_16(size="full"):
         raise ValueError(f"size must be 'full' or 'small' got {size}.")
     ds_name, url = DS_MAP[size]
 
-    zip_file = os.path.join(DIR, f"{ds_name}.zip")
-    training = os.path.join(DIR, f"{ds_name}_training.npz")
-    testing = os.path.join(DIR, f"{ds_name}_testing.npz")
+    zip_file = DIR / f"{ds_name}.zip"
+    training = DIR / f"{ds_name}_training.npz"
+    testing = DIR / f"{ds_name}_testing.npz"
 
-    if not os.path.isfile(training) or not os.path.isfile(testing):
+    if not training.exists() or not testing.exists():
         print("downloading dataset...\n")
-        wget.download(url, DIR)
+        wget.download(url, str(DIR))
         with zipfile.ZipFile(zip_file, "r") as zip_ref:
             zip_ref.extractall(DIR)
         print("done!")
 
-    if os.path.isfile(training) and os.path.isfile(testing):
+    if training.exists() and testing.exists():
         print("Loading dataset...\n")
         shrec_training = np.load(training, allow_pickle=True)
         shrec_testing = np.load(testing, allow_pickle=True)
