@@ -1270,7 +1270,8 @@ class SimplicialComplex(Complex):
 
         Parameters
         ----------
-        file_path: str, the source of the data to be loadeded
+        file_path: str or pathlib.Path
+            the source of the data to be loadeded
 
         process : bool, trimesh will try to process the mesh before loading it.
 

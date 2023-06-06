@@ -2251,7 +2251,8 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        file_path: str, the file path of the data to be loadeded
+        file_path: str or pathlib.Path
+            the file path of the data to be loadeded
         process : bool, trimesh will try to process the mesh before loading it.
         force: (str or None)
             options: 'mesh' loader will "force" the result into a mesh through concatenation
