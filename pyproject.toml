@@ -97,3 +97,6 @@ extend-ignore = ["E501", "F401", "E203"]
 per-file-ignores = [
     "*/__init__.py: F401,F403,D104"
 ]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: not covered", "@overload"]
