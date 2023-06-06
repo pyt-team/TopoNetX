@@ -1,20 +1,34 @@
 """Various examples of named graphs represented as complexes."""
 
-from typing import Literal
+from typing import Literal, Union, overload
 
 import networkx as nx
 import numpy as np
 
-from toponetx import CellComplex
+from toponetx import CellComplex, SimplicialComplex
 from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
 from toponetx.transform.graph_to_simplicial_complex import graph_2_clique_complex
 
 __all__ = ["karate_club"]
 
 
+@overload
 def karate_club(
-    complex_type: Literal["simplicial", "cell"] = "simplicial", feat_dim: int = 2
-):
+    complex_type: Literal["cell"] = ..., feat_dim: int = ...
+) -> CellComplex:
+    ...
+
+
+@overload
+def karate_club(
+    complex_type: Literal["simplicial"] = ..., feat_dim: int = ...
+) -> SimplicialComplex:
+    ...
+
+
+def karate_club(
+    complex_type: Literal["cell", "simplicial"] = "simplicial", feat_dim: int = 2
+) -> Union[CellComplex, SimplicialComplex]:
     """Load the karate club as featured cell/simplicial complex.
 
     Parameters
