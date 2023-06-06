@@ -2206,8 +2206,8 @@ class CellComplex(Complex):
         for node in G.nodes:
             self.add_node(node)
 
-    @staticmethod
-    def from_trimesh(mesh):
+    @classmethod
+    def from_trimesh(cls, mesh) -> "CellComplex":
         """Convert from trimesh object.
 
         Examples
@@ -2222,7 +2222,7 @@ class CellComplex(Complex):
         >>> CX.nodes[0]['position']
         """
         # try to see the index of the first vertex
-        CX = CellComplex(mesh.faces)
+        CX = cls(mesh.faces)
 
         first_ind = np.min(mesh.faces)
 
@@ -2245,8 +2245,8 @@ class CellComplex(Complex):
 
         return CX
 
-    @staticmethod
-    def load_mesh(file_path, process=False, force=None):
+    @classmethod
+    def load_mesh(cls, file_path, process=False, force=None) -> "CellComplex":
         """Load a mesh.
 
         Parameters
@@ -2270,4 +2270,4 @@ class CellComplex(Complex):
         import trimesh
 
         mesh = trimesh.load_mesh(file_path, process=process, force=None)
-        return CellComplex.from_trimesh(mesh)
+        return cls.from_trimesh(mesh)

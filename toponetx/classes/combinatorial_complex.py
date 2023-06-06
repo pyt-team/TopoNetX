@@ -1172,8 +1172,8 @@ class CombinatorialComplex(Complex):
             return A, col
         return A
 
-    @staticmethod
-    def from_trimesh(mesh):
+    @classmethod
+    def from_trimesh(cls, mesh) -> "CombinatorialComplex":
         """Import from trimesh.
 
         Examples
@@ -1183,7 +1183,7 @@ class CombinatorialComplex(Complex):
         >>> CC = CombinatorialComplex.from_trimesh(mesh)
         >>> CC.nodes
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def restrict_to_cells(self, cell_set, name=None):
         """Construct a combinatorial complex using a subset of the cells.
