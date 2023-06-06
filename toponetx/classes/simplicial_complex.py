@@ -1180,8 +1180,8 @@ class SimplicialComplex(Complex):
                 maximals.append(tuple(s))
         return maximals
 
-    @staticmethod
-    def from_spharpy(mesh):
+    @classmethod
+    def from_spharpy(cls, mesh) -> "SimplicialComplex":
         """Import from sharpy.
 
         Examples
@@ -1195,7 +1195,7 @@ class SimplicialComplex(Complex):
         >>> SC = SimplicialComplex.from_spharpy(mesh)
         """
         vertices = np.array(mesh.vertlist)
-        SC = SimplicialComplex(mesh.trilist)
+        SC = cls(mesh.trilist)
 
         first_ind = np.min(mesh.trilist)
 
@@ -1213,8 +1213,8 @@ class SimplicialComplex(Complex):
 
         return SC
 
-    @staticmethod
-    def from_gudhi(tree):
+    @classmethod
+    def from_gudhi(cls, tree: SimplexTree) -> "SimplicialComplex":
         """Import from gudhi.
 
         Examples
@@ -1224,13 +1224,13 @@ class SimplicialComplex(Complex):
         >>> tree.insert([1,2,3,5])
         >>> SC = SimplicialComplex.from_gudhi(tree)
         """
-        SC = SimplicialComplex()
+        SC = cls()
         for simplex, _ in tree.get_skeleton(tree.dimension()):
             SC.add_simplex(simplex)
         return SC
 
-    @staticmethod
-    def from_trimesh(mesh):
+    @classmethod
+    def from_trimesh(cls, mesh) -> "SimplicialComplex":
         """Import from trimesh.
 
         Examples
@@ -1244,7 +1244,7 @@ class SimplicialComplex(Complex):
         >>> print(SC.simplices)
         >>> SC[(0)]['position']
         """
-        SC = SimplicialComplex(mesh.faces)
+        SC = cls(mesh.faces)
 
         first_ind = np.min(mesh.faces)
 
@@ -1264,8 +1264,8 @@ class SimplicialComplex(Complex):
 
         return SC
 
-    @staticmethod
-    def load_mesh(file_path, process=False, force=None):
+    @classmethod
+    def load_mesh(cls, file_path, process=False, force=None) -> "SimplicialComplex":
         """Load a mesh.
 
         Parameters
@@ -1295,7 +1295,7 @@ class SimplicialComplex(Complex):
         import trimesh
 
         mesh = trimesh.load_mesh(file_path, process=process, force=None)
-        return SimplicialComplex.from_trimesh(mesh)
+        return cls.from_trimesh(mesh)
 
     def is_triangular_mesh(self):
         """Check if the simplicial complex is a triangular mesh."""
@@ -1388,8 +1388,8 @@ class SimplicialComplex(Complex):
         mesh = self.to_spharapy()
         return mesh.laplacianmatrix(mode=mode)
 
-    @staticmethod
-    def from_nx_graph(G):
+    @classmethod
+    def from_nx_graph(cls, G) -> "SimplicialComplex":
         """Convert from netwrokx graph.
 
         Examples
@@ -1401,7 +1401,7 @@ class SimplicialComplex(Complex):
         >>> SC[(1, 2)]["weight"]
         2
         """
-        return SimplicialComplex(G, name=G.name)
+        return cls(G, name=G.name)
 
     def is_connected(self):
         """Check if the simplicial complex is connected.
@@ -1418,8 +1418,8 @@ class SimplicialComplex(Complex):
             G.add_node(list(node)[0])
         return nx.is_connected(G)
 
-    @staticmethod
-    def simplicial_closure_of_hypergraph(H):
+    @classmethod
+    def simplicial_closure_of_hypergraph(cls, H) -> "SimplicialComplex":
         """Compute the simplicial complex closure of a hypergraph.
 
         Parameters
@@ -1444,7 +1444,7 @@ class SimplicialComplex(Complex):
         lst = []
         for e in edges:
             lst.append(edges[e])
-        return SimplicialComplex(lst)
+        return cls(lst)
 
     def to_cell_complex(self):
         """Convert a simplicial complex to a cell complex.
