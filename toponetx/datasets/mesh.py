@@ -69,8 +69,8 @@ def shrec_16(size="full"):
     "complexes",label","node_feat","edge_feat" and "face_feat".
     complex : stores the simplicial complex of the mesh
     label :  stores the label of the mesh
-    node_feat : stores position and normal of the each node in the mesh
-    edge_feat : stores 10 edge features: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
+    node_feat : stores 6 dim node feature vector: position and normal of the each node in the mesh
+    edge_feat : stores 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
     face_feat : face area, face normal, face angle
 
     Example
