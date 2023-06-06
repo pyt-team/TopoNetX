@@ -199,7 +199,6 @@ class SimplicialComplex(Complex):
         """
         if rank < len(self._simplex_set.faces_dict) and rank >= 0:
             return sorted(tuple(i) for i in self._simplex_set.faces_dict[rank].keys())
-            # return list(self._simplex_set.faces_dict[n].keys())
         if rank < 0:
             raise ValueError(f"input must be a postive integer, got {rank}")
         raise ValueError(f"input {rank} exceeds max dim")
@@ -1245,7 +1244,6 @@ class SimplicialComplex(Complex):
         >>> print(SC.simplices)
         >>> SC[(0)]['position']
         """
-        # try to see the index of the first vertex
         SC = SimplicialComplex(mesh.faces)
 
         first_ind = np.min(mesh.faces)

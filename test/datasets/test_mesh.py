@@ -11,16 +11,16 @@ class TestMeshDatasets(unittest.TestCase):
 
     def test_stanford_bunny(self):
         """Test stanford_bunny."""
-        simplicialbunny = stanford_bunny("simplicial complex")
+        simplicialbunny = stanford_bunny("simplicial")
 
         assert len(simplicialbunny) == 2503
 
-        cellbunny = stanford_bunny("cell complex")
+        cellbunny = stanford_bunny("cell")
 
         assert len(cellbunny) == 2503
 
         with self.assertRaises(ValueError):
-            stanford_bunny("polyhedral complex")
+            stanford_bunny("polyhedral")
 
     def test_shrec_16(self):
         """Test shrec_16."""

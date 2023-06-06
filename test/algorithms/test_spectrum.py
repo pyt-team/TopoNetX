@@ -38,17 +38,17 @@ class TestSpectrum(unittest.TestCase):
 
     def test_hodge_laplacian_eigenvectors(self):
         """Test hodge_laplacian_eigenvectors function."""
-        L = sparse.eye(3)  # Sample Laplacian matrix
+        L = sparse.eye(3)
         n_components = 2
         eigenvaluevector, eigenvectors = hodge_laplacian_eigenvectors(L, n_components)
         assert len(eigenvaluevector) == 3
-        assert len(eigenvectors) == 3
+        assert eigenvectors.shape == (3, 3)
 
-        L = sparse.eye(29)  # Sample Laplacian matrix
+        L = sparse.eye(29)
         n_components = 2
         eigenvaluevector, eigenvectors = hodge_laplacian_eigenvectors(L, n_components)
         assert len(eigenvaluevector) == 2
-        assert len(eigenvectors) == 2
+        assert eigenvectors.shape == (29, 2)
 
     def test_laplacian_beltrami_eigenvectors1(self):
         """Test test_set_laplacian_beltrami_eigenvectors."""
