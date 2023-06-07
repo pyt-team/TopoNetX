@@ -72,7 +72,7 @@ class Complex:
         pass
 
     @abc.abstractmethod
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of nodes."""
         pass
 

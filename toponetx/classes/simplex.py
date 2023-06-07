@@ -143,7 +143,7 @@ class Simplex:
         """
         self.properties[key] = item
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Get the number of nodes in the simplex.
 
         :return: The number of nodes in the simplex.

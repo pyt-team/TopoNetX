@@ -139,12 +139,11 @@ class CellView:
         else:
             raise TypeError("Input must be a tuple, list or a cell.")
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return the number of cells in the cell view."""
         if len(self._cells) == 0:
             return 0
-        else:
-            return np.sum([len(self._cells[cell]) for cell in self._cells])
+        return sum(len(self._cells[cell]) for cell in self._cells)
 
     def __iter__(self):
         """Iterate over all cells in the cell view."""
