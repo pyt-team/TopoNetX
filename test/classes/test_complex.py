@@ -38,7 +38,7 @@ class TestComplex(unittest.TestCase):
             """Compute string representation."""
             raise NotImplementedError
 
-        def __len__(self):
+        def __len__(self) -> int:
             """Compute number of nodes."""
             raise NotImplementedError
 

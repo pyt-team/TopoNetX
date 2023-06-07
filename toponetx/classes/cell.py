@@ -189,7 +189,7 @@ class Cell:
 
         return True
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Get the number of elements in the cell.
 
         Returns

@@ -92,7 +92,7 @@ class HyperEdge:
         """
         self.properties[key] = item
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Compute the number of nodes in the hyperedge.
 
         Returns

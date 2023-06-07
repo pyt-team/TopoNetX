@@ -211,7 +211,7 @@ class SimplicialComplex(Complex):
         """Return string representation."""
         return f"SimplicialComplex(name={self.name})"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Compute number of simplices.
 
         Returns
