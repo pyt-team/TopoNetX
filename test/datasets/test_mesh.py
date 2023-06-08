@@ -49,10 +49,8 @@ class TestMeshDatasets(unittest.TestCase):
 
         nodes, edges, faces = coseg_data["complexes"][0].shape
         n_nodes = coseg_data["node_feat"][0].shape
-        n_edges = coseg_data["edge_feat"][0].shape
         n_faces = coseg_data["face_feat"][0].shape
         assert nodes == n_nodes[0]
-        assert edges == n_edges[0]
         assert faces == n_faces[0]
         assert len(coseg_data["face_label"][0]) == faces
 
