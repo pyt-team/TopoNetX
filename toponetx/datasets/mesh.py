@@ -167,9 +167,14 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
     face_feat : face area, face normal, face angle
     face label :  stores the label of mesh segmentation as a face label
 
+    Data Source
+    -----------
+    The coseg dataset was downloaded and processed from the repo : https://github.com/Ideas-Laboratory/shape-coseg-dataset
+
     Example
     -------
     >>> coseg_data = coseg("alian")
+
 
     """
     if data not in COSEG_DS_MAP:
