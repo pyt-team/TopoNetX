@@ -12,7 +12,7 @@ from toponetx import CellComplex, SimplicialComplex
 __all__ = ["stanford_bunny", "shrec_16"]
 
 DIR = Path(__file__).parent
-DS_MAP = {
+SHREC_DS_MAP = {
     "full": ("shrec", "https://github.com/mhajij/shrec_16/raw/main/shrec.zip"),
     "small": (
         "small_shrec",
@@ -116,9 +116,9 @@ def shrec_16(size: Literal["full", "small"] = "full"):
     >>> testing_edge_feat = shrec_testing["edge_feat"]
     >>> testing_face_feat = shrec_testing["face_feat"]
     """
-    if size not in DS_MAP:
+    if size not in SHREC_DS_MAP:
         raise ValueError(f"size must be 'full' or 'small' got {size}.")
-    ds_name, url = DS_MAP[size]
+    ds_name, url = SHREC_DS_MAP[size]
 
     zip_file = DIR / f"{ds_name}.zip"
     training = DIR / f"{ds_name}_training.npz"
