@@ -20,6 +20,21 @@ DS_MAP = {
     ),
 }
 
+COSEG_DS_MAP = {
+    "alian": (
+        "coseg_alien",
+        "https://github.com/mhajij/shrec_16/raw/main/coseg_alien.zip",
+    ),
+    "chair": (
+        "coseg_chairs",
+        "https://github.com/mhajij/shrec_16/raw/main/coseg_chairs.zip",
+    ),
+    "vase": (
+        "coseg_vases",
+        "https://github.com/mhajij/shrec_16/raw/main/coseg_vases.zip",
+    ),
+}
+
 
 @overload
 def stanford_bunny(complex_type: Literal["cell"] = ...) -> CellComplex:
@@ -110,18 +125,73 @@ def shrec_16(size: Literal["full", "small"] = "full"):
     testing = DIR / f"{ds_name}_testing.npz"
 
     if not training.exists() or not testing.exists():
-        print("downloading dataset...\n")
+        print(f"downloading shrec 16 {size} dataset...\n")
         wget.download(url, str(DIR))
         with zipfile.ZipFile(zip_file, "r") as zip_ref:
             zip_ref.extractall(DIR)
         print("done!")
 
     if training.exists() and testing.exists():
-        print("Loading dataset...\n")
+        print(f"Loading shrec 16 {size} dataset...\n")
         shrec_training = np.load(training, allow_pickle=True)
         shrec_testing = np.load(testing, allow_pickle=True)
         print("done!")
         return shrec_training, shrec_testing
+
+    raise ValueError(
+        f"Files couldn't be found in folder {DIR}, fail to load the dataset."
+    )
+
+
+def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
+    """Load training/testing shrec 16 datasets".
+
+    Parameters
+    ----------
+    size : {"alien", "vase","chair"}, default='alien'
+        Dataset size. Options are "alien", "vase", or"chair".
+
+    Returns
+    -------
+    npz file
+        The npz files store the complexes of coseg segmentation dataset along
+        with their nodes, edges and faces features.
+
+    Notes
+    -----
+    Each npz file stores 5 keys:
+    "complexes",label","node_feat","edge_feat" and "face_feat".
+    complex : stores the simplicial complex of the mesh
+    node_feat : stores 6 dim node feature vector: position and normal of the each node in the mesh
+    edge_feat : stores 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
+    face_feat : face area, face normal, face angle
+    face label :  stores the label of mesh segmentation as a face label
+
+    Example
+    -------
+    >>> coseg_data = coseg("alian")
+
+    """
+    if data not in COSEG_DS_MAP:
+        raise ValueError(f"data must be 'alien', 'vase', or 'chair' got {data}.")
+    ds_name, url = COSEG_DS_MAP[data]
+
+    zip_file = DIR / f"{ds_name}.zip"
+    unziped_file = DIR / f"{ds_name}.npz"
+
+    if not unziped_file.exists():
+        print(f"downloading {data} dataset...\n")
+        wget.download(url, str(DIR))
+        with zipfile.ZipFile(zip_file, "r") as zip_ref:
+            zip_ref.extractall(DIR)
+        print("done!")
+
+    if unziped_file.exists():
+        print("Loading dataset...\n")
+        coseg = np.load(unziped_file, allow_pickle=True)
+
+        print("done!")
+        return coseg
 
     raise ValueError(
         f"Files couldn't be found in folder {DIR}, fail to load the dataset."
