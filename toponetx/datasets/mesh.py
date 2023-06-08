@@ -144,12 +144,12 @@ def shrec_16(size: Literal["full", "small"] = "full"):
 
 
 def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
-    """Load training/testing shrec 16 datasets".
+    """Load coseg mesh segmentation datasets".
 
     Parameters
     ----------
     size : {"alien", "vase","chair"}, default='alien'
-        Dataset size. Options are "alien", "vase", or"chair".
+        The name of the coseg dataset to be loaded. Options are "alien", "vase", or"chair".
 
     Returns
     -------
@@ -174,8 +174,11 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
     Example
     -------
     >>> coseg_data = coseg("alian")
-
-
+    >>> complexes = coseg_data["complexes"]
+    >>> node_feat = coseg_data["node_feat"]
+    >>> edge_feat = coseg_data["edge_feat"]
+    >>> face_feat = coseg_data["face_feat"]
+    >>> face_label = coseg_data["face_label"]
     """
     if data not in COSEG_DS_MAP:
         raise ValueError(f"data must be 'alien', 'vase', or 'chair' got {data}.")
