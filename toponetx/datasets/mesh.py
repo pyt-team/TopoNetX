@@ -9,7 +9,7 @@ import wget
 
 from toponetx import CellComplex, SimplicialComplex
 
-__all__ = ["stanford_bunny", "shrec_16"]
+__all__ = ["stanford_bunny", "shrec_16", "coseg"]
 
 DIR = Path(__file__).parent
 SHREC_DS_MAP = {
@@ -77,7 +77,7 @@ def stanford_bunny(
 
 
 def shrec_16(size: Literal["full", "small"] = "full"):
-    """Load training/testing shrec 16 datasets".
+    """Load training/testing shrec 16 datasets.
 
     Parameters
     ----------
@@ -100,8 +100,13 @@ def shrec_16(size: Literal["full", "small"] = "full"):
     edge_feat : stores 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
     face_feat : face area, face normal, face angle
 
-    Example
-    -------
+    Raises
+    ------
+    RuntimeError
+        If dataset is not found on in DIR.
+
+    Examples
+    --------
     >>> shrec_training, shrec_testing = shrec_16()
     >>> # training dataset
     >>> training_complexes = shrec_training["complexes"]
@@ -138,42 +143,47 @@ def shrec_16(size: Literal["full", "small"] = "full"):
         print("done!")
         return shrec_training, shrec_testing
 
-    raise ValueError(
+    raise RuntimeError(
         f"Files couldn't be found in folder {DIR}, fail to load the dataset."
     )
 
 
 def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
-    """Load coseg mesh segmentation datasets".
+    """Load coseg mesh segmentation datasets.
 
     Parameters
     ----------
-    size : {"alien", "vase","chair"}, default='alien'
-        The name of the coseg dataset to be loaded. Options are "alien", "vase", or"chair".
+    data : {'alien', 'vase', 'chair'}, default='alien'
+        The name of the coseg dataset to be loaded. Options are 'alien', 'vase', or 'chair'.
 
     Returns
     -------
     npz file
         The npz files store the complexes of coseg segmentation dataset along
-        with their nodes, edges and faces features.
+        with their nodes, edges, and faces features.
+
+    Raises
+    ------
+    RuntimeError
+        If the dataset is not found in DIR.
 
     Notes
     -----
     Each npz file stores 5 keys:
-    "complexes",label","node_feat","edge_feat" and "face_feat".
+    "complexes", "label", "node_feat", "edge_feat", and "face_feat".
     complex : stores the simplicial complex of the mesh
-    node_feat : stores 6 dim node feature vector: position and normal of the each node in the mesh
-    edge_feat : stores 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
-    face_feat : face area, face normal, face angle
-    face label :  stores the label of mesh segmentation as a face label
+    node_feat : stores a 6-dimensional node feature vector: position and normal of each node in the mesh
+    edge_feat : stores a 10-dimensional edge feature vector: dihedral angle, edge span, 2 edge angles in the triangle, 6 edge ratios.
+    face_feat : stores face area, face normal, face angle
+    face_label : stores the label of mesh segmentation as a face label
 
     Data Source
     -----------
-    The coseg dataset was downloaded and processed from the repo : https://github.com/Ideas-Laboratory/shape-coseg-dataset
+    The coseg dataset was downloaded and processed from the repo: https://github.com/Ideas-Laboratory/shape-coseg-dataset
 
-    Example
-    -------
-    >>> coseg_data = coseg("alian")
+    Examples
+    --------
+    >>> coseg_data = coseg("alien")
     >>> complexes = coseg_data["complexes"]
     >>> node_feat = coseg_data["node_feat"]
     >>> edge_feat = coseg_data["edge_feat"]
@@ -201,6 +211,6 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
         print("done!")
         return coseg
 
-    raise ValueError(
+    raise RuntimeError(
         f"Files couldn't be found in folder {DIR}, fail to load the dataset."
     )
