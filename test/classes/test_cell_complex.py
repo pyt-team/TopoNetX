@@ -998,6 +998,11 @@ class TestCellComplex(unittest.TestCase):
         with self.assertRaises(ValueError):
             CX.hodge_laplacian_matrix(rank, signed, weight, index)
 
+    def test_init_type_exception(self):
+        """Test if incorrect datatype raises a TypeError exception."""
+        with self.assertRaises(TypeError):
+            CellComplex(cells=1)
+
 
 if __name__ == "__main__":
     unittest.main()
