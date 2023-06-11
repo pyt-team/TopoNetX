@@ -418,6 +418,9 @@ class TestSimplicialComplex(unittest.TestCase):
             ),
         )
 
+        with self.assertRaises(ValueError):
+            SC.hodge_laplacian_matrix(rank=3)
+
     def test_adjacency_matrix(self):
         """Test adjacency_matrix shape and values."""
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
@@ -438,6 +441,10 @@ class TestSimplicialComplex(unittest.TestCase):
                 ]
             ),
         )
+
+        ind, A = SC.adjacency_matrix(rank=0, index=True)
+        expected_ind = {(0,): 0, (1,): 1, (2,): 2, (3,): 3, (4,): 4}
+        self.assertDictEqual(ind, expected_ind)
 
     def test_get_boundaries(self):
         """Test the get_boundaries method."""
@@ -677,6 +684,16 @@ class TestSimplicialComplex(unittest.TestCase):
         result = SC.to_hypergraph()
         assert len(result.edges) == len(expected_result.edges)
 
+    def test_to_cell_complex(self):
+        """Test to convert SimplicialComplex to Cell Complex."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        CC = SC.to_cell_complex()
+        assert set(CC.edges) == {(2, 5), (2, 3), (2, 1), (2, 4), (3, 1), (1, 4)}
+        assert set(CC.nodes) == {2, 5, 3, 1, 4}
+
     def test_to_combinatorial_complex(self):
         """Convert a SimplicialComplex to a CombinatorialComplex and compare the number of cells and nodes."""
         c1 = Simplex((1, 2, 3))
@@ -853,6 +870,18 @@ class TestSimplicialComplex(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             SC.coadjacency_matrix(rank, signed, weight, index)
+
+        # Test case 4: index is True
+        # Test case 1: Rank is within valid range
+        rank = 1
+        signed = False
+        weight = None
+        index = True
+
+        ind, result = SC.coadjacency_matrix(rank, signed, weight, index)
+
+        # Assert the result is of type scipy.sparse.csr.csr_matrix
+        assert result.shape == (6, 6)
 
     def test_restrict_to_simplices(self):
         """Test the restrict_to_simplices method of SimplicialComplex."""
