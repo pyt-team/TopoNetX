@@ -367,6 +367,27 @@ class TestSimplicialComplex(unittest.TestCase):
 
         np.testing.assert_array_equal(L_hodge.toarray(), D - A)
 
+        # compute the Hodge Laplacian using the hodge_laplacian_matrix() method, for signed=False and index=True
+        row, L_hodge = SC.hodge_laplacian_matrix(rank=0, signed=False, index=True)
+
+        assert L_hodge.shape == (5, 5)
+
+        D = np.diag([1, 3, 3, 3, 2])
+        A = np.array(
+            [
+                [0.0, 1.0, 0.0, 0.0, 0.0],
+                [1.0, 0.0, 1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 1.0, 1.0],
+                [0.0, 1.0, 1.0, 0.0, 1.0],
+                [0.0, 0.0, 1.0, 1.0, 0.0],
+            ]
+        )
+
+        np.testing.assert_array_equal(L_hodge.toarray(), np.abs(D - A))
+        expected_row = {(0,): 0, (1,): 1, (2,): 2, (3,): 3, (4,): 4}
+
+        self.assertDictEqual(row, expected_row)
+
     def test_adjacency_matrix(self):
         """Test adjacency_matrix shape and values."""
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
