@@ -334,6 +334,16 @@ class TestSimplicialComplex(unittest.TestCase):
             np.array([[0, 1, -1, 1, 0, 0], [0, 0, 0, 1, -1, 1]]).T,
         )
 
+        # repeat the same test, but with signed=False
+        B2 = SC.incidence_matrix(rank=2, signed=False)
+        assert B2.shape == (6, 2)
+
+        # assert that the incidence matrix is correct
+        np.testing.assert_array_equal(
+            B2.toarray(),
+            np.array([[0, 1, 1, 1, 0, 0], [0, 0, 0, 1, 1, 1]]).T,
+        )
+
     def test_hodge_laplacian_matrix(self):
         """Test hodge_laplacian_matrix shape and values."""
         # create a SimplicialComplex object with a few simplices
@@ -485,6 +495,23 @@ class TestSimplicialComplex(unittest.TestCase):
         assert B0.shape[-1] == len(SC.skeleton(0))
 
         assert np.sum(B0.dot(B1)) == 0  # boundary of boundary = 0
+
+        # check incidence matrix for signed=False
+        row, col, B1 = SC.incidence_matrix(1, index=True, signed=False)
+        assert (len(row), len(col)) == B1.shape
+
+        np.testing.assert_array_equal(
+            B1.toarray(),
+            np.array(
+                [
+                    [1, 1, 1, 1, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 1, 1, 1, 0],
+                    [0, 1, 0, 0, 1, 0, 0, 1],
+                    [0, 0, 1, 0, 0, 1, 0, 1],
+                    [0, 0, 0, 1, 0, 0, 1, 0],
+                ]
+            ),
+        )
 
     def test_coincidence_matrix_2(self):
         """Test coincidence matrix."""
