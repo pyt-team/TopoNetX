@@ -167,7 +167,7 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex(s)
         assert SC["A"]["heat"] == 1
 
-    def add_simplices_from(self):
+    def test_add_simplices_from(self):
         """Test add simplices from."""
         with self.assertRaises(ValueError):
             SC = SimplicialComplex()
