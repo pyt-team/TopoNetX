@@ -25,6 +25,7 @@ from networkx.classes.reportviews import EdgeView, NodeView
 from networkx.utils import pairwise
 from scipy.sparse import csr_matrix
 
+from toponetx.classes import CombinatorialComplex
 from toponetx.classes.cell import Cell
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import CellView
@@ -1757,7 +1758,15 @@ class CellComplex(Complex):
         >>> CX= CX.to_combinatorial_complex()
         >>> CX.cells
         """
-        raise NotImplementedError()
+        cc = CombinatorialComplex()
+        for c in self.cells:
+            cc.add_cell(c, rank=2)
+        for c in self.edges:
+            cc.add_cell(c, rank=1)
+        for c in self.nodes:
+            cc.add_node(c)
+
+        return cc
 
     def to_hypergraph(self):
         """Convert to hypergraph.
