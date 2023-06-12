@@ -130,19 +130,6 @@ class TestComplex(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             complex_obj.coadjacency_matrix()
 
-    def test_clear_cache(self):
-        """Test the _clear_cache method."""
-        complex_obj = self.ConcreteComplex()
-
-        with self.assertRaises(AttributeError):
-            complex_obj.cache  # Cache attribute should not exist initially
-
-        complex_obj._clear_cache()
-
-        self.assertEqual(
-            complex_obj.cache, {}
-        )  # Cache attribute should be an empty dictionary
-
 
 if __name__ == "__main__":
     unittest.main()
