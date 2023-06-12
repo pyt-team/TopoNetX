@@ -76,12 +76,8 @@ class Complex:
         """Return number of nodes."""
         pass
 
-    def _clear_cache(self):
-        """Clear cache."""
-        self.cache = {}
-
     @abc.abstractmethod
-    def clone(self):
+    def clone(self) -> "Complex":
         """Clone complex."""
 
     @abc.abstractmethod
