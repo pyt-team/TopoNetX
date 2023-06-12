@@ -198,7 +198,7 @@ class SimplicialComplex(Complex):
         Set of simplices of dimension n.
         """
         if rank < len(self._simplex_set.faces_dict) and rank >= 0:
-            return sorted(tuple(i) for i in self._simplex_set.faces_dict[rank].keys())
+            return sorted(tuple(sorted(i)) for i in self._simplex_set.faces_dict[rank].keys())
         if rank < 0:
             raise ValueError(f"input must be a postive integer, got {rank}")
         raise ValueError(f"input {rank} exceeds max dim")
@@ -780,7 +780,7 @@ class SimplicialComplex(Complex):
                 idx_simplices.append(idx_simplex)
                 values.append((-1) ** i)
                 face = frozenset(simplex).difference({left_out})
-                idx_faces.append(simplex_dict_d_minus_1[tuple(face)])
+                idx_faces.append(simplex_dict_d_minus_1[tuple(sorted(face))])
         assert len(values) == (rank + 1) * len(simplex_dict_d)
         boundary = coo_matrix(
             (values, (idx_faces, idx_simplices)),
