@@ -81,7 +81,7 @@ class Complex:
         self.cache = {}
 
     @abc.abstractmethod
-    def clone(self):
+    def clone(self) -> "Complex":
         """Clone complex."""
 
     @abc.abstractmethod

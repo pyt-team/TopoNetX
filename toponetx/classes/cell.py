@@ -131,10 +131,17 @@ class Cell:
         self.properties[key] = item
 
     def clone(self) -> "Cell":
-        """Clone the Cell with all properties."""
-        clone_cell = Cell(self.elements, self.name, self._regular)
-        clone_cell.properties.update(self.properties)
-        return clone_cell
+        """Clone the Cell with all properties.
+
+        The clone method by default returns an independent shallow copy of the cell and attributes. That is, if an
+        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
+        for new containers.
+
+        Returns
+        -------
+        Cell
+        """
+        return Cell(self.elements, self.name, self._regular, **self.properties)
 
     @staticmethod
     def is_valid_cell(elements, regular=False):

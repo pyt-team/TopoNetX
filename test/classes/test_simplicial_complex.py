@@ -783,9 +783,16 @@ class TestSimplicialComplex(unittest.TestCase):
         assert Simplex((1, 2, 3, 4)) not in SC1.simplices
         assert Simplex((1, 2, 5)) not in SC1.simplices
 
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_clone(self):
+        """Test the clone method of SimplicialComplex."""
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3], color="red")
+        SC2 = SC.clone()
+        assert SC2 is not SC
+        assert SC2[(1, 2, 3)] is not SC[(1, 2, 3)]
+        SC2.remove_maximal_simplex([1, 2, 3])
+        assert 1 in SC
+        assert (1, 2, 3) in SC
 
 
 if __name__ == "__main__":
