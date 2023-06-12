@@ -77,7 +77,7 @@ class Complex:
         pass
 
     @abc.abstractmethod
-    def clone(self):
+    def clone(self) -> "Complex":
         """Clone complex."""
 
     @abc.abstractmethod

@@ -1504,3 +1504,15 @@ class SimplicialComplex(Complex):
             for cell in self.skeleton(rank):
                 CC.add_cell(cell, rank=len(cell) - 1, **self[cell])
         return CC
+
+    def clone(self) -> "SimplicialComplex":
+        """Return a copy of the simplicial complex.
+
+        The clone method by default returns an independent shallow copy of the simplicial complex. Use Python’s
+        `copy.deepcopy` for new containers.
+
+        Returns
+        -------
+        SimplicialComplex
+        """
+        return SimplicialComplex(self.simplices, name=self.name)

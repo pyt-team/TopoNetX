@@ -174,3 +174,16 @@ class Simplex:
         :rtype: str
         """
         return f"Nodes set: {tuple(self.nodes)}, attrs: {self.properties}"
+
+    def clone(self) -> "Simplex":
+        """Return a copy of the simplex.
+
+        The clone method by default returns an independent shallow copy of the simplex and attributes. That is, if an
+        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
+        for new containers.
+
+        Returns
+        -------
+        Simplex
+        """
+        return Simplex(self.nodes, name=self.name, **self.properties)
