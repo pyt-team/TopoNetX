@@ -1,11 +1,11 @@
 """Test simplicial complex class."""
 
 import unittest
-import warnings
 
 import hypernetx as hnx
 import networkx as nx
 import numpy as np
+import pytest
 import scipy
 import trimesh
 from gudhi import SimplexTree
@@ -170,15 +170,10 @@ class TestSimplicialComplex(unittest.TestCase):
 
     def test_maxdim(self):
         """Test deprecated maxdim property for deprecation warning."""
-        with warnings.catch_warnings(record=True) as w:
+        with pytest.deprecated_call():
             # Cause a warning by accessing the deprecated maxdim property
             SC = SimplicialComplex()
             _ = SC.maxdim
-
-            # Check if the warning was raised
-            self.assertEqual(len(w), 1)
-            self.assertTrue(issubclass(w[0].category, DeprecationWarning))
-            self.assertIn("deprecated", str(w[0].message))
 
     def test_add_simplices_from(self):
         """Test add simplices from."""
