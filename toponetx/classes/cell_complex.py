@@ -1706,7 +1706,7 @@ class CellComplex(Complex):
     ):
         """Restrict cell complex to nodes.
 
-        This constructs a new cell complex  by restricting the cells in the cell complex to
+        This constructs a new cell complex by restricting the cells in the cell complex to
         the nodes referenced by node_set.
 
         Parameters
@@ -1748,6 +1748,10 @@ class CellComplex(Complex):
         A cell complex is a type of combinatorial complex.
         The rank of an element in a cell complex is its dimension, so vertices have rank 0,
         edges have rank 1, and faces have rank 2.
+
+        Returns
+        -------
+        Combinatorial Complex : CombinatorialComplex
 
         Examples
         --------
