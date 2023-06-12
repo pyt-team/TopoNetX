@@ -1003,6 +1003,36 @@ class TestCellComplex(unittest.TestCase):
         with self.assertRaises(TypeError):
             CellComplex(cells=1)
 
+    def test_maxdim_warning(self):
+        """Test if Deprecation Warning is raised when the maxdim method is called."""
+        with self.assertWarns(DeprecationWarning):
+            CX = CellComplex()
+            CX.maxdim
+
+    def test_dim_edgecases(self):
+        """Test if dim is testing for edge cases."""
+        CX = CellComplex()
+        CX.add_node(1)
+        assert CX.dim == 0
+
+    def test_skeleton_method_exception(self):
+        """Test if the skeleton method raises a TopoNetXError exception."""
+        with self.assertRaises(TopoNetXError):
+            CX = CellComplex()
+            CX.skeleton(rank=4)
+
+        with self.assertRaises(TopoNetXError):
+            CX = CellComplex()
+            CX.skeleton(rank=3)
+
+    def test_getitem_dunder_method(self):
+        """Test if the dunder __getitem__ method returns the appropriate neighbors of the given node."""
+        CX = CellComplex()
+        CX.add_edges_from([(1, 2), (2, 3), (5, 2), (1, 9), (1, 6)])
+        assert sorted(list(CX.__getitem__(1))) == [2, 6, 9]
+        assert sorted(list(CX.__getitem__(2))) == [1, 3, 5]
+        assert sorted(list(CX.__getitem__(6))) == [1]
+
 
 if __name__ == "__main__":
     unittest.main()
