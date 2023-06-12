@@ -528,7 +528,6 @@ class CellComplex(Complex):
         """
         if node not in self.nodes:
             raise KeyError(f"input {node} is not in the complex.")
-            return
 
         return self._G[node]
 
