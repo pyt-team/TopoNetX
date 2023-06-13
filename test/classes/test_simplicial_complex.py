@@ -5,6 +5,7 @@ import unittest
 import hypernetx as hnx
 import networkx as nx
 import numpy as np
+import pytest
 import scipy
 import trimesh
 from gudhi import SimplexTree
@@ -37,12 +38,6 @@ class TestSimplicialComplex(unittest.TestCase):
     def test_dim_property(self):
         """Test dim property."""
         # Test the dim property of the SimplicialComplex class
-        sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        self.assertEqual(sc.dim, 2)
-
-    def test_maxdim_property(self):
-        """Test maxdim property."""
-        # Test the maxdim property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         self.assertEqual(sc.dim, 2)
 
@@ -165,7 +160,21 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex(s)
         assert SC["A"]["heat"] == 1
 
-    def add_simplices_from(self):
+    def test_maxdim(self):
+        """Test deprecated maxdim property for deprecation warning."""
+        with pytest.deprecated_call():
+            # Cause a warning by accessing the deprecated maxdim property
+            SC = SimplicialComplex()
+            max_dim = SC.maxdim
+            assert max_dim == -1
+
+        with pytest.deprecated_call():
+            # Cause a warning by accessing the deprecated maxdim property
+            SC = SimplicialComplex([[1, 2, 3]])
+            max_dim = SC.maxdim
+            assert max_dim == 2
+
+    def test_add_simplices_from(self):
         """Test add simplices from."""
         with self.assertRaises(ValueError):
             SC = SimplicialComplex()
@@ -319,12 +328,19 @@ class TestSimplicialComplex(unittest.TestCase):
             np.array([[0, 1, -1, 1, 0, 0], [0, 0, 0, 1, -1, 1]]).T,
         )
 
+        # repeat the same test, but with signed=False
+        B2 = SC.incidence_matrix(rank=2, signed=False)
+        assert B2.shape == (6, 2)
+
+        # assert that the incidence matrix is correct
+        np.testing.assert_array_equal(
+            B2.toarray(),
+            np.array([[0, 1, 1, 1, 0, 0], [0, 0, 0, 1, 1, 1]]).T,
+        )
+
     def test_hodge_laplacian_matrix(self):
         """Test hodge_laplacian_matrix shape and values."""
-        # create a SimplicialComplex object with a few simplices
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-
-        # compute the Hodge Laplacian using the hodge_laplacian_matrix() method
         L_hodge = SC.hodge_laplacian_matrix(rank=0)
 
         assert L_hodge.shape == (5, 5)
@@ -341,6 +357,67 @@ class TestSimplicialComplex(unittest.TestCase):
         )
 
         np.testing.assert_array_equal(L_hodge.toarray(), D - A)
+
+    def test_hodge_laplacian_matrix_index(self):
+        """Test unsigned hodge_laplacian_matrix method with index."""
+        SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
+        row, L_hodge = SC.hodge_laplacian_matrix(rank=0, signed=False, index=True)
+
+        assert L_hodge.shape == (5, 5)
+
+        D = np.diag([1, 3, 3, 3, 2])
+        A = np.array(
+            [
+                [0.0, 1.0, 0.0, 0.0, 0.0],
+                [1.0, 0.0, 1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 1.0, 1.0],
+                [0.0, 1.0, 1.0, 0.0, 1.0],
+                [0.0, 0.0, 1.0, 1.0, 0.0],
+            ]
+        )
+
+        np.testing.assert_array_equal(L_hodge.toarray(), np.abs(D - A))
+        expected_row = {(0,): 0, (1,): 1, (2,): 2, (3,): 3, (4,): 4}
+
+        self.assertDictEqual(row, expected_row)
+
+    def test_hodge_laplacian_matrix_rank_2(self):
+        """Test unsigned hodge_laplacian_matrix method with index for different ranks."""
+        SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
+        column, L_hodge = SC.hodge_laplacian_matrix(rank=2, signed=False, index=True)
+        expected_col = {(1, 2, 3): 0, (2, 3, 4): 1}
+        self.assertDictEqual(column, expected_col)
+        np.testing.assert_array_equal(L_hodge.A, np.array([[3, 1], [1, 3]]))
+
+    def test_hodge_laplacian_matrix_rank_1(self):
+        """Test unsigned hodge_laplacian_matrix method with index for different ranks."""
+        SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
+        column, L_hodge = SC.hodge_laplacian_matrix(rank=1, signed=False, index=True)
+        expected_col = {
+            (0, 1): 0,
+            (1, 2): 1,
+            (1, 3): 2,
+            (2, 3): 3,
+            (2, 4): 4,
+            (3, 4): 5,
+        }
+        self.assertDictEqual(column, expected_col)
+        np.testing.assert_array_equal(
+            L_hodge.A,
+            np.array(
+                [
+                    [2.0, 1.0, 1.0, 0.0, 0.0, 0.0],
+                    [1.0, 3.0, 0.0, 0.0, 1.0, 0.0],
+                    [1.0, 0.0, 3.0, 0.0, 0.0, 1.0],
+                    [0.0, 0.0, 0.0, 4.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 0.0, 3.0, 0.0],
+                    [0.0, 0.0, 1.0, 0.0, 0.0, 3.0],
+                ]
+            ),
+        )
+
+        with self.assertRaises(ValueError):
+            SC.hodge_laplacian_matrix(rank=3)
 
     def test_adjacency_matrix(self):
         """Test adjacency_matrix shape and values."""
@@ -362,6 +439,10 @@ class TestSimplicialComplex(unittest.TestCase):
                 ]
             ),
         )
+
+        ind, A = SC.adjacency_matrix(rank=0, index=True)
+        expected_ind = {(0,): 0, (1,): 1, (2,): 2, (3,): 3, (4,): 4}
+        self.assertDictEqual(ind, expected_ind)
 
     def test_get_boundaries(self):
         """Test the get_boundaries method."""
@@ -470,6 +551,23 @@ class TestSimplicialComplex(unittest.TestCase):
         assert B0.shape[-1] == len(SC.skeleton(0))
 
         assert np.sum(B0.dot(B1)) == 0  # boundary of boundary = 0
+
+        # check incidence matrix for signed=False
+        row, col, B1 = SC.incidence_matrix(1, index=True, signed=False)
+        assert (len(row), len(col)) == B1.shape
+
+        np.testing.assert_array_equal(
+            B1.toarray(),
+            np.array(
+                [
+                    [1, 1, 1, 1, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 1, 1, 1, 0],
+                    [0, 1, 0, 0, 1, 0, 0, 1],
+                    [0, 0, 1, 0, 0, 1, 0, 1],
+                    [0, 0, 0, 1, 0, 0, 1, 0],
+                ]
+            ),
+        )
 
     def test_coincidence_matrix_2(self):
         """Test coincidence matrix."""
@@ -583,6 +681,16 @@ class TestSimplicialComplex(unittest.TestCase):
         )
         result = SC.to_hypergraph()
         assert len(result.edges) == len(expected_result.edges)
+
+    def test_to_cell_complex(self):
+        """Test to convert SimplicialComplex to Cell Complex."""
+        c1 = Simplex((1, 2, 3))
+        c2 = Simplex((1, 2, 4))
+        c3 = Simplex((2, 5))
+        SC = SimplicialComplex([c1, c2, c3])
+        CC = SC.to_cell_complex()
+        assert set(CC.edges) == {(2, 5), (2, 3), (2, 1), (2, 4), (3, 1), (1, 4)}
+        assert set(CC.nodes) == {2, 5, 3, 1, 4}
 
     def test_to_combinatorial_complex(self):
         """Convert a SimplicialComplex to a CombinatorialComplex and compare the number of cells and nodes."""
@@ -760,6 +868,18 @@ class TestSimplicialComplex(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             SC.coadjacency_matrix(rank, signed, weight, index)
+
+        # Test case 4: index is True
+        # Test case 1: Rank is within valid range
+        rank = 1
+        signed = False
+        weight = None
+        index = True
+
+        ind, result = SC.coadjacency_matrix(rank, signed, weight, index)
+
+        # Assert the result is of type scipy.sparse.csr.csr_matrix
+        assert result.shape == (6, 6)
 
     def test_restrict_to_simplices(self):
         """Test the restrict_to_simplices method of SimplicialComplex."""
