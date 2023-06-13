@@ -41,12 +41,6 @@ class TestSimplicialComplex(unittest.TestCase):
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         self.assertEqual(sc.dim, 2)
 
-    def test_maxdim_property(self):
-        """Test maxdim property."""
-        # Test the maxdim property of the SimplicialComplex class
-        sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        self.assertEqual(sc.dim, 2)
-
     def test_nodes_property(self):
         """Test nodes property."""
         # Test the nodes property of the SimplicialComplex class
@@ -171,7 +165,14 @@ class TestSimplicialComplex(unittest.TestCase):
         with pytest.deprecated_call():
             # Cause a warning by accessing the deprecated maxdim property
             SC = SimplicialComplex()
-            _ = SC.maxdim
+            max_dim = SC.maxdim
+            assert max_dim == -1
+
+        with pytest.deprecated_call():
+            # Cause a warning by accessing the deprecated maxdim property
+            SC = SimplicialComplex([[1, 2, 3]])
+            max_dim = SC.maxdim
+            assert max_dim == 2
 
     def test_add_simplices_from(self):
         """Test add simplices from."""
@@ -339,10 +340,7 @@ class TestSimplicialComplex(unittest.TestCase):
 
     def test_hodge_laplacian_matrix(self):
         """Test hodge_laplacian_matrix shape and values."""
-        # create a SimplicialComplex object with a few simplices
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-
-        # compute the Hodge Laplacian using the hodge_laplacian_matrix() method
         L_hodge = SC.hodge_laplacian_matrix(rank=0)
 
         assert L_hodge.shape == (5, 5)
@@ -360,7 +358,9 @@ class TestSimplicialComplex(unittest.TestCase):
 
         np.testing.assert_array_equal(L_hodge.toarray(), D - A)
 
-        # compute the Hodge Laplacian using the hodge_laplacian_matrix() method, for signed=False and index=True
+    def test_hodge_laplacian_matrix_index(self):
+        """Test unsigned hodge_laplacian_matrix method with index."""
+        SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         row, L_hodge = SC.hodge_laplacian_matrix(rank=0, signed=False, index=True)
 
         assert L_hodge.shape == (5, 5)
@@ -381,12 +381,17 @@ class TestSimplicialComplex(unittest.TestCase):
 
         self.assertDictEqual(row, expected_row)
 
-        # compute Hodge Laplacian for different ranks
+    def test_hodge_laplacian_matrix_rank_2(self):
+        """Test unsigned hodge_laplacian_matrix method with index for different ranks."""
+        SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         column, L_hodge = SC.hodge_laplacian_matrix(rank=2, signed=False, index=True)
         expected_col = {(1, 2, 3): 0, (2, 3, 4): 1}
         self.assertDictEqual(column, expected_col)
         np.testing.assert_array_equal(L_hodge.A, np.array([[3, 1], [1, 3]]))
 
+    def test_hodge_laplacian_matrix_rank_1(self):
+        """Test unsigned hodge_laplacian_matrix method with index for different ranks."""
+        SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         column, L_hodge = SC.hodge_laplacian_matrix(rank=1, signed=False, index=True)
         expected_col = {
             (0, 1): 0,
