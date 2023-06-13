@@ -309,7 +309,7 @@ class CombinatorialComplex(Complex):
         return self._complex_set.hyperedge_dict
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Return shape.
 
         This is:
@@ -317,7 +317,7 @@ class CombinatorialComplex(Complex):
 
         Returns
         -------
-        tuple
+        tuple of ints
         """
         return self._complex_set.shape
 
