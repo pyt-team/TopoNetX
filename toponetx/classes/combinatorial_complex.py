@@ -42,8 +42,8 @@ class CombinatorialComplex(Complex):
     ----------
     cells : (optional)iterable, default: None
 
-    name : hashable, optional, default: None
-        If None then a placeholder '_'  will be inserted as name
+    name : str, optional
+        An identifiable name for the combinatorial complex.
 
     ranks : (optional) an iterable, default: None.
         when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
@@ -81,14 +81,17 @@ class CombinatorialComplex(Complex):
     """
 
     def __init__(
-        self, cells=None, name=None, ranks=None, weight=None, graph_based=False, **attr
-    ):
+        self,
+        cells=None,
+        name: str = "",
+        ranks=None,
+        weight=None,
+        graph_based=False,
+        **attr,
+    ) -> None:
         super().__init__()
 
-        if not name:
-            self.name = ""
-        else:
-            self.name = name
+        self.name = name
 
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
 
