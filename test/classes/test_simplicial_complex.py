@@ -176,39 +176,27 @@ class TestSimplicialComplex(unittest.TestCase):
 
     def test_add_simplices_from(self):
         """Test add simplices from."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             SC = SimplicialComplex()
-            SC._add_simplices_from(4)
-
-    def test__insert_node(self):
-        """Test _insert_node."""
-        SC = SimplicialComplex()
-        SC._insert_node(9)
-        assert 9 in SC
-        with self.assertRaises(ValueError):
-            SC._insert_node((1, 2))
-
-        with self.assertRaises(ValueError):
-            s = Simplex((1, 2, 3, 4))
-            SC._insert_node(s)
-
-        SC = SimplicialComplex()
-        assert SC.dim == -1
-        SC._insert_node(9)
-        assert SC.dim == 0
-        assert SC[9]["is_maximal"] is True
+            SC.add_simplices_from(4)
 
     def test_add_node(self):
         """Test add node."""
         SC = SimplicialComplex()
         SC.add_node(9)
         assert 9 in SC
-        with self.assertRaises(ValueError):
-            SC.add_node((1, 2))
+        with self.assertRaises(TypeError):
+            SC.add_node({2, 3})
 
         with self.assertRaises(ValueError):
             s = Simplex((1, 2, 3, 4))
             SC.add_node(s)
+
+        SC = SimplicialComplex()
+        assert SC.dim == -1
+        SC.add_node(9)
+        assert SC.dim == 0
+        assert SC[9]["is_maximal"] is True
 
     def test_add_simplex(self):
         """Test add_simplex method."""
