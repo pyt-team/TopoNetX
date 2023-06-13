@@ -181,10 +181,34 @@ class SimplicialComplex(Complex):
         """Set of all simplices."""
         return self._simplex_set
 
-    def is_maximal(self, simplex):
-        """Check if simplex is maximal."""
-        if simplex in self:
-            return self[simplex]["is_maximal"]
+    def is_maximal(self, simplex: Iterable) -> bool:
+        """Check if simplex is maximal.
+
+        Parameters
+        ----------
+        simplex : Iterable
+            simplex to check
+
+        Returns
+        -------
+        bool
+
+        Raises
+        ------
+        ValueError
+            If simplex is not in simplicial complex.
+
+        Examples
+        --------
+        >>> SC = SimplicialComplex([[1, 2, 3]])
+        >>> SC.is_maximal([1, 2, 3])
+        True
+        >>> SC.is_maximal([1, 2])
+        False
+        """
+        if simplex not in self:
+            raise ValueError(f"Simplex {simplex} is not in the simplicial complex.")
+        return self[simplex]["is_maximal"]
 
     def get_maximal_simplices_of_simplex(self, simplex):
         """Get maximal simplices of simplex."""
