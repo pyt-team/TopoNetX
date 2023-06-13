@@ -1138,49 +1138,48 @@ class CellComplex(Complex):
             return d
         raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
+    def set_cell_data(self, cell, rank, attr_name, attr_value):
+        """Set data for a specific cell in the complex.
 
-def set_cell_data(self, cell, rank, attr_name, attr_value):
-    """Set data for a specific cell in the complex.
+        Parameters
+        ----------
+        cell : str or tuple
+            The cell to set data for.
+        rank : int
+            The rank of the cell.
+        attr_name : str
+            The name of the attribute to set.
+        attr_value : object
+            The value to set for the attribute.
 
-    Parameters
-    ----------
-    cell : str or tuple
-        The cell to set data for.
-    rank : int
-        The rank of the cell.
-    attr_name : str
-        The name of the attribute to set.
-    attr_value : object
-        The value to set for the attribute.
+        Raises
+        ------
+        KeyError
+            If the specified cell is not found.
 
-    Raises
-    ------
-    KeyError
-        If the specified cell is not found.
-
-    Notes
-    -----
-    - For rank 0 cells (nodes), the data is stored in the 'nodes' dictionary.
-    - For rank 1 cells (edges), the data is stored in the 'edges' dictionary.
-    - For rank 2 cells (other cells), the data is stored in the 'cells' dictionary.
-    """
-    if rank == 0:
-        if cell in self.nodes:
-            self.nodes[cell][attr_name] = attr_value
+        Notes
+        -----
+        - For rank 0 cells (nodes), the data is stored in the 'nodes' dictionary.
+        - For rank 1 cells (edges), the data is stored in the 'edges' dictionary.
+        - For rank 2 cells (other cells), the data is stored in the 'cells' dictionary.
+        """
+        if rank == 0:
+            if cell in self.nodes:
+                self.nodes[cell][attr_name] = attr_value
+            else:
+                raise KeyError(f"{cell} is not a node in the complex.")
+        elif rank == 1:
+            if cell in self.edges and len(cell) == 2:
+                self.edges[cell][attr_name] = attr_value
+            else:
+                raise KeyError(f"{cell} is not a valid edge in the complex.")
+        elif rank == 2:
+            if cell in self.cells:
+                self.cells[cell][attr_name] = attr_value
+            else:
+                raise KeyError(f"{cell} is not a valid cell in the complex.")
         else:
-            raise KeyError(f"{cell} is not a node in the complex.")
-    elif rank == 1:
-        if cell in self.edges and len(cell) == 2:
-            self.edges[cell][attr_name] = attr_value
-        else:
-            raise KeyError(f"{cell} is not a valid edge in the complex.")
-    elif rank == 2:
-        if cell in self.cells:
-            self.cells[cell][attr_name] = attr_value
-        else:
-            raise KeyError(f"{cell} is not a valid cell in the complex.")
-    else:
-        raise ValueError(f"Invalid rank: {rank}. Rank must be 0, 1, or 2.")
+            raise ValueError(f"Invalid rank: {rank}. Rank must be 0, 1, or 2.")
 
     def get_cell_data(self, cell, rank, attr_name=None):
         """Retrieve data associated with a specific cell in the complex.
@@ -1220,12 +1219,16 @@ def set_cell_data(self, cell, rank, attr_name, attr_value):
             raise ValueError(f"Invalid rank: {rank}. Rank must be 0, 1, or 2.")
 
         if cell in container:
-            if attr_name is not None and attr_name in container[cell]:
-                return container[cell][attr_name]
-            else:
+            if attr_name is not None:
+                if attr_name in container[cell]:
+                    return container[cell][attr_name]
                 raise KeyError(
-                    f"Key '{attr_name}' is not an attribute name for the cell '{cell}'."
+                    f"Node '{cell}' does not have an attribute with key {attr_name}."
                 )
+
+            else:
+                return container[cell]
+
         else:
             if rank == 0:
                 raise KeyError(f"Node '{cell}' is not present in the complex.")

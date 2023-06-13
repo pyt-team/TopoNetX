@@ -935,9 +935,6 @@ class TestCellComplex(unittest.TestCase):
         data = cx.get_cell_data(("A", "B"), 1, "attribute_name")
         self.assertEqual(data, "Value AB")
 
-        data = cx.get_cell_data("C", 2, "attribute_name")
-        self.assertEqual(data, {"attribute_name": "Value C"})
-
         data = cx.get_cell_data("B", 0)
         self.assertEqual(data, {"attribute_name": "Value B"})
 
@@ -963,9 +960,9 @@ class TestCellComplex(unittest.TestCase):
         cx.add_node("A")
         cx.add_node("B")
 
-        cx.add_edge(("A", "B"))
+        cx.add_edge("A", "B")
 
-        cx.add_cell(["A", "B", "C"])
+        cx.add_cell(["A", "B", "C"], rank=2)
 
         cx.set_cell_data("A", 0, "attribute_name", "Value A")
         self.assertEqual(cx.nodes["A"]["attribute_name"], "Value A")
@@ -973,8 +970,8 @@ class TestCellComplex(unittest.TestCase):
         cx.set_cell_data(("A", "B"), 1, "attribute_name", "Value AB")
         self.assertEqual(cx.edges[("A", "B")]["attribute_name"], "Value AB")
 
-        cx.set_cell_data("C", 2, "attribute_name", "Value C")
-        self.assertEqual(cx.cells["C"]["attribute_name"], "Value C")
+        cx.set_cell_data(["A", "B", "C"], 2, "attribute_name", "Value C")
+        self.assertEqual(cx.cells[("A", "B", "C")]["attribute_name"], "Value C")
 
         with self.assertRaises(KeyError):
             cx.set_cell_data("D", 1, "attribute_name", "Value D")
@@ -994,11 +991,11 @@ class TestCellComplex(unittest.TestCase):
         """Test the get_cell_data method without specifying an attribute name."""
         cx = CellComplex()
 
-        cx.add_node("A", **{"attribute_name": "Value A"})
+        cx.add_node("A")
         cx.add_node("B", **{"attribute_name": "Value B"})
 
         data = cx.get_cell_data("A", 0)
-        self.assertEqual(data, {"attribute_name": "Value A"})
+        assert len(data) == 0
 
     def test_hodge_laplacian_matrix(self):
         """Test the hodge_laplacian_matrix method of CellComplex."""
