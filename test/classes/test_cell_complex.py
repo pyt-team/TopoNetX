@@ -918,26 +918,87 @@ class TestCellComplex(unittest.TestCase):
         with self.assertRaises(KeyError):
             CX.neighbors(10)
 
-    def test_node_attributes(self):
-        """Test the setting and retrieval of node attributes."""
-        G = nx.path_graph(3)
-        CX = CellComplex(G)
-        CX.add_cell([1, 2, 3, 4], rank=2)
-        d = {1: {"color": "red", "attr2": 1}, 2: {"color": "blue", "attr2": 3}}
-        CX.set_node_attributes(d)
-        assert CX.get_node_attributes("color") == {1: "red", 2: "blue"}
+    def test_get_cell_data(self):
+        """Test the get_cell_data method of CellComplex."""
+        cx = CellComplex()
 
-    def test_edge_attributes(self):
-        """Test the setting and retrieval of edge attributes."""
-        G = nx.path_graph(3)
-        CX = CellComplex(G)
-        CX.add_cell([1, 2, 3, 4], rank=2)
-        d = {
-            (1, 2): {"color": "red", "attr2": 1},
-            (2, 3): {"color": "blue", "attr2": 3},
-        }
-        CX.set_edge_attributes(d)
-        assert CX.get_edge_attributes("color") == {(1, 2): "red", (2, 3): "blue"}
+        cx.add_node("A", **{"attribute_name": "Value A"})
+        cx.add_node("B", **{"attribute_name": "Value B"})
+
+        cx.add_edge("A", "B", **{"attribute_name": "Value AB"})
+
+        cx.add_cell(["A", "B", "C"], rank=2, **{"attribute_name": "Value C"})
+
+        data = cx.get_cell_data("A", 0, "attribute_name")
+        self.assertEqual(data, "Value A")
+
+        data = cx.get_cell_data(("A", "B"), 1, "attribute_name")
+        self.assertEqual(data, "Value AB")
+
+        data = cx.get_cell_data("C", 2, "attribute_name")
+        self.assertEqual(data, {"attribute_name": "Value C"})
+
+        data = cx.get_cell_data("B", 0)
+        self.assertEqual(data, {"attribute_name": "Value B"})
+
+        with self.assertRaises(KeyError):
+            cx.get_cell_data("D", 1, "attribute_name")
+
+        with self.assertRaises(KeyError):
+            cx.get_cell_data("A", 0, "invalid_attribute")
+
+        with self.assertRaises(KeyError):
+            cx.get_cell_data("C", 2, "invalid_attribute")
+
+        with self.assertRaises(KeyError):
+            cx.get_cell_data("E", 0)
+
+        with self.assertRaises(ValueError):
+            cx.get_cell_data("A", 3, "attribute_name")
+
+    def test_set_cell_data(self):
+        """Test the set_cell_data method of CellComplex."""
+        cx = CellComplex()
+
+        cx.add_node("A")
+        cx.add_node("B")
+
+        cx.add_edge(("A", "B"))
+
+        cx.add_cell(["A", "B", "C"])
+
+        cx.set_cell_data("A", 0, "attribute_name", "Value A")
+        self.assertEqual(cx.nodes["A"]["attribute_name"], "Value A")
+
+        cx.set_cell_data(("A", "B"), 1, "attribute_name", "Value AB")
+        self.assertEqual(cx.edges[("A", "B")]["attribute_name"], "Value AB")
+
+        cx.set_cell_data("C", 2, "attribute_name", "Value C")
+        self.assertEqual(cx.cells["C"]["attribute_name"], "Value C")
+
+        with self.assertRaises(KeyError):
+            cx.set_cell_data("D", 1, "attribute_name", "Value D")
+
+    def test_get_cell_data_after_set(self):
+        """Test the get_cell_data method after setting cell data."""
+        cx = CellComplex()
+
+        cx.add_node("A")
+
+        cx.set_cell_data("A", 0, "attribute_name", "Value A")
+
+        data = cx.get_cell_data("A", 0, "attribute_name")
+        self.assertEqual(data, "Value A")
+
+    def test_get_cell_data_without_attr(self):
+        """Test the get_cell_data method without specifying an attribute name."""
+        cx = CellComplex()
+
+        cx.add_node("A", **{"attribute_name": "Value A"})
+        cx.add_node("B", **{"attribute_name": "Value B"})
+
+        data = cx.get_cell_data("A", 0)
+        self.assertEqual(data, {"attribute_name": "Value A"})
 
     def test_hodge_laplacian_matrix(self):
         """Test the hodge_laplacian_matrix method of CellComplex."""
