@@ -29,14 +29,11 @@ class TestSimplicialComplex(unittest.TestCase):
 
     def test_shape_property(self):
         """Test shape property."""
-        # Test the shape property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        self.assertEqual(sc.shape, [5, 6, 2])
+        self.assertEqual(sc.shape, (5, 6, 2))
 
-    def test_shape_empty(self):
-        """Test shape property when Simplicial Complex is Empty."""
         sc = SimplicialComplex()
-        self.assertEqual(sc.shape, None)
+        self.assertEqual(sc.shape, tuple())
 
     def test_dim_property(self):
         """Test dim property."""
@@ -72,10 +69,11 @@ class TestSimplicialComplex(unittest.TestCase):
 
     def test_is_maximal(self):
         """Test is_maximal method."""
-        # Test the is_maximal method of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        is_maximal = sc.is_maximal([1, 2, 3])
-        self.assertTrue(is_maximal)
+        self.assertTrue(sc.is_maximal([1, 2, 3]))
+
+        with self.assertRaises(ValueError):
+            sc.is_maximal([1, 2, 3, 4])
 
     def test_contructor_using_graph(self):
         """Test input a networkx graph in the constructor."""

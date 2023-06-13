@@ -243,12 +243,9 @@ class HyperEdgeView:
         return self.hyperedge_dict[rank][hyperedge_]
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Compute shape."""
-        if len(self.hyperedge_dict) == 0:
-            print("Complex is empty.")
-        else:
-            return [len(self.hyperedge_dict[i]) for i in self.allranks]
+        return tuple(len(self.hyperedge_dict[i]) for i in self.allranks)
 
     def __len__(self):
         """Compute number of nodes."""
@@ -521,18 +518,15 @@ class SimplexView:
                 return self.faces_dict[0][frozenset({simplex})]
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Return the number of simplices in each dimension.
 
         Returns
         -------
-        list
-            A list of integers representing the number of simplices in each dimension.
+        tuple of ints
+            A tuple of integers representing the number of simplices in each dimension.
         """
-        if len(self.faces_dict) == 0:
-            print("Complex is empty.")
-        else:
-            return [len(self.faces_dict[i]) for i in range(len(self.faces_dict))]
+        return tuple(len(self.faces_dict[i]) for i in range(len(self.faces_dict)))
 
     def __len__(self):
         """Return the number of simplices in the SimplexView instance."""

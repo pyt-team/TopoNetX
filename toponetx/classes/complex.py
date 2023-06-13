@@ -52,8 +52,14 @@ class Complex:
 
     @property
     @abc.abstractmethod
-    def shape(self) -> tuple:
-        """Return number of cells for each rank."""
+    def shape(self) -> tuple[int, ...]:
+        """Return number of cells for each rank.
+
+        Returns
+        -------
+        tuple of ints
+            The number of elements for each rank. If the complex is empty, an empty tuple is returned.
+        """
         pass
 
     @abc.abstractmethod

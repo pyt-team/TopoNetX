@@ -133,22 +133,19 @@ class SimplicialComplex(Complex):
                 self._add_simplices_from(simplices)
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Shape of simplicial complex.
 
         (number of simplices[i], for i in range(0,dim(Sc))  )
 
         Returns
         -------
-        tuple
+        tuple of ints
         """
-        if len(self._simplex_set.faces_dict) == 0:
-            print("Simplicial Complex is empty.")
-        else:
-            return [
-                len(self._simplex_set.faces_dict[i])
-                for i in range(len(self._simplex_set.faces_dict))
-            ]
+        return tuple(
+            len(self._simplex_set.faces_dict[i])
+            for i in range(len(self._simplex_set.faces_dict))
+        )
 
     @property
     def dim(self) -> int:
@@ -181,10 +178,34 @@ class SimplicialComplex(Complex):
         """Set of all simplices."""
         return self._simplex_set
 
-    def is_maximal(self, simplex):
-        """Check if simplex is maximal."""
-        if simplex in self:
-            return self[simplex]["is_maximal"]
+    def is_maximal(self, simplex: Iterable) -> bool:
+        """Check if simplex is maximal.
+
+        Parameters
+        ----------
+        simplex : Iterable
+            simplex to check
+
+        Returns
+        -------
+        bool
+
+        Raises
+        ------
+        ValueError
+            If simplex is not in simplicial complex.
+
+        Examples
+        --------
+        >>> SC = SimplicialComplex([[1, 2, 3]])
+        >>> SC.is_maximal([1, 2, 3])
+        True
+        >>> SC.is_maximal([1, 2])
+        False
+        """
+        if simplex not in self:
+            raise ValueError(f"Simplex {simplex} is not in the simplicial complex.")
+        return self[simplex]["is_maximal"]
 
     def get_maximal_simplices_of_simplex(self, simplex):
         """Get maximal simplices of simplex."""
