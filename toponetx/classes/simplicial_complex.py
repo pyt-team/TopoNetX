@@ -133,22 +133,19 @@ class SimplicialComplex(Complex):
                 self._add_simplices_from(simplices)
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Shape of simplicial complex.
 
         (number of simplices[i], for i in range(0,dim(Sc))  )
 
         Returns
         -------
-        tuple
+        tuple of ints
         """
-        if len(self._simplex_set.faces_dict) == 0:
-            print("Simplicial Complex is empty.")
-        else:
-            return [
-                len(self._simplex_set.faces_dict[i])
-                for i in range(len(self._simplex_set.faces_dict))
-            ]
+        return tuple(
+            len(self._simplex_set.faces_dict[i])
+            for i in range(len(self._simplex_set.faces_dict))
+        )
 
     @property
     def dim(self) -> int:

@@ -28,14 +28,11 @@ class TestSimplicialComplex(unittest.TestCase):
 
     def test_shape_property(self):
         """Test shape property."""
-        # Test the shape property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        self.assertEqual(sc.shape, [5, 6, 2])
+        self.assertEqual(sc.shape, (5, 6, 2))
 
-    def test_shape_empty(self):
-        """Test shape property when Simplicial Complex is Empty."""
         sc = SimplicialComplex()
-        self.assertEqual(sc.shape, None)
+        self.assertEqual(sc.shape, tuple())
 
     def test_dim_property(self):
         """Test dim property."""
