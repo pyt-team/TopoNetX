@@ -68,10 +68,11 @@ class TestSimplicialComplex(unittest.TestCase):
 
     def test_is_maximal(self):
         """Test is_maximal method."""
-        # Test the is_maximal method of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        is_maximal = sc.is_maximal([1, 2, 3])
-        self.assertTrue(is_maximal)
+        self.assertTrue(sc.is_maximal([1, 2, 3]))
+
+        with self.assertRaises(ValueError):
+            sc.is_maximal([1, 2, 3, 4])
 
     def test_contructor_using_graph(self):
         """Test input a networkx graph in the constructor."""
