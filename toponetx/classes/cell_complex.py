@@ -26,6 +26,7 @@ from networkx.utils import pairwise
 from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell
+from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import CellView
 from toponetx.exception import TopoNetXError
@@ -1106,6 +1107,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> import networkx as nx
+        >>> from toponetx import CellComplex
         >>> G = nx.path_graph(3)
         >>> d = {((1, 2, 3, 4), 0): {'color': 'red', 'attr2': 1}, (1, 2, 4): {'color': 'blue', 'attr2': 3 }}
         >>> CX = CellComplex(G)
@@ -1135,6 +1137,107 @@ class CellComplex(Complex):
             return d
         raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
+    def set_cell_data(self, cell, rank, attr_name, attr_value):
+        """Set data for a specific cell in the complex.
+
+        Parameters
+        ----------
+        cell : str or tuple
+            The cell to set data for.
+        rank : int
+            The rank of the cell.
+        attr_name : str
+            The name of the attribute to set.
+        attr_value : object
+            The value to set for the attribute.
+
+        Raises
+        ------
+        KeyError
+            If the specified cell is not found.
+
+        Notes
+        -----
+        - For rank 0 cells (nodes), the data is stored in the 'nodes' dictionary.
+        - For rank 1 cells (edges), the data is stored in the 'edges' dictionary.
+        - For rank 2 cells (other cells), the data is stored in the 'cells' dictionary.
+        """
+        if rank == 0:
+            if cell in self.nodes:
+                self.nodes[cell][attr_name] = attr_value
+            else:
+                raise KeyError(f"{cell} is not a node in the complex.")
+        elif rank == 1:
+            if cell in self.edges and len(cell) == 2:
+                self.edges[cell][attr_name] = attr_value
+            else:
+                raise KeyError(f"{cell} is not a valid edge in the complex.")
+        elif rank == 2:
+            if cell in self.cells:
+                self.cells[cell][attr_name] = attr_value
+            else:
+                raise KeyError(f"{cell} is not a valid cell in the complex.")
+        else:
+            raise ValueError(f"Invalid rank: {rank}. Rank must be 0, 1, or 2.")
+
+    def get_cell_data(self, cell, rank, attr_name=None):
+        """Retrieve data associated with a specific cell in the complex.
+
+        Parameters
+        ----------
+        cell : str or tuple
+            The cell to retrieve data from.
+        rank : int
+            The rank of the cell.
+        attr_name : str, optional
+            The name of the attribute to retrieve. Default is None.
+
+        Returns
+        -------
+        object
+            The value associated with the specified cell and attribute.
+
+        Raises
+        ------
+        KeyError
+            If the specified cell or attribute is not found.
+
+        Notes
+        -----
+        - For rank 0 cells (nodes), the data is retrieved from the 'nodes' dictionary.
+        - For rank 1 cells (edges), the data is retrieved from the 'edges' dictionary.
+        - For rank 2 cells (other cells), the data is retrieved from the 'cells' dictionary.
+        """
+        if rank == 0:
+            container = self.nodes
+        elif rank == 1:
+            container = self.edges
+        elif rank == 2:
+            container = self.cells
+        else:
+            raise ValueError(f"Invalid rank: {rank}. Rank must be 0, 1, or 2.")
+
+        if cell in container:
+            if attr_name is not None:
+                if attr_name in container[cell]:
+                    return container[cell][attr_name]
+                raise KeyError(
+                    f"Node '{cell}' does not have an attribute with key {attr_name}."
+                )
+
+            else:
+                return container[cell]
+
+        else:
+            if rank == 0:
+                raise KeyError(f"Node '{cell}' is not present in the complex.")
+            elif rank == 1:
+                raise KeyError(
+                    f"Edge '{cell}' is not present in the complex or does not have two nodes."
+                )
+            else:
+                raise KeyError(f"Cell '{cell}' is not present in the complex.")
+
     def remove_equivalent_cells(self):
         """Remove equivalent cells.
 
@@ -1154,6 +1257,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> import networkx as nx
+        >>> from toponetx import CellComplex
         >>> G = nx.path_graph(3)
         >>> cx = CellComplex(G)
         >>> cx.add_cell([1,2,3,4], rank=2)
@@ -1704,7 +1808,7 @@ class CellComplex(Complex):
     ):
         """Restrict cell complex to nodes.
 
-        This constructs a new cell complex  by restricting the cells in the cell complex to
+        This constructs a new cell complex by restricting the cells in the cell complex to
         the nodes referenced by node_set.
 
         Parameters
@@ -1747,6 +1851,10 @@ class CellComplex(Complex):
         The rank of an element in a cell complex is its dimension, so vertices have rank 0,
         edges have rank 1, and faces have rank 2.
 
+        Returns
+        -------
+        Combinatorial Complex : CombinatorialComplex
+
         Examples
         --------
         >>> CX = CellComplex()
@@ -1756,7 +1864,15 @@ class CellComplex(Complex):
         >>> CX= CX.to_combinatorial_complex()
         >>> CX.cells
         """
-        raise NotImplementedError()
+        cc = CombinatorialComplex()
+        for c in self.cells:
+            cc.add_cell(c, rank=2)
+        for c in self.edges:
+            cc.add_cell(c, rank=1)
+        for c in self.nodes:
+            cc.add_node(c)
+
+        return cc
 
     def to_hypergraph(self):
         """Convert to hypergraph.
