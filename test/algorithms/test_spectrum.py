@@ -1,7 +1,6 @@
 """Test spectrum module."""
 
-import unittest
-
+import pytest
 import scipy.sparse as sparse
 
 from toponetx.algorithms.spectrum import (
@@ -21,7 +20,7 @@ from toponetx.classes import CellComplex, CombinatorialComplex, SimplicialComple
 from toponetx.datasets.mesh import stanford_bunny
 
 
-class TestSpectrum(unittest.TestCase):
+class TestSpectrum:
     """Test spectrum module."""
 
     def test_normalize(self):
@@ -83,7 +82,7 @@ class TestSpectrum(unittest.TestCase):
 
         assert len(d) == len(SC.skeleton(1))
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
             set_hodge_laplacian_eigenvector_attrs(SC, 1, 2, "hi")
 
@@ -125,7 +124,3 @@ class TestSpectrum(unittest.TestCase):
         s = combinatorial_complex_adjacency_spectrum(CC, 0, 2)
 
         assert len(CC.nodes) == len(s)
-
-
-if __name__ == "__main__":
-    unittest.main()

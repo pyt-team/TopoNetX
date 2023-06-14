@@ -1,14 +1,13 @@
 """Unit tests for the combinatorial complex class."""
 
-import unittest
-
 import networkx as nx
+import pytest
 
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.hyperedge import HyperEdge
 
 
-class TestCombinatorialComplex(unittest.TestCase):
+class TestCombinatorialComplex:
     """Test CombinatorialComplex class."""
 
     def test_init_empty_cc(self):
@@ -102,7 +101,3 @@ class TestCombinatorialComplex(unittest.TestCase):
         assert B.shape == (4, 2)
         assert (B.T[0].todense() == [1, 1, 1, 0]).all()
         assert (B.T[1].todense() == [0, 1, 1, 1]).all()
-
-
-if __name__ == "__main__":
-    unittest.main()

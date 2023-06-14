@@ -342,9 +342,9 @@ class CombinatorialComplex(Complex):
         """Return detailed string representation."""
         return f"Combinatorial Complex with {len(self.nodes)} nodes and cells with ranks {self.ranks} and sizes {self.shape} "
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation."""
-        return f"CombinatorialComplex(name={self.name})"
+        return f"CombinatorialComplex(name='{self.name}')"
 
     def __len__(self):
         """Return number of nodes."""
@@ -1196,7 +1196,7 @@ class CombinatorialComplex(Complex):
         -------
         new Combinatorial Complex : NestedCombinatorialComplex
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
         # RNS = self.cells.restrict_to(element_subset=cell_set, name=name)
         # return NestedCombinatorialComplex(cells=RNS, name=name)
@@ -1220,7 +1220,7 @@ class CombinatorialComplex(Complex):
         new Combinatorial Complex : NestedCombinatorialComplex
 
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def from_networkx_graph(self, G):
         """Construct a combinatorial complex from a networkx graph.

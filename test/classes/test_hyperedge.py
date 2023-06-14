@@ -1,20 +1,19 @@
 """Test hyperedge class."""
 
-import unittest
-from collections.abc import Hashable, Iterable
+import pytest
 
 from toponetx.classes.hyperedge import HyperEdge
 
 
-class HyperEdgeTestCase(unittest.TestCase):
+class HyperEdgeTestCase:
     """Test case for the HyperEdge class."""
 
     def test_hyperedge_creation(self):
         """Test creating a HyperEdge object."""
         elements = (1, 2, 3)
         hyperedge = HyperEdge(elements)
-        self.assertEqual(len(hyperedge), 3)
-        self.assertEqual(tuple(hyperedge), elements)
+        assert len(hyperedge) == 3
+        assert tuple(hyperedge) == elements
 
         elements = (1,)
         hyperedge = HyperEdge(elements)
@@ -29,8 +28,8 @@ class HyperEdgeTestCase(unittest.TestCase):
         """Test getitem method."""
         hyperedge = HyperEdge(1)
         hyperedge["weight"] = 1
-        with self.assertRaises(KeyError):
-            hyperedge["weightss"]
+        with pytest.raises(KeyError):
+            _ = hyperedge["weightss"]
 
     def test_hyperedge_with_rank_and_attributes(self):
         """Test creating a HyperEdge object with rank and attributes."""
@@ -38,22 +37,22 @@ class HyperEdgeTestCase(unittest.TestCase):
         rank = 10
         attributes = {"color": "red", "weight": 2.5}
         hyperedge = HyperEdge(elements, rank=rank, **attributes)
-        self.assertEqual(hyperedge.rank, rank)
-        self.assertEqual(hyperedge["color"], attributes["color"])
-        self.assertEqual(hyperedge["weight"], attributes["weight"])
+        assert hyperedge.rank == rank
+        assert hyperedge["color"] == attributes["color"]
+        assert hyperedge["weight"] == attributes["weight"]
 
     def test_hyperedge_contains(self):
         """Test checking element containment in a HyperEdge."""
         elements = (1, 2, 3)
         hyperedge = HyperEdge(elements)
-        self.assertIn(1, hyperedge)
-        self.assertNotIn(4, hyperedge)
+        assert 1 in hyperedge
+        assert 4 not in hyperedge
 
     def test_hyperedge_iteration(self):
         """Test iterating over the elements of a HyperEdge."""
         elements = (1, 2, 3)
         hyperedge = HyperEdge(elements)
-        self.assertCountEqual(hyperedge, elements)
+        assert tuple(hyperedge) == elements
 
     def test_hyperedge_representation(self):
         """Test the string representation of a HyperEdge."""
@@ -93,14 +92,10 @@ class HyperEdgeTestCase(unittest.TestCase):
 
     def test_inite_method_non_hashabe(self):
         """Test non hashable."""
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             HyperEdge([1, [1], 2], rank=4)
 
     def test_duplicates_elements(self):
         """Test duplicates_elements."""
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             HyperEdge([1, 1, 2], rank=4)
-
-
-if __name__ == "__main__":
-    unittest.main()

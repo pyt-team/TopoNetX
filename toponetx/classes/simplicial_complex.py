@@ -225,9 +225,9 @@ class SimplicialComplex(Complex):
         """Return detailed string representation."""
         return f"Simplicial Complex with shape {self.shape} and dimension {self.dim}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation."""
-        return f"SimplicialComplex(name={self.name})"
+        return f"SimplicialComplex(name='{self.name}')"
 
     def __len__(self) -> int:
         """Compute number of simplices.
@@ -450,11 +450,14 @@ class SimplicialComplex(Complex):
 
     def remove_nodes(self, node_set: Iterable[Hashable]) -> None:
         """Remove the given nodes from the simplicial complex.
+
         Any simplices that become invalid due to the removal of nodes are also removed.
+
         Parameters
         ----------
         node_set : Iterable
             The nodes to be removed from the simplicial complex.
+
         Examples
         --------
         >>> SC = SimplicialComplex([(1, 2), (2, 3), (3, 4)])

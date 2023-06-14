@@ -230,9 +230,9 @@ class CellComplex(Complex):
         """Return detailed string representation."""
         return f"Cell Complex with {len(self.nodes)} nodes, {len(self.edges)} edges  and {len(self.cells)} 2-cells "
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation."""
-        return f"CellComplex(name={self.name})"
+        return f"CellComplex(name='{self.name}')"
 
     def __len__(self):
         """Return number of nodes."""

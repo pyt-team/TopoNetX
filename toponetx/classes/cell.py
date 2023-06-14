@@ -258,9 +258,9 @@ class Cell:
         """Check if the complex contains e."""
         return e in self._elements
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation of regular cell."""
-        return f"Cell{self.elements}"
+        return f"Cell({self.elements})"
 
     @property
     def boundary(self):
