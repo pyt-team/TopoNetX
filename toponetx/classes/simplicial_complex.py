@@ -448,6 +448,29 @@ class SimplicialComplex(Complex):
         else:
             raise KeyError("simplex is not a part of the simplicial complex")
 
+    def remove_nodes(self, node_set: Iterable[Hashable]) -> None:
+        """Remove the given nodes from the simplicial complex.
+        Any simplices that become invalid due to the removal of nodes are also removed.
+        Parameters
+        ----------
+        node_set : Iterable
+            The nodes to be removed from the simplicial complex.
+        Examples
+        --------
+        >>> SC = SimplicialComplex([(1, 2), (2, 3), (3, 4)])
+        >>> SC.remove_nodes([1])
+        >>> SC.simplices
+        SimplexView([(2,), (3,), (4,), (2, 3), (3, 4)])
+        """
+        removed_simplices = set()
+        for simplex in self:
+            if any(node in simplex for node in node_set):
+                removed_simplices.add(simplex)
+
+        # Delete the simplices from largest to smallest. This way they are maximal when they are deleted.
+        for simplex in sorted(removed_simplices, key=len, reverse=True):
+            self.remove_maximal_simplex(simplex)
+
     def add_node(self, node: Hashable, **attr) -> None:
         """Add node to simplicial complex.
 
