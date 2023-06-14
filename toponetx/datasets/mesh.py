@@ -1,11 +1,12 @@
 """Various examples of named meshes represented as complexes."""
 
 import zipfile
+from io import BytesIO
 from pathlib import Path
 from typing import Literal, Union, overload
 
 import numpy as np
-import wget
+import requests
 
 from toponetx import CellComplex, SimplicialComplex
 
@@ -125,14 +126,13 @@ def shrec_16(size: Literal["full", "small"] = "full"):
         raise ValueError(f"size must be 'full' or 'small' got {size}.")
     ds_name, url = SHREC_DS_MAP[size]
 
-    zip_file = DIR / f"{ds_name}.zip"
     training = DIR / f"{ds_name}_training.npz"
     testing = DIR / f"{ds_name}_testing.npz"
 
     if not training.exists() or not testing.exists():
         print(f"downloading shrec 16 {size} dataset...\n")
-        wget.download(url, str(DIR))
-        with zipfile.ZipFile(zip_file, "r") as zip_ref:
+        r = requests.get(url)
+        with zipfile.ZipFile(BytesIO(r.content)) as zip_ref:
             zip_ref.extractall(DIR)
         print("done!")
 
@@ -194,13 +194,12 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
         raise ValueError(f"data must be 'alien', 'vase', or 'chair' got {data}.")
     ds_name, url = COSEG_DS_MAP[data]
 
-    zip_file = DIR / f"{ds_name}.zip"
     unziped_file = DIR / f"{ds_name}.npz"
 
     if not unziped_file.exists():
         print(f"downloading {data} dataset...\n")
-        wget.download(url, str(DIR))
-        with zipfile.ZipFile(zip_file, "r") as zip_ref:
+        r = requests.get(url)
+        with zipfile.ZipFile(BytesIO(r.content)) as zip_ref:
             zip_ref.extractall(DIR)
         print("done!")
 
