@@ -102,8 +102,11 @@ class Complex:
         pass
 
     @abc.abstractmethod
-    def remove_nodes(self, node_set):
-        """Return dimension of the complex."""
+    def remove_nodes(self, node_set) -> None:
+        """Remove the given nodes from the complex.
+
+        Any elements that become invalid due to the removal of nodes are also removed.
+        """
         pass
 
     @abc.abstractmethod

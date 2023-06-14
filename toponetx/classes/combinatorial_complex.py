@@ -506,7 +506,7 @@ class CombinatorialComplex(Complex):
         self._remove_node(node)
         return self
 
-    def remove_nodes(self, node_set):
+    def remove_nodes(self, node_set) -> None:
         """Remove nodes from cells.
 
         This also deletes references in combinatorial complex nodes.
@@ -515,14 +515,9 @@ class CombinatorialComplex(Complex):
         ----------
         node_set : an iterable of hashables or Entities
             Nodes in CC
-
-        Returns
-        -------
-        Combinatorial Complex : NestedCombinatorialComplex
         """
         for node in node_set:
             self.remove_node(node)
-        return self
 
     def _add_node(self, node, **attr):
         """Add one node as hyperedge."""

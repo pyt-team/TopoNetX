@@ -294,6 +294,24 @@ class TestSimplicialComplex(unittest.TestCase):
             SC.add_simplex((1, 2, 3, 4), weight=1)
             SC.remove_maximal_simplex((1, 2, 3))
 
+    def test_remove_nodes(self) -> None:
+        """Test remove_nodes method."""
+        SC = SimplicialComplex([[0, 1], [1, 2, 3], [2, 3, 4], [4, 5]])
+        SC.remove_nodes([2, 5])
+
+        assert [0, 1] in SC
+        assert [1, 3] in SC
+        assert [3, 4] in SC
+        assert [4] in SC
+        assert [2, 3] not in SC
+        assert [2, 4] not in SC
+
+        assert SC.is_maximal([0, 1])
+        assert SC.is_maximal([1, 3])
+        assert SC.is_maximal([3, 4])
+        assert SC.is_maximal([4])
+        assert not SC.is_maximal([1])
+
     def test_skeleton_and_cliques(self):
         """Test skeleton and cliques methods."""
         G = nx.karate_club_graph()
