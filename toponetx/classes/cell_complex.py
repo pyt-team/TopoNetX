@@ -574,7 +574,7 @@ class CellComplex(Complex):
             if node in cell:
                 self.remove_cell(cell)
 
-    def remove_nodes(self, node_set: Iterable[Hashable]):
+    def remove_nodes(self, node_set: Iterable[Hashable]) -> None:
         """Remove nodes from cells.
 
         This also deletes references in cell complex nodes.

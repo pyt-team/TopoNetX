@@ -58,7 +58,7 @@ class TestComplex(unittest.TestCase):
             """Get the node object from the complex."""
             raise NotImplementedError
 
-        def remove_nodes(self, node_set):
+        def remove_nodes(self, node_set) -> None:
             """Remove nodes from the complex."""
             raise NotImplementedError
 

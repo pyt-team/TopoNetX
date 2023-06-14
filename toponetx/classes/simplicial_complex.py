@@ -477,9 +477,9 @@ class SimplicialComplex(Complex):
                         continue
                     else:
                         s = s.nodes
-                        self._simplex_set.faces_dict[len(s) - 1][s][
-                            "membership"
-                        ].remove(simplex_)
+                        self._simplex_set.faces_dict[len(s) - 1][s]["membership"] -= {
+                            simplex_
+                        }
                         if (
                             len(
                                 self._simplex_set.faces_dict[len(s) - 1][s][
@@ -562,6 +562,32 @@ class SimplicialComplex(Complex):
         >>> SC.remove_maximal_simplex((1, 2, 3, 4, 5))
         """
         self._remove_maximal_simplex(simplex)
+
+    def remove_nodes(self, node_set: Iterable[Hashable]) -> None:
+        """Remove the given nodes from the simplicial complex.
+
+        Any simplices that become invalid due to the removal of nodes are also removed.
+
+        Parameters
+        ----------
+        node_set : Iterable
+            The nodes to be removed from the simplicial complex.
+
+        Examples
+        --------
+        >>> SC = SimplicialComplex([(1, 2), (2, 3), (3, 4)])
+        >>> SC.remove_nodes([1])
+        >>> SC.simplices
+        SimplexView([(2,), (3,), (4,), (2, 3), (3, 4)])
+        """
+        removed_simplices = set()
+        for simplex in self:
+            if any(node in simplex for node in node_set):
+                removed_simplices.add(simplex)
+
+        # Delete the simplices from largest to smallest. This way they are maximal when they are deleted.
+        for simplex in sorted(removed_simplices, key=len, reverse=True):
+            self.remove_maximal_simplex(simplex)
 
     def add_node(self, node, **attr):
         """Add node to simplicial complex."""
