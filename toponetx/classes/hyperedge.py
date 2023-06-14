@@ -21,7 +21,7 @@ class HyperEdge:
     rank : int, optional
         The rank of the hyperedge. Default is None.
     name : str, optional
-        The name of the hyperedge. Default is None.
+        The name of the hyperedge.
     **attr : additional attributes
         Additional attributes of the hyperedge, as keyword arguments.
 
@@ -33,11 +33,8 @@ class HyperEdge:
     >>> ac3 = HyperEdge(("a", "b", "c"), rank=10)
     """
 
-    def __init__(self, elements, rank=None, name=None, **attr):
-        if name is None:
-            self.name = ""
-        else:
-            self.name = name
+    def __init__(self, elements, rank=None, name: str = "", **attr) -> None:
+        self.name = name
 
         if isinstance(elements, Hashable) and not isinstance(elements, Iterable):
             elements = frozenset([elements])

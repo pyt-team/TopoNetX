@@ -21,15 +21,12 @@ class CellView:
 
     Parameters
     ----------
-    name : str
+    name : str, optional
         The name of the cell view.
     """
 
-    def __init__(self, name=None):
-        if name is None:
-            self.name = "_"
-        else:
-            self.name = name
+    def __init__(self, name: str = "") -> None:
+        self.name = name
 
         # Initialize a dictionary to hold cells, with keys being the tuple
         # that defines the cell, and values being dictionaries of cell objects
@@ -195,7 +192,7 @@ class HyperEdgeView:
 
     Parameters
     ----------
-    name : str
+    name : str, optional
         The name of the view.
 
     Examples
@@ -203,13 +200,8 @@ class HyperEdgeView:
     >>> hev = HyperEdgeView()
     """
 
-    def __init__(self, name=None):
-
-        if name is None:
-            self.name = ""
-        else:
-            self.name = name
-
+    def __init__(self, name: str = "") -> None:
+        self.name = name
         self.hyperedge_dict = {}
 
     @staticmethod
@@ -447,7 +439,7 @@ class SimplexView:
     Parameters
     ----------
     name : str, optional
-        Name of the SimplexView instance, defaults to "_".
+        Name of the SimplexView instance.
 
     Attributes
     ----------
@@ -472,18 +464,8 @@ class SimplexView:
         Returns a string representation of the SimplexView instance.
     """
 
-    def __init__(self, name=None):
-        """Initialize a SimplexView instance.
-
-        Parameters
-        ----------
-        name : str, optional
-            Name of the SimplexView instance, defaults to "_".
-        """
-        if name is None:
-            self.name = "_"
-        else:
-            self.name = name
+    def __init__(self, name: str = "") -> None:
+        self.name = name
 
         self.max_dim = -1
         self.faces_dict = []
@@ -605,11 +587,8 @@ class SimplexView:
 class NodeView:
     """Node view class."""
 
-    def __init__(self, objectdict, cell_type, name=None):
-        if name is None:
-            self.name = "_"
-        else:
-            self.name = name
+    def __init__(self, objectdict, cell_type, name: str = "") -> None:
+        self.name = name
         if len(objectdict) != 0:
             self.nodes = objectdict[0]
         else:

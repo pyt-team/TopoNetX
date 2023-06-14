@@ -95,13 +95,10 @@ class SimplicialComplex(Complex):
     SimplexView([(0,), (1,), (3,), (4,), (2,), (0, 1), (0, 3), (0, 4), (1, 4), (1, 2), (1, 3), (2, 3), (1, 2, 3)])
     """
 
-    def __init__(self, simplices=None, name=None, **attr):
+    def __init__(self, simplices=None, name: str = "", **attr):
         super().__init__()
 
-        if name is None:
-            self.name = ""
-        else:
-            self.name = name
+        self.name = name
 
         self._simplex_set = SimplexView()
 

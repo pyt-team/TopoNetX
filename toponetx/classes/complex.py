@@ -35,7 +35,7 @@ class Complex:
     and computer science, such as geometric modeling, data analysis, and machine learning.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @property

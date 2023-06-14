@@ -37,11 +37,8 @@ class Simplex:
     >>> simplex3 = Simplex((1, 2, 4, 5), weight=1)
     """
 
-    def __init__(self, elements, name=None, construct_tree=True, **attr):
-        if name is None:
-            self.name = ""
-        else:
-            self.name = name
+    def __init__(self, elements, name: str = "", construct_tree=True, **attr) -> None:
+        self.name = name
         self.construct_tree = construct_tree
         self.nodes = frozenset(elements)
         if len(self.nodes) != len(elements):

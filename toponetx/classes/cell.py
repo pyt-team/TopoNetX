@@ -20,7 +20,7 @@ class Cell:
         An iterable that contains hashable objects representing the nodes of the cell. The order of the elements is important
         and defines the cell up to cyclic permutation.
     name : str, optional
-        A string representing the name of the cell. The default value is None.
+        A string representing the name of the cell.
     regular : bool, optional
         A boolean indicating whether the cell satisfies the regularity condition. The default value is True.
         A 2D cell is regular if and only if there is no repetition in the boundary edges that define the cell.
@@ -56,11 +56,8 @@ class Cell:
     ((0, 1), (0, 0))]
     """
 
-    def __init__(self, elements, name=None, regular=True, **attr):
-        if name is None:
-            self.name = "_"
-        else:
-            self.name = name
+    def __init__(self, elements, name: str = "", regular=True, **attr) -> None:
+        self.name = name
         self._regular = regular
         elements = list(elements)
         self._boundary = list(

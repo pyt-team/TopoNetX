@@ -115,13 +115,10 @@ class CellComplex(Complex):
     >>> CX.is_regular
     """
 
-    def __init__(self, cells=None, name=None, regular=True, **attr):
+    def __init__(self, cells=None, name: str = "", regular=True, **attr) -> None:
         super().__init__()
 
-        if not name:
-            self.name = ""
-        else:
-            self.name = name
+        self.name = name
 
         self._regular = regular
         self._G = Graph()
