@@ -3,7 +3,7 @@
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import Literal, Union, overload
+from typing import Literal, overload
 
 import numpy as np
 import requests
@@ -49,7 +49,7 @@ def stanford_bunny(complex_type: Literal["simplicial"] = ...) -> SimplicialCompl
 
 def stanford_bunny(
     complex_type: Literal["cell", "simplicial"] = "simplicial"
-) -> Union[CellComplex, SimplicialComplex]:
+) -> CellComplex | SimplicialComplex:
     """Load the Stanford Bunny mesh as a complex.
 
     Parameters
