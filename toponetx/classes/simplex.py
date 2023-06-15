@@ -162,7 +162,7 @@ class Simplex:
         :return: A string representation of the simplex.
         :rtype: str
         """
-        return f"Simplex{tuple(self.nodes)}"
+        return f"Simplex({tuple(self.nodes)})"
 
     def __str__(self):
         """Return string representation of the simplex.

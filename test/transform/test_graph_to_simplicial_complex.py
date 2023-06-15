@@ -1,8 +1,7 @@
 """Test graph to simplicial complex transformation."""
 
-import unittest
-
 import networkx as nx
+import pytest
 
 from toponetx.transform.graph_to_simplicial_complex import (
     graph_2_clique_complex,
@@ -10,7 +9,7 @@ from toponetx.transform.graph_to_simplicial_complex import (
 )
 
 
-class TestGraphToSimplicialComplex(unittest.TestCase):
+class TestGraphToSimplicialComplex:
     """Test graph to simplicial complex transformation."""
 
     def test_graph_2_neighbor_complex(self):
@@ -49,9 +48,3 @@ class TestGraphToSimplicialComplex(unittest.TestCase):
         assert sc.dim == 1
         assert (0, 2, 3) not in sc
         assert (0, 1, 2) not in sc
-
-        return
-
-
-if __name__ == "__main__":
-    unittest.main()

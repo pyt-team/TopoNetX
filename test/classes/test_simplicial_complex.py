@@ -1,13 +1,9 @@
 """Test simplicial complex class."""
 
-import unittest
-
 import hypernetx as hnx
 import networkx as nx
 import numpy as np
 import pytest
-import scipy
-import trimesh
 from gudhi import SimplexTree
 
 from toponetx import (
@@ -19,54 +15,51 @@ from toponetx import (
 )
 
 
-class TestSimplicialComplex(unittest.TestCase):
+class TestSimplicialComplex:
     """Test SimplicialComplex class."""
 
     def test_iterable_simplices(self):
         """Test TypeError for simplices not iterable."""
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             SimplicialComplex(simplices=1)
 
     def test_shape_property(self):
         """Test shape property."""
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        self.assertEqual(sc.shape, (5, 6, 2))
+        assert sc.shape == (5, 6, 2)
 
         sc = SimplicialComplex()
-        self.assertEqual(sc.shape, tuple())
+        assert sc.shape == tuple()
 
     def test_dim_property(self):
         """Test dim property."""
-        # Test the dim property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        self.assertEqual(sc.dim, 2)
+        assert sc.dim == 2
 
     def test_nodes_property(self):
         """Test nodes property."""
-        # Test the nodes property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         nodes = sc.nodes
-        self.assertEqual(len(nodes), 5)
-        self.assertIn([1], nodes)
-        self.assertNotIn([8], nodes)
+        assert len(nodes) == 5
+        assert [1] in nodes
+        assert [8] not in nodes
 
     def test_simplices_property(self):
         """Test simplices property."""
-        # Test the simplices property of the SimplicialComplex class
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         simplices = sc.simplices
-        self.assertEqual(len(simplices), 13)
-        self.assertIn([1, 2, 3], simplices)
-        self.assertIn([2, 3, 4], simplices)
-        self.assertIn([0, 1], simplices)
+        assert len(simplices) == 13
+        assert [1, 2, 3] in simplices
+        assert [2, 3, 4] in simplices
+        assert [0, 1] in simplices
         # ... add more assertions based on the expected simplices
 
     def test_is_maximal(self):
         """Test is_maximal method."""
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        self.assertTrue(sc.is_maximal([1, 2, 3]))
+        assert sc.is_maximal([1, 2, 3])
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             sc.is_maximal([1, 2, 3, 4])
 
     def test_contructor_using_graph(self):
@@ -84,7 +77,7 @@ class TestSimplicialComplex(unittest.TestCase):
 
     def test_skeleton_raise_errors(self):
         """Test skeleton raises."""
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             G = nx.Graph()
             G.add_edge(0, 1)
             G.add_edge(2, 5)
@@ -92,7 +85,7 @@ class TestSimplicialComplex(unittest.TestCase):
             SC = SimplicialComplex(G)
             SC.skeleton(-2)
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             G = nx.Graph()
             G.add_edge(0, 1)
             G.add_edge(2, 5)
@@ -118,7 +111,7 @@ class TestSimplicialComplex(unittest.TestCase):
         G.add_edge(2, 5)
         G.add_edge(5, 4, weight=5)
         SC = SimplicialComplex(G, name="graph complex")
-        assert (repr(SC)) == "SimplicialComplex(name=graph complex)"
+        assert (repr(SC)) == "SimplicialComplex(name='graph complex')"
         assert SC.name == "graph complex"
 
     def test_getittem__(self):
@@ -129,9 +122,9 @@ class TestSimplicialComplex(unittest.TestCase):
         G.add_edge(5, 4, weight=5)
         SC = SimplicialComplex(G, name="graph complex")
         SC.add_simplex((1, 2, 3), heat=5)
-        # with self.assertRaises(ValueError):
+        # with pytest.raises(ValueError):
         assert SC[(1, 2, 3)]["heat"] == 5
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             SC[(1, 2, 3, 4, 5)]["heat"]
 
     def test_setitem__(self):
@@ -142,7 +135,7 @@ class TestSimplicialComplex(unittest.TestCase):
         G.add_edge(5, 4, weight=5)
         SC = SimplicialComplex(G, name="graph complex")
         SC.add_simplex((1, 2, 3), heat=5)
-        # with self.assertRaises(ValueError):
+        # with pytest.raises(ValueError):
 
         SC[(1, 2, 3)]["heat"] = 6
 
@@ -176,7 +169,7 @@ class TestSimplicialComplex(unittest.TestCase):
 
     def test_add_simplices_from(self):
         """Test add simplices from."""
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             SC = SimplicialComplex()
             SC.add_simplices_from(4)
 
@@ -185,12 +178,18 @@ class TestSimplicialComplex(unittest.TestCase):
         SC = SimplicialComplex()
         SC.add_node(9)
         assert 9 in SC
-        with self.assertRaises(TypeError):
-            SC.add_node({2, 3})
+        with pytest.raises(TypeError):
+            SC.add_node({1, 2})
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             s = Simplex((1, 2, 3, 4))
             SC.add_node(s)
+
+        SC = SimplicialComplex()
+        assert SC.dim == -1
+        SC.add_node(9)
+        assert SC.dim == 0
+        assert SC[9]["is_maximal"] is True
 
         SC = SimplicialComplex()
         assert SC.dim == -1
@@ -227,11 +226,11 @@ class TestSimplicialComplex(unittest.TestCase):
         assert (6,) in SC.simplices
 
         # simplex cannot contain unhashable elements
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             SC.add_simplex([[1, 2], [2, 3]])
 
         # simplex cannot contain duplicate nodes
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.add_simplex((1, 2, 2))
 
     def test_remove_maximal_simplex(self):
@@ -260,7 +259,7 @@ class TestSimplicialComplex(unittest.TestCase):
         c1 = Simplex((1, 2, 3, 4, 5))
         SC.add_simplex(c1)
         SC.remove_maximal_simplex((1, 2, 3, 4, 5))
-        self.assertNotIn((1, 2, 3, 4, 5), SC)
+        assert (1, 2, 3, 4, 5) not in SC
 
         # check removal with Simplex
         SC = SimplicialComplex()
@@ -268,16 +267,16 @@ class TestSimplicialComplex(unittest.TestCase):
         c1 = Simplex((1, 2, 3, 4, 5))
         SC.add_simplex(c1)
         SC.remove_maximal_simplex(c1)
-        self.assertNotIn((1, 2, 3, 4, 5), SC)
+        assert (1, 2, 3, 4, 5) not in SC
 
         # check error when simplex not in complex
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             SC = SimplicialComplex()
             SC.add_simplex((1, 2, 3, 4), weight=1)
             SC.remove_maximal_simplex([5, 6, 7])
 
         # only maximal simplices can be removed
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC = SimplicialComplex()
             SC.add_simplex((1, 2, 3, 4), weight=1)
             SC.remove_maximal_simplex((1, 2, 3))
@@ -385,14 +384,14 @@ class TestSimplicialComplex(unittest.TestCase):
         np.testing.assert_array_equal(L_hodge.toarray(), np.abs(D - A))
         expected_row = {(0,): 0, (1,): 1, (2,): 2, (3,): 3, (4,): 4}
 
-        self.assertDictEqual(row, expected_row)
+        assert row == expected_row
 
     def test_hodge_laplacian_matrix_rank_2(self):
         """Test unsigned hodge_laplacian_matrix method with index for different ranks."""
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         column, L_hodge = SC.hodge_laplacian_matrix(rank=2, signed=False, index=True)
         expected_col = {(1, 2, 3): 0, (2, 3, 4): 1}
-        self.assertDictEqual(column, expected_col)
+        assert column == expected_col
         np.testing.assert_array_equal(L_hodge.A, np.array([[3, 1], [1, 3]]))
 
     def test_hodge_laplacian_matrix_rank_1(self):
@@ -407,7 +406,7 @@ class TestSimplicialComplex(unittest.TestCase):
             (2, 4): 4,
             (3, 4): 5,
         }
-        self.assertDictEqual(column, expected_col)
+        assert column == expected_col
         np.testing.assert_array_equal(
             L_hodge.A,
             np.array(
@@ -422,7 +421,7 @@ class TestSimplicialComplex(unittest.TestCase):
             ),
         )
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.hodge_laplacian_matrix(rank=3)
 
     def test_adjacency_matrix(self):
@@ -448,18 +447,18 @@ class TestSimplicialComplex(unittest.TestCase):
 
         ind, A = SC.adjacency_matrix(rank=0, index=True)
         expected_ind = {(0,): 0, (1,): 1, (2,): 2, (3,): 3, (4,): 4}
-        self.assertDictEqual(ind, expected_ind)
+        assert ind == expected_ind
 
     def test_get_boundaries(self):
         """Test the get_boundaries method."""
         simplices = [(1, 2, 3), (2, 3, 4), (0, 1)]
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             SimplicialComplex.get_boundaries(1)
 
         boundaries = SimplicialComplex.get_boundaries(simplices)
-        self.assertIn(frozenset((1, 2)), boundaries)
-        self.assertIn(frozenset((1, 3)), boundaries)
-        self.assertIn(frozenset((2, 3)), boundaries)
+        assert frozenset((1, 2)) in boundaries
+        assert frozenset((1, 3)) in boundaries
+        assert frozenset((2, 3)) in boundaries
 
         # test for min dim/max dim combinations
         boundaries = SimplicialComplex.get_boundaries(simplices, min_dim=2)
@@ -491,8 +490,8 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex([1, 2, 4])
         SC.add_simplex([3, 4, 8])
         cofaces = SC.get_cofaces([1, 2, 4], codimension=1)
-        self.assertIn(frozenset({1, 2, 3, 4}), cofaces)
-        self.assertNotIn((3, 4, 8), cofaces)
+        assert frozenset({1, 2, 3, 4}) in cofaces
+        assert frozenset({3, 4, 8}) not in cofaces
         # ... add more assertions based on the expected cofaces
 
     def test_get_star(self):
@@ -502,8 +501,8 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex([1, 2, 4])
         SC.add_simplex([3, 4, 8])
         star = SC.get_star([1, 2, 4])
-        self.assertIn(frozenset({1, 2, 4}), star)
-        self.assertIn(frozenset({1, 2, 3, 4}), star)
+        assert frozenset({1, 2, 4}) in star
+        assert frozenset({1, 2, 3, 4}) in star
         # ... add more assertions based on the expected star
 
     def test_set_simplex_attributes(self):
@@ -514,7 +513,7 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex([3, 4, 8])
         d = {(1, 2, 3): "red", (1, 2, 4): "blue"}
         SC.set_simplex_attributes(d, name="color")
-        self.assertEqual(SC[(1, 2, 3)]["color"], "red")
+        assert SC[(1, 2, 3)]["color"] == "red"
 
         # test for non-existing simplex
         d = {(3, 4, 5): "Nope"}
@@ -528,16 +527,16 @@ class TestSimplicialComplex(unittest.TestCase):
 
         edges = SimplicialComplex().get_edges_from_matrix(matrix)
 
-        self.assertEqual(set(edges), set(expected_edges))
+        assert set(edges) == set(expected_edges)
 
     def test_incidence_matrix(self):
         """Test incidence matrix."""
         SC = SimplicialComplex()
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 5])
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.incidence_matrix(10)
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.incidence_matrix(-1)
 
         B1 = SC.incidence_matrix(1)
@@ -599,14 +598,14 @@ class TestSimplicialComplex(unittest.TestCase):
     def test_is_triangular_mesh(self):
         """Test is_triangular_mesh."""
         SC = stanford_bunny()
-        self.assertTrue(SC.is_triangular_mesh())
+        assert SC.is_triangular_mesh()
 
         # test for non triangular mesh
         SC = SimplicialComplex()
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 4])
         SC.add_simplex([3, 4, 8])
-        self.assertFalse(SC.is_triangular_mesh())
+        assert not SC.is_triangular_mesh()
 
     def test_to_trimesh(self):
         """Test to_trimesh."""
@@ -619,7 +618,7 @@ class TestSimplicialComplex(unittest.TestCase):
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 4])
         SC.add_simplex([3, 4, 8])
-        with self.assertRaises(TopoNetXError):
+        with pytest.raises(TopoNetXError):
             SC.to_trimesh()
 
     def test_laplace_beltrami_operator(self):
@@ -628,7 +627,7 @@ class TestSimplicialComplex(unittest.TestCase):
 
         laplacian_matrix = SC.laplace_beltrami_operator()
 
-        self.assertIsInstance(laplacian_matrix, np.ndarray)
+        assert isinstance(laplacian_matrix, np.ndarray)
 
     def test_from_nx_graph(self):
         """Test from networkx graph."""
@@ -636,12 +635,12 @@ class TestSimplicialComplex(unittest.TestCase):
         G.add_edge(1, 2, weight=2)
         G.add_edge(3, 4, weight=4)
         SC = SimplicialComplex.from_nx_graph(G)
-        self.assertEqual(SC[(1, 2)]["weight"], 2)
+        assert SC[(1, 2)]["weight"] == 2
 
     def test_is_connected(self):
         """Test is connected."""
         SC = stanford_bunny()
-        self.assertTrue(SC.is_connected())
+        assert SC.is_connected()
 
     def test_simplicial_closure_of_hypergraph(self):
         """Test simplicial_closure_of_hypergraph."""
@@ -809,13 +808,13 @@ class TestSimplicialComplex(unittest.TestCase):
         # Test case 2: Rank is below the valid range
         rank = 0
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.down_laplacian_matrix(rank, signed, weight, index)
 
         # Test case 3: Rank is above the valid range
         rank = 5
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.down_laplacian_matrix(rank, signed, weight, index)
 
     def test_adjacency_matrix2(self):
@@ -838,13 +837,13 @@ class TestSimplicialComplex(unittest.TestCase):
         # Test case 2: Rank is below the valid range
         rank = -1
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.adjacency_matrix(rank, signed, weight, index)
 
         # Test case 3: Rank is above the valid range
         rank = 5
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.adjacency_matrix(rank, signed, weight, index)
 
     def test_coadjacency_matrix(self):
@@ -866,13 +865,13 @@ class TestSimplicialComplex(unittest.TestCase):
         # Test case 2: Rank is below the valid range
         rank = 0
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.coadjacency_matrix(rank, signed, weight, index)
 
         # Test case 3: Rank is above the valid range
         rank = 5
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SC.coadjacency_matrix(rank, signed, weight, index)
 
         # Test case 4: index is True
@@ -917,7 +916,3 @@ class TestSimplicialComplex(unittest.TestCase):
         SC2.remove_maximal_simplex([1, 2, 3])
         assert 1 in SC
         assert (1, 2, 3) in SC
-
-
-if __name__ == "__main__":
-    unittest.main()

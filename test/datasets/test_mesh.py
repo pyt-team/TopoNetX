@@ -1,12 +1,12 @@
 """Test mesh dataset."""
 
-import unittest
+import pytest
 
 from toponetx import CellComplex, SimplicialComplex
 from toponetx.datasets.mesh import coseg, shrec_16, stanford_bunny
 
 
-class TestMeshDatasets(unittest.TestCase):
+class TestMeshDatasets:
     """Test datasets utils."""
 
     def test_stanford_bunny(self):
@@ -19,7 +19,7 @@ class TestMeshDatasets(unittest.TestCase):
 
         assert len(cellbunny) == 2503
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             stanford_bunny("polyhedral")
 
     def test_shrec_16(self):
@@ -53,7 +53,3 @@ class TestMeshDatasets(unittest.TestCase):
         assert nodes == n_nodes[0]
         assert faces == n_faces[0]
         assert len(coseg_data["face_label"][0]) == faces
-
-
-if __name__ == "__main__":
-    unittest.main()

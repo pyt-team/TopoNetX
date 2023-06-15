@@ -1,16 +1,15 @@
 """Test cell complex class."""
 
-import unittest
-
 import networkx as nx
 import numpy as np
+import pytest
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.exception import TopoNetXError
 
 
-class TestCellComplex(unittest.TestCase):
+class TestCellComplex:
     """Test cell complex class."""
 
     def test_init_empty_cell_complex(self):
@@ -53,7 +52,7 @@ class TestCellComplex(unittest.TestCase):
         gr.add_edge(2, 0)
         gr.add_edge(1, 2)
         CX = CellComplex(gr)
-        self.assertEqual(CX.dim, 1)
+        assert CX.dim == 1
         assert len(CX.cells) == 0
         assert len(CX.nodes) == 3
         assert len(CX.edges) == 3
@@ -75,8 +74,8 @@ class TestCellComplex(unittest.TestCase):
         # allows for constructions of non-regular cells
         CX = CellComplex(regular=False)
         # the "is_regular" method checks if any non-regular cells are added
-        self.assertEqual(CX.is_regular, True)
-        self.assertEqual(CX.dim, 0)
+        assert CX.is_regular
+        assert CX.dim == 0
 
         # test non-regular cell complex
         CX = CellComplex(regular=False)
@@ -437,7 +436,7 @@ class TestCellComplex(unittest.TestCase):
         assert len(cc.edges) == 1
         assert len(cc.nodes) == 2
 
-        with self.assertRaises(TopoNetXError):
+        with pytest.raises(TopoNetXError):
             cc.remove_node(980)
 
     def test_add_cells_from_list_cells(self):
@@ -496,20 +495,20 @@ class TestCellComplex(unittest.TestCase):
     def test_repr(self):
         """Test the string representation of the cell complex."""
         cx = CellComplex(name="test")
-        self.assertEqual(repr(cx), "CellComplex(name=test)")
+        assert repr(cx) == "CellComplex(name='test')"
 
     def test_len(self):
         """Test the length of the cell complex."""
         cx = CellComplex()
         cx.add_cell([1, 2, 3], rank=2)
-        self.assertEqual(len(cx), 3)
+        assert len(cx) == 3
 
     def test_iter(self):
         """Test the iterator of the cell complex."""
         cx = CellComplex()
         cx.add_cell([1, 2, 3], rank=2)
         cx.add_cell([2, 3, 4], rank=2)
-        self.assertEqual(set(iter(cx)), {1, 2, 3, 4})
+        assert set(iter(cx)) == {1, 2, 3, 4}
 
     def test_cell_equivalence_class(self):
         """Test the cell equivalence class method."""
@@ -526,7 +525,7 @@ class TestCellComplex(unittest.TestCase):
 
         equivalence_classes = cx._cell_equivalence_class()
 
-        self.assertEqual(len(equivalence_classes), 4)
+        assert len(equivalence_classes) == 4
 
     def test__remove_equivalent_cells(self):
         """Test the remove equivalent cells method."""
@@ -611,7 +610,7 @@ class TestCellComplex(unittest.TestCase):
         assert CX.size((2, 3, 4, 5), node_set=[3, 4, 5]) == 3
         assert CX.size((5, 6, 7, 8), node_set=[6, 7, 8]) == 3
         assert CX.size(c, node_set=[1, 2, 3]) == 3
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             CX.size((1, 2, 3, 4, 5, 5, 6))
 
     def test_insert_cell(self):
@@ -715,7 +714,7 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([3, 4, 8], rank=2)
         CX.set_cell_attributes(d, 2)
         attributes = CX.get_cell_attributes("color", 2)
-        self.assertEqual(attributes, {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"})
+        assert attributes == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
 
     def test_remove_equivalent_cells(self):
         """Unit test for the remove_equivalent_cells method."""
@@ -729,9 +728,9 @@ class TestCellComplex(unittest.TestCase):
             rank=2,
         )
         CX.add_cell([3, 4, 8], rank=2)
-        self.assertEqual(len(CX.cells), 5)
+        assert len(CX.cells) == 5
         CX.remove_equivalent_cells()
-        self.assertEqual(len(CX.cells), 3)
+        assert len(CX.cells) == 3
 
     def test_is_insertable_cycle(self):
         """Unit test for the is_insertable_cycle method."""
@@ -739,9 +738,10 @@ class TestCellComplex(unittest.TestCase):
 
         CX.add_cell([1, 2, 3, 4], rank=2)
         CX.add_cell([3, 4, 5], rank=2)
-        self.assertTrue(CX.is_insertable_cycle([1, 2, 3, 4]))
-        self.assertFalse(CX.is_insertable_cycle([1, 2, 3, 4, 1, 2]))
-        self.assertFalse(CX.is_insertable_cycle([1, 2, 1]))
+
+        assert CX.is_insertable_cycle([1, 2, 3, 4])
+        assert not CX.is_insertable_cycle([1, 2, 3, 4, 1, 2])
+        assert not CX.is_insertable_cycle([1, 2, 1])
 
     def test_incidence_matrix(self):
         """Unit test for the incidence_matrix method."""
@@ -751,10 +751,13 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([3, 4, 5], rank=2)
         B1 = CX.incidence_matrix(1)
         B2 = CX.incidence_matrix(2)
-        self.assertEqual(
-            B1.dot(B2).todense().tolist(),
-            [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
-        )
+        assert B1.dot(B2).todense().tolist() == [
+            [0.0, 0.0],
+            [0.0, 0.0],
+            [0.0, 0.0],
+            [0.0, 0.0],
+            [0.0, 0.0],
+        ]
 
     def test_restrict_to_cells(self):
         """Test restricting a cell complex to a subset of cells and edges."""
@@ -839,22 +842,22 @@ class TestCellComplex(unittest.TestCase):
         """Test for the _insert_cell method."""
         CX = CellComplex()
         CX._insert_cell([1, 2, 3], color="red")
-        self.assertEqual(len(CX._cells._cells), 1)
+        assert len(CX._cells._cells) == 1
         CX._insert_cell((1, 2, 3), attr1=5)
-        self.assertEqual(len(CX._cells._cells), 1)
+        assert len(CX._cells._cells) == 1
         CX._insert_cell(Cell([1, 2, 3], name="Cell 1"))
-        self.assertEqual(len(CX._cells._cells), 1)
+        assert len(CX._cells._cells) == 1
         CX._insert_cell([1, 2, 4])
-        self.assertEqual(len(CX._cells._cells), 2)
+        assert len(CX._cells._cells) == 2
 
     def test_insert_cell_invalid_input(self):
         """Test _insert_cell method with invalid input."""
         CX = CellComplex()
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             CX._insert_cell("invalid_input")
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             CX._insert_cell(123)
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             CX._insert_cell({"elements": [1, 2, 3]})
 
     def test_delete_cell_2(self):
@@ -863,16 +866,16 @@ class TestCellComplex(unittest.TestCase):
         CX._insert_cell([1, 2, 3], color="red")
         CX._insert_cell([4, 5, 6], color="blue")
         CX._delete_cell((1, 2, 3))
-        self.assertEqual(len(CX._cells._cells), 1)
-        self.assertEqual(len(CX.cells), 1)
+        assert len(CX._cells._cells) == 1
+        assert len(CX.cells) == 1
         CX._delete_cell((4, 5, 6))
-        self.assertEqual(len(CX._cells._cells), 0)
-        self.assertEqual(len(CX.cells), 0)
+        assert len(CX._cells._cells) == 0
+        assert len(CX.cells) == 0
 
     def test_delete_cell_invalid_input(self):
         """Test for the _delete_cell method with invalid input."""
         CX = CellComplex()
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             CX._delete_cell((1, 2, 3))
 
     def test_number_of_nodes(self):
@@ -881,9 +884,9 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([1, 2, 3], rank=2)
         CX.add_node(4)
         CX.add_node(5)
-        self.assertEqual(CX.number_of_nodes(), 5)
-        self.assertEqual(CX.number_of_nodes([1, 2, 3]), 3)
-        self.assertEqual(CX.number_of_nodes([1, 6]), 1)
+        assert CX.number_of_nodes() == 5
+        assert CX.number_of_nodes([1, 2, 3]) == 3
+        assert CX.number_of_nodes([1, 6]) == 1
 
     def test_number_of_edges(self):
         """Test for the number_of_edges method."""
@@ -891,9 +894,9 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([1, 2, 3], rank=2)
         CX.add_node(4)
         CX.add_node(5)
-        self.assertEqual(CX.number_of_edges(), 3)
-        self.assertEqual(CX.number_of_edges([(1, 2), (2, 3)]), 2)
-        self.assertEqual(CX.number_of_edges([(4, 5), (6, 7)]), 0)
+        assert CX.number_of_edges() == 3
+        assert CX.number_of_edges([(1, 2), (2, 3)]) == 2
+        assert CX.number_of_edges([(4, 5), (6, 7)]) == 0
 
     def test_number_of_cells(self):
         """Test for the number_of_cells method."""
@@ -901,8 +904,8 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([1, 2, 3], rank=2)
         CX.add_node(4)
         CX.add_node(5)
-        self.assertEqual(CX.number_of_cells(), 1)
-        self.assertEqual(CX.number_of_cells([(4, 5), (6, 7)]), 0)
+        assert CX.number_of_cells() == 1
+        assert CX.number_of_cells([(4, 5), (6, 7)]) == 0
 
     def test_order(self):
         """Test for the order method."""
@@ -910,12 +913,12 @@ class TestCellComplex(unittest.TestCase):
         CX.add_cell([1, 2, 3], rank=2)
         CX.add_node(4)
         CX.add_node(5)
-        self.assertEqual(CX.order(), 5)
+        assert CX.order() == 5
 
     def test_neighbors_error(self):
         """Test to check for ValueError in neighbors method."""
         CX = CellComplex()
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             CX.neighbors(10)
 
     def test_get_cell_data(self):
@@ -930,27 +933,27 @@ class TestCellComplex(unittest.TestCase):
         cx.add_cell(["A", "B", "C"], rank=2, **{"attribute_name": "Value C"})
 
         data = cx.get_cell_data("A", 0, "attribute_name")
-        self.assertEqual(data, "Value A")
+        assert data == "Value A"
 
         data = cx.get_cell_data(("A", "B"), 1, "attribute_name")
-        self.assertEqual(data, "Value AB")
+        assert data == "Value AB"
 
         data = cx.get_cell_data("B", 0)
-        self.assertEqual(data, {"attribute_name": "Value B"})
+        assert data == {"attribute_name": "Value B"}
 
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             cx.get_cell_data("D", 1, "attribute_name")
 
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             cx.get_cell_data("A", 0, "invalid_attribute")
 
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             cx.get_cell_data("C", 2, "invalid_attribute")
 
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             cx.get_cell_data("E", 0)
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             cx.get_cell_data("A", 3, "attribute_name")
 
     def test_set_cell_data(self):
@@ -965,15 +968,15 @@ class TestCellComplex(unittest.TestCase):
         cx.add_cell(["A", "B", "C"], rank=2)
 
         cx.set_cell_data("A", 0, "attribute_name", "Value A")
-        self.assertEqual(cx.nodes["A"]["attribute_name"], "Value A")
+        assert cx.nodes["A"]["attribute_name"] == "Value A"
 
         cx.set_cell_data(("A", "B"), 1, "attribute_name", "Value AB")
-        self.assertEqual(cx.edges[("A", "B")]["attribute_name"], "Value AB")
+        assert cx.edges[("A", "B")]["attribute_name"] == "Value AB"
 
         cx.set_cell_data(["A", "B", "C"], 2, "attribute_name", "Value C")
-        self.assertEqual(cx.cells[("A", "B", "C")]["attribute_name"], "Value C")
+        assert cx.cells[("A", "B", "C")]["attribute_name"] == "Value C"
 
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             cx.set_cell_data("D", 1, "attribute_name", "Value D")
 
     def test_get_cell_data_after_set(self):
@@ -985,7 +988,7 @@ class TestCellComplex(unittest.TestCase):
         cx.set_cell_data("A", 0, "attribute_name", "Value A")
 
         data = cx.get_cell_data("A", 0, "attribute_name")
-        self.assertEqual(data, "Value A")
+        assert data == "Value A"
 
     def test_get_cell_data_without_attr(self):
         """Test the get_cell_data method without specifying an attribute name."""
@@ -1035,7 +1038,7 @@ class TestCellComplex(unittest.TestCase):
         index_list, result = CX.hodge_laplacian_matrix(rank, signed, weight, index)
 
         # Assert the index_list is of type list
-        self.assertIsInstance(index_list, dict)
+        assert isinstance(index_list, dict)
 
         # Test case 5: Rank is 2 and maxdim is 2
         rank = 2
@@ -1048,24 +1051,24 @@ class TestCellComplex(unittest.TestCase):
         index_list, result = CX.hodge_laplacian_matrix(rank, signed, weight, index)
 
         # Assert the index_list is of type list
-        self.assertIsInstance(index_list, dict)
+        assert isinstance(index_list, dict)
 
         # Test case 7: Rank is 2 and maxdim is not 2
         rank = 3
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             CX.hodge_laplacian_matrix(rank, signed, weight, index)
 
     def test_init_type_exception(self):
         """Test if incorrect datatype raises a TypeError exception."""
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             CellComplex(cells=1)
 
     def test_maxdim_warning(self):
         """Test if Deprecation Warning is raised when the maxdim method is called."""
-        with self.assertWarns(DeprecationWarning):
+        with pytest.deprecated_call():
             CX = CellComplex()
-            CX.maxdim
+            _ = CX.maxdim
 
     def test_dim_edgecases(self):
         """Test if dim is testing for edge cases."""
@@ -1075,11 +1078,11 @@ class TestCellComplex(unittest.TestCase):
 
     def test_skeleton_method_exception(self):
         """Test if the skeleton method raises a TopoNetXError exception."""
-        with self.assertRaises(TopoNetXError):
+        with pytest.raises(TopoNetXError):
             CX = CellComplex()
             CX.skeleton(rank=4)
 
-        with self.assertRaises(TopoNetXError):
+        with pytest.raises(TopoNetXError):
             CX = CellComplex()
             CX.skeleton(rank=3)
 
@@ -1090,7 +1093,3 @@ class TestCellComplex(unittest.TestCase):
         assert sorted(list(CX.__getitem__(1))) == [2, 6, 9]
         assert sorted(list(CX.__getitem__(2))) == [1, 3, 5]
         assert sorted(list(CX.__getitem__(6))) == [1]
-
-
-if __name__ == "__main__":
-    unittest.main()
