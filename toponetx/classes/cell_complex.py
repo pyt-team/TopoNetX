@@ -11,7 +11,7 @@ import warnings
 from collections import defaultdict
 from collections.abc import Hashable, Iterable
 from itertools import zip_longest
-from typing import Any, Literal, Optional, Union
+from typing import Any
 from warnings import warn
 
 import networkx as nx
@@ -278,7 +278,7 @@ class CellComplex(Complex):
         """
         return self.neighbors(node)
 
-    def _insert_cell(self, cell: Union[tuple, list, Cell], **attr):
+    def _insert_cell(self, cell: tuple | list | Cell, **attr):
         """Insert cell."""
         # input must be list, tuple or Cell type
         if isinstance(cell, tuple) or isinstance(cell, list) or isinstance(cell, Cell):
@@ -297,7 +297,7 @@ class CellComplex(Complex):
         else:
             raise TypeError("input must be list, tuple or Cell type")
 
-    def _delete_cell(self, cell: Union[tuple, list, Cell], key=None):
+    def _delete_cell(self, cell: tuple | list | Cell, key=None):
         """Delete cell."""
         if isinstance(cell, Cell):
             cell = cell.elements
@@ -406,8 +406,8 @@ class CellComplex(Complex):
 
     def size(
         self,
-        cell: Union[tuple, list, Cell],
-        node_set: Optional[Iterable[Hashable]] = None,
+        cell: tuple | list | Cell,
+        node_set: Iterable[Hashable] | None = None,
     ) -> int:
         """Compute number of nodes in node_set that belong to cell.
 
@@ -438,7 +438,7 @@ class CellComplex(Complex):
             else:
                 raise KeyError(f" the key {cell} is not a key for an existing cell ")
 
-    def number_of_nodes(self, node_set: Optional[Iterable[Hashable]] = None):
+    def number_of_nodes(self, node_set: Iterable[Hashable] | None = None):
         """Compute number of nodes in node_set belonging to cell complex.
 
         Parameters
@@ -456,7 +456,7 @@ class CellComplex(Complex):
         else:
             return len(self.nodes)
 
-    def number_of_edges(self, edge_set: Optional[Iterable[tuple]] = None) -> int:
+    def number_of_edges(self, edge_set: Iterable[tuple] | None = None) -> int:
         """Compute number of edges in edge_set belonging to cell complex.
 
         Parameters
@@ -481,7 +481,7 @@ class CellComplex(Complex):
             return len(self.edges)
 
     def number_of_cells(
-        self, cell_set: Optional[Iterable[Union[tuple, list, Cell]]] = None
+        self, cell_set: Iterable[tuple | list | Cell] | None = None
     ) -> int:
         """Compute number of cells in cell_set belonging to cell complex.
 
@@ -626,8 +626,8 @@ class CellComplex(Complex):
 
     def add_cell(
         self,
-        cell: Union[tuple, list, Cell],
-        rank: Optional[int] = None,
+        cell: tuple | list | Cell,
+        rank: int | None = None,
         check_skeleton=False,
         **attr,
     ):
@@ -717,8 +717,8 @@ class CellComplex(Complex):
 
     def add_cells_from(
         self,
-        cell_set: Iterable[Union[tuple, list, Cell]],
-        rank: Optional[int] = None,
+        cell_set: Iterable[tuple | list | Cell],
+        rank: int | None = None,
         check_skeleton=False,
         **attr,
     ):
@@ -740,7 +740,7 @@ class CellComplex(Complex):
         for cell in cell_set:
             self.add_cell(cell=cell, rank=rank, check_skeleton=check_skeleton, **attr)
 
-    def remove_cell(self, cell: Union[tuple, list, Cell]):
+    def remove_cell(self, cell: tuple | list | Cell):
         """Remove a single cell from Cell Complex.
 
         Parameters
@@ -763,7 +763,7 @@ class CellComplex(Complex):
             self._delete_cell(cell)
         return self
 
-    def remove_cells(self, cell_set: Iterable[Union[tuple, list, Cell]]):
+    def remove_cells(self, cell_set: Iterable[tuple | list | Cell]):
         """Remove cells from a cell complex that are in cell_set.
 
         Parameters
@@ -791,11 +791,9 @@ class CellComplex(Complex):
 
     def set_filtration(
         self,
-        values: Union[
-            dict[Union[Hashable, tuple, list, Cell], dict],
-            dict[Union[Hashable, tuple, list, Cell], Any],
-        ],
-        name: Optional[str] = None,
+        values: dict[Hashable | tuple | list | Cell, dict]
+        | dict[Hashable | tuple | list | Cell, Any],
+        name: str | None = None,
     ) -> None:
         """Set filtration.
 
@@ -840,7 +838,7 @@ class CellComplex(Complex):
         self.set_cell_attributes(d_edges, name=name, rank=1)
         self.set_cell_attributes(d_cells, name=name, rank=2)
 
-    def get_filtration(self, name: str) -> dict[Union[Hashable, tuple], Any]:
+    def get_filtration(self, name: str) -> dict[Hashable | tuple, Any]:
         """Get filtration.
 
         Parameters
@@ -873,8 +871,8 @@ class CellComplex(Complex):
 
     def set_node_attributes(
         self,
-        values: Union[dict[Hashable, dict], dict[Hashable, Any]],
-        name: Optional[str] = None,
+        values: dict[Hashable, dict] | dict[Hashable, Any],
+        name: str | None = None,
     ) -> None:
         """Set node attributes.
 
@@ -924,8 +922,8 @@ class CellComplex(Complex):
 
     def set_edge_attributes(
         self,
-        values: Union[dict[tuple, dict], dict[tuple, Any]],
-        name: Optional[str] = None,
+        values: dict[tuple, dict] | dict[tuple, Any],
+        name: str | None = None,
     ) -> None:
         """Set edge attributes.
 
@@ -975,12 +973,10 @@ class CellComplex(Complex):
 
     def set_cell_attributes(
         self,
-        values: Union[
-            dict[Union[Hashable, tuple, list, Cell], dict],
-            dict[Union[Hashable, tuple, list, Cell], Any],
-        ],
+        values: dict[Hashable | tuple | list | Cell, dict]
+        | dict[Hashable | tuple | list | Cell, Any],
         rank: int,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> None:
         """Set cell attributes.
 
@@ -1085,9 +1081,7 @@ class CellComplex(Complex):
         else:
             raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
-    def get_cell_attributes(
-        self, name: str, rank: int
-    ) -> dict[Union[Hashable, tuple], Any]:
+    def get_cell_attributes(self, name: str, rank: int) -> dict[Hashable | tuple, Any]:
         """Get node attributes from graph.
 
         Parameters
@@ -1270,7 +1264,7 @@ class CellComplex(Complex):
 
     def is_insertable_cycle(
         self,
-        cell: Union[Cell, tuple, list],
+        cell: tuple | list | Cell,
         check_skeleton: bool = True,
         warnings_dis: bool = False,
     ) -> bool:
@@ -1324,7 +1318,7 @@ class CellComplex(Complex):
 
     def incidence_matrix(
         self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
-    ) -> Union[scipy.sparse.csc_matrix, tuple[dict, dict, scipy.sparse.csc_matrix]]:
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Incidence matrix for the cx indexed by nodes x cells.
 
         Parameters
@@ -1478,7 +1472,7 @@ class CellComplex(Complex):
 
     def hodge_laplacian_matrix(
         self, rank: int, signed=True, weight: bool = False, index: bool = False
-    ) -> Union[scipy.sparse.csc_matrix, tuple[dict, dict, scipy.sparse.csc_matrix]]:
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Compute the hodge-laplacian matrix for the CX.
 
         Parameters
@@ -1728,15 +1722,15 @@ class CellComplex(Complex):
 
     def restrict_to_cells(
         self,
-        cell_set: Iterable[Union[Cell, tuple]],
+        cell_set: Iterable[Cell | tuple],
         keep_edges: bool = False,
-        name: Optional[str] = None,
+        name: str = "",
     ):
         """Construct cell complex using a subset of the cells in cell complex.
 
         Parameters
         ----------
-        cell_set: Iterable[Union[Cell, tuple]]
+        cell_set: Iterable[Cell | tuple]
             A subset of elements of the cell complex's cells (self.cells) and edges (self.edges).
             Cells can be represented as Cell objects or tuples with length > 2.
 
@@ -1800,9 +1794,7 @@ class CellComplex(Complex):
 
         return CX
 
-    def restrict_to_nodes(
-        self, node_set: Iterable[Hashable], name: Optional[str] = None
-    ):
+    def restrict_to_nodes(self, node_set: Iterable[Hashable], name: str = ""):
         """Restrict cell complex to nodes.
 
         This constructs a new cell complex by restricting the cells in the cell complex to

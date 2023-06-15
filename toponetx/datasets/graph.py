@@ -1,6 +1,6 @@
 """Various examples of named graphs represented as complexes."""
 
-from typing import Literal, Union, overload
+from typing import Literal, overload
 
 import networkx as nx
 import numpy as np
@@ -28,7 +28,7 @@ def karate_club(
 
 def karate_club(
     complex_type: Literal["cell", "simplicial"] = "simplicial", feat_dim: int = 2
-) -> Union[CellComplex, SimplicialComplex]:
+) -> CellComplex | SimplicialComplex:
     """Load the karate club as featured cell/simplicial complex.
 
     Parameters
