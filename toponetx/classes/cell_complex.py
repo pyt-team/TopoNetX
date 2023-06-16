@@ -1830,7 +1830,7 @@ class CellComplex(Complex):
         CX = CellComplex(_G)
 
         for cell in cells:
-            CX.add_cell(cell)
+            CX.add_cell(cell, **self.get_cell_data(cell, 2))
         return CX
 
     def to_combinatorial_complex(self):
@@ -1847,19 +1847,20 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CX = CellComplex()
-        >>> CX.add_cell([1,2,3,4],rank=2)
-        >>> CX.add_cell([2,3,4,5],rank=2)
-        >>> CX.add_cell([5,6,7,8],rank=2)
-        >>> CX= CX.to_combinatorial_complex()
+        >>> CX.add_cell([1,2,3,4],rank=2,weight = 1)
+        >>> CX.add_cell([2,3,4,5],rank=2,weight = 4)
+        >>> CX.add_cell([5,6,7,8],rank=2,weight = 0)
+        >>> CX.add_node(0,color='red')
+        >>> CC= CX.to_combinatorial_complex()
         >>> CX.cells
         """
         cc = CombinatorialComplex()
         for c in self.cells:
-            cc.add_cell(c, rank=2)
+            cc.add_cell(c, rank=2, **self.get_cell_data(c, 2))
         for c in self.edges:
-            cc.add_cell(c, rank=1)
+            cc.add_cell(c, rank=1, **self.get_cell_data(c, 1))
         for c in self.nodes:
-            cc.add_node(c)
+            cc.add_node(c, **self.get_cell_data(c, 0))
 
         return cc
 
@@ -1869,7 +1870,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CX = CellComplex()
-        >>> CX.add_cell([1,2,3,4],rank=2)
+        >>> CX.add_cell([1,2,3,4],rank=2,color='red')
         >>> CX.add_cell([2,3,4,5],rank=2)
         >>> CX.add_cell([5,6,7,8],rank=2)
         >>> HG = CX.to_hypergraph()
@@ -1879,14 +1880,22 @@ class CellComplex(Complex):
 
         cells = []
         for cell in self.cells:
-            cells.append(Entity(str(list(cell.elements)), elements=cell.elements))
+            cells.append(
+                Entity(
+                    str(list(cell.elements)),
+                    elements=cell.elements,
+                    **self.get_cell_data(cell, 2),
+                )
+            )
         for cell in self.edges:
-            cells.append(Entity(str(list(cell)), elements=cell))
+            cells.append(
+                Entity(str(list(cell)), elements=cell, **self.get_cell_data(cell, 1))
+            )
         E = EntitySet("CX_to_HG", elements=cells)
         HG = Hypergraph(E)
         nodes = []
         for cell in self.nodes:
-            nodes.append(Entity(cell, elements=[]))
+            nodes.append(Entity(cell, elements=[], **self.get_cell_data(cell, 0)))
         HG._add_nodes_from(nodes)
         return HG
 
@@ -1912,8 +1921,6 @@ class CellComplex(Complex):
         such that every consecutive pair of nodes v(i),v(i+1)
         share at least s cell.
         """
-        import networkx as nx
-
         return nx.is_connected(self._G)
 
     def singletons(self):
@@ -1923,8 +1930,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        singles : list
-            A list of cells uids.
+        new clone of the Cell Complex : Cellcomplex
 
         Examples
         --------
@@ -1939,7 +1945,22 @@ class CellComplex(Complex):
         return [node for node in self.nodes if self.degree(node) == 0]
 
     def clone(self) -> "CellComplex":
-        """Create a clone of the CellComplex."""
+        """Create a clone of the CellComplex.
+
+        Returns
+        -------
+        cell complex : CellComplex
+            A list of cells uids.
+
+        Examples
+        --------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1,2,3,4],rank=2,weight=5)
+        >>> CX.add_cell([2,3,4,5],rank=2)
+        >>> CX.add_cell([5,6,7,8],rank=2)
+        >>> CX.add_node(0)
+        >>> CX2 = CX.clone()
+        """
         _G = self._G.copy()
         CX = CellComplex(_G, self.name)
         for cell in self.cells:

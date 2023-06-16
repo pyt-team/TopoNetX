@@ -40,10 +40,12 @@ class Simplex:
     def __init__(self, elements, name: str = "", construct_tree=True, **attr) -> None:
         self.name = name
         self.construct_tree = construct_tree
+        for i in elements:
+            if not isinstance(i, Hashable):
+                raise ValueError(f"All nodes of a simplex must be hashable, got {i}")
         self.nodes = frozenset(elements)
         if len(self.nodes) != len(elements):
             raise ValueError("A simplex cannot contain duplicate nodes.")
-
         if construct_tree:
             self._faces = self.construct_simplex_tree(elements)
         else:

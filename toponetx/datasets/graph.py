@@ -42,7 +42,8 @@ def karate_club(
     Returns
     -------
     When input is "simplicial":
-           a SimplicialComplex obtained from karate club with the following features
+           a SimplicialComplex obtained from karate club graph by lifting the graph to its clique complex.
+           The simplicial complex comes with the following features
         "node_feat":
             - its value is the first feat_dim Hodge Laplacian eigenvectors attached to nodes.
         "edge_feat":
@@ -51,7 +52,9 @@ def karate_club(
             - its value is the first feat_dim Hodge Laplacian eigenvectors attached to faces.
         "tetrahedron_feat": the first feat_dim Hodge Laplacian eigenvectors attached to tetrahedron.
     When input is "cell":
-            a CellComplex obtained from karate club with the following features
+            a CellComplex obtained from karate club by lifting the graph to a cell obtained obtained
+            from the graph by adding the independent homology cycles in the graph.
+            The cell complex comes with the following features
         "node_feat":
             - its value is the first feat_dim Hodge Laplacian eigenvectors attached to nodes.
         "edge_feat":

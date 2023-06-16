@@ -49,6 +49,7 @@ class TestSimplex:
         assert (1, 3) in s
         assert frozenset((1, 3)) in s
         assert (1, 3, 4, 5, 6, 7) not in s
+        assert not (1, 3, 4, 5, 6, 7) in s
 
     def test_construct_tree(self):
         """Test the construct_tree property of the simplex."""
@@ -63,3 +64,26 @@ class TestSimplex:
         s = Simplex((1, 2, 3), construct_tree=True)
         s["weight"] = 1
         assert s["weight"] == 1
+
+    def test_faces(self):
+        """Test getting faces from simplex."""
+        s = Simplex((1, 2, 3), constuct_tree=False)
+        faces = s.faces
+        assert len(faces) == 7
+
+        s = Simplex((1, 2, 3), constuct_tree=True)
+        faces = s.faces
+        assert len(faces) == 7
+
+    def test_clone(self):
+        """Test clone method."""
+        s = Simplex((1, 2, 3))
+        s1 = s.clone()
+
+        assert 1 in s1
+        assert 2 in s1
+        assert 3 in s1
+        assert (1, 2) in s1
+        assert (2, 3) in s1
+        assert (1, 3) in s1
+        assert (1, 2, 3) in s1
