@@ -1921,8 +1921,6 @@ class CellComplex(Complex):
         such that every consecutive pair of nodes v(i),v(i+1)
         share at least s cell.
         """
-        import networkx as nx
-
         return nx.is_connected(self._G)
 
     def singletons(self):
@@ -1932,8 +1930,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        singles : list
-            A list of cells uids.
+        new clone of the Cell Complex : Cellcomplex
 
         Examples
         --------
@@ -1948,7 +1945,22 @@ class CellComplex(Complex):
         return [node for node in self.nodes if self.degree(node) == 0]
 
     def clone(self) -> "CellComplex":
-        """Create a clone of the CellComplex."""
+        """Create a clone of the CellComplex.
+
+        Returns
+        -------
+        cell complex : CellComplex
+            A list of cells uids.
+
+        Examples
+        --------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1,2,3,4],rank=2,weight=5)
+        >>> CX.add_cell([2,3,4,5],rank=2)
+        >>> CX.add_cell([5,6,7,8],rank=2)
+        >>> CX.add_node(0)
+        >>> CX2 = CX.clone()
+        """
         _G = self._G.copy()
         CX = CellComplex(_G, self.name)
         for cell in self.cells:
