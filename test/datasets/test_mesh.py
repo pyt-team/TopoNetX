@@ -37,6 +37,9 @@ class TestMeshDatasets:
         assert len(shrec_training["face_feat"]) == 100
         assert len(shrec_testing["face_feat"]) == 20
 
+        with pytest.raises(ValueError):
+            shrec_16(size="huge")
+
     def test_coseg(self):
         """Test coseg."""
         coseg_data = coseg(data="alian")
@@ -53,3 +56,6 @@ class TestMeshDatasets:
         assert nodes == n_nodes[0]
         assert faces == n_faces[0]
         assert len(coseg_data["face_label"][0]) == faces
+
+        with pytest.raises(ValueError):
+            coseg(data="cars")
