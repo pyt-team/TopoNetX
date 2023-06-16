@@ -792,7 +792,7 @@ class CombinatorialComplex(Complex):
                 )  # put the simplex in cananical order
                 if len(hyperedge_) != len(hyperedge):
                     raise ValueError(
-                        f"a hyperedge cannot contain duplicate nodes,got {hyperedge_}"
+                        f"a cell cannot contain duplicate nodes,got {hyperedge_}"
                     )
             else:
                 hyperedge_ = hyperedge.nodes
@@ -800,7 +800,7 @@ class CombinatorialComplex(Complex):
             for i in hyperedge_:
                 if not isinstance(i, Hashable):
                     raise ValueError(
-                        "every element hyperedge must be hashable, input hyperedge is {hyperedge_}"
+                        f"every element cell must be hashable, input cell is {hyperedge_}"
                     )
         if (
             rank == 0
@@ -809,7 +809,7 @@ class CombinatorialComplex(Complex):
         ):
             if len(hyperedge) > 1:
                 raise ValueError(
-                    "rank must be positive for higher order hyperedges, got rank = 0 "
+                    "rank must be positive for higher order cells, got rank = 0 "
                 )
 
         self._aux_complex.add_simplex(Simplex(hyperedge_, r=rank))
@@ -830,7 +830,8 @@ class CombinatorialComplex(Complex):
                         )
 
             self._add_hyperedge_helper(hyperedge_, rank, **attr)
-            self._complex_set.hyperedge_dict[rank][hyperedge_]["weight"] = 1
+            if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_]:
+                self._complex_set.hyperedge_dict[rank][hyperedge_]["weight"] = 1
             if isinstance(hyperedge, HyperEdge):
                 self._complex_set.hyperedge_dict[rank][hyperedge_].update(
                     hyperedge.properties
@@ -854,7 +855,8 @@ class CombinatorialComplex(Complex):
                         )
             self._aux_complex[hyperedge_]["r"] = rank
             self._add_hyperedge_helper(hyperedge_, rank, **attr)
-            self._complex_set.hyperedge_dict[rank][hyperedge_]["weight"] = 1
+            if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_]:
+                self._complex_set.hyperedge_dict[rank][hyperedge_]["weight"] = 1
             if isinstance(hyperedge, HyperEdge):
                 self._complex_set.hyperedge_dict[rank][hyperedge_].update(
                     hyperedge.properties
