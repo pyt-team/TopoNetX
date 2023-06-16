@@ -2,6 +2,7 @@
 
 
 import networkx as nx
+import pytest
 
 from toponetx.transform.graph_to_simplicial_complex import (
     graph_to_clique_complex,
@@ -49,6 +50,7 @@ class TestGraphToSimplicialComplex:
         assert sc.dim == 1
         assert (0, 2, 3) not in sc
         assert (0, 1, 2) not in sc
+
 
         return
 
@@ -162,3 +164,4 @@ class TestGraphToSimplicialComplex:
                 assert simplex in sc
             for simplex in unexpected_simplices:
                 assert simplex not in sc
+

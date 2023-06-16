@@ -1,45 +1,45 @@
 """Test Cell class."""
 
-import unittest
+import pytest
 
 from toponetx.classes.simplex import Simplex
 
 
-class TestSimplex(unittest.TestCase):
+class TestSimplex:
     """Test the Simplex class."""
 
     def test_simplex_creation(self):
         """Test simplex creation."""
         s = Simplex((1,))
-        self.assertEqual(len(s), 1)
-        self.assertEqual(tuple(s), (1,))
-        self.assertEqual(s.construct_tree, True)
-        self.assertEqual(s.name, "")
-        self.assertEqual(s.properties, {})
+        assert len(s) == 1
+        assert tuple(s) == (1,)
+        assert s.construct_tree is True
+        assert s.name == ""
+        assert s.properties == {}
 
     def test_duplicate_nodes(self):
         """Test creation of simplex with duplicate nodes."""
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             Simplex((1, 1, 2))
 
     def test_contains(self):
         """Test the __contains__ method of the simplex."""
         s = Simplex((1, 2))
-        self.assertIn(1, s)
-        self.assertIn((1,), s)
-        self.assertNotIn(3, s)
-        self.assertIn((1, 2), s)
+        assert 1 in s
+        assert (1,) in s
+        assert 3 not in s
+        assert (1, 2) in s
 
     def test_boundary(self):
         """Test the boundary property of the simplex."""
         s = Simplex((1, 2, 3))
         boundary = s.boundary
-        self.assertEqual(len(boundary), 3)
+        assert len(boundary) == 3
 
     def test_representation(self):
         """Test the string representation of the simplex."""
         s = Simplex((1, 2, 3))
-        assert repr(s), "Simplex(1, 2, 3)"
+        assert repr(s), "Simplex((1, 2, 3))"
         assert str(s) == "Nodes set: (1, 2, 3), attrs: {}"
 
     def test__contains__(self):
@@ -63,7 +63,3 @@ class TestSimplex(unittest.TestCase):
         s = Simplex((1, 2, 3), construct_tree=True)
         s["weight"] = 1
         assert s["weight"] == 1
-
-
-if __name__ == "__main__":
-    unittest.main()

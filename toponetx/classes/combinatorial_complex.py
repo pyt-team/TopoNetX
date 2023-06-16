@@ -42,8 +42,8 @@ class CombinatorialComplex(Complex):
     ----------
     cells : (optional)iterable, default: None
 
-    name : hashable, optional, default: None
-        If None then a placeholder '_'  will be inserted as name
+    name : str, optional
+        An identifiable name for the combinatorial complex.
 
     ranks : (optional) an iterable, default: None.
         when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
@@ -81,14 +81,17 @@ class CombinatorialComplex(Complex):
     """
 
     def __init__(
-        self, cells=None, name=None, ranks=None, weight=None, graph_based=False, **attr
-    ):
+        self,
+        cells=None,
+        name: str = "",
+        ranks=None,
+        weight=None,
+        graph_based=False,
+        **attr,
+    ) -> None:
         super().__init__()
 
-        if not name:
-            self.name = ""
-        else:
-            self.name = name
+        self.name = name
 
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
 
@@ -309,7 +312,7 @@ class CombinatorialComplex(Complex):
         return self._complex_set.hyperedge_dict
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Return shape.
 
         This is:
@@ -317,7 +320,7 @@ class CombinatorialComplex(Complex):
 
         Returns
         -------
-        tuple
+        tuple of ints
         """
         return self._complex_set.shape
 
@@ -331,7 +334,7 @@ class CombinatorialComplex(Complex):
         return sorted(self._complex_set.allranks)
 
     @property
-    def dim(self):
+    def dim(self) -> int:
         """Return dimension."""
         return max(list(self._complex_set.allranks))
 
@@ -339,9 +342,9 @@ class CombinatorialComplex(Complex):
         """Return detailed string representation."""
         return f"Combinatorial Complex with {len(self.nodes)} nodes and cells with ranks {self.ranks} and sizes {self.shape} "
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation."""
-        return f"CombinatorialComplex(name={self.name})"
+        return f"CombinatorialComplex(name='{self.name}')"
 
     def __len__(self):
         """Return number of nodes."""
@@ -506,7 +509,7 @@ class CombinatorialComplex(Complex):
         self._remove_node(node)
         return self
 
-    def remove_nodes(self, node_set):
+    def remove_nodes(self, node_set) -> None:
         """Remove nodes from cells.
 
         This also deletes references in combinatorial complex nodes.
@@ -515,14 +518,9 @@ class CombinatorialComplex(Complex):
         ----------
         node_set : an iterable of hashables or Entities
             Nodes in CC
-
-        Returns
-        -------
-        Combinatorial Complex : NestedCombinatorialComplex
         """
         for node in node_set:
             self.remove_node(node)
-        return self
 
     def _add_node(self, node, **attr):
         """Add one node as hyperedge."""
@@ -1172,8 +1170,8 @@ class CombinatorialComplex(Complex):
             return A, col
         return A
 
-    @staticmethod
-    def from_trimesh(mesh):
+    @classmethod
+    def from_trimesh(cls, mesh) -> "CombinatorialComplex":
         """Import from trimesh.
 
         Examples
@@ -1183,7 +1181,7 @@ class CombinatorialComplex(Complex):
         >>> CC = CombinatorialComplex.from_trimesh(mesh)
         >>> CC.nodes
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def restrict_to_cells(self, cell_set, name=None):
         """Construct a combinatorial complex using a subset of the cells.
@@ -1198,7 +1196,7 @@ class CombinatorialComplex(Complex):
         -------
         new Combinatorial Complex : NestedCombinatorialComplex
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
         # RNS = self.cells.restrict_to(element_subset=cell_set, name=name)
         # return NestedCombinatorialComplex(cells=RNS, name=name)
@@ -1222,7 +1220,7 @@ class CombinatorialComplex(Complex):
         new Combinatorial Complex : NestedCombinatorialComplex
 
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def from_networkx_graph(self, G):
         """Construct a combinatorial complex from a networkx graph.

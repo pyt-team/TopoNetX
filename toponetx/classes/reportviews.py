@@ -4,7 +4,6 @@ Such as:
 HyperEdgeView, CellView, SimplexView.
 """
 from collections.abc import Hashable, Iterable
-from typing import Union
 
 import numpy as np
 
@@ -21,15 +20,12 @@ class CellView:
 
     Parameters
     ----------
-    name : str
+    name : str, optional
         The name of the cell view.
     """
 
-    def __init__(self, name=None):
-        if name is None:
-            self.name = "_"
-        else:
-            self.name = name
+    def __init__(self, name: str = "") -> None:
+        self.name = name
 
         # Initialize a dictionary to hold cells, with keys being the tuple
         # that defines the cell, and values being dictionaries of cell objects
@@ -87,7 +83,7 @@ class CellView:
         else:
             raise TypeError("Input must be a tuple, list or a cell.")
 
-    def raw(self, cell: Union[tuple, list, Cell]) -> Union[Cell, list[Cell]]:
+    def raw(self, cell: tuple | list | Cell) -> Cell | list[Cell]:
         """Indexes the raw cell objects analogous to the overall index of CellView.
 
         Parameters
@@ -139,12 +135,11 @@ class CellView:
         else:
             raise TypeError("Input must be a tuple, list or a cell.")
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return the number of cells in the cell view."""
         if len(self._cells) == 0:
             return 0
-        else:
-            return np.sum([len(self._cells[cell]) for cell in self._cells])
+        return sum(len(self._cells[cell]) for cell in self._cells)
 
     def __iter__(self):
         """Iterate over all cells in the cell view."""
@@ -196,7 +191,7 @@ class HyperEdgeView:
 
     Parameters
     ----------
-    name : str
+    name : str, optional
         The name of the view.
 
     Examples
@@ -204,13 +199,8 @@ class HyperEdgeView:
     >>> hev = HyperEdgeView()
     """
 
-    def __init__(self, name=None):
-
-        if name is None:
-            self.name = ""
-        else:
-            self.name = name
-
+    def __init__(self, name: str = "") -> None:
+        self.name = name
         self.hyperedge_dict = {}
 
     @staticmethod
@@ -244,12 +234,9 @@ class HyperEdgeView:
         return self.hyperedge_dict[rank][hyperedge_]
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Compute shape."""
-        if len(self.hyperedge_dict) == 0:
-            print("Complex is empty.")
-        else:
-            return [len(self.hyperedge_dict[i]) for i in self.allranks]
+        return tuple(len(self.hyperedge_dict[i]) for i in self.allranks)
 
     def __len__(self):
         """Compute number of nodes."""
@@ -451,7 +438,7 @@ class SimplexView:
     Parameters
     ----------
     name : str, optional
-        Name of the SimplexView instance, defaults to "_".
+        Name of the SimplexView instance.
 
     Attributes
     ----------
@@ -476,18 +463,8 @@ class SimplexView:
         Returns a string representation of the SimplexView instance.
     """
 
-    def __init__(self, name=None):
-        """Initialize a SimplexView instance.
-
-        Parameters
-        ----------
-        name : str, optional
-            Name of the SimplexView instance, defaults to "_".
-        """
-        if name is None:
-            self.name = "_"
-        else:
-            self.name = name
+    def __init__(self, name: str = "") -> None:
+        self.name = name
 
         self.max_dim = -1
         self.faces_dict = []
@@ -522,18 +499,15 @@ class SimplexView:
                 return self.faces_dict[0][frozenset({simplex})]
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Return the number of simplices in each dimension.
 
         Returns
         -------
-        list
-            A list of integers representing the number of simplices in each dimension.
+        tuple of ints
+            A tuple of integers representing the number of simplices in each dimension.
         """
-        if len(self.faces_dict) == 0:
-            print("Complex is empty.")
-        else:
-            return [len(self.faces_dict[i]) for i in range(len(self.faces_dict))]
+        return tuple(len(self.faces_dict[i]) for i in range(len(self.faces_dict)))
 
     def __len__(self):
         """Return the number of simplices in the SimplexView instance."""
@@ -612,11 +586,8 @@ class SimplexView:
 class NodeView:
     """Node view class."""
 
-    def __init__(self, objectdict, cell_type, name=None):
-        if name is None:
-            self.name = "_"
-        else:
-            self.name = name
+    def __init__(self, objectdict, cell_type, name: str = "") -> None:
+        self.name = name
         if len(objectdict) != 0:
             self.nodes = objectdict[0]
         else:

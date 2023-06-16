@@ -37,11 +37,8 @@ class Simplex:
     >>> simplex3 = Simplex((1, 2, 4, 5), weight=1)
     """
 
-    def __init__(self, elements, name=None, construct_tree=True, **attr):
-        if name is None:
-            self.name = ""
-        else:
-            self.name = name
+    def __init__(self, elements, name: str = "", construct_tree=True, **attr) -> None:
+        self.name = name
         self.construct_tree = construct_tree
         self.nodes = frozenset(elements)
         if len(self.nodes) != len(elements):
@@ -143,7 +140,7 @@ class Simplex:
         """
         self.properties[key] = item
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Get the number of nodes in the simplex.
 
         :return: The number of nodes in the simplex.
@@ -165,7 +162,7 @@ class Simplex:
         :return: A string representation of the simplex.
         :rtype: str
         """
-        return f"Simplex{tuple(self.nodes)}"
+        return f"Simplex({tuple(self.nodes)})"
 
     def __str__(self):
         """Return string representation of the simplex.
@@ -174,3 +171,16 @@ class Simplex:
         :rtype: str
         """
         return f"Nodes set: {tuple(self.nodes)}, attrs: {self.properties}"
+
+    def clone(self) -> "Simplex":
+        """Return a copy of the simplex.
+
+        The clone method by default returns an independent shallow copy of the simplex and attributes. That is, if an
+        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
+        for new containers.
+
+        Returns
+        -------
+        Simplex
+        """
+        return Simplex(self.nodes, name=self.name, **self.properties)

@@ -1,11 +1,9 @@
 """Test utils loading datasets."""
 
-import unittest
-
 import toponetx.datasets.utils as data_utils
 
 
-class TestUtils(unittest.TestCase):
+class TestUtils:
     """Test datasets utils."""
 
     def test_load_ppi(self):

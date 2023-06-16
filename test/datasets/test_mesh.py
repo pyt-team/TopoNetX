@@ -1,26 +1,26 @@
 """Test mesh dataset."""
 
-import unittest
+import pytest
 
 from toponetx import CellComplex, SimplicialComplex
-from toponetx.datasets.mesh import shrec_16, stanford_bunny
+from toponetx.datasets.mesh import coseg, shrec_16, stanford_bunny
 
 
-class TestMeshDatasets(unittest.TestCase):
+class TestMeshDatasets:
     """Test datasets utils."""
 
     def test_stanford_bunny(self):
         """Test stanford_bunny."""
-        simplicialbunny = stanford_bunny("simplicial complex")
+        simplicialbunny = stanford_bunny("simplicial")
 
         assert len(simplicialbunny) == 2503
 
-        cellbunny = stanford_bunny("cell complex")
+        cellbunny = stanford_bunny("cell")
 
         assert len(cellbunny) == 2503
 
-        with self.assertRaises(ValueError):
-            stanford_bunny("polyhedral complex")
+        with pytest.raises(ValueError):
+            stanford_bunny("polyhedral")
 
     def test_shrec_16(self):
         """Test shrec_16."""
@@ -37,6 +37,19 @@ class TestMeshDatasets(unittest.TestCase):
         assert len(shrec_training["face_feat"]) == 100
         assert len(shrec_testing["face_feat"]) == 20
 
+    def test_coseg(self):
+        """Test coseg."""
+        coseg_data = coseg(data="alian")
 
-if __name__ == "__main__":
-    unittest.main()
+        assert len(coseg_data["complexes"]) != 0
+        assert len(coseg_data["node_feat"]) != 0
+        assert len(coseg_data["edge_feat"]) != 0
+        assert len(coseg_data["face_feat"]) != 0
+        assert len(coseg_data["face_label"]) != 0
+
+        nodes, edges, faces = coseg_data["complexes"][0].shape
+        n_nodes = coseg_data["node_feat"][0].shape
+        n_faces = coseg_data["face_feat"][0].shape
+        assert nodes == n_nodes[0]
+        assert faces == n_faces[0]
+        assert len(coseg_data["face_label"][0]) == faces

@@ -20,7 +20,7 @@ class Cell:
         An iterable that contains hashable objects representing the nodes of the cell. The order of the elements is important
         and defines the cell up to cyclic permutation.
     name : str, optional
-        A string representing the name of the cell. The default value is None.
+        A string representing the name of the cell.
     regular : bool, optional
         A boolean indicating whether the cell satisfies the regularity condition. The default value is True.
         A 2D cell is regular if and only if there is no repetition in the boundary edges that define the cell.
@@ -56,11 +56,8 @@ class Cell:
     ((0, 1), (0, 0))]
     """
 
-    def __init__(self, elements, name=None, regular=True, **attr):
-        if name is None:
-            self.name = "_"
-        else:
-            self.name = name
+    def __init__(self, elements, name: str = "", regular=True, **attr) -> None:
+        self.name = name
         self._regular = regular
         elements = list(elements)
         self._boundary = list(
@@ -131,10 +128,17 @@ class Cell:
         self.properties[key] = item
 
     def clone(self) -> "Cell":
-        """Clone the Cell with all properties."""
-        clone_cell = Cell(self.elements, self.name, self._regular)
-        clone_cell.properties.update(self.properties)
-        return clone_cell
+        """Clone the Cell with all properties.
+
+        The clone method by default returns an independent shallow copy of the cell and attributes. That is, if an
+        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
+        for new containers.
+
+        Returns
+        -------
+        Cell
+        """
+        return Cell(self.elements, self.name, self._regular, **self.properties)
 
     @staticmethod
     def is_valid_cell(elements, regular=False):
@@ -189,7 +193,7 @@ class Cell:
 
         return True
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Get the number of elements in the cell.
 
         Returns
@@ -254,9 +258,9 @@ class Cell:
         """Check if the complex contains e."""
         return e in self._elements
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation of regular cell."""
-        return f"Cell{self.elements}"
+        return f"Cell({self.elements})"
 
     @property
     def boundary(self):

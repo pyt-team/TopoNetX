@@ -35,7 +35,7 @@ class Complex:
     and computer science, such as geometric modeling, data analysis, and machine learning.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @property
@@ -52,8 +52,14 @@ class Complex:
 
     @property
     @abc.abstractmethod
-    def shape(self) -> tuple:
-        """Return number of cells for each rank."""
+    def shape(self) -> tuple[int, ...]:
+        """Return number of cells for each rank.
+
+        Returns
+        -------
+        tuple of ints
+            The number of elements for each rank. If the complex is empty, an empty tuple is returned.
+        """
         pass
 
     @abc.abstractmethod
@@ -72,16 +78,12 @@ class Complex:
         pass
 
     @abc.abstractmethod
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of nodes."""
         pass
 
-    def _clear_cache(self):
-        """Clear cache."""
-        self.cache = {}
-
     @abc.abstractmethod
-    def clone(self):
+    def clone(self) -> "Complex":
         """Clone complex."""
 
     @abc.abstractmethod
@@ -100,8 +102,11 @@ class Complex:
         pass
 
     @abc.abstractmethod
-    def remove_nodes(self, node_set):
-        """Return dimension of the complex."""
+    def remove_nodes(self, node_set) -> None:
+        """Remove the given nodes from the complex.
+
+        Any elements that become invalid due to the removal of nodes are also removed.
+        """
         pass
 
     @abc.abstractmethod
