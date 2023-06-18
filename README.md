@@ -4,6 +4,9 @@
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7958504.svg)](https://doi.org/10.5281/zenodo.7958504)
 
+
+![toponetx](https://github.com/mhajij/shrec_16/blob/main/logo.png)
+
 # 🌐 TopoNetX (TNX) 🍩
 # Computing with Relational Data abstracted as Topological Domains
 
