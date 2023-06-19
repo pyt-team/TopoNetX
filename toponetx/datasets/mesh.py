@@ -94,12 +94,12 @@ def shrec_16(size: Literal["full", "small"] = "full"):
     Notes
     -----
     Each npz file stores 5 keys:
-    "complexes",label","node_feat","edge_feat" and "face_feat".
+    "complexes","node_feat","edge_feat", "face_feat" and mesh label".
     complex : stores the simplicial complex of the mesh
     node_feat : stores a 6 dim node feature vector: position and normal of the each node in the mesh
     edge_feat : stores a 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
     face_feat : stores a 7-dimensional face feature vector: face area (1 feat), face normal (3 feat), face angles (3 feat)
-    mesh label :  stores the label of the mesh
+    mesh label : stores the label of the mesh
 
     Raises
     ------
