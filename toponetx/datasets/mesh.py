@@ -96,10 +96,10 @@ def shrec_16(size: Literal["full", "small"] = "full"):
     Each npz file stores 5 keys:
     "complexes",label","node_feat","edge_feat" and "face_feat".
     complex : stores the simplicial complex of the mesh
-    label :  stores the label of the mesh
-    node_feat : stores 6 dim node feature vector: position and normal of the each node in the mesh
-    edge_feat : stores 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
-    face_feat : face area, face normal, face angle
+    node_feat : stores a 6 dim node feature vector: position and normal of the each node in the mesh
+    edge_feat : stores a 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
+    face_feat : stores a 7-dimensional face feature vector: face area (1 feat), face normal (3 feat), face angles (3 feat)
+    mesh label :  stores the label of the mesh
 
     Raises
     ------
@@ -174,7 +174,7 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
     complex : stores the simplicial complex of the mesh
     node_feat : stores a 6-dimensional node feature vector: position and normal of each node in the mesh
     edge_feat : stores a 10-dimensional edge feature vector: dihedral angle, edge span, 2 edge angles in the triangle, 6 edge ratios.
-    face_feat : stores face area, face normal, face angle
+    face_feat : stores a 7-dimensional face feature vector: face area (1 feat), face normal (3 feat), face angles (3 feat)
     face_label : stores the label of mesh segmentation as a face label
 
     Data Source
