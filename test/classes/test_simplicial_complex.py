@@ -127,8 +127,8 @@ class TestSimplicialComplex:
         with pytest.raises(KeyError):
             SC[(1, 2, 3, 4, 5)]["heat"]
 
-    def test_setitem__(self):
-        """Test __getitem__ and __setitem__ methods."""
+    def test_setting_simplex_attributes(self):
+        """Test setting simplex attributes through a `SimplicialComplex` object."""
         G = nx.Graph()
         G.add_edge(0, 1)
         G.add_edge(2, 5)
