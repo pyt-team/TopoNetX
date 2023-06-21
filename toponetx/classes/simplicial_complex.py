@@ -290,7 +290,7 @@ class SimplicialComplex(Complex):
             for _ in range(diff):
                 self._simplex_set.faces_dict.append(dict())
 
-    def _update_faces_dict_entry(self, face, simplex_, maximal_faces, **attr):
+    def _update_faces_dict_entry(self, face, simplex_, maximal_faces, **attr) -> None:
         """Update faces dictionary entry.
 
         Parameters
@@ -301,52 +301,41 @@ class SimplicialComplex(Complex):
 
         Notes
         -----
-        the input 'face' is a face of the input 'simplex'.
+        the input `face` is a face of the input `simplex`.
         """
+        face = frozenset(sorted(face))
         k = len(face)
-        if frozenset(sorted(face)) not in self._simplex_set.faces_dict[k - 1]:
+        if face not in self._simplex_set.faces_dict[k - 1]:
             if len(face) == len(simplex_):
-
-                self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))] = {
+                self._simplex_set.faces_dict[k - 1][face] = {
                     "is_maximal": True,
                     "membership": set(),
                 }
             else:
-                self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))] = {
+                self._simplex_set.faces_dict[k - 1][face] = {
                     "is_maximal": False,
                     "membership": set({simplex_}),
                 }
         else:
             if len(face) != len(simplex_):
-                if self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                    "is_maximal"
-                ]:
-
-                    maximal_faces.add(frozenset(sorted(face)))
-                    self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                        "is_maximal"
-                    ] = False
-                    self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                        "membership"
-                    ].add(simplex_)
-
-                else:  # make sure all children of previous maximal simplices do
-                    # not have that membership  anymore
-                    d = self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                        "membership"
-                    ].copy()
+                if self._simplex_set.faces_dict[k - 1][face]["is_maximal"]:
+                    maximal_faces.add(face)
+                    self._simplex_set.faces_dict[k - 1][face]["is_maximal"] = False
+                    self._simplex_set.faces_dict[k - 1][face]["membership"].add(
+                        simplex_
+                    )
+                else:
+                    # make sure all children of previous maximal simplices do not have that membership anymore
+                    d = self._simplex_set.faces_dict[k - 1][face]["membership"].copy()
                     for f in d:
                         if f in maximal_faces:
-                            self._simplex_set.faces_dict[k - 1][
-                                frozenset(sorted(face))
-                            ]["membership"].remove(f)
-                    self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                        "is_maximal"
-                    ] = False
-                    self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                        "membership"
-                    ].add(simplex_)
-
+                            self._simplex_set.faces_dict[k - 1][face][
+                                "membership"
+                            ].remove(f)
+                    self._simplex_set.faces_dict[k - 1][face]["is_maximal"] = False
+                    self._simplex_set.faces_dict[k - 1][face]["membership"].add(
+                        simplex_
+                    )
             else:
                 self._simplex_set.faces_dict[k - 1][simplex_].update(attr)
 
