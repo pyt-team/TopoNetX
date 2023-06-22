@@ -1,12 +1,14 @@
 """HyperEdge classes."""
 
 
-from collections.abc import Hashable, Iterable
+from collections.abc import Collection, Hashable
+
+from toponetx.classes.complex import Atom
 
 __all__ = ["HyperEdge"]
 
 
-class HyperEdge:
+class HyperEdge(Atom):
     """Class for a hyperedge (or a set-type cell) in a combinatorial complex or a hyperedge complex.
 
     This class represents a set-type cell in a combinatorial complex,
@@ -33,96 +35,16 @@ class HyperEdge:
     >>> ac3 = HyperEdge(("a", "b", "c"), rank=10)
     """
 
-    def __init__(self, elements, rank=None, name: str = "", **attr) -> None:
-        self.name = name
+    def __init__(self, elements: Collection, name: str = "", rank=None, **attr) -> None:
+        for i in elements:
+            if not isinstance(i, Hashable):
+                raise TypeError("Every element of HyperEdge must be hashable.")
 
-        if isinstance(elements, Hashable) and not isinstance(elements, Iterable):
-            elements = frozenset([elements])
-        if elements is not None:
-            for i in elements:
-                if not isinstance(i, Hashable):
-                    raise TypeError("Every element of HyperEdge must be hashable.")
+        super().__init__(frozenset(sorted(elements)), name, **attr)
+        if len(elements) != len(self.elements):
+            raise ValueError("A hyperedge cannot contain duplicate nodes.")
 
-        self.nodes = frozenset(list(elements))
         self._rank = rank
-
-        if len(self.nodes) != len(elements):
-            raise ValueError("A ranked entity cannot contain duplicate nodes.")
-
-        self.properties = dict()
-        self.properties.update(attr)
-
-    def __getitem__(self, item):
-        """Get the attribute of the hyperedge.
-
-        Parameters
-        ----------
-        item : str
-            The attribute name.
-
-        Returns
-        -------
-        Any
-            The value of the attribute.
-
-        Raises
-        ------
-        KeyError
-            If the attribute is not present in the hyperedge.
-        """
-        if item not in self.properties:
-            raise KeyError(
-                f"Attribute '{item}' is not present in the hyperedge '{self.name}'."
-            )
-        else:
-            return self.properties[item]
-
-    def __setitem__(self, key, item):
-        """Set the attribute of the hyperedge.
-
-        Parameters
-        ----------
-        key : str
-            The attribute name.
-        item : Any
-            The value of the attribute.
-        """
-        self.properties[key] = item
-
-    def __len__(self) -> int:
-        """Compute the number of nodes in the hyperedge.
-
-        Returns
-        -------
-        int
-            The number of nodes in the hyperedge.
-        """
-        return len(self.nodes)
-
-    def __iter__(self):
-        """Iterate over the nodes of the hyperedge.
-
-        Returns
-        -------
-        Iterator
-            An iterator over the nodes of the hyperedge.
-        """
-        return iter(self.nodes)
-
-    def __contains__(self, e):
-        """Check if e is in the nodes.
-
-        Parameters
-        ----------
-        e : Any
-            The element to check.
-
-        Returns
-        -------
-        bool
-            True if e is in the nodes, False otherwise.
-        """
-        return e in self.nodes
 
     def __str__(self):
         """Return a string representation of the HyperEdge.
@@ -132,7 +54,7 @@ class HyperEdge:
         str
             A string representation of the HyperEdge.
         """
-        return f"Nodes set: {tuple(self.nodes)}, attrs: {self.properties}"
+        return f"Nodes set: {tuple(self.elements)}, attrs: {self._properties}"
 
     @property
     def rank(self):

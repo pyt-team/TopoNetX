@@ -3,7 +3,7 @@
 Such as:
 HyperEdgeView, CellView, SimplexView.
 """
-from collections.abc import Hashable, Iterable
+from collections.abc import Collection, Hashable, Iterable
 
 import numpy as np
 
@@ -58,12 +58,12 @@ class CellView:
             # If there is only one cell with these elements, return its properties
             elif len(self._cells[cell.elements]) == 1:
                 k = next(iter(self._cells[cell.elements].keys()))
-                return self._cells[cell.elements][k].properties
+                return self._cells[cell.elements][k]._properties
 
             # If there are multiple cells with these elements, return the properties of all cells
             else:
                 return [
-                    self._cells[cell.elements][c].properties
+                    self._cells[cell.elements][c]._properties
                     for c in self._cells[cell.elements]
                 ]
 
@@ -74,9 +74,9 @@ class CellView:
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
                     k = next(iter(self._cells[cell].keys()))
-                    return self._cells[cell][k].properties
+                    return self._cells[cell][k]._properties
                 else:
-                    return [self._cells[cell][c].properties for c in self._cells[cell]]
+                    return [self._cells[cell][c]._properties for c in self._cells[cell]]
             else:
                 raise KeyError(f"cell {cell} is not in the cell dictionary")
 
@@ -209,7 +209,7 @@ class HyperEdgeView:
             hyperedge_ = frozenset(hyperedge)
 
         elif isinstance(hyperedge, HyperEdge):
-            hyperedge_ = hyperedge.nodes
+            hyperedge_ = hyperedge.elements
         elif isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
             hyperedge_ = frozenset([hyperedge])
         else:
@@ -238,12 +238,11 @@ class HyperEdgeView:
         """Compute shape."""
         return tuple(len(self.hyperedge_dict[i]) for i in self.allranks)
 
-    def __len__(self):
-        """Compute number of nodes."""
+    def __len__(self) -> int:
+        """Compute the number of nodes."""
         if len(self.hyperedge_dict) == 0:
             return 0
-        else:
-            return np.sum(self.shape)
+        return sum(self.shape)
 
     def __iter__(self):
         """Iterate over the hyperedges."""
@@ -254,7 +253,7 @@ class HyperEdgeView:
             ]
         return iter(all_hyperedges)
 
-    def __contains__(self, e):
+    def __contains__(self, e: Collection) -> bool:
         """Check if e is in the hyperedges."""
         if len(self.hyperedge_dict) == 0:
             return False
@@ -274,7 +273,7 @@ class HyperEdgeView:
             else:
                 for i in list(self.allranks):
 
-                    if frozenset(e.nodes) in self.hyperedge_dict[i]:
+                    if frozenset(e.elements) in self.hyperedge_dict[i]:
                         return True
                 return False
 
@@ -385,7 +384,7 @@ class HyperEdgeView:
             else:
                 for i in list(self.allranks):
 
-                    if frozenset(e.nodes) in self.hyperedge_dict[i]:
+                    if frozenset(e.elements) in self.hyperedge_dict[i]:
                         return i
                 raise KeyError(f"hyperedge {e} is not in the complex")
 
@@ -446,21 +445,6 @@ class SimplexView:
         Maximum dimension of the simplices in the SimplexView instance.
     faces_dict : list of dict
         A list containing dictionaries of faces for each dimension.
-
-    Methods
-    -------
-    __getitem__(self, simplex):
-        Returns a dictionary of properties associated with the given simplex.
-    __len__(self):
-        Returns the number of simplices in the SimplexView instance.
-    __iter__(self):
-        Returns an iterator over all simplices in the SimplexView instance.
-    __contains__(self, e):
-        Returns True if the given simplex is in the SimplexView instance.
-    __repr__(self):
-        Returns a string representation of the SimplexView instance.
-    __str__(self):
-        Returns a string representation of the SimplexView instance.
     """
 
     def __init__(self, name: str = "") -> None:
@@ -483,8 +467,8 @@ class SimplexView:
             A dictionary of properties associated with the given simplex.
         """
         if isinstance(simplex, Simplex):
-            if simplex.nodes in self.faces_dict[len(simplex) - 1]:
-                return self.faces_dict[len(simplex) - 1][simplex.nodes]
+            if simplex.elements in self.faces_dict[len(simplex) - 1]:
+                return self.faces_dict[len(simplex) - 1][simplex.elements]
         elif isinstance(simplex, Iterable):
             simplex = frozenset(simplex)
             if simplex in self.faces_dict[len(simplex) - 1]:
@@ -509,12 +493,11 @@ class SimplexView:
         """
         return tuple(len(self.faces_dict[i]) for i in range(len(self.faces_dict)))
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return the number of simplices in the SimplexView instance."""
         if len(self.faces_dict) == 0:
             return 0
-        else:
-            return np.sum(self.shape)
+        return sum(self.shape)
 
     def __iter__(self):
         """Return an iterator over all simplices in the simplex view."""
@@ -523,62 +506,64 @@ class SimplexView:
             all_simplices = all_simplices + list(self.faces_dict[i].keys())
         return iter(all_simplices)
 
-    def __contains__(self, e):
+    def __contains__(self, item) -> bool:
         """Check if a simplex is in the simplex view.
 
         Parameters
         ----------
-        e : Simplex or iterable or hashable
+        item : Any
             The simplex to be checked for membership in the simplex view
 
         Returns
         -------
         bool
             True if the simplex is in the simplex view, False otherwise
+
+        Examples
+        --------
+        Check if a node is in the simplex view:
+
+        >>> view = SimplexView()
+        >>> view.faces_dict.append({frozenset({1}): {'weight': 1}})
+        >>> view.max_dim = 0
+        >>> 1 in view
+        True
+        >>> 2 in view
+        False
+
+        Check if a simplex is in the simplex view:
+
+        >>> view.faces_dict.append({frozenset({1, 2}): {'weight': 1}})
+        >>> view.max_dim = 1
+        >>> {1, 2} in view
+        True
+        >>> {1, 3} in view
+        False
+        >>> {1, 2, 3} in view
+        False
         """
-        if len(self.faces_dict) == 0:
-            return False
-
-        if isinstance(e, Iterable):
-            if len(e) - 1 > self.max_dim:
+        if isinstance(item, Iterable):
+            item = frozenset(item)
+            if not 0 < len(item) <= self.max_dim + 1:
                 return False
-            elif len(e) == 0:
-                return False
-            else:
-                return frozenset(e) in self.faces_dict[len(e) - 1]
+            return item in self.faces_dict[len(item) - 1]
+        elif isinstance(item, Hashable):
+            return frozenset({item}) in self.faces_dict[0]
+        return False
 
-        elif isinstance(e, Simplex):
-            if len(e) - 1 > self.max_dim:
-                return False
-            elif len(e) == 0:
-                return False
-            else:
-                return e.nodes in self.faces_dict[len(e) - 1]
-
-        elif isinstance(e, Hashable):
-            if isinstance(e, Iterable):
-                if len(e) - 1 > self.max_dim:
-                    return False
-                elif len(e) == 0:
-                    return False
-            else:
-                return frozenset({e}) in self.faces_dict[0]
-        else:
-            return False
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation that can be used to recreate it."""
-        all_simplices = []
+        all_simplices: list[tuple[int, ...]] = []
         for i in range(len(self.faces_dict)):
-            all_simplices = all_simplices + [tuple(j) for j in self.faces_dict[i]]
+            all_simplices += [tuple(j) for j in self.faces_dict[i]]
 
         return f"SimplexView({all_simplices})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return detailed string representation of the simplex view."""
-        all_simplices = []
+        all_simplices: list[tuple[int, ...]] = []
         for i in range(len(self.faces_dict)):
-            all_simplices = all_simplices + [tuple(j) for j in self.faces_dict[i]]
+            all_simplices += [tuple(j) for j in self.faces_dict[i]]
 
         return f"SimplexView({all_simplices})"
 
@@ -598,7 +583,7 @@ class NodeView:
 
         self.cell_type = cell_type
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation of nodes.
 
         Returns
@@ -623,8 +608,8 @@ class NodeView:
             Dict of properties associated with that cells.
         """
         if isinstance(cell, self.cell_type):
-            if cell.nodes in self.nodes:
-                return self.nodes[cell.nodes]
+            if cell.elements in self.nodes:
+                return self.nodes[cell.elements]
         elif isinstance(cell, Iterable):
             cell = frozenset(cell)
             if cell in self.nodes:
@@ -638,17 +623,17 @@ class NodeView:
 
                 return self.nodes[frozenset({cell})]
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Compute number of nodes."""
         return len(self.nodes)
 
-    def __contains__(self, e):
+    def __contains__(self, e) -> bool:
         """Check if e is in the nodes."""
         if isinstance(e, Hashable) and not isinstance(e, self.cell_type):
             return frozenset({e}) in self.nodes
 
         elif isinstance(e, self.cell_type):
-            return e.nodes in self.nodes
+            return e.elements in self.nodes
 
         elif isinstance(e, Iterable):
             if len(e) == 1:
