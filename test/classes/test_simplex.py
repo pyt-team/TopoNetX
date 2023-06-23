@@ -15,7 +15,7 @@ class TestSimplex:
         assert tuple(s) == (1,)
         assert s.construct_tree is True
         assert s.name == ""
-        assert s.properties == {}
+        assert s._properties == {}
 
     def test_duplicate_nodes(self):
         """Test creation of simplex with duplicate nodes."""

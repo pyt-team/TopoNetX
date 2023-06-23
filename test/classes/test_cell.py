@@ -75,7 +75,7 @@ class TestCell:
         """Test __setitem__."""
         c = Cell([1, 2, 3])
         c["weight"] = 1
-        assert c.properties["weight"] == 1
+        assert c["weight"] == 1
 
     def test___iter__(self):
         """Test __iter__."""

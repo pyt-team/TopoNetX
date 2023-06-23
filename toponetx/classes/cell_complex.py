@@ -193,7 +193,7 @@ class CellComplex(Complex):
         """
         return len(self.nodes), len(self.edges), len(self.cells)
 
-    def skeleton(self, rank):
+    def skeleton(self, rank: int):
         """Compute skeleton."""
         if rank == 0:
             return self.nodes
@@ -285,7 +285,7 @@ class CellComplex(Complex):
             if isinstance(cell, tuple) or isinstance(cell, list):
                 cell = Cell(elements=cell, name=str(len(self.cells)), **attr)
             elif isinstance(cell, Cell):
-                cell.properties.update(attr)
+                cell.update(attr)
 
             if cell.elements not in self._cells._cells:
                 self._cells._cells[cell.elements] = {0: cell}
@@ -890,7 +890,7 @@ class CellComplex(Complex):
         >>> CX.add_cell([1,2,3,4], rank=2)
         >>> d={ 1: { 'color':'red','attr2':1 },2: {'color':'blue','attr2':3 } }
         >>> CX.set_node_attributes(d)
-        >>> CX.nodes[1]['color']
+        >>> CX[1]['color']
         'red'
         """
         self.set_cell_attributes(values, rank=0, name=name)
@@ -2342,9 +2342,7 @@ class CellComplex(Complex):
                                faces=[[0, 1, 2]],
                                process=False)
         >>> CX = CellComplex.from_trimesh(mesh)
-        >>> print(CX.nodes)
-        >>> print(CX.cells)
-        >>> CX.nodes[0]['position']
+        >>> CX[0]['position']
         """
         # try to see the index of the first vertex
         CX = cls(mesh.faces)
@@ -2390,7 +2388,6 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CX = CellComplex.load_mesh("bunny.obj")
-        >>> CX.nodes
         """
         import trimesh
 

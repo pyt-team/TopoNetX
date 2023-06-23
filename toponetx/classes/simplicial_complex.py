@@ -274,7 +274,7 @@ class SimplicialComplex(Complex):
             all_simplices = all_simplices + list(self._simplex_set.faces_dict[i].keys())
         return iter(all_simplices)
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self.face_set.
 
         Parameters
@@ -399,16 +399,16 @@ class SimplicialComplex(Complex):
                     sorted(simplex)
                 )  # put the simplex in canonical order
             else:
-                simplex_ = simplex.nodes
+                simplex_ = simplex.elements
         if simplex_ in self._simplex_set.faces_dict[len(simplex_) - 1]:
-            if self.__getitem__(simplex)["is_maximal"]:
+            if self[simplex]["is_maximal"]:
                 del self._simplex_set.faces_dict[len(simplex_) - 1][simplex_]
                 faces = Simplex(simplex_).faces
                 for s in faces:
                     if len(s) == len(simplex_):
                         continue
                     else:
-                        s = s.nodes
+                        s = s.elements
                         self._simplex_set.faces_dict[len(s) - 1][s]["membership"] -= {
                             simplex_
                         }
@@ -499,11 +499,11 @@ class SimplicialComplex(Complex):
 
                 simplex_ = frozenset(
                     sorted(simplex)
-                )  # put the simplex in cananical order
+                )  # put the simplex in canonical order
                 if len(simplex_) != len(simplex):
                     raise ValueError("a simplex cannot contain duplicate nodes")
             else:
-                simplex_ = simplex.nodes
+                simplex_ = simplex.elements
             self._update_faces_dict_length(simplex_)
 
             if (
@@ -523,7 +523,7 @@ class SimplicialComplex(Complex):
                     self._update_faces_dict_entry(face, simplex_, maximal_faces, **attr)
             if isinstance(simplex, Simplex):
                 self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(
-                    simplex.properties
+                    simplex._properties
                 )
             else:
                 self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(attr)
@@ -1220,7 +1220,7 @@ class SimplicialComplex(Complex):
                                faces=[[0, 1, 2]],
                                process=False)
         >>> SC = SimplicialComplex.from_trimesh(mesh)
-        >>> print(SC.nodes0)
+        >>> print(SC.nodes)
         >>> print(SC.simplices)
         >>> SC[(0)]['position']
         """

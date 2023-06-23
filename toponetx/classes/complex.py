@@ -2,8 +2,100 @@
 
 
 import abc
+from collections.abc import Collection, Iterator
+from typing import Any
 
-__all__ = ["Complex"]
+__all__ = ["Atom", "Complex"]
+
+
+class Atom(abc.ABC):
+    """Abstract class representing an atom in a complex.
+
+    Parameters
+    ----------
+    elements : Collection
+        The elements in the atom.
+    name : str, optional
+        A name for the atom.
+    attr : keyword arguments, optional
+        Additional attributes to be associated with the atom.
+    """
+
+    def __init__(self, elements: Collection, name: str = "", **attr) -> None:
+        self.elements = elements
+        self.name = name
+
+        self._properties = dict()
+        self._properties.update(attr)
+
+    def __len__(self) -> int:
+        """Return the number of elements in the atom."""
+        return len(self.elements)
+
+    def __iter__(self) -> Iterator:
+        """Return an iterator over the elements in the atom.
+
+        Returns
+        -------
+        Iterator
+        """
+        return iter(self.elements)
+
+    def __contains__(self, item: Any) -> bool:
+        """Return True if the given element is contained in this atom.
+
+        Parameters
+        ----------
+        item : Any
+            The item to be checked.
+
+        Returns
+        -------
+        bool
+        """
+        return item in self.elements
+
+    def __getitem__(self, item: Any) -> Any:
+        """Return the property with the given name.
+
+        Parameters
+        ----------
+        item : Any
+            The name of the property.
+
+        Returns
+        -------
+        Any
+            The value of the property.
+
+        Raises
+        ------
+        KeyError
+            If the property does not exist.
+        """
+        return self._properties[item]
+
+    def __setitem__(self, key: Any, value: Any) -> None:
+        """Set the property with the given name to the given value.
+
+        Parameters
+        ----------
+        key : Any
+            The name of the property.
+        value : Any
+            The value of the property.
+        """
+        self._properties[key] = value
+
+    def update(self, attributes: dict) -> None:
+        """Update the properties of the atom.
+
+        Parameters
+        ----------
+        attributes : dict
+            The properties to be updated.
+        """
+        self._properties.update(attributes)
 
 
 class Complex:

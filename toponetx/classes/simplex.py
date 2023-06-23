@@ -1,12 +1,15 @@
 """Simplex Class."""
 
-from collections.abc import Hashable, Iterable
+from collections.abc import Collection, Hashable, Iterable, Iterator
 from itertools import combinations
+from typing import Any
+
+from toponetx.classes.complex import Atom
 
 __all__ = ["Simplex"]
 
 
-class Simplex:
+class Simplex(Atom):
     """
     A class representing a simplex in a simplicial complex.
 
@@ -15,7 +18,7 @@ class Simplex:
 
     Parameters
     ----------
-    elements: Iterable
+    elements: Collection
         The nodes in the simplex.
     name : str, optional
         A name for the simplex.
@@ -37,38 +40,51 @@ class Simplex:
     >>> simplex3 = Simplex((1, 2, 4, 5), weight=1)
     """
 
-    def __init__(self, elements, name: str = "", construct_tree=True, **attr) -> None:
-        self.name = name
-        self.construct_tree = construct_tree
+    def __init__(
+        self, elements: Collection, name: str = "", construct_tree=True, **attr
+    ) -> None:
         for i in elements:
             if not isinstance(i, Hashable):
                 raise ValueError(f"All nodes of a simplex must be hashable, got {i}")
-        self.nodes = frozenset(elements)
-        if len(self.nodes) != len(elements):
+
+        super().__init__(frozenset(sorted(elements)), name, **attr)
+        if len(elements) != len(self.elements):
             raise ValueError("A simplex cannot contain duplicate nodes.")
+
+        self.construct_tree = construct_tree
         if construct_tree:
             self._faces = self.construct_simplex_tree(elements)
         else:
             self._faces = frozenset()
-        self.properties = dict()
-        self.properties.update(attr)
 
-    def __contains__(self, e):
-        """Return True if the given element is a subset of the nodes."""
-        if len(self.nodes) == 0:
-            return False
-        if isinstance(e, Iterable):
-            if len(e) > len(self.nodes):
-                return False
-            else:
-                if isinstance(e, frozenset):
-                    return e <= self.nodes
-                else:
-                    return frozenset(e) <= self.nodes
-        elif isinstance(e, Hashable):
-            return frozenset({e}) <= self.nodes
-        else:
-            return False
+    def __contains__(self, item: Any) -> bool:
+        """Return True if the given element is a subset of the nodes.
+
+        Parameters
+        ----------
+        item : Any
+            The element to be checked.
+
+        Returns
+        -------
+        bool
+            True if the given element is a subset of the nodes.
+
+        Examples
+        --------
+        >>> s = Simplex((1, 2, 3))
+        >>> 1 in s
+        True
+        >>> 4 in s
+        False
+        >>> (1, 2) in s
+        True
+        >>> (1, 4) in s
+        False
+        """
+        if isinstance(item, Iterable):
+            return frozenset(item) <= self.elements
+        return super().__contains__(item)
 
     @staticmethod
     def construct_simplex_tree(elements):
@@ -88,7 +104,7 @@ class Simplex:
         if self.construct_tree:
             return frozenset(i for i in self._faces if len(i) == len(self) - 1)
         else:
-            faces = Simplex.construct_simplex_tree(self.nodes)
+            faces = Simplex.construct_simplex_tree(self.elements)
             return frozenset(i for i in faces if len(i) == len(self) - 1)
 
     def sign(self, face):
@@ -99,7 +115,7 @@ class Simplex:
         face : Simplex
             A face of the simplex.
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     def faces(self):
@@ -116,55 +132,15 @@ class Simplex:
         if self.construct_tree:
             return self._faces
         else:
-            return Simplex.construct_simplex_tree(self.nodes)
+            return Simplex.construct_simplex_tree(self.elements)
 
-    def __getitem__(self, item):
-        """Get item.
-
-        Get the value of the attribute associated with the simplex.
-
-        :param item: The name of the attribute.
-        :type item: str
-        :return: The value of the attribute.
-        :raises KeyError: If the attribute is not found in the simplex.
-        """
-        if item not in self.properties:
-            raise KeyError(f"Attribute '{item}' is not found in the simplex.")
-        else:
-            return self.properties[item]
-
-    def __setitem__(self, key, item):
-        """Set the value of an attribute associated with the simplex.
-
-        :param key: The name of the attribute.
-        :type key: str
-        :param item: The value of the attribute.
-        """
-        self.properties[key] = item
-
-    def __len__(self) -> int:
-        """Get the number of nodes in the simplex.
-
-        :return: The number of nodes in the simplex.
-        :rtype: int
-        """
-        return len(self.nodes)
-
-    def __iter__(self):
-        """Get an iterator over the nodes in the simplex.
-
-        :return: An iterator over the nodes in the simplex.
-        :rtype: iter
-        """
-        return iter(self.nodes)
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation of the simplex.
 
         :return: A string representation of the simplex.
         :rtype: str
         """
-        return f"Simplex({tuple(self.nodes)})"
+        return f"Simplex({tuple(self.elements)})"
 
     def __str__(self):
         """Return string representation of the simplex.
@@ -172,7 +148,7 @@ class Simplex:
         :return: A string representation of the simplex.
         :rtype: str
         """
-        return f"Nodes set: {tuple(self.nodes)}, attrs: {self.properties}"
+        return f"Nodes set: {tuple(self.elements)}, attrs: {self._properties}"
 
     def clone(self) -> "Simplex":
         """Return a copy of the simplex.
@@ -185,4 +161,4 @@ class Simplex:
         -------
         Simplex
         """
-        return Simplex(self.nodes, name=self.name, **self.properties)
+        return Simplex(self.elements, name=self.name, **self._properties)
