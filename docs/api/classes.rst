@@ -22,24 +22,14 @@ Complex
 .. automodule:: toponetx.classes.complex
    :members:
 
-Dynamic Cell
-------------
-.. automodule:: toponetx.classes.dynamic_cell
-   :members:
-
 Hyperedge
 ---------
 .. automodule:: toponetx.classes.hyperedge
    :members:
 
-Node
-----
-.. automodule:: toponetx.classes.node
-   :members:
-
-ReportView
+ReportViews
 -----------
-.. automodule:: toponetx.classes.reportview
+.. automodule:: toponetx.classes.reportviews
    :members:
 
 Simplex

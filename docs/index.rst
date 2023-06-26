@@ -1,5 +1,5 @@
 🌐 TopoNetX (TNX) 🍩
-===================
+====================
 
 `TopoNetX` is a Python package for computationals on Topological Domains. Topological domains are the natural mathematical structures representing relations between the components of a dataset.
 
