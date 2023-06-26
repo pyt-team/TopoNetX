@@ -47,11 +47,13 @@ source_suffix = [".rst"]
 
 master_doc = "index"
 
-language = None
+language = "en"
 
-nbsphinx_thumbnails = {
-    "tutorials/01_simplicial_complexes": "tutorials/sc.png",
-}
+# nbsphinx_thumbnails = {
+#     "notebooks/01_simplicial_complexes": "notebooks/sc.png",
+#     "notebooks/02_cell_complexes": "notebooks/cc.png",
+#     "notebooks/03_combinatorial_complexes": "notebooks/ccc.png",
+# }
 
 nbsphinx_prolog = (
     r"""
