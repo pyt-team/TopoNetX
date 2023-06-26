@@ -10,7 +10,6 @@ __all__ = [
     "normalize_laplacian",
     "normalize_x_laplacian",
     "kipf_adjacency_matrix_normalization",
-    "asymmetric_kipf_normalization",
     "asymmetric_xu_normalization",
     "bunch_normalization",
     "_compute_B1_normalized",
@@ -107,53 +106,6 @@ def kipf_adjacency_matrix_normalization(
     A_opt_to = A_opt.dot(r_mat_inv_sqrt).transpose().dot(r_mat_inv_sqrt)
 
     return A_opt_to
-
-
-def asymmetric_kipf_normalization(B, is_sparse=True):
-    """Normalize the asymmetric matrix using Kipf's normalization.
-
-        Typically used to normalize boundary operators.
-
-    Parameters
-    ----------
-        B (numpy.ndarray or scipy.sparse.csr_matrix): The asymmetric matrix.
-        is_sparse (bool): If True, treat B as a sparse matrix.
-
-    Returns
-    -------
-        scipy.sparse.coo_matrix or numpy.ndarray: The normalized asymmetric matrix.
-
-    Notes
-    -----
-        This normalization is based on Kipf's formulation, which computes the degree matrices D_i and D_j,
-        and multiplies them with the asymmetric matrix B.
-    """
-    if is_sparse:
-        rowsum = np.array(np.abs(B).sum(1))
-        colsum = np.array(np.abs(B).sum(0))
-        degree_mat_inv_sqrt_row = diags(np.power(rowsum, -0.5).flatten())
-        degree_mat_inv_sqrt_col = diags(np.power(colsum, -0.5).flatten())
-        degree_mat_inv_sqrt_row = degree_mat_inv_sqrt_row.toarray()
-        degree_mat_inv_sqrt_col = degree_mat_inv_sqrt_col.toarray()
-        degree_mat_inv_sqrt_row[np.isinf(degree_mat_inv_sqrt_row)] = 0.0
-        degree_mat_inv_sqrt_col[np.isinf(degree_mat_inv_sqrt_col)] = 0.0
-        degree_mat_inv_sqrt_row = coo_matrix(degree_mat_inv_sqrt_row)
-        degree_mat_inv_sqrt_col = coo_matrix(degree_mat_inv_sqrt_col)
-
-        normalized_matrix = (
-            B.dot(degree_mat_inv_sqrt_col).transpose().dot(degree_mat_inv_sqrt_row)
-        ).T
-        return normalized_matrix
-    else:
-        Di = np.sum(np.abs(B), axis=1)
-        Dj = np.sum(np.abs(B), axis=0)
-        inv_Dj = np.mat(np.diag(np.power(Dj, -0.5)))
-        inv_Dj[np.isinf(inv_Dj)] = 0.0
-        Di2 = np.mat(np.diag(np.power(Di, -0.5)))
-        Di2[np.isinf(Di2)] = 0.0
-        B = np.mat(B)
-        G = Di2 * B * inv_Dj
-        return G
 
 
 def asymmetric_xu_normalization(B, is_sparse=True):

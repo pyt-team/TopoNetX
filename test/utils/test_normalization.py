@@ -13,7 +13,6 @@ from toponetx.utils.normalization import (
     _compute_D2,
     _compute_D3,
     _compute_D5,
-    asymmetric_kipf_normalization,
     asymmetric_xu_normalization,
     bunch_normalization,
     kipf_adjacency_matrix_normalization,
@@ -115,38 +114,70 @@ def test_kipf_adjacency_matrix_normalization():
     assert np.allclose(normalized_A_opt.toarray(), expected_result.toarray())
 
 
-def test_asymmetric_kipf_normalization():
-    """Unit test for asymmetric_kipf_normalization function."""
-    # Test case 1: Sparse matrix input
-    A = np.array([[0, 1, 1], [1, 0, 0], [0, 1, 0]])
-    expected_result = coo_matrix(
-        [[0.0, 0.70710678, 0.70710678], [0.70710678, 0.0, 0.0], [0.0, 1.0, 0.0]]
+def test_bunch_normalization():
+    """Unit tests for bunch_normalization function."""
+    # Test case 1: Normalization with numpy arrays
+    B1 = np.array([[1, 0, 1], [0, 1, 1], [1, 1, 0]])
+    B2 = np.array([[1, 0, 1], [0, 1, 0], [1, 1, 1]])
+    B1N, B1TN, B2N, B2TN = bunch_normalization(B1, B2)
+
+    assert np.allclose(
+        B1N,
+        np.array([[0.1, 0.0, 0.1], [0.0, 0.125, 0.125], [0.16666667, 0.16666667, 0.0]]),
     )
-    normalized_matrix = asymmetric_kipf_normalization(A, is_sparse=True)
-    assert np.allclose(normalized_matrix.toarray(), expected_result.toarray())
 
-    # Test case 2: Dense matrix input
-    B = np.array([[0, 2, 1], [1, 0, 0], [0, 1, 0]])
-    expected_result = np.array(
-        [[0.0, 0.89442719, 0.4472136], [0.4472136, 0.0, 0.0], [0.0, 0.89442719, 0.0]]
+    assert np.allclose(
+        B1TN,
+        np.array([[0.2, 0.0, 0.33333333], [0.0, 0.125, 0.16666667], [0.3, 0.375, 0.0]]),
     )
-    normalized_matrix = asymmetric_kipf_normalization(B, is_sparse=False)
-    assert np.allclose(normalized_matrix, expected_result)
 
-    # Test case 3: Empty matrix
-    C = np.array([])
-    expected_result = np.array([])
-    normalized_matrix = asymmetric_kipf_normalization(C)
-    assert np.allclose(normalized_matrix, expected_result)
+    assert np.allclose(
+        B2N,
+        np.array(
+            [
+                [0.33333333, 0.0, 0.33333333],
+                [0.0, 0.33333333, 0.0],
+                [0.33333333, 0.33333333, 0.33333333],
+            ]
+        ),
+    )
 
-    # Test case 4: Single-row matrix
-    D = np.array([[0, 1, 0]])
-    expected_result = np.array([[0.0, 1.0, 0.0]])
-    normalized_matrix = asymmetric_kipf_normalization(D)
-    assert np.allclose(normalized_matrix, expected_result)
+    assert np.allclose(
+        B2TN,
+        np.array(
+            [[0.5, 0.0, 0.33333333], [0.0, 1.0, 0.33333333], [0.5, 0.0, 0.33333333]]
+        ),
+    )
 
-    # Test case 5: Single-column matrix
-    E = np.array([[0], [1], [0]])
-    expected_result = np.array([[0.0], [1.0], [0.0]])
-    normalized_matrix = asymmetric_kipf_normalization(E)
-    assert np.allclose(normalized_matrix, expected_result)
+    # Test case 2: Normalization with scipy coo_matrices
+    B1 = coo_matrix([[1, 0, 1], [0, 1, 1], [1, 1, 0]])
+    B2 = coo_matrix([[1, 0, 1], [0, 1, 0], [1, 1, 1]])
+    B1N, B1TN, B2N, B2TN = bunch_normalization(B1, B2)
+
+    assert np.allclose(
+        B1N.toarray(),
+        np.array([[0.1, 0.0, 0.1], [0.0, 0.125, 0.125], [0.16666667, 0.16666667, 0.0]]),
+    )
+
+    assert np.allclose(
+        B1TN.toarray(),
+        np.array([[0.2, 0.0, 0.33333333], [0.0, 0.125, 0.16666667], [0.3, 0.375, 0.0]]),
+    )
+
+    assert np.allclose(
+        B2N.toarray(),
+        np.array(
+            [
+                [0.33333333, 0.0, 0.33333333],
+                [0.0, 0.33333333, 0.0],
+                [0.33333333, 0.33333333, 0.33333333],
+            ]
+        ),
+    )
+
+    assert np.allclose(
+        B2TN.toarray(),
+        np.array(
+            [[0.5, 0.0, 0.33333333], [0.0, 1.0, 0.33333333], [0.5, 0.0, 0.33333333]]
+        ),
+    )
