@@ -96,8 +96,8 @@ def kipf_adjacency_matrix_normalization(
     """
     if add_identity:
         size = A_opt.shape[0]
-        eye = np.eye(size)
-        A_opt = np.abs(A_opt) + identity_multiplier * eye
+        eye = diags(size * [identity_multiplier])
+        A_opt = np.abs(A_opt) + eye
     else:
         A_opt = np.abs(A_opt)
     rowsum = np.array(A_opt.sum(1))
@@ -106,7 +106,7 @@ def kipf_adjacency_matrix_normalization(
     r_mat_inv_sqrt = diags(r_inv_sqrt)
     A_opt_to = A_opt.dot(r_mat_inv_sqrt).transpose().dot(r_mat_inv_sqrt)
 
-    return coo_matrix(A_opt_to)
+    return A_opt_to
 
 
 def asymmetric_kipf_normalization(B, is_sparse=True):
