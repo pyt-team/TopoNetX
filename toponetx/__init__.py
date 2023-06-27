@@ -22,19 +22,19 @@ from .transform.graph_to_simplicial_complex import (
     graph_2_neighbor_complex,
 )
 from .utils.normalization import (
-    _compute_B1_normalized,
-    _compute_B1T_normalized,
-    _compute_B2_normalized,
-    _compute_B2T_normalized,
+    _compute_B1_normalized_matrix,
+    _compute_B1T_normalized_matrix,
+    _compute_B2_normalized_matrix,
+    _compute_B2T_normalized_matrix,
     _compute_D1,
     _compute_D2,
     _compute_D3,
     _compute_D5,
-    asymmetric_xu_normalization,
-    bunch_normalization,
-    kipf_adjacency_matrix_normalization,
-    normalize_laplacian,
-    normalize_x_laplacian,
+    compute_bunch_normalized_matrices,
+    compute_kipf_adjacency_normalized_matrix,
+    compute_laplacian_normalized_matrix,
+    compute_x_laplacian_normalized_matrix,
+    compute_xu_asymmetric_normalized_matrix,
 )
 from .utils.structure import (
     neighborhood_list_to_neighborhood_dict,
