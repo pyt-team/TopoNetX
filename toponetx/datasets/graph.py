@@ -1,5 +1,6 @@
 """Various examples of named graphs represented as complexes."""
 
+from pathlib import Path
 from typing import Literal, overload
 
 import networkx as nx
@@ -9,7 +10,9 @@ from toponetx import CellComplex, SimplicialComplex
 from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
 from toponetx.transform.graph_to_simplicial_complex import graph_2_clique_complex
 
-__all__ = ["karate_club"]
+__all__ = ["karate_club", "coauthorship"]
+
+DIR = Path(__file__).parent
 
 
 @overload
@@ -135,3 +138,43 @@ def karate_club(
         return cx
 
     raise ValueError(f"complex_type must be 'simplicial' or 'cell' got {complex_type}")
+
+
+def coauthorship() -> SimplicialComplex:
+    """Load the coauthorship network from [SNN20] as a simplicial complex.
+    The coauthorship network is a simplicial complex where a paper with k authors is represented by a (k-1)-simplex.
+    The added subsimplices of the (k-1)-simplex are interpreted as collaborations among subsets of authors.
+    An attribute named "citations" is added to each simplex, corresponding to the number of citations attributed to the given collaborations of k authors.
+    The coauthorship network is sampled from Semantic Scholar Open Research Corpus and pre-processed as in [SNN20].
+    See [SNN20] for a more detailed description of the dataset.
+
+    References
+    ----------
+    [SNN20] Stefania Ebli, Michael Defferrard and Gard Spreemann.
+        Simplicial Neural Networks.
+        Topological Data Analysis and Beyond workshop at NeurIPS.
+        https://arxiv.org/abs/2010.03633
+        https://github.com/stefaniaebli/simplicial_neural_networks
+
+    Returns
+    -------
+    A SimplicialComplex obtained from the coauthorship network in [SNN20].
+    The simplicial complex comes with the following feature:
+        "citations":
+            - the number of citations attributed to the given collaborations of k authors.
+
+    """
+    cochains = np.load(DIR / "150250_cochains.npy", allow_pickle=True)
+
+    simplices = []
+    for dim in list(range(len(cochains)))[::-1]:
+        li = list(cochains[dim].keys())
+        simplices += [list(l) for l in li]
+
+    sc = SimplicialComplex(simplices)
+
+    for i in range(len(cochains)):
+        dic = {tuple(sorted(list(k))): v for k, v in cochains[i].items()}
+        sc.set_simplex_attributes(dic, name="citations")
+
+    return sc

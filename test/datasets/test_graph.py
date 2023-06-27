@@ -1,7 +1,7 @@
 """Test graph dataset."""
 
 from toponetx import CellComplex, SimplicialComplex
-from toponetx.datasets.graph import karate_club
+from toponetx.datasets.graph import karate_club, coauthorship
 
 
 class TestGraph:
@@ -24,3 +24,11 @@ class TestGraph:
         assert len(cell_karate_club_data.get_cell_attributes("node_feat", rank=0)) != 0
         assert len(cell_karate_club_data.get_cell_attributes("edge_feat", rank=1)) != 0
         assert len(cell_karate_club_data.get_cell_attributes("cell_feat", rank=2)) != 0
+
+    def test_coauthorship(self):
+        """Test coauthorship."""
+        simplicial_coauthorship_data = coauthorship()
+
+        assert (
+            len(simplicial_coauthorship_data.get_simplex_attributes("citations")) != 0
+        )
