@@ -95,7 +95,7 @@ def compute_kipf_adjacency_normalized_matrix(
 
     Returns
     -------
-    scipy.sparse.coo_matrix
+    scipy.sparse.csr_matrix
         The normalized adjacency matrix.
 
     Notes
@@ -133,7 +133,7 @@ def compute_xu_asymmetric_normalized_matrix(B, is_sparse=True):
 
     Returns
     -------
-    numpy.ndarray or scipy.sparse.coo_matrix
+    numpy.ndarray or scipy.sparse.csr_matrix
         The normalized asymmetric matrix.
 
     Notes
@@ -163,19 +163,19 @@ def compute_bunch_normalized_matrices(B1, B2):
     Parameters
     ----------
     B1 : numpy array or scipy csr_matrix
-        The boundary B1: C1->C0 of a simplicial complex.
-    B2 : numpy array or scipy coo_matrix
-        The boundary B2: C2->C1 of a simplicial complex.
+        The boundary B1: C1->C0 of a complex.
+    B2 : numpy array or scipy csr_matrix
+        The boundary B2: C2->C1 of a complex.
 
     Returns
     -------
-    B1 : numpy array or scipy coo_matrix
+    B1 : numpy array or scipy csr_matrix
         Normalized B1: C1->C0.
-    B1T : numpy array or scipy coo_matrix
+    B1T : numpy array or scipy csr_matrix
         Normalized B1T: C0->C1.
-    B2 : numpy array or scipy coo_matrix
+    B2 : numpy array or scipy csr_matrix
         Normalized B2: C2->C1.
-    B2T : numpy array or scipy coo_matrix
+    B2T : numpy array or scipy csr_matrix
         Normalized B2T: C1->C2.
 
     References
@@ -209,7 +209,7 @@ def _compute_B1_normalized_matrix(B1, B2):
 
     Returns
     -------
-    _ : numpy array or scipy coo_matrix
+    _ : numpy array or scipy csr_matrix
         Normalized B1: C1->C0.
     """
     D2 = _compute_D2(B2)
@@ -233,7 +233,7 @@ def _compute_B1T_normalized_matrix(B1, B2):
 
     Returns
     -------
-    _ : numpy array or scipy coo_matrix
+    _ : numpy array or scipy csr_matrix
         Normalized transpose boundary matrix B1T: C0->C1.
         This is the coboundary C0->C1.
     """
