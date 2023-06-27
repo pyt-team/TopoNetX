@@ -24,7 +24,6 @@ indices in S and T to other values.
 
 from collections import defaultdict
 from collections.abc import Iterable
-from typing import Optional
 
 from scipy.sparse import csr_matrix
 
@@ -104,7 +103,7 @@ def sparse_array_to_neighborhood_dict(
     )
 
 
-def incidence_to_adjacency(B, s: Optional[int] = None, signed=False):
+def incidence_to_adjacency(B, s: int | None = None, signed=False):
     """Get adjacency matrix from boolean incidence matrix for s-metrics.
 
     Self loops are not supported.

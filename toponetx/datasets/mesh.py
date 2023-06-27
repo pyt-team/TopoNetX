@@ -1,11 +1,12 @@
 """Various examples of named meshes represented as complexes."""
 
 import zipfile
+from io import BytesIO
 from pathlib import Path
-from typing import Literal, Union, overload
+from typing import Literal, overload
 
 import numpy as np
-import wget
+import requests
 
 from toponetx import CellComplex, SimplicialComplex
 
@@ -48,7 +49,7 @@ def stanford_bunny(complex_type: Literal["simplicial"] = ...) -> SimplicialCompl
 
 def stanford_bunny(
     complex_type: Literal["cell", "simplicial"] = "simplicial"
-) -> Union[CellComplex, SimplicialComplex]:
+) -> CellComplex | SimplicialComplex:
     """Load the Stanford Bunny mesh as a complex.
 
     Parameters
@@ -93,12 +94,12 @@ def shrec_16(size: Literal["full", "small"] = "full"):
     Notes
     -----
     Each npz file stores 5 keys:
-    "complexes",label","node_feat","edge_feat" and "face_feat".
+    "complexes","node_feat","edge_feat", "face_feat" and mesh label".
     complex : stores the simplicial complex of the mesh
-    label :  stores the label of the mesh
-    node_feat : stores 6 dim node feature vector: position and normal of the each node in the mesh
-    edge_feat : stores 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
-    face_feat : face area, face normal, face angle
+    node_feat : stores a 6 dim node feature vector: position and normal of the each node in the mesh
+    edge_feat : stores a 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
+    face_feat : stores a 7-dimensional face feature vector: face area (1 feat), face normal (3 feat), face angles (3 feat)
+    mesh label : stores the label of the mesh
 
     Raises
     ------
@@ -125,14 +126,13 @@ def shrec_16(size: Literal["full", "small"] = "full"):
         raise ValueError(f"size must be 'full' or 'small' got {size}.")
     ds_name, url = SHREC_DS_MAP[size]
 
-    zip_file = DIR / f"{ds_name}.zip"
     training = DIR / f"{ds_name}_training.npz"
     testing = DIR / f"{ds_name}_testing.npz"
 
     if not training.exists() or not testing.exists():
         print(f"downloading shrec 16 {size} dataset...\n")
-        wget.download(url, str(DIR))
-        with zipfile.ZipFile(zip_file, "r") as zip_ref:
+        r = requests.get(url)
+        with zipfile.ZipFile(BytesIO(r.content)) as zip_ref:
             zip_ref.extractall(DIR)
         print("done!")
 
@@ -174,7 +174,7 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
     complex : stores the simplicial complex of the mesh
     node_feat : stores a 6-dimensional node feature vector: position and normal of each node in the mesh
     edge_feat : stores a 10-dimensional edge feature vector: dihedral angle, edge span, 2 edge angles in the triangle, 6 edge ratios.
-    face_feat : stores face area, face normal, face angle
+    face_feat : stores a 7-dimensional face feature vector: face area (1 feat), face normal (3 feat), face angles (3 feat)
     face_label : stores the label of mesh segmentation as a face label
 
     Data Source
@@ -194,13 +194,12 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
         raise ValueError(f"data must be 'alien', 'vase', or 'chair' got {data}.")
     ds_name, url = COSEG_DS_MAP[data]
 
-    zip_file = DIR / f"{ds_name}.zip"
     unziped_file = DIR / f"{ds_name}.npz"
 
     if not unziped_file.exists():
         print(f"downloading {data} dataset...\n")
-        wget.download(url, str(DIR))
-        with zipfile.ZipFile(zip_file, "r") as zip_ref:
+        r = requests.get(url)
+        with zipfile.ZipFile(BytesIO(r.content)) as zip_ref:
             zip_ref.extractall(DIR)
         print("done!")
 

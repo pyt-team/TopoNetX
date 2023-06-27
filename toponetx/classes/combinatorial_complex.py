@@ -5,8 +5,6 @@ from collections.abc import Hashable, Iterable
 
 import networkx as nx
 import numpy as np
-import pandas as pd
-from hypernetx import Hypergraph
 from networkx import Graph
 from scipy.sparse import csr_matrix
 
@@ -42,8 +40,8 @@ class CombinatorialComplex(Complex):
     ----------
     cells : (optional)iterable, default: None
 
-    name : hashable, optional, default: None
-        If None then a placeholder '_'  will be inserted as name
+    name : str, optional
+        An identifiable name for the combinatorial complex.
 
     ranks : (optional) an iterable, default: None.
         when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
@@ -81,14 +79,16 @@ class CombinatorialComplex(Complex):
     """
 
     def __init__(
-        self, cells=None, name=None, ranks=None, weight=None, graph_based=False, **attr
-    ):
+        self,
+        cells=None,
+        name: str = "",
+        ranks=None,
+        graph_based=False,
+        **attr,
+    ) -> None:
         super().__init__()
 
-        if not name:
-            self.name = ""
-        else:
-            self.name = name
+        self.name = name
 
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
 
@@ -289,7 +289,7 @@ class CombinatorialComplex(Complex):
     @property
     def nodes(self):
         """
-        Object associated with self._nodes.
+        Object associated with self.elements.
 
         Returns
         -------
@@ -309,7 +309,7 @@ class CombinatorialComplex(Complex):
         return self._complex_set.hyperedge_dict
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Return shape.
 
         This is:
@@ -317,11 +317,11 @@ class CombinatorialComplex(Complex):
 
         Returns
         -------
-        tuple
+        tuple of ints
         """
         return self._complex_set.shape
 
-    def skeleton(self, rank):
+    def skeleton(self, rank: int):
         """Return skeleton."""
         return self._complex_set.skeleton(rank)
 
@@ -339,9 +339,9 @@ class CombinatorialComplex(Complex):
         """Return detailed string representation."""
         return f"Combinatorial Complex with {len(self.nodes)} nodes and cells with ranks {self.ranks} and sizes {self.shape} "
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation."""
-        return f"CombinatorialComplex(name={self.name})"
+        return f"CombinatorialComplex(name='{self.name}')"
 
     def __len__(self):
         """Return number of nodes."""
@@ -364,7 +364,7 @@ class CombinatorialComplex(Complex):
         """Set the attributes of a hyperedge or node in the CC."""
         if cell in self:
             if isinstance(cell, self.cell_type):
-                if cell.nodes in self.nodes:
+                if cell.elements in self.nodes:
                     self.nodes.update(attr)
             elif isinstance(cell, Iterable):
                 cell = frozenset(cell)
@@ -506,7 +506,7 @@ class CombinatorialComplex(Complex):
         self._remove_node(node)
         return self
 
-    def remove_nodes(self, node_set):
+    def remove_nodes(self, node_set) -> None:
         """Remove nodes from cells.
 
         This also deletes references in combinatorial complex nodes.
@@ -515,14 +515,9 @@ class CombinatorialComplex(Complex):
         ----------
         node_set : an iterable of hashables or Entities
             Nodes in CC
-
-        Returns
-        -------
-        Combinatorial Complex : NestedCombinatorialComplex
         """
         for node in node_set:
             self.remove_node(node)
-        return self
 
     def _add_node(self, node, **attr):
         """Add one node as hyperedge."""
@@ -575,7 +570,7 @@ class CombinatorialComplex(Complex):
         >>> CC.add_cell([3, 4], rank=2)
         >>> d = {(1, 2, 3, 4): 'red', (1, 2, 3): 'blue', (3, 4): 'green'}
         >>> CC.set_cell_attributes(d, name='color')
-        >>> CC.cells[(3, 4)].properties['color']
+        >>> CC.cells[(3, 4)]['color']
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -585,7 +580,7 @@ class CombinatorialComplex(Complex):
         >>> CC = NestedCombinatorialComplex(G)
         >>> d = {(1, 2): {'color': 'red','attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3}}
         >>> CC.set_cell_attributes(d)
-        >>> CC.cells[(0, 1)].properties['color']
+        >>> CC.cells[(0, 1)]['color']
         'blue'
         3
 
@@ -635,9 +630,9 @@ class CombinatorialComplex(Complex):
         'blue'
         """
         return {
-            node: self.nodes[node].properties[name]
+            node: self.nodes[node][name]
             for node in self.nodes
-            if name in self.nodes[node].properties
+            if name in self.nodes[node]
         }
 
     def get_cell_attributes(self, name, rank=None):
@@ -666,9 +661,9 @@ class CombinatorialComplex(Complex):
         """
         if rank is not None:
             return {
-                cell: self.skeleton(rank)[cell].properties[name]
+                cell: self.skeleton(rank)[cell][name]
                 for cell in self.skeleton(rank)
-                if name in self.skeleton(rank)[cell].properties
+                if name in self.skeleton(rank)[cell]
             }
         else:
             return {
@@ -794,15 +789,15 @@ class CombinatorialComplex(Complex):
                 )  # put the simplex in cananical order
                 if len(hyperedge_) != len(hyperedge):
                     raise ValueError(
-                        f"a hyperedge cannot contain duplicate nodes,got {hyperedge_}"
+                        f"a cell cannot contain duplicate nodes,got {hyperedge_}"
                     )
             else:
-                hyperedge_ = hyperedge.nodes
+                hyperedge_ = hyperedge.elements
         if isinstance(hyperedge, Iterable) or isinstance(hyperedge, HyperEdge):
             for i in hyperedge_:
                 if not isinstance(i, Hashable):
                     raise ValueError(
-                        "every element hyperedge must be hashable, input hyperedge is {hyperedge_}"
+                        f"every element cell must be hashable, input cell is {hyperedge_}"
                     )
         if (
             rank == 0
@@ -811,7 +806,7 @@ class CombinatorialComplex(Complex):
         ):
             if len(hyperedge) > 1:
                 raise ValueError(
-                    "rank must be positive for higher order hyperedges, got rank = 0 "
+                    "rank must be positive for higher order cells, got rank = 0 "
                 )
 
         self._aux_complex.add_simplex(Simplex(hyperedge_, r=rank))
@@ -832,10 +827,11 @@ class CombinatorialComplex(Complex):
                         )
 
             self._add_hyperedge_helper(hyperedge_, rank, **attr)
-            self._complex_set.hyperedge_dict[rank][hyperedge_]["weight"] = 1
+            if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_]:
+                self._complex_set.hyperedge_dict[rank][hyperedge_]["weight"] = 1
             if isinstance(hyperedge, HyperEdge):
                 self._complex_set.hyperedge_dict[rank][hyperedge_].update(
-                    hyperedge.properties
+                    hyperedge._properties
                 )
 
         else:
@@ -856,10 +852,11 @@ class CombinatorialComplex(Complex):
                         )
             self._aux_complex[hyperedge_]["r"] = rank
             self._add_hyperedge_helper(hyperedge_, rank, **attr)
-            self._complex_set.hyperedge_dict[rank][hyperedge_]["weight"] = 1
+            if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_]:
+                self._complex_set.hyperedge_dict[rank][hyperedge_]["weight"] = 1
             if isinstance(hyperedge, HyperEdge):
                 self._complex_set.hyperedge_dict[rank][hyperedge_].update(
-                    hyperedge.properties
+                    hyperedge._properties
                 )
 
     def _add_hyperedges_from(self, hyperedges):
@@ -878,7 +875,7 @@ class CombinatorialComplex(Complex):
             del self._complex_set.hyperedge_dict[0][hyperedge]
 
         if isinstance(hyperedge, HyperEdge):
-            hyperedge_ = hyperedge.nodes
+            hyperedge_ = hyperedge.elements
         else:
             hyperedge_ = frozenset(hyperedge)
         rank = self._complex_set.get_rank(hyperedge_)
@@ -1198,7 +1195,7 @@ class CombinatorialComplex(Complex):
         -------
         new Combinatorial Complex : NestedCombinatorialComplex
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
         # RNS = self.cells.restrict_to(element_subset=cell_set, name=name)
         # return NestedCombinatorialComplex(cells=RNS, name=name)
@@ -1222,7 +1219,7 @@ class CombinatorialComplex(Complex):
         new Combinatorial Complex : NestedCombinatorialComplex
 
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def from_networkx_graph(self, G):
         """Construct a combinatorial complex from a networkx graph.
@@ -1264,7 +1261,7 @@ class CombinatorialComplex(Complex):
         >>> CC = CombinatorialComplex(cells=E)
         >>> HG = CC.to_hypergraph()
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def is_connected(self, s=1, cells=False):
         """Determine if combinatorial complex is :term:`s-connected <s-connected, s-node-connected>`.
@@ -1631,7 +1628,7 @@ class CombinatorialComplex(Complex):
         generated by the s-adjacency matrix.
 
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def cell_distance(self, source, target, s=1):
         """Return the shortest s-walk distance between two cells.

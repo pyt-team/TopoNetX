@@ -11,7 +11,7 @@ import warnings
 from collections import defaultdict
 from collections.abc import Hashable, Iterable
 from itertools import zip_longest
-from typing import Any, Literal, Optional, Union
+from typing import Any
 from warnings import warn
 
 import networkx as nx
@@ -26,6 +26,7 @@ from networkx.utils import pairwise
 from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell import Cell
+from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import CellView
 from toponetx.exception import TopoNetXError
@@ -114,13 +115,10 @@ class CellComplex(Complex):
     >>> CX.is_regular
     """
 
-    def __init__(self, cells=None, name=None, regular=True, **attr):
+    def __init__(self, cells=None, name: str = "", regular=True, **attr) -> None:
         super().__init__()
 
-        if not name:
-            self.name = ""
-        else:
-            self.name = name
+        self.name = name
 
         self._regular = regular
         self._G = Graph()
@@ -195,7 +193,7 @@ class CellComplex(Complex):
         """
         return len(self.nodes), len(self.edges), len(self.cells)
 
-    def skeleton(self, rank):
+    def skeleton(self, rank: int):
         """Compute skeleton."""
         if rank == 0:
             return self.nodes
@@ -232,9 +230,9 @@ class CellComplex(Complex):
         """Return detailed string representation."""
         return f"Cell Complex with {len(self.nodes)} nodes, {len(self.edges)} edges  and {len(self.cells)} 2-cells "
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation."""
-        return f"CellComplex(name={self.name})"
+        return f"CellComplex(name='{self.name}')"
 
     def __len__(self):
         """Return number of nodes."""
@@ -280,14 +278,14 @@ class CellComplex(Complex):
         """
         return self.neighbors(node)
 
-    def _insert_cell(self, cell: Union[tuple, list, Cell], **attr):
+    def _insert_cell(self, cell: tuple | list | Cell, **attr):
         """Insert cell."""
         # input must be list, tuple or Cell type
         if isinstance(cell, tuple) or isinstance(cell, list) or isinstance(cell, Cell):
             if isinstance(cell, tuple) or isinstance(cell, list):
                 cell = Cell(elements=cell, name=str(len(self.cells)), **attr)
             elif isinstance(cell, Cell):
-                cell.properties.update(attr)
+                cell.update(attr)
 
             if cell.elements not in self._cells._cells:
                 self._cells._cells[cell.elements] = {0: cell}
@@ -299,7 +297,7 @@ class CellComplex(Complex):
         else:
             raise TypeError("input must be list, tuple or Cell type")
 
-    def _delete_cell(self, cell: Union[tuple, list, Cell], key=None):
+    def _delete_cell(self, cell: tuple | list | Cell, key=None):
         """Delete cell."""
         if isinstance(cell, Cell):
             cell = cell.elements
@@ -408,8 +406,8 @@ class CellComplex(Complex):
 
     def size(
         self,
-        cell: Union[tuple, list, Cell],
-        node_set: Optional[Iterable[Hashable]] = None,
+        cell: tuple | list | Cell,
+        node_set: Iterable[Hashable] | None = None,
     ) -> int:
         """Compute number of nodes in node_set that belong to cell.
 
@@ -440,7 +438,7 @@ class CellComplex(Complex):
             else:
                 raise KeyError(f" the key {cell} is not a key for an existing cell ")
 
-    def number_of_nodes(self, node_set: Optional[Iterable[Hashable]] = None):
+    def number_of_nodes(self, node_set: Iterable[Hashable] | None = None):
         """Compute number of nodes in node_set belonging to cell complex.
 
         Parameters
@@ -458,7 +456,7 @@ class CellComplex(Complex):
         else:
             return len(self.nodes)
 
-    def number_of_edges(self, edge_set: Optional[Iterable[tuple]] = None) -> int:
+    def number_of_edges(self, edge_set: Iterable[tuple] | None = None) -> int:
         """Compute number of edges in edge_set belonging to cell complex.
 
         Parameters
@@ -483,7 +481,7 @@ class CellComplex(Complex):
             return len(self.edges)
 
     def number_of_cells(
-        self, cell_set: Optional[Iterable[Union[tuple, list, Cell]]] = None
+        self, cell_set: Iterable[tuple | list | Cell] | None = None
     ) -> int:
         """Compute number of cells in cell_set belonging to cell complex.
 
@@ -573,7 +571,7 @@ class CellComplex(Complex):
             if node in cell:
                 self.remove_cell(cell)
 
-    def remove_nodes(self, node_set: Iterable[Hashable]):
+    def remove_nodes(self, node_set: Iterable[Hashable]) -> None:
         """Remove nodes from cells.
 
         This also deletes references in cell complex nodes.
@@ -628,8 +626,8 @@ class CellComplex(Complex):
 
     def add_cell(
         self,
-        cell: Union[tuple, list, Cell],
-        rank: Optional[int] = None,
+        cell: tuple | list | Cell,
+        rank: int | None = None,
         check_skeleton=False,
         **attr,
     ):
@@ -719,8 +717,8 @@ class CellComplex(Complex):
 
     def add_cells_from(
         self,
-        cell_set: Iterable[Union[tuple, list, Cell]],
-        rank: Optional[int] = None,
+        cell_set: Iterable[tuple | list | Cell],
+        rank: int | None = None,
         check_skeleton=False,
         **attr,
     ):
@@ -742,7 +740,7 @@ class CellComplex(Complex):
         for cell in cell_set:
             self.add_cell(cell=cell, rank=rank, check_skeleton=check_skeleton, **attr)
 
-    def remove_cell(self, cell: Union[tuple, list, Cell]):
+    def remove_cell(self, cell: tuple | list | Cell):
         """Remove a single cell from Cell Complex.
 
         Parameters
@@ -765,7 +763,7 @@ class CellComplex(Complex):
             self._delete_cell(cell)
         return self
 
-    def remove_cells(self, cell_set: Iterable[Union[tuple, list, Cell]]):
+    def remove_cells(self, cell_set: Iterable[tuple | list | Cell]):
         """Remove cells from a cell complex that are in cell_set.
 
         Parameters
@@ -793,11 +791,9 @@ class CellComplex(Complex):
 
     def set_filtration(
         self,
-        values: Union[
-            dict[Union[Hashable, tuple, list, Cell], dict],
-            dict[Union[Hashable, tuple, list, Cell], Any],
-        ],
-        name: Optional[str] = None,
+        values: dict[Hashable | tuple | list | Cell, dict]
+        | dict[Hashable | tuple | list | Cell, Any],
+        name: str | None = None,
     ) -> None:
         """Set filtration.
 
@@ -842,7 +838,7 @@ class CellComplex(Complex):
         self.set_cell_attributes(d_edges, name=name, rank=1)
         self.set_cell_attributes(d_cells, name=name, rank=2)
 
-    def get_filtration(self, name: str) -> dict[Union[Hashable, tuple], Any]:
+    def get_filtration(self, name: str) -> dict[Hashable | tuple, Any]:
         """Get filtration.
 
         Parameters
@@ -875,8 +871,8 @@ class CellComplex(Complex):
 
     def set_node_attributes(
         self,
-        values: Union[dict[Hashable, dict], dict[Hashable, Any]],
-        name: Optional[str] = None,
+        values: dict[Hashable, dict] | dict[Hashable, Any],
+        name: str | None = None,
     ) -> None:
         """Set node attributes.
 
@@ -894,7 +890,7 @@ class CellComplex(Complex):
         >>> CX.add_cell([1,2,3,4], rank=2)
         >>> d={ 1: { 'color':'red','attr2':1 },2: {'color':'blue','attr2':3 } }
         >>> CX.set_node_attributes(d)
-        >>> CX.nodes[1]['color']
+        >>> CX[1]['color']
         'red'
         """
         self.set_cell_attributes(values, rank=0, name=name)
@@ -926,8 +922,8 @@ class CellComplex(Complex):
 
     def set_edge_attributes(
         self,
-        values: Union[dict[tuple, dict], dict[tuple, Any]],
-        name: Optional[str] = None,
+        values: dict[tuple, dict] | dict[tuple, Any],
+        name: str | None = None,
     ) -> None:
         """Set edge attributes.
 
@@ -977,12 +973,10 @@ class CellComplex(Complex):
 
     def set_cell_attributes(
         self,
-        values: Union[
-            dict[Union[Hashable, tuple, list, Cell], dict],
-            dict[Union[Hashable, tuple, list, Cell], Any],
-        ],
+        values: dict[Hashable | tuple | list | Cell, dict]
+        | dict[Hashable | tuple | list | Cell, Any],
         rank: int,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> None:
         """Set cell attributes.
 
@@ -1087,9 +1081,7 @@ class CellComplex(Complex):
         else:
             raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
-    def get_cell_attributes(
-        self, name: str, rank: int
-    ) -> dict[Union[Hashable, tuple], Any]:
+    def get_cell_attributes(self, name: str, rank: int) -> dict[Hashable | tuple, Any]:
         """Get node attributes from graph.
 
         Parameters
@@ -1106,6 +1098,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> import networkx as nx
+        >>> from toponetx import CellComplex
         >>> G = nx.path_graph(3)
         >>> d = {((1, 2, 3, 4), 0): {'color': 'red', 'attr2': 1}, (1, 2, 4): {'color': 'blue', 'attr2': 3 }}
         >>> CX = CellComplex(G)
@@ -1135,6 +1128,107 @@ class CellComplex(Complex):
             return d
         raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
+    def set_cell_data(self, cell, rank, attr_name, attr_value):
+        """Set data for a specific cell in the complex.
+
+        Parameters
+        ----------
+        cell : str or tuple
+            The cell to set data for.
+        rank : int
+            The rank of the cell.
+        attr_name : str
+            The name of the attribute to set.
+        attr_value : object
+            The value to set for the attribute.
+
+        Raises
+        ------
+        KeyError
+            If the specified cell is not found.
+
+        Notes
+        -----
+        - For rank 0 cells (nodes), the data is stored in the 'nodes' dictionary.
+        - For rank 1 cells (edges), the data is stored in the 'edges' dictionary.
+        - For rank 2 cells (other cells), the data is stored in the 'cells' dictionary.
+        """
+        if rank == 0:
+            if cell in self.nodes:
+                self.nodes[cell][attr_name] = attr_value
+            else:
+                raise KeyError(f"{cell} is not a node in the complex.")
+        elif rank == 1:
+            if cell in self.edges and len(cell) == 2:
+                self.edges[cell][attr_name] = attr_value
+            else:
+                raise KeyError(f"{cell} is not a valid edge in the complex.")
+        elif rank == 2:
+            if cell in self.cells:
+                self.cells[cell][attr_name] = attr_value
+            else:
+                raise KeyError(f"{cell} is not a valid cell in the complex.")
+        else:
+            raise ValueError(f"Invalid rank: {rank}. Rank must be 0, 1, or 2.")
+
+    def get_cell_data(self, cell, rank, attr_name=None):
+        """Retrieve data associated with a specific cell in the complex.
+
+        Parameters
+        ----------
+        cell : str or tuple
+            The cell to retrieve data from.
+        rank : int
+            The rank of the cell.
+        attr_name : str, optional
+            The name of the attribute to retrieve. Default is None.
+
+        Returns
+        -------
+        object
+            The value associated with the specified cell and attribute.
+
+        Raises
+        ------
+        KeyError
+            If the specified cell or attribute is not found.
+
+        Notes
+        -----
+        - For rank 0 cells (nodes), the data is retrieved from the 'nodes' dictionary.
+        - For rank 1 cells (edges), the data is retrieved from the 'edges' dictionary.
+        - For rank 2 cells (other cells), the data is retrieved from the 'cells' dictionary.
+        """
+        if rank == 0:
+            container = self.nodes
+        elif rank == 1:
+            container = self.edges
+        elif rank == 2:
+            container = self.cells
+        else:
+            raise ValueError(f"Invalid rank: {rank}. Rank must be 0, 1, or 2.")
+
+        if cell in container:
+            if attr_name is not None:
+                if attr_name in container[cell]:
+                    return container[cell][attr_name]
+                raise KeyError(
+                    f"Node '{cell}' does not have an attribute with key {attr_name}."
+                )
+
+            else:
+                return container[cell]
+
+        else:
+            if rank == 0:
+                raise KeyError(f"Node '{cell}' is not present in the complex.")
+            elif rank == 1:
+                raise KeyError(
+                    f"Edge '{cell}' is not present in the complex or does not have two nodes."
+                )
+            else:
+                raise KeyError(f"Cell '{cell}' is not present in the complex.")
+
     def remove_equivalent_cells(self):
         """Remove equivalent cells.
 
@@ -1154,6 +1248,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> import networkx as nx
+        >>> from toponetx import CellComplex
         >>> G = nx.path_graph(3)
         >>> cx = CellComplex(G)
         >>> cx.add_cell([1,2,3,4], rank=2)
@@ -1169,7 +1264,7 @@ class CellComplex(Complex):
 
     def is_insertable_cycle(
         self,
-        cell: Union[Cell, tuple, list],
+        cell: tuple | list | Cell,
         check_skeleton: bool = True,
         warnings_dis: bool = False,
     ) -> bool:
@@ -1223,7 +1318,7 @@ class CellComplex(Complex):
 
     def incidence_matrix(
         self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
-    ) -> Union[scipy.sparse.csc_matrix, tuple[dict, dict, scipy.sparse.csc_matrix]]:
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Incidence matrix for the cx indexed by nodes x cells.
 
         Parameters
@@ -1377,7 +1472,7 @@ class CellComplex(Complex):
 
     def hodge_laplacian_matrix(
         self, rank: int, signed=True, weight: bool = False, index: bool = False
-    ) -> Union[scipy.sparse.csc_matrix, tuple[dict, dict, scipy.sparse.csc_matrix]]:
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Compute the hodge-laplacian matrix for the CX.
 
         Parameters
@@ -1627,15 +1722,15 @@ class CellComplex(Complex):
 
     def restrict_to_cells(
         self,
-        cell_set: Iterable[Union[Cell, tuple]],
+        cell_set: Iterable[Cell | tuple],
         keep_edges: bool = False,
-        name: Optional[str] = None,
+        name: str = "",
     ):
         """Construct cell complex using a subset of the cells in cell complex.
 
         Parameters
         ----------
-        cell_set: Iterable[Union[Cell, tuple]]
+        cell_set: Iterable[Cell | tuple]
             A subset of elements of the cell complex's cells (self.cells) and edges (self.edges).
             Cells can be represented as Cell objects or tuples with length > 2.
 
@@ -1699,12 +1794,10 @@ class CellComplex(Complex):
 
         return CX
 
-    def restrict_to_nodes(
-        self, node_set: Iterable[Hashable], name: Optional[str] = None
-    ):
+    def restrict_to_nodes(self, node_set: Iterable[Hashable], name: str = ""):
         """Restrict cell complex to nodes.
 
-        This constructs a new cell complex  by restricting the cells in the cell complex to
+        This constructs a new cell complex by restricting the cells in the cell complex to
         the nodes referenced by node_set.
 
         Parameters
@@ -1737,7 +1830,7 @@ class CellComplex(Complex):
         CX = CellComplex(_G)
 
         for cell in cells:
-            CX.add_cell(cell)
+            CX.add_cell(cell, **self.get_cell_data(cell, 2))
         return CX
 
     def to_combinatorial_complex(self):
@@ -1747,16 +1840,29 @@ class CellComplex(Complex):
         The rank of an element in a cell complex is its dimension, so vertices have rank 0,
         edges have rank 1, and faces have rank 2.
 
+        Returns
+        -------
+        Combinatorial Complex : CombinatorialComplex
+
         Examples
         --------
         >>> CX = CellComplex()
-        >>> CX.add_cell([1,2,3,4],rank=2)
-        >>> CX.add_cell([2,3,4,5],rank=2)
-        >>> CX.add_cell([5,6,7,8],rank=2)
-        >>> CX= CX.to_combinatorial_complex()
+        >>> CX.add_cell([1,2,3,4],rank=2,weight = 1)
+        >>> CX.add_cell([2,3,4,5],rank=2,weight = 4)
+        >>> CX.add_cell([5,6,7,8],rank=2,weight = 0)
+        >>> CX.add_node(0,color='red')
+        >>> CC= CX.to_combinatorial_complex()
         >>> CX.cells
         """
-        raise NotImplementedError()
+        cc = CombinatorialComplex()
+        for c in self.cells:
+            cc.add_cell(c, rank=2, **self.get_cell_data(c, 2))
+        for c in self.edges:
+            cc.add_cell(c, rank=1, **self.get_cell_data(c, 1))
+        for c in self.nodes:
+            cc.add_node(c, **self.get_cell_data(c, 0))
+
+        return cc
 
     def to_hypergraph(self):
         """Convert to hypergraph.
@@ -1764,7 +1870,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CX = CellComplex()
-        >>> CX.add_cell([1,2,3,4],rank=2)
+        >>> CX.add_cell([1,2,3,4],rank=2,color='red')
         >>> CX.add_cell([2,3,4,5],rank=2)
         >>> CX.add_cell([5,6,7,8],rank=2)
         >>> HG = CX.to_hypergraph()
@@ -1774,14 +1880,22 @@ class CellComplex(Complex):
 
         cells = []
         for cell in self.cells:
-            cells.append(Entity(str(list(cell.elements)), elements=cell.elements))
+            cells.append(
+                Entity(
+                    str(list(cell.elements)),
+                    elements=cell.elements,
+                    **self.get_cell_data(cell, 2),
+                )
+            )
         for cell in self.edges:
-            cells.append(Entity(str(list(cell)), elements=cell))
+            cells.append(
+                Entity(str(list(cell)), elements=cell, **self.get_cell_data(cell, 1))
+            )
         E = EntitySet("CX_to_HG", elements=cells)
         HG = Hypergraph(E)
         nodes = []
         for cell in self.nodes:
-            nodes.append(Entity(cell, elements=[]))
+            nodes.append(Entity(cell, elements=[], **self.get_cell_data(cell, 0)))
         HG._add_nodes_from(nodes)
         return HG
 
@@ -1807,8 +1921,6 @@ class CellComplex(Complex):
         such that every consecutive pair of nodes v(i),v(i+1)
         share at least s cell.
         """
-        import networkx as nx
-
         return nx.is_connected(self._G)
 
     def singletons(self):
@@ -1818,8 +1930,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        singles : list
-            A list of cells uids.
+        new clone of the Cell Complex : Cellcomplex
 
         Examples
         --------
@@ -1834,7 +1945,22 @@ class CellComplex(Complex):
         return [node for node in self.nodes if self.degree(node) == 0]
 
     def clone(self) -> "CellComplex":
-        """Create a clone of the CellComplex."""
+        """Create a clone of the CellComplex.
+
+        Returns
+        -------
+        cell complex : CellComplex
+            A list of cells uids.
+
+        Examples
+        --------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1,2,3,4],rank=2,weight=5)
+        >>> CX.add_cell([2,3,4,5],rank=2)
+        >>> CX.add_cell([5,6,7,8],rank=2)
+        >>> CX.add_node(0)
+        >>> CX2 = CX.clone()
+        """
         _G = self._G.copy()
         CX = CellComplex(_G, self.name)
         for cell in self.cells:
@@ -2216,9 +2342,7 @@ class CellComplex(Complex):
                                faces=[[0, 1, 2]],
                                process=False)
         >>> CX = CellComplex.from_trimesh(mesh)
-        >>> print(CX.nodes)
-        >>> print(CX.cells)
-        >>> CX.nodes[0]['position']
+        >>> CX[0]['position']
         """
         # try to see the index of the first vertex
         CX = cls(mesh.faces)
@@ -2264,7 +2388,6 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CX = CellComplex.load_mesh("bunny.obj")
-        >>> CX.nodes
         """
         import trimesh
 

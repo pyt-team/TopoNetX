@@ -1,8 +1,8 @@
 """Test Cell class."""
 
-import unittest
 from collections import defaultdict
 
+import pytest
 from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell_complex import CellComplex
@@ -14,7 +14,7 @@ from toponetx.utils.structure import (
 )
 
 
-class TestStructure(unittest.TestCase):
+class TestStructure:
     """Test structure module."""
 
     def test_sparse_array_to_neighborhood_list(self):
@@ -61,7 +61,7 @@ class TestStructure(unittest.TestCase):
 
         assert list(output1) == expected1
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             output1 = sparse_array_to_neighborhood_list(B1, list(row.keys()))
 
     def test_neighborhood_list_to_neighborhood_dict(self):
@@ -141,7 +141,3 @@ class TestStructure(unittest.TestCase):
         assert (
             adj != expected_adj
         ).nnz == 0  # tests sparsity of difference -> if the difference has no non-zero entries, it is the same
-
-
-if __name__ == "__main__":
-    unittest.main()

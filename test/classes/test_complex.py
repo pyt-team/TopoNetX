@@ -1,12 +1,11 @@
 """Test Complex class."""
 
-import unittest
-from abc import ABC, abstractmethod
+import pytest
 
 from toponetx.classes.complex import Complex
 
 
-class TestComplex(unittest.TestCase):
+class TestComplex:
     """Test the Complex abstract class."""
 
     class ConcreteComplex(Complex):
@@ -15,121 +14,117 @@ class TestComplex(unittest.TestCase):
         @property
         def nodes(self):
             """Nodes."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         @property
         def dim(self) -> int:
             """Dimension."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def shape(self):
             """Compute shape."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def skeleton(self, rank):
             """Compute rank-skeleton."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def __str__(self):
             """Compute string representation."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def __repr__(self):
             """Compute string representation."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def __len__(self) -> int:
             """Compute number of nodes."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def clone(self):
             """Clone the complex."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def __iter__(self):
             """Iterate over the nodes."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def __contains__(self, item):
             """Check if a node is in the complex."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def __getitem__(self, node):
             """Get the node object from the complex."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
-        def remove_nodes(self, node_set):
+        def remove_nodes(self, node_set) -> None:
             """Remove nodes from the complex."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def add_node(self, node):
             """Add a node to the complex."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def incidence_matrix(self):
             """Compute the incidence matrix."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def adjacency_matrix(self):
             """Compute the adjacency matrix."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
         def coadjacency_matrix(self):
             """Compute the coadjacency matrix."""
-            raise NotImplementedError
+            raise NotImplementedError()
 
     def test_abstract_methods(self):
-        """Test that abstract methods raise NotImplementedError."""
+        """Test that abstract methods raise NotImplementedError()."""
         complex_obj = self.ConcreteComplex()
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.nodes
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.dim
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.shape()
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.skeleton(0)
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             str(complex_obj)
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             repr(complex_obj)
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             len(complex_obj)
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.clone()
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             iter(complex_obj)
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             1 in complex_obj
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj["node"]
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.remove_nodes([1, 2, 3])
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.add_node("node")
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.incidence_matrix()
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.adjacency_matrix()
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             complex_obj.coadjacency_matrix()
-
-
-if __name__ == "__main__":
-    unittest.main()
