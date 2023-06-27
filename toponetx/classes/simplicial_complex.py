@@ -248,20 +248,6 @@ class SimplicialComplex(Complex):
         else:
             raise KeyError("simplex is not in the simplicial complex")
 
-    def __setitem__(self, simplex, **attr):
-        """Set attributes to a simplex."""
-        if isinstance(simplex, Simplex):
-            if simplex.nodes in self.faces_dict[len(simplex) - 1]:
-                self.faces_dict[len(simplex) - 1].update(attr)
-        elif isinstance(simplex, Iterable):
-            simplex = frozenset(simplex)
-            self.faces_dict[len(simplex) - 1].update(attr)
-        elif isinstance(simplex, Hashable):
-            if frozenset({simplex}) in self:
-                self.faces_dict[0].update(attr)
-        else:
-            raise TypeError("Input simplex must be Simplex, Iterable or Hashable.")
-
     def __iter__(self):
         """Iterate over all faces of the simplicial complex.
 
