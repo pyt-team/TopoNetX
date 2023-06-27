@@ -44,8 +44,7 @@ def compute_laplacian_normalized_matrix(L):
     topeigen_val = spl.eigsh(L.asfptype(), k=1, which="LM", return_eigenvectors=False)[
         0
     ]
-    L_normalized = L * (1.0 / topeigen_val)
-    return L_normalized
+    return L * (1.0 / topeigen_val)
 
 
 def compute_x_laplacian_normalized_matrix(L, Lx):
@@ -71,8 +70,7 @@ def compute_x_laplacian_normalized_matrix(L, Lx):
     """
     assert L.shape[0] == L.shape[1]
     topeig = spl.eigsh(L.asfptype(), k=1, which="LM", return_eigenvectors=False)[0]
-    Lx_normalized = Lx * (1.0 / topeig)
-    return Lx_normalized
+    return Lx * (1.0 / topeig)
 
 
 def compute_kipf_adjacency_normalized_matrix(
