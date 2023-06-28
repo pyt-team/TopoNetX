@@ -142,7 +142,7 @@ class CombinatorialComplex(Complex):
                     u, v = edge
                     self.add_cell([u, v], 1, **cells.get_edge_data(u, v))
 
-    def _ce_matrix_helper(self, children, uidset, sparse=True, index=False):
+    def _incidence_matrix_helper(self, children, uidset, sparse=True, index=False):
         """Help compute the incidence matrix."""
         from collections import OrderedDict
         from operator import itemgetter
