@@ -142,7 +142,7 @@ class CombinatorialComplex(Complex):
                     u, v = edge
                     self.add_cell([u, v], 1, **cells.get_edge_data(u, v))
 
-    def _incidence_matrix_helper(self, children, uidset, sparse=True, index=False):
+    def _ce_matrix_helper(self, children, uidset, sparse=True, index=False):
         """Help compute the incidence matrix."""
         from collections import OrderedDict
         from operator import itemgetter
@@ -1164,7 +1164,7 @@ class CombinatorialComplex(Complex):
             B = self.incidence_matrix(
                 rank, via_rank, incidence_type="down", sparse=True, index=index
             )
-        A = incidence_to_adjacency(B.T)
+        A = incidence_to_adjacency(B)
         if index:
             return A, col
         return A
