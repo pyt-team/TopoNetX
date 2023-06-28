@@ -253,10 +253,10 @@ class CombinatorialComplex(Complex):
         if to_rank is None:
             if incidence_type == "up":
                 children = self.skeleton(rank)
-                uidset = self.skeleton(rank + 1, level="upper")
+                uidset = self.skeleton(rank + 1)
             elif incidence_type == "down":
                 uidset = self.skeleton(rank)
-                children = self.skeleton(rank - 1, level="lower")
+                children = self.skeleton(rank - 1)
             raise TopoNetXError("incidence_type must be 'up' or 'down' ")
         else:
             assert (
