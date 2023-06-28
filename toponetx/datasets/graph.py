@@ -142,6 +142,7 @@ def karate_club(
 
 def coauthorship() -> SimplicialComplex:
     """Load the coauthorship network from [SNN20] as a simplicial complex.
+
     The coauthorship network is a simplicial complex where a paper with k authors is represented by a (k-1)-simplex.
     The added subsimplices of the (k-1)-simplex are interpreted as collaborations among subsets of authors.
     An attribute named "citations" is added to each simplex, corresponding to the number of citations attributed to the given collaborations of k authors.
@@ -158,23 +159,20 @@ def coauthorship() -> SimplicialComplex:
 
     Returns
     -------
-    A SimplicialComplex obtained from the coauthorship network in [SNN20].
-    The simplicial complex comes with the following feature:
-        "citations":
-            - the number of citations attributed to the given collaborations of k authors.
+    SimplicialComplex
+        The simplicial complex comes with the attribute "citations", the number of citations attributed to the given collaborations of k authors.
 
     """
     cochains = np.load(DIR / "150250_cochains.npy", allow_pickle=True)
 
     simplices = []
-    for dim in list(range(len(cochains)))[::-1]:
-        li = list(cochains[dim].keys())
-        simplices += [list(l) for l in li]
+    for dim in range(len(cochains) - 1, -1, -1):
+        simplices += [list(el) for el in cochains[dim].keys()]
 
     sc = SimplicialComplex(simplices)
 
     for i in range(len(cochains)):
-        dic = {tuple(sorted(list(k))): v for k, v in cochains[i].items()}
+        dic = {tuple(sorted(k)): v for k, v in cochains[i].items()}
         sc.set_simplex_attributes(dic, name="citations")
 
     return sc
