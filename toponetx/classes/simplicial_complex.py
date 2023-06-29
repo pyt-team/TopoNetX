@@ -69,6 +69,13 @@ class SimplicialComplex(Complex):
         list of maximal simplices that define the simplicial complex
     name : hashable, optional, default: None
         If None then a placeholder '' will be inserted as name
+    kwargs : keyword arguments, optional
+        Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
 
     Notes
     -----
@@ -95,24 +102,14 @@ class SimplicialComplex(Complex):
     SimplexView([(0,), (1,), (3,), (4,), (2,), (0, 1), (0, 3), (0, 4), (1, 4), (1, 2), (1, 3), (2, 3), (1, 2, 3)])
     """
 
-    def __init__(self, simplices=None, name: str = "", **attr):
-        super().__init__()
+    def __init__(self, simplices=None, name: str = "", **kwargs):
+        super().__init__(**kwargs)
 
         self.name = name
 
         self._simplex_set = SimplexView()
 
-        self.complex = dict()  # dictionary for simplicial complex attributes
-
-        if simplices is not None:
-
-            if not isinstance(simplices, Iterable):
-                raise TypeError(
-                    f"Input simplices must be given as Iterable, got {type(simplices)}."
-                )
-
         if isinstance(simplices, Graph):
-
             _simplices = []
             for simplex in simplices:  # simplices is a networkx G
                 _simplices.append(([simplex], simplices.nodes[simplex]))
@@ -124,10 +121,13 @@ class SimplicialComplex(Complex):
             for simplex in _simplices:
                 s1 = Simplex(simplex[0], **simplex[1])
                 simplices.append(s1)
-
-        if simplices is not None:
-            if isinstance(simplices, Iterable):
-                self.add_simplices_from(simplices)
+            self.add_simplices_from(simplices)
+        elif isinstance(simplices, Iterable):
+            self.add_simplices_from(simplices)
+        elif simplices is not None:
+            raise TypeError(
+                f"Input simplices must be given as Iterable, got {type(simplices)}."
+            )
 
     @property
     def shape(self) -> tuple[int, ...]:

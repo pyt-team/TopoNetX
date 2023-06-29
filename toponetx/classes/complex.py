@@ -125,10 +125,23 @@ class Complex(abc.ABC):
     structure consisting of a set of points, a subset of the power set of points, and a ranking function
     that assigns a rank to each subset based on its size. These classes are used in many areas of mathematics
     and computer science, such as geometric modeling, data analysis, and machine learning.
+
+    Parameters
+    ----------
+    kwargs : keyword arguments, optional
+        Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
     """
 
-    def __init__(self) -> None:
-        pass
+    complex: dict[Any, Any]
+
+    def __init__(self, **kwargs) -> None:
+        self.complex = dict()
+        self.complex.update(kwargs)
 
     @property
     @abc.abstractmethod

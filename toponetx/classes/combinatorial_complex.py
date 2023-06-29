@@ -48,6 +48,13 @@ class CombinatorialComplex(Complex):
         If None, weight for all rows is assumed to be 1.
     graph_based : bool, default=False
         When true rank 1 edges must have cardinality equals to 1
+    kwargs : keyword arguments, optional
+        Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
 
     Mathematical example
     --------------------
@@ -81,9 +88,9 @@ class CombinatorialComplex(Complex):
         name: str = "",
         ranks: Collection | None = None,
         graph_based: bool = False,
-        **attr,
+        **kwargs,
     ) -> None:
-        super().__init__()
+        super().__init__(**kwargs)
 
         self.name = name
 
