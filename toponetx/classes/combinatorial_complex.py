@@ -995,7 +995,13 @@ class CombinatorialComplex(Complex):
         return self
 
     def incidence_matrix(
-        self, rank, to_rank=None, incidence_type="up", weight=None, sparse=True, index=False
+        self,
+        rank,
+        to_rank=None,
+        incidence_type="up",
+        weight=None,
+        sparse=True,
+        index=False,
     ):
         """Compute incidence matrix for the CC indexed by nodes x cells.
 

@@ -111,9 +111,11 @@ class TestCombinatorialComplex:
         CC.add_cell([2, 5], rank=1)
         CC.add_cell([2, 6, 4], rank=2)
         B = CC.incidence_matrix(0)
-        assert B.shape == (6,3)
-        assert (B.todense() == [[1,1,0],[1,0,1],[0,1,0],[0,0,0],[0,0,1],[0,0,0]]).all()
-
+        assert B.shape == (6, 3)
+        assert (
+            B.todense()
+            == [[1, 1, 0], [1, 0, 1], [0, 1, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]]
+        ).all()
 
     def test_adjacency_matrix(self):
         """Test generating an adjacency matrix."""
@@ -125,7 +127,17 @@ class TestCombinatorialComplex:
         CC.add_cell([2, 6, 4], rank=2)
         A02 = CC.adjacency_matrix(0, 2)
         assert A02.shape == (6, 6)
-        assert (A02.todense() == [[0,1,1,1,0,0],[1,0,1,1,0,1],[1,1,0,1,0,0],[1,1,1,0,0,1],[0,0,0,0,0,0],[0,1,0,1,0,0]]).all()
+        assert (
+            A02.todense()
+            == [
+                [0, 1, 1, 1, 0, 0],
+                [1, 0, 1, 1, 0, 1],
+                [1, 1, 0, 1, 0, 0],
+                [1, 1, 1, 0, 0, 1],
+                [0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 1, 0, 0],
+            ]
+        ).all()
 
     def test_coadjacency_matrix(self):
         """Test generating a coadjacency matrix."""
@@ -137,7 +149,7 @@ class TestCombinatorialComplex:
         CC.add_cell([2, 6, 4], rank=2)
         CA10 = CC.coadjacency_matrix(1, 0)
         assert CA10.shape == (3, 3)
-        assert (CA10.todense() == [[0,1,1],[1,0,0],[1,0,0]]).all()
+        assert (CA10.todense() == [[0, 1, 1], [1, 0, 0], [1, 0, 0]]).all()
 
     def test_clone(self):
         """Test the clone method of CombinatorialComplex."""
@@ -148,4 +160,3 @@ class TestCombinatorialComplex:
         assert (2, 3, 4) in CC2.cells
         CC2.remove_cell([1, 2, 3])
         assert len(CC.cells) == 6
-
