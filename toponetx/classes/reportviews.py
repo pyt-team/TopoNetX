@@ -240,8 +240,6 @@ class HyperEdgeView:
 
     def __len__(self) -> int:
         """Compute the number of nodes."""
-        if len(self.hyperedge_dict) == 0:
-            return 0
         return sum(self.shape)
 
     def __iter__(self):

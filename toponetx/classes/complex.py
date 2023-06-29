@@ -98,7 +98,7 @@ class Atom(abc.ABC):
         self._properties.update(attributes)
 
 
-class Complex:
+class Complex(abc.ABC):
     """Abstract class representing a complex.
 
     A complex is a space that is constructed by attaching lower-dimensional
