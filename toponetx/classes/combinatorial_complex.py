@@ -257,7 +257,8 @@ class CombinatorialComplex(Complex):
             elif incidence_type == "down":
                 uidset = self.skeleton(rank)
                 children = self.skeleton(rank - 1)
-            raise TopoNetXError("incidence_type must be 'up' or 'down' ")
+            else:
+                raise TopoNetXError("incidence_type must be 'up' or 'down' ")
         else:
             assert (
                 rank != to_rank
@@ -1013,7 +1014,7 @@ class CombinatorialComplex(Complex):
         return self
 
     def incidence_matrix(
-        self, rank, to_rank, incidence_type="up", weight=None, sparse=True, index=False
+        self, rank, to_rank=None, incidence_type="up", weight=None, sparse=True, index=False
     ):
         """Compute incidence matrix for the CC indexed by nodes x cells.
 
