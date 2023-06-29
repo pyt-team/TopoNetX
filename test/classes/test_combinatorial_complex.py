@@ -101,3 +101,13 @@ class TestCombinatorialComplex:
         assert B.shape == (4, 2)
         assert (B.T[0].todense() == [1, 1, 1, 0]).all()
         assert (B.T[1].todense() == [0, 1, 1, 1]).all()
+
+    def test_clone(self):
+        """Test the clone method of CombinatorialComplex."""
+        CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CC2 = CC.clone()
+        assert len(CC2.cells) == 6
+        assert (1, 2, 3) in CC2.cells
+        assert (2, 3, 4) in CC2.cells
+        CC2.remove_cell([1, 2, 3])
+        assert len(CC.cells) == 6

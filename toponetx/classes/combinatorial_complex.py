@@ -1,7 +1,6 @@
 """Creation and manipulation of a combinatorial complex."""
 
-import warnings
-from collections.abc import Hashable, Iterable
+from collections.abc import Collection, Hashable, Iterable
 
 import networkx as nx
 import numpy as np
@@ -26,50 +25,48 @@ class CombinatorialComplex(Complex):
     """Class for Combinatorial Complex.
 
     A Combinatorial Complex (CC) is a triple CC = (S, X, rk) where:
-    -  S is an abstract set of entities,
+    - S is an abstract set of entities,
     - X a subset of the power set of X, and
-    - rk is the a rank function that associates for every
-    set x in X a rank, a positive integer.
+    - rk is the a rank function that associates for every set x in X a rank, a positive integer.
 
-    The rank function i must satisfy x<=y then rk(x)<=rk(y).
+    The rank function rk must satisfy x <= y then rk(x) <= rk(y).
     We call this condition the CC condition.
 
     A CC is a generlization of graphs, hypergraphs, cellular and simplicial complexes.
 
     Parameters
     ----------
-    cells : (optional)iterable, default: None
-
+    cells : Collection, optional
     name : str, optional
         An identifiable name for the combinatorial complex.
-
-    ranks : (optional) an iterable, default: None.
+    ranks : Collection, optional
         when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
         size as cells.
-
-    weight : array-like, optional, default : None
+    weight : array-like, optional
         User specified weight corresponding to setsytem of type pandas.DataFrame,
         length must equal number of rows in dataframe.
         If None, weight for all rows is assumed to be 1.
-
-    graph_based : boolean, default is False. When true
-                rank 1 edges must have cardinality equals to 1
-
+    graph_based : bool, default=False
+        When true rank 1 edges must have cardinality equals to 1
 
     Mathematical example
     --------------------
     Let S = {1, 2, 3, 4} be a set of entities.
     Let X = {{1, 2}, {1, 2, 3}, {1, 3}, {1, 4}} be a subset of the power set of S.
-    Let i be the ranking function that assigns the
+    Let rk be the ranking function that assigns the
     length of a set as its rank, i.e. rk({1, 2}) = 2, rk({1, 2, 3}) = 3, etc.
 
     Then, (S, X, rk) is a combinatorial complex.
 
     Examples
     --------
-    >>> # define an empty Combinatorial Complex
+    Define an empty combinatorial complex:
+
     >>> CC = CombinatorialComplex()
-    >>> # add cells using the add_cell method
+
+    Add cells to the combinatorial complex:
+
+    >>> CC = CombinatorialComplex()
     >>> CC.add_cell([1, 2], rank=1)
     >>> CC.add_cell([3, 4], rank=1)
     >>> CC.add_cell([1, 2, 3, 4], rank=2)
@@ -80,10 +77,10 @@ class CombinatorialComplex(Complex):
 
     def __init__(
         self,
-        cells=None,
+        cells: Collection | None = None,
         name: str = "",
-        ranks=None,
-        graph_based=False,
+        ranks: Collection | None = None,
+        graph_based: bool = False,
         **attr,
     ) -> None:
         super().__init__()
@@ -104,13 +101,11 @@ class CombinatorialComplex(Complex):
         self.complex = dict()  # dictionary for combinatorial complex attributes
 
         if cells is not None:
-
             if not isinstance(cells, Iterable):
                 raise TypeError(
                     f"Input cells must be given as Iterable, got {type(cells)}."
                 )
 
-        if cells is not None:
             if not isinstance(cells, Graph):
                 if ranks is None:
                     for cell in cells:
@@ -123,7 +118,6 @@ class CombinatorialComplex(Complex):
                         self.add_cell(cell, cell.rank)
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-
                         if len(cells) != len(ranks):
                             raise TopoNetXError(
                                 "cells and ranks must have equal number of elements"
@@ -135,7 +129,6 @@ class CombinatorialComplex(Complex):
                     for cell in cells:
                         self.add_cell(cell, ranks)
             else:
-
                 for node in cells.nodes:  # cells is a networkx graph
                     self.add_node(node, **cells.nodes[node])
                 for edge in cells.edges:
@@ -211,21 +204,17 @@ class CombinatorialComplex(Complex):
 
         Parameters
         ----------
-        incidence_type : str, optional, default 'up', other options 'down'
-
-        sparse : boolean, optional, default: True
-
-        index : boolean, optional, default : False
+        incidence_type : {'up', 'down'}, default='up'
+        sparse : bool, default=True
+        index : bool, default=False
             If True return will include a dictionary of children uid : row number
             and element uid : column number
 
         Returns
         -------
         incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
-
         row dictionary : dict
             Dictionary identifying row with item in entityset's children
-
         column dictionary : dict
             Dictionary identifying column with item in entityset's uidset
 
@@ -333,7 +322,7 @@ class CombinatorialComplex(Complex):
     @property
     def dim(self) -> int:
         """Return dimension."""
-        return max(list(self._complex_set.allranks))
+        return max(self._complex_set.allranks)
 
     def __str__(self):
         """Return detailed string representation."""
@@ -467,7 +456,7 @@ class CombinatorialComplex(Complex):
 
         Parameters
         ----------
-        cell_set : an interable of HyperEdge, optional, default: None
+        cell_set : an interable of HyperEdge, optional
             If None, then return the number of cells.
 
         Returns
@@ -718,7 +707,7 @@ class CombinatorialComplex(Complex):
                 if i not in self._complex_set.hyperedge_dict[0]:
                     self._complex_set.hyperedge_dict[0][frozenset({i})] = {"weight": 1}
 
-    def _add_hyperedge(self, hyperedge, rank, **attr):
+    def _add_hyperedge(self, hyperedge, rank: int, **attr):
         """Add hyperedge.
 
         Parameters
@@ -786,7 +775,7 @@ class CombinatorialComplex(Complex):
             if not isinstance(hyperedge, HyperEdge):
                 hyperedge_ = frozenset(
                     sorted(hyperedge)
-                )  # put the simplex in cananical order
+                )  # put the simplex in canonical order
                 if len(hyperedge_) != len(hyperedge):
                     raise ValueError(
                         f"a cell cannot contain duplicate nodes,got {hyperedge_}"
@@ -859,15 +848,7 @@ class CombinatorialComplex(Complex):
                     hyperedge._properties
                 )
 
-    def _add_hyperedges_from(self, hyperedges):
-        if isinstance(hyperedges, Iterable):
-            for s in hyperedges:
-                self.hyperedges(s)
-        else:
-            raise ValueError("input cells must be an iterable of HyperEdge objects")
-
     def _remove_hyperedge(self, hyperedge):
-
         if hyperedge not in self.cells:
             raise KeyError(f"The cell {hyperedge} is not in the complex")
 
@@ -902,7 +883,7 @@ class CombinatorialComplex(Complex):
         ----------
         cell : hashable, iterable or HyperEdge
             If hashable the cell returned will be empty.
-            rank : rank of a cell
+        rank : rank of a cell
 
         Returns
         -------
@@ -1663,4 +1644,20 @@ class CombinatorialComplex(Complex):
         Uses the networkx shortest_path_length method on the graph
         generated by the s-cell_adjacency matrix.
         """
-        raise NotImplementedError
+        raise NotImplementedError()
+
+    def clone(self) -> "CombinatorialComplex":
+        """Return a copy of the simplex.
+
+        The clone method by default returns an independent shallow copy of the simplex and attributes. That is, if an
+        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
+        for new containers.
+
+        Returns
+        -------
+        CombinatorialComplex
+        """
+        CC = CombinatorialComplex(name=self.name, graph_based=self.graph_based)
+        for cell in self.cells:
+            CC.add_cell(cell, self.cells.get_rank(cell))
+        return CC
