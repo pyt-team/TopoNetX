@@ -73,6 +73,21 @@ class CellComplex(Complex):
         such as sparse matrices.
     5. Robust error handling and validation of input data, ensuring that the package is reliable and easy to use.
 
+    Parameters
+    ----------
+    cells : iterable, optional
+        A list of cells to add to the complex.
+    name : string, optional
+        Name of the complex.
+    regular : bool, default=True
+    kwargs : keyword arguments, optional
+        Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
+
     Examples
     --------
     Iteratively construct a cell complex:
@@ -115,8 +130,8 @@ class CellComplex(Complex):
     >>> CX.is_regular
     """
 
-    def __init__(self, cells=None, name: str = "", regular=True, **attr) -> None:
-        super().__init__()
+    def __init__(self, cells=None, name: str = "", regular=True, **kwargs) -> None:
+        super().__init__(**kwargs)
 
         self.name = name
 
@@ -145,8 +160,6 @@ class CellComplex(Complex):
                 raise TypeError(
                     f"cells must be iterable, networkx graph or None, got {type(cells)}"
                 )
-        self.complex = dict()  # dictionary for cell complex attributes
-        self.complex.update(attr)
 
     @property
     def cells(self) -> CellView:
