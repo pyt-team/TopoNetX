@@ -187,7 +187,7 @@ class ColoredHyperGraph(Complex):
 
     def __str__(self):
         """Return detailed string representation."""
-        return f"Colored Hypergraph with {len(self.nodes)} nodes and cells with ranks {self.ranks} and sizes {self.shape} "
+        return f"Colored Hypergraph with {len(self.nodes)} nodes and hyperedges with colors {self.ranks} and sizes {self.shape} "
 
     def __repr__(self) -> str:
         """Return string representation."""
@@ -434,30 +434,83 @@ class ColoredHyperGraph(Complex):
                     hyperedge._properties
                 )
 
+    def _remove_hyperedge(self, hyperedge):
+        if hyperedge not in self.cells:
+            raise KeyError(f"The cell {hyperedge} is not in the colored hypergraph")
+
+        if isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
+            del self._complex_set.hyperedge_dict[0][hyperedge]
+
+        if isinstance(hyperedge, HyperEdge):
+            hyperedge_ = hyperedge.elements
+        else:
+            hyperedge_ = frozenset(hyperedge)
+        rank = self._complex_set.get_rank(hyperedge_)
+        del self._complex_set.hyperedge_dict[rank][hyperedge_]
+
+        return
+
     def _add_node(self, node, **attr):
-        """Add one node as hyperedge."""
-        self._add_hyperedge(hyperedge=node, rank=0, **attr)
+        """
+        Add one node as a hyperedge.
+
+        Parameters
+        ----------
+        node : hashable
+            The node to add as a hyperedge.
+        **attr : dict
+            Additional attributes to assign to the hyperedge.
+
+        Returns
+        -------
+        None
+        """
+        self._add_hyperedge(hyperedge=node, color=0, **attr)
 
     def add_node(self, node, **attr):
-        """Add a node."""
+        """
+        Add a node.
+
+        Parameters
+        ----------
+        node : hashable
+            The node to add.
+        **attr : dict
+            Additional attributes to assign to the node.
+
+        Returns
+        -------
+        None
+        """
         self._add_node(node, **attr)
 
     def set_node_attributes(self, values, name=None):
-        """Set node attributes."""
-        if name is not None:
-            for cell, value in values.items():
-                try:
-                    self.nodes[cell].__dict__[name] = value
-                except AttributeError:
-                    pass
+        """
+        Set node attributes.
 
-        else:
-            for cell, d in values.items():
+        Parameters
+        ----------
+        values : dict
+            A dictionary where keys are nodes and values are the attributes to set.
+        name : str or None, optional
+            The name of the attribute to set for all nodes. If None, attributes will be set individually for each node.
+
+        Returns
+        -------
+        None
+        """
+        if name is not None:
+            for node, value in values.items():
                 try:
-                    self.nodes[cell].__dict__.update(d)
+                    self.nodes[node].__dict__[name] = value
                 except AttributeError:
                     pass
-            return
+        else:
+            for node, d in values.items():
+                try:
+                    self.nodes[node].__dict__.update(d)
+                except AttributeError:
+                    pass
 
     def set_cell_attributes(self, values, name=None):
         """Set cell attributes.
@@ -601,7 +654,6 @@ class ColoredHyperGraph(Complex):
         Colored Hypergraph : ColoredHyperGraph
         """
         self._add_hyperedge(cell, rank, **attr)
-        return self
 
     def add_cells_from(self, cells, ranks=None):
         """Add cells to Colored Hypergraph.
@@ -658,7 +710,6 @@ class ColoredHyperGraph(Complex):
         """
         for cell in cell_set:
             self.remove_cell(cell)
-        return self
 
     def incidence_matrix(
         self,
@@ -891,13 +942,7 @@ class ColoredHyperGraph(Complex):
         >>> CHG = ColoredHyperGraph(cells=E)
         >>> CHG.is_connected()
         """
-        B = self.incidence_matrix(rank=0, to_rank=None, incidence_type="up")
-        if cells:
-            A = incidence_to_adjacency(B, s=s)
-        else:
-            A = incidence_to_adjacency(B.transpose(), s=s)
-        G = nx.from_scipy_sparse_matrix(A)
-        return nx.is_connected(G)
+        pass
 
     def remove_singletons(self, name=None):
         """Construct new CHG with singleton cells removed.
