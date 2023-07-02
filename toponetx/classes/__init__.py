@@ -1,5 +1,6 @@
 from .cell import *
 from .cell_complex import *
+from .colored_hypergraph import *
 from .combinatorial_complex import *
 from .complex import *
 from .hyperedge import *

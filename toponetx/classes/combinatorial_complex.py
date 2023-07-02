@@ -14,6 +14,7 @@ from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import (
+    _incidence_matrix_helper,
     incidence_to_adjacency,
     sparse_array_to_neighborhood_dict,
 )
@@ -142,65 +143,6 @@ class CombinatorialComplex(Complex):
                     u, v = edge
                     self.add_cell([u, v], 1, **cells.get_edge_data(u, v))
 
-    def _incidence_matrix_helper(self, children, uidset, sparse=True, index=False):
-        """Help compute the incidence matrix."""
-        from collections import OrderedDict
-        from operator import itemgetter
-
-        ndict = dict(zip(children, range(len(children))))
-        edict = dict(zip(uidset, range(len(uidset))))
-
-        ndict = OrderedDict(sorted(ndict.items(), key=itemgetter(1)))
-        edict = OrderedDict(sorted(edict.items(), key=itemgetter(1)))
-
-        r_hyperedge_dict = {j: children[j] for j in range(len(children))}
-        k_hyperedge_dict = {i: uidset[i] for i in range(len(uidset))}
-
-        r_hyperedge_dict = OrderedDict(
-            sorted(r_hyperedge_dict.items(), key=itemgetter(0))
-        )
-        k_hyperedge_dict = OrderedDict(
-            sorted(k_hyperedge_dict.items(), key=itemgetter(0))
-        )
-
-        if len(ndict) != 0:
-
-            # if index:
-            #     rowdict = {v: k for k, v in ndict.items()}
-            #     coldict = {v: k for k, v in edict.items()}
-
-            if sparse:
-                # Create csr sparse matrix
-                rows = list()
-                cols = list()
-                data = list()
-                for n in ndict:
-                    for e in edict:
-                        if n <= e:
-                            data.append(1)
-                            rows.append(ndict[n])
-                            cols.append(edict[e])
-                MP = csr_matrix(
-                    (data, (rows, cols)),
-                    shape=(len(r_hyperedge_dict), len(k_hyperedge_dict)),
-                )
-            else:
-                # Create an np.matrix
-                MP = np.zeros((len(children), len(uidset)), dtype=int)
-                for e in k_hyperedge_dict:
-                    for n in r_hyperedge_dict:
-                        if r_hyperedge_dict[n] <= k_hyperedge_dict[e]:
-                            MP[ndict[n], edict[e]] = 1
-            if index:
-                return ndict, edict, MP
-            else:
-                return MP
-        else:
-            if index:
-                return {}, {}, np.zeros(1)
-            else:
-                return np.zeros(1)
-
     def _incidence_matrix(
         self, rank, to_rank, incidence_type="up", weight=None, sparse=True, index=False
     ):
@@ -270,7 +212,7 @@ class CombinatorialComplex(Complex):
             ):  # up incidence is defined between two skeletons of different ranks
                 children = self.skeleton(to_rank)
                 uidset = self.skeleton(rank)
-        return self._incidence_matrix_helper(children, uidset, sparse, index)
+        return _incidence_matrix_helper(children, uidset, sparse, index)
 
     @property
     def cells(self):
