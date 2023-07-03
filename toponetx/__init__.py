@@ -20,6 +20,8 @@ from .transform.graph_to_cell_complex import homology_cycle_cell_complex
 from .transform.graph_to_simplicial_complex import (
     graph_2_clique_complex,
     graph_2_neighbor_complex,
+    graph_to_clique_complex,
+    graph_to_neighbor_complex,
 )
 from .utils.structure import (
     neighborhood_list_to_neighborhood_dict,
