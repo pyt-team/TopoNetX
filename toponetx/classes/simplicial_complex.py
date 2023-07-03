@@ -103,9 +103,7 @@ class SimplicialComplex(Complex):
     """
 
     def __init__(self, simplices=None, name: str = "", **kwargs):
-        super().__init__(**kwargs)
-
-        self.name = name
+        super().__init__(name, **kwargs)
 
         self._simplex_set = SimplexView()
 

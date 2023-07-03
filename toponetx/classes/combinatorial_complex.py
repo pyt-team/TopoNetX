@@ -90,9 +90,7 @@ class CombinatorialComplex(Complex):
         graph_based: bool = False,
         **kwargs,
     ) -> None:
-        super().__init__(**kwargs)
-
-        self.name = name
+        super().__init__(name, **kwargs)
 
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
 
@@ -105,7 +103,6 @@ class CombinatorialComplex(Complex):
         self._aux_complex = SimplicialComplex()
 
         self._complex_set = HyperEdgeView()
-        self.complex = dict()  # dictionary for combinatorial complex attributes
 
         if cells is not None:
             if not isinstance(cells, Iterable):

@@ -128,6 +128,8 @@ class Complex(abc.ABC):
 
     Parameters
     ----------
+    name : str, optional
+        Optional name for the complex.
     kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
@@ -139,7 +141,8 @@ class Complex(abc.ABC):
 
     complex: dict[Any, Any]
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, name: str = "", **kwargs) -> None:
+        self.name = name
         self.complex = dict()
         self.complex.update(kwargs)
 

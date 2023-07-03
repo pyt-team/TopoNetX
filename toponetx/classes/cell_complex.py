@@ -131,9 +131,7 @@ class CellComplex(Complex):
     """
 
     def __init__(self, cells=None, name: str = "", regular=True, **kwargs) -> None:
-        super().__init__(**kwargs)
-
-        self.name = name
+        super().__init__(name, **kwargs)
 
         self._regular = regular
         self._G = Graph()
