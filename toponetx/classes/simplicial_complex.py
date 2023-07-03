@@ -139,10 +139,7 @@ class SimplicialComplex(Complex):
         -------
         tuple of ints
         """
-        return tuple(
-            len(self._simplex_set.faces_dict[i])
-            for i in range(len(self._simplex_set.faces_dict))
-        )
+        return self._simplex_set.shape
 
     @property
     def dim(self) -> int:
@@ -276,23 +273,23 @@ class SimplicialComplex(Complex):
             for _ in range(diff):
                 self._simplex_set.faces_dict.append(dict())
 
-    def _update_faces_dict_entry(self, face, simplex_, maximal_faces, **attr) -> None:
+    def _update_faces_dict_entry(self, face, simplex, maximal_faces) -> None:
         """Update faces dictionary entry.
 
         Parameters
         ----------
         face :  an iterable, typically a list, tuple, set or a Simplex
         simplex : an iterable, typically a list, tuple, set or a Simplex
-        **attr : attrs associated with the input simplex
 
         Notes
         -----
         the input `face` is a face of the input `simplex`.
         """
-        face = frozenset(sorted(face))
+        face = frozenset(face)
         k = len(face)
+
         if face not in self._simplex_set.faces_dict[k - 1]:
-            if len(face) == len(simplex_):
+            if k == len(simplex):
                 self._simplex_set.faces_dict[k - 1][face] = {
                     "is_maximal": True,
                     "membership": set(),
@@ -300,30 +297,19 @@ class SimplicialComplex(Complex):
             else:
                 self._simplex_set.faces_dict[k - 1][face] = {
                     "is_maximal": False,
-                    "membership": set({simplex_}),
+                    "membership": {simplex},
                 }
         else:
-            if len(face) != len(simplex_):
+            if k != len(simplex):
+                self._simplex_set.faces_dict[k - 1][face]["membership"].add(simplex)
                 if self._simplex_set.faces_dict[k - 1][face]["is_maximal"]:
                     maximal_faces.add(face)
                     self._simplex_set.faces_dict[k - 1][face]["is_maximal"] = False
-                    self._simplex_set.faces_dict[k - 1][face]["membership"].add(
-                        simplex_
-                    )
                 else:
                     # make sure all children of previous maximal simplices do not have that membership anymore
-                    d = self._simplex_set.faces_dict[k - 1][face]["membership"].copy()
-                    for f in d:
-                        if f in maximal_faces:
-                            self._simplex_set.faces_dict[k - 1][face][
-                                "membership"
-                            ].remove(f)
-                    self._simplex_set.faces_dict[k - 1][face]["is_maximal"] = False
-                    self._simplex_set.faces_dict[k - 1][face]["membership"].add(
-                        simplex_
-                    )
-            else:
-                self._simplex_set.faces_dict[k - 1][simplex_].update(attr)
+                    self._simplex_set.faces_dict[k - 1][face][
+                        "membership"
+                    ] -= maximal_faces
 
     @staticmethod
     def get_boundaries(simplices, min_dim=None, max_dim=None):
@@ -352,20 +338,20 @@ class SimplicialComplex(Complex):
             for r in range(numnodes, 0, -1):
                 for face in combinations(simplex, r):
                     if max_dim is None and min_dim is None:
-                        face_set.add(frozenset(sorted(face)))
+                        face_set.add(frozenset(face))
                     elif max_dim is not None and min_dim is not None:
                         if len(face) <= max_dim + 1 and len(face) >= min_dim + 1:
-                            face_set.add(frozenset(sorted(face)))
+                            face_set.add(frozenset(face))
                     elif max_dim is not None and min_dim is None:
                         if len(face) <= max_dim + 1:
-                            face_set.add(frozenset(sorted(face)))
+                            face_set.add(frozenset(face))
                     elif max_dim is None and min_dim is not None:
                         if len(face) >= min_dim + 1:
-                            face_set.add(frozenset(sorted(face)))
+                            face_set.add(frozenset(face))
 
         return face_set
 
-    def remove_maximal_simplex(self, simplex):
+    def remove_maximal_simplex(self, simplex) -> None:
         """Remove maximal simplex from simplicial complex.
 
         Note
@@ -381,9 +367,7 @@ class SimplicialComplex(Complex):
         """
         if isinstance(simplex, Iterable):
             if not isinstance(simplex, Simplex):
-                simplex_ = frozenset(
-                    sorted(simplex)
-                )  # put the simplex in canonical order
+                simplex_ = frozenset(simplex)
             else:
                 simplex_ = simplex.elements
         if simplex_ in self._simplex_set.faces_dict[len(simplex_) - 1]:
@@ -471,7 +455,7 @@ class SimplicialComplex(Complex):
         else:
             self.add_simplex([node], **attr)
 
-    def add_simplex(self, simplex, **attr):
+    def add_simplex(self, simplex, **attr) -> None:
         """Add simplex to simplicial complex."""
         if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
             simplex = [simplex]
@@ -479,13 +463,7 @@ class SimplicialComplex(Complex):
             simplex = [simplex]
         if isinstance(simplex, Iterable) or isinstance(simplex, Simplex):
             if not isinstance(simplex, Simplex):
-                for x in simplex:
-                    if not isinstance(x, Hashable):
-                        raise TypeError("all element of simplex must be hashable")
-
-                simplex_ = frozenset(
-                    sorted(simplex)
-                )  # put the simplex in canonical order
+                simplex_ = frozenset(simplex)
                 if len(simplex_) != len(simplex):
                     raise ValueError("a simplex cannot contain duplicate nodes")
             else:
@@ -506,7 +484,8 @@ class SimplicialComplex(Complex):
 
             for r in range(numnodes, 0, -1):
                 for face in combinations(simplex_, r):
-                    self._update_faces_dict_entry(face, simplex_, maximal_faces, **attr)
+                    self._update_faces_dict_entry(face, simplex_, maximal_faces)
+            self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(attr)
             if isinstance(simplex, Simplex):
                 self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(
                     simplex._properties
