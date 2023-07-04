@@ -1,6 +1,7 @@
 """Creation and manipulation of a combinatorial complex."""
 
-from collections.abc import Collection, Hashable, Iterable
+from collections.abc import Collection, Hashable, Iterable, Iterator
+from typing import Literal
 
 import networkx as nx
 import numpy as np
@@ -139,7 +140,9 @@ class CombinatorialComplex(Complex):
                     u, v = edge
                     self.add_cell([u, v], 1, **cells.get_edge_data(u, v))
 
-    def _incidence_matrix_helper(self, children, uidset, sparse=True, index=False):
+    def _incidence_matrix_helper(
+        self, children, uidset, sparse: bool = True, index: bool = False
+    ):
         """Help compute the incidence matrix."""
         from collections import OrderedDict
         from operator import itemgetter
@@ -199,7 +202,13 @@ class CombinatorialComplex(Complex):
                 return np.zeros(1)
 
     def _incidence_matrix(
-        self, rank, to_rank, incidence_type="up", weight=None, sparse=True, index=False
+        self,
+        rank,
+        to_rank,
+        incidence_type: Literal["up", "down"] = "up",
+        weight=None,
+        sparse: bool = True,
+        index: bool = False,
     ):
         """Compute incidence matrix.
 
@@ -329,7 +338,7 @@ class CombinatorialComplex(Complex):
         """Return dimension."""
         return max(self._complex_set.allranks)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return detailed string representation."""
         return f"Combinatorial Complex with {len(self.nodes)} nodes and cells with ranks {self.ranks} and sizes {self.shape} "
 
@@ -337,15 +346,15 @@ class CombinatorialComplex(Complex):
         """Return string representation."""
         return f"CombinatorialComplex(name='{self.name}')"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of nodes."""
         return len(self.nodes)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Iterate over the nodes."""
         return iter(self.nodes)
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self.nodes.
 
         Parameters
@@ -394,7 +403,7 @@ class CombinatorialComplex(Complex):
         """
         return self.nodes[node]
 
-    def degree(self, node, rank=1):
+    def degree(self, node, rank: int = 1) -> int:
         """Compute the number of cells of certain rank that contain node.
 
         Parameters
@@ -425,7 +434,7 @@ class CombinatorialComplex(Complex):
             return len(memberships)
         raise TopoNetXError("Rank must be non-negative integer")
 
-    def size(self, cell):
+    def size(self, cell) -> int:
         """Compute the number of nodes in node_set that belong to cell.
 
         Parameters
@@ -450,7 +459,7 @@ class CombinatorialComplex(Complex):
 
         Returns
         -------
-        number_of_nodes : int
+        int
         """
         if node_set:
             return len([node for node in self.nodes if node in node_set])
@@ -466,7 +475,7 @@ class CombinatorialComplex(Complex):
 
         Returns
         -------
-        number_of_cells : int
+        int
         """
         if cell_set:
             return len([cell for cell in self.cells if cell in cell_set])
@@ -481,7 +490,7 @@ class CombinatorialComplex(Complex):
         """
         return len(self.nodes)
 
-    def _remove_node(self, node):
+    def _remove_node(self, node) -> None:
         self._remove_hyperedge(node)
 
     def remove_node(self, node):
@@ -513,15 +522,15 @@ class CombinatorialComplex(Complex):
         for node in node_set:
             self.remove_node(node)
 
-    def _add_node(self, node, **attr):
+    def _add_node(self, node, **attr) -> None:
         """Add one node as hyperedge."""
         self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
-    def add_node(self, node, **attr):
+    def add_node(self, node, **attr) -> None:
         """Add a node."""
         self._add_node(node, **attr)
 
-    def set_node_attributes(self, values, name=None):
+    def set_node_attributes(self, values, name: str | None = None) -> None:
         """Set node attributes."""
         if name is not None:
             for cell, value in values.items():
@@ -538,7 +547,7 @@ class CombinatorialComplex(Complex):
                     pass
             return
 
-    def set_cell_attributes(self, values, name=None):
+    def set_cell_attributes(self, values, name: str | None = None) -> None:
         """Set cell attributes.
 
         Parameters
@@ -595,7 +604,7 @@ class CombinatorialComplex(Complex):
                     pass
             return
 
-    def get_node_attributes(self, name):
+    def get_node_attributes(self, name: str):
         """Get node attributes.
 
         Parameters
@@ -629,7 +638,7 @@ class CombinatorialComplex(Complex):
             if name in self.nodes[node]
         }
 
-    def get_cell_attributes(self, name, rank=None):
+    def get_cell_attributes(self, name: str, rank=None):
         """Get node attributes from graph.
 
         Parameters
@@ -666,7 +675,7 @@ class CombinatorialComplex(Complex):
                 if name in self.cells[cell].properties
             }
 
-    def _add_hyperedge_helper(self, hyperedge_, rank, **attr):
+    def _add_hyperedge_helper(self, hyperedge_, rank, **attr) -> None:
         """Add hyperedge.
 
         Parameters
@@ -853,7 +862,7 @@ class CombinatorialComplex(Complex):
                     hyperedge._properties
                 )
 
-    def _remove_hyperedge(self, hyperedge):
+    def _remove_hyperedge(self, hyperedge) -> None:
         if hyperedge not in self.cells:
             raise KeyError(f"The cell {hyperedge} is not in the complex")
 
@@ -869,7 +878,7 @@ class CombinatorialComplex(Complex):
 
         return
 
-    def _add_nodes_from(self, nodes):
+    def _add_nodes_from(self, nodes) -> None:
         """Instantiate new nodes when cells are added to the CC.
 
         Private helper method.
@@ -962,7 +971,6 @@ class CombinatorialComplex(Complex):
         the node is dropped from self.
         """
         self._remove_hyperedge(cell)
-
         return self
 
     def get_incidence_structure_dict(self, i, j):
@@ -1002,10 +1010,10 @@ class CombinatorialComplex(Complex):
         self,
         rank,
         to_rank=None,
-        incidence_type="up",
+        incidence_type: str = "up",
         weight=None,
-        sparse=True,
-        index=False,
+        sparse: bool = True,
+        index: bool = False,
     ):
         """Compute incidence matrix for the CC indexed by nodes x cells.
 
@@ -1031,7 +1039,7 @@ class CombinatorialComplex(Complex):
             rank, to_rank, incidence_type=incidence_type, sparse=sparse, index=index
         )
 
-    def adjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def adjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Sparse weighted :term:`s-adjacency matrix`.
 
         Parameters
@@ -1079,7 +1087,7 @@ class CombinatorialComplex(Complex):
             return A, row
         return A
 
-    def cell_adjacency_matrix(self, index=False, s=1):
+    def cell_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the cell adjacency matrix.
 
         Parameters
@@ -1103,7 +1111,7 @@ class CombinatorialComplex(Complex):
         A = incidence_to_adjacency(B.transpose(), s=s)
         return A
 
-    def node_adjacency_matrix(self, index=False, s=1):
+    def node_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the node adjacency matrix."""
         B = self.incidence_matrix(
             rank=0, to_rank=None, incidence_type="up", index=index
@@ -1114,7 +1122,7 @@ class CombinatorialComplex(Complex):
         A = incidence_to_adjacency(B, s=s)
         return A
 
-    def coadjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix.
 
         The sparse weighted :term:`s-coadjacency matrix`
@@ -1174,7 +1182,7 @@ class CombinatorialComplex(Complex):
         """
         raise NotImplementedError()
 
-    def restrict_to_cells(self, cell_set, name=None):
+    def restrict_to_cells(self, cell_set, name: str = ""):
         """Construct a combinatorial complex using a subset of the cells.
 
         Parameters
@@ -1192,7 +1200,7 @@ class CombinatorialComplex(Complex):
         # RNS = self.cells.restrict_to(element_subset=cell_set, name=name)
         # return NestedCombinatorialComplex(cells=RNS, name=name)
 
-    def restrict_to_nodes(self, node_set, name=None):
+    def restrict_to_nodes(self, node_set, name: str = ""):
         """Restrict to a set of nodes.
 
         Constructs a new combinatorial complex  by restricting the
@@ -1203,17 +1211,15 @@ class CombinatorialComplex(Complex):
         ----------
         node_set: iterable of hashables
             References a subset of elements of self.nodes
-
         name: str, optional
 
         Returns
         -------
         new Combinatorial Complex : NestedCombinatorialComplex
-
         """
         raise NotImplementedError()
 
-    def from_networkx_graph(self, G):
+    def from_networkx_graph(self, G: nx.Graph) -> None:
         """Construct a combinatorial complex from a networkx graph.
 
         Parameters
@@ -1255,7 +1261,7 @@ class CombinatorialComplex(Complex):
         """
         raise NotImplementedError()
 
-    def is_connected(self, s=1, cells=False):
+    def is_connected(self, s: int = 1, cells: bool = False):
         """Determine if combinatorial complex is :term:`s-connected <s-connected, s-node-connected>`.
 
         Parameters
@@ -1311,7 +1317,7 @@ class CombinatorialComplex(Complex):
                         singletons.append(cell)
         return singletons
 
-    def remove_singletons(self, name=None):
+    def remove_singletons(self, name: str | None = None):
         """Construct new CC with singleton cells removed.
 
         Parameters
@@ -1325,7 +1331,9 @@ class CombinatorialComplex(Complex):
         cells = [cell for cell in self.cells if cell not in self.singletons()]
         return self.restrict_to_cells(cells)
 
-    def s_connected_components(self, s=1, cells=True, return_singletons=False):
+    def s_connected_components(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = False
+    ):
         """Return a generator for s-cell-connected components.
 
         or the :term:`s-node-connected components <s-connected component, s-node-connected component>`.
@@ -1377,7 +1385,9 @@ class CombinatorialComplex(Complex):
                         continue
                 yield {rowdict[n] for n in c}
 
-    def s_component_subgraphs(self, s=1, cells=True, return_singletons=False):
+    def s_component_subgraphs(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = False
+    ):
         """Return a generator for the induced subgraphs of s_connected components.
 
         Removes singletons unless return_singletons is set to True.
@@ -1406,7 +1416,9 @@ class CombinatorialComplex(Complex):
             else:
                 yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
 
-    def s_components(self, s=1, cells=True, return_singletons=True):
+    def s_components(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = True
+    ):
         """Compute s-connected components.
 
         Same as s_connected_components.
@@ -1419,7 +1431,7 @@ class CombinatorialComplex(Complex):
             s=s, cells=cells, return_singletons=return_singletons
         )
 
-    def connected_components(self, cells=False, return_singletons=True):
+    def connected_components(self, cells: bool = False, return_singletons: bool = True):
         """Compute s-connected components.
 
         Same as :meth:`s_connected_components`,
@@ -1432,7 +1444,7 @@ class CombinatorialComplex(Complex):
         """
         return self.s_connected_components(cells=cells, return_singletons=True)
 
-    def connected_component_subgraphs(self, return_singletons=True):
+    def connected_component_subgraphs(self, return_singletons: bool = True):
         """Compute s-component subgraphs with s=1.
 
         Same as :meth:`s_component_subgraphs` with s=1.
@@ -1445,7 +1457,7 @@ class CombinatorialComplex(Complex):
         """
         return self.s_component_subgraphs(return_singletons=return_singletons)
 
-    def components(self, cells=False, return_singletons=True):
+    def components(self, cells: bool = False, return_singletons: bool = True):
         """Compute s-connected components for s=1.
 
         Same as :meth:`s_connected_components` with s=1.
@@ -1459,7 +1471,7 @@ class CombinatorialComplex(Complex):
         """
         return self.s_connected_components(s=1, cells=cells)
 
-    def component_subgraphs(self, return_singletons=False):
+    def component_subgraphs(self, return_singletons: bool = False):
         """Compute s-component subgraphs wth s=1.
 
         Same as :meth:`s_components_subgraphs` with s=1. Returns iterator.
@@ -1470,7 +1482,7 @@ class CombinatorialComplex(Complex):
         """
         return self.s_component_subgraphs(return_singletons=return_singletons)
 
-    def node_diameters(self, s=1):
+    def node_diameters(self, s: int = 1):
         """Return node diameters of the connected components.
 
         Parameters
@@ -1497,7 +1509,7 @@ class CombinatorialComplex(Complex):
         loc = np.argmax(diams)
         return diams[loc], diams, comps
 
-    def cell_diameters(self, s=1):
+    def cell_diameters(self, s: int = 1):
         """Return the cell diameters of the s_cell_connected component subgraphs.
 
         Parameters
@@ -1527,7 +1539,7 @@ class CombinatorialComplex(Complex):
         loc = np.argmax(diams)
         return diams[loc], diams, comps
 
-    def diameter(self, s=1):
+    def diameter(self, s: int = 1) -> int:
         """Return the length of the longest shortest s-walk between nodes.
 
         Parameters
@@ -1558,7 +1570,7 @@ class CombinatorialComplex(Complex):
         else:
             raise TopoNetXError(f"CC is not s-connected. s={s}")
 
-    def cell_diameter(self, s=1):
+    def cell_diameter(self, s: int = 1) -> int:
         """Return length of the longest shortest s-walk between cells.
 
         Parameters
@@ -1568,7 +1580,7 @@ class CombinatorialComplex(Complex):
 
         Return
         ------
-        cell_diameter : int
+        int
 
         Raises
         ------
@@ -1589,7 +1601,7 @@ class CombinatorialComplex(Complex):
         else:
             raise TopoNetXError(f"CC is not s-connected. s={s}")
 
-    def distance(self, source, target, s=1):
+    def distance(self, source, target, s: int = 1) -> int:
         """Return shortest s-walk distance between two nodes.
 
         Parameters
@@ -1622,7 +1634,7 @@ class CombinatorialComplex(Complex):
         """
         raise NotImplementedError()
 
-    def cell_distance(self, source, target, s=1):
+    def cell_distance(self, source, target, s: int = 1):
         """Return the shortest s-walk distance between two cells.
 
         Parameters
@@ -1636,7 +1648,8 @@ class CombinatorialComplex(Complex):
 
         Returns
         -------
-        s- walk distance : the shortest s-walk cell distance
+        int
+            The shortest s-walk cell distance between `source` and `target`.
             A shortest s-walk is computed as a sequence of cells,
             the s-walk distance is the number of cells in the sequence
             minus 1. If no such path exists returns np.inf.

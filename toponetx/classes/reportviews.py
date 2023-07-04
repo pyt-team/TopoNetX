@@ -3,7 +3,9 @@
 Such as:
 HyperEdgeView, CellView, SimplexView.
 """
-from collections.abc import Collection, Hashable, Iterable
+from collections.abc import Collection, Hashable, Iterable, Iterator
+from itertools import chain
+from typing import Any
 
 import numpy as np
 
@@ -137,11 +139,9 @@ class CellView:
 
     def __len__(self) -> int:
         """Return the number of cells in the cell view."""
-        if len(self._cells) == 0:
-            return 0
         return sum(len(self._cells[cell]) for cell in self._cells)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Iterate over all cells in the cell view."""
         return iter(
             [
@@ -151,12 +151,12 @@ class CellView:
             ]
         )
 
-    def __contains__(self, e):
+    def __contains__(self, e: Any) -> bool:
         """Check if a given element is in the cell view.
 
         Parameters
         ----------
-        e : tuple or Cell
+        e : Iterable
             The element to check.
 
         Returns
@@ -164,21 +164,16 @@ class CellView:
         bool
             Whether or not the element is in the cell view.
         """
-        if isinstance(e, list):
-            e = tuple(e)
-        if isinstance(e, tuple):
-            return e in self._cells
-
-        elif isinstance(e, Cell):
-            return e.elements in self._cells
-        else:
+        if not isinstance(e, Iterable):
             return False
+        e = tuple(e)
+        return e in self._cells
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the cell view."""
         return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representation of the cell view."""
         return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
@@ -207,7 +202,6 @@ class HyperEdgeView:
     def _to_frozen_set(hyperedge):
         if isinstance(hyperedge, Iterable):
             hyperedge_ = frozenset(hyperedge)
-
         elif isinstance(hyperedge, HyperEdge):
             hyperedge_ = hyperedge.elements
         elif isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
@@ -242,14 +236,9 @@ class HyperEdgeView:
         """Compute the number of nodes."""
         return sum(self.shape)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Iterate over the hyperedges."""
-        all_hyperedges = []
-        for i in sorted(list(self.allranks)):
-            all_hyperedges = all_hyperedges + [
-                tuple(k) for k in self.hyperedge_dict[i].keys()
-            ]
-        return iter(all_hyperedges)
+        return chain.from_iterable(self.hyperedge_dict.values())
 
     def __contains__(self, e: Collection) -> bool:
         """Check if e is in the hyperedges."""
@@ -260,8 +249,8 @@ class HyperEdgeView:
             if len(e) == 0:
                 return False
             else:
-                for i in list(self.allranks):
-                    if frozenset(e) in self.hyperedge_dict[i]:
+                for hyperedges in self.hyperedge_dict.values():
+                    if frozenset(e) in hyperedges:
                         return True
                 return False
 
@@ -269,9 +258,8 @@ class HyperEdgeView:
             if len(e) == 0:
                 return False
             else:
-                for i in list(self.allranks):
-
-                    if frozenset(e.elements) in self.hyperedge_dict[i]:
+                for hyperedges in self.hyperedge_dict.values():
+                    if frozenset(e.elements) in hyperedges:
                         return True
                 return False
 
@@ -282,52 +270,26 @@ class HyperEdgeView:
 
             return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return string representation of hyperedges.
 
         Returns
         -------
         str
         """
-        all_hyperedges = []
-        for i in sorted(list(self.allranks)):
-            all_hyperedges = all_hyperedges + [
-                tuple(k) for k in self.hyperedge_dict[i].keys()
-            ]
-        return f"CellView({all_hyperedges}) "
+        return f"HyperEdgeView([{map(tuple, self)}])"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of hyperedges.
 
         Returns
         -------
         str
         """
-        all_hyperedges = []
+        return f"HyperEdgeView([{map(tuple, self)}])"
 
-        for i in sorted(list(self.allranks)):
-            all_hyperedges = all_hyperedges + [
-                tuple(k) for k in self.hyperedge_dict[i].keys()
-            ]
-
-        return f"HyperEdgeView({all_hyperedges}) "
-
-    def skeleton(self, rank, name=None, level=None):
+    def skeleton(self, rank, level=None):
         """Skeleton of the complex."""
-        if name is None and level is None:
-            name = "X" + str(rank)
-        elif name is None and level == "equal":
-            name = "X" + str(rank)
-        elif name is None and level == "upper":
-            name = "X>=" + str(rank)
-        elif name is None and level == "up":
-            name = "X>=" + str(rank)
-        elif name is None and level == "lower":
-            name = "X<=" + str(rank)
-        elif name is None and level == "down":
-            name = "X<=" + str(rank)
-        else:
-            assert isinstance(name, str)
         if level is None or level == "equal":
             elements = []
             if rank in self.allranks:
@@ -406,7 +368,6 @@ class HyperEdgeView:
         return sorted(list(self.hyperedge_dict.keys()))
 
     def _get_lower_rank(self, rank):
-
         if len(self.allranks) == 0:
             return -1
 
@@ -475,9 +436,7 @@ class SimplexView:
                 raise KeyError(f"input {simplex} is not in the simplex dictionary")
 
         elif isinstance(simplex, Hashable):
-
             if frozenset({simplex}) in self:
-
                 return self.faces_dict[0][frozenset({simplex})]
 
     @property
@@ -493,16 +452,11 @@ class SimplexView:
 
     def __len__(self) -> int:
         """Return the number of simplices in the SimplexView instance."""
-        if len(self.faces_dict) == 0:
-            return 0
         return sum(self.shape)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Return an iterator over all simplices in the simplex view."""
-        all_simplices = []
-        for i in range(len(self.faces_dict)):
-            all_simplices = all_simplices + list(self.faces_dict[i].keys())
-        return iter(all_simplices)
+        return chain.from_iterable(self.faces_dict)
 
     def __contains__(self, item) -> bool:
         """Check if a simplex is in the simplex view.

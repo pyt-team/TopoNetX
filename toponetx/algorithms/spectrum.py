@@ -1,4 +1,5 @@
 """Module to compute spectra."""
+from typing import Literal
 
 import numpy as np
 import scipy as sp
@@ -50,7 +51,7 @@ def _normalize(f):
     return f_normalized
 
 
-def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
+def hodge_laplacian_eigenvectors(hodge_laplacian, n_components: int):
     """Compute the first k eigenvectors of the hodge laplacian matrix.
 
     Parameters
@@ -96,7 +97,11 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components):
 
 
 def set_hodge_laplacian_eigenvector_attrs(
-    complex, dim, n_components, laplacian_type="hodge", normalized=True
+    complex,
+    dim: int,
+    n_components: int,
+    laplacian_type: Literal["up", "down", "hodge"] = "hodge",
+    normalized: bool = True,
 ):
     """Set the hodge laplacian eigenvectors as simplex attributes.
 
@@ -141,7 +146,7 @@ def set_hodge_laplacian_eigenvector_attrs(
         complex.set_simplex_attributes(d, str(i) + ".th_eigen")
 
 
-def laplacian_beltrami_eigenvectors(SC, mode="fem"):
+def laplacian_beltrami_eigenvectors(SC, mode: str = "fem"):
     """Compute the first k eigenvectors of the laplacian beltrami matrix.
 
     Examples
@@ -155,7 +160,7 @@ def laplacian_beltrami_eigenvectors(SC, mode="fem"):
     return eigenvectors, eigenvalues
 
 
-def set_laplacian_beltrami_eigenvectors(complex):
+def set_laplacian_beltrami_eigenvectors(complex) -> None:
     """Set the laplacian beltrami eigenvectors as simplex attributes.
 
     Parameters
@@ -177,7 +182,7 @@ def set_laplacian_beltrami_eigenvectors(complex):
         complex.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
 
 
-def laplacian_spectrum(matrix, weight="weight"):
+def laplacian_spectrum(matrix, weight: str = "weight"):
     """Return eigenvalues of the Laplacian matrix.
 
     Parameters
@@ -195,7 +200,9 @@ def laplacian_spectrum(matrix, weight="weight"):
     return sp.linalg.eigvalsh(matrix.todense())
 
 
-def cell_complex_hodge_laplacian_spectrum(CX: CellComplex, rank: int, weight="weight"):
+def cell_complex_hodge_laplacian_spectrum(
+    CX: CellComplex, rank: int, weight: str = "weight"
+):
     """Return eigenvalues of the Laplacian of G.
 
     Parameters
@@ -222,7 +229,7 @@ def cell_complex_hodge_laplacian_spectrum(CX: CellComplex, rank: int, weight="we
 
 
 def simplicial_complex_hodge_laplacian_spectrum(
-    SC: SimplicialComplex, rank, weight="weight"
+    SC: SimplicialComplex, rank, weight: str = "weight"
 ):
     """Return eigenvalues of the Laplacian of G.
 
@@ -277,7 +284,7 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
 
 
 def simplicial_complex_adjacency_spectrum(
-    SC: SimplicialComplex, dim: int, weight="weight"
+    SC: SimplicialComplex, dim: int, weight: str = "weight"
 ):
     """Return eigenvalues of the Laplacian of G.
 

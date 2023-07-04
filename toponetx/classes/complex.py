@@ -17,16 +17,16 @@ class Atom(abc.ABC):
         The elements in the atom.
     name : str, optional
         A name for the atom.
-    attr : keyword arguments, optional
+    kwargs : keyword arguments, optional
         Additional attributes to be associated with the atom.
     """
 
-    def __init__(self, elements: Collection, name: str = "", **attr) -> None:
+    def __init__(self, elements: Collection, name: str = "", **kwargs) -> None:
         self.elements = elements
         self.name = name
 
         self._properties = dict()
-        self._properties.update(attr)
+        self._properties.update(kwargs)
 
     def __len__(self) -> int:
         """Return the number of elements in the atom."""
@@ -171,18 +171,26 @@ class Complex(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def skeleton(self, rank):
+    def skeleton(self, rank: int):
         """Return dimension of the complex."""
         pass
 
     @abc.abstractmethod
-    def __str__(self):
+    def __str__(self) -> str:
         """Print basic string representation."""
         pass
 
     @abc.abstractmethod
-    def __repr__(self):
-        """Print detailed string representation."""
+    def __repr__(self) -> str:
+        """Printable representation of the complex.
+
+        Makes an attempt to return a string that would produce an object with the same value when passed to ``eval()``,
+        but may not be possible for all objects.
+
+        Returns
+        -------
+        str
+        """
         pass
 
     @abc.abstractmethod
@@ -195,17 +203,17 @@ class Complex(abc.ABC):
         """Clone complex."""
 
     @abc.abstractmethod
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Return an iterator over the nodes."""
         pass
 
     @abc.abstractmethod
-    def __contains__(self, item):
+    def __contains__(self, item: Any) -> bool:
         """Check whether the complex contains an item."""
         pass
 
     @abc.abstractmethod
-    def __getitem__(self, node):
+    def __getitem__(self, key):
         """Get item."""
         pass
 
@@ -218,7 +226,7 @@ class Complex(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def add_node(self, node):
+    def add_node(self, node) -> None:
         """Add node to the complex."""
         pass
 
