@@ -46,7 +46,7 @@ class HyperEdge(Atom):
 
         self._rank = rank
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representation of the HyperEdge.
 
         Returns

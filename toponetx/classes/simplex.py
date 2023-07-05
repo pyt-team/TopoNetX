@@ -41,7 +41,7 @@ class Simplex(Atom):
     """
 
     def __init__(
-        self, elements: Collection, name: str = "", construct_tree=True, **attr
+        self, elements: Collection, name: str = "", construct_tree: bool = True, **attr
     ) -> None:
         for i in elements:
             if not isinstance(i, Hashable):
@@ -87,11 +87,10 @@ class Simplex(Atom):
         return super().__contains__(item)
 
     @staticmethod
-    def construct_simplex_tree(elements):
+    def construct_simplex_tree(elements: Collection) -> frozenset["Simplex"]:
         """Return set of Simplex objects representing the faces."""
         faceset = set()
-        numnodes = len(elements)
-        for r in range(numnodes, 0, -1):
+        for r in range(len(elements), 0, -1):
             for face in combinations(elements, r):
                 faceset.add(
                     Simplex(elements=sorted(face), construct_tree=False)
@@ -99,7 +98,7 @@ class Simplex(Atom):
         return frozenset(faceset)
 
     @property
-    def boundary(self):
+    def boundary(self) -> frozenset["Simplex"]:
         """Return a set of Simplex objects representing the boundary faces."""
         if self.construct_tree:
             return frozenset(i for i in self._faces if len(i) == len(self) - 1)
@@ -107,7 +106,7 @@ class Simplex(Atom):
             faces = Simplex.construct_simplex_tree(self.elements)
             return frozenset(i for i in faces if len(i) == len(self) - 1)
 
-    def sign(self, face):
+    def sign(self, face) -> int:
         """Calculate the sign of the simplex with respect to a given face.
 
         Parameters
@@ -142,7 +141,7 @@ class Simplex(Atom):
         """
         return f"Simplex({tuple(self.elements)})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of the simplex.
 
         :return: A string representation of the simplex.

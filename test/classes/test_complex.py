@@ -25,7 +25,7 @@ class TestComplex:
             """Compute shape."""
             raise NotImplementedError()
 
-        def skeleton(self, rank):
+        def skeleton(self, rank: int):
             """Compute rank-skeleton."""
             raise NotImplementedError()
 
@@ -53,7 +53,7 @@ class TestComplex:
             """Check if a node is in the complex."""
             raise NotImplementedError()
 
-        def __getitem__(self, node):
+        def __getitem__(self, key):
             """Get the node object from the complex."""
             raise NotImplementedError()
 
