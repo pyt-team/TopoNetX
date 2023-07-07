@@ -719,7 +719,6 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        incidence_type : {'up', 'down'}, default='up'
         sparse : bool, default=True
         index : bool, default=False
             If True return will include a dictionary of children uid : row number
@@ -755,17 +754,9 @@ class ColoredHyperGraph(Complex):
         if rank == to_rank:
             raise ValueError("incidence must be computed for k!=r, got equal r and k.")
 
-        if (
-            rank < to_rank
-        ):  # up incidence is defined between two skeletons of different ranks
-            children = self.skeleton(rank)
-            uidset = self.skeleton(to_rank)
+        children = self.skeleton(rank)
+        uidset = self.skeleton(to_rank)
 
-        elif (
-            rank > to_rank
-        ):  # up incidence is defined between two skeletons of different ranks
-            children = self.skeleton(to_rank)
-            uidset = self.skeleton(rank)
         return _compute_incidence_matrix(children, uidset, sparse, index)
 
     def incidence_matrix(
@@ -777,7 +768,7 @@ class ColoredHyperGraph(Complex):
         index=False,
     ):
         """Compute incidence matrix of the colored hypergraph."""
-        return _compute_incidence_matrix(rank, to_rank, weight, sparse, index)
+        return self._incidence_matrix(rank, to_rank, weight, sparse, index)
 
     def adjacency_matrix(self, rank, via_rank, s=1, index=False):
         """Sparse weighted :term:`s-adjacency matrix`.
@@ -785,7 +776,7 @@ class ColoredHyperGraph(Complex):
         Parameters
         ----------
         r,k : int, int
-            Two ranks for skeletons in the input Colored Hypergraph, such that r<k
+            Two ranks for skeletons in the input Colored Hypergraph
         s : int, list, optional, default : 1
             Minimum number of edges shared by neighbors with node.
         index: boolean, optional, default: False
