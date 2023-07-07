@@ -16,7 +16,9 @@ from toponetx.algorithms.spectrum import (
     simplicial_complex_adjacency_spectrum,
     simplicial_complex_hodge_laplacian_spectrum,
 )
-from toponetx.classes import CellComplex, CombinatorialComplex, SimplicialComplex
+from toponetx.classes.cell_complex import CellComplex
+from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.datasets.mesh import stanford_bunny
 
 

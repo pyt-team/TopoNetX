@@ -133,7 +133,7 @@ def incidence_to_adjacency(B, s: int | None = None, signed=False):
     return A
 
 
-def _incidence_matrix_helper(children, uidset, sparse=True, index=False):
+def _compute_incidence_matrix(children, uidset, sparse=True, index=False):
     """Help compute the incidence matrix."""
     from collections import OrderedDict
     from operator import itemgetter

@@ -5,8 +5,9 @@ from typing import Literal, overload
 import networkx as nx
 import numpy as np
 
-from toponetx import CellComplex, SimplicialComplex
 from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
+from toponetx.classes.cell_complex import CellComplex
+from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.transform.graph_to_simplicial_complex import graph_2_clique_complex
 
 __all__ = ["karate_club"]

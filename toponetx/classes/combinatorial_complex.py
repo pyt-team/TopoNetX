@@ -14,7 +14,7 @@ from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import (
-    _incidence_matrix_helper,
+    _compute_incidence_matrix,
     incidence_to_adjacency,
     sparse_array_to_neighborhood_dict,
 )
@@ -212,7 +212,7 @@ class CombinatorialComplex(Complex):
             ):  # up incidence is defined between two skeletons of different ranks
                 children = self.skeleton(to_rank)
                 uidset = self.skeleton(rank)
-        return _incidence_matrix_helper(children, uidset, sparse, index)
+        return _compute_incidence_matrix(children, uidset, sparse, index)
 
     @property
     def cells(self):

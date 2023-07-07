@@ -8,7 +8,7 @@ __all__ = [
 
 import networkx as nx
 
-from toponetx import SimplicialComplex
+from toponetx.classes.simplicial_complex import SimplicialComplex
 
 
 def graph_2_neighbor_complex(G):
