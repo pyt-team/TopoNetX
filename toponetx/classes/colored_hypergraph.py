@@ -711,36 +711,76 @@ class ColoredHyperGraph(Complex):
         for cell in cell_set:
             self.remove_cell(cell)
 
-    def incidence_matrix(
-        self,
-        rank,
-        to_rank=None,
-        incidence_type="up",
-        weight=None,
-        sparse=True,
-        index=False,
-    ):
-        """Compute incidence matrix for the CHG indexed by nodes x cells.
+    def _incidence_matrix(self, rank, to_rank, weight=None, sparse=True, index=False):
+        """Compute incidence matrix.
+
+        An incidence matrix indexed by r-ranked hyperedges k-ranked hyperedges
+        r !=k, when k is None incidence_type will be considered instead
 
         Parameters
         ----------
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
-            If True return will include a dictionary of node uid : row number
-            and cell uid : column number
+        incidence_type : {'up', 'down'}, default='up'
+        sparse : bool, default=True
+        index : bool, default=False
+            If True return will include a dictionary of children uid : row number
+            and element uid : column number
 
         Returns
         -------
         incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
         row dictionary : dict
-            Dictionary identifying rows with nodes
+            Dictionary identifying row with item in entityset's children
         column dictionary : dict
-            Dictionary identifying columns with cells
+            Dictionary identifying column with item in entityset's uidset
+
+        Notes
+        -----
+        Incidence_matrix method  is a method for generating the incidence matrix of a combinatorial complex.
+        An incidence matrix is a matrix that describes the relationships between the hyperedges
+        of a complex. In this case, the incidence_matrix method generates a matrix where
+        the rows correspond to the hyperedges of the complex and the columns correspond to the faces
+        . The entries in the matrix are either 0 or 1,
+        depending on whether a hyperedge contains a given face or not.
+        For example, if hyperedge i contains face j, then the entry in the ith
+        row and jth column of the matrix will be 1, otherwise it will be 0.
+
+        To generate the incidence matrix, the incidence_matrix method first creates
+        a dictionary where the keys are the faces of the complex and the values are
+        the hyperedges that contain that face. This allows the method to quickly look up
+        which hyperedges contain a given face. The method then iterates over the hyperedges in
+        the HyperEdgeView instance, and for each hyperedge, it checks which faces it contains.
+        For each face that the hyperedge contains, the method increments the corresponding entry
+        in the matrix. Finally, the method returns the completed incidence matrix.
         """
-        pass
+        if rank == to_rank:
+            raise ValueError("incidence must be computed for k!=r, got equal r and k.")
+
+        if (
+            rank < to_rank
+        ):  # up incidence is defined between two skeletons of different ranks
+            children = self.skeleton(rank)
+            uidset = self.skeleton(to_rank)
+
+        elif (
+            rank > to_rank
+        ):  # up incidence is defined between two skeletons of different ranks
+            children = self.skeleton(to_rank)
+            uidset = self.skeleton(rank)
+        return _incidence_matrix_helper(children, uidset, sparse, index)
+
+        # =============================================================================
+        #     def incidence_matrix(
+        #         self,
+        #         rank,
+        #         to_rank=None,
+        #         weight=None,
+        #         sparse=True,
+        #         index=False,
+        #     ):
+        #         """Compute incidence matrix of the colored hypergraph."""
+        # =============================================================================
+
+        return _incidence_matrix_helper(rank, to_rank, weight, sparse, index)
 
     def adjacency_matrix(self, rank, via_rank, s=1, index=False):
         """Sparse weighted :term:`s-adjacency matrix`.

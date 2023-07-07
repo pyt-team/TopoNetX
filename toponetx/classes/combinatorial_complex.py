@@ -73,7 +73,7 @@ class CombinatorialComplex(Complex):
     >>> CC = CombinatorialComplex()
 
     Add cells to the combinatorial complex:
-
+    >>> from toponetx import CombinatorialComplex
     >>> CC = CombinatorialComplex()
     >>> CC.add_cell([1, 2], rank=1)
     >>> CC.add_cell([3, 4], rank=1)
