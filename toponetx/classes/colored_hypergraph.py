@@ -768,18 +768,15 @@ class ColoredHyperGraph(Complex):
             uidset = self.skeleton(rank)
         return _compute_incidence_matrix(children, uidset, sparse, index)
 
-        # =============================================================================
-        #     def incidence_matrix(
-        #         self,
-        #         rank,
-        #         to_rank=None,
-        #         weight=None,
-        #         sparse=True,
-        #         index=False,
-        #     ):
-        #         """Compute incidence matrix of the colored hypergraph."""
-        # =============================================================================
-
+    def incidence_matrix(
+        self,
+        rank,
+        to_rank=None,
+        weight=None,
+        sparse=True,
+        index=False,
+    ):
+        """Compute incidence matrix of the colored hypergraph."""
         return _compute_incidence_matrix(rank, to_rank, weight, sparse, index)
 
     def adjacency_matrix(self, rank, via_rank, s=1, index=False):
