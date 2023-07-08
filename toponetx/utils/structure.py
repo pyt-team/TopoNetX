@@ -1,26 +1,4 @@
-"""Utilities on structures.
-
-The first function, sparse_array_to_neighborhood_list, takes a sparse array
-representing a higher order structure between two sets of
-cells, S and T, and converts it to a neighborhood list. This
-is a list of tuples such that each tuple has the form (s, t),
-where s and t are indices representing cells in S and T.
-The function also allows for optional dictionaries that map
- the indices in S and T to other values.
-
-The second function, neighborhood_list_to_neighborhood_dict,
-takes a neighborhood list and converts it to a neighborhood dictionary.
-This dictionary maps each cell i in S to a list of cells j that are in
-the neighborhood of i.
-
-The third function, sparse_array_to_neighborhood_dict,
-combines the first two functions and takes a sparse array as
-input and returns a neighborhood dictionary. It first converts
-the sparse array to a neighborhood list, and then converts the
-neighborhood list to a neighborhood dictionary. Like the first
-function, it also allows for optional dictionaries that map the
-indices in S and T to other values.
-"""
+"""Utilities on structures."""
 
 from collections import defaultdict
 from collections.abc import Iterable
