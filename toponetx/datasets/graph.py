@@ -144,10 +144,10 @@ def coauthorship() -> SimplicialComplex:
     """Load the coauthorship network from [SNN20] as a simplicial complex.
 
     The coauthorship network is a simplicial complex where a paper with k authors is represented by a (k-1)-simplex.
-    The added subsimplices of the (k-1)-simplex are interpreted as collaborations among subsets of authors.
-    An attribute named "citations" is added to each simplex, corresponding to the number of citations attributed to the given collaborations of k authors.
-    The coauthorship network is sampled from Semantic Scholar Open Research Corpus and pre-processed as in [SNN20].
-    See [SNN20] for a more detailed description of the dataset.
+    The dataset is pre-processed as in [SNN20]. From the Semantic Scholar Open Research Corpus 80 papers with number of citations between 5 and 10 were sampled.
+    The papers constitute simplices in the complex, which is completed with subsimplices (seen as collaborations between subsets of authors) to form a simplicial complex.
+    An attribute named "citations" is added to each simplex, corresponding to the sum of citations of all papers on which the authors represented by the simplex collaborated.
+    The resulting simplicial complex is of dimension 10 and contains 24552 simplices in total. See [SNN20] for a more detailed description of the dataset.
 
     References
     ----------
@@ -163,16 +163,16 @@ def coauthorship() -> SimplicialComplex:
         The simplicial complex comes with the attribute "citations", the number of citations attributed to the given collaborations of k authors.
 
     """
-    cochains = np.load(DIR / "150250_cochains.npy", allow_pickle=True)
+    coauthorship = np.load(DIR / "coauthorship.npy", allow_pickle=True)
 
     simplices = []
-    for dim in range(len(cochains) - 1, -1, -1):
-        simplices += [list(el) for el in cochains[dim].keys()]
+    for dim in range(len(coauthorship) - 1, -1, -1):
+        simplices += [list(el) for el in coauthorship[dim].keys()]
 
     sc = SimplicialComplex(simplices)
 
-    for i in range(len(cochains)):
-        dic = {tuple(sorted(k)): v for k, v in cochains[i].items()}
+    for i in range(len(coauthorship)):
+        dic = {tuple(sorted(k)): v for k, v in coauthorship[i].items()}
         sc.set_simplex_attributes(dic, name="citations")
 
     return sc
