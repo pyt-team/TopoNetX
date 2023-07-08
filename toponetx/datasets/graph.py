@@ -8,7 +8,7 @@ import numpy as np
 
 from toponetx import CellComplex, SimplicialComplex
 from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
-from toponetx.transform.graph_to_simplicial_complex import graph_2_clique_complex
+from toponetx.transform.graph_to_simplicial_complex import graph_to_clique_complex
 
 __all__ = ["karate_club", "coauthorship"]
 
@@ -37,7 +37,7 @@ def karate_club(
     Parameters
     ----------
     complex_type : {'simplicial','cell'}, default='simplicial'
-        The type of complex to loaded.
+        The type of complex to load.
     feat_dim : int, default=2
         The number of eigenvectors to be attached to the simplices/cells
         of the output complex.
@@ -79,7 +79,7 @@ def karate_club(
     """
     if complex_type == "simplicial":
         g = nx.karate_club_graph()
-        sc = graph_2_clique_complex(g)
+        sc = graph_to_clique_complex(g)
 
         _, nodes_feat = hodge_laplacian_eigenvectors(
             sc.hodge_laplacian_matrix(0), feat_dim

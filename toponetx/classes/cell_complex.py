@@ -9,7 +9,7 @@ We reserve the notation CC for a combinatorial complex.
 
 import warnings
 from collections import defaultdict
-from collections.abc import Hashable, Iterable
+from collections.abc import Collection, Hashable, Iterable, Iterator
 from itertools import zip_longest
 from typing import Any
 from warnings import warn
@@ -23,7 +23,7 @@ from hypernetx.classes.entity import Entity
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
 from networkx.utils import pairwise
-from scipy.sparse import csr_matrix
+from scipy.sparse import csc_matrix
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
@@ -73,6 +73,21 @@ class CellComplex(Complex):
         such as sparse matrices.
     5. Robust error handling and validation of input data, ensuring that the package is reliable and easy to use.
 
+    Parameters
+    ----------
+    cells : iterable, optional
+        A list of cells to add to the complex.
+    name : string, optional
+        Name of the complex.
+    regular : bool, default=True
+    kwargs : keyword arguments, optional
+        Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
+
     Examples
     --------
     Iteratively construct a cell complex:
@@ -115,10 +130,10 @@ class CellComplex(Complex):
     >>> CX.is_regular
     """
 
-    def __init__(self, cells=None, name: str = "", regular=True, **attr) -> None:
-        super().__init__()
-
-        self.name = name
+    def __init__(
+        self, cells=None, name: str = "", regular: bool = True, **kwargs
+    ) -> None:
+        super().__init__(name, **kwargs)
 
         self._regular = regular
         self._G = Graph()
@@ -145,8 +160,6 @@ class CellComplex(Complex):
                 raise TypeError(
                     f"cells must be iterable, networkx graph or None, got {type(cells)}"
                 )
-        self.complex = dict()  # dictionary for cell complex attributes
-        self.complex.update(attr)
 
     @property
     def cells(self) -> CellView:
@@ -226,7 +239,7 @@ class CellComplex(Complex):
                 return False
         return True
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return detailed string representation."""
         return f"Cell Complex with {len(self.nodes)} nodes, {len(self.edges)} edges  and {len(self.cells)} 2-cells "
 
@@ -234,11 +247,11 @@ class CellComplex(Complex):
         """Return string representation."""
         return f"CellComplex(name='{self.name}')"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of nodes."""
         return len(self.nodes)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Iterate over the nodes.
 
         Returns
@@ -248,7 +261,7 @@ class CellComplex(Complex):
         """
         return iter(self.nodes)
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self.nodes.
 
         Parameters
@@ -351,7 +364,7 @@ class CellComplex(Complex):
                         all_inserted_cells.add(j)
         return equiv_classes
 
-    def _remove_equivalent_cells(self):
+    def _remove_equivalent_cells(self) -> None:
         """Remove homotopic cells from the cell complex.
 
         Examples
@@ -383,14 +396,14 @@ class CellComplex(Complex):
                         else:
                             self._delete_cell(c, k)
 
-    def degree(self, node: Hashable, rank=1) -> int:
+    def degree(self, node: Hashable, rank: int = 1) -> int:
         """Compute the number of cells of certain rank that contain node.
 
         Parameters
         ----------
         node : hashable
             Identifier for the node.
-        rank : positive integer, optional, default: 1
+        rank : int, default=1
             Smallest size of cell to consider in degree.
 
         Returns
@@ -529,14 +542,13 @@ class CellComplex(Complex):
 
         return self._G[node]
 
-    def cell_neighbors(self, cell, s=1):
+    def cell_neighbors(self, cell, s: int = 1):
         """Cells in cell complex which share s nodes(s) with cells.
 
         Parameters
         ----------
         cell : Cell or Iterable representing a acell
-
-        s : int, list, optional, default : 1
+        s : int, default=1
             Minimum number of nodes shared by neighbors cell node.
 
         Returns
@@ -546,7 +558,7 @@ class CellComplex(Complex):
         """
         raise NotImplementedError()
 
-    def remove_node(self, node: Hashable):
+    def remove_node(self, node: Hashable) -> None:
         """Remove the given node from the cell complex.
 
         This method removes the given node from the cell complex, along with any
@@ -588,11 +600,11 @@ class CellComplex(Complex):
         for node in node_set:
             self.remove_node(node)
 
-    def add_node(self, node: Hashable, **attr):
+    def add_node(self, node: Hashable, **attr) -> None:
         """Add a single node to cell complex."""
         self._G.add_node(node, **attr)
 
-    def _add_nodes_from(self, nodes: Iterable[Hashable]):
+    def _add_nodes_from(self, nodes: Iterable[Hashable]) -> None:
         """Instantiate new nodes when cells added to cell complex.
 
         Parameters
@@ -602,7 +614,7 @@ class CellComplex(Complex):
         for node in nodes:
             self.add_node(node)
 
-    def add_edge(self, u_of_edge: Hashable, v_of_edge: Hashable, **attr):
+    def add_edge(self, u_of_edge: Hashable, v_of_edge: Hashable, **attr) -> None:
         """Add edge.
 
         Parameters
@@ -613,7 +625,7 @@ class CellComplex(Complex):
         """
         self._G.add_edge(u_of_edge, v_of_edge, **attr)
 
-    def add_edges_from(self, ebunch_to_add: Iterable[tuple], **attr):
+    def add_edges_from(self, ebunch_to_add: Iterable[tuple], **attr) -> None:
         """Add edges.
 
         Parameters
@@ -628,7 +640,7 @@ class CellComplex(Complex):
         self,
         cell: tuple | list | Cell,
         rank: int | None = None,
-        check_skeleton=False,
+        check_skeleton: bool = False,
         **attr,
     ):
         """Add a single cell to cell complex.
@@ -719,9 +731,9 @@ class CellComplex(Complex):
         self,
         cell_set: Iterable[tuple | list | Cell],
         rank: int | None = None,
-        check_skeleton=False,
+        check_skeleton: bool = False,
         **attr,
-    ):
+    ) -> None:
         """Add cells to cell complex.
 
         Parameters
@@ -1128,7 +1140,7 @@ class CellComplex(Complex):
             return d
         raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
-    def set_cell_data(self, cell, rank, attr_name, attr_value):
+    def set_cell_data(self, cell, rank, attr_name: str, attr_value):
         """Set data for a specific cell in the complex.
 
         Parameters
@@ -1171,7 +1183,7 @@ class CellComplex(Complex):
         else:
             raise ValueError(f"Invalid rank: {rank}. Rank must be 0, 1, or 2.")
 
-    def get_cell_data(self, cell, rank, attr_name=None):
+    def get_cell_data(self, cell, rank, attr_name: str | None = None):
         """Retrieve data associated with a specific cell in the complex.
 
         Parameters
@@ -1229,7 +1241,7 @@ class CellComplex(Complex):
             else:
                 raise KeyError(f"Cell '{cell}' is not present in the complex.")
 
-    def remove_equivalent_cells(self):
+    def remove_equivalent_cells(self) -> None:
         """Remove equivalent cells.
 
         Remove cells from the cell complex which are homotopic.
@@ -1471,7 +1483,7 @@ class CellComplex(Complex):
             raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
 
     def hodge_laplacian_matrix(
-        self, rank: int, signed=True, weight: bool = False, index: bool = False
+        self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Compute the hodge-laplacian matrix for the CX.
 
@@ -1899,7 +1911,7 @@ class CellComplex(Complex):
         HG._add_nodes_from(nodes)
         return HG
 
-    def is_connected(self, s=1, cells=False):
+    def is_connected(self, s: int = 1, cells: bool = False):
         """Determine if cell complex is s-connected.
 
         Parameters
@@ -1972,7 +1984,9 @@ class CellComplex(Complex):
         for node in self.singletons():
             self._G.remove_node(node)
 
-    def s_connected_components(self, s=1, cells=True, return_singletons=False):
+    def s_connected_components(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = False
+    ):
         """Return generator for the s-connected components.
 
         Parameters
@@ -2021,7 +2035,9 @@ class CellComplex(Complex):
                         continue
                 yield {rowdict[n] for n in c}
 
-    def s_component_subgraphs(self, s=1, cells=True, return_singletons=False):
+    def s_component_subgraphs(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = False
+    ):
         """Return a generator for the induced subgraphs of s_connected components.
 
         Removes singletons unless return_singletons is set to True.
@@ -2049,7 +2065,9 @@ class CellComplex(Complex):
             else:
                 yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
 
-    def s_components(self, s=1, cells=True, return_singletons=True):
+    def s_components(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = True
+    ):
         """Compute s-component.
 
         Same as s_connected_components.
@@ -2062,7 +2080,7 @@ class CellComplex(Complex):
             s=s, cells=cells, return_singletons=return_singletons
         )
 
-    def connected_components(self, cells=False, return_singletons=True):
+    def connected_components(self, cells: bool = False, return_singletons: bool = True):
         """Compute s-connected components with s=1.
 
         Same as s_connected_component` with s=1, but nodes returned.
@@ -2075,7 +2093,7 @@ class CellComplex(Complex):
         """
         return self.s_connected_components(cells=cells, return_singletons=True)
 
-    def connected_component_subgraphs(self, return_singletons=True):
+    def connected_component_subgraphs(self, return_singletons: bool = True):
         """Compute connected component subgraphs with s=1.
 
         Same as :meth:`s_component_subgraphs` with s=1. Returns iterator.
@@ -2086,7 +2104,7 @@ class CellComplex(Complex):
         """
         return self.s_component_subgraphs(return_singletons=return_singletons)
 
-    def components(self, cells=False, return_singletons=True):
+    def components(self, cells: bool = False, return_singletons: bool = True):
         """Compute s-component with s=1.
 
         Same as :meth:`s_connected_components` with s=1.
@@ -2099,7 +2117,7 @@ class CellComplex(Complex):
         """
         return self.s_connected_components(s=1, cells=cells)
 
-    def component_subgraphs(self, return_singletons=False):
+    def component_subgraphs(self, return_singletons: bool = False):
         """Compute s-component subgraphs with s=1.
 
         Same as :meth:`s_components_subgraphs` with s=1. Returns iterator.
@@ -2132,7 +2150,7 @@ class CellComplex(Complex):
         loc = np.argmax(diams)
         return diams[loc], diams, comps
 
-    def cell_diameters(self, s=1):
+    def cell_diameters(self, s: int = 1):
         """Return the cell diameters of the s_cell_connected component subgraphs.
 
         Parameters
@@ -2172,7 +2190,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        diameter : int
+        int
 
         Raises
         ------
@@ -2201,7 +2219,7 @@ class CellComplex(Complex):
 
         Return
         ------
-        cell_diameter : int
+        int
 
         Raises
         ------
@@ -2221,7 +2239,7 @@ class CellComplex(Complex):
             return nx.diameter(G)
         raise TopoNetXError(f"cell complex is not s-connected. s={s}")
 
-    def distance(self, source, target, s=1):
+    def distance(self, source, target, s: int = 1) -> int:
         """Return shortest s-walk distance between two nodes in the cell complex.
 
         Parameters
@@ -2235,7 +2253,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        s-walk distance : int
+        int
 
         See Also
         --------
@@ -2265,7 +2283,7 @@ class CellComplex(Complex):
             warnings.warn(f"No {s}-path between {source} and {target}")
             return np.inf
 
-    def cell_distance(self, source, target, s=1):
+    def cell_distance(self, source, target, s: int = 1) -> int:
         """Return the shortest s-walk distance between two cells in the cell complex.
 
         Parameters
@@ -2318,11 +2336,8 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CX = CellComplex()
-        >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
-        >>> G = Graph()
-        >>> G.add_edge(1,0)
-        >>> G.add_edge(2,0)
-        >>> G.add_edge(1,2)
+        >>> CX.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
+        >>> G = Graph([(0, 1), (0, 2), (1, 2)])
         >>> CX.from_networkx_graph(G)
         >>> CX.edges
         """
@@ -2369,7 +2384,7 @@ class CellComplex(Complex):
         return CX
 
     @classmethod
-    def load_mesh(cls, file_path, process=False, force=None) -> "CellComplex":
+    def load_mesh(cls, file_path, process: bool = False, force=None) -> "CellComplex":
         """Load a mesh.
 
         Parameters

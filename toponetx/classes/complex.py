@@ -17,16 +17,16 @@ class Atom(abc.ABC):
         The elements in the atom.
     name : str, optional
         A name for the atom.
-    attr : keyword arguments, optional
+    kwargs : keyword arguments, optional
         Additional attributes to be associated with the atom.
     """
 
-    def __init__(self, elements: Collection, name: str = "", **attr) -> None:
+    def __init__(self, elements: Collection, name: str = "", **kwargs) -> None:
         self.elements = elements
         self.name = name
 
         self._properties = dict()
-        self._properties.update(attr)
+        self._properties.update(kwargs)
 
     def __len__(self) -> int:
         """Return the number of elements in the atom."""
@@ -98,7 +98,7 @@ class Atom(abc.ABC):
         self._properties.update(attributes)
 
 
-class Complex:
+class Complex(abc.ABC):
     """Abstract class representing a complex.
 
     A complex is a space that is constructed by attaching lower-dimensional
@@ -125,10 +125,26 @@ class Complex:
     structure consisting of a set of points, a subset of the power set of points, and a ranking function
     that assigns a rank to each subset based on its size. These classes are used in many areas of mathematics
     and computer science, such as geometric modeling, data analysis, and machine learning.
+
+    Parameters
+    ----------
+    name : str, optional
+        Optional name for the complex.
+    kwargs : keyword arguments, optional
+        Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
     """
 
-    def __init__(self) -> None:
-        pass
+    complex: dict[Any, Any]
+
+    def __init__(self, name: str = "", **kwargs) -> None:
+        self.name = name
+        self.complex = dict()
+        self.complex.update(kwargs)
 
     @property
     @abc.abstractmethod
@@ -155,18 +171,26 @@ class Complex:
         pass
 
     @abc.abstractmethod
-    def skeleton(self, rank):
+    def skeleton(self, rank: int):
         """Return dimension of the complex."""
         pass
 
     @abc.abstractmethod
-    def __str__(self):
+    def __str__(self) -> str:
         """Print basic string representation."""
         pass
 
     @abc.abstractmethod
-    def __repr__(self):
-        """Print detailed string representation."""
+    def __repr__(self) -> str:
+        """Printable representation of the complex.
+
+        Makes an attempt to return a string that would produce an object with the same value when passed to ``eval()``,
+        but may not be possible for all objects.
+
+        Returns
+        -------
+        str
+        """
         pass
 
     @abc.abstractmethod
@@ -179,17 +203,17 @@ class Complex:
         """Clone complex."""
 
     @abc.abstractmethod
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Return an iterator over the nodes."""
         pass
 
     @abc.abstractmethod
-    def __contains__(self, item):
+    def __contains__(self, item: Any) -> bool:
         """Check whether the complex contains an item."""
         pass
 
     @abc.abstractmethod
-    def __getitem__(self, node):
+    def __getitem__(self, key):
         """Get item."""
         pass
 
@@ -202,7 +226,7 @@ class Complex:
         pass
 
     @abc.abstractmethod
-    def add_node(self, node):
+    def add_node(self, node) -> None:
         """Add node to the complex."""
         pass
 

@@ -1,17 +1,18 @@
 """Methods to lift a graph to a simplicial complex."""
 
-__all__ = [
-    "graph_2_clique_complex",
-    "graph_2_neighbor_complex",
-]
-
+from warnings import warn
 
 import networkx as nx
 
-from toponetx import SimplicialComplex
+from toponetx.classes.simplicial_complex import SimplicialComplex
+
+__all__ = [
+    "graph_to_clique_complex",
+    "graph_to_neighbor_complex",
+]
 
 
-def graph_2_neighbor_complex(G):
+def graph_to_neighbor_complex(G: nx.Graph) -> SimplicialComplex:
     """Get the neighbor complex of a graph.
 
     Parameters
@@ -28,16 +29,17 @@ def graph_2_neighbor_complex(G):
     -----
     This type of simplicial complexes can have very large dimension ( dimension = max_i(len (G.neighbors(i))) )
     and it is a function of the distribution of the valency of the graph.
-
     """
-    neighbors = []
-    for i in G.nodes():
-        N = list(G.neighbors(i)) + [i]  # each simplex is the node and its n-hop nbhd
-        neighbors.append(N)
-    return SimplicialComplex(neighbors)
+    simplices = []
+    for node in G:
+        # each simplex is the node and its n-hop neighbors
+        simplices.append(list(G.neighbors(node)) + [node])
+    return SimplicialComplex(simplices)
 
 
-def graph_2_clique_complex(G, max_dim=None):
+def graph_to_clique_complex(
+    G: nx.Graph, max_dim: int | None = None
+) -> SimplicialComplex:
     """Get the clique complex of a graph.
 
     Parameters
@@ -54,9 +56,28 @@ def graph_2_clique_complex(G, max_dim=None):
     SimplicialComplex
         The clique simplicial complex of dimension dim of the graph G.
     """
-    if max_dim is None:
-        lst = nx.enumerate_all_cliques(G)
-        return SimplicialComplex(list(lst))
+    cliques = nx.enumerate_all_cliques(G)
+    if max_dim is not None:
+        cliques = filter(lambda clique: len(clique) <= max_dim, cliques)
 
-    lst = filter(lambda face: len(face) <= max_dim, nx.enumerate_all_cliques(G))
-    return SimplicialComplex(list(lst))
+    return SimplicialComplex(cliques)
+
+
+def graph_2_neighbor_complex(G) -> SimplicialComplex:
+    warn(
+        "`graph_2_neighbor_complex` is deprecated and will be removed in a future version, use `graph_to_neighbor_complex` instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return graph_to_neighbor_complex(G)
+
+
+def graph_2_clique_complex(
+    G: nx.Graph, max_dim: int | None = None
+) -> SimplicialComplex:
+    warn(
+        "`graph_2_clique_complex` is deprecated and will be removed in a future version, use `graph_to_clique_complex` instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return graph_to_clique_complex(G, max_dim)

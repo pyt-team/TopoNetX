@@ -3,9 +3,9 @@
 import pickle
 
 
-def to_pickle(obj, filename):
+def to_pickle(obj, filename: str) -> None:
     """Write object to a pickle file."""
-    with open(f"{filename}", "wb") as f:
+    with open(filename, "wb") as f:
         pickle.dump(obj, f)
 
 

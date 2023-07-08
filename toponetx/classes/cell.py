@@ -1,9 +1,9 @@
 """Cell and CellView classes."""
 
 from collections import Counter, deque
-from collections.abc import Collection, Iterable
+from collections.abc import Collection, Iterable, Sequence
 from itertools import zip_longest
-from typing import Any
+from typing import Literal
 
 from toponetx.classes.complex import Atom
 
@@ -50,9 +50,9 @@ class Cell(Atom):
     >>> v2 = (1, 1)
     >>> v3 = (0, 1)
     # create the cell with the vertices and edges
-    >>> cell = Cell([v0, v1, v2, v3],type="square")
+    >>> cell = Cell([v0, v1, v2, v3], type="square")
     >>> cell["type"]
-    >>> print(list(cell.boundary))
+    >>> list(cell.boundary)
     [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
     ((0, 1), (0, 0))]
     """
@@ -102,15 +102,15 @@ class Cell(Atom):
         return Cell(self.elements, self.name, self._regular, **self._properties)
 
     @staticmethod
-    def is_valid_cell(elements, regular=False):
+    def is_valid_cell(elements: Sequence, regular: bool = False) -> bool:
         """Check if a 2D cell defined by a list of elements is valid.
 
         Parameters
         ----------
-        elements : list
+        elements : Sequence
             List of elements defining the cell.
-        regular : bool, optional
-            Indicates if the cell is regular. Default is False.
+        regular : bool, default=False
+            Indicates if the cell is regular.
 
         Returns
         -------
@@ -138,10 +138,13 @@ class Cell(Atom):
         return True
 
     @property
-    def is_regular(self):
+    def is_regular(self) -> bool:
         """Check if a cell is regular.
 
-        Return true is the Cell is a regular cell, and False otherwise
+        Returns
+        -------
+        bool
+            True if the Cell is regular, and False otherwise
         """
         if self._regular:  # condition enforced
             return True
@@ -154,7 +157,7 @@ class Cell(Atom):
 
         return True
 
-    def sign(self, edge):
+    def sign(self, edge) -> Literal[-1, 1]:
         """Compute the sign of the edge with respect to the cell.
 
         This takes an edge as input and computes the sign of the edge with respect to the cell.
@@ -226,7 +229,7 @@ class Cell(Atom):
             **self._properties,
         )
 
-    def is_homotopic_to(self, cell):
+    def is_homotopic_to(self, cell) -> bool:
         """Check if self is homotopic to input cell.
 
         Parameters
@@ -243,7 +246,7 @@ class Cell(Atom):
         )
 
     @staticmethod
-    def _are_homotopic(cell1, cell):
+    def _are_homotopic(cell1, cell) -> bool:
         """Check if cell1 is homotopic to input cell.
 
         Parameters
@@ -290,6 +293,6 @@ class Cell(Atom):
                 return True
         return False
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of regular cell."""
         return f"Nodes set:{self.elements}, boundary edges:{self.boundary}, attrs:{self._properties}"
