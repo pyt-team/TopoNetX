@@ -1264,14 +1264,14 @@ class CellComplex(Complex):
         >>> from toponetx import CellComplex
         >>> G = nx.path_graph(3)
         >>> cx = CellComplex(G)
-        >>> cx.add_cell([1,2,3,4], rank=2)
-        >>> cx.add_cell([1,2,3,4], rank=2)
-        >>> cx.add_cell([2,3,4,1], rank=2)
+        >>> cx.add_cell([1,2,3,4], rank=2) #*
+        >>> cx.add_cell([1,2,3,4], rank=2) #*
+        >>> cx.add_cell([2,3,4,1], rank=2) #*
         >>> cx.add_cell([1,2,4], rank=2,)
         >>> cx.add_cell([3,4,8], rank=2)
         >>> print(cx.cells)
         >>> cx.remove_equivalent_cells()
-        >>> print(cx.cells) # observe homotpic cells have been removed
+        >>> print(cx.cells) # observe homotpic cells ( marked with #* ) have been removed
         """
         self._remove_equivalent_cells()
 
@@ -1328,6 +1328,73 @@ class CellComplex(Complex):
                         )
                     return False
         return True
+
+    def node_cell_incidence_matrix(
+        self, weight: bool = False, index: bool = False
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
+        """Nodes/cells incidence matrix for the indexed by nodes X cells.
+
+        Parameters
+        ----------
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+        index : boolean, optional, default False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The indicendence matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, incidence matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        """
+        node_index = {node: i for i, node in enumerate(sorted(self._G.nodes))}
+        cell_index = {c.elements: i for i, c in enumerate(self.cells)}
+        A = sp.sparse.lil_matrix((len(node_index), len(self.cells)))
+        for cj, c in enumerate(cell_index):
+            for ni, n in enumerate(node_index):
+                if n in c:
+                    A[ni, cj] = 1
+        if index:
+
+            return node_index, cell_index, A.asformat("csc")
+        else:
+            return A.asformat("csc")
+
+    def node_via_cells_adjacnecy_matrix(
+        self, weight: bool = False, index: bool = False
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
+        """Nodes adjaency matrix where adjacency is computed with respect to 2-cells.
+
+        Parameters
+        ----------
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+        index : boolean, optional, default False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The adjaency matrix, if `index` is False, otherwise
+            index of nodes, adjaency matrix, if 'index' is True
+        """
+        if index:
+            node_index, cell_index, M = incidence_to_adjacency(
+                self.node_cell_incidence_matrix(weight, index).T
+            )
+
+            return node_index, M
+        else:
+            return incidence_to_adjacency(
+                self.node_cell_incidence_matrix(weight, index)
+            )
 
     def incidence_matrix(
         self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
@@ -1979,6 +2046,10 @@ class CellComplex(Complex):
         for cell in self.cells:
             CX.add_cell(cell.clone())
         return CX
+
+    def euler_characterisitics(self) -> int:
+        """Euler characterisitics of the cell complex."""
+        return len(self.nodes) - len(self.edges) + len(self.cells)
 
     def remove_singletons(self) -> "CellComplex":
         """Remove singleton nodes (see `CellComplex.singletons()`)."""
