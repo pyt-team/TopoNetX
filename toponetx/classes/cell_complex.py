@@ -1329,7 +1329,7 @@ class CellComplex(Complex):
                     return False
         return True
 
-    def node_cell_incidence_matrix(
+    def node_all_cell_incidence_matrix(
         self, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Nodes/cells incidence matrix for the indexed by nodes X cells.
@@ -1352,20 +1352,23 @@ class CellComplex(Complex):
             where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
         """
         node_index = {node: i for i, node in enumerate(sorted(self._G.nodes))}
-        cell_index = {c.elements: i for i, c in enumerate(self.cells)}
-        A = sp.sparse.lil_matrix((len(node_index), len(self.cells)))
-        for cj, c in enumerate(cell_index):
+        edgelist = sorted([sorted(e) for e in self._G.edges])
+        all_cell_index = {tuple(sorted(edge)): i for i, edge in enumerate(edgelist)}
+        cell_index = {c.elements: i + len(edgelist) for i, c in enumerate(self.cells)}
+        all_cell_index.update(cell_index)
+        A = sp.sparse.lil_matrix((len(node_index), len(all_cell_index)))
+        for cj, c in enumerate(all_cell_index):
             for ni, n in enumerate(node_index):
                 if n in c:
                     A[ni, cj] = 1
         if index:
 
-            return node_index, cell_index, A.asformat("csc")
+            return node_index, all_cell_index, A.asformat("csc")
         else:
             return A.asformat("csc")
 
-    def node_via_cells_adjacnecy_matrix(
-        self, weight: bool = False, index: bool = False
+    def node_all_cell_adjacnecy_matrix(
+        self, s: int | None = None, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Nodes adjaency matrix where adjacency is computed with respect to 2-cells.
 
@@ -1384,16 +1387,34 @@ class CellComplex(Complex):
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
             The adjaency matrix, if `index` is False, otherwise
             index of nodes, adjaency matrix, if 'index' is True
+        Examples
+        --------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([3, 4, 5], rank=2)
+        >>> CX.node_all_cell_adjacnecy_matrix().todense()
+        matrix([[0., 2., 1., 2., 0.],
+                [2., 0., 2., 1., 0.],
+                [1., 2., 0., 3., 2.],
+                [2., 1., 3., 0., 2.],
+                [0., 0., 2., 2., 0.]])
+        >>> # observe the constrast with the regular adjaency matrix
+        >>> CX.adjacency_matrix(0).todense()
+        matrix([[0., 1., 0., 1., 0.],
+                [1., 0., 1., 0., 0.],
+                [0., 1., 0., 1., 1.],
+                [1., 0., 1., 0., 1.],
+                [0., 0., 1., 1., 0.]])
         """
         if index:
-            node_index, cell_index, M = incidence_to_adjacency(
-                self.node_cell_incidence_matrix(weight, index).T
+            node_index, cell_index, M = self.node_all_cell_incidence_matrix(
+                weight, index
             )
 
-            return node_index, M
+            return node_index, incidence_to_adjacency(M.T, s)
         else:
             return incidence_to_adjacency(
-                self.node_cell_incidence_matrix(weight, index)
+                self.node_all_cell_incidence_matrix(weight, index).T, s
             )
 
     def incidence_matrix(
@@ -2087,23 +2108,36 @@ class CellComplex(Complex):
         s_connected_components : iterator
             Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
             components of CX.
+        Example
+        -------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([2,3,4],rank=2)
+        >>> CX.add_cell([5,6,7],rank=2)
+        >>> list(CX.s_connected_components(s=1))
+        >>> # [{2, 3, 4, 5, 6, 7}]
+        >>> CX.add_cell([4,5],rank=1)
+        >>> list(CX.s_connected_components(s=1))
+        >>> # [{2, 3, 4}, {5, 6, 7}]
+
         """
         if cells:
-            A, coldict = self.coadjacency_matrix(rank=2, index=True)
+            node_dict, A = self.node_all_cell_adjacnecy_matrix(s=s, index=True)
+            node_dict = {v: k for k, v in node_dict.items()}
             G = nx.from_scipy_sparse_matrix(A)
 
             for c in nx.connected_components(G):
                 if not return_singletons and len(c) == 1:
                     continue
-                yield {coldict[n] for n in c}
+                yield {node_dict[n] for n in c}
         else:
-            A, rowdict = self.adjacency_matrix(rank=0, index=True)
+            node_dict, A = self.node_all_cell_adjacnecy_matrix(s=s, index=True)
+            node_dict = {v: k for k, v in node_dict.items()}
             G = nx.from_scipy_sparse_matrix(A)
             for c in nx.connected_components(G):
                 if not return_singletons:
                     if len(c) == 1:
                         continue
-                yield {rowdict[n] for n in c}
+                yield {node_dict[n] for n in c}
 
     def s_component_subgraphs(self, s=1, cells=True, return_singletons=False):
         """Return a generator for the induced subgraphs of s_connected components.
@@ -2202,7 +2236,7 @@ class CellComplex(Complex):
         list of the diameters of the s-components and
         list of the s-component nodes
         """
-        A, coldict = self.adjacency_matrix(rank=0, index=True)
+        coldict, A = self.node_all_cell_adjacnecy_matrix(index=True)
         G = nx.from_scipy_sparse_matrix(A)
         diams = []
         comps = []
@@ -2233,7 +2267,7 @@ class CellComplex(Complex):
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
         """
-        A, coldict = self.coadjacency_matrix(rank=2, index=True)
+        coldict, A = self.node_all_cell_adjacnecy_matrix(index=True)
         G = nx.from_scipy_sparse_matrix(A)
         diams = []
         comps = []
