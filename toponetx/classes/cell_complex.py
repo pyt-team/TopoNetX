@@ -2116,7 +2116,7 @@ class CellComplex(Complex):
             self._G.remove_node(node)
 
     def get_linegraph(self, s=1, cells=True):
-        """Return generator for the s-connected components.
+        """Create line graph of self.
 
         If cells=True (default), the cells will be the vertices of the line graph.
         Two vertices are connected by an s-line-graph edge if the corresponding cell
