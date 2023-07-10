@@ -163,5 +163,5 @@ class TestCombinatorialComplex:
 
     def test_combinatorial_complex_init(self):
         """Test the init method of CombinatorialComplex class."""
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             CombinatorialComplex(cells=1)
