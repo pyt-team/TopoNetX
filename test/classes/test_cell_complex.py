@@ -1093,3 +1093,13 @@ class TestCellComplex:
         assert sorted(list(CX.__getitem__(1))) == [2, 6, 9]
         assert sorted(list(CX.__getitem__(2))) == [1, 3, 5]
         assert sorted(list(CX.__getitem__(6))) == [1]
+
+    def test_remove_nodes(self):
+        """Test remove nodes method of the class Cell Complex."""
+        cc = CellComplex()
+        cell = [1, 2, 3]
+        cc.add_cell(cell, rank=2)
+        cc.remove_nodes([1, 2, 3])  # removing node removes cells attached to it.
+        assert len(cc.cells) == 0
+        assert len(cc.edges) == 0
+        assert len(cc.nodes) == 0
