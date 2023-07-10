@@ -1417,6 +1417,38 @@ class CellComplex(Complex):
                 self.node_all_cell_incidence_matrix(weight, index).T, s
             )
 
+    def cell_adjacnecy_matrix(
+        self, s: int | None = None, weight: bool = False, index: bool = False
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
+        """Nodes adjaency matrix where adjacency is computed with respect to 2-cells.
+
+        Parameters
+        ----------
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+        index : boolean, optional, default False
+            If True return will include a dictionary of cell uid
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The adjaency matrix, if `index` is False, otherwise
+            index of cells, adjaency matrix, if 'index' is True
+
+        """
+        if index:
+            node_index, cell_index, M = self.node_all_cell_incidence_matrix(
+                weight, index
+            )
+
+            return cell_index, incidence_to_adjacency(M, s)
+        else:
+            return incidence_to_adjacency(
+                self.node_all_cell_incidence_matrix(weight, index).T, s
+            )
+
     def incidence_matrix(
         self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
@@ -1793,7 +1825,9 @@ class CellComplex(Complex):
         else:
             return L_down
 
-    def adjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
+    def adjacency_matrix(
+        self, rank: int, s: int | None = None, signed: bool = False, index: bool = False
+    ):
         """Compute adjacency matrix for a given rank."""
         if index:
             ind, _, incidence = self.incidence_matrix(
@@ -1805,11 +1839,13 @@ class CellComplex(Complex):
         incidence = incidence.T
 
         if index:
-            return ind, incidence_to_adjacency(incidence)
+            return ind, incidence_to_adjacency(incidence, s)
         else:
-            return incidence_to_adjacency(incidence)
+            return incidence_to_adjacency(incidence, s)
 
-    def coadjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
+    def coadjacency_matrix(
+        self, rank: int, s: int | None = None, signed: bool = False, index: bool = False
+    ):
         """Compute coadjacency matrix for a given rank."""
         if index:
             _, ind, incidence = self.incidence_matrix(rank, signed=signed, index=True)
@@ -1817,9 +1853,9 @@ class CellComplex(Complex):
             incidence = self.incidence_matrix(rank, signed=signed)
 
         if index:
-            return ind, incidence_to_adjacency(incidence)
+            return ind, incidence_to_adjacency(incidence, s)
         else:
-            return incidence_to_adjacency(incidence)
+            return incidence_to_adjacency(incidence, s)
 
     def restrict_to_cells(
         self,
@@ -2077,6 +2113,18 @@ class CellComplex(Complex):
         for node in self.singletons():
             self._G.remove_node(node)
 
+    def get_linegraph(self, s=1, cells=True):
+        """Create line graph of a cell complex."""
+        # node_dict, A = self.node_all_cell_adjacnecy_matrix(s=s, index=True)
+        # g = nx.Graph()
+        # g.add_edges_from(A.todense())
+        # return g
+        # N = len(self.nodes)
+        # for i,c in enumerate(self.cells):
+        #    for n in c:
+        #        g.add_edge("cell"+str(i),n)
+        return
+
     def s_connected_components(self, s=1, cells=True, return_singletons=False):
         """Return generator for the s-connected components.
 
@@ -2160,25 +2208,14 @@ class CellComplex(Complex):
             s-cell(node) components of cell complex.
         """
         for idx, c in enumerate(
-            self.s_components(s=s, cells=cells, return_singletons=return_singletons)
+            self.s_connected_components(
+                s=s, cells=cells, return_singletons=return_singletons
+            )
         ):
             if cells:
-                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
+                yield self.restrict_to_nodes(c, name=f"{self.name}:{idx}")
             else:
-                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
-
-    def s_components(self, s=1, cells=True, return_singletons=True):
-        """Compute s-component.
-
-        Same as s_connected_components.
-
-        See Also
-        --------
-        s_connected_components
-        """
-        return self.s_connected_components(
-            s=s, cells=cells, return_singletons=return_singletons
-        )
+                yield self.restrict_to_nodes(c, name=f"{self.name}:{idx}")
 
     def connected_components(self, cells=False, return_singletons=True):
         """Compute s-connected components with s=1.
