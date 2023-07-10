@@ -160,3 +160,8 @@ class TestCombinatorialComplex:
         assert (2, 3, 4) in CC2.cells
         CC2.remove_cell([1, 2, 3])
         assert len(CC.cells) == 6
+
+    def test_combinatorial_complex_init(self):
+        """Test the init method of CombinatorialComplex class."""
+        with pytest.raises(ValueError):
+            CombinatorialComplex(cells=1)
