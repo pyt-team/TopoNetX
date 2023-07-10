@@ -1445,7 +1445,7 @@ class CellComplex(Complex):
 
         """
         if index:
-            node_index, cell_index, M = self.node_all_cell_incidence_matrix(
+            node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
                 weight, index
             )
 
@@ -2115,13 +2115,39 @@ class CellComplex(Complex):
         for node in self.singletons():
             self._G.remove_node(node)
 
-    def get_linegraph(self, cells=True):
-        """Create line graph of a cell complex."""
-        g = self._G
-        for i, c in enumerate(self.cells):
-            for n in c:
-                g.add_edge("cell" + str(i), n)
-        return g
+    def get_linegraph(self, s=1, cells=True):
+        """Return generator for the s-connected components.
+
+        If cells=True (default), the cells will be the vertices of the line graph.
+        Two vertices are connected by an s-line-graph edge if the corresponding cell
+        complex edges intersect in at least s cell complex nodes.
+
+        If cells=False, the cell complex nodes will be the vertices of the line graph.
+        Two vertices are connected if the nodes they correspond to share at least s
+        incident cell complex edges.
+
+        Parameters
+        ----------
+        s : int
+            The width of the connections.
+        cells : bool, optional, default=True
+            Determines if cells or nodes will be the vertices in the line graph.
+
+        Returns
+        -------
+        nx.Graph
+            A NetworkX graph representing the s-linegraph of the Cell Complex.
+        """
+        if isinstance(s, None):
+            ValueError(
+                "s must be a positive integer larger than 1, got type of s None."
+            )
+        if cells:
+            M = self.node_to_all_cell_adjacnecy_matrix(s=s)
+        else:
+            M = self.cell_to_all_nodes_coadjacnecy_matrix(s=s)
+
+        return nx.from_scipy_sparse_matrix(M)
 
     def s_connected_components(self, s=1, cells=True, return_singletons=False):
         """Return generator for the s-connected components.
