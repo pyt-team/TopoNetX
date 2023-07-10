@@ -1329,7 +1329,7 @@ class CellComplex(Complex):
                     return False
         return True
 
-    def node_all_cell_incidence_matrix(
+    def node_to_all_cell_incidence_matrix(
         self, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Nodes/cells incidence matrix for the indexed by nodes X cells.
@@ -1367,10 +1367,13 @@ class CellComplex(Complex):
         else:
             return A.asformat("csc")
 
-    def node_all_cell_adjacnecy_matrix(
+    def node_to_all_cell_adjacnecy_matrix(
         self, s: int | None = None, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
-        """Nodes adjaency matrix where adjacency is computed with respect to 2-cells.
+        """Nodes s-adjaency matrix where adjacency is computed with respect to 2-cells.
+
+        Two nodes are s-adjacent iff there exists a cell (1 dimensional or 2 dimensional)
+        share contain them.
 
         Parameters
         ----------
@@ -1392,7 +1395,7 @@ class CellComplex(Complex):
         >>> CX = CellComplex()
         >>> CX.add_cell([1, 2, 3, 4], rank=2)
         >>> CX.add_cell([3, 4, 5], rank=2)
-        >>> CX.node_all_cell_adjacnecy_matrix().todense()
+        >>> CX.node_to_all_cell_adjacnecy_matrix().todense()
         matrix([[0., 2., 1., 2., 0.],
                 [2., 0., 2., 1., 0.],
                 [1., 2., 0., 3., 2.],
@@ -1407,20 +1410,23 @@ class CellComplex(Complex):
                 [0., 0., 1., 1., 0.]])
         """
         if index:
-            node_index, cell_index, M = self.node_all_cell_incidence_matrix(
+            node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
                 weight, index
             )
 
             return node_index, incidence_to_adjacency(M.T, s)
         else:
             return incidence_to_adjacency(
-                self.node_all_cell_incidence_matrix(weight, index).T, s
+                self.node_to_all_cell_incidence_matrix(weight, index).T, s
             )
 
-    def cell_adjacnecy_matrix(
+    def all_cell_to_node_codjacnecy_matrix(
         self, s: int | None = None, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
-        """Nodes adjaency matrix where adjacency is computed with respect to 2-cells.
+        """All cells s-coadjacency matrix where coadjacency is computed with respect to 0-cells.
+
+        Two cells (1 dimensional or 2 dimensional) are s-coadjacent iff
+        they share a vertex
 
         Parameters
         ----------
@@ -1446,7 +1452,7 @@ class CellComplex(Complex):
             return cell_index, incidence_to_adjacency(M, s)
         else:
             return incidence_to_adjacency(
-                self.node_all_cell_incidence_matrix(weight, index).T, s
+                self.node_all_cell_incidence_matrix(weight, index), s
             )
 
     def incidence_matrix(
@@ -1825,9 +1831,7 @@ class CellComplex(Complex):
         else:
             return L_down
 
-    def adjacency_matrix(
-        self, rank: int, s: int | None = None, signed: bool = False, index: bool = False
-    ):
+    def adjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
         """Compute adjacency matrix for a given rank."""
         if index:
             ind, _, incidence = self.incidence_matrix(
@@ -1839,13 +1843,11 @@ class CellComplex(Complex):
         incidence = incidence.T
 
         if index:
-            return ind, incidence_to_adjacency(incidence, s)
+            return ind, incidence_to_adjacency(incidence)
         else:
-            return incidence_to_adjacency(incidence, s)
+            return incidence_to_adjacency(incidence)
 
-    def coadjacency_matrix(
-        self, rank: int, s: int | None = None, signed: bool = False, index: bool = False
-    ):
+    def coadjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
         """Compute coadjacency matrix for a given rank."""
         if index:
             _, ind, incidence = self.incidence_matrix(rank, signed=signed, index=True)
@@ -1853,9 +1855,9 @@ class CellComplex(Complex):
             incidence = self.incidence_matrix(rank, signed=signed)
 
         if index:
-            return ind, incidence_to_adjacency(incidence, s)
+            return ind, incidence_to_adjacency(incidence)
         else:
-            return incidence_to_adjacency(incidence, s)
+            return incidence_to_adjacency(incidence)
 
     def restrict_to_cells(
         self,
@@ -2113,17 +2115,13 @@ class CellComplex(Complex):
         for node in self.singletons():
             self._G.remove_node(node)
 
-    def get_linegraph(self, s=1, cells=True):
+    def get_linegraph(self, cells=True):
         """Create line graph of a cell complex."""
-        # node_dict, A = self.node_all_cell_adjacnecy_matrix(s=s, index=True)
-        # g = nx.Graph()
-        # g.add_edges_from(A.todense())
-        # return g
-        # N = len(self.nodes)
-        # for i,c in enumerate(self.cells):
-        #    for n in c:
-        #        g.add_edge("cell"+str(i),n)
-        return
+        g = self._G
+        for i, c in enumerate(self.cells):
+            for n in c:
+                g.add_edge("cell" + str(i), n)
+        return g
 
     def s_connected_components(self, s=1, cells=True, return_singletons=False):
         """Return generator for the s-connected components.
