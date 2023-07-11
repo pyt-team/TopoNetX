@@ -2300,6 +2300,14 @@ class CellComplex(Complex):
         ----------
         list of the diameters of the s-components and
         list of the s-component nodes
+
+        Example
+        -------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([2,3,4],rank=2)
+        >>> CX.add_cell([5,6,7],rank=2)
+        >>> list(CX.node_diameters())
+
         """
         coldict, A = self.node_to_all_cell_adjacnecy_matrix(index=True)
         coldict = {v: k for k, v in coldict.items()}
@@ -2314,8 +2322,7 @@ class CellComplex(Complex):
                 temp.add(coldict[e])
             comps.append(temp)
             diams.append(diamc)
-        loc = np.argmax(diams)
-        return diams[loc], diams, comps
+        return diams, comps
 
     def cell_diameters(self, s=1):
         """Return the cell diameters of the s_cell_connected component subgraphs.
@@ -2329,12 +2336,19 @@ class CellComplex(Complex):
         maximum diameter : int
 
         list of diameters : list
-            List of cell_diameters for s-cell component subgraphs in CX
+            List of cell_diameters for s-cell component subcomplexes in CX
 
         list of component : list
-            List of the cell uids in the s-cell component subgraphs.
+            List of the cell uids in the s-cell component subcomplexes.
+
+        Example
+        -------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([2,3,4],rank=2)
+        >>> CX.add_cell([5,6,7],rank=2)
+        >>> list(CX.cell_diameters())
         """
-        coldict, A = self.node_to_all_cell_adjacnecy_matrix(index=True)
+        coldict, A = self.all_cell_to_node_codjacnecy_matrix(index=True)
         coldict = {v: k for k, v in coldict.items()}
 
         G = nx.from_scipy_sparse_array(A)
@@ -2347,8 +2361,7 @@ class CellComplex(Complex):
                 temp.add(coldict[e])
             comps.append(temp)
             diams.append(diamc)
-        loc = np.argmax(diams)
-        return diams[loc], diams, comps
+        return diams, comps
 
     def diameter(self):
         """Return length of the longest shortest s-walk between nodes.
@@ -2444,7 +2457,6 @@ class CellComplex(Complex):
             target = target.uid
         rowdict, A = self.node_to_all_cell_adjacnecy_matrix(index=True)
         G = nx.from_scipy_sparse_array(A)
-        # rkey = {v: k for k, v in rowdict.items()}
         try:
             path = nx.shortest_path_length(G, rowdict[source], rowdict[target])
             return path
