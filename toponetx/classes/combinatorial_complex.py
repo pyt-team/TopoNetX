@@ -364,31 +364,18 @@ class CombinatorialComplex(Complex):
         return item in self.nodes
 
     def __setitem__(self, cell, attr):
-        """Set the attributes of a hyperedge or node in the CC."""
-        if cell in self:
-            if isinstance(cell, self.cell_type):
-                if cell.elements in self.nodes:
-                    self.nodes.update(attr)
-            elif isinstance(cell, Iterable):
-                cell = frozenset(cell)
-                if cell in self.nodes:
-                    self.nodes.update(attr)
-                else:
-                    raise KeyError(f"node {cell} is not in complex")
-            elif isinstance(cell, Hashable):
-                if frozenset({cell}) in self:
-                    self.nodes.update(attr)
-                    return
-        # we now check if the input is a cell in
+        """Set the attributes of a cell in the CC."""
+        if cell in self.nodes:
+            self.nodes[cell].update(attr)
+            return
+        # we now check if the input is a cell in the CC
         elif cell in self.cells:
-
             hyperedge_ = HyperEdgeView._to_frozen_set(cell)
-            rank = self.get_rank(hyperedge_)
-
-            if hyperedge_ in self.hyperedge_dict[rank]:
-                self.hyperedge_dict[rank][hyperedge_] = attr
-            else:
-                raise KeyError(f"input {cell} is not in the complex")
+            rank = self.cells.get_rank(hyperedge_)
+            if hyperedge_ in self._complex_set.hyperedge_dict[rank]:
+                self._complex_set.hyperedge_dict[rank][hyperedge_] = attr
+        else:
+            raise KeyError(f"input {cell} is not in the complex")
 
     def __getitem__(self, node):
         """Return the attrs of a node.
@@ -418,21 +405,29 @@ class CombinatorialComplex(Complex):
         int
             Number of cells of certain rank that contain node.
         """
-        if node in self.nodes:
-            memberships = set(self.nodes[node].memberships)
-        else:
-            raise (print(f"The input node {node} is not an element of the node set."))
-        if rank >= 0:
-            return len(
-                set(
-                    e
-                    for e in memberships
-                    if e in self.cells and self.cells[e].rank == rank
+        if node not in self.nodes:
+            raise KeyError(f"Node {node} not in Combinatorial Complex.")
+        if isinstance(rank, int):
+            if rank >= 0:
+                return sum(
+                    [
+                        1 if node in x else 0
+                        for x in self._complex_set.hyperedge_dict[rank].keys()
+                    ]
                 )
-            )
-        if rank is None:
-            return len(memberships)
-        raise TopoNetXError("Rank must be non-negative integer")
+            else:
+                raise TopoNetXError("Rank must be positive")
+        elif rank is None:
+            rank_list = self._complex_set.hyperedge_dict.keys()
+            value = 0
+            for rank in rank_list:
+                value += sum(
+                    [
+                        1 if node in x else 0
+                        for x in self._complex_set.hyperedge_dict[rank].keys()
+                    ]
+                )
+            return value
 
     def size(self, cell) -> int:
         """Compute the number of nodes in node_set that belong to cell.
@@ -462,7 +457,7 @@ class CombinatorialComplex(Complex):
         int
         """
         if node_set:
-            return len([node for node in self.nodes if node in node_set])
+            return len([node for node in node_set if node in self.nodes])
         return len(self.nodes)
 
     def number_of_cells(self, cell_set=None):
@@ -478,7 +473,7 @@ class CombinatorialComplex(Complex):
         int
         """
         if cell_set:
-            return len([cell for cell in self.cells if cell in cell_set])
+            return len([cell for cell in cell_set if cell in self.cells])
         return len(self.cells)
 
     def order(self):
