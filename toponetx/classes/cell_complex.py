@@ -2155,6 +2155,7 @@ class CellComplex(Complex):
         Parameters
         ----------
         s : int, optional, default: 1
+            The width of the connections.
         cells : boolean, optional, default: True
             If True will return cell components, if False will return node components
         return_singletons : bool, optional, default : False
@@ -2220,6 +2221,7 @@ class CellComplex(Complex):
         Parameters
         ----------
         s : int, optional, default: 1
+            The width of the connections.
         cells : boolean, optional, cells=False
             Determines if cell or node components are desired. Returns
             subcomplexes equal to the cx restricted to each set of nodes(cells) in the
@@ -2330,6 +2332,7 @@ class CellComplex(Complex):
         Parameters
         ----------
         s : int, optional, default: 1
+            The width of the connections.
 
         Returns
         -------
@@ -2369,6 +2372,7 @@ class CellComplex(Complex):
         Parameters
         ----------
         s : int, optional, default: 1
+            The width of the connections.
 
         Returns
         -------
@@ -2431,7 +2435,7 @@ class CellComplex(Complex):
         target : node.uid or node
             a node in the CX
         s : int
-            the number of cells
+            The width of the connections.
 
         Returns
         -------
