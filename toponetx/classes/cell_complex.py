@@ -2412,7 +2412,7 @@ class CellComplex(Complex):
         -----
         Two cells are s-coadjacent if they share s nodes.
         Two nodes e_start and e_end are s-walk connected if there is a sequence of
-        cells e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
+        cells (one or two dimensional) e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
         are s-coadjacent. If the cell complex is not connected, an error will be raised.
         """
         A = self.all_cell_to_node_codjacnecy_matrix()
