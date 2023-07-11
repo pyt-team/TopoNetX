@@ -5,6 +5,7 @@ import pytest
 
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.hyperedge import HyperEdge
+from toponetx.exception import TopoNetXError
 
 
 class TestCombinatorialComplex:
@@ -165,3 +166,179 @@ class TestCombinatorialComplex:
         """Test the init method of CombinatorialComplex class."""
         with pytest.raises(TypeError):
             CombinatorialComplex(cells=1)
+
+    def test_incidence_matrix_to_rank_down(self):
+        """Test generating an incidence matrix by setting the down_rank parameter."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        B = CC.incidence_matrix(2, 0, incidence_type="down")
+        assert B.shape == (6, 2)
+        assert (B.todense() == [[1, 0], [1, 1], [1, 0], [1, 1], [0, 0], [0, 1]]).all()
+
+    def test_incidence_matrix_to_rank_down_without_rank(self):
+        """Test generating an incidence matrix by setting the down_rank parameter without mentioning rank."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        B = CC.incidence_matrix(2, incidence_type="down")
+        assert B.shape == (3, 2)
+        assert (B.todense() == [[1, 0], [1, 0], [0, 0]]).all()
+
+    def test_incidence_matrix_to_rank_with_wrong_incidence_type(self):
+        """Test generating an incidence matrix by mentioning wrong rank."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        with pytest.raises(TopoNetXError):
+            CC.incidence_matrix(2, incidence_type="wrong")
+
+    def test_incidence_matrix_with_equal_rank(self):
+        """Test generating an incidence matrix by having equal rank."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        with pytest.raises(ValueError):
+            CC.incidence_matrix(1, 1)
+
+    def test_incidence_dict(self):
+        """Test generating an incidence dictionary."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        assert CC.incidence_dict == {
+            1: {
+                frozenset({1, 2}): {"weight": 1},
+                frozenset({1, 3}): {"weight": 1},
+                frozenset({2, 5}): {"weight": 1},
+            },
+            0: {
+                frozenset({1}): {"weight": 1},
+                frozenset({2}): {"weight": 1},
+                frozenset({3}): {"weight": 1},
+                frozenset({4}): {"weight": 1},
+                frozenset({5}): {"weight": 1},
+                frozenset({6}): {"weight": 1},
+            },
+            2: {
+                frozenset({1, 2, 3, 4}): {"weight": 1},
+                frozenset({2, 4, 6}): {"weight": 1},
+            },
+        }
+
+    def test_dim(self):
+        """
+        Test for the dimensionality of the CombinatorialComplex object.
+
+        Gets the highest rank of the cells in the CombinatorialComplex object.
+        """
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=3)
+        assert CC.dim == 3
+
+    def test_repr(self):
+        """Test the represntation function of the CombinatorialComplex object by mentioning a name."""
+        CC = CombinatorialComplex(name="sampleobject")
+        assert repr(CC) == "CombinatorialComplex(name='sampleobject')"
+
+    def test_contains(self):
+        """Test whether the contains method works correctly."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        assert [(1)] in CC.nodes
+        assert [2] in CC.nodes
+        assert [3] in CC.nodes
+        assert [4] in CC.nodes
+        assert [5] in CC.nodes
+        assert [6] in CC.nodes
+
+    def test_set_item(self):
+        """Test for set_item method of the CombinatorialComplex object."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1], rank=3)
+        CC.add_cell([1, 2], rank=3)
+        # Updating an node attribute present in the CombinatorialComplex object.
+        CC.__setitem__([1], {"weights": 1})
+        # Setting a cell attribute present in the CombinatorialComplex object.
+        CC.__setitem__([1, 2], {"weights": 1})
+        assert CC._complex_set.hyperedge_dict[3][frozenset([1, 2])] == {"weights": 1}
+        assert CC.nodes[1]["weights"] == 1
+
+    def test_degree(self):
+        """Test for the degree function."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        CC.add_cell([1, 2], rank=2)
+        assert CC.degree(1) == 2
+        with pytest.raises(TopoNetXError):
+            assert CC.degree(1, -1) == TopoNetXError("Rank must be positive")
+        assert CC.degree(2, 2) == 3
+        with pytest.raises(KeyError):
+            node = 7
+            assert CC.degree(node, 2) == KeyError(
+                f"Node {node} not in Combinatorial Complex."
+            )
+
+    def test_size(self):
+        """Test for the size function."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        CC.add_cell([1, 2], rank=2)
+        assert CC.size(1) == 1
+        with pytest.raises(TopoNetXError):
+            CC.size(frozenset([1, 2, 3])) == TopoNetXError(
+                "Input cell is not in cells of the CC"
+            )
+
+    def test_num_nodes_and_cells(self):
+        """Test for number of nodes and number of cells."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        CC.add_cell([1, 2], rank=2)
+        y1 = HyperEdge([1, 2], rank=1)
+        y2 = HyperEdge([1, 3], rank=1)
+        assert CC.number_of_nodes() == 6
+        assert CC.number_of_nodes([1, 2]) == 2
+        assert CC.number_of_cells() == 12
+        assert CC.number_of_cells([y1, y2]) == 2
+
+    def test_order(self):
+        """Test for the order function."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2, 3, 4, 5, 6, 7, 8], rank=1)
+        assert CC.order() == 8
