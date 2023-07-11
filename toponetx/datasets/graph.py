@@ -1,5 +1,6 @@
 """Various examples of named graphs represented as complexes."""
 
+from pathlib import Path
 from typing import Literal, overload
 
 import networkx as nx
@@ -9,7 +10,9 @@ from toponetx import CellComplex, SimplicialComplex
 from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
 from toponetx.transform.graph_to_simplicial_complex import graph_to_clique_complex
 
-__all__ = ["karate_club"]
+__all__ = ["karate_club", "coauthorship"]
+
+DIR = Path(__file__).parent
 
 
 @overload
@@ -135,3 +138,41 @@ def karate_club(
         return cx
 
     raise ValueError(f"complex_type must be 'simplicial' or 'cell' got {complex_type}")
+
+
+def coauthorship() -> SimplicialComplex:
+    """Load the coauthorship network from [SNN20] as a simplicial complex.
+
+    The coauthorship network is a simplicial complex where a paper with k authors is represented by a (k-1)-simplex.
+    The dataset is pre-processed as in [SNN20]. From the Semantic Scholar Open Research Corpus 80 papers with number of citations between 5 and 10 were sampled.
+    The papers constitute simplices in the complex, which is completed with subsimplices (seen as collaborations between subsets of authors) to form a simplicial complex.
+    An attribute named "citations" is added to each simplex, corresponding to the sum of citations of all papers on which the authors represented by the simplex collaborated.
+    The resulting simplicial complex is of dimension 10 and contains 24552 simplices in total. See [SNN20] for a more detailed description of the dataset.
+
+    References
+    ----------
+    [SNN20] Stefania Ebli, Michael Defferrard and Gard Spreemann.
+        Simplicial Neural Networks.
+        Topological Data Analysis and Beyond workshop at NeurIPS.
+        https://arxiv.org/abs/2010.03633
+        https://github.com/stefaniaebli/simplicial_neural_networks
+
+    Returns
+    -------
+    SimplicialComplex
+        The simplicial complex comes with the attribute "citations", the number of citations attributed to the given collaborations of k authors.
+
+    """
+    coauthorship = np.load(DIR / "coauthorship.npy", allow_pickle=True)
+
+    simplices = []
+    for dim in range(len(coauthorship) - 1, -1, -1):
+        simplices += [list(el) for el in coauthorship[dim].keys()]
+
+    sc = SimplicialComplex(simplices)
+
+    for i in range(len(coauthorship)):
+        dic = {tuple(sorted(k)): v for k, v in coauthorship[i].items()}
+        sc.set_simplex_attributes(dic, name="citations")
+
+    return sc
