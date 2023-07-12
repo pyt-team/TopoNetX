@@ -1445,7 +1445,7 @@ class CellComplex(Complex):
             return cell_index, incidence_to_adjacency(M, s)
         else:
             return incidence_to_adjacency(
-                self.node_all_cell_incidence_matrix(weight, index), s
+                self.node_to_all_cell_incidence_matrix(weight, index), s
             )
 
     def incidence_matrix(
