@@ -9,7 +9,7 @@ We reserve the notation CC for a combinatorial complex.
 
 import warnings
 from collections import defaultdict
-from collections.abc import Hashable, Iterable
+from collections.abc import Collection, Hashable, Iterable, Iterator
 from itertools import zip_longest
 from typing import Any
 from warnings import warn
@@ -23,7 +23,7 @@ from hypernetx.classes.entity import Entity
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
 from networkx.utils import pairwise
-from scipy.sparse import csr_matrix
+from scipy.sparse import csc_matrix
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
@@ -130,10 +130,10 @@ class CellComplex(Complex):
     >>> CX.is_regular
     """
 
-    def __init__(self, cells=None, name: str = "", regular=True, **kwargs) -> None:
-        super().__init__(**kwargs)
-
-        self.name = name
+    def __init__(
+        self, cells=None, name: str = "", regular: bool = True, **kwargs
+    ) -> None:
+        super().__init__(name, **kwargs)
 
         self._regular = regular
         self._G = Graph()
@@ -239,7 +239,7 @@ class CellComplex(Complex):
                 return False
         return True
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return detailed string representation."""
         return f"Cell Complex with {len(self.nodes)} nodes, {len(self.edges)} edges  and {len(self.cells)} 2-cells "
 
@@ -247,11 +247,11 @@ class CellComplex(Complex):
         """Return string representation."""
         return f"CellComplex(name='{self.name}')"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of nodes."""
         return len(self.nodes)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Iterate over the nodes.
 
         Returns
@@ -261,12 +261,12 @@ class CellComplex(Complex):
         """
         return iter(self.nodes)
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self.nodes.
 
         Parameters
         ----------
-        item : hashable or RankedEntity
+        item : hashable
             Iterm.
 
         Returns
@@ -281,8 +281,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        node : Entity or hashable
-            If hashable, then must be uid of node in cell complex.
+        node : hashable
 
         Returns
         -------
@@ -364,7 +363,7 @@ class CellComplex(Complex):
                         all_inserted_cells.add(j)
         return equiv_classes
 
-    def _remove_equivalent_cells(self):
+    def _remove_equivalent_cells(self) -> None:
         """Remove homotopic cells from the cell complex.
 
         Examples
@@ -396,14 +395,14 @@ class CellComplex(Complex):
                         else:
                             self._delete_cell(c, k)
 
-    def degree(self, node: Hashable, rank=1) -> int:
+    def degree(self, node: Hashable, rank: int = 1) -> int:
         """Compute the number of cells of certain rank that contain node.
 
         Parameters
         ----------
         node : hashable
             Identifier for the node.
-        rank : positive integer, optional, default: 1
+        rank : int, default=1
             Smallest size of cell to consider in degree.
 
         Returns
@@ -529,8 +528,8 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        node : hashable or Entity
-            uid for a node in cell complex or the node Entity
+        node : hashable
+            uid for a node in cell complex
 
         Returns
         -------
@@ -542,14 +541,13 @@ class CellComplex(Complex):
 
         return self._G[node]
 
-    def cell_neighbors(self, cell, s=1):
+    def cell_neighbors(self, cell, s: int = 1):
         """Cells in cell complex which share s nodes(s) with cells.
 
         Parameters
         ----------
         cell : Cell or Iterable representing a acell
-
-        s : int, list, optional, default : 1
+        s : int, default=1
             Minimum number of nodes shared by neighbors cell node.
 
         Returns
@@ -559,7 +557,7 @@ class CellComplex(Complex):
         """
         raise NotImplementedError()
 
-    def remove_node(self, node: Hashable):
+    def remove_node(self, node: Hashable) -> None:
         """Remove the given node from the cell complex.
 
         This method removes the given node from the cell complex, along with any
@@ -601,11 +599,11 @@ class CellComplex(Complex):
         for node in node_set:
             self.remove_node(node)
 
-    def add_node(self, node: Hashable, **attr):
+    def add_node(self, node: Hashable, **attr) -> None:
         """Add a single node to cell complex."""
         self._G.add_node(node, **attr)
 
-    def _add_nodes_from(self, nodes: Iterable[Hashable]):
+    def _add_nodes_from(self, nodes: Iterable[Hashable]) -> None:
         """Instantiate new nodes when cells added to cell complex.
 
         Parameters
@@ -615,7 +613,7 @@ class CellComplex(Complex):
         for node in nodes:
             self.add_node(node)
 
-    def add_edge(self, u_of_edge: Hashable, v_of_edge: Hashable, **attr):
+    def add_edge(self, u_of_edge: Hashable, v_of_edge: Hashable, **attr) -> None:
         """Add edge.
 
         Parameters
@@ -626,7 +624,7 @@ class CellComplex(Complex):
         """
         self._G.add_edge(u_of_edge, v_of_edge, **attr)
 
-    def add_edges_from(self, ebunch_to_add: Iterable[tuple], **attr):
+    def add_edges_from(self, ebunch_to_add: Iterable[tuple], **attr) -> None:
         """Add edges.
 
         Parameters
@@ -641,14 +639,14 @@ class CellComplex(Complex):
         self,
         cell: tuple | list | Cell,
         rank: int | None = None,
-        check_skeleton=False,
+        check_skeleton: bool = False,
         **attr,
     ):
         """Add a single cell to cell complex.
 
         Parameters
         ----------
-        cell : hashable or RankedEntity
+        cell : hashable
             If hashable the cell returned will be empty.
         rank : {0, 1, 2}
             Rank of the cell to be added.
@@ -732,9 +730,9 @@ class CellComplex(Complex):
         self,
         cell_set: Iterable[tuple | list | Cell],
         rank: int | None = None,
-        check_skeleton=False,
+        check_skeleton: bool = False,
         **attr,
-    ):
+    ) -> None:
         """Add cells to cell complex.
 
         Parameters
@@ -1141,7 +1139,7 @@ class CellComplex(Complex):
             return d
         raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
 
-    def set_cell_data(self, cell, rank, attr_name, attr_value):
+    def set_cell_data(self, cell, rank, attr_name: str, attr_value):
         """Set data for a specific cell in the complex.
 
         Parameters
@@ -1184,7 +1182,7 @@ class CellComplex(Complex):
         else:
             raise ValueError(f"Invalid rank: {rank}. Rank must be 0, 1, or 2.")
 
-    def get_cell_data(self, cell, rank, attr_name=None):
+    def get_cell_data(self, cell, rank, attr_name: str | None = None):
         """Retrieve data associated with a specific cell in the complex.
 
         Parameters
@@ -1242,7 +1240,7 @@ class CellComplex(Complex):
             else:
                 raise KeyError(f"Cell '{cell}' is not present in the complex.")
 
-    def remove_equivalent_cells(self):
+    def remove_equivalent_cells(self) -> None:
         """Remove equivalent cells.
 
         Remove cells from the cell complex which are homotopic.
@@ -1264,14 +1262,14 @@ class CellComplex(Complex):
         >>> from toponetx import CellComplex
         >>> G = nx.path_graph(3)
         >>> cx = CellComplex(G)
-        >>> cx.add_cell([1,2,3,4], rank=2) #*
-        >>> cx.add_cell([1,2,3,4], rank=2) #*
-        >>> cx.add_cell([2,3,4,1], rank=2) #*
+        >>> cx.add_cell([1,2,3,4], rank=2)
+        >>> cx.add_cell([1,2,3,4], rank=2)
+        >>> cx.add_cell([2,3,4,1], rank=2)
         >>> cx.add_cell([1,2,4], rank=2,)
         >>> cx.add_cell([3,4,8], rank=2)
         >>> print(cx.cells)
         >>> cx.remove_equivalent_cells()
-        >>> print(cx.cells) # observe homotpic cells ( marked with #* ) have been removed
+        >>> print(cx.cells) # observe homotpic cells have been removed
         """
         self._remove_equivalent_cells()
 
@@ -1328,132 +1326,6 @@ class CellComplex(Complex):
                         )
                     return False
         return True
-
-    def node_to_all_cell_incidence_matrix(
-        self, weight: bool = False, index: bool = False
-    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
-        """Nodes/cells incidence matrix for the indexed by nodes X cells.
-
-        Parameters
-        ----------
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
-            If True return will include a dictionary of node uid : row number
-            and cell uid : column number
-
-        Returns
-        -------
-        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
-            The indicendence matrix, if `index` is False, otherwise
-            lower (row) index dict, upper (col) index dict, incidence matrix
-            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
-        """
-        node_index = {node: i for i, node in enumerate(sorted(self._G.nodes))}
-        edgelist = sorted([sorted(e) for e in self._G.edges])
-        all_cell_index = {tuple(sorted(edge)): i for i, edge in enumerate(edgelist)}
-        cell_index = {c.elements: i + len(edgelist) for i, c in enumerate(self.cells)}
-        all_cell_index.update(cell_index)
-        A = sp.sparse.lil_matrix((len(node_index), len(all_cell_index)))
-        for cj, c in enumerate(all_cell_index):
-            for ni, n in enumerate(node_index):
-                if n in c:
-                    A[ni, cj] = 1
-        if index:
-
-            return node_index, all_cell_index, A.asformat("csc")
-        else:
-            return A.asformat("csc")
-
-    def node_to_all_cell_adjacnecy_matrix(
-        self, s: int | None = None, weight: bool = False, index: bool = False
-    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
-        """Nodes s-adjaency matrix where adjacency is computed with respect to 2-cells.
-
-        Two nodes are s-adjacent iff there exists a cell (1 dimensional or 2 dimensional)
-        share contain them.
-
-        Parameters
-        ----------
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
-            If True return will include a dictionary of node uid : row number
-            and cell uid : column number
-
-        Returns
-        -------
-        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
-            The adjaency matrix, if `index` is False, otherwise
-            index of nodes, adjaency matrix, if 'index' is True
-        Examples
-        --------
-        >>> CX = CellComplex()
-        >>> CX.add_cell([1, 2, 3, 4], rank=2)
-        >>> CX.add_cell([3, 4, 5], rank=2)
-        >>> CX.node_to_all_cell_adjacnecy_matrix().todense()
-        matrix([[0., 2., 1., 2., 0.],
-                [2., 0., 2., 1., 0.],
-                [1., 2., 0., 3., 2.],
-                [2., 1., 3., 0., 2.],
-                [0., 0., 2., 2., 0.]])
-        >>> # observe the constrast with the regular adjaency matrix
-        >>> CX.adjacency_matrix(0).todense()
-        matrix([[0., 1., 0., 1., 0.],
-                [1., 0., 1., 0., 0.],
-                [0., 1., 0., 1., 1.],
-                [1., 0., 1., 0., 1.],
-                [0., 0., 1., 1., 0.]])
-        """
-        if index:
-            node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
-                weight, index
-            )
-
-            return node_index, incidence_to_adjacency(M.T, s)
-        else:
-            return incidence_to_adjacency(
-                self.node_to_all_cell_incidence_matrix(weight, index).T, s
-            )
-
-    def all_cell_to_node_codjacnecy_matrix(
-        self, s: int | None = None, weight: bool = False, index: bool = False
-    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
-        """All cells s-coadjacency matrix where coadjacency is computed with respect to 0-cells.
-
-        Two cells (1 dimensional or 2 dimensional) are s-coadjacent iff
-        they share a vertex
-
-        Parameters
-        ----------
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
-            If True return will include a dictionary of cell uid
-
-        Returns
-        -------
-        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
-            The adjaency matrix, if `index` is False, otherwise
-            index of cells, adjaency matrix, if 'index' is True
-
-        """
-        if index:
-            node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
-                weight, index
-            )
-
-            return cell_index, incidence_to_adjacency(M, s)
-        else:
-            return incidence_to_adjacency(
-                self.node_all_cell_incidence_matrix(weight, index), s
-            )
 
     def incidence_matrix(
         self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
@@ -1610,7 +1482,7 @@ class CellComplex(Complex):
             raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
 
     def hodge_laplacian_matrix(
-        self, rank: int, signed=True, weight: bool = False, index: bool = False
+        self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Compute the hodge-laplacian matrix for the CX.
 
@@ -2038,7 +1910,7 @@ class CellComplex(Complex):
         HG._add_nodes_from(nodes)
         return HG
 
-    def is_connected(self, s=1, cells=False):
+    def is_connected(self, s: int = 1, cells: bool = False):
         """Determine if cell complex is s-connected.
 
         Parameters
@@ -2517,11 +2389,8 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CX = CellComplex()
-        >>> CX.add_cells_from([[1,2,4],[1,2,7] ],rank=2)
-        >>> G = Graph()
-        >>> G.add_edge(1,0)
-        >>> G.add_edge(2,0)
-        >>> G.add_edge(1,2)
+        >>> CX.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
+        >>> G = Graph([(0, 1), (0, 2), (1, 2)])
         >>> CX.from_networkx_graph(G)
         >>> CX.edges
         """
@@ -2568,7 +2437,7 @@ class CellComplex(Complex):
         return CX
 
     @classmethod
-    def load_mesh(cls, file_path, process=False, force=None) -> "CellComplex":
+    def load_mesh(cls, file_path, process: bool = False, force=None) -> "CellComplex":
         """Load a mesh.
 
         Parameters
