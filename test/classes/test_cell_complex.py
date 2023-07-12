@@ -412,6 +412,115 @@ class TestCellComplex:
         assert result[0] == expected_cell_index
         assert np.allclose(result[1].toarray(), expected_result.toarray())
 
+    def test_s_connected_components(self):
+        """Test_s_connected_components."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function with cells=True
+        result = list(CX.s_connected_components(s=1, cells=True))
+        expected_result = [
+            {(2, 3), (2, 3, 4), (2, 4), (3, 4)},
+            {(5, 6), (5, 6, 7), (5, 7), (6, 7)},
+        ]
+        assert result == expected_result
+
+        # Test the function with cells=False
+        result = list(CX.s_connected_components(s=1, cells=False))
+        expected_result = [{2, 3, 4}, {5, 6, 7}]
+        assert result == expected_result
+
+        # Test the function with return_singletons=True
+        result = list(
+            CX.s_connected_components(s=1, cells=False, return_singletons=True)
+        )
+        expected_result = [{2, 3, 4}, {5, 6, 7}]
+        assert result == expected_result
+
+        # Test the function with return_singletons=False
+        result = list(
+            CX.s_connected_components(s=2, cells=False, return_singletons=False)
+        )
+        expected_result = [{2, 3, 4}, {5, 6, 7}]
+        assert result == expected_result
+
+    def test_s_component_subcomplexes(self):
+        """Test_s_component_subcomplexes."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function with cells=True
+        result = list(CX.s_component_subcomplexes(s=1, cells=True))
+        expected_result = [CellComplex(), CellComplex()]
+        expected_result[0].add_cell([2, 3, 4], rank=2)
+        expected_result[1].add_cell([5, 6, 7], rank=2)
+        assert len(result[0].cells) == len(expected_result[0].cells)
+        assert len(result[1].cells) == len(expected_result[1].cells)
+
+        CX = CellComplex()
+        # Test the function with return_singletons=False
+        result = list(
+            CX.s_component_subcomplexes(s=1, cells=False, return_singletons=False)
+        )
+        expected_result = []
+        assert result == expected_result
+
+    def test_connected_components(self):
+        """Test_connected_components."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function with cells=False and return_singletons=True
+        result = list(CX.connected_components(cells=True, return_singletons=True))
+        expected_result = [
+            {(2, 3), (2, 3, 4), (2, 4), (3, 4)},
+            {(5, 6), (5, 6, 7), (5, 7), (6, 7)},
+        ]
+        assert result == expected_result
+
+        CX = CellComplex()
+        # Test the function with cells=False and return_singletons=False
+        result = list(CX.connected_components(cells=False, return_singletons=False))
+        expected_result = []
+        assert result == expected_result
+
+    def test_connected_component_subcomplexes(self):
+        """Test_connected_component_subcomplexes."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function with return_singletons=True
+        result = list(CX.connected_component_subcomplexes(return_singletons=True))
+        expected_result = [CellComplex(), CellComplex()]
+        expected_result[0].add_cell([2, 3, 4], rank=2)
+        expected_result[1].add_cell([5, 6, 7], rank=2)
+        assert len(result[0].cells) == len(expected_result[0].cells)
+        assert len(result[1].cells) == len(expected_result[1].cells)
+
+        # Test the function with return_singletons=False
+        CX = CellComplex()  # Initialize your class object
+        result = list(CX.connected_component_subcomplexes(return_singletons=False))
+        expected_result = []
+        assert result == expected_result
+
+    def test_euler_characteristic(self):
+        """Test euler_characteristic."""
+        CX = CellComplex()
+        CX.add_cells_from([[1, 2, 3], [1, 2, 3]], rank=2)
+        assert CX.euler_characterisitics() == 2
+
     def test_clear(self):
         """Test the clear method of the cell complex."""
         CX = CellComplex()
