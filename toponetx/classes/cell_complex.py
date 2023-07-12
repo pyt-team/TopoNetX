@@ -1327,6 +1327,127 @@ class CellComplex(Complex):
                     return False
         return True
 
+    def node_to_all_cell_incidence_matrix(
+        self, weight: bool = False, index: bool = False
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
+        """Nodes/cells incidence matrix for the indexed by nodes X cells.
+
+        Parameters
+        ----------
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+        index : boolean, optional, default False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The indicendence matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, incidence matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        """
+        node_index = {node: i for i, node in enumerate(sorted(self._G.nodes))}
+        edgelist = sorted([sorted(e) for e in self._G.edges])
+        all_cell_index = {tuple(sorted(edge)): i for i, edge in enumerate(edgelist)}
+        cell_index = {c.elements: i + len(edgelist) for i, c in enumerate(self.cells)}
+        all_cell_index.update(cell_index)
+        A = sp.sparse.lil_matrix((len(node_index), len(all_cell_index)))
+        for cj, c in enumerate(all_cell_index):
+            for ni, n in enumerate(node_index):
+                if n in c:
+                    A[ni, cj] = 1
+        if index:
+
+            return node_index, all_cell_index, A.asformat("csc")
+        else:
+            return A.asformat("csc")
+
+    def node_to_all_cell_adjacnecy_matrix(
+        self, s: int | None = None, weight: bool = False, index: bool = False
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
+        """Nodes s-adjaency matrix where adjacency is computed with respect to 2-cells.
+
+        Two nodes are s-adjacent iff there exists a cell (1 dimensional or 2 dimensional)
+        share contain them.
+
+        Parameters
+        ----------
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+        index : boolean, optional, default False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The adjaency matrix, if `index` is False, otherwise
+            index of nodes, adjaency matrix, if 'index' is True
+        Examples
+        --------
+        >>> CX = CellComplex()
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([3, 4, 5], rank=2)
+        >>> CX.node_to_all_cell_adjacnecy_matrix().todense()
+        matrix([[0., 2., 1., 2., 0.],
+                [2., 0., 2., 1., 0.],
+                [1., 2., 0., 3., 2.],
+                [2., 1., 3., 0., 2.],
+                [0., 0., 2., 2., 0.]])
+        >>> # observe the constrast with the regular adjaency matrix
+        >>> CX.adjacency_matrix(0).todense()
+        matrix([[0., 1., 0., 1., 0.],
+                [1., 0., 1., 0., 0.],
+                [0., 1., 0., 1., 1.],
+                [1., 0., 1., 0., 1.],
+                [0., 0., 1., 1., 0.]])
+        """
+        if index:
+            node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
+                weight, index
+            )
+
+            return node_index, incidence_to_adjacency(M.T, s)
+        else:
+            return incidence_to_adjacency(
+                self.node_to_all_cell_incidence_matrix(weight, index).T, s
+            )
+
+    def all_cell_to_node_codjacnecy_matrix(
+        self, s: int | None = None, weight: bool = False, index: bool = False
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
+        """All cells s-coadjacency matrix where coadjacency is computed with respect to 0-cells.
+
+        Two cells (1 dimensional or 2 dimensional) are s-coadjacent iff
+        they share a vertex
+        Parameters
+        ----------
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+        index : boolean, optional, default False
+            If True return will include a dictionary of cell uid
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The adjaency matrix, if `index` is False, otherwise
+            index of cells, adjaency matrix, if 'index' is True
+        """
+        if index:
+            node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
+                weight, index
+            )
+
+            return cell_index, incidence_to_adjacency(M, s)
+        else:
+            return incidence_to_adjacency(
+                self.node_all_cell_incidence_matrix(weight, index), s
+            )
+
     def incidence_matrix(
         self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:

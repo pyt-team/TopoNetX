@@ -3,6 +3,7 @@
 import networkx as nx
 import numpy as np
 import pytest
+import scipy.sparse as sp
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
@@ -255,6 +256,127 @@ class TestCellComplex:
         CX = CellComplex()
         B2 = CX.incidence_matrix(rank=2)
         assert B2.shape == (0, 0)
+
+    def test_node_to_all_cell_incidence_matrix(self):
+        """Test node_to_all_cell_incidence_matrix."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([3, 4, 5], rank=2)
+
+        # Test the function without index
+        result = CX.node_to_all_cell_incidence_matrix(weight=False, index=False)
+        expected_result = sp.csc_matrix(
+            np.array(
+                [
+                    [0.0, 2.0, 1.0, 2.0, 0.0],
+                    [2.0, 0.0, 2.0, 1.0, 0.0],
+                    [1.0, 2.0, 0.0, 3.0, 2.0],
+                    [2.0, 1.0, 3.0, 0.0, 2.0],
+                    [0.0, 0.0, 2.0, 2.0, 0.0],
+                ]
+            )
+        )
+        assert sp.isspmatrix_csc(result)
+        assert np.allclose(result.toarray(), expected_result.toarray())
+
+        # Test the function with index
+        result = CX.node_to_all_cell_incidence_matrix(weight=False, index=True)
+        expected_node_index = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+        expected_cell_index = {(1, 2, 3, 4): 0, (3, 4, 5): 1}
+        expected_result = sp.csc_matrix(
+            np.array(
+                [
+                    [0.0, 2.0, 1.0, 2.0, 0.0],
+                    [2.0, 0.0, 2.0, 1.0, 0.0],
+                    [1.0, 2.0, 0.0, 3.0, 2.0],
+                    [2.0, 1.0, 3.0, 0.0, 2.0],
+                    [0.0, 0.0, 2.0, 2.0, 0.0],
+                ]
+            )
+        )
+        assert isinstance(result, tuple)
+        assert isinstance(result[0], dict)
+        assert isinstance(result[1], dict)
+        assert sp.isspmatrix_csc(result[2])
+        assert result[0] == expected_node_index
+        assert result[1] == expected_cell_index
+        assert np.allclose(result[2].toarray(), expected_result.toarray())
+
+    def test_node_to_all_cell_adjacnecy_matrix(self):
+        """Test node_to_all_cell_adjacnecy_matrix."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([3, 4, 5], rank=2)
+
+        # Test the function without index
+        result = CX.node_to_all_cell_adjacnecy_matrix(s=None, weight=False, index=False)
+        expected_result = sp.csc_matrix(
+            np.array(
+                [
+                    [0.0, 1.0, 0.0, 1.0, 0.0],
+                    [1.0, 0.0, 1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 1.0, 1.0],
+                    [1.0, 0.0, 1.0, 0.0, 1.0],
+                    [0.0, 0.0, 1.0, 1.0, 0.0],
+                ]
+            )
+        )
+        assert sp.isspmatrix_csc(result)
+        assert np.allclose(result.toarray(), expected_result.toarray())
+
+        # Test the function with index
+        result = CX.node_to_all_cell_adjacnecy_matrix(s=None, weight=False, index=True)
+        expected_node_index = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+        expected_result = sp.csc_matrix(
+            np.array(
+                [
+                    [0.0, 1.0, 0.0, 1.0, 0.0],
+                    [1.0, 0.0, 1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 1.0, 1.0],
+                    [1.0, 0.0, 1.0, 0.0, 1.0],
+                    [0.0, 0.0, 1.0, 1.0, 0.0],
+                ]
+            )
+        )
+        assert isinstance(result, tuple)
+        assert isinstance(result[0], dict)
+        assert sp.isspmatrix_csc(result[2])
+        assert result[0] == expected_node_index
+        assert np.allclose(result[2].toarray(), expected_result.toarray())
+
+    def test_all_cell_to_node_codjacnecy_matrix(self):
+        """Test all cell to node codjacnecy matrix."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([3, 4, 5], rank=2)
+
+        # Test the function without index
+        result = CX.all_cell_to_node_codjacnecy_matrix(
+            s=None, weight=False, index=False
+        )
+        expected_result = sp.csc_matrix(
+            np.array([[0.0, 2.0], [2.0, 0.0], [1.0, 2.0], [2.0, 1.0], [0.0, 0.0]])
+        )
+        assert sp.isspmatrix_csc(result)
+        assert np.allclose(result.toarray(), expected_result.toarray())
+
+        # Test the function with index
+        result = CX.all_cell_to_node_codjacnecy_matrix(s=None, weight=False, index=True)
+        expected_cell_index = {(1, 2, 3, 4): 0, (3, 4, 5): 1}
+        expected_result = sp.csc_matrix(
+            np.array([[0.0, 2.0], [2.0, 0.0], [1.0, 2.0], [2.0, 1.0], [0.0, 0.0]])
+        )
+        assert isinstance(result, tuple)
+        assert isinstance(result[0], dict)
+        assert sp.isspmatrix_csc(result[2])
+        assert result[0] == expected_cell_index
+        assert np.allclose(result[2].toarray(), expected_result.toarray())
 
     def test_clear(self):
         """Test the clear method of the cell complex."""
