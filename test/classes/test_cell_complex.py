@@ -515,6 +515,103 @@ class TestCellComplex:
         expected_result = []
         assert result == expected_result
 
+    def test_node_diameters(self):
+        """Test for the node_diameters method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function
+        result = list(CX.node_diameters())
+        expected_result = ([1, 1], [{(2, 3, 4)}, {(5, 6, 7)}])
+        assert result == expected_result
+
+    def test_cell_diameters(self):
+        """Test for the cell_diameters method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function
+        result = list(CX.cell_diameters())
+        expected_result = [
+            [1, 1],
+            [{(2, 3), (2, 3, 4), (2, 4), (3, 4)}, {(5, 6), (5, 6, 7), (5, 7), (6, 7)}],
+        ]
+        assert result == expected_result
+
+    def test_diameter(self):
+        """Test for the diameter method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+        CX.add_cell([2, 5], rank=1)
+        # Test the function
+        result = CX.diameter()
+        expected_result = 3
+        assert result == expected_result
+
+    def test_cell_diameter(self):
+        """Test for the cell_diameter method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+        CX.add_cell([2, 5], rank=1)
+
+        # Test the function
+        result = CX.cell_diameter()
+        expected_result = 4
+        assert result == expected_result
+
+    def test_distance(self):
+        """Test for the distance method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function
+        result = CX.distance(2, 3)
+        expected_result = 1
+        assert result == expected_result
+
+    def test_cell_distance(self):
+        """Test for the cell_distance method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+        CX.add_cell([2, 5], rank=1)
+
+        # Test the function
+        result = CX.cell_distance((2, 3, 4), (5, 6, 7))
+        expected_result = 2
+        assert result == expected_result
+
+    def test_from_networkx_graph(self):
+        """Test for the from_networkx_graph method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Create a NetworkX graph
+        G = nx.Graph()
+        G.add_edges_from([(0, 1), (0, 2), (1, 2)])
+
+        # Test the function
+        CX.from_networkx_graph(G)
+        result = list(CX.edges)
+        expected_result = [(0, 1), (0, 2), (1, 2)]
+        assert result == expected_result
+
     def test_euler_characteristic(self):
         """Test euler_characteristic."""
         CX = CellComplex()
