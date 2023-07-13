@@ -525,7 +525,7 @@ class TestCellComplex:
 
         # Test the function
         result = list(CX.node_diameters())
-        expected_result = ([1, 1], [{(2, 3, 4)}, {(5, 6, 7)}])
+        expected_result = [[1, 1], [{(2, 3, 4)}, {(5, 6, 7)}]]
         assert result == expected_result
 
     def test_cell_diameters(self):
