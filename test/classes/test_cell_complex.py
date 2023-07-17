@@ -1125,25 +1125,6 @@ class TestCellComplex:
             CX._delete_cell((1, 2, 3, 4), key=10)
             CX._delete_cell((1, 2, 3, 4), key=100)
 
-    def test_degree_not_implemented(self):
-        """Test degree not implemented error. Please remove when the method is implemented."""
-        with pytest.raises(NotImplementedError) as exp_exception:
-            CX = CellComplex()
-            CX.degree(1, rank=2)
-
-        assert (
-            str(exp_exception.value) == "Rank 2 is currently not supported by degree."
-        )
-
-    def test_cell_neighbors_not_implemented(self):
-        """Test cell neighbors not implemented error. Please remove when the method is implemented."""
-        with pytest.raises(NotImplementedError):
-            CX = CellComplex()
-            CX._insert_cell((1, 2, 3, 4))
-            CX._insert_cell((1, 2, 3, 5))
-            CX._insert_cell((3, 5, 6, 7))
-            CX.cell_neighbors((1, 2, 3, 4))
-
     def test_add_cell_regularity_conditions(self):
         """Test regularity conditions for add cell method."""
         CX = CellComplex()
