@@ -1125,7 +1125,7 @@ class TestCellComplex:
             CX._delete_cell((1, 2, 3, 4), key=10)
             CX._delete_cell((1, 2, 3, 4), key=100)
 
-    def test_degree_not_implemented():
+    def test_degree_not_implemented(self):
         """Test degree not implemented error. Please remove when the method is implemented."""
         with pytest.raises(NotImplementedError) as exp_exception:
             CX = CellComplex()
@@ -1135,7 +1135,7 @@ class TestCellComplex:
             str(exp_exception.value) == "Rank 2 is currently not supported by degree."
         )
 
-    def test_cell_neighbors_not_implemented():
+    def test_cell_neighbors_not_implemented(self):
         """Test cell neighbors not implemented error. Please remove when the method is implemented."""
         with pytest.raises(NotImplementedError):
             CX = CellComplex()
