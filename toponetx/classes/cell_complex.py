@@ -714,11 +714,8 @@ class CellComplex(Complex):
                             self._G.add_edges_from(edges_cell)
                         self._insert_cell(Cell(cell, regular=self._regular), **attr)
                     else:
-                        print(
+                        raise ValueError(
                             f"Invalid cycle condition for cell {cell}. This input cell is not inserted, check if edges of the input cell are in the 1-skeleton."
-                        )
-                        print(
-                            "To ignore this check, set check_skeleton = False or check if the input cell is a valid 2d cell."
                         )
                 else:
                     raise ValueError("invalid input")
