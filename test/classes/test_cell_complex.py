@@ -1099,7 +1099,35 @@ class TestCellComplex:
         cc = CellComplex()
         cell = [1, 2, 3]
         cc.add_cell(cell, rank=2)
-        cc.remove_nodes([1, 2, 3])  # removing node removes cells attached to it.
+        cc.remove_nodes([1, 2, 3])
         assert len(cc.cells) == 0
         assert len(cc.edges) == 0
         assert len(cc.nodes) == 0
+
+    def test_delete_cell_with_key(self):
+        """Test delete cell method with key."""
+        CX = CellComplex()
+        CX._insert_cell((1, 2, 3, 4))
+        CX._insert_cell((1, 2, 3, 4))
+        CX._insert_cell((1, 2, 3, 4))
+        CX._insert_cell((2, 3, 4, 5))
+
+        assert len(CX.cells) == 4
+        assert len(CX._cells._cells.keys()) == 2
+        assert sorted(list(CX._cells._cells[(1, 2, 3, 4)].keys())) == [0, 1, 2]
+
+        CX._delete_cell((1, 2, 3, 4), key=2)
+        assert len(CX.cells) == 3
+        assert len(CX._cells._cells.keys()) == 2
+        assert sorted(list(CX._cells._cells[(1, 2, 3, 4)].keys())) == [0, 1]
+
+        with pytest.raises(KeyError):
+            CX._delete_cell((1, 2, 3, 4), key=10)
+            CX._delete_cell((1, 2, 3, 4), key=100)
+
+    def test_degree_not_implemented():
+        """Test degree not implemented error. Please remove when the method is implemented."""
+        with pytest.raises(NotImplementedError):
+            CX = CellComplex()
+            CX.degree(rank=2)
+            CX.degree(rank=3)
