@@ -1099,7 +1099,76 @@ class TestCellComplex:
         cc = CellComplex()
         cell = [1, 2, 3]
         cc.add_cell(cell, rank=2)
-        cc.remove_nodes([1, 2, 3])  # removing node removes cells attached to it.
+        cc.remove_nodes([1, 2, 3])
         assert len(cc.cells) == 0
         assert len(cc.edges) == 0
         assert len(cc.nodes) == 0
+
+    def test_delete_cell_with_key(self):
+        """Test delete cell method with key."""
+        CX = CellComplex()
+        CX._insert_cell((1, 2, 3, 4))
+        CX._insert_cell((1, 2, 3, 4))
+        CX._insert_cell((1, 2, 3, 4))
+        CX._insert_cell((2, 3, 4, 5))
+
+        assert len(CX.cells) == 4
+        assert len(CX._cells._cells.keys()) == 2
+        assert sorted(list(CX._cells._cells[(1, 2, 3, 4)].keys())) == [0, 1, 2]
+
+        CX._delete_cell((1, 2, 3, 4), key=2)
+        assert len(CX.cells) == 3
+        assert len(CX._cells._cells.keys()) == 2
+        assert sorted(list(CX._cells._cells[(1, 2, 3, 4)].keys())) == [0, 1]
+
+        with pytest.raises(KeyError):
+            CX._delete_cell((1, 2, 3, 4), key=10)
+            CX._delete_cell((1, 2, 3, 4), key=100)
+
+    def test_add_cell_regularity_conditions(self):
+        """Test regularity conditions for add cell method."""
+        CX = CellComplex()
+        with pytest.raises(TopoNetXError) as exp_exception:
+            CX.add_cell((1, 1, 2, 3), rank=0)
+
+        assert (
+            str(exp_exception.value)
+            == "Use add_node to insert nodes or zero ranked cells."
+        )
+
+        with pytest.raises(ValueError) as exp_exception:
+            CX.add_cell((1, 1, 2, 3), rank=1)
+
+        assert (
+            str(exp_exception.value)
+            == "rank 1 cells (edges) must have exactly two nodes"
+        )
+
+        with pytest.raises(ValueError) as exp_exception:
+            CX.add_cell((1, 1), rank=1)
+
+        assert (
+            str(exp_exception.value)
+            == " invalid insertion : self-loops are not allowed."
+        )
+
+        with pytest.raises(ValueError) as exp_exception:
+            CX.add_cell((1, 1, 2, 3), rank=2)
+
+        assert (
+            str(exp_exception.value)
+            == "Invalid cycle condition for cell [1, 1, 2, 3]. This input cell is not inserted, check if edges of the input cell are in the 1-skeleton."
+        )
+
+        with pytest.raises(ValueError) as exp_exception:
+            CX.add_cell(1, rank=2)
+
+        assert str(exp_exception.value) == "invalid input"
+
+        with pytest.raises(ValueError) as exp_exception:
+            CX.add_cell({1, 5, 2, 3}, rank=4)
+
+        assert (
+            str(exp_exception.value)
+            == "Add cell only supports adding cells of dimensions 0,1 or 2-- got 4"
+        )
