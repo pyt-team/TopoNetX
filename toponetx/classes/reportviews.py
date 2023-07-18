@@ -55,7 +55,9 @@ class CellView:
         if isinstance(cell, Cell):
 
             if cell.elements not in self._cells:
-                raise KeyError(f"cell {cell} is not in the cell dictionary")
+                raise KeyError(
+                    f"cell {cell.__repr__()} is not in the cell dictionary",
+                )
 
             # If there is only one cell with these elements, return its properties
             elif len(self._cells[cell.elements]) == 1:
