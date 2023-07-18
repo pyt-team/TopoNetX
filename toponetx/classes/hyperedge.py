@@ -68,5 +68,4 @@ class HyperEdge(Atom):
         if self._rank is not None:
             return self._rank
         else:
-            print("HyperEdge has no rank")
             return None
