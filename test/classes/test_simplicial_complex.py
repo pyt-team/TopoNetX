@@ -4,6 +4,9 @@ import hypernetx as hnx
 import networkx as nx
 import numpy as np
 import pytest
+import spharapy.datasets as sd
+import spharapy.spharabasis as sb
+import spharapy.trimesh as tm
 from gudhi import SimplexTree
 
 from toponetx import (
@@ -185,6 +188,10 @@ class TestSimplicialComplex:
             s = Simplex((1, 2, 3, 4))
             SC.add_node(s)
 
+        s = Simplex({1})  # singleton simplex
+        SC.add_node(s)
+        assert s in SC
+
         SC = SimplicialComplex()
         assert SC.dim == -1
         SC.add_node(9)
@@ -232,6 +239,14 @@ class TestSimplicialComplex:
         # simplex cannot contain duplicate nodes
         with pytest.raises(ValueError):
             SC.add_simplex((1, 2, 2))
+
+        # add hashable, non iterable node to SC
+        SC.add_simplex(11)
+        assert 11 in SC.simplices
+
+        # add random string to SC
+        SC.add_simplex("test")
+        assert ("test",) in SC.simplices
 
     def test_remove_maximal_simplex(self):
         """Test remove_maximal_simplex method."""
@@ -916,3 +931,37 @@ class TestSimplicialComplex:
         SC2.remove_maximal_simplex([1, 2, 3])
         assert 1 in SC
         assert (1, 2, 3) in SC
+
+    def test_normalized_laplacian_matrix(self):
+        """Test the normalized_laplacian_matrix method of SimplicialComplex."""
+        SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
+        L = SC.normalized_laplacian_matrix(rank=1)
+        assert np.allclose(
+            L.toarray(),
+            np.array(
+                [
+                    [0.5, -0.2236068, -0.2236068, 0.0, 0.0, 0.0],
+                    [-0.2236068, 0.59999996, 0.0, 0.0, -0.2236068, 0.0],
+                    [-0.2236068, 0.0, 0.59999996, 0.0, 0.0, -0.2236068],
+                    [0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                    [0.0, -0.2236068, 0.0, 0.0, 0.75, 0.0],
+                    [0.0, 0.0, -0.2236068, 0.0, 0.0, 0.75],
+                ]
+            ),
+        )
+
+    def test_from_spharpy(self):
+        """Test the from_spharpy method of SimplicialComplex (support for spharpy trimesh)."""
+        mesh = tm.TriMesh(
+            [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
+        )
+        SC = SimplicialComplex.from_spharpy(mesh)
+        simplices = SC.simplices
+        assert len(simplices) == 7
+        assert [0, 1, 2] in simplices
+        assert [0, 1] in simplices
+        assert [0, 2] in simplices
+        assert [1, 2] in simplices
+        assert [0] in simplices
+        assert [1] in simplices
+        assert [2] in simplices

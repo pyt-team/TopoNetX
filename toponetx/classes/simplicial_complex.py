@@ -459,7 +459,13 @@ class SimplicialComplex(Complex):
             self.add_simplex([node], **attr)
 
     def add_simplex(self, simplex, **attr) -> None:
-        """Add simplex to simplicial complex."""
+        """Add simplex to simplicial complex.
+
+        Parameters
+        ----------
+        simplex : Hashable or Iterable or Simplex or str
+            a Hashable or Iterable or Simplex in a simplicial complex.
+        """
         if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
             simplex = [simplex]
         if isinstance(simplex, str):
@@ -495,8 +501,6 @@ class SimplicialComplex(Complex):
                 )
             else:
                 self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(attr)
-        else:
-            raise TypeError("input type must be iterable, or Simplex")
 
     def add_simplices_from(self, simplices) -> None:
         """Add simplices from iterable to simplicial complex."""
