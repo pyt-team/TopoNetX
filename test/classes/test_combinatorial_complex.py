@@ -298,13 +298,11 @@ class TestCombinatorialComplex:
         CC.add_cell([1, 2], rank=2)
         assert CC.degree(1) == 2
         with pytest.raises(TopoNetXError):
-            assert CC.degree(1, -1) == TopoNetXError("Rank must be positive")
+            assert CC.degree(1, -1)
         assert CC.degree(2, 2) == 3
         with pytest.raises(KeyError):
             node = 7
-            assert CC.degree(node, 2) == KeyError(
-                f"Node {node} not in Combinatorial Complex."
-            )
+            assert CC.degree(node, 2)
 
     def test_size(self):
         """Test for the size function."""
@@ -317,9 +315,7 @@ class TestCombinatorialComplex:
         CC.add_cell([1, 2], rank=2)
         assert CC.size(1) == 1
         with pytest.raises(TopoNetXError):
-            CC.size(frozenset([1, 2, 3])) == TopoNetXError(
-                "Input cell is not in cells of the CC"
-            )
+            CC.size(frozenset([1, 2, 3]))
 
     def test_num_nodes_and_cells(self):
         """Test for number of nodes and number of cells."""
@@ -400,9 +396,7 @@ class TestCombinatorialComplex:
         }
         node = {4: 3}
         with pytest.raises(TypeError):
-            example.remove_node(node) == TypeError(
-                "node must be a HyperEdge or a hashable object"
-            )
+            example.remove_node(node)
         example = CombinatorialComplex()
         example.add_cell([1, 2], rank=1)
         example.add_cell([1, 3, 2], rank=1)
