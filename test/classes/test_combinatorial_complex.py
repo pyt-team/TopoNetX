@@ -342,3 +342,96 @@ class TestCombinatorialComplex:
         CC = CombinatorialComplex()
         CC.add_cell([1, 2, 3, 4, 5, 6, 7, 8], rank=1)
         assert CC.order() == 8
+
+    def test_remove_nodes(self):
+        """Test for the remove_node and remove_nodes methods."""
+        example = CombinatorialComplex()
+        example.add_cell([1, 2], rank=1)
+        example.add_cell([1, 3, 2], rank=1)
+        example.add_cell([1, 2, 4, 3], rank=2)
+        example.add_cell([2, 5], rank=1)
+        example.add_cell([2, 6, 4], rank=2)
+        example.remove_node(1)
+        assert example._complex_set.hyperedge_dict == {
+            1: {
+                frozenset({2, 5}): {"weight": 1},
+                frozenset({2}): {"weight": 1},
+                frozenset({2, 3}): {"weight": 1},
+            },
+            0: {
+                frozenset({2}): {"weight": 1},
+                frozenset({3}): {"weight": 1},
+                frozenset({4}): {"weight": 1},
+                frozenset({5}): {"weight": 1},
+                frozenset({6}): {"weight": 1},
+            },
+            2: {
+                frozenset({2, 4, 6}): {"weight": 1},
+                frozenset({2, 3, 4}): {"weight": 1},
+            },
+        }
+        with pytest.raises(KeyError):
+            example.remove_nodes([1]) == KeyError("node 1 not in CombinatorialComplex")
+        example.remove_nodes([2, 5])
+        assert example._complex_set.hyperedge_dict == {
+            1: {frozenset({3}): {"weight": 1}},
+            0: {
+                frozenset({3}): {"weight": 1},
+                frozenset({4}): {"weight": 1},
+                frozenset({6}): {"weight": 1},
+            },
+            2: {frozenset({4, 6}): {"weight": 1}, frozenset({3, 4}): {"weight": 1}},
+        }
+        assert example._aux_complex.simplices.faces_dict == [
+            {
+                frozenset({3}): {"is_maximal": True, "membership": set()},
+                frozenset({4}): {"is_maximal": True, "membership": set()},
+                frozenset({6}): {"is_maximal": True, "membership": set()},
+            },
+            {
+                frozenset({3, 4}): {"is_maximal": True, "membership": set()},
+                frozenset({4, 6}): {"is_maximal": True, "membership": set()},
+            },
+        ]
+        example.remove_nodes(HyperEdge([3]))
+        assert example._complex_set.hyperedge_dict == {
+            0: {frozenset({4}): {"weight": 1}, frozenset({6}): {"weight": 1}},
+            2: {frozenset({4, 6}): {"weight": 1}, frozenset({4}): {"weight": 1}},
+        }
+        node = {4: 3}
+        with pytest.raises(TypeError):
+            example.remove_node(node) == TypeError(
+                "node must be a HyperEdge or a hashable object"
+            )
+        example = CombinatorialComplex()
+        example.add_cell([1, 2], rank=1)
+        example.add_cell([1, 3, 2], rank=1)
+        example.add_cell([1, 2, 4, 3], rank=2)
+        example.add_cell([2, 5], rank=1)
+        example.add_cell([2, 6, 4], rank=2)
+        example.remove_nodes([HyperEdge([1]), HyperEdge([2])])
+        assert example._complex_set.hyperedge_dict == {
+            1: {frozenset({3}): {"weight": 1}, frozenset({5}): {"weight": 1}},
+            0: {
+                frozenset({3}): {"weight": 1},
+                frozenset({4}): {"weight": 1},
+                frozenset({5}): {"weight": 1},
+                frozenset({6}): {"weight": 1},
+            },
+            2: {frozenset({3, 4}): {"weight": 1}, frozenset({4, 6}): {"weight": 1}},
+        }
+
+    def test_set_cell_attributes(self):
+        """Test for the set_cell_attributes method."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3, 2], rank=1)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        d = {(1, 2, 3, 4): "red", (1, 2, 3): "blue"}
+        CC.set_cell_attributes(d, name="color")
+        assert CC.cells[(1, 2, 3, 4)]["color"] == "red"
+        d = {(1, 2): {"attr1": "blue", "size": "large"}}
+        CC.set_cell_attributes(d)
+        assert CC.cells[(1, 2)]["attr1"] == "blue"

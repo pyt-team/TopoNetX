@@ -485,13 +485,43 @@ class CombinatorialComplex(Complex):
         """
         return len(self.nodes)
 
+    def _remove_node_helper(self, node) -> None:
+        """Remove node from cells. Assumes node is present in the CC."""
+        # Removing node in hyperedgeview
+        for key in list(self.cells.hyperedge_dict.keys()):
+            for key_rank in list(self.cells.hyperedge_dict[key].keys()):
+                replace_key = key_rank.difference(node)
+                if len(replace_key) > 0:
+                    # Removing node removes all references to the node and leaves the remaining hyperedges untouched
+                    self.cells.hyperedge_dict[key][
+                        replace_key
+                    ] = self.cells.hyperedge_dict[key][key_rank]
+                    if key_rank != replace_key:
+                        del self.cells.hyperedge_dict[key][key_rank]
+                else:
+                    # Remove original hyperedge from the ranks
+                    del self.cells.hyperedge_dict[key][key_rank]
+            if self.cells.hyperedge_dict[key] == {}:
+                del self.cells.hyperedge_dict[key]
+        # Removing nodes in Simplical Complex
+        self._aux_complex.remove_nodes(node)
+
     def _remove_node(self, node) -> None:
-        self._remove_hyperedge(node)
+        if isinstance(node, HyperEdge):
+            pass
+        elif isinstance(node, Hashable):
+            node = HyperEdge([node])
+        else:
+            raise TypeError("node must be a HyperEdge or a hashable object")
+        if node not in self.nodes:
+            raise KeyError(f"node {node} not in CombinatorialComplex")
+        self._remove_node_helper(node)
 
     def remove_node(self, node):
         """Remove node from cells.
 
         This also deletes any reference in the nodes of the CC.
+        This also deletes cell references in higher ranks for the particular node.
 
         Parameters
         ----------
@@ -511,11 +541,22 @@ class CombinatorialComplex(Complex):
 
         Parameters
         ----------
-        node_set : an iterable of hashables or Entities
+        node_set : an iterable of hashables
             Nodes in CC
         """
+        copy_set = set()
         for node in node_set:
-            self.remove_node(node)
+            if isinstance(node, Hashable):
+                if isinstance(node, HyperEdge):
+                    copy_set.add(list(node.elements)[0])
+                else:
+                    copy_set.add(node)
+                if node not in self.nodes:
+                    raise KeyError(f"node {node} not in CombinatorialComplex")
+            else:
+                raise TypeError("node {node} must be a HyperEdge or a hashable object")
+        self._remove_node_helper(copy_set)
+        return self
 
     def _add_node(self, node, **attr) -> None:
         """Add one node as hyperedge."""
@@ -588,13 +629,13 @@ class CombinatorialComplex(Complex):
         if name is not None:
             for cell, value in values.items():
                 try:
-                    self.cells[cell].__dict__[name] = value
+                    self.cells[cell][name] = value
                 except AttributeError:
                     pass
         else:
             for cell, d in values.items():
                 try:
-                    self.cells[cell].__dict__.update(d)
+                    self.cells[cell].update(d)
                 except AttributeError:
                     pass
             return
@@ -685,36 +726,36 @@ class CombinatorialComplex(Complex):
         """
         if rank in self._complex_set.hyperedge_dict:
             if hyperedge_ in self._complex_set.hyperedge_dict[rank]:
+                self._complex_set.hyperedge_dict[rank][hyperedge_].update(attr)
                 for i in hyperedge_:
                     if 0 not in self._complex_set.hyperedge_dict:
                         self._complex_set.hyperedge_dict[0] = {}
 
-                    if frozenset({i}) not in self._complex_set.hyperedge_dict[0]:
+                    if i not in self._complex_set.hyperedge_dict[0]:
                         self._complex_set.hyperedge_dict[0][frozenset({i})] = {
                             "weight": 1
                         }
-                self._complex_set.hyperedge_dict[rank][hyperedge_].update(attr)
             else:
                 self._complex_set.hyperedge_dict[rank][hyperedge_] = {}
+                self._complex_set.hyperedge_dict[rank][hyperedge_].update(attr)
                 for i in hyperedge_:
                     if 0 not in self._complex_set.hyperedge_dict:
                         self._complex_set.hyperedge_dict[0] = {}
 
-                    if frozenset({i}) not in self._complex_set.hyperedge_dict[0]:
+                    if i not in self._complex_set.hyperedge_dict[0]:
                         self._complex_set.hyperedge_dict[0][frozenset({i})] = {
                             "weight": 1
                         }
-                self._complex_set.hyperedge_dict[rank][hyperedge_].update(attr)
         else:
             self._complex_set.hyperedge_dict[rank] = {}
             self._complex_set.hyperedge_dict[rank][hyperedge_] = {}
+            self._complex_set.hyperedge_dict[rank][hyperedge_].update(attr)
 
             for i in hyperedge_:
                 if 0 not in self._complex_set.hyperedge_dict:
                     self._complex_set.hyperedge_dict[0] = {}
-                if frozenset({i}) not in self._complex_set.hyperedge_dict[0]:
+                if i not in self._complex_set.hyperedge_dict[0]:
                     self._complex_set.hyperedge_dict[0][frozenset({i})] = {"weight": 1}
-            self._complex_set.hyperedge_dict[rank][hyperedge_].update(attr)
 
     def _add_hyperedge(self, hyperedge, rank: int, **attr):
         """Add hyperedge.
@@ -760,12 +801,11 @@ class CombinatorialComplex(Complex):
                 if 0 not in self._complex_set.hyperedge_dict:
                     self._complex_set.hyperedge_dict[0] = {}
                 self._complex_set.hyperedge_dict[0][frozenset({hyperedge})] = {}
+                self._complex_set.hyperedge_dict[0][frozenset({hyperedge})].update(attr)
                 self._aux_complex.add_simplex(Simplex(frozenset({hyperedge}), r=0))
                 self._complex_set.hyperedge_dict[0][frozenset({hyperedge})][
                     "weight"
                 ] = 1
-                # update attributes
-                self._complex_set.hyperedge_dict[0][frozenset({hyperedge})].update(attr)
                 return
 
         if isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
@@ -775,12 +815,11 @@ class CombinatorialComplex(Complex):
                 if 0 not in self._complex_set.hyperedge_dict:
                     self._complex_set.hyperedge_dict[0] = {}
                 self._complex_set.hyperedge_dict[0][frozenset({hyperedge})] = {}
+                self._complex_set.hyperedge_dict[0][frozenset({hyperedge})].update(attr)
                 self._aux_complex.add_simplex(Simplex(frozenset({hyperedge}), r=0))
                 self._complex_set.hyperedge_dict[0][frozenset({hyperedge})][
                     "weight"
                 ] = 1
-                # update attributes
-                self._complex_set.hyperedge_dict[0][frozenset({hyperedge})].update(attr)
                 return
         if isinstance(hyperedge, Iterable) or isinstance(hyperedge, HyperEdge):
             if not isinstance(hyperedge, HyperEdge):
