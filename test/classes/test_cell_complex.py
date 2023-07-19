@@ -3,6 +3,7 @@
 import networkx as nx
 import numpy as np
 import pytest
+import scipy
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
@@ -255,6 +256,367 @@ class TestCellComplex:
         CX = CellComplex()
         B2 = CX.incidence_matrix(rank=2)
         assert B2.shape == (0, 0)
+
+    def test_node_to_all_cell_incidence_matrix(self):
+        """Test node_to_all_cell_incidence_matrix."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([3, 4, 5], rank=2)
+
+        # Test the function without index
+        result = CX.node_to_all_cell_incidence_matrix(weight=False, index=False)
+        expected_result = scipy.sparse.csc_matrix(
+            np.array(
+                [
+                    [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+                    [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+                    [0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0],
+                    [0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0],
+                    [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0],
+                ]
+            )
+        )
+        assert np.allclose(result.toarray(), expected_result.toarray())
+
+        # Test the function with index
+        node_index, cell_index, _ = CX.node_to_all_cell_incidence_matrix(
+            weight=False, index=True
+        )
+        expected_node_index = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+        expected_cell_index = {
+            (1, 2): 0,
+            (1, 4): 1,
+            (2, 3): 2,
+            (3, 4): 3,
+            (3, 5): 4,
+            (4, 5): 5,
+            (1, 2, 3, 4): 6,
+            (3, 4, 5): 7,
+        }
+        expected_result = scipy.sparse.csc_matrix(
+            np.array(
+                [
+                    [0.0, 2.0, 1.0, 2.0, 0.0],
+                    [2.0, 0.0, 2.0, 1.0, 0.0],
+                    [1.0, 2.0, 0.0, 3.0, 2.0],
+                    [2.0, 1.0, 3.0, 0.0, 2.0],
+                    [0.0, 0.0, 2.0, 2.0, 0.0],
+                ]
+            )
+        )
+        assert isinstance(node_index, dict)
+        assert isinstance(cell_index, dict)
+        assert node_index == expected_node_index
+        assert cell_index == expected_cell_index
+
+    def test_node_to_all_cell_adjacnecy_matrix(self):
+        """Test node_to_all_cell_adjacnecy_matrix."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([3, 4, 5], rank=2)
+
+        # Test the function without index
+        result = CX.node_to_all_cell_adjacnecy_matrix(s=2, weight=False, index=False)
+        expected_result = scipy.sparse.csc_matrix(
+            np.array(
+                [
+                    [0.0, 1.0, 0.0, 1.0, 0.0],
+                    [1.0, 0.0, 1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 1.0, 1.0],
+                    [1.0, 0.0, 1.0, 0.0, 1.0],
+                    [0.0, 0.0, 1.0, 1.0, 0.0],
+                ]
+            )
+        )
+        assert np.allclose(result.toarray(), expected_result.toarray())
+
+        # Test the function with index
+        result = CX.node_to_all_cell_adjacnecy_matrix(s=None, weight=False, index=True)
+        expected_node_index = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+        expected_result = scipy.sparse.csc_matrix(
+            np.array(
+                [
+                    [0.0, 2.0, 1.0, 2.0, 0.0],
+                    [2.0, 0.0, 2.0, 1.0, 0.0],
+                    [1.0, 2.0, 0.0, 3.0, 2.0],
+                    [2.0, 1.0, 3.0, 0.0, 2.0],
+                    [0.0, 0.0, 2.0, 2.0, 0.0],
+                ]
+            )
+        )
+        assert isinstance(result, tuple)
+        assert isinstance(result[0], dict)
+        assert result[0] == expected_node_index
+        assert np.allclose(result[1].toarray(), expected_result.toarray())
+
+    def test_all_cell_to_node_codjacnecy_matrix(self):
+        """Test all cell to node codjacnecy matrix."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([3, 4, 5], rank=2)
+
+        # Test the function without index
+        result = CX.all_cell_to_node_codjacnecy_matrix(
+            s=None, weight=False, index=False
+        )
+        expected_result = scipy.sparse.csc_matrix(
+            np.array(
+                [
+                    [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 2.0, 0.0],
+                    [1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.0, 1.0],
+                    [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 2.0, 1.0],
+                    [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0, 2.0],
+                    [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0],
+                    [0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 2.0],
+                    [2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 0.0, 2.0],
+                    [0.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 0.0],
+                ]
+            )
+        )
+        assert np.allclose(result.toarray(), expected_result.toarray())
+
+        # Test the function with index
+        result = CX.all_cell_to_node_codjacnecy_matrix(s=None, weight=False, index=True)
+        expected_cell_index = {
+            (1, 2): 0,
+            (1, 4): 1,
+            (2, 3): 2,
+            (3, 4): 3,
+            (3, 5): 4,
+            (4, 5): 5,
+            (1, 2, 3, 4): 6,
+            (3, 4, 5): 7,
+        }
+        expected_result = scipy.sparse.csc_matrix(
+            np.array(
+                [
+                    [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 2.0, 0.0],
+                    [1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.0, 1.0],
+                    [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 2.0, 1.0],
+                    [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0, 2.0],
+                    [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0],
+                    [0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 2.0],
+                    [2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 0.0, 2.0],
+                    [0.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 0.0],
+                ]
+            )
+        )
+        assert isinstance(result, tuple)
+        assert isinstance(result[0], dict)
+        assert result[0] == expected_cell_index
+        assert np.allclose(result[1].toarray(), expected_result.toarray())
+
+    def test_s_connected_components(self):
+        """Test_s_connected_components."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function with cells=True
+        result = list(CX.s_connected_components(s=1, cells=True))
+        expected_result = [
+            {(2, 3), (2, 3, 4), (2, 4), (3, 4)},
+            {(5, 6), (5, 6, 7), (5, 7), (6, 7)},
+        ]
+        assert result == expected_result
+
+        # Test the function with cells=False
+        result = list(CX.s_connected_components(s=1, cells=False))
+        expected_result = [{2, 3, 4}, {5, 6, 7}]
+        assert result == expected_result
+
+        # Test the function with return_singletons=True
+        result = list(
+            CX.s_connected_components(s=1, cells=False, return_singletons=True)
+        )
+        expected_result = [{2, 3, 4}, {5, 6, 7}]
+        assert result == expected_result
+
+        # Test the function with return_singletons=False
+        result = list(
+            CX.s_connected_components(s=2, cells=False, return_singletons=False)
+        )
+        expected_result = [{2, 3, 4}, {5, 6, 7}]
+        assert result == expected_result
+
+    def test_s_component_subcomplexes(self):
+        """Test_s_component_subcomplexes."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function with cells=True
+        result = list(CX.s_component_subcomplexes(s=1, cells=True))
+        expected_result = [CellComplex(), CellComplex()]
+        expected_result[0].add_cell([2, 3, 4], rank=2)
+        expected_result[1].add_cell([5, 6, 7], rank=2)
+        assert len(result[0].cells) == len(expected_result[0].cells)
+        assert len(result[1].cells) == len(expected_result[1].cells)
+
+        CX = CellComplex()
+        # Test the function with return_singletons=False
+        result = list(
+            CX.s_component_subcomplexes(s=1, cells=False, return_singletons=False)
+        )
+        expected_result = []
+        assert result == expected_result
+
+    def test_connected_components(self):
+        """Test_connected_components."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function with cells=False and return_singletons=True
+        result = list(CX.connected_components(cells=True, return_singletons=True))
+        expected_result = [
+            {(2, 3), (2, 3, 4), (2, 4), (3, 4)},
+            {(5, 6), (5, 6, 7), (5, 7), (6, 7)},
+        ]
+        assert result == expected_result
+
+        CX = CellComplex()
+        # Test the function with cells=False and return_singletons=False
+        result = list(CX.connected_components(cells=False, return_singletons=False))
+        expected_result = []
+        assert result == expected_result
+
+    def test_connected_component_subcomplexes(self):
+        """Test_connected_component_subcomplexes."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function with return_singletons=True
+        result = list(CX.connected_component_subcomplexes(return_singletons=True))
+        expected_result = [CellComplex(), CellComplex()]
+        expected_result[0].add_cell([2, 3, 4], rank=2)
+        expected_result[1].add_cell([5, 6, 7], rank=2)
+        assert len(result[0].cells) == len(expected_result[0].cells)
+        assert len(result[1].cells) == len(expected_result[1].cells)
+
+        # Test the function with return_singletons=False
+        CX = CellComplex()  # Initialize your class object
+        result = list(CX.connected_component_subcomplexes(return_singletons=False))
+        expected_result = []
+        assert result == expected_result
+
+    def test_node_diameters(self):
+        """Test for the node_diameters method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function
+        result = list(CX.node_diameters())
+        expected_result = [[1, 1], [{2, 3, 4}, {5, 6, 7}]]
+        assert result == expected_result
+
+    def test_cell_diameters(self):
+        """Test for the cell_diameters method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function
+        result = list(CX.cell_diameters())
+        expected_result = [
+            [1, 1],
+            [{(2, 3), (2, 3, 4), (2, 4), (3, 4)}, {(5, 6), (5, 6, 7), (5, 7), (6, 7)}],
+        ]
+        assert result == expected_result
+
+    def test_diameter(self):
+        """Test for the diameter method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+        CX.add_cell([2, 5], rank=1)
+        # Test the function
+        result = CX.diameter()
+        expected_result = 3
+        assert result == expected_result
+
+    def test_cell_diameter(self):
+        """Test for the cell_diameter method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+        CX.add_cell([2, 5], rank=1)
+
+        # Test the function
+        result = CX.cell_diameter()
+        expected_result = 4
+        assert result == expected_result
+
+    def test_distance(self):
+        """Test for the distance method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+
+        # Test the function
+        result = CX.distance(2, 3)
+        expected_result = 1
+        assert result == expected_result
+
+    def test_cell_distance(self):
+        """Test for the cell_distance method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Add some cells to the complex
+        CX.add_cell([2, 3, 4], rank=2)
+        CX.add_cell([5, 6, 7], rank=2)
+        CX.add_cell([2, 5], rank=1)
+
+        # Test the function
+        result = CX.cell_distance((2, 3, 4), (5, 6, 7))
+        expected_result = 2
+        assert result == expected_result
+
+    def test_from_networkx_graph(self):
+        """Test for the from_networkx_graph method."""
+        CX = CellComplex()  # Initialize your class object
+
+        # Create a NetworkX graph
+        G = nx.Graph()
+        G.add_edges_from([(0, 1), (0, 2), (1, 2)])
+
+        # Test the function
+        CX.from_networkx_graph(G)
+        result = list(CX.edges)
+        expected_result = [(0, 1), (0, 2), (1, 2)]
+        assert result == expected_result
+
+    def test_euler_characteristic(self):
+        """Test euler_characteristic."""
+        CX = CellComplex()
+        CX.add_cells_from([[1, 2, 3], [1, 2, 3]], rank=2)
+        assert CX.euler_characterisitics() == 2
 
     def test_clear(self):
         """Test the clear method of the cell complex."""
