@@ -571,14 +571,14 @@ class CombinatorialComplex(Complex):
         if name is not None:
             for cell, value in values.items():
                 try:
-                    self.nodes[cell].__dict__[name] = value
+                    self.nodes[cell] = value
                 except AttributeError:
                     pass
 
         else:
             for cell, d in values.items():
                 try:
-                    self.nodes[cell].__dict__.update(d)
+                    self.nodes[cell].update(d)
                 except AttributeError:
                     pass
             return
@@ -669,9 +669,9 @@ class CombinatorialComplex(Complex):
         'blue'
         """
         return {
-            node: self.nodes[node][name]
-            for node in self.nodes
-            if name in self.nodes[node]
+            node: self.nodes.nodes[node][name]
+            for node in self.nodes.nodes
+            if name in self.nodes.nodes[node]
         }
 
     def get_cell_attributes(self, name: str, rank=None):

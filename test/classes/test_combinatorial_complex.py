@@ -67,8 +67,13 @@ class TestCombinatorialComplex:
         """Test adding a cell to a CC."""
         CC = CombinatorialComplex()
         CC.add_cell([1, 2, 3], rank=2)
-
         assert (1, 2, 3) in CC.cells
+        with pytest.raises(ValueError) as ex:
+            CC.add_cell(HyperEdge([1]), 3)
+            assert (
+                str(ex.value)
+                == "violation of the combinatorial complex condition : the hyperedge frozenset({1, 2, 3}) in the complex has rank 2 is smaller than 3, the rank of the input hyperedge frozenset({1}) "
+            )
 
     def test_add_cells_from(self):
         """Test adding multiple cells to a CC."""
@@ -199,8 +204,9 @@ class TestCombinatorialComplex:
         CC.add_cell([1, 2, 4, 3], rank=2)
         CC.add_cell([2, 5], rank=1)
         CC.add_cell([2, 6, 4], rank=2)
-        with pytest.raises(TopoNetXError):
+        with pytest.raises(TopoNetXError) as exp:
             CC.incidence_matrix(2, incidence_type="wrong")
+        assert str(exp.value) == "incidence_type must be 'up' or 'down' "
 
     def test_incidence_matrix_with_equal_rank(self):
         """Test generating an incidence matrix by having equal rank."""
@@ -210,8 +216,11 @@ class TestCombinatorialComplex:
         CC.add_cell([1, 2, 4, 3], rank=2)
         CC.add_cell([2, 5], rank=1)
         CC.add_cell([2, 6, 4], rank=2)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as exp:
             CC.incidence_matrix(1, 1)
+        assert (
+            str(exp.value) == "incidence must be computed for k!=r, got equal r and k."
+        )
 
     def test_incidence_dict(self):
         """Test generating an incidence dictionary."""
@@ -297,12 +306,14 @@ class TestCombinatorialComplex:
         CC.add_cell([2, 6, 4], rank=2)
         CC.add_cell([1, 2], rank=2)
         assert CC.degree(1) == 2
-        with pytest.raises(TopoNetXError):
-            assert CC.degree(1, -1)
+        with pytest.raises(TopoNetXError) as exp:
+            CC.degree(1, -1)
+        assert str(exp.value) == "Rank must be positive"
         assert CC.degree(2, 2) == 3
-        with pytest.raises(KeyError):
+        with pytest.raises(KeyError) as exp:
             node = 7
             assert CC.degree(node, 2)
+        assert str(exp.value) == "'Node 7 not in Combinatorial Complex.'"
 
     def test_size(self):
         """Test for the size function."""
@@ -314,8 +325,9 @@ class TestCombinatorialComplex:
         CC.add_cell([2, 6, 4], rank=2)
         CC.add_cell([1, 2], rank=2)
         assert CC.size(1) == 1
-        with pytest.raises(TopoNetXError):
+        with pytest.raises(TopoNetXError) as exp:
             CC.size(frozenset([1, 2, 3]))
+        assert str(exp.value) == "Input cell is not in cells of the CC"
 
     def test_num_nodes_and_cells(self):
         """Test for number of nodes and number of cells."""
@@ -366,8 +378,9 @@ class TestCombinatorialComplex:
                 frozenset({2, 3, 4}): {"weight": 1},
             },
         }
-        with pytest.raises(KeyError):
-            example.remove_nodes([1]) == KeyError("node 1 not in CombinatorialComplex")
+        with pytest.raises(KeyError) as exp:
+            example.remove_nodes([1])
+        assert str(exp.value) == "'node 1 not in CombinatorialComplex'"
         example.remove_nodes([2, 5])
         assert example._complex_set.hyperedge_dict == {
             1: {frozenset({3}): {"weight": 1}},
@@ -395,8 +408,9 @@ class TestCombinatorialComplex:
             2: {frozenset({4, 6}): {"weight": 1}, frozenset({4}): {"weight": 1}},
         }
         node = {4: 3}
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError) as exp:
             example.remove_node(node)
+        assert str(exp.value) == "node must be a HyperEdge or a hashable object"
         example = CombinatorialComplex()
         example.add_cell([1, 2], rank=1)
         example.add_cell([1, 3, 2], rank=1)
@@ -429,3 +443,87 @@ class TestCombinatorialComplex:
         d = {(1, 2): {"attr1": "blue", "size": "large"}}
         CC.set_cell_attributes(d)
         assert CC.cells[(1, 2)]["attr1"] == "blue"
+
+    def test_set_node_attributes(self):
+        """Test for the set and get nodes attributes method."""
+        example1 = CombinatorialComplex()
+        example1.add_cell([4, 6], rank=2)
+        node = 4
+        d = {node: {"color": "red", "attr2": 1}}
+        example1.set_node_attributes(d)
+        assert example1.nodes.nodes[frozenset({node})]["color"] == "red"
+        example1.get_node_attributes("color") == {frozenset({4}): "red"}
+
+    def test_add_cells(self):
+        """Test for the add_cells method."""
+        CC = CombinatorialComplex()
+        CC.add_cells_from([[1, 2], [1, 3, 2], [1, 2, 3, 4]], ranks=[1, 1, 2])
+        assert CC._complex_set.hyperedge_dict == {
+            1: {frozenset({1, 2}): {"weight": 1}, frozenset({1, 2, 3}): {"weight": 1}},
+            0: {
+                frozenset({1}): {"weight": 1},
+                frozenset({2}): {"weight": 1},
+                frozenset({3}): {"weight": 1},
+                frozenset({4}): {"weight": 1},
+            },
+            2: {frozenset({1, 2, 3, 4}): {"weight": 1}},
+        }
+        with pytest.raises(TopoNetXError) as exp:
+            CC.add_cells_from([[1, 4]], ranks=[1, 1])
+        assert str(exp.value) == "cells and ranks must have equal number of elements"
+        CC = CombinatorialComplex()
+        CC.add_cells_from(
+            [
+                HyperEdge([1, 2], rank=1),
+                HyperEdge([1, 3, 2], rank=1),
+                HyperEdge([1, 2, 3, 4], rank=2),
+            ]
+        )
+        assert CC._complex_set.hyperedge_dict == {
+            1: {frozenset({1, 2}): {"weight": 1}, frozenset({1, 2, 3}): {"weight": 1}},
+            0: {
+                frozenset({1}): {"weight": 1},
+                frozenset({2}): {"weight": 1},
+                frozenset({3}): {"weight": 1},
+                frozenset({4}): {"weight": 1},
+            },
+            2: {frozenset({1, 2, 3, 4}): {"weight": 1}},
+        }
+        CC = CombinatorialComplex()
+        with pytest.raises(ValueError) as exp:
+            CC.add_cells_from(
+                [[1, 2], HyperEdge([1, 3, 2], rank=1), HyperEdge([1, 2, 3, 4], rank=2)]
+            )
+        assert (
+            str(exp.value)
+            == "input must be an HyperEdge [1, 2] object when rank is None"
+        )
+        with pytest.raises(ValueError) as exp:
+            CC.add_cells_from([HyperEdge([1, 3, 2], rank=1), HyperEdge([1, 2, 3, 4])])
+        assert (
+            str(exp.value)
+            == "input HyperEdge Nodes set: (1, 2, 3, 4), attrs: {} has None rank"
+        )
+
+    def test_adjacency_incidence_structure_dict(self):
+        """Test for the incidence and adjacency structure dictionaries."""
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        CC.add_cell([1, 2, 4, 3], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        assert list(CC.get_incidence_structure_dict(0, 1).keys()) == [0, 1, 2]
+        assert list(CC.get_incidence_structure_dict(0, 1).values()) == [
+            [0, 1],
+            [0, 2],
+            [1, 4],
+        ]
+        assert list(CC.get_adjacency_structure_dict(0, 2).keys()) == [1, 2, 3, 0, 5]
+        assert list(CC.get_adjacency_structure_dict(0, 2).values()) == [
+            [0, 2, 3, 5],
+            [0, 1, 3],
+            [0, 1, 2, 5],
+            [1, 2, 3],
+            [1, 3],
+        ]
