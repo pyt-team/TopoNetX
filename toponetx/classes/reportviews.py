@@ -578,7 +578,7 @@ class NodeView:
                 return self.nodes[frozenset({cell})]
 
     def __len__(self) -> int:
-        """Compute number of nodes."""
+        """Compute the number of nodes."""
         return len(self.nodes)
 
     def __contains__(self, e) -> bool:
