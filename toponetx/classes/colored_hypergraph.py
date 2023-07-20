@@ -139,7 +139,9 @@ class ColoredHyperGraph(Complex):
             NodeView of all nodes.
         """
         return NodeView(
-            self._complex_set.hyperedge_dict, cell_type=HyperEdge, colored_nodes=True
+            self._complex_set.hyperedge_dict.get(0, {}),
+            cell_type=HyperEdge,
+            colored_nodes=True,
         )
 
     @property

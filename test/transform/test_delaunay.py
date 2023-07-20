@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from toponetx.classes.simplex import Simplex
 from toponetx.transform import delaunay_triangulation
 
 
@@ -11,13 +12,13 @@ def test_delaunay_triangulation_simple():
     SC = delaunay_triangulation(points)
 
     assert set(SC.simplices) == {
-        frozenset([0]),
-        frozenset([1]),
-        frozenset([2]),
-        frozenset([0, 1]),
-        frozenset([0, 2]),
-        frozenset([1, 2]),
-        frozenset([0, 1, 2]),
+        Simplex((0,)),
+        Simplex((1,)),
+        Simplex((2,)),
+        Simplex((0, 1)),
+        Simplex((0, 2)),
+        Simplex((1, 2)),
+        Simplex((0, 1, 2)),
     }
 
 
@@ -27,15 +28,15 @@ def test_delaunay_triangulation():
     SC = delaunay_triangulation(points)
 
     assert set(SC.simplices) == {
-        frozenset([0]),
-        frozenset([1]),
-        frozenset([2]),
-        frozenset([3]),
-        frozenset([0, 1]),
-        frozenset([0, 2]),
-        frozenset([1, 2]),
-        frozenset([1, 3]),
-        frozenset([2, 3]),
-        frozenset([0, 1, 2]),
-        frozenset([1, 2, 3]),
+        Simplex((0,)),
+        Simplex((1,)),
+        Simplex((2,)),
+        Simplex((3,)),
+        Simplex((0, 1)),
+        Simplex((0, 2)),
+        Simplex((1, 2)),
+        Simplex((1, 3)),
+        Simplex((2, 3)),
+        Simplex((0, 1, 2)),
+        Simplex((1, 2, 3)),
     }
