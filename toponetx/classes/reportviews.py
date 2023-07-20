@@ -13,6 +13,7 @@ from toponetx.classes.complex import Atom
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.path import Path
 from toponetx.classes.simplex import Simplex
+from toponetx.classes.simplex_trie import SimplexTrie
 
 __all__ = [
     "HyperEdgeView",
@@ -821,26 +822,28 @@ class SimplexView(AtomView[Simplex]):
     These classes are used in conjunction with the SimplicialComplex class
     for view/read only purposes for simplices in simplicial complexes.
 
-    Attributes
+    Parameters
     ----------
-    max_dim : int
-        Maximum dimension of the simplices in the SimplexView instance.
-    faces_dict : list of dict
-        A list containing dictionaries of faces for each dimension.
+    simplex_trie : SimplexTrie
+        A SimplexTrie instance containing the simplices in the simplex view.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, simplex_trie: SimplexTrie) -> None:
         """Initialize an instance of the Simplex View class.
 
         The SimplexView class is used to provide a view/read only information
         into a subset of the nodes in a simplex.
         These classes are used in conjunction with the SimplicialComplex class
         for view/read only purposes for simplices in simplicial complexes.
-        """
-        self.max_dim = -1
-        self.faces_dict = []
 
-    def __getitem__(self, simplex: Any) -> dict:
+        Parameters
+        ----------
+        simplex_trie : SimplexTrie
+            A SimplexTrie instance containing the simplices in the simplex view.
+        """
+        self._simplex_trie = simplex_trie
+
+    def __getitem__(self, simplex: Any) -> dict[Hashable, Any]:
         """Get the dictionary of attributes associated with the given simplex.
 
         Parameters
@@ -858,18 +861,15 @@ class SimplexView(AtomView[Simplex]):
         KeyError
             If the simplex is not in the simplex view.
         """
-        if isinstance(simplex, Simplex):
-            if simplex.elements in self.faces_dict[len(simplex) - 1]:
-                return self.faces_dict[len(simplex) - 1][simplex.elements]
-        elif isinstance(simplex, Iterable):
-            simplex = frozenset(simplex)
-            if simplex in self.faces_dict[len(simplex) - 1]:
-                return self.faces_dict[len(simplex) - 1][simplex]
-            else:
-                raise KeyError(f"input {simplex} is not in the simplex dictionary")
+        if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
+            simplex = (simplex,)
+        else:
+            simplex = tuple(sorted(simplex))
 
-        elif isinstance(simplex, Hashable) and frozenset({simplex}) in self:
-            return self.faces_dict[0][frozenset({simplex})]
+        node = self._simplex_trie.find(simplex)
+        if node is None:
+            raise KeyError(f"Simplex {simplex} is not in the simplex view.")
+        return node.attributes
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -880,7 +880,7 @@ class SimplexView(AtomView[Simplex]):
         tuple of ints
             A tuple of integers representing the number of simplices in each dimension.
         """
-        return tuple(len(self.faces_dict[i]) for i in range(len(self.faces_dict)))
+        return tuple(self._simplex_trie.shape)
 
     def __len__(self) -> int:
         """Return the number of simplices in the SimplexView instance.
@@ -890,7 +890,7 @@ class SimplexView(AtomView[Simplex]):
         int
             Returns the number of simplices in the SimplexView instance.
         """
-        return sum(self.shape)
+        return len(self._simplex_trie)
 
     def __iter__(self) -> Iterator:
         """Return an iterator over all simplices in the simplex view.
@@ -900,7 +900,7 @@ class SimplexView(AtomView[Simplex]):
         Iterator
             Returns an iterator over all simplices in the simplex view.
         """
-        return chain.from_iterable(self.faces_dict)
+        return iter(map(lambda node: node.simplex, self._simplex_trie))
 
     def __contains__(self, atom: Any) -> bool:
         """Check if a simplex is in the simplex view.
@@ -938,14 +938,11 @@ class SimplexView(AtomView[Simplex]):
         >>> {1, 2, 3} in view
         False
         """
-        if isinstance(atom, Iterable):
-            atom = frozenset(atom)
-            if not 0 < len(atom) <= self.max_dim + 1:
-                return False
-            return atom in self.faces_dict[len(atom) - 1]
-        elif isinstance(atom, Hashable):
-            return frozenset({atom}) in self.faces_dict[0]
-        return False
+        if isinstance(atom, Hashable) and not isinstance(atom, Iterable):
+            atom = (atom,)
+        else:
+            atom = tuple(sorted(atom))
+        return atom in self._simplex_trie
 
     def __repr__(self) -> str:
         """Return string representation that can be used to recreate it.
@@ -955,11 +952,7 @@ class SimplexView(AtomView[Simplex]):
         str
             Returns the __repr__ representation of the object.
         """
-        all_simplices: list[tuple[int, ...]] = []
-        for i in range(len(self.faces_dict)):
-            all_simplices += [tuple(j) for j in self.faces_dict[i]]
-
-        return f"SimplexView({all_simplices})"
+        return f"SimplexView({[tuple(simplex.elements) for simplex in self._simplex_trie]})"
 
     def __str__(self) -> str:
         """Return detailed string representation of the simplex view.
@@ -969,11 +962,7 @@ class SimplexView(AtomView[Simplex]):
         str
             Returns the __str__ representation of the object.
         """
-        all_simplices: list[tuple[int, ...]] = []
-        for i in range(len(self.faces_dict)):
-            all_simplices += [tuple(j) for j in self.faces_dict[i]]
-
-        return f"SimplexView({all_simplices})"
+        return f"SimplexView({[tuple(simplex.elements) for simplex in self._simplex_trie]})"
 
 
 class NodeView:
@@ -981,7 +970,7 @@ class NodeView:
 
     Parameters
     ----------
-    objectdict : dict
+    nodes : dict[Hashable, Any]
         A dictionary of nodes with their attributes.
     cell_type : type
         The type of the cell.
@@ -989,22 +978,19 @@ class NodeView:
         Whether or not the nodes are colored.
     """
 
-    def __init__(self, objectdict, cell_type, colored_nodes: bool = False) -> None:
+    def __init__(self, nodes: dict[Hashable, Any], cell_type, colored_nodes: bool = False) -> None:
         """Initialize an instance of the Node view class.
 
         Parameters
         ----------
-        objectdict : dict
+        nodes : dict[Hashable, Any]
             A dictionary of nodes with their attributes.
         cell_type : type
             The type of the cell.
-        colored_nodes : bool, optional, default = False
+        colored_nodes : bool, default = False
             Whether or not the nodes are colored.
         """
-        if len(objectdict) != 0:
-            self.nodes = objectdict[0]
-        else:
-            self.nodes = {}
+        self.nodes = nodes
 
         if cell_type is None:
             raise ValueError("cell_type cannot be None")
@@ -1020,9 +1006,7 @@ class NodeView:
         str
             Returns the __repr__ representation of the object.
         """
-        all_nodes = [tuple(j) for j in self.nodes]
-
-        return f"NodeView({all_nodes})"
+        return f"NodeView({list(map(tuple, self.nodes.keys()))})"
 
     def __iter__(self) -> Iterator:
         """Return an iterator over all nodes in the node view.
@@ -1099,12 +1083,13 @@ class NodeView:
             return False
 
 
-class PathView(SimplexView):
+class PathView(AtomView[Path]):
     """Path view class."""
 
     def __init__(self) -> None:
         """Initialize an instance of the Path view class."""
-        super().__init__()
+        self.max_dim = -1
+        self.faces_dict = []
 
     def __getitem__(self, path: Any) -> dict:
         """Get the dictionary of attributes associated with the given path.
@@ -1138,6 +1123,16 @@ class PathView(SimplexView):
 
         raise KeyError(f"input {path} is not in the path dictionary")
 
+    def __iter__(self) -> Iterator:
+        """Return an iterator over all paths in the path view.
+
+        Returns
+        -------
+        Iterator
+            Iterator over all paths in the paths view.
+        """
+        return chain.from_iterable(self.faces_dict)
+
     def __contains__(self, atom: Any) -> bool:
         """Check if a path is in the path view.
 
@@ -1164,6 +1159,16 @@ class PathView(SimplexView):
         elif isinstance(atom, Hashable):
             return (atom,) in self.faces_dict[0]
         return False
+
+    def __len__(self) -> int:
+        """Return the number of simplices in the SimplexView instance.
+
+        Returns
+        -------
+        int
+            Returns the number of simplices in the SimplexView instance.
+        """
+        return sum(self.shape)
 
     def __repr__(self) -> str:
         """Return string representation that can be used to recreate it.
@@ -1192,3 +1197,14 @@ class PathView(SimplexView):
             all_paths += [tuple(j) for j in self.faces_dict[i]]
 
         return f"PathView({all_paths})"
+
+    @property
+    def shape(self) -> tuple[int, ...]:
+        """Return the number of paths in each dimension.
+
+        Returns
+        -------
+        tuple of ints
+            A tuple of integers representing the number of paths in each dimension.
+        """
+        return tuple(len(self.faces_dict[i]) for i in range(len(self.faces_dict)))

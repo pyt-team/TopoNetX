@@ -34,10 +34,18 @@ class TestSimplicialComplex:
         sc = SimplicialComplex()
         assert sc.shape == ()
 
+        # make sure that empty dimensions are not part of the shape after removal
+        sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
+        sc.remove_nodes([2, 3])
+        assert sc.shape == (3, 1)
+
     def test_dim_property(self):
         """Test dim property."""
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         assert sc.dim == 2
+
+        sc.remove_nodes([2, 3])
+        assert sc.dim == 1
 
     def test_nodes_property(self):
         """Test nodes property."""
@@ -61,6 +69,8 @@ class TestSimplicialComplex:
         """Test is_maximal method."""
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
         assert sc.is_maximal([1, 2, 3])
+        assert not sc.is_maximal([1, 2])
+        assert not sc.is_maximal([3])
 
         with pytest.raises(ValueError):
             sc.is_maximal([1, 2, 3, 4])
@@ -80,20 +90,16 @@ class TestSimplicialComplex:
 
     def test_skeleton_raise_errors(self):
         """Test skeleton raises."""
+        G = nx.Graph()
+        G.add_edge(0, 1)
+        G.add_edge(2, 5)
+        G.add_edge(5, 4, weight=5)
+        SC = SimplicialComplex(G)
+
         with pytest.raises(ValueError):
-            G = nx.Graph()
-            G.add_edge(0, 1)
-            G.add_edge(2, 5)
-            G.add_edge(5, 4, weight=5)
-            SC = SimplicialComplex(G)
             SC.skeleton(-2)
 
         with pytest.raises(ValueError):
-            G = nx.Graph()
-            G.add_edge(0, 1)
-            G.add_edge(2, 5)
-            G.add_edge(5, 4, weight=5)
-            SC = SimplicialComplex(G)
             SC.skeleton(2)
 
     def test_str(self):
@@ -140,7 +146,7 @@ class TestSimplicialComplex:
         # with pytest.raises(ValueError):
         assert SC[(1, 2, 3)]["heat"] == 5
         with pytest.raises(KeyError):
-            SC[(1, 2, 3, 4, 5)]["heat"]
+            _ = SC[(1, 2, 3, 4, 5)]["heat"]
 
     def test_setting_simplex_attributes(self):
         """Test setting simplex attributes through a `SimplicialComplex` object."""
@@ -150,37 +156,20 @@ class TestSimplicialComplex:
         G.add_edge(5, 4, weight=5)
         SC = SimplicialComplex(G, name="graph complex")
         SC.add_simplex((1, 2, 3), heat=5)
-        # with pytest.raises(ValueError):
 
         SC[(1, 2, 3)]["heat"] = 6
-
         assert SC[(1, 2, 3)]["heat"] == 6
 
         SC[(2, 5)]["heat"] = 1
-
         assert SC[(2, 5)]["heat"] == 1
 
         s = Simplex((1, 2, 3, 4), heat=1)
         SC.add_simplex(s)
         assert SC[(1, 2, 3, 4)]["heat"] == 1
 
-        s = Simplex(("A"), heat=1)
+        s = Simplex(("A",), heat=1)
         SC.add_simplex(s)
         assert SC["A"]["heat"] == 1
-
-    def test_maxdim(self):
-        """Test deprecated maxdim property for deprecation warning."""
-        with pytest.deprecated_call():
-            # Cause a warning by accessing the deprecated maxdim property
-            SC = SimplicialComplex()
-            max_dim = SC.maxdim
-            assert max_dim == -1
-
-        with pytest.deprecated_call():
-            # Cause a warning by accessing the deprecated maxdim property
-            SC = SimplicialComplex([[1, 2, 3]])
-            max_dim = SC.maxdim
-            assert max_dim == 2
 
     def test_add_simplices_from(self):
         """Test add simplices from."""
@@ -208,13 +197,11 @@ class TestSimplicialComplex:
         assert SC.dim == -1
         SC.add_node(9)
         assert SC.dim == 0
-        assert SC[9]["is_maximal"] is True
 
         SC = SimplicialComplex()
         assert SC.dim == -1
         SC.add_node(9)
         assert SC.dim == 0
-        assert SC[9]["is_maximal"] is True
 
     def test_add_simplex(self):
         """Test add_simplex method."""
@@ -262,22 +249,14 @@ class TestSimplicialComplex:
 
     def test_remove_maximal_simplex(self):
         """Test remove_maximal_simplex method."""
-        # create a SimplicialComplex object with a few simplices
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-
-        # remove a maximal simplex using the remove_maximal_simplex() method
         SC.remove_maximal_simplex([1, 2, 3])
 
-        # check that the simplex was removed correctly (tuple)
         assert (1, 2, 3) not in SC.simplices
 
-        # create a SimplicialComplex object with a few simplices
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4]])
-
-        # remove a maximal simplex from the complex
         SC.remove_maximal_simplex([2, 3, 4])
 
-        # check that the simplex was removed correctly (list)
         assert [2, 3, 4] not in SC.simplices
 
         # check after the add_simplex method
@@ -297,7 +276,7 @@ class TestSimplicialComplex:
         assert (1, 2, 3, 4, 5) not in SC
 
         # check error when simplex not in complex
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             SC = SimplicialComplex()
             SC.add_simplex((1, 2, 3, 4), weight=1)
             SC.remove_maximal_simplex([5, 6, 7])
@@ -323,7 +302,6 @@ class TestSimplicialComplex:
         assert SC.is_maximal([0, 1])
         assert SC.is_maximal([1, 3])
         assert SC.is_maximal([3, 4])
-        assert SC.is_maximal([4])
         assert not SC.is_maximal([1])
 
     def test_skeleton_and_cliques(self):
@@ -346,15 +324,10 @@ class TestSimplicialComplex:
 
     def test_incidence_matrix_1(self):
         """Test incidence_matrix shape and values."""
-        # create a SimplicialComplex object with a few simplices
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 
-        # compute the incidence matrix using the boundary_matrix() method
         B2 = SC.incidence_matrix(rank=2)
-
         assert B2.shape == (6, 2)
-
-        # assert that the incidence matrix is correct
         np.testing.assert_array_equal(
             B2.toarray(),
             np.array([[0, 1, -1, 1, 0, 0], [0, 0, 0, 1, -1, 1]]).T,
@@ -363,8 +336,6 @@ class TestSimplicialComplex:
         # repeat the same test, but with signed=False
         B2 = SC.incidence_matrix(rank=2, signed=False)
         assert B2.shape == (6, 2)
-
-        # assert that the incidence matrix is correct
         np.testing.assert_array_equal(
             B2.toarray(),
             np.array([[0, 1, 1, 1, 0, 0], [0, 0, 0, 1, 1, 1]]).T,
@@ -523,9 +494,11 @@ class TestSimplicialComplex:
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 4])
         SC.add_simplex([3, 4, 8])
+
         cofaces = SC.get_cofaces([1, 2, 4], codimension=1)
-        assert frozenset({1, 2, 3, 4}) in cofaces
-        assert frozenset({3, 4, 8}) not in cofaces
+        cofaces = list(map(lambda simplex: simplex.elements, cofaces))
+        assert (1, 2, 3, 4) in cofaces
+        assert (3, 4, 8) not in cofaces
         # ... add more assertions based on the expected cofaces
 
     def test_get_star(self):
@@ -534,9 +507,12 @@ class TestSimplicialComplex:
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 4])
         SC.add_simplex([3, 4, 8])
+
         star = SC.get_star([1, 2, 4])
-        assert frozenset({1, 2, 4}) in star
-        assert frozenset({1, 2, 3, 4}) in star
+        star = list(map(lambda simplex: simplex.elements, star))
+
+        assert (1, 2, 4) in star
+        assert (1, 2, 3, 4) in star
         # ... add more assertions based on the expected star
 
     def test_set_simplex_attributes(self):
@@ -640,6 +616,8 @@ class TestSimplicialComplex:
     def test_is_triangular_mesh(self):
         """Test is_triangular_mesh."""
         SC = stanford_bunny("simplicial")
+        print("dim", SC.dim)
+        print(list(SC.get_all_maximal_simplices()))
         assert SC.is_triangular_mesh()
 
         # test for non triangular mesh
@@ -737,13 +715,10 @@ class TestSimplicialComplex:
 
     def test_to_cell_complex(self):
         """Test to convert SimplicialComplex to Cell Complex."""
-        c1 = Simplex((1, 2, 3))
-        c2 = Simplex((1, 2, 4))
-        c3 = Simplex((2, 5))
-        SC = SimplicialComplex([c1, c2, c3])
+        SC = SimplicialComplex([(1, 2, 3), (1, 2, 4), (2, 5)])
         CC = SC.to_cell_complex()
-        assert set(CC.edges) == {(2, 5), (2, 3), (2, 1), (2, 4), (3, 1), (1, 4)}
-        assert set(CC.nodes) == {2, 5, 3, 1, 4}
+        assert set(CC.nodes) == {1, 2, 3, 4, 5}
+        assert set(CC.edges) == {(2, 1), (3, 1), (2, 3), (2, 4), (1, 4), (2, 5)}
 
     def test_to_combinatorial_complex(self):
         """Convert a SimplicialComplex to a CombinatorialComplex and compare the number of cells and nodes."""
@@ -812,11 +787,13 @@ class TestSimplicialComplex:
 
     def test_get_all_maximal_simplices(self):
         """Retrieve all maximal simplices from a SimplicialComplex and compare the number of simplices."""
-        c1 = Simplex((1, 2, 3))
-        c2 = Simplex((1, 2, 4))
-        c3 = Simplex((1, 2, 5))
-        SC = SimplicialComplex([c1, c2, c3])
-        result = SC.get_all_maximal_simplices()
+        SC = SimplicialComplex([(1, 2)])
+        assert set(
+            map(lambda simplex: simplex.elements, SC.get_all_maximal_simplices())
+        ) == {(1, 2)}
+
+        SC = SimplicialComplex([(1, 2, 3), (1, 2, 4), (1, 2, 5)])
+        result = list(SC.get_all_maximal_simplices())
         assert len(result) == 3
 
     def test_coincidence_matrix(self):
@@ -839,31 +816,21 @@ class TestSimplicialComplex:
 
     def test_down_laplacian_matrix(self):
         """Test the down_laplacian_matrix method of SimplicialComplex."""
-        # Test case 1: Rank is within valid range
         SC = SimplicialComplex()
         SC.add_simplex([1, 2, 3])
         SC.add_simplex([4, 5, 6])
-        rank = 1
-        signed = True
-        weight = None
-        index = False
 
-        result = SC.down_laplacian_matrix(rank, signed, weight, index)
-
-        # Assert the result is of type scipy.sparse.csr.csr_matrix
+        # Test case 1: Rank is within valid range
+        result = SC.down_laplacian_matrix(rank=1, signed=True, weight=None, index=False)
         assert result.shape == (6, 6)
 
         # Test case 2: Rank is below the valid range
-        rank = 0
-
         with pytest.raises(ValueError):
-            SC.down_laplacian_matrix(rank, signed, weight, index)
+            SC.down_laplacian_matrix(rank=0, signed=True, weight=None, index=False)
 
         # Test case 3: Rank is above the valid range
-        rank = 5
-
         with pytest.raises(ValueError):
-            SC.down_laplacian_matrix(rank, signed, weight, index)
+            SC.down_laplacian_matrix(rank=5, signed=True, weight=None, index=False)
 
     def test_adjacency_matrix2(self):
         """Test the adjacency_matrix method of SimplicialComplex."""
@@ -872,27 +839,17 @@ class TestSimplicialComplex:
         SC.add_simplex([4, 5, 6])
 
         # Test case 1: Rank is within valid range
-        rank = 1
-        signed = False
-        weight = None
-        index = False
+        result = SC.adjacency_matrix(rank=1, signed=True, weight=None, index=False)
 
-        result = SC.adjacency_matrix(rank, signed, weight, index)
-
-        # Assert the result is of type scipy.sparse.csr.csr_matrix
         assert result.shape == (6, 6)
 
         # Test case 2: Rank is below the valid range
-        rank = -1
-
         with pytest.raises(ValueError):
-            SC.adjacency_matrix(rank, signed, weight, index)
+            SC.adjacency_matrix(rank=-1, signed=False, weight=None, index=False)
 
         # Test case 3: Rank is above the valid range
-        rank = 5
-
         with pytest.raises(ValueError):
-            SC.adjacency_matrix(rank, signed, weight, index)
+            SC.adjacency_matrix(rank=5, signed=False, weight=None, index=False)
 
     def test_dirac_operator_matrix(self):
         """Test dirac operator."""
