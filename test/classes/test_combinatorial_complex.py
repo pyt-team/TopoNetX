@@ -70,7 +70,7 @@ class TestCombinatorialComplex:
         assert (1, 2, 3) in CC.cells
         with pytest.raises(ValueError) as ex:
             CC.add_cell(HyperEdge([1]), 3)
-            assert (
+        assert (
                 str(ex.value)
                 == "violation of the combinatorial complex condition : the hyperedge frozenset({1, 2, 3}) in the complex has rank 2 is smaller than 3, the rank of the input hyperedge frozenset({1}) "
             )
