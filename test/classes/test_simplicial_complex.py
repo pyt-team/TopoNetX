@@ -616,7 +616,7 @@ class TestSimplicialComplex:
 
     def test_is_triangular_mesh(self):
         """Test is_triangular_mesh."""
-        SC = stanford_bunny()
+        SC = stanford_bunny("simplicial")
         assert SC.is_triangular_mesh()
 
         # test for non triangular mesh
@@ -628,7 +628,7 @@ class TestSimplicialComplex:
 
     def test_to_trimesh(self):
         """Test to_trimesh."""
-        SC = stanford_bunny()
+        SC = stanford_bunny("simplicial")
         trimesh_obj = SC.to_trimesh()
         assert len(trimesh_obj.vertices) == len(SC.skeleton(0))
 
@@ -642,7 +642,7 @@ class TestSimplicialComplex:
 
     def test_laplace_beltrami_operator(self):
         """Test laplace_beltrami_operator."""
-        SC = stanford_bunny()
+        SC = stanford_bunny("simplicial")
 
         laplacian_matrix = SC.laplace_beltrami_operator()
 
@@ -658,7 +658,7 @@ class TestSimplicialComplex:
 
     def test_is_connected(self):
         """Test is connected."""
-        SC = stanford_bunny()
+        SC = stanford_bunny("simplicial")
         assert SC.is_connected()
 
     def test_simplicial_closure_of_hypergraph(self):

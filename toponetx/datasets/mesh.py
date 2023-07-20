@@ -38,23 +38,23 @@ COSEG_DS_MAP = {
 
 
 @overload
-def stanford_bunny(complex_type: Literal["cell"] = ...) -> CellComplex:
+def stanford_bunny(complex_type: Literal["cell"]) -> CellComplex:
     ...
 
 
 @overload
-def stanford_bunny(complex_type: Literal["simplicial"] = ...) -> SimplicialComplex:
+def stanford_bunny(complex_type: Literal["simplicial"]) -> SimplicialComplex:
     ...
 
 
 def stanford_bunny(
-    complex_type: Literal["cell", "simplicial"] = "simplicial"
+    complex_type: Literal["cell", "simplicial"]
 ) -> CellComplex | SimplicialComplex:
     """Load the Stanford Bunny mesh as a complex.
 
     Parameters
     ----------
-    complex_type : {'cell', 'simplicial'}, default='simplicial'
+    complex_type : {'cell', 'simplicial'}
         The type of complex to load. Supported values are
         "simplicial complex" and "cell complex".
         The default is "simplicial complex".
