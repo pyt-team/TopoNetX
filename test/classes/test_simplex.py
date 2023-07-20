@@ -45,6 +45,22 @@ class TestSimplex:
         assert 3 not in s
         assert (1, 2) in s
 
+    def test_le(self) -> None:
+        """Test the __le__ method of the simplex."""
+        s1 = Simplex([1, 2])
+        s2 = Simplex([1, 2])
+        s3 = Simplex([1, 2, 3])
+        s4 = Simplex([4])
+
+        assert s1 <= s2
+        assert s1 <= s3
+        assert not s3 <= s1
+        assert s1 <= s4
+        assert s3 <= s4
+
+        with pytest.raises(TypeError):
+            _ = s1 <= 1
+
     def test_boundary(self):
         """Test the boundary property of the simplex."""
         s = Simplex((1, 2, 3))

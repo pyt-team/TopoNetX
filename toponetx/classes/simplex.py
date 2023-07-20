@@ -2,17 +2,22 @@
 
 import warnings
 from collections.abc import Collection, Hashable, Iterable
+from functools import total_ordering
 from itertools import combinations
-from typing import Any
+from typing import Generic, TypeVar
 
 from typing_extensions import Self, deprecated
 
 from toponetx.classes.complex import Atom
+from toponetx.utils.iterable import is_ordered_subset
 
 __all__ = ["Simplex"]
 
+ElementType = TypeVar("ElementType", bound=Hashable)
 
-class Simplex(Atom[frozenset[Hashable]]):
+
+@total_ordering
+class Simplex(Atom, Generic[ElementType]):
     """A class representing a simplex in a simplicial complex.
 
     This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension. The
@@ -20,7 +25,7 @@ class Simplex(Atom[frozenset[Hashable]]):
 
     Parameters
     ----------
-    elements : Collection
+    elements : Collection[Hashable]
         The nodes in the simplex.
     construct_tree : bool, default=True
         If True, construct the entire simplicial tree for the simplex.
@@ -40,9 +45,11 @@ class Simplex(Atom[frozenset[Hashable]]):
     >>> simplex3 = tnx.Simplex((1, 2, 4, 5), weight=1)
     """
 
+    elements: frozenset[Hashable]
+
     def __init__(
         self,
-        elements: Collection,
+        elements: Collection[ElementType],
         construct_tree: bool = False,
         **kwargs,
     ) -> None:
@@ -55,15 +62,12 @@ class Simplex(Atom[frozenset[Hashable]]):
                 stacklevel=2,
             )
 
-        for i in elements:
-            if not isinstance(i, Hashable):
-                raise ValueError(f"All nodes of a simplex must be hashable, got {i}")
-
-        super().__init__(frozenset(sorted(elements)), **kwargs)
-        if len(elements) != len(self.elements):
+        if len(elements) != len(set(elements)):
             raise ValueError("A simplex cannot contain duplicate nodes.")
 
-    def __contains__(self, item: Any) -> bool:
+        super().__init__(tuple(sorted(elements)), **kwargs)
+
+    def __contains__(self, item: ElementType | Iterable[ElementType]) -> bool:
         """Return True if the given element is a subset of the nodes.
 
         Parameters
@@ -89,8 +93,26 @@ class Simplex(Atom[frozenset[Hashable]]):
         False
         """
         if isinstance(item, Iterable):
-            return frozenset(item) <= self.elements
+            item = tuple(sorted(item))
+            return is_ordered_subset(item, self.elements)
         return super().__contains__(item)
+
+    def __le__(self, other) -> bool:
+        """Return True if this simplex comes before the other simplex in the lexicographic order.
+
+        Parameters
+        ----------
+        other : Any
+            The other simplex to compare with.
+
+        Returns
+        -------
+        bool
+            True if this simplex comes before the other simplex in the lexicographic order.
+        """
+        if not isinstance(other, Simplex):
+            return NotImplemented
+        return tuple(self.elements) <= tuple(other.elements)
 
     @staticmethod
     def validate_attributes(attributes: dict) -> None:
@@ -113,8 +135,10 @@ class Simplex(Atom[frozenset[Hashable]]):
 
     @staticmethod
     @deprecated("`Simplex.construct_simplex_tree` is deprecated.")
-    def construct_simplex_tree(elements: Collection) -> frozenset["Simplex"]:
-        """Return set of Simplex objects representing the faces.
+    def construct_simplex_tree(
+        elements: Collection[ElementType],
+    ) -> frozenset["Simplex[ElementType]"]:
+        """Return the set of Simplex objects representing the faces.
 
         Parameters
         ----------
@@ -129,16 +153,14 @@ class Simplex(Atom[frozenset[Hashable]]):
         faceset = set()
         for r in range(len(elements), 0, -1):
             for face in combinations(elements, r):
-                faceset.add(
-                    Simplex(elements=sorted(face), construct_tree=False)
-                )  # any face is always ordered
+                faceset.add(Simplex(elements=face, construct_tree=False))
         return frozenset(faceset)
 
     @property
     @deprecated(
         "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead."
     )
-    def boundary(self) -> frozenset["Simplex"]:
+    def boundary(self) -> frozenset["Simplex[ElementType]"]:
         """Return the set of the set of all n-1 faces in of the input n-simplex.
 
         Returns
@@ -156,7 +178,7 @@ class Simplex(Atom[frozenset[Hashable]]):
             for elements in combinations(self.elements, len(self) - 1)
         )
 
-    def sign(self, face) -> int:
+    def sign(self, face: "Simplex[ElementType]") -> int:
         """Calculate the sign of the simplex with respect to a given face.
 
         Parameters
@@ -170,7 +192,7 @@ class Simplex(Atom[frozenset[Hashable]]):
     @deprecated(
         "`Simplex.faces` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead."
     )
-    def faces(self):
+    def faces(self) -> frozenset["Simplex[ElementType]"]:
         """Get the set of faces of the simplex.
 
         If `construct_tree` is True, return the precomputed set of faces `_faces`.

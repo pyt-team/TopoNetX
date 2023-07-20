@@ -235,7 +235,9 @@ class CombinatorialComplex(ColoredHyperGraph):
             Returns all the nodes of the combinatorial complex.
         """
         return NodeView(
-            self._complex_set.hyperedge_dict, cell_type=HyperEdge, colored_nodes=False
+            self._complex_set.hyperedge_dict.get(0, {}),
+            cell_type=HyperEdge,
+            colored_nodes=False,
         )
 
     @property
