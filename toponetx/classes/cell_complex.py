@@ -53,13 +53,13 @@ class CellComplex(Complex):
     of 2d cell complexes. If higher dimensional cell complexes are desired
     then one should utilize the class CombinatorialComplex.
 
-    Mathtmatically, in TNX a cell complex it a triplet (V, E, C)
+    Mathematically, in TNX a cell complex it a triplet (V, E, C)
     where V is a set of nodes, E is a set of edges and C is a set of 2-cells.
     In TNX each 2-cell C is consists of a finite sequence of nodes C=(n1,...,nk,n1) with k>=2.
     All edges between two consecutive nodes in C belong to  E.
     Regular cells have unique nodes in C whereas non-regular cells allow for duplication.
 
-    In TNX cell complexes are implementes to be dynamic in the sense that
+    In TNX, cell complexes are implemented to be dynamic in the sense that
     they can change by adding or subtracting objects (nodes, edges, 2-cells)
     from them.
 
@@ -2353,7 +2353,7 @@ class CellComplex(Complex):
             diams.append(diamc)
         return diams, comps
 
-    def diameter(self):
+    def diameter(self) -> int:
         """Return length of the longest shortest s-walk between nodes.
 
         Parameters
@@ -2382,7 +2382,7 @@ class CellComplex(Complex):
             return nx.diameter(G)
         raise TopoNetXError("cc is not connected.")
 
-    def cell_diameter(self, s=1):
+    def cell_diameter(self, s: int = 1) -> int:
         """Return the length of the longest shortest s-walk between cells.
 
         Parameters
@@ -2468,7 +2468,8 @@ class CellComplex(Complex):
 
         Returns
         -------
-        s- walk distance : the shortest s-walk cell distance
+        int
+            Shortest s-walk cell distance between `source` and `target`.
             A shortest s-walk is computed as a sequence of cells,
             the s-walk distance is the number of cells in the sequence
             minus 1. If no such path exists returns np.inf.
@@ -2501,7 +2502,7 @@ class CellComplex(Complex):
             warnings.warn(f"No {s}-path between {source} and {target}")
             return np.inf
 
-    def from_networkx_graph(self, G):
+    def from_networkx_graph(self, G: nx.Graph) -> None:
         """Add edges and nodes from a graph G to self.
 
         Examples

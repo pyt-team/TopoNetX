@@ -11,7 +11,6 @@ import networkx as nx
 import numpy as np
 from gudhi import SimplexTree
 from hypernetx import Hypergraph
-from networkx import Graph
 from scipy.sparse import coo_matrix, dok_matrix
 
 from toponetx.classes.complex import Complex
@@ -26,7 +25,7 @@ class SimplicialComplex(Complex):
     """Class representing a simplicial complex.
 
     Class for construction boundary operators, Hodge Laplacians,
-    higher order (co)adjacency operators from collection of
+    higher order (co)adjacency operators from a collection of
     simplices.
 
     A simplicial complex is a topological space of a specific kind, constructed by
@@ -48,7 +47,7 @@ class SimplicialComplex(Complex):
     which are a type of topological space constructed by "gluing together" points, line segments,
     triangles, and higher-dimensional counterparts. The class provides methods for computing boundary
     operators, Hodge Laplacians, and higher-order adjacency operators on the simplicial complex.
-    It also allows for compatibility with the NetworkX and gudhi libraries.
+    It also allows for compatibility with NetworkX and the GUDHI library.
 
     Features
     --------
@@ -88,17 +87,18 @@ class SimplicialComplex(Complex):
 
     >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
 
-    TopoNetX is also compatible with NetworkX, allowing users to create a simplicial complex from a NetworkX graph:
+    TopoNetX is also compatible with NetworkX, allowing users to create a simplicial complex from a NetworkX graph.
+    Existing node and edge attributes are copied to the simplicial complex:
 
-    >>> G = Graph() # networkx G
+    >>> G = nx.Graph()
     >>> G.add_edge(0, 1, weight=4)
-    >>> G.add_edge(0, 3)
-    >>> G.add_edge(0, 4)
-    >>> G.add_edge(1, 4)
+    >>> G.add_edges_from([(0, 3), (0, 4), (1, 4)])
     >>> SC = SimplicialComplex(simplices=G)
     >>> SC.add_simplex([1, 2, 3])
     >>> SC.simplices
     SimplexView([(0,), (1,), (3,), (4,), (2,), (0, 1), (0, 3), (0, 4), (1, 4), (1, 2), (1, 3), (2, 3), (1, 2, 3)])
+    >>> SC[(0, 1)]["weight"]
+    4
     """
 
     def __init__(self, simplices=None, name: str = "", **kwargs) -> None:
@@ -106,7 +106,7 @@ class SimplicialComplex(Complex):
 
         self._simplex_set = SimplexView()
 
-        if isinstance(simplices, Graph):
+        if isinstance(simplices, nx.Graph):
             _simplices = {}
             for simplex, data in simplices.nodes(
                 data=True
@@ -185,7 +185,7 @@ class SimplicialComplex(Complex):
         Raises
         ------
         ValueError
-            If simplex is not in simplicial complex.
+            If simplex is not in the simplicial complex.
 
         Examples
         --------
@@ -371,7 +371,7 @@ class SimplicialComplex(Complex):
             else:
                 simplex_ = simplex.elements
         if simplex_ in self._simplex_set.faces_dict[len(simplex_) - 1]:
-            if self[simplex]["is_maximal"]:
+            if self.is_maximal(simplex):
                 del self._simplex_set.faces_dict[len(simplex_) - 1][simplex_]
                 faces = Simplex(simplex_).faces
                 for s in faces:
@@ -782,15 +782,17 @@ class SimplicialComplex(Complex):
 
         Parameters
         ----------
-        d : int, dimension of the Laplacian matrix.
-        signed : bool, is true return absolute value entry of the Laplacian matrix
+        d : int
+            Dimension of the Laplacian matrix.
+        signed : bool, default=True
+            Whether to return the signed or unsigned hodge laplacian.
             This is useful when one needs to obtain higher-order
             adjacency matrices from the hodge-laplacian
             typically higher-order adjacency matrices' entries are
             typically positive.
         weight : bool, default=False
-        index : boolean, optional, default False
-            Indicates wheather to return the indices that define the incidence matrix.
+        index : bool, default=False
+            Indicates whether to return the indices that define the incidence matrix.
 
         Returns
         -------
@@ -1385,7 +1387,7 @@ class SimplicialComplex(Complex):
         Parameters
         ----------
         H : hyernetx hypergraph
-        Hypergraph.
+            The hypergraph to compute the simplicial complex closure of.
 
         Returns
         -------

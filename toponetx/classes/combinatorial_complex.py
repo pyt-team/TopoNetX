@@ -444,7 +444,7 @@ class CombinatorialComplex(Complex):
             raise TopoNetXError("Input cell is not in cells of the CC")
         return len(self._complex_set[cell])
 
-    def number_of_nodes(self, node_set=None):
+    def number_of_nodes(self, node_set=None) -> int:
         """Compute the number of nodes in node_set belonging to the CC.
 
         Parameters
@@ -460,7 +460,7 @@ class CombinatorialComplex(Complex):
             return len([node for node in node_set if node in self.nodes])
         return len(self.nodes)
 
-    def number_of_cells(self, cell_set=None):
+    def number_of_cells(self, cell_set=None) -> int:
         """Compute the number of cells in cell_set belonging to the CC.
 
         Parameters
@@ -873,8 +873,6 @@ class CombinatorialComplex(Complex):
         rank = self._complex_set.get_rank(hyperedge_)
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
 
-        return
-
     def _add_nodes_from(self, nodes) -> None:
         """Instantiate new nodes when cells are added to the CC.
 
@@ -914,7 +912,7 @@ class CombinatorialComplex(Complex):
         self._add_hyperedge(cell, rank, **attr)
         return self
 
-    def add_cells_from(self, cells, ranks=None):
+    def add_cells_from(self, cells, ranks=None) -> None:
         """Add cells to combinatorial complex.
 
         Parameters
@@ -1541,12 +1539,12 @@ class CombinatorialComplex(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, default=1
             Minimum number of edges shared by neighbors with node.
 
         Returns
         -------
-        diameter : int
+        int
 
         Raises
         ------
@@ -1572,7 +1570,7 @@ class CombinatorialComplex(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, default=1
             Minimum number of edges shared by neighbors with node.
 
         Return
@@ -1612,7 +1610,7 @@ class CombinatorialComplex(Complex):
 
         Returns
         -------
-        s-walk distance : int
+        int
 
         See Also
         --------
@@ -1640,7 +1638,7 @@ class CombinatorialComplex(Complex):
             an cell in the combinatorial complex
         target : cell.uid or cell
             an cell in the combinatorial complex
-        s : int
+        s : int, default=1
             the number of intersections between pairwise consecutive cells
 
         Returns
