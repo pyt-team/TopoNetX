@@ -498,6 +498,10 @@ class TestSimplicialComplex:
             frozenset({0}),
         }
 
+        # test for contradicting min dim/max dim combination
+        boundaries = SimplicialComplex.get_boundaries(simplices, min_dim=2, max_dim=1)
+        assert boundaries == set()
+
     def test_get_cofaces(self):
         """Test the get_cofaces method."""
         SC = SimplicialComplex()

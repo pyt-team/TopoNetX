@@ -64,9 +64,9 @@ class SimplicialComplex(Complex):
 
     Parameters
     ----------
-    simplices : list, optional,  default: None
+    simplices : list, optional
         list of maximal simplices that define the simplicial complex
-    name : hashable, optional, default: None
+    name : hashable, optional
         If None then a placeholder '' will be inserted as name
     kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
@@ -306,13 +306,15 @@ class SimplicialComplex(Complex):
                     ] -= maximal_faces
 
     @staticmethod
-    def get_boundaries(simplices, min_dim=None, max_dim=None):
-        """Get boundaries of simplices.
+    def get_boundaries(
+        simplices: Iterable, min_dim=None, max_dim=None
+    ) -> set[frozenset]:
+        """Get boundaries of the given simplices.
 
         Parameters
         ----------
-        simplices : list
-            list or of simplices, typically integers.
+        simplices : Iterable
+            Iterable of simplices for which to compute the boundaries.
         min_dim : int, optional
             constrain the max dimension of faces
         max_dim : int, optional
@@ -320,8 +322,9 @@ class SimplicialComplex(Complex):
 
         Returns
         -------
-        face_set : set
-            DESCRIPTION. list of tuples or all faces at all levels (subsets) of the input list of simplices
+        set of frozensets
+            Set of simplices that are boundaries of the given simplices. If `min_dim` or `max_dim` are given, only
+            simplices with dimension in the given range are returned.
         """
         if not isinstance(simplices, Iterable):
             raise TypeError(
@@ -330,20 +333,14 @@ class SimplicialComplex(Complex):
 
         face_set = set()
         for simplex in simplices:
-            numnodes = len(simplex)
-            for r in range(numnodes, 0, -1):
+            start = (
+                min(max_dim + 1, len(simplex)) if max_dim is not None else len(simplex)
+            )
+            end = min_dim if min_dim is not None else 0
+
+            for r in range(start, end, -1):
                 for face in combinations(simplex, r):
-                    if max_dim is None and min_dim is None:
-                        face_set.add(frozenset(face))
-                    elif max_dim is not None and min_dim is not None:
-                        if len(face) <= max_dim + 1 and len(face) >= min_dim + 1:
-                            face_set.add(frozenset(face))
-                    elif max_dim is not None and min_dim is None:
-                        if len(face) <= max_dim + 1:
-                            face_set.add(frozenset(face))
-                    elif max_dim is None and min_dim is not None:
-                        if len(face) >= min_dim + 1:
-                            face_set.add(frozenset(face))
+                    face_set.add(frozenset(face))
 
         return face_set
 
