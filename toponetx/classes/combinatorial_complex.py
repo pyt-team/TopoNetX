@@ -671,6 +671,7 @@ class CombinatorialComplex(Complex):
                 for cell in self.cells
                 if name in self.cells[cell].properties
             }
+        
     def add_hyperedge_with_its_nodes(self, hyperedge_, rank, **attr):
         self._complex_set.hyperedge_dict[rank][hyperedge_].update(attr)
         for i in hyperedge_:
