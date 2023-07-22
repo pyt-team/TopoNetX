@@ -16,27 +16,25 @@ DIR = Path(__file__).parent
 
 
 @overload
-def karate_club(
-    complex_type: Literal["cell"] = ..., feat_dim: int = ...
-) -> CellComplex:
+def karate_club(complex_type: Literal["cell"], feat_dim: int = ...) -> CellComplex:
     ...
 
 
 @overload
 def karate_club(
-    complex_type: Literal["simplicial"] = ..., feat_dim: int = ...
+    complex_type: Literal["simplicial"], feat_dim: int = ...
 ) -> SimplicialComplex:
     ...
 
 
 def karate_club(
-    complex_type: Literal["cell", "simplicial"] = "simplicial", feat_dim: int = 2
+    complex_type: Literal["cell", "simplicial"], feat_dim: int = 2
 ) -> CellComplex | SimplicialComplex:
     """Load the karate club as featured cell/simplicial complex.
 
     Parameters
     ----------
-    complex_type : {'simplicial','cell'}, default='simplicial'
+    complex_type : {'simplicial','cell'}
         The type of complex to load.
     feat_dim : int, default=2
         The number of eigenvectors to be attached to the simplices/cells
