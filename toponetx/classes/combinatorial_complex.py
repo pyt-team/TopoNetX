@@ -810,7 +810,6 @@ class CombinatorialComplex(Complex):
             self._complex_set.hyperedge_dict[0][hyperedge_set] = {}
             self._complex_set.hyperedge_dict[0][hyperedge_set].update(attr)
             self._complex_set.hyperedge_dict[0][hyperedge_set]["weight"] = 1
-            self._aux_complex.add_simplex(Simplex(hyperedge_set), r=0)
         else:
 
             for node in hyperedge_:
@@ -818,7 +817,7 @@ class CombinatorialComplex(Complex):
                     for existing_hyperedge in self._node_membership[node]:
                         e_rank = self._complex_set.get_rank(existing_hyperedge)
                         if rank > e_rank:
-                            if not hyperedge_.issuperset(existing_hyperedge):
+                            if existing_hyperedge.issuperset(hyperedge_):
                                 raise ValueError(
                                     "a violation of the combinatorial complex condition:"
                                     + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
