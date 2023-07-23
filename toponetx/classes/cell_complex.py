@@ -1782,7 +1782,7 @@ class CellComplex(Complex):
             self.cells.cell_weight dictionary values.
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
-            dependeing on the input dimension
+            depending on the input dimension
 
         Returns
         -------
@@ -1791,7 +1791,7 @@ class CellComplex(Complex):
         when index is true:
             return also a list : list
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
-            dependeing on the input dimension
+            depending on the input dimension
 
         Examples
         --------
@@ -2097,7 +2097,7 @@ class CellComplex(Complex):
         return CX
 
     def euler_characterisitics(self) -> int:
-        """Euler characterisitics of the cell complex."""
+        """Euler characteristics of the cell complex."""
         return len(self.nodes) - len(self.edges) + len(self.cells)
 
     def remove_singletons(self) -> "CellComplex":
@@ -2562,7 +2562,7 @@ class CellComplex(Complex):
         Parameters
         ----------
         file_path: str or pathlib.Path
-            the file path of the data to be loadeded
+            the file path of the data to be loaded
         process : bool, trimesh will try to process the mesh before loading it.
         force: (str or None)
             options: 'mesh' loader will "force" the result into a mesh through concatenation
