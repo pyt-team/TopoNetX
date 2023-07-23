@@ -527,7 +527,6 @@ class CombinatorialComplex(Complex):
         Combinatorial Complex : CombinatorialComplex
         """
         self._remove_node(node)
-        return self
 
     def remove_nodes(self, node_set) -> None:
         """Remove nodes from cells.
