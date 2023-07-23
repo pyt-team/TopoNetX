@@ -329,7 +329,7 @@ class CellComplex(Complex):
         Returns
         -------
         equiv : dict[Cell, set[Cell]]
-            Dict struture: `Cell` representing equivalence class -> Set of all `Cell`s in class
+            Dict structure: `Cell` representing equivalence class -> Set of all `Cell`s in class
 
         Examples
         --------
@@ -455,7 +455,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        node_set : an interable of nodes, optional, default: None
+        node_set : an iterable of nodes, optional, default: None
             If None, then return the number of nodes in cell complex.
 
         Returns
@@ -499,7 +499,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        cell_set : an interable of cells, optional, default: None
+        cell_set : an iterable of cells, optional, default: None
             cells can be represented as a `tuple`, `list`, or `Cell` object
             If None, then return the number of cells in cell complex.
 
@@ -546,7 +546,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        cell : Cell or Iterable representing a acell
+        cell : Cell or Iterable representing a cell
         s : int, default=1
             Minimum number of nodes shared by neighbors cell node.
 
@@ -1247,7 +1247,7 @@ class CellComplex(Complex):
 
         Note
         ------
-        Remove all 2d- cells that are homotpic (equivalent to each other)
+        Remove all 2d- cells that are homotopic (equivalent to each other)
 
         Returns
         -------
@@ -1266,7 +1266,7 @@ class CellComplex(Complex):
         >>> cx.add_cell([3,4,8], rank=2)
         >>> print(cx.cells)
         >>> cx.remove_equivalent_cells()
-        >>> print(cx.cells) # observe homotpic cells have been removed
+        >>> print(cx.cells) # observe homotopic cells have been removed
         """
         self._remove_equivalent_cells()
 
@@ -1341,7 +1341,7 @@ class CellComplex(Complex):
         Returns
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
-            The indicendence matrix, if `index` is False, otherwise
+            The incidence matrix, if `index` is False, otherwise
             lower (row) index dict, upper (col) index dict, incidence matrix
             where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
         """
@@ -1364,7 +1364,7 @@ class CellComplex(Complex):
     def node_to_all_cell_adjacnecy_matrix(
         self, s: int | None = None, weight: bool = False, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
-        """Nodes s-adjaency matrix where adjacency is computed with respect to 2-cells.
+        """Nodes s-adjacency matrix where adjacency is computed with respect to 2-cells.
 
         Two nodes are s-adjacent iff there exists a cell (1 dimensional or 2 dimensional)
         share contain them.
@@ -1381,20 +1381,20 @@ class CellComplex(Complex):
         Returns
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
-            The adjaency matrix, if `index` is False, otherwise
-            index of nodes, adjaency matrix, if 'index' is True
+            The adjacency matrix, if `index` is False, otherwise
+            index of nodes, adjacency matrix, if 'index' is True
         Examples
         --------
         >>> CX = CellComplex()
         >>> CX.add_cell([1, 2, 3, 4], rank=2)
         >>> CX.add_cell([3, 4, 5], rank=2)
-        >>> CX.node_to_all_cell_adjacnecy_matrix().todense()
+        >>> CX.node_to_all_cell_adjacency_matrix().todense()
         matrix([[0., 2., 1., 2., 0.],
                 [2., 0., 2., 1., 0.],
                 [1., 2., 0., 3., 2.],
                 [2., 1., 3., 0., 2.],
                 [0., 0., 2., 2., 0.]])
-        >>> # observe the constrast with the regular adjaency matrix
+        >>> # observe the contrast with the regular adjacency matrix
         >>> CX.adjacency_matrix(0).todense()
         matrix([[0., 1., 0., 1., 0.],
                 [1., 0., 1., 0., 0.],
@@ -1431,8 +1431,8 @@ class CellComplex(Complex):
         Returns
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
-            The adjaency matrix, if `index` is False, otherwise
-            index of cells, adjaency matrix, if 'index' is True
+            The adjacency matrix, if `index` is False, otherwise
+            index of cells, adjacency matrix, if 'index' is True
         """
         if index:
             node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
@@ -1467,7 +1467,7 @@ class CellComplex(Complex):
         Returns
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
-            The indicendence matrix, if `index` is False, otherwise
+            The incidence matrix, if `index` is False, otherwise
             lower (row) index dict, upper (col) index dict, incidence matrix
             where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
 
@@ -1619,7 +1619,7 @@ class CellComplex(Complex):
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
         index : boolean, default False
-            indicates wheather to return the indices that define the Laplacian matrix
+            indicates whether to return the indices that define the Laplacian matrix
 
         Returns
         -------
@@ -1712,7 +1712,7 @@ class CellComplex(Complex):
             self.cells.cell_weight dictionary values.
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
-            dependeing on the input dimension
+            depending on the input dimension
 
         Returns
         -------
@@ -1721,7 +1721,7 @@ class CellComplex(Complex):
         when index is true:
             return also a list : list
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
-            dependeing on the input dimension
+            depending on the input dimension
 
         Examples
         --------
