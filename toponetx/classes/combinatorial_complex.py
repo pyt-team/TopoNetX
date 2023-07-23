@@ -512,7 +512,7 @@ class CombinatorialComplex(Complex):
             raise KeyError(f"node {node} not in CombinatorialComplex")
         self._remove_node_helper(node)
 
-    def remove_node(self, node):
+    def remove_node(self, node) -> None:
         """Remove node from cells.
 
         This also deletes any reference in the nodes of the CC.
