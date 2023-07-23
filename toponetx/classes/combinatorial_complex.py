@@ -115,7 +115,7 @@ class CombinatorialComplex(Complex):
                             )
                         if cell.rank is None:
                             raise ValueError(f"input HyperEdge {cell} has None rank")
-                        self.add_cell(cell, cell.rank)
+                        self.add_cell(cell, rank=cell.rank)
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
                         if len(cells) != len(ranks):
@@ -788,9 +788,9 @@ class CombinatorialComplex(Complex):
             hyperedge_set = frozenset({hyperedge})
         elif isinstance(hyperedge, Iterable) or isinstance(hyperedge, HyperEdge):
             hyperedge_ = (
-                hyperedge
+                hyperedge.elements
                 if isinstance(hyperedge, HyperEdge)
-                else frozenset(sorted(hyperedge))
+                else frozenset(hyperedge)
             )
             if not all(isinstance(i, Hashable) for i in hyperedge_):
                 raise ValueError("every element hyperedge must be hashable.")
@@ -815,32 +815,35 @@ class CombinatorialComplex(Complex):
             for node in hyperedge_:
                 if node in self._node_membership:
                     for existing_hyperedge in self._node_membership[node]:
-                        e_rank = self._complex_set.get_rank(existing_hyperedge)
-                        if rank > e_rank:
-                            if existing_hyperedge.issuperset(hyperedge_):
-                                raise ValueError(
-                                    "a violation of the combinatorial complex condition:"
-                                    + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
-                                )
+                        if existing_hyperedge == hyperedge_:
+                            continue
+                        else:
+                            e_rank = self._complex_set.get_rank(existing_hyperedge)
+                            if rank > e_rank:
+                                if existing_hyperedge.issuperset(hyperedge_):
+                                    raise ValueError(
+                                        "a violation of the combinatorial complex condition:"
+                                        + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
+                                    )
 
-                        if rank < e_rank:
-                            if hyperedge_.issuperset(existing_hyperedge):
-                                raise ValueError(
-                                    "violation of the combinatorial complex condition : "
-                                    + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
-                                )
+                            if rank < e_rank:
+                                if hyperedge_.issuperset(existing_hyperedge):
+                                    raise ValueError(
+                                        "violation of the combinatorial complex condition : "
+                                        + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
+                                    )
                 self._add_hyperedge_helper(hyperedge_set, rank, **attr)
                 self._complex_set.hyperedge_dict[rank][hyperedge_set]["weight"] = 1
                 if isinstance(hyperedge, HyperEdge):
                     self._complex_set.hyperedge_dict[rank][hyperedge_set].update(
-                        hyperedge.properties
+                        hyperedge._properties
                     )
             else:
                 self._add_hyperedge_helper(hyperedge_set, rank, **attr)
                 self._complex_set.hyperedge_dict[rank][hyperedge_set]["weight"] = 1
                 if isinstance(hyperedge, HyperEdge):
                     self._complex_set.hyperedge_dict[rank][hyperedge_set].update(
-                        hyperedge.properties
+                        hyperedge._properties
                     )
 
     def _remove_hyperedge(self, hyperedge) -> None:

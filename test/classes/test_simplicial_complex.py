@@ -9,13 +9,12 @@ import spharapy.spharabasis as sb
 import spharapy.trimesh as tm
 from gudhi import SimplexTree
 
-from toponetx import (
-    CombinatorialComplex,
-    Simplex,
-    SimplicialComplex,
-    TopoNetXError,
-    stanford_bunny,
-)
+from toponetx.classes.cell_complex import CellComplex
+from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.simplex import Simplex
+from toponetx.classes.simplicial_complex import SimplicialComplex
+from toponetx.datasets.mesh import stanford_bunny
+from toponetx.exception import TopoNetXError
 
 
 class TestSimplicialComplex:

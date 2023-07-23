@@ -8,7 +8,8 @@ from typing import Literal, overload
 import numpy as np
 import requests
 
-from toponetx import CellComplex, SimplicialComplex
+from toponetx.classes.cell_complex import CellComplex
+from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = ["stanford_bunny", "shrec_16", "coseg"]
 
