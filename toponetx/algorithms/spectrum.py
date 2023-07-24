@@ -107,14 +107,14 @@ def set_hodge_laplacian_eigenvector_attrs(
 
     Parameters
     ----------
-    complex : a SimplialComplex/CellComplex object
+    complex : a SimplicialComplex/CellComplex object
         Complex.
     dim : int
         Dimension of the hodge laplacian to be computed.
     n_components : int
         The number of eigenvectors to be computed
     laplacian_type : str
-        Rype of hodge matrix to be computed,
+        Type of hodge matrix to be computed,
         options : up, down, hodge
     normalized : bool
         Normalize the eigenvector or not.
@@ -165,7 +165,7 @@ def set_laplacian_beltrami_eigenvectors(complex) -> None:
 
     Parameters
     ----------
-    complex : a SimplialComplex object
+    complex : a SimplicialComplex object
         Complex.
 
     Examples
@@ -246,7 +246,7 @@ def simplicial_complex_hodge_laplacian_spectrum(
 
     Examples
     --------
-    >>> from toponets import SimplicialComplex
+    >>> from toponetx import SimplicialComplex
     >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> spectrum=simplicial_complex_hodge_laplacian_spectrum(SC,1)
     """
