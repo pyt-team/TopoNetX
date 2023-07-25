@@ -107,6 +107,18 @@ class TestCombinatorialComplex:
         assert B.shape == (4, 2)
         assert (B.T[0].todense() == [1, 1, 1, 0]).all()
         assert (B.T[1].todense() == [0, 1, 1, 1]).all()
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3, 2], rank=1)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        B, row, col = CC.incidence_matrix(1, index=True)
+        assert B[(frozenset({1, 2}))] == 0
+        assert B[(frozenset({1, 2, 3}))] == 1
+        assert B[(frozenset({2, 5}))] == 2
 
     def test_incidence_matrix_to_rank_none(self):
         """Test generating an incidence matrix without setting the to_rank parameter."""
@@ -314,6 +326,7 @@ class TestCombinatorialComplex:
             node = 7
             assert CC.degree(node, 2)
         assert str(exp.value) == "'Node 7 not in Combinatorial Complex.'"
+        assert CC.degree(1, rank=None) == 5
 
     def test_size(self):
         """Test for the size function."""
@@ -453,6 +466,14 @@ class TestCombinatorialComplex:
         example1.set_node_attributes(d)
         assert example1.nodes.nodes[frozenset({node})]["color"] == "red"
         example1.get_node_attributes("color") == {frozenset({4}): "red"}
+        node = 6
+        d = {node: "red"}
+        example1.set_node_attributes(d, "color")
+        # assert example1.nodes.
+        assert example1.get_node_attributes("color") == {
+            frozenset({4}): "red",
+            frozenset({6}): "red",
+        }
 
     def test_add_cells(self):
         """Test for the add_cells method."""
@@ -527,3 +548,41 @@ class TestCombinatorialComplex:
             [1, 2, 3],
             [1, 3],
         ]
+
+    def test_cell_node_adjacency_matrix(self):
+        """Test for the cells adjacency matrix method."""
+        CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        B = CC.incidence_matrix(rank=0, to_rank=2)
+        assert B.shape == (4, 2)
+        assert (B.T[0].todense() == [1, 1, 1, 0]).all()
+        assert (B.T[1].todense() == [0, 1, 1, 1]).all()
+        CC = CombinatorialComplex()
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([1, 2], rank=1)
+        CC.add_cell([1, 3, 2], rank=1)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 6, 4], rank=2)
+        B, row, col = CC.incidence_matrix(1, index=True)
+        assert B[(frozenset({1, 2}))] == 0
+        assert B[(frozenset({1, 2, 3}))] == 1
+        assert B[(frozenset({2, 5}))] == 2
+        assert (
+            CC.cell_adjacency_matrix().todense()
+            == [
+                [0, 1, 1, 0, 0, 0],
+                [1, 0, 1, 0, 1, 0],
+                [1, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+            ]
+        ).all()
+        (
+            CC.node_adjacency_matrix().todense() == [[0, 1, 1], [1, 0, 1], [1, 1, 0]]
+        ).all()
+        assert CC.diameter() == 1
+        with pytest.raises(TopoNetXError) as exp:
+            CC.diameter(s=2)
+        assert str(exp.value) == "CC is not s-connected. s=2"
