@@ -571,7 +571,7 @@ class CombinatorialComplex(Complex):
         if name is not None:
             for cell, value in values.items():
                 try:
-                    self.nodes[cell] = value
+                    self.nodes[cell][name] = value
                 except AttributeError:
                     pass
 
@@ -1018,11 +1018,11 @@ class CombinatorialComplex(Complex):
     def get_all_incidence_structure_dict(self):
         """Get all incidence structure dictionary."""
         d = {}
-        for r in range(1, self.dim):
+        for r in range(1, self.dim + 1):
             B0r = sparse_array_to_neighborhood_dict(
                 self.incidence_matrix(rank=0, to_rank=r)
             )
-            d["B_0_" + {r}] = B0r
+            d["B_0_" + str(r)] = B0r
         return d
 
     def remove_cells(self, cell_set):
