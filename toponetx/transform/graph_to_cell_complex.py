@@ -7,7 +7,7 @@ __all__ = [
 
 import networkx as nx
 
-from toponetx import CellComplex
+from toponetx.classes.cell_complex import CellComplex
 
 
 def homology_cycle_cell_complex(G):

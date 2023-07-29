@@ -1,7 +1,7 @@
 """Module with views.
 
 Such as:
-HyperEdgeView, CellView, SimplexView.
+HyperEdgeView, CellView, SimplexView, NodeView.
 """
 from collections.abc import Collection, Hashable, Iterable, Iterator
 from itertools import chain
@@ -9,10 +9,10 @@ from typing import Any
 
 import numpy as np
 
-from toponetx import TopoNetXError
 from toponetx.classes.cell import Cell
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.simplex import Simplex
+from toponetx.exception import TopoNetXError
 
 __all__ = ["HyperEdgeView", "CellView", "SimplexView", "NodeView"]
 
