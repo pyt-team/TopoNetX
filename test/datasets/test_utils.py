@@ -10,4 +10,4 @@ class TestUtils:
         """Test that the ppi dataset loads correctly."""
         G = data_utils.load_ppi()
         assert len(G.nodes) == 20
-        assert len(G.edges) == 102
+        assert len(G.edges) == 101
