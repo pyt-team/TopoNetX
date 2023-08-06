@@ -262,7 +262,6 @@ class HyperEdgeView:
                     if frozenset(e) in hyperedges:
                         return True
                 return False
-
         elif isinstance(e, HyperEdge):
             if len(e) == 0:
                 return False
@@ -271,13 +270,8 @@ class HyperEdgeView:
                     if frozenset(e.elements) in hyperedges:
                         return True
                 return False
-
         elif isinstance(e, Hashable):
             return frozenset({e}) in self.hyperedge_dict[0]
-
-        else:
-
-            return False
 
     def __repr__(self) -> str:
         """Return string representation of hyperedges.
