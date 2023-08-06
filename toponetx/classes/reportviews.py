@@ -303,17 +303,17 @@ class HyperEdgeView:
 
         elif level == "upper" or level == "up":
             elements = []
-            for rank in self.allranks:
-                if rank >= rank:
+            for rank_i in self.allranks:
+                if rank_i >= rank:
 
-                    elements = elements + list(self.hyperedge_dict[rank].keys())
+                    elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
 
         elif level == "lower" or level == "down":
             elements = []
-            for rank in self.allranks:
-                if rank <= rank:
-                    elements = elements + list(self.hyperedge_dict[rank].keys())
+            for rank_i in self.allranks:
+                if rank_i <= rank:
+                    elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
         else:
             raise TopoNetXError(
