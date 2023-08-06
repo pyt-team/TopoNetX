@@ -110,7 +110,7 @@ class CellView:
         if isinstance(cell, Cell):
 
             if cell.elements not in self._cells:
-                raise KeyError(f"cell {cell} is not in the cell dictionary")
+                raise KeyError(f"cell {cell.__repr__()} is not in the cell dictionary")
 
             # If there is only one cell with these elements, return its properties
             elif len(self._cells[cell.elements]) == 1:
@@ -153,12 +153,12 @@ class CellView:
             ]
         )
 
-    def __contains__(self, e: Any) -> bool:
+    def __contains__(self, e: tuple | list | Cell) -> bool:
         """Check if a given element is in the cell view.
 
         Parameters
         ----------
-        e : Iterable
+        e : tuple, list, or cell
             The element to check.
 
         Returns
@@ -166,10 +166,19 @@ class CellView:
         bool
             Whether or not the element is in the cell view.
         """
-        if not isinstance(e, Iterable):
-            return False
-        e = tuple(e)
-        return e in self._cells
+        while True:
+            if isinstance(e, Cell):
+                break
+            elif isinstance(e, tuple):
+                break
+            elif isinstance(e, list):
+                break
+            else:
+                raise TypeError("Input must be of type: tuple, list or a cell.")
+
+        e = Cell(e)
+        e_homotopic_to = [e.is_homotopic_to(x) for x in self._cells]
+        return any(e_homotopic_to)
 
     def __repr__(self) -> str:
         """Return a string representation of the cell view."""
