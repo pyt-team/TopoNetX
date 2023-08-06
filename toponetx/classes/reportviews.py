@@ -331,7 +331,20 @@ class HyperEdgeView:
         -------
         int, the rank of the hyperedge e
         """
-        if isinstance(e, Iterable):
+        if isinstance(e, HyperEdge):
+            if len(e) == 0:
+                return 0
+            else:
+                for i in list(self.allranks):
+                    if frozenset(e.elements) in self.hyperedge_dict[i]:
+                        return i
+                raise KeyError(f"hyperedge {e.elements} is not in the complex")
+        elif isinstance(e, str):
+            if frozenset({e}) in self.hyperedge_dict[0]:
+                return 0
+            else:
+                raise KeyError(f"hyperedge {frozenset({e})} is not in the complex")
+        elif isinstance(e, Iterable):
             if len(e) == 0:
                 return 0
             else:
@@ -339,31 +352,11 @@ class HyperEdgeView:
                     if frozenset(e) in self.hyperedge_dict[i]:
                         return i
                 raise KeyError(f"hyperedge {e} is not in the complex")
-
-        elif isinstance(e, HyperEdge):
-
-            if len(e) == 0:
-                return 0
-            else:
-                for i in list(self.allranks):
-
-                    if frozenset(e.elements) in self.hyperedge_dict[i]:
-                        return i
-                raise KeyError(f"hyperedge {e} is not in the complex")
-
         elif isinstance(e, Hashable) and not isinstance(e, Iterable):
-
-            if e in self.hyperedge_dict[0]:
+            if frozenset({e}) in self.hyperedge_dict[0]:
                 return 0
             else:
-                raise KeyError(f"hyperedge {e} is not in the complex")
-
-        elif isinstance(e, str):
-
-            if e in self.hyperedge_dict[0]:
-                return 0
-            else:
-                raise KeyError(f"hyperedge {e} is not in the complex")
+                raise KeyError(f"hyperedge {frozenset({e})} is not in the complex")
 
     @property
     def allranks(self):
