@@ -280,7 +280,7 @@ class HyperEdgeView:
         -------
         str
         """
-        return f"HyperEdgeView([{map(tuple, self)}])"
+        return f"HyperEdgeView({[tuple(x) for x in self]})"
 
     def __str__(self) -> str:
         """Return string representation of hyperedges.
@@ -289,7 +289,7 @@ class HyperEdgeView:
         -------
         str
         """
-        return f"HyperEdgeView([{map(tuple, self)}])"
+        return f"HyperEdgeView({[tuple(x) for x in self]})"
 
     def skeleton(self, rank, level=None):
         """Skeleton of the complex."""
