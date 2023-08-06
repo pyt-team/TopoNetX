@@ -2,9 +2,11 @@
 
 import pytest
 
+from toponetx import CombinatorialComplex, HyperEdge
 from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.reportviews import CellView, HyperEdgeView, NodeView, SimplexView
+from toponetx.exception import TopoNetXError
 
 
 class TestReportViews_CellView:
@@ -242,3 +244,261 @@ class TestReportViews_CellView:
 
 class TestReportViews_HyperEdgeView:
     """Test the HyperEdgeView class of the ReportView class."""
+
+    def test_hyper_edge_view_to_frozenset(self):
+        """Testing the _to_frozen_set static method of the Hyperedge View Class."""
+        he_1 = HyperEdge((1, 2, 3, 4), rank=2)
+        he_2 = HyperEdge({1, 2, 3, 4}, rank=2)
+        he_3 = [1, 2, 3, 4]
+        he_4 = (1, 2, 3, 4)
+        he_5 = 1
+
+        assert HyperEdgeView._to_frozen_set(he_1) == frozenset({1, 2, 3, 4})
+        assert HyperEdgeView._to_frozen_set(he_2) == frozenset({1, 2, 3, 4})
+        assert HyperEdgeView._to_frozen_set(he_3) == frozenset({1, 2, 3, 4})
+        assert HyperEdgeView._to_frozen_set(he_4) == frozenset({1, 2, 3, 4})
+        assert HyperEdgeView._to_frozen_set(he_5) == frozenset({1})
+
+    def test_hyper_edge_view_contains(self):
+        """Test the __contains__ method for the Hyperedge View Class."""
+        hev = HyperEdgeView(name="testing_hev")
+
+        he_1 = HyperEdge((1, 2, 3, 4), rank=2)
+        he_2 = HyperEdge({1, 2, 3, 5}, rank=2)
+        he_3 = [1, 2, 3, 4]
+        he_4 = (1, 2, 3, 5)
+        he_5 = []
+        he_6 = HyperEdge({}, rank=1)
+
+        CC = CombinatorialComplex([he_1], name="trial_CC")
+        hev_2 = CC._complex_set
+
+        assert hev.__contains__(he_1) is False
+        assert hev.__contains__(he_5) is False
+        assert hev.__contains__(he_6) is False
+
+        assert hev_2.__contains__(he_1) is True
+        assert hev_2.__contains__(he_2) is False
+        assert hev_2.__contains__(he_3) is True
+        assert hev_2.__contains__(he_4) is False
+
+    def test_hyper_edge_view_repr(self):
+        """Test the __repr__ method for the Hyperedge View Class."""
+        he_1 = HyperEdge((1, 2, 3, 4), rank=2)
+
+        CC = CombinatorialComplex([he_1], name="trial_CC")
+
+        assert (
+            CC._complex_set.__repr__()
+            == "HyperEdgeView([(1, 2, 3, 4), (1,), (2,), (3,), (4,)])"
+        )
+
+    def test_hyper_edge_view_str(self):
+        """Test the __str__ method for the Hyperedge View Class."""
+        he_1 = HyperEdge((1, 2, 3, 4), rank=2)
+
+        CC = CombinatorialComplex([he_1], name="trial_CC")
+
+        assert (
+            CC._complex_set.__str__()
+            == "HyperEdgeView([(1, 2, 3, 4), (1,), (2,), (3,), (4,)])"
+        )
+
+    def test_hyper_edge_view_skeleton(self):
+        """Test the skeleton method for the Hyperedge View Class."""
+        he_1 = HyperEdge((1, 2, 3, 4), rank=2)
+
+        CC = CombinatorialComplex([he_1], name="trial_CC")
+        hev = CC._complex_set
+
+        assert hev.skeleton(rank=0) == [
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+        ]
+
+        assert hev.skeleton(rank=2) == [frozenset({1, 2, 3, 4})]
+
+        assert hev.skeleton(rank=3) == []
+
+        assert hev.skeleton(rank=0, level="upper") == [
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+            frozenset({1, 2, 3, 4}),
+        ]
+
+        assert hev.skeleton(rank=2, level="upper") == [frozenset({1, 2, 3, 4})]
+
+        assert hev.skeleton(rank=3, level="upper") == []
+
+        assert hev.skeleton(rank=0, level="up") == [
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+            frozenset({1, 2, 3, 4}),
+        ]
+
+        assert hev.skeleton(rank=2, level="up") == [frozenset({1, 2, 3, 4})]
+
+        assert hev.skeleton(rank=3, level="up") == []
+
+        assert hev.skeleton(rank=0, level="down") == [
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+        ]
+
+        assert hev.skeleton(rank=2, level="down") == [
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+            frozenset({1, 2, 3, 4}),
+        ]
+
+        assert hev.skeleton(rank=0, level="lower") == [
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+        ]
+
+        assert hev.skeleton(rank=2, level="lower") == [
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+            frozenset({1, 2, 3, 4}),
+        ]
+
+        with pytest.raises(TopoNetXError) as exp_exception:
+            hev.skeleton(rank=2, level="should_raise_error")
+
+        assert (
+            str(exp_exception.value)
+            == "level must be None, equal, 'upper', 'lower', 'up', or 'down' "
+        )
+
+    def test_hyper_edge_view_get_rank(self):
+        """Test the get_rank method of the Hyperedge View Class."""
+        he_1 = HyperEdge((1, 2, 3, 4), rank=2)
+
+        CC = CombinatorialComplex([he_1], name="trial_CC")
+        hev = CC._complex_set
+
+        assert hev.get_rank([]) == 0
+
+        assert hev.get_rank([1]) == 0
+
+        assert hev.get_rank([1, 2, 3, 4]) == 2
+
+        with pytest.raises(KeyError) as exp_exception:
+            hev.get_rank([1, 4, 5, 8])
+
+        assert (
+            str(exp_exception.value) == "'hyperedge [1, 4, 5, 8] is not in the complex'"
+        )
+
+        he_2 = HyperEdge({}, rank=1)
+
+        assert hev.get_rank(he_2) == 0
+
+        he_3 = HyperEdge({1}, rank=0)
+
+        assert hev.get_rank(he_3) == 0
+
+        assert hev.get_rank(he_1) == 2
+
+        he_4 = HyperEdge({8, 1, 9, 7})
+
+        with pytest.raises(KeyError) as exp_exception:
+            hev.get_rank(he_4)
+
+        assert (
+            str(exp_exception.value)
+            == f"'hyperedge {he_4.elements} is not in the complex'"
+        )
+
+        assert hev.get_rank(1) == 0
+        assert hev.get_rank(2) == 0
+
+        with pytest.raises(KeyError) as exp_exception:
+            hev.get_rank(6)
+
+        assert (
+            str(exp_exception.value)
+            == "'hyperedge frozenset({6}) is not in the complex'"
+        )
+
+        he_5 = HyperEdge(("1", "2", "3", "4"), rank=2)
+
+        CC_2 = CombinatorialComplex([he_5], name="trial_CC")
+        hev_2 = CC_2._complex_set
+
+        with pytest.raises(KeyError) as exp_exception:
+            hev_2.get_rank("6")
+
+        assert (
+            str(exp_exception.value)
+            == "\"hyperedge frozenset({'6'}) is not in the complex\""
+        )
+
+        assert hev_2.get_rank("1") == 0
+        assert hev_2.get_rank("2") == 0
+
+    def test_hyper_edge_view_get_lower_rank(self):
+        """Test the _get_lower_rank method of the Hyperedge View Class."""
+        CC = CombinatorialComplex([], name="trial_CC")
+        hev = CC._complex_set
+
+        assert hev._get_lower_rank(rank=1) == -1
+
+        he_1 = HyperEdge((1, 2, 3, 4), rank=2)
+        he_2 = HyperEdge((1, 2, 3, 4, 6, 7), rank=3)
+
+        CC = CombinatorialComplex([he_1, he_2], name="trial_CC")
+        hev = CC._complex_set
+
+        assert hev._get_lower_rank(rank=3) == -1
+
+        assert hev._get_lower_rank(rank=0) == -1
+
+        assert hev._get_lower_rank(rank=5) == -1
+
+        assert hev._get_lower_rank(rank=2) == 0
+
+        with pytest.raises(ValueError) as e:
+            hev._get_lower_rank(rank=1)
+
+        assert str(e.value) == "1 is not in list"
+
+    def test_hyper_edge_view_get_higher_rank(self):
+        """Test the _get_higher_rank method of the Hyperedge View Class."""
+        CC = CombinatorialComplex([], name="trial_CC")
+        hev = CC._complex_set
+
+        assert hev._get_higher_rank(rank=1) == -1
+
+        he_1 = HyperEdge((1, 2, 3, 4), rank=2)
+        he_2 = HyperEdge((1, 2, 3, 4, 6, 7), rank=3)
+
+        CC = CombinatorialComplex([he_1, he_2], name="trial_CC")
+        hev = CC._complex_set
+
+        assert hev._get_higher_rank(rank=3) == -1
+
+        assert hev._get_higher_rank(rank=0) == -1
+
+        assert hev._get_higher_rank(rank=6) == -1
+
+        assert hev._get_higher_rank(rank=2) == 3
+
+        with pytest.raises(ValueError) as e:
+            hev._get_higher_rank(rank=1)
+
+        assert str(e.value) == "1 is not in list"
