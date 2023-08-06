@@ -217,8 +217,6 @@ class HyperEdgeView:
             hyperedge_ = hyperedge.elements
         elif isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
             hyperedge_ = frozenset([hyperedge])
-        else:
-            hyperedge_ = frozenset(hyperedge)
         return hyperedge_
 
     def __getitem__(self, hyperedge):
