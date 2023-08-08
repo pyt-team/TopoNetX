@@ -8,6 +8,7 @@ from toponetx.exception import (
 
 from .classes.cell import Cell
 from .classes.cell_complex import CellComplex
+from .classes.colored_hypergraph import ColoredHyperGraph
 from .classes.combinatorial_complex import CombinatorialComplex
 from .classes.complex import Complex
 from .classes.hyperedge import HyperEdge
