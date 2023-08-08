@@ -58,8 +58,11 @@ class TestHyperEdgeCases:
         """Test the string representation of a HyperEdge."""
         elements = (1, 2, 3)
         hyperedge = HyperEdge(elements)
-        # expected_repr = f"HyperEdge{elements}"
+        expected_repr = (
+            f"Nodes set: {tuple(hyperedge.elements)}, rank: {hyperedge.rank}"
+        )
         assert isinstance(repr(hyperedge), str)
+        assert repr(hyperedge) == expected_repr
 
     def test_hyperedge_str(self):
         """Test the string conversion of a HyperEdge."""
