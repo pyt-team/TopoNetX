@@ -56,6 +56,10 @@ class HyperEdge(Atom):
         """
         return f"Nodes set: {tuple(self.elements)}, attrs: {self._properties}"
 
+    def __repr__(self):
+        """Return a string representation of HyperEdge."""
+        return f"Nodes set: {tuple(self.elements)}, rank: {self._rank}"
+
     def __hash__(self):
         """Return a hash code representation of the HyperEdge."""
         return hash((self.elements, self._rank))

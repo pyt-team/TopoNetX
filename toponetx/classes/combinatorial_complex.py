@@ -488,14 +488,14 @@ class CombinatorialComplex(Complex):
             for key_rank in list(self.cells.hyperedge_dict[key].keys()):
                 replace_key = key_rank.difference(node)
                 if len(replace_key) > 0:
-                    # Removing node removes all references to the node and leaves the remaining hyperedges untouched
-                    self.cells.hyperedge_dict[key][
-                        replace_key
-                    ] = self.cells.hyperedge_dict[key][key_rank]
                     if key_rank != replace_key:
+                        self._max_complex.difference_update(
+                            {HyperEdge(key_rank, rank=key)}
+                        )
                         del self.cells.hyperedge_dict[key][key_rank]
                 else:
                     # Remove original hyperedge from the ranks
+                    self._max_complex.difference_update({HyperEdge(key_rank, rank=key)})
                     del self.cells.hyperedge_dict[key][key_rank]
             if self.cells.hyperedge_dict[key] == {}:
                 del self.cells.hyperedge_dict[key]
