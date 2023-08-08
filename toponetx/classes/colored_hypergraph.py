@@ -13,11 +13,6 @@ from toponetx.classes.reportviews import HyperEdgeView, NodeView
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
-from toponetx.utils.structure import (
-    _compute_incidence_matrix,
-    incidence_to_adjacency,
-    sparse_array_to_neighborhood_dict,
-)
 
 __all__ = ["ColoredHyperGraph"]
 
@@ -754,10 +749,10 @@ class ColoredHyperGraph(Complex):
         if rank == to_rank:
             raise ValueError("incidence must be computed for k!=r, got equal r and k.")
 
-        children = self.skeleton(rank)
-        uidset = self.skeleton(to_rank)
+        # children = self.skeleton(rank)
+        # uidset = self.skeleton(to_rank)
 
-        return _compute_incidence_matrix(children, uidset, sparse, index)
+        # return _compute_incidence_matrix(children, uidset, sparse, index)
 
     def incidence_matrix(
         self,
