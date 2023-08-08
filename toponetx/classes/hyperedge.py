@@ -57,16 +57,49 @@ class HyperEdge(Atom):
         return f"Nodes set: {tuple(self.elements)}, attrs: {self._properties}"
 
     def __repr__(self):
-        """Return a string representation of HyperEdge."""
+        """Return a string representation of the HyperEdge.
+
+        Returns
+        -------
+        str
+            A string representation of the HyperEdge.
+        """
         return f"Nodes set: {tuple(self.elements)}, rank: {self._rank}"
 
     def __hash__(self):
-        """Return a hash code representation of the HyperEdge."""
+        """Return a hash representation of the HyperEdge using its elements and rank.
+
+        Returns
+        -------
+        int
+            A hashed representation of the HyperEdge.
+        """
         return hash((self.elements, self._rank))
 
     def __eq__(self, other):
-        """Return true if and only if the HyperEdge's elements are rank are equal."""
-        return self.elements == other.elements and self._rank == other._rank
+        """Return a bool True if and only if all attributes of HyperEdge objects are equal.
+
+        Returns
+        -------
+        bool
+            A boolean value if the HyperEdge objects are equal.
+        """
+        if isinstance(other, HyperEdge):
+            return self.__dict__ == other.__dict__  # check all attributes
+        return NotImplemented
+
+    def __ne__(self, other):
+        """Return a bool True if and only if any attributes of HyperEdge objects are not equal.
+
+        Returns
+        -------
+        bool
+            A boolean value if the HyperEdge objects are not equal.
+        """
+        x = self.__eq__(other)
+        if x is not NotImplemented:
+            return not x
+        return NotImplemented
 
     @property
     def rank(self):
