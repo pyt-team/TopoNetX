@@ -55,6 +55,15 @@ class HyperEdge(Atom):
             A string representation of the HyperEdge.
         """
         return f"Nodes set: {tuple(self.elements)}, attrs: {self._properties}"
+    
+    def __hash__(self):
+        return hash((self.elements,self._rank))
+
+    def __eq__(self,other):
+        return self.elements == other.elements and self._rank == other._rank   
+    
+    def __repr__(self):
+        return str((self.elements,self._rank))
 
     @property
     def rank(self):

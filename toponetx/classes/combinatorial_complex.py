@@ -21,17 +21,6 @@ from toponetx.utils.structure import (
 
 __all__ = ["CombinatorialComplex"]
 
-class Maximal_Cell(HyperEdge):
-    def __hash__(self):
-        return hash((self.elements,self._rank))
-
-    def __eq__(self,other):
-        return self.elements == other.elements and self._rank == other._rank   
-    
-    def __repr__(self):
-        return str((self.elements,self._rank))
-
-
 class CombinatorialComplex(Complex):
     """Class for Combinatorial Complex.
 
@@ -811,7 +800,7 @@ class CombinatorialComplex(Complex):
             hyperedge_set = hyperedge_
         else:
             raise ValueError("Invalid hyperedge type")
-        cell_add = Maximal_Cell(hyperedge_set,rank = rank)
+        cell_add = HyperEdge(hyperedge_set,rank = rank)
         for elem in self._max_complex:
             # Check if the element is a superset
             if elem.elements.issuperset(cell_add.elements):
@@ -824,7 +813,7 @@ class CombinatorialComplex(Complex):
                                 + f"the hyperedge {elem.elements} in the complex has rank {elem._rank} is larger than {cell_add._rank}, the rank of the input hyperedge {cell_add.elements} "
                             )
 
-        self._max_complex.add(Maximal_Cell(hyperedge_set,rank = rank))
+        self._max_complex.add(HyperEdge(hyperedge_set,rank = rank))
         self._add_hyperedge_helper(hyperedge_set, rank, **attr)
         # This is O(N) time complexity to add a hyper edge with O(N) space complexity
         if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_set]:
@@ -918,6 +907,7 @@ class CombinatorialComplex(Complex):
             hyperedge_ = frozenset(hyperedge)
         rank = self._complex_set.get_rank(hyperedge_)
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
+        self._max_complex.difference_update({HyperEdge(hyperedge_,rank = rank)})
 
     def _add_nodes_from(self, nodes) -> None:
         """Instantiate new nodes when cells are added to the CC.
