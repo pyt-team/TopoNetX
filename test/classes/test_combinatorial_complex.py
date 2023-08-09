@@ -3,7 +3,9 @@
 import networkx as nx
 import pytest
 
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.combinatorial_complex import (
+    CombinatorialComplex2 as CombinatorialComplex,
+)
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.exception import TopoNetXError
 
@@ -322,7 +324,7 @@ class TestCombinatorialComplex:
         with pytest.raises(KeyError) as exp:
             node = 7
             assert CC.degree(node, 2)
-        assert str(exp.value) == "'Node 7 not in Combinatorial Complex.'"
+        assert str(exp.value) == "'Node 7 not in CC.'"
         assert CC.degree(1, rank=None) == 5
 
     def test_size(self):
@@ -387,7 +389,7 @@ class TestCombinatorialComplex:
         }
         with pytest.raises(KeyError) as exp:
             example.remove_nodes([1])
-        assert str(exp.value) == "'node 1 not in CombinatorialComplex'"
+        assert str(exp.value) == "'node 1 not in CC'"
         example.remove_nodes([2, 5])
         assert example._complex_set.hyperedge_dict == {
             0: {
