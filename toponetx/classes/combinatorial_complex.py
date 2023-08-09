@@ -2028,7 +2028,7 @@ class CombinatorialComplex2(ColoredHyperGraph):
         -------
         Combinatorial Complex : CombinatorialComplex
         """
-        return super().add_cell(cells, ranks=None)
+        return super().add_cells_from(cells, ranks)
 
     def _remove_hyperedge(self, hyperedge) -> None:
         if hyperedge not in self.cells:
@@ -2044,6 +2044,38 @@ class CombinatorialComplex2(ColoredHyperGraph):
         rank = self._complex_set.get_rank(hyperedge_)
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
         self._max_complex.difference_update({HyperEdge(hyperedge_, rank=rank)})
+
+    def remove_cell(self, cell):
+        """Remove a single cell from CC.
+
+        Parameters
+        ----------
+        cell : hashable or RankedEntity
+
+        Returns
+        -------
+        Combinatorial Complex : CombinatorialComplex
+
+        Notes
+        -----
+        Deletes reference to cell from all of its nodes.
+        If any of its nodes do not belong to any other cells
+        the node is dropped from self.
+        """
+        super().remove_cell(cell)
+
+    def remove_cells(self, cell_set):
+        """Remove cells from CC.
+
+        Parameters
+        ----------
+        cell_set : iterable of hashables
+
+        Returns
+        -------
+        Combinatorial Complex : NestedCombinatorialComplex
+        """
+        super().remove_cells(cell_set)
 
     def clone(self) -> "CombinatorialComplex":
         """Return a copy of the simplex.
