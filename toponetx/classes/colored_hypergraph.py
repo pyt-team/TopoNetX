@@ -1516,7 +1516,7 @@ class ColoredHyperGraph(Complex):
         if nx.is_connected(G):
             return nx.diameter(G)
         else:
-            raise TopoNetXError(f"CHG is not s-connected. s={s}")
+            raise TopoNetXError(f"{self.__shortstr__} is not s-connected. s={s}")
 
     def cell_diameter(self, s: int = 1) -> int:
         """Return length of the longest shortest s-walk between cells.
