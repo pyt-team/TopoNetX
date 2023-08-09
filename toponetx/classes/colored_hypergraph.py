@@ -971,7 +971,7 @@ class ColoredHyperGraph(Complex):
         sparse: bool = True,
         index: bool = False,
     ):
-        """Compute incidence matrix for the CC indexed by nodes x cells.
+        """Compute incidence matrix for the CHG indexed by nodes x cells.
 
         Parameters
         ----------
@@ -1301,7 +1301,7 @@ class ColoredHyperGraph(Complex):
         An s-cell-component has the property that for any two cells e1 and e2
         there is a sequence of cells starting with e1 and ending with e2
         such that pairwise adjacent cells in the sequence intersect in at least
-        s nodes. If s=1 these are the path components of the CC.
+        s nodes. If s=1 these are the path components of the CHG.
 
         If cells=False this method returns s-node-connected components.
         A list of sets of uids of the nodes which are s-walk connected.
@@ -1314,7 +1314,7 @@ class ColoredHyperGraph(Complex):
         ------
         s_connected_components : iterator
             Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
-            components of CC.
+            components of CHG.
         """
         if cells:
             A, coldict = self.cell_adjacency_matrix(s=s, index=True)
@@ -1346,7 +1346,7 @@ class ColoredHyperGraph(Complex):
             Minimum number of edges shared by neighbors with node.
         cells : boolean, optional, cells=False
             Determines if cell or node components are desired. Returns
-            subgraphs equal to the CC restricted to each set of nodes(cells) in the
+            subgraphs equal to the CHG restricted to each set of nodes(cells) in the
             s-connected components or s-cell-connected components
         return_singletons : bool, optional
 
@@ -1469,7 +1469,7 @@ class ColoredHyperGraph(Complex):
         -------
         maximum diameter : int
         list of diameters : list
-            List of cell_diameters for s-cell component subgraphs in CC
+            List of cell_diameters for s-cell component subgraphs in CHG
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
         """
@@ -1502,7 +1502,7 @@ class ColoredHyperGraph(Complex):
         Raises
         ------
         TopoNetXError
-            If CC is not s-cell-connected
+            If CHG is not s-cell-connected
 
         Notes
         -----
@@ -1516,7 +1516,7 @@ class ColoredHyperGraph(Complex):
         if nx.is_connected(G):
             return nx.diameter(G)
         else:
-            raise TopoNetXError(f"CC is not s-connected. s={s}")
+            raise TopoNetXError(f"CHG is not s-connected. s={s}")
 
     def cell_diameter(self, s: int = 1) -> int:
         """Return length of the longest shortest s-walk between cells.
@@ -1547,7 +1547,7 @@ class ColoredHyperGraph(Complex):
         if nx.is_connected(G):
             return nx.diameter(G)
         else:
-            raise TopoNetXError(f"CC is not s-connected. s={s}")
+            raise TopoNetXError(f"CHG is not s-connected. s={s}")
 
     def distance(self, source, target, s: int = 1) -> int:
         """Return shortest s-walk distance between two nodes.
@@ -1555,9 +1555,9 @@ class ColoredHyperGraph(Complex):
         Parameters
         ----------
         source : node.uid or node
-            a node in the CC
+            a node in the CHG
         target : node.uid or node
-            a node in the CC
+            a node in the CHG
         s : int
             the number of cells
 
@@ -1629,7 +1629,7 @@ class ColoredHyperGraph(Complex):
         -------
         ColoredHyperGraph
         """
-        CC = ColoredHyperGraph(name=self.name, graph_based=self.graph_based)
+        CHG = ColoredHyperGraph(name=self.name, graph_based=self.graph_based)
         for cell in self.cells:
-            CC.add_cell(cell, self.cells.get_rank(cell))
-        return CC
+            CHG.add_cell(cell, self.cells.get_rank(cell))
+        return CHG
