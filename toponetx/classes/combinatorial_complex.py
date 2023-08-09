@@ -1743,6 +1743,18 @@ class CombinatorialComplex2(ColoredHyperGraph):
         """
         return super().number_of_cells(cell_set)
 
+    def shape(self):
+        """Return shape.
+
+        This is:
+        (number of cells[i], for i in range(0,dim(CC))  )
+
+        Returns
+        -------
+        tuple of ints
+        """
+        return super().shape()
+
     def order(self):
         """Compute the number of nodes in the CC.
 
@@ -1987,6 +1999,36 @@ class CombinatorialComplex2(ColoredHyperGraph):
             self._complex_set.hyperedge_dict[rank][hyperedge_set].update(
                 hyperedge._properties
             )
+
+    def add_cell(self, cell, rank=None, **attr):
+        """Add a single cells to combinatorial complex.
+
+        Parameters
+        ----------
+        cell : hashable, iterable or HyperEdge
+            If hashable the cell returned will be empty.
+        rank : rank of a cell
+
+        Returns
+        -------
+        Combinatorial Complex : CombinatorialComplex
+        """
+        return super().add_cell(cell, rank, **attr)
+
+    def add_cells_from(self, cells, ranks=None) -> None:
+        """Add cells to combinatorial complex.
+
+        Parameters
+        ----------
+        cells : iterable of hashables
+            For hashables the cells returned will be empty.
+        ranks: Iterable or int. When iterable, len(ranks) == len(cells)
+
+        Returns
+        -------
+        Combinatorial Complex : CombinatorialComplex
+        """
+        return super().add_cell(cells, ranks=None)
 
     def _remove_hyperedge(self, hyperedge) -> None:
         if hyperedge not in self.cells:
