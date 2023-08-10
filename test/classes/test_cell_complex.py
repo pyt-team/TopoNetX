@@ -973,7 +973,7 @@ class TestCellComplex:
         assert CX.size((5, 6, 7, 8), node_set=[6, 7, 8]) == 3
         assert CX.size(c, node_set=[1, 2, 3]) == 3
         with pytest.raises(KeyError):
-            CX.size((1, 2, 3, 4, 5, 5, 6))
+            CX.size((1, 2, 3, 4, 5, 6))
 
     def test_insert_cell(self):
         """Test inserting a cell into the cell complex."""
@@ -1309,7 +1309,10 @@ class TestCellComplex:
         with pytest.raises(KeyError):
             cx.get_cell_data("A", 0, "invalid_attribute")
 
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
+            cx.get_cell_data(["C"], 2, "invalid_attribute")
+
+        with pytest.raises(TypeError):
             cx.get_cell_data("C", 2, "invalid_attribute")
 
         with pytest.raises(KeyError):
