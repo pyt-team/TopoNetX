@@ -1,1 +1,1 @@
-from toponetx.algorithms.spectrum import *
+from .spectrum import *
