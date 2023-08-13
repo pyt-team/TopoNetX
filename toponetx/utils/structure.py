@@ -27,6 +27,13 @@ from collections.abc import Iterable
 
 from scipy.sparse import csr_matrix
 
+__all__ = [
+    "sparse_array_to_neighborhood_list",
+    "neighborhood_list_to_neighborhood_dict",
+    "sparse_array_to_neighborhood_dict",
+    "incidence_to_adjacency",
+]
+
 
 def sparse_array_to_neighborhood_list(
     sparse_array, src_dict=None, dst_dict=None

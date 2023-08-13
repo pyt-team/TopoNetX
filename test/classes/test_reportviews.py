@@ -2,9 +2,7 @@
 
 import pytest
 
-from toponetx import CombinatorialComplex, HyperEdge
-from toponetx.classes.cell import Cell
-from toponetx.classes.cell_complex import CellComplex
+from toponetx.classes import Cell, CellComplex, CombinatorialComplex, HyperEdge
 from toponetx.classes.reportviews import CellView, HyperEdgeView, NodeView, SimplexView
 from toponetx.exception import TopoNetXError
 
