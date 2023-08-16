@@ -110,7 +110,7 @@ class CellView:
         if isinstance(cell, Cell):
 
             if cell.elements not in self._cells:
-                raise KeyError(f"cell {cell} is not in the cell dictionary")
+                raise KeyError(f"cell {cell.__repr__()} is not in the cell dictionary")
 
             # If there is only one cell with these elements, return its properties
             elif len(self._cells[cell.elements]) == 1:
@@ -153,12 +153,12 @@ class CellView:
             ]
         )
 
-    def __contains__(self, e: Any) -> bool:
+    def __contains__(self, e: tuple | list | Cell) -> bool:
         """Check if a given element is in the cell view.
 
         Parameters
         ----------
-        e : Iterable
+        e : tuple, list, or cell
             The element to check.
 
         Returns
@@ -166,10 +166,19 @@ class CellView:
         bool
             Whether or not the element is in the cell view.
         """
-        if not isinstance(e, Iterable):
-            return False
-        e = tuple(e)
-        return e in self._cells
+        while True:
+            if isinstance(e, Cell):
+                break
+            elif isinstance(e, tuple):
+                break
+            elif isinstance(e, list):
+                break
+            else:
+                raise TypeError("Input must be of type: tuple, list or a cell.")
+
+        e = Cell(e)
+        e_homotopic_to = [e.is_homotopic_to(x) for x in self._cells]
+        return any(e_homotopic_to)
 
     def __repr__(self) -> str:
         """Return a string representation of the cell view."""
@@ -208,8 +217,6 @@ class HyperEdgeView:
             hyperedge_ = hyperedge.elements
         elif isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
             hyperedge_ = frozenset([hyperedge])
-        else:
-            hyperedge_ = frozenset(hyperedge)
         return hyperedge_
 
     def __getitem__(self, hyperedge):
@@ -255,7 +262,6 @@ class HyperEdgeView:
                     if frozenset(e) in hyperedges:
                         return True
                 return False
-
         elif isinstance(e, HyperEdge):
             if len(e) == 0:
                 return False
@@ -264,13 +270,8 @@ class HyperEdgeView:
                     if frozenset(e.elements) in hyperedges:
                         return True
                 return False
-
         elif isinstance(e, Hashable):
             return frozenset({e}) in self.hyperedge_dict[0]
-
-        else:
-
-            return False
 
     def __repr__(self) -> str:
         """Return string representation of hyperedges.
@@ -279,7 +280,7 @@ class HyperEdgeView:
         -------
         str
         """
-        return f"HyperEdgeView([{map(tuple, self)}])"
+        return f"HyperEdgeView({[tuple(x) for x in self]})"
 
     def __str__(self) -> str:
         """Return string representation of hyperedges.
@@ -288,7 +289,7 @@ class HyperEdgeView:
         -------
         str
         """
-        return f"HyperEdgeView([{map(tuple, self)}])"
+        return f"HyperEdgeView({[tuple(x) for x in self]})"
 
     def skeleton(self, rank, level=None):
         """Skeleton of the complex."""
@@ -302,17 +303,17 @@ class HyperEdgeView:
 
         elif level == "upper" or level == "up":
             elements = []
-            for rank in self.allranks:
-                if rank >= rank:
+            for rank_i in self.allranks:
+                if rank_i >= rank:
 
-                    elements = elements + list(self.hyperedge_dict[rank].keys())
+                    elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
 
         elif level == "lower" or level == "down":
             elements = []
-            for rank in self.allranks:
-                if rank <= rank:
-                    elements = elements + list(self.hyperedge_dict[rank].keys())
+            for rank_i in self.allranks:
+                if rank_i <= rank:
+                    elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
         else:
             raise TopoNetXError(
@@ -330,7 +331,20 @@ class HyperEdgeView:
         -------
         int, the rank of the hyperedge e
         """
-        if isinstance(e, Iterable):
+        if isinstance(e, HyperEdge):
+            if len(e) == 0:
+                return 0
+            else:
+                for i in list(self.allranks):
+                    if frozenset(e.elements) in self.hyperedge_dict[i]:
+                        return i
+                raise KeyError(f"hyperedge {e.elements} is not in the complex")
+        elif isinstance(e, str):
+            if frozenset({e}) in self.hyperedge_dict[0]:
+                return 0
+            else:
+                raise KeyError(f"hyperedge {frozenset({e})} is not in the complex")
+        elif isinstance(e, Iterable):
             if len(e) == 0:
                 return 0
             else:
@@ -338,31 +352,11 @@ class HyperEdgeView:
                     if frozenset(e) in self.hyperedge_dict[i]:
                         return i
                 raise KeyError(f"hyperedge {e} is not in the complex")
-
-        elif isinstance(e, HyperEdge):
-
-            if len(e) == 0:
-                return 0
-            else:
-                for i in list(self.allranks):
-
-                    if frozenset(e.elements) in self.hyperedge_dict[i]:
-                        return i
-                raise KeyError(f"hyperedge {e} is not in the complex")
-
         elif isinstance(e, Hashable) and not isinstance(e, Iterable):
-
-            if e in self.hyperedge_dict[0]:
+            if frozenset({e}) in self.hyperedge_dict[0]:
                 return 0
             else:
-                raise KeyError(f"hyperedge {e} is not in the complex")
-
-        elif isinstance(e, str):
-
-            if e in self.hyperedge_dict[0]:
-                return 0
-            else:
-                raise KeyError(f"hyperedge {e} is not in the complex")
+                raise KeyError(f"hyperedge {frozenset({e})} is not in the complex")
 
     @property
     def allranks(self):
