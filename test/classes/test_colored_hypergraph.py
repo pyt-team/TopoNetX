@@ -4,9 +4,6 @@ import networkx as nx
 import pytest
 
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
-from toponetx.classes.combinatorial_complex import (
-    CombinatorialComplex2 as CombinatorialComplex,
-)
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.exception import TopoNetXError
 
@@ -219,13 +216,13 @@ class TestCombinatorialComplex:
 
     def test_adjacency_incidence_structure_dict(self):
         """Test for the incidence and adjacency structure dictionaries."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        dict1 = CC.get_all_incidence_structure_dict()
+        CHG = ColoredHyperGraph()
+        CHG.add_cell([1, 2], rank=1)
+        CHG.add_cell([1, 3], rank=1)
+        CHG.add_cell([1, 2, 4, 3], rank=2)
+        CHG.add_cell([2, 5], rank=1)
+        CHG.add_cell([2, 6, 4], rank=2)
+        dict1 = CHG.get_all_incidence_structure_dict()
         assert list(dict1["B_0_1"].keys()) == [0, 1, 2]
         assert list(dict1["B_0_1"].values()) == [
             [0, 1],
@@ -237,25 +234,25 @@ class TestCombinatorialComplex:
 
     def test_cell_node_adjacency_matrix(self):
         """Test for the cells adjacency matrix method."""
-        CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
-        B = CC.incidence_matrix(rank=0, to_rank=2)
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        B = CHG.incidence_matrix(rank=0, to_rank=2)
         assert B.shape == (4, 2)
         assert (B.T[0].todense() == [1, 1, 1, 0]).all()
         assert (B.T[1].todense() == [0, 1, 1, 1]).all()
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 2, 3, 4], rank=2)
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3, 2], rank=1)
-        CC.add_cell([1, 2, 3, 4], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        B, row, col = CC.incidence_matrix(1, index=True)
+        CHG = ColoredHyperGraph()
+        CHG.add_cell([1, 2], rank=1)
+        CHG.add_cell([1, 2, 3, 4], rank=2)
+        CHG.add_cell([1, 2], rank=1)
+        CHG.add_cell([1, 3, 2], rank=1)
+        CHG.add_cell([1, 2, 3, 4], rank=2)
+        CHG.add_cell([2, 5], rank=1)
+        CHG.add_cell([2, 6, 4], rank=2)
+        B, row, col = CHG.incidence_matrix(1, index=True)
         assert B[(frozenset({1, 2}))] == 0
         assert B[(frozenset({1, 2, 3}))] == 1
         assert B[(frozenset({2, 5}))] == 2
         assert (
-            CC.cell_adjacency_matrix().todense()
+            CHG.cell_adjacency_matrix().todense()
             == [
                 [0, 1, 1, 0, 0, 0],
                 [1, 0, 1, 0, 1, 0],
@@ -266,12 +263,12 @@ class TestCombinatorialComplex:
             ]
         ).all()
         (
-            CC.node_adjacency_matrix().todense() == [[0, 1, 1], [1, 0, 1], [1, 1, 0]]
+            CHG.node_adjacency_matrix().todense() == [[0, 1, 1], [1, 0, 1], [1, 1, 0]]
         ).all()
-        assert CC.diameter() == 1
+        assert CHG.diameter() == 1
         with pytest.raises(TopoNetXError) as exp:
-            CC.diameter(s=2)
-        assert str(exp.value) == "CC is not s-connected. s=2"
+            CHG.diameter(s=2)
+        assert str(exp.value) == "CHG is not s-connected. s=2"
 
 
 #: TODO add tests for CHG not covered by CC tests
