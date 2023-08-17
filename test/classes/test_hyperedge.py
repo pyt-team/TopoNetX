@@ -58,8 +58,11 @@ class TestHyperEdgeCases:
         """Test the string representation of a HyperEdge."""
         elements = (1, 2, 3)
         hyperedge = HyperEdge(elements)
-        # expected_repr = f"HyperEdge{elements}"
+        expected_repr = (
+            f"Nodes set: {tuple(hyperedge.elements)}, rank: {hyperedge.rank}"
+        )
         assert isinstance(repr(hyperedge), str)
+        assert repr(hyperedge) == expected_repr
 
     def test_hyperedge_str(self):
         """Test the string conversion of a HyperEdge."""
@@ -92,6 +95,36 @@ class TestHyperEdgeCases:
 
         he = HyperEdge([1, 4, 2], name="A")
         assert he.name == "A"
+
+    def test_eq(self):
+        """Test eq."""
+        he1 = HyperEdge((1, 4, 2), rank=4)
+        he2 = HyperEdge((1, 4, 2), rank=4)
+        assert he1 == he2
+
+        he1 = HyperEdge([1, 4, 2], rank=4)
+        he2 = HyperEdge([1, 4, 2], rank=5)
+        assert he1 != he2
+
+        he1 = HyperEdge([1, 4, 2], rank=4)
+        he2 = HyperEdge([1, 4, 2])
+        assert he1 != he2
+
+        he1 = HyperEdge([1, 4, 2], rank=4)
+        he2 = HyperEdge([1, 4, 2], name="A")
+        assert he1 != he2
+
+        assert he1 != 1
+
+    def test_hash(self):
+        """Test HyperEdge hash."""
+        he1 = HyperEdge((1, 4, 2), rank=4)
+        he2 = HyperEdge((1, 4, 2), rank=4)
+        assert hash(he1) == hash(he2)
+
+        he1 = HyperEdge([1, 4, 2], rank=4)
+        he2 = HyperEdge([1, 4, 2], rank=5)
+        assert hash(he1) != hash(he2)
 
     def test_inite_method_non_hashabe(self):
         """Test non hashable."""

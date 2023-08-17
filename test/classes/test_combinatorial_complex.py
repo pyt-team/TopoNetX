@@ -3,7 +3,9 @@
 import networkx as nx
 import pytest
 
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.combinatorial_complex import (
+    CombinatorialComplex2 as CombinatorialComplex,
+)
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.exception import TopoNetXError
 
@@ -322,7 +324,7 @@ class TestCombinatorialComplex:
         with pytest.raises(KeyError) as exp:
             node = 7
             assert CC.degree(node, 2)
-        assert str(exp.value) == "'Node 7 not in Combinatorial Complex.'"
+        assert str(exp.value) == "'Node 7 not in CC.'"
         assert CC.degree(1, rank=None) == 5
 
     def test_size(self):
@@ -370,12 +372,12 @@ class TestCombinatorialComplex:
         example.add_cell([2, 5], rank=1)
         example.add_cell([2, 6, 4], rank=2)
         example.remove_node(1)
+        assert example._max_complex == {
+            HyperEdge([2, 4, 6], rank=2),
+            HyperEdge([2, 5], rank=1),
+        }
         assert example._complex_set.hyperedge_dict == {
-            1: {
-                frozenset({2, 5}): {"weight": 1},
-                frozenset({2}): {"weight": 1},
-                frozenset({2, 3}): {"weight": 1},
-            },
+            1: {frozenset({2, 5}): {"weight": 1}},
             0: {
                 frozenset({2}): {"weight": 1},
                 frozenset({3}): {"weight": 1},
@@ -383,39 +385,22 @@ class TestCombinatorialComplex:
                 frozenset({5}): {"weight": 1},
                 frozenset({6}): {"weight": 1},
             },
-            2: {
-                frozenset({2, 4, 6}): {"weight": 1},
-                frozenset({2, 3, 4}): {"weight": 1},
-            },
+            2: {frozenset({2, 4, 6}): {"weight": 1}},
         }
         with pytest.raises(KeyError) as exp:
             example.remove_nodes([1])
-        assert str(exp.value) == "'node 1 not in CombinatorialComplex'"
+        assert str(exp.value) == "'node 1 not in CC'"
         example.remove_nodes([2, 5])
         assert example._complex_set.hyperedge_dict == {
-            1: {frozenset({3}): {"weight": 1}},
             0: {
                 frozenset({3}): {"weight": 1},
                 frozenset({4}): {"weight": 1},
                 frozenset({6}): {"weight": 1},
-            },
-            2: {frozenset({4, 6}): {"weight": 1}, frozenset({3, 4}): {"weight": 1}},
+            }
         }
-        assert example._aux_complex.simplices.faces_dict == [
-            {
-                frozenset({3}): {"is_maximal": True, "membership": set()},
-                frozenset({4}): {"is_maximal": True, "membership": set()},
-                frozenset({6}): {"is_maximal": True, "membership": set()},
-            },
-            {
-                frozenset({3, 4}): {"is_maximal": True, "membership": set()},
-                frozenset({4, 6}): {"is_maximal": True, "membership": set()},
-            },
-        ]
         example.remove_nodes(HyperEdge([3]))
         assert example._complex_set.hyperedge_dict == {
-            0: {frozenset({4}): {"weight": 1}, frozenset({6}): {"weight": 1}},
-            2: {frozenset({4, 6}): {"weight": 1}, frozenset({4}): {"weight": 1}},
+            0: {frozenset({4}): {"weight": 1}, frozenset({6}): {"weight": 1}}
         }
         node = {4: 3}
         with pytest.raises(TypeError) as exp:
@@ -429,15 +414,14 @@ class TestCombinatorialComplex:
         example.add_cell([2, 6, 4], rank=2)
         example.remove_nodes([HyperEdge([1]), HyperEdge([2])])
         assert example._complex_set.hyperedge_dict == {
-            1: {frozenset({3}): {"weight": 1}, frozenset({5}): {"weight": 1}},
             0: {
                 frozenset({3}): {"weight": 1},
                 frozenset({4}): {"weight": 1},
                 frozenset({5}): {"weight": 1},
                 frozenset({6}): {"weight": 1},
-            },
-            2: {frozenset({3, 4}): {"weight": 1}, frozenset({4, 6}): {"weight": 1}},
+            }
         }
+        assert example._max_complex == set()
 
     def test_set_cell_attributes(self):
         """Test for the set_cell_attributes method."""
