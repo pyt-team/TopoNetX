@@ -39,7 +39,7 @@ class ColoredHyperGraph(Complex):
     cells : Collection, optional
     name : str, optional
         An identifiable name for the Colored Hypergraph.
-    colors : Collection, optional
+    ranks : Collection, optional
         when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
         size as cells.
     weight : array-like, optional
@@ -80,15 +80,15 @@ class ColoredHyperGraph(Complex):
         self,
         cells: Collection | None = None,
         name: str = "",
-        colors: Collection | None = None,
+        ranks: Collection | None = None,
+        graph_based: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
 
         self.name = name
-
+        self.graph_based = graph_based
         self._complex_set = HyperEdgeView()
-        self.complex = dict()
 
         if cells is not None:
             if not isinstance(cells, Iterable):
@@ -96,8 +96,8 @@ class ColoredHyperGraph(Complex):
                     f"Input cells must be given as Iterable, got {type(cells)}."
                 )
 
-            if not isinstance(colors, Graph):
-                if colors is None:
+            if not isinstance(cells, Graph):
+                if ranks is None:
                     for cell in cells:
                         if not isinstance(cell, HyperEdge):
                             raise ValueError(
@@ -105,19 +105,19 @@ class ColoredHyperGraph(Complex):
                             )
                         if cell.rank is None:
                             raise ValueError(f"input HyperEdge {cell} has None rank")
-                        self.add_cell(cell, cell.rank)
+                        self.add_cell(cell, rank=cell.rank)
                 else:
-                    if isinstance(cells, Iterable) and isinstance(colors, Iterable):
-                        if len(cells) != len(colors):
+                    if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
+                        if len(cells) != len(ranks):
                             raise TopoNetXError(
                                 "cells and ranks must have equal number of elements"
                             )
                         else:
-                            for cell, color in zip(cells, colors):
+                            for cell, color in zip(cells, ranks):
                                 self.add_cell(cell, color)
-                if isinstance(cells, Iterable) and isinstance(colors, int):
+                if isinstance(cells, Iterable) and isinstance(ranks, int):
                     for cell in cells:
-                        self.add_cell(cell, colors)
+                        self.add_cell(cell, ranks)
             else:
                 for node in cells.nodes:  # cells is a networkx graph
                     self.add_node(node, **cells.nodes[node])
@@ -509,7 +509,7 @@ class ColoredHyperGraph(Complex):
         -------
         None
         """
-        self._add_hyperedge(hyperedge=node, color=0, **attr)
+        self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
     def add_node(self, node, **attr):
         """
