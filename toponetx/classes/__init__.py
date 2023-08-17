@@ -1,7 +1,6 @@
 from .cell import Cell
 from .cell_complex import CellComplex
-from .colored_hypergraph import ColoredHyperGraph
-from .combinatorial_complex import CombinatorialComplex, CombinatorialComplex2
+from .combinatorial_complex import CombinatorialComplex
 from .complex import Atom, Complex
 from .hyperedge import HyperEdge
 from .reportviews import CellView, HyperEdgeView, NodeView, SimplexView
@@ -12,8 +11,6 @@ __all__ = [
     "CellComplex",
     "Cell",
     "CombinatorialComplex",
-    "CombinatorialComplex2",
-    "ColoredHyperGraph",
     "Atom",
     "Complex",
     "HyperEdge",
