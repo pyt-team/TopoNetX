@@ -1,7 +1,7 @@
 from .cell import Cell
 from .cell_complex import CellComplex
-from .combinatorial_complex import CombinatorialComplex, CombinatorialComplex2
 from .colored_hypergraph import ColoredHyperGraph
+from .combinatorial_complex import CombinatorialComplex, CombinatorialComplex2
 from .complex import Atom, Complex
 from .hyperedge import HyperEdge
 from .reportviews import CellView, HyperEdgeView, NodeView, SimplexView
