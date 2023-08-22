@@ -1,5 +1,7 @@
 """Unit tests for the colored hypergraph class."""
 
+import collections
+
 import networkx as nx
 import pytest
 
@@ -15,6 +17,29 @@ class TestCombinatorialComplex:
         """Test creation of an empty CHG."""
         CHG = ColoredHyperGraph()
         assert len(CHG) == 0
+
+    def test_init_none_rank(self):
+        """Test creation of CHG with no rank."""
+        # test CHG creation with non-HyperEdge cells with None rank.
+        with pytest.raises(ValueError):
+            CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]])
+
+        y1 = HyperEdge(elements=[1, 2])
+        y2 = HyperEdge(elements=[2, 4])
+
+        # test CHG creation with HyperEdge having None rank
+        with pytest.raises(ValueError):
+            CHG = ColoredHyperGraph(cells=[y1, y2])
+
+        # test CHG creation with iterable cells and iterable ranks mismatch.
+        with pytest.raises(TopoNetXError):
+            CHG = ColoredHyperGraph(cells=[[1, 2, 3], [2, 3, 4]], ranks=[1, 2, 3])
+
+        # test CHG creation with iterable cells and iterable ranks match.
+        CHG = ColoredHyperGraph(cells=[[1, 2, 3], [2, 3, 4]], ranks=[1, 2])
+        assert len(CHG.cells) == 6
+        assert (1, 2, 3) in CHG.cells
+        assert (2, 3, 4) in CHG.cells
 
     def test_init_from_lists(self):
         """Test creation of a CHG from a list of cells."""
@@ -63,6 +88,55 @@ class TestCombinatorialComplex:
 
         assert "a" in CHG.cells
 
+    def test_chg_str(self):
+        """Test CHG string representation."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        assert (
+            str(CHG)
+            == f"Colored Hypergraph with {len(CHG.nodes)} nodes and hyperedges with colors {CHG.ranks} and sizes {CHG.shape} "
+        )
+
+    def test_chg_repr(self):
+        """Test CHG repr representation."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2, name="chg_test")
+        assert repr(CHG) == f"ColoredHyperGraph(name='{CHG.name}')"
+
+    def test_chg_iter(self):
+        """Test CHG iter."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        isinstance(CHG, collections.abc.Iterable)
+        it = iter(CHG)
+        assert next(it) == frozenset({1})
+        assert next(it) == frozenset({2})
+        assert next(it) == frozenset({3})
+        assert next(it) == frozenset({4})
+        with pytest.raises(StopIteration):
+            next(it)
+
+    def test_chg_contains(self):
+        """Test chg contains property."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        assert 1 in CHG
+        assert 2 in CHG
+        assert 3 in CHG
+        assert 4 in CHG
+        assert 5 not in CHG
+
+    def test_chg_getitem(self):
+        """Test chg get node properties."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        assert CHG[1] == {"weight": 1}
+
+    def test_chg_set(self):
+        """Test chg set node properties."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        assert CHG[1] == {"weight": 1}
+        CHG[1] = {"weight": 2}
+        assert CHG[1] == {"weight": 2}
+
+        with pytest.raises(KeyError):
+            CHG[5] = {"weight": 5}
+
     def test_add_cell(self):
         """Test adding a cell to a CHG."""
         CHG = ColoredHyperGraph()
@@ -92,6 +166,28 @@ class TestCombinatorialComplex:
 
         assert (1, 2, 3) not in CHG.cells
         assert (2, 3, 4) not in CHG.cells
+
+    def test_chg_shape(self):
+        """Test CHG shape property."""
+        y1 = HyperEdge(elements=[1, 2], rank=1)
+        y2 = HyperEdge(elements=[2, 4], rank=1)
+        y3 = HyperEdge(elements=[3, 5], rank=1)
+        y4 = HyperEdge(elements=[4, 5], rank=1)
+        y5 = HyperEdge(elements=[5, 7], rank=1)
+
+        CHG = ColoredHyperGraph(cells=[y1, y2, y3, y4, y5])
+        assert CHG.shape == (6, 5)
+
+    def test_chg_ranks(self):
+        """Test CHG ranks property."""
+        y1 = HyperEdge(elements=[1, 2], rank=1)
+        y2 = HyperEdge(elements=[2, 4], rank=2)
+        y3 = HyperEdge(elements=[3, 5], rank=1)
+        y4 = HyperEdge(elements=[4, 5], rank=1)
+        y5 = HyperEdge(elements=[5, 7], rank=5)
+
+        CHG = ColoredHyperGraph(cells=[y1, y2, y3, y4, y5])
+        assert CHG.ranks == [0, 1, 2, 5]
 
     def test_incidence_matrix(self):
         """Test generating an incidence matrix."""
