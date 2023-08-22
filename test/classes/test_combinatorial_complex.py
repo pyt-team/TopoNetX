@@ -3,9 +3,7 @@
 import networkx as nx
 import pytest
 
-from toponetx.classes.combinatorial_complex import (
-    CombinatorialComplex2 as CombinatorialComplex,
-)
+from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.exception import TopoNetXError
 
