@@ -542,6 +542,10 @@ class NodeView:
 
         return f"NodeView({all_nodes})"
 
+    def __iter__(self) -> Iterator:
+        """Return an iterator over all nodes in the node view."""
+        return iter(self.nodes)
+
     def __getitem__(self, cell):
         """Get item.
 
