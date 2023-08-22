@@ -1,5 +1,5 @@
 """Methods to lift a graph to a simplicial complex."""
-
+from itertools import takewhile
 from warnings import warn
 
 import networkx as nx
@@ -57,8 +57,11 @@ def graph_to_clique_complex(
         The clique simplicial complex of dimension dim of the graph G.
     """
     cliques = nx.enumerate_all_cliques(G)
+
+    # `nx.enumerate_all_cliques` returns cliques in ascending order of size. Abort calling the generator once we reach
+    # cliques larger than the requested max dimension.
     if max_dim is not None:
-        cliques = filter(lambda clique: len(clique) <= max_dim, cliques)
+        cliques = takewhile(lambda clique: len(clique) <= max_dim, cliques)
 
     return SimplicialComplex(cliques)
 
