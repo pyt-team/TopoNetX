@@ -18,24 +18,8 @@ class TestCombinatorialComplex:
         CHG = ColoredHyperGraph()
         assert len(CHG) == 0
 
-    def test_init_none_rank(self):
-        """Test creation of CHG with no rank."""
-        # test CHG creation with non-HyperEdge cells with None rank.
-        with pytest.raises(ValueError):
-            CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]])
-
-        y1 = HyperEdge(elements=[1, 2])
-        y2 = HyperEdge(elements=[2, 4])
-
-        # test CHG creation with HyperEdge having None rank
-        with pytest.raises(ValueError):
-            CHG = ColoredHyperGraph(cells=[y1, y2])
-
-        # test CHG creation with iterable cells and iterable ranks mismatch.
-        with pytest.raises(TopoNetXError):
-            CHG = ColoredHyperGraph(cells=[[1, 2, 3], [2, 3, 4]], ranks=[1, 2, 3])
-
-        # test CHG creation with iterable cells and iterable ranks match.
+    def test_init_chg(self):
+        """Test creation of CHG."""
         CHG = ColoredHyperGraph(cells=[[1, 2, 3], [2, 3, 4]], ranks=[1, 2])
         assert len(CHG.cells) == 6
         assert (1, 2, 3) in CHG.cells
@@ -205,7 +189,7 @@ class TestCombinatorialComplex:
         CHG.add_cell([1, 2, 3, 4], rank=2)
         CHG.add_cell([2, 5], rank=1)
         CHG.add_cell([2, 6, 4], rank=2)
-        B, row, col = CHG.incidence_matrix(1, index=True)
+        B, row, col = CHG.incidence_matrix(1, 2, index=True)
         assert B[(frozenset({1, 2}))] == 0
         assert B[(frozenset({1, 2, 3}))] == 1
         assert B[(frozenset({2, 5}))] == 2
@@ -218,7 +202,7 @@ class TestCombinatorialComplex:
         CHG.add_cell([1, 2, 4, 3], rank=2)
         CHG.add_cell([2, 5], rank=1)
         CHG.add_cell([2, 6, 4], rank=2)
-        B = CHG.incidence_matrix(0)
+        B = CHG.incidence_matrix(0, 1)
         assert B.shape == (6, 3)
         assert (
             B.todense()
@@ -282,33 +266,9 @@ class TestCombinatorialComplex:
         CHG.add_cell([1, 2, 4, 3], rank=2)
         CHG.add_cell([2, 5], rank=1)
         CHG.add_cell([2, 6, 4], rank=2)
-        B = CHG.incidence_matrix(2, 0, incidence_type="down")
+        B = CHG.incidence_matrix(0, 2)
         assert B.shape == (6, 2)
         assert (B.todense() == [[1, 0], [1, 1], [1, 0], [1, 1], [0, 0], [0, 1]]).all()
-
-    def test_incidence_matrix_to_rank_down_without_rank(self):
-        """Test generating an incidence matrix by setting the down_rank parameter without mentioning rank."""
-        CHG = ColoredHyperGraph()
-        CHG.add_cell([1, 2], rank=1)
-        CHG.add_cell([1, 3], rank=1)
-        CHG.add_cell([1, 2, 4, 3], rank=2)
-        CHG.add_cell([2, 5], rank=1)
-        CHG.add_cell([2, 6, 4], rank=2)
-        B = CHG.incidence_matrix(2, incidence_type="down")
-        assert B.shape == (3, 2)
-        assert (B.todense() == [[1, 0], [1, 0], [0, 0]]).all()
-
-    def test_incidence_matrix_to_rank_with_wrong_incidence_type(self):
-        """Test generating an incidence matrix by mentioning wrong rank."""
-        CHG = ColoredHyperGraph()
-        CHG.add_cell([1, 2], rank=1)
-        CHG.add_cell([1, 3], rank=1)
-        CHG.add_cell([1, 2, 4, 3], rank=2)
-        CHG.add_cell([2, 5], rank=1)
-        CHG.add_cell([2, 6, 4], rank=2)
-        with pytest.raises(TopoNetXError) as exp:
-            CHG.incidence_matrix(2, incidence_type="wrong")
-        assert str(exp.value) == "incidence_type must be 'up' or 'down' "
 
     def test_adjacency_incidence_structure_dict(self):
         """Test for the incidence and adjacency structure dictionaries."""
@@ -327,44 +287,6 @@ class TestCombinatorialComplex:
         ]
         assert list(dict1["B_0_2"].keys()) == [0, 1]
         assert list(dict1["B_0_2"].values()) == [[0, 1, 2, 3], [1, 3, 5]]
-
-    def test_cell_node_adjacency_matrix(self):
-        """Test for the cells adjacency matrix method."""
-        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
-        B = CHG.incidence_matrix(rank=0, to_rank=2)
-        assert B.shape == (4, 2)
-        assert (B.T[0].todense() == [1, 1, 1, 0]).all()
-        assert (B.T[1].todense() == [0, 1, 1, 1]).all()
-        CHG = ColoredHyperGraph()
-        CHG.add_cell([1, 2], rank=1)
-        CHG.add_cell([1, 2, 3, 4], rank=2)
-        CHG.add_cell([1, 2], rank=1)
-        CHG.add_cell([1, 3, 2], rank=1)
-        CHG.add_cell([1, 2, 3, 4], rank=2)
-        CHG.add_cell([2, 5], rank=1)
-        CHG.add_cell([2, 6, 4], rank=2)
-        B, row, col = CHG.incidence_matrix(1, index=True)
-        assert B[(frozenset({1, 2}))] == 0
-        assert B[(frozenset({1, 2, 3}))] == 1
-        assert B[(frozenset({2, 5}))] == 2
-        assert (
-            CHG.cell_adjacency_matrix().todense()
-            == [
-                [0, 1, 1, 0, 0, 0],
-                [1, 0, 1, 0, 1, 0],
-                [1, 1, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-            ]
-        ).all()
-        (
-            CHG.node_adjacency_matrix().todense() == [[0, 1, 1], [1, 0, 1], [1, 1, 0]]
-        ).all()
-        assert CHG.diameter() == 1
-        with pytest.raises(TopoNetXError) as exp:
-            CHG.diameter(s=2)
-        assert str(exp.value) == "CHG is not s-connected. s=2"
 
 
 #: TODO add tests for CHG not covered by CC tests

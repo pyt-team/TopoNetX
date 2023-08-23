@@ -15,6 +15,7 @@ from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import (
+    compute_set_incidence,
     incidence_to_adjacency,
     sparse_array_to_neighborhood_dict,
 )
@@ -81,13 +82,11 @@ class ColoredHyperGraph(Complex):
         cells: Collection | None = None,
         name: str = "",
         ranks: Collection | None = None,
-        graph_based: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
 
         self.name = name
-        self.graph_based = graph_based
         self._complex_set = HyperEdgeView()
 
         if cells is not None:
@@ -100,12 +99,9 @@ class ColoredHyperGraph(Complex):
                 if ranks is None:
                     for cell in cells:
                         if not isinstance(cell, HyperEdge):
-                            raise ValueError(
-                                f"input must be an HyperEdge {cell} object when rank is None"
-                            )
-                        if cell.rank is None:
-                            raise ValueError(f"input HyperEdge {cell} has None rank")
-                        self.add_cell(cell, rank=cell.rank)
+                            self.add_cell(cell, rank=1)
+                        else:
+                            self.add_cell(cell, rank=cell.rank)
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
                         if len(cells) != len(ranks):
@@ -733,19 +729,10 @@ class ColoredHyperGraph(Complex):
         -------
         Colored Hypergraph : ColoredHyperGraph
         """
-        if self.graph_based:
-            if rank == 1:
-                if not isinstance(cell, Iterable):
-                    TopoNetXError(
-                        "Rank 1 cells in graph-based ColoredHyperGraph must be Iterable."
-                    )
-                if len(cell) != 2:
-                    TopoNetXError(
-                        f"Rank 1 cells in graph-based ColoredHyperGraph must have size equalt to 1 got {cell}."
-                    )
-
-        self._add_hyperedge(cell, rank, **attr)
-        return self
+        if rank is None:
+            self._add_hyperedge(cell, rank=1, **attr)
+        else:
+            self._add_hyperedge(cell, rank=rank, **attr)
 
     def add_cells_from(self, cells, ranks=None):
         """Add cells to Colored Hypergraph.
@@ -824,72 +811,10 @@ class ColoredHyperGraph(Complex):
         for cell in cell_set:
             self.remove_cell(cell)
 
-    def _incidence_matrix_helper(
-        self, children, uidset, sparse: bool = True, index: bool = False
-    ):
-        """Help compute the incidence matrix."""
-        from collections import OrderedDict
-        from operator import itemgetter
-
-        ndict = dict(zip(children, range(len(children))))
-        edict = dict(zip(uidset, range(len(uidset))))
-
-        ndict = OrderedDict(sorted(ndict.items(), key=itemgetter(1)))
-        edict = OrderedDict(sorted(edict.items(), key=itemgetter(1)))
-
-        r_hyperedge_dict = {j: children[j] for j in range(len(children))}
-        k_hyperedge_dict = {i: uidset[i] for i in range(len(uidset))}
-
-        r_hyperedge_dict = OrderedDict(
-            sorted(r_hyperedge_dict.items(), key=itemgetter(0))
-        )
-        k_hyperedge_dict = OrderedDict(
-            sorted(k_hyperedge_dict.items(), key=itemgetter(0))
-        )
-
-        if len(ndict) != 0:
-
-            # if index:
-            #     rowdict = {v: k for k, v in ndict.items()}
-            #     coldict = {v: k for k, v in edict.items()}
-
-            if sparse:
-                # Create csr sparse matrix
-                rows = list()
-                cols = list()
-                data = list()
-                for n in ndict:
-                    for e in edict:
-                        if n <= e:
-                            data.append(1)
-                            rows.append(ndict[n])
-                            cols.append(edict[e])
-                MP = csr_matrix(
-                    (data, (rows, cols)),
-                    shape=(len(r_hyperedge_dict), len(k_hyperedge_dict)),
-                )
-            else:
-                # Create an np.matrix
-                MP = np.zeros((len(children), len(uidset)), dtype=int)
-                for e in k_hyperedge_dict:
-                    for n in r_hyperedge_dict:
-                        if r_hyperedge_dict[n] <= k_hyperedge_dict[e]:
-                            MP[ndict[n], edict[e]] = 1
-            if index:
-                return ndict, edict, MP
-            else:
-                return MP
-        else:
-            if index:
-                return {}, {}, np.zeros(1)
-            else:
-                return np.zeros(1)
-
     def _incidence_matrix(
         self,
         rank,
         to_rank,
-        incidence_type: Literal["up", "down"] = "up",
         weight=None,
         sparse: bool = True,
         index: bool = False,
@@ -901,7 +826,6 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        incidence_type : {'up', 'down'}, default='up'
         sparse : bool, default=True
         index : bool, default=False
             If True return will include a dictionary of children uid : row number
@@ -936,37 +860,14 @@ class ColoredHyperGraph(Complex):
         """
         if rank == to_rank:
             raise ValueError("incidence must be computed for k!=r, got equal r and k.")
-        if to_rank is None:
-            if incidence_type == "up":
-                children = self.skeleton(rank)
-                uidset = self.skeleton(rank + 1)
-            elif incidence_type == "down":
-                uidset = self.skeleton(rank)
-                children = self.skeleton(rank - 1)
-            else:
-                raise TopoNetXError("incidence_type must be 'up' or 'down' ")
-        else:
-            assert (
-                rank != to_rank
-            )  # incidence is defined between two skeletons of different ranks
-            if (
-                rank < to_rank
-            ):  # up incidence is defined between two skeletons of different ranks
-                children = self.skeleton(rank)
-                uidset = self.skeleton(to_rank)
-
-            elif (
-                rank > to_rank
-            ):  # up incidence is defined between two skeletons of different ranks
-                children = self.skeleton(to_rank)
-                uidset = self.skeleton(rank)
-        return self._incidence_matrix_helper(children, uidset, sparse, index)
+        children = self.skeleton(rank)
+        uidset = self.skeleton(to_rank)
+        return compute_set_incidence(children, uidset, sparse, index)
 
     def incidence_matrix(
         self,
         rank,
-        to_rank=None,
-        incidence_type: str = "up",
+        to_rank,
         weight=None,
         sparse: bool = True,
         index: bool = False,
@@ -991,9 +892,7 @@ class ColoredHyperGraph(Complex):
         column dictionary : dict
             Dictionary identifying columns with cells
         """
-        return self._incidence_matrix(
-            rank, to_rank, incidence_type=incidence_type, sparse=sparse, index=index
-        )
+        return self._incidence_matrix(rank, to_rank, sparse=sparse, index=index)
 
     def adjacency_matrix(self, rank, via_rank, s=1, index=False):
         """Sparse weighted :term:`s-adjacency matrix`.
@@ -1028,16 +927,12 @@ class ColoredHyperGraph(Complex):
         >>> CHG = ColoredHyperGraph(cells=G)
         >>> CHG.adjacency_matrix(0, 1)
         """
-        if via_rank is not None:
-            assert rank < via_rank
         if index:
             B, row, col = self.incidence_matrix(
                 rank, via_rank, sparse=True, index=index
             )
         else:
-            B = self.incidence_matrix(
-                rank, via_rank, incidence_type="up", sparse=True, index=index
-            )
+            B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
         A = incidence_to_adjacency(B.T, s=s)
         if index:
             return A, row
@@ -1056,27 +951,11 @@ class ColoredHyperGraph(Complex):
           all cells adjacency_matrix : scipy.sparse.csr.csr_matrix
 
         """
-        B = self.incidence_matrix(
-            rank=0, to_rank=None, incidence_type="up", index=index
-        )
-        if index:
-
-            A = incidence_to_adjacency(B[0].transpose(), s=s)
-
-            return A, B[2]
-        A = incidence_to_adjacency(B.transpose(), s=s)
-        return A
+        raise NotImplementedError()
 
     def node_adjacency_matrix(self, index=False, s=1):
         """Compute the node adjacency matrix."""
-        B = self.incidence_matrix(
-            rank=0, to_rank=None, incidence_type="up", index=index
-        )
-        if index:
-            A = incidence_to_adjacency(B[0], s=s)
-            return A, B[1]
-        A = incidence_to_adjacency(B, s=s)
-        return A
+        raise NotImplementedError()
 
     def coadjacency_matrix(self, rank, via_rank, s=1, index=False):
         """Compute the coadjacency matrix.
@@ -1110,16 +989,12 @@ class ColoredHyperGraph(Complex):
 
             coadjacency_matrix : scipy.sparse.csr.csr_matrix
         """
-        if via_rank is not None:
-            assert rank > via_rank
         if index:
             B, row, col = self.incidence_matrix(
-                via_rank, rank, incidence_type="down", sparse=True, index=index
+                via_rank, rank, sparse=True, index=index
             )
         else:
-            B = self.incidence_matrix(
-                rank, via_rank, incidence_type="down", sparse=True, index=index
-            )
+            B = self.incidence_matrix(via_rank, rank, sparse=True, index=index)
         A = incidence_to_adjacency(B)
         if index:
             return A, col
@@ -1152,9 +1027,6 @@ class ColoredHyperGraph(Complex):
         new Colored Hypergraph : NestedColoredHyperGraph
         """
         raise NotImplementedError()
-
-        # RNS = self.cells.restrict_to(element_subset=cell_set, name=name)
-        # return NestedColoredHyperGraph(cells=RNS, name=name)
 
     def restrict_to_nodes(self, node_set, name=None):
         """Restrict to a set of nodes.
@@ -1237,13 +1109,7 @@ class ColoredHyperGraph(Complex):
         >>> CHG = ColoredHyperGraph(cells=E)
         >>> CHG.is_connected()
         """
-        B = self.incidence_matrix(rank=0, to_rank=None, incidence_type="up")
-        if cells:
-            A = incidence_to_adjacency(B, s=s)
-        else:
-            A = incidence_to_adjacency(B.transpose(), s=s)
-        G = nx.from_scipy_sparse_matrix(A)
-        return nx.is_connected(G)
+        raise NotImplementedError()
 
     def singletons(self):
         """Return a list of singleton cell.
@@ -1316,22 +1182,7 @@ class ColoredHyperGraph(Complex):
             Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
             components of CHG.
         """
-        if cells:
-            A, coldict = self.cell_adjacency_matrix(s=s, index=True)
-            G = nx.from_scipy_sparse_matrix(A)
-
-            for c in nx.connected_components(G):
-                if not return_singletons and len(c) == 1:
-                    continue
-                yield {coldict[n] for n in c}
-        else:
-            A, rowdict = self.node_adjacency_matrix(s=s, index=True)
-            G = nx.from_scipy_sparse_matrix(A)
-            for c in nx.connected_components(G):
-                if not return_singletons:
-                    if len(c) == 1:
-                        continue
-                yield {rowdict[n] for n in c}
+        raise NotImplementedError()
 
     def s_component_subgraphs(
         self, s: int = 1, cells: bool = True, return_singletons: bool = False
@@ -1356,13 +1207,7 @@ class ColoredHyperGraph(Complex):
             Iterator returns subgraphs generated by the cells (or nodes) in the
             s-cell(node) components.
         """
-        for idx, c in enumerate(
-            self.s_components(s=s, cells=cells, return_singletons=return_singletons)
-        ):
-            if cells:
-                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
-            else:
-                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
+        raise NotImplementedError()
 
     def s_components(
         self, s: int = 1, cells: bool = True, return_singletons: bool = True
@@ -1375,9 +1220,7 @@ class ColoredHyperGraph(Complex):
         --------
         s_connected_components
         """
-        return self.s_connected_components(
-            s=s, cells=cells, return_singletons=return_singletons
-        )
+        raise NotImplementedError()
 
     def connected_components(self, cells: bool = False, return_singletons: bool = True):
         """Compute s-connected components.
@@ -1390,7 +1233,7 @@ class ColoredHyperGraph(Complex):
         --------
         s_connected_components
         """
-        return self.s_connected_components(cells=cells, return_singletons=True)
+        raise NotImplementedError()
 
     def connected_component_subgraphs(self, return_singletons: bool = True):
         """Compute s-component subgraphs with s=1.
@@ -1403,7 +1246,7 @@ class ColoredHyperGraph(Complex):
         --------
         s_component_subgraphs
         """
-        return self.s_component_subgraphs(return_singletons=return_singletons)
+        raise NotImplementedError()
 
     def components(self, cells: bool = False, return_singletons: bool = True):
         """Compute s-connected components for s=1.
@@ -1417,7 +1260,7 @@ class ColoredHyperGraph(Complex):
         --------
         s_connected_components
         """
-        return self.s_connected_components(s=1, cells=cells)
+        raise NotImplementedError()
 
     def component_subgraphs(self, return_singletons: bool = False):
         """Compute s-component subgraphs wth s=1.
@@ -1428,7 +1271,7 @@ class ColoredHyperGraph(Complex):
         --------
         s_component_subgraphs
         """
-        return self.s_component_subgraphs(return_singletons=return_singletons)
+        raise NotImplementedError()
 
     def node_diameters(self, s: int = 1):
         """Return node diameters of the connected components.
@@ -1443,19 +1286,7 @@ class ColoredHyperGraph(Complex):
         list of the diameters of the s-components and
         list of the s-component nodes
         """
-        A, coldict = self.node_adjacency_matrix(s=s, index=True)
-        G = nx.from_scipy_sparse_matrix(A)
-        diams = []
-        comps = []
-        for c in nx.connected_components(G):
-            diamc = nx.diameter(G.subgraph(c))
-            temp = set()
-            for e in c:
-                temp.add(coldict[e])
-            comps.append(temp)
-            diams.append(diamc)
-        loc = np.argmax(diams)
-        return diams[loc], diams, comps
+        raise NotImplementedError()
 
     def cell_diameters(self, s: int = 1):
         """Return the cell diameters of the s_cell_connected component subgraphs.
@@ -1473,19 +1304,7 @@ class ColoredHyperGraph(Complex):
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
         """
-        A, coldict = self.cell_adjacency_matrix(s=s, index=True)
-        G = nx.from_scipy_sparse_matrix(A)
-        diams = []
-        comps = []
-        for c in nx.connected_components(G):
-            diamc = nx.diameter(G.subgraph(c))
-            temp = set()
-            for e in c:
-                temp.add(coldict[e])
-            comps.append(temp)
-            diams.append(diamc)
-        loc = np.argmax(diams)
-        return diams[loc], diams, comps
+        raise NotImplementedError()
 
     def diameter(self, s: int = 1) -> int:
         """Return the length of the longest shortest s-walk between nodes.
@@ -1511,12 +1330,7 @@ class ColoredHyperGraph(Complex):
         nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
         are s-adjacent. If the graph is not connected, an error will be raised.
         """
-        A = self.node_adjacency_matrix(s=s)
-        G = nx.from_scipy_sparse_matrix(A)
-        if nx.is_connected(G):
-            return nx.diameter(G)
-        else:
-            raise TopoNetXError(f"{self.__shortstr__} is not s-connected. s={s}")
+        raise NotImplementedError()
 
     def cell_diameter(self, s: int = 1) -> int:
         """Return length of the longest shortest s-walk between cells.
@@ -1542,12 +1356,7 @@ class ColoredHyperGraph(Complex):
         cells e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
         are s-adjacent. If the graph is not connected, an error will be raised.
         """
-        A = self.cell_adjacency_matrix(s=s)
-        G = nx.from_scipy_sparse_matrix(A)
-        if nx.is_connected(G):
-            return nx.diameter(G)
-        else:
-            raise TopoNetXError(f"CHG is not s-connected. s={s}")
+        raise NotImplementedError()
 
     def distance(self, source, target, s: int = 1) -> int:
         """Return shortest s-walk distance between two nodes.
@@ -1629,7 +1438,7 @@ class ColoredHyperGraph(Complex):
         -------
         ColoredHyperGraph
         """
-        CHG = ColoredHyperGraph(name=self.name, graph_based=self.graph_based)
+        CHG = ColoredHyperGraph(name=self.name)
         for cell in self.cells:
             CHG.add_cell(cell, self.cells.get_rank(cell))
         return CHG

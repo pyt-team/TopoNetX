@@ -16,6 +16,7 @@ from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import (
+    compute_set_incidence,
     incidence_to_adjacency,
     sparse_array_to_neighborhood_dict,
 )
@@ -447,9 +448,256 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        Combinatorial Complex : CombinatorialComplex
+        Colored Hypergraph : ColoredHyperGraph
         """
-        return super().add_cell(cell, rank, **attr)
+        if self.graph_based:
+            if rank == 1:
+                if not isinstance(cell, Iterable):
+                    TopoNetXError(
+                        "Rank 1 cells in graph-based ColoredHyperGraph must be Iterable."
+                    )
+                if len(cell) != 2:
+                    TopoNetXError(
+                        f"Rank 1 cells in graph-based ColoredHyperGraph must have size equalt to 1 got {cell}."
+                    )
+
+        self._add_hyperedge(cell, rank=rank, **attr)
+
+    def _incidence_matrix(
+        self,
+        rank,
+        to_rank,
+        incidence_type: Literal["up", "down"] = "up",
+        weight=None,
+        sparse: bool = True,
+        index: bool = False,
+    ):
+        """Compute incidence matrix.
+
+        An incidence matrix indexed by r-ranked hyperedges k-ranked hyperedges
+        r !=k, when k is None incidence_type will be considered instead
+
+        Parameters
+        ----------
+        incidence_type : {'up', 'down'}, default='up'
+        sparse : bool, default=True
+        index : bool, default=False
+            If True return will include a dictionary of children uid : row number
+            and element uid : column number
+
+        Returns
+        -------
+        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        row dictionary : dict
+            Dictionary identifying row with item in entityset's children
+        column dictionary : dict
+            Dictionary identifying column with item in entityset's uidset
+
+        Notes
+        -----
+        Incidence_matrix method  is a method for generating the incidence matrix of a ColoredHyperGraph.
+        An incidence matrix is a matrix that describes the relationships between the hyperedges
+        of a complex. In this case, the incidence_matrix method generates a matrix where
+        the rows correspond to the hyperedges of the complex and the columns correspond to the faces
+        . The entries in the matrix are either 0 or 1,
+        depending on whether a hyperedge contains a given face or not.
+        For example, if hyperedge i contains face j, then the entry in the ith
+        row and jth column of the matrix will be 1, otherwise it will be 0.
+
+        To generate the incidence matrix, the incidence_matrix method first creates
+        a dictionary where the keys are the faces of the complex and the values are
+        the hyperedges that contain that face. This allows the method to quickly look up
+        which hyperedges contain a given face. The method then iterates over the hyperedges in
+        the HyperEdgeView instance, and for each hyperedge, it checks which faces it contains.
+        For each face that the hyperedge contains, the method increments the corresponding entry
+        in the matrix. Finally, the method returns the completed incidence matrix.
+        """
+        if rank == to_rank:
+            raise ValueError("incidence must be computed for k!=r, got equal r and k.")
+        if to_rank is None:
+            if incidence_type == "up":
+                children = self.skeleton(rank)
+                uidset = self.skeleton(rank + 1)
+            elif incidence_type == "down":
+                uidset = self.skeleton(rank)
+                children = self.skeleton(rank - 1)
+            else:
+                raise TopoNetXError("incidence_type must be 'up' or 'down' ")
+        else:
+            assert (
+                rank != to_rank
+            )  # incidence is defined between two skeletons of different ranks
+            if (
+                rank < to_rank
+            ):  # up incidence is defined between two skeletons of different ranks
+                children = self.skeleton(rank)
+                uidset = self.skeleton(to_rank)
+
+            elif (
+                rank > to_rank
+            ):  # up incidence is defined between two skeletons of different ranks
+                children = self.skeleton(to_rank)
+                uidset = self.skeleton(rank)
+        return compute_set_incidence(children, uidset, sparse, index)
+
+    def incidence_matrix(
+        self,
+        rank,
+        to_rank=None,
+        incidence_type: str = "up",
+        weight=None,
+        sparse: bool = True,
+        index: bool = False,
+    ):
+        """Compute incidence matrix for the CC between rank and to_rank skeleti.
+
+        Parameters
+        ----------
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+        index : boolean, optional, default False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        row dictionary : dict
+            Dictionary identifying rows with nodes
+        column dictionary : dict
+            Dictionary identifying columns with cells
+        """
+        return self._incidence_matrix(
+            rank, to_rank, incidence_type=incidence_type, sparse=sparse, index=index
+        )
+
+    def adjacency_matrix(self, rank, via_rank, s=1, index=False):
+        """Sparse weighted :term:`s-adjacency matrix`.
+
+        Parameters
+        ----------
+        r,k : int, int
+            Two ranks for skeletons in the input Colored Hypergraph
+        s : int, list, optional, default : 1
+            Minimum number of edges shared by neighbors with node.
+        index: boolean, optional, default: False
+            If True, will return a rowdict of row to node uid
+        index : book, default=False
+            indicate weather to return the indices of the adjacency matrix.
+
+        Returns
+        -------
+        If index is True
+            adjacency_matrix : scipy.sparse.csr.csr_matrix
+            row dictionary : dict
+
+        If index if False
+            adjacency_matrix : scipy.sparse.csr.csr_matrix
+
+        Examples
+        --------
+        >>> G = Graph() # networkx graph
+        >>> G.add_edge(0, 1)
+        >>> G.add_edge(0,3)
+        >>> G.add_edge(0,4)
+        >>> G.add_edge(1, 4)
+        >>> CHG = ColoredHyperGraph(cells=G)
+        >>> CHG.adjacency_matrix(0, 1)
+        """
+        if via_rank is not None:
+            assert rank < via_rank
+        if index:
+            B, row, col = self.incidence_matrix(
+                rank, via_rank, sparse=True, index=index
+            )
+        else:
+            B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
+        A = incidence_to_adjacency(B.T, s=s)
+        if index:
+            return A, row
+        return A
+
+    def cell_adjacency_matrix(self, index=False, s=1):
+        """Compute the cell adjacency matrix.
+
+        Parameters
+        ----------
+        s : int, list, optional, default : 1
+            Minimum number of edges shared by neighbors with node.
+
+        Return
+        ------
+          all cells adjacency_matrix : scipy.sparse.csr.csr_matrix
+
+        """
+        B = self.incidence_matrix(
+            rank=0, to_rank=None, incidence_type="up", index=index
+        )
+        if index:
+
+            A = incidence_to_adjacency(B[0].transpose(), s=s)
+
+            return A, B[2]
+        A = incidence_to_adjacency(B.transpose(), s=s)
+        return A
+
+    def node_adjacency_matrix(self, index=False, s=1):
+        """Compute the node adjacency matrix."""
+        B = self.incidence_matrix(rank=0, to_rank=None, index=index)
+        if index:
+            A = incidence_to_adjacency(B[0], s=s)
+            return A, B[1]
+        A = incidence_to_adjacency(B, s=s)
+        return A
+
+    def coadjacency_matrix(self, rank, via_rank, s=1, index=False):
+        """Compute the coadjacency matrix.
+
+        The sparse weighted :term:`s-coadjacency matrix`
+
+        Parameters
+        ----------
+        r,k : two ranks for skeletons in the input Colored Hypergraph, such that r>k
+
+        s : int, list, optional, default : 1
+            Minimum number of edges shared by neighbors with node.
+
+        index: boolean, optional, default: False
+            if True, will return a rowdict of row to node uid
+
+        weight: bool, default=True
+            If False all nonzero entries are 1.
+            If True adjacency matrix will depend on weighted incidence matrix,
+        index : book, default=False
+            indicate weather to return the indices of the adjacency matrix.
+
+        Returns
+        -------
+        If index is True
+            coadjacency_matrix : scipy.sparse.csr.csr_matrix
+
+            row dictionary : dict
+
+        If index if False
+
+            coadjacency_matrix : scipy.sparse.csr.csr_matrix
+        """
+        if via_rank is not None:
+            assert rank > via_rank
+        if index:
+            B, row, col = self.incidence_matrix(
+                via_rank, rank, incidence_type="down", sparse=True, index=index
+            )
+        else:
+            B = self.incidence_matrix(
+                rank, via_rank, incidence_type="down", sparse=True, index=index
+            )
+        A = incidence_to_adjacency(B)
+        if index:
+            return A, col
+        return A
 
     def add_cells_from(self, cells, ranks=None) -> None:
         """Add cells to combinatorial complex.
@@ -528,3 +776,412 @@ class CombinatorialComplex(ColoredHyperGraph):
         for cell in self.cells:
             CC.add_cell(cell, self.cells.get_rank(cell))
         return CC
+
+    def is_connected(self, s=1, cells=False):
+        """Determine if combintorial complex is :term:`s-connected <s-connected, s-node-connected>`.
+
+        Parameters
+        ----------
+        s : int, list, optional, default : 1
+            Minimum number of edges shared by neighbors with node.
+
+        cells: boolean, optional, default: False
+            If True, will determine if s-cell-connected.
+            For s=1 s-cell-connected is the same as s-connected.
+
+        Returns
+        -------
+        is_connected : boolean
+
+        Notes
+        -----
+        A CHG is s node connected if for any two nodes v0,vn
+        there exists a sequence of nodes v0,v1,v2,...,v(n-1),vn
+        such that every consecutive pair of nodes v(i),v(i+1)
+        share at least s cell.
+
+        Examples
+        --------
+        >>> CHG = ColoredHyperGraph(cells=E)
+        >>> CHG.is_connected()
+        """
+        B = self.incidence_matrix(rank=0, to_rank=None, incidence_type="up")
+        if cells:
+            A = incidence_to_adjacency(B, s=s)
+        else:
+            A = incidence_to_adjacency(B.transpose(), s=s)
+        G = nx.from_scipy_sparse_matrix(A)
+        return nx.is_connected(G)
+
+    def singletons(self):
+        """Return a list of singleton cell.
+
+        A singleton cell is a cell of
+        size 1 with a node of degree 1.
+
+        Returns
+        -------
+        singles : list
+            A list of cells uids.
+        """
+        singletons = []
+        for cell in self.cells:
+            zero_elements = self.cells[cell].skeleton(0)
+            if len(zero_elements) == 1:
+                for n in zero_elements:
+                    if self.degree(n) == 1:
+                        singletons.append(cell)
+        return singletons
+
+    def remove_singletons(self, name=None):
+        """Construct new CHG with singleton cells removed.
+
+        Parameters
+        ----------
+        name: str, optional, default: None
+
+        Returns
+        -------
+        new CHG : CHG
+        """
+        cells = [cell for cell in self.cells if cell not in self.singletons()]
+        return self.restrict_to_cells(cells)
+
+    def s_connected_components(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = False
+    ):
+        """Return a generator for s-cell-connected components.
+
+        or the :term:`s-node-connected components <s-connected component, s-node-connected component>`.
+
+        Parameters
+        ----------
+        s : int, list, optional, default : 1
+            Minimum number of edges shared by neighbors with node.
+        cells : boolean, optional, default: True
+            If True will return cell components, if False will return node components
+        return_singletons : bool, optional, default : False
+
+        Notes
+        -----
+        If cells=True, this method returns the s-cell-connected components as
+        lists of lists of cell uids.
+        An s-cell-component has the property that for any two cells e1 and e2
+        there is a sequence of cells starting with e1 and ending with e2
+        such that pairwise adjacent cells in the sequence intersect in at least
+        s nodes. If s=1 these are the path components of the CHG.
+
+        If cells=False this method returns s-node-connected components.
+        A list of sets of uids of the nodes which are s-walk connected.
+        Two nodes v1 and v2 are s-walk-connected if there is a
+        sequence of nodes starting with v1 and ending with v2 such that pairwise
+        adjacent nodes in the sequence share s cells. If s=1 these are the
+        path components of the ColoredHyperGraph .
+
+        Yields
+        ------
+        s_connected_components : iterator
+            Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
+            components of CHG.
+        """
+        if cells:
+            A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+            G = nx.from_scipy_sparse_matrix(A)
+
+            for c in nx.connected_components(G):
+                if not return_singletons and len(c) == 1:
+                    continue
+                yield {coldict[n] for n in c}
+        else:
+            A, rowdict = self.node_adjacency_matrix(s=s, index=True)
+            G = nx.from_scipy_sparse_matrix(A)
+            for c in nx.connected_components(G):
+                if not return_singletons:
+                    if len(c) == 1:
+                        continue
+                yield {rowdict[n] for n in c}
+
+    def s_component_subgraphs(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = False
+    ):
+        """Return a generator for the induced subgraphs of s_connected components.
+
+        Removes singletons unless return_singletons is set to True.
+
+        Parameters
+        ----------
+        s : int, list, optional, default : 1
+            Minimum number of edges shared by neighbors with node.
+        cells : boolean, optional, cells=False
+            Determines if cell or node components are desired. Returns
+            subgraphs equal to the CHG restricted to each set of nodes(cells) in the
+            s-connected components or s-cell-connected components
+        return_singletons : bool, optional
+
+        Yields
+        ------
+        s_component_subgraphs : iterator
+            Iterator returns subgraphs generated by the cells (or nodes) in the
+            s-cell(node) components.
+        """
+        for idx, c in enumerate(
+            self.s_components(s=s, cells=cells, return_singletons=return_singletons)
+        ):
+            if cells:
+                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
+            else:
+                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
+
+    def s_components(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = True
+    ):
+        """Compute s-connected components.
+
+        Same as s_connected_components.
+
+        See Also
+        --------
+        s_connected_components
+        """
+        return self.s_connected_components(
+            s=s, cells=cells, return_singletons=return_singletons
+        )
+
+    def connected_components(self, cells: bool = False, return_singletons: bool = True):
+        """Compute s-connected components.
+
+        Same as :meth:`s_connected_components`,
+        with s=1, but nodes are returned
+        by default. Return iterator.
+
+        See Also
+        --------
+        s_connected_components
+        """
+        return self.s_connected_components(cells=cells, return_singletons=True)
+
+    def connected_component_subgraphs(self, return_singletons: bool = True):
+        """Compute s-component subgraphs with s=1.
+
+        Same as :meth:`s_component_subgraphs` with s=1.
+
+        Returns iterator.
+
+        See Also
+        --------
+        s_component_subgraphs
+        """
+        return self.s_component_subgraphs(return_singletons=return_singletons)
+
+    def components(self, cells: bool = False, return_singletons: bool = True):
+        """Compute s-connected components for s=1.
+
+        Same as :meth:`s_connected_components` with s=1.
+
+        But nodes are returned
+        by default. Return iterator.
+
+        See Also
+        --------
+        s_connected_components
+        """
+        return self.s_connected_components(s=1, cells=cells)
+
+    def component_subgraphs(self, return_singletons: bool = False):
+        """Compute s-component subgraphs wth s=1.
+
+        Same as :meth:`s_components_subgraphs` with s=1. Returns iterator.
+
+        See Also
+        --------
+        s_component_subgraphs
+        """
+        return self.s_component_subgraphs(return_singletons=return_singletons)
+
+    def node_diameters(self, s: int = 1):
+        """Return node diameters of the connected components.
+
+        Parameters
+        ----------
+        s : int, list, optional, default : 1
+            Minimum number of edges shared by neighbors with node.
+
+        Returns
+        -------
+        list of the diameters of the s-components and
+        list of the s-component nodes
+        """
+        A, coldict = self.node_adjacency_matrix(s=s, index=True)
+        G = nx.from_scipy_sparse_matrix(A)
+        diams = []
+        comps = []
+        for c in nx.connected_components(G):
+            diamc = nx.diameter(G.subgraph(c))
+            temp = set()
+            for e in c:
+                temp.add(coldict[e])
+            comps.append(temp)
+            diams.append(diamc)
+        loc = np.argmax(diams)
+        return diams[loc], diams, comps
+
+    def cell_diameters(self, s: int = 1):
+        """Return the cell diameters of the s_cell_connected component subgraphs.
+
+        Parameters
+        ----------
+        s : int, list, optional, default : 1
+            Minimum number of edges shared by neighbors with node.
+
+        Returns
+        -------
+        maximum diameter : int
+        list of diameters : list
+            List of cell_diameters for s-cell component subgraphs in CHG
+        list of component : list
+            List of the cell uids in the s-cell component subgraphs.
+        """
+        A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+        G = nx.from_scipy_sparse_matrix(A)
+        diams = []
+        comps = []
+        for c in nx.connected_components(G):
+            diamc = nx.diameter(G.subgraph(c))
+            temp = set()
+            for e in c:
+                temp.add(coldict[e])
+            comps.append(temp)
+            diams.append(diamc)
+        loc = np.argmax(diams)
+        return diams[loc], diams, comps
+
+    def diameter(self, s: int = 1) -> int:
+        """Return the length of the longest shortest s-walk between nodes.
+
+        Parameters
+        ----------
+        s : int, default=1
+            Minimum number of edges shared by neighbors with node.
+
+        Returns
+        -------
+        int
+
+        Raises
+        ------
+        TopoNetXError
+            If CHG is not s-cell-connected
+
+        Notes
+        -----
+        Two nodes are s-adjacent if they share s cells.
+        Two nodes v_start and v_end are s-walk connected if there is a sequence of
+        nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
+        are s-adjacent. If the graph is not connected, an error will be raised.
+        """
+        A = self.node_adjacency_matrix(s=s)
+        G = nx.from_scipy_sparse_matrix(A)
+        if nx.is_connected(G):
+            return nx.diameter(G)
+        else:
+            raise TopoNetXError(f"{self.__shortstr__} is not s-connected. s={s}")
+
+    def cell_diameter(self, s: int = 1) -> int:
+        """Return length of the longest shortest s-walk between cells.
+
+        Parameters
+        ----------
+        s : int, default=1
+            Minimum number of edges shared by neighbors with node.
+
+        Return
+        ------
+        int
+
+        Raises
+        ------
+        TopoNetXError
+            If ColoredHyperGraph is not s-cell-connected
+
+        Notes
+        -----
+        Two cells are s-adjacent if they share s nodes.
+        Two nodes e_start and e_end are s-walk connected if there is a sequence of
+        cells e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
+        are s-adjacent. If the graph is not connected, an error will be raised.
+        """
+        A = self.cell_adjacency_matrix(s=s)
+        G = nx.from_scipy_sparse_matrix(A)
+        if nx.is_connected(G):
+            return nx.diameter(G)
+        else:
+            raise TopoNetXError(f"CHG is not s-connected. s={s}")
+
+    def distance(self, source, target, s: int = 1) -> int:
+        """Return shortest s-walk distance between two nodes.
+
+        Parameters
+        ----------
+        source : node.uid or node
+            a node in the CHG
+        target : node.uid or node
+            a node in the CHG
+        s : int
+            the number of cells
+
+        Returns
+        -------
+        int
+
+        See Also
+        --------
+        cell_distance
+
+        Notes
+        -----
+        The s-distance is the shortest s-walk length between the nodes.
+        An s-walk between nodes is a sequence of nodes that pairwise share
+        at least s cells. The length of the shortest s-walk is 1 less than
+        the number of nodes in the path sequence.
+
+        Uses the networkx shortest_path_length method on the graph
+        generated by the s-adjacency matrix.
+
+        """
+        raise NotImplementedError()
+
+    def cell_distance(self, source, target, s: int = 1):
+        """Return the shortest s-walk distance between two cells.
+
+        Parameters
+        ----------
+        source : cell.uid or cell
+            an cell in the colored hypergraph
+        target : cell.uid or cell
+            an cell in the colored hypergraph
+        s : int, default=1
+            the number of intersections between pairwise consecutive cells
+
+        Returns
+        -------
+        int
+            The shortest s-walk cell distance between `source` and `target`.
+            A shortest s-walk is computed as a sequence of cells,
+            the s-walk distance is the number of cells in the sequence
+            minus 1. If no such path exists returns np.inf.
+
+        See Also
+        --------
+        distance
+
+        Notes
+        -----
+        The s-distance is the shortest s-walk length between the cells.
+        An s-walk between cells is a sequence of cells such that consecutive pairwise
+        cells intersect in at least s nodes. The length of the shortest s-walk is 1 less than
+        the number of cells in the path sequence.
+
+        Uses the networkx shortest_path_length method on the graph
+        generated by the s-cell_adjacency matrix.
+        """
+        raise NotImplementedError()
