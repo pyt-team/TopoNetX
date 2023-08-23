@@ -32,8 +32,10 @@ class TestGraphToSimplicialComplex:
     def test_graph_to_clique_complex(self):
         """Test graph_2_clique_complex."""
         G = nx.Graph()
+        G.graph["label"] = 12
 
-        G.add_edge(0, 1)
+        G.add_node(0, label=5)
+        G.add_edge(0, 1, weight=10)
         G.add_edge(1, 2)
         G.add_edge(2, 0)
         G.add_edge(2, 3)
@@ -44,6 +46,11 @@ class TestGraphToSimplicialComplex:
         assert sc.dim == 2
         assert (0, 2, 3) in sc
         assert (0, 1, 2) in sc
+
+        # attributes are copied
+        assert sc.complex["label"] == 12
+        assert sc[(0,)]["label"] == 5
+        assert sc[(0, 1)]["weight"] == 10
 
         sc = graph_to_clique_complex(G, max_dim=2)
 
