@@ -63,7 +63,16 @@ def graph_to_clique_complex(
     if max_dim is not None:
         cliques = takewhile(lambda clique: len(clique) <= max_dim, cliques)
 
-    return SimplicialComplex(cliques)
+    SC = SimplicialComplex(cliques)
+
+    # copy attributes of the input graph
+    for node in G.nodes:
+        SC[[node]].update(G.nodes[node])
+    for edge in G.edges:
+        SC[edge].update(G.edges[edge])
+    SC.complex.update(G.graph)
+
+    return SC
 
 
 def graph_2_neighbor_complex(G) -> SimplicialComplex:
