@@ -27,15 +27,15 @@ __all__ = ["CombinatorialComplex"]
 class CombinatorialComplex(ColoredHyperGraph):
     """Class for Combinatorial Complex.
 
-    A Combinatorial Complex (CC) is a triple CC = (S, X, rk) where:
+    A Combinatorial Complex (CCC) is a triple CCC = (S, X, rk) where:
     - S is an abstract set of entities,
     - X a subset of the power set of X, and
     - rk is the a rank function that associates for every set x in X a rank, a positive integer.
 
     The rank function rk must satisfy x <= y then rk(x) <= rk(y).
-    We call this condition the CC condition.
+    We call this condition the CCC condition.
 
-    A CC is a generlization of graphs, hypergraphs, cellular and simplicial complexes.
+    A CCC is a generlization of graphs, hypergraphs, cellular and simplicial complexes.
 
     Parameters
     ----------
@@ -72,17 +72,17 @@ class CombinatorialComplex(ColoredHyperGraph):
     --------
     Define an empty combinatorial complex:
 
-    >>> CC = CombinatorialComplex()
+    >>> CCC = CombinatorialComplex()
 
     Add cells to the combinatorial complex:
 
-    >>> CC = CombinatorialComplex()
-    >>> CC.add_cell([1, 2], rank=1)
-    >>> CC.add_cell([3, 4], rank=1)
-    >>> CC.add_cell([1, 2, 3, 4], rank=2)
-    >>> CC.add_cell([1, 2, 4], rank=2)
-    >>> CC.add_cell([3, 4], rank=2)
-    >>> CC.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
+    >>> CCC = CombinatorialComplex()
+    >>> CCC.add_cell([1, 2], rank=1)
+    >>> CCC.add_cell([3, 4], rank=1)
+    >>> CCC.add_cell([1, 2, 3, 4], rank=2)
+    >>> CCC.add_cell([1, 2, 4], rank=2)
+    >>> CCC.add_cell([3, 4], rank=2)
+    >>> CCC.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
     """
 
     def __init__(
@@ -144,21 +144,21 @@ class CombinatorialComplex(ColoredHyperGraph):
         return f"CombinatorialComplex(name='{self.name}')"
 
     def __setitem__(self, cell, attr):
-        """Set the attributes of a cell in the CC."""
+        """Set the attributes of a cell in the CCC."""
         return super().__setitem__(cell, attr)
 
     @property
     def __shortstr__(self):
         """Return the short string generic representation."""
-        return "CC"
+        return "CCC"
 
     def number_of_nodes(self, node_set=None) -> int:
-        """Compute the number of nodes in node_set belonging to the CC.
+        """Compute the number of nodes in node_set belonging to the CCC.
 
         Parameters
         ----------
-        node_set : an interable of Entities, optional, default: None
-            If None, then return the number of nodes in the CC.
+        node_set : an interable of Entities, optional
+            If None, then return the number of nodes in the CCC.
 
         Returns
         -------
@@ -167,7 +167,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().number_of_nodes(node_set)
 
     def number_of_cells(self, cell_set=None) -> int:
-        """Compute the number of cells in cell_set belonging to the CC.
+        """Compute the number of cells in cell_set belonging to the CCC.
 
         Parameters
         ----------
@@ -184,7 +184,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """Return shape.
 
         This is:
-        (number of cells[i], for i in range(0,dim(CC))  )
+        (number of cells[i], for i in range(0,dim(CCC))  )
 
         Returns
         -------
@@ -193,7 +193,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().shape()
 
     def order(self):
-        """Compute the number of nodes in the CC.
+        """Compute the number of nodes in the CCC.
 
         Returns
         -------
@@ -202,7 +202,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().order()
 
     def _remove_node_helper(self, node) -> None:
-        """Remove node from cells. Assumes node is present in the CC."""
+        """Remove node from cells. Assumes node is present in the CCC."""
         # Removing node in hyperedgeview
         for key in list(self.cells.hyperedge_dict.keys()):
             for key_rank in list(self.cells.hyperedge_dict[key].keys()):
@@ -228,14 +228,14 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         node_set : an iterable of hashables
-            Nodes in CC
+            Nodes in CCC
         """
         return super().remove_nodes(node_set)
 
     def remove_node(self, node) -> None:
         """Remove node from cells.
 
-        This also deletes any reference in the nodes of the CC.
+        This also deletes any reference in the nodes of the CCC.
         This also deletes cell references in higher ranks for the particular node.
 
         Parameters
@@ -253,10 +253,9 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        values : TYPE
-            DESCRIPTION.
-        name : TYPE, optional
-            DESCRIPTION. The default is None.
+        values : dict
+        Dictionary of cell attributes to set keyed by cell name.
+        name : str, optional
 
         Returns
         -------
@@ -268,23 +267,23 @@ class CombinatorialComplex(ColoredHyperGraph):
         to assign a cell attribute to store the value of that property for
         each cell:
 
-        >>> CC = CombinatorialComplex()
-        >>> CC.add_cell([1, 2, 3, 4], rank=2)
-        >>> CC.add_cell([1, 2, 4], rank=2,)
-        >>> CC.add_cell([3, 4], rank=2)
+        >>> CCC = CombinatorialComplex()
+        >>> CCC.add_cell([1, 2, 3, 4], rank=2)
+        >>> CCC.add_cell([1, 2, 4], rank=2,)
+        >>> CCC.add_cell([3, 4], rank=2)
         >>> d = {(1, 2, 3, 4): 'red', (1, 2, 3): 'blue', (3, 4): 'green'}
-        >>> CC.set_cell_attributes(d, name='color')
-        >>> CC.cells[(3, 4)]['color']
+        >>> CCC.set_cell_attributes(d, name='color')
+        >>> CCC.cells[(3, 4)]['color']
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
         the entire dictionary will be used to update edge attributes:
 
         >>> G = nx.path_graph(3)
-        >>> CC = NestedCombinatorialComplex(G)
+        >>> CCC = NestedCombinatorialComplex(G)
         >>> d = {(1, 2): {'color': 'red','attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3}}
-        >>> CC.set_cell_attributes(d)
-        >>> CC.cells[(0, 1)]['color']
+        >>> CCC.set_cell_attributes(d)
+        >>> CCC.cells[(0, 1)]['color']
         'blue'
         3
 
@@ -308,16 +307,16 @@ class CombinatorialComplex(ColoredHyperGraph):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = NestedCombinatorialComplex(G)
+        >>> CCC = NestedCombinatorialComplex(G)
         >>> d = {0: {'color': 'red', 'attr2': 1 },1: {'color': 'blue', 'attr2': 3} }
-        >>> CC.set_node_attributes(d)
-        >>> CC.get_node_attributes('color')
+        >>> CCC.set_node_attributes(d)
+        >>> CCC.get_node_attributes('color')
         {0: 'red', 1: 'blue'}
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CC = NestedCombinatorialComplex(G)
-        >>> nodes_color = CC.get_node_attributes('color')
+        >>> CCC = NestedCombinatorialComplex(G)
+        >>> nodes_color = CCC.get_node_attributes('color')
         >>> nodes_color[1]
         'blue'
         """
@@ -340,10 +339,10 @@ class CombinatorialComplex(ColoredHyperGraph):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = CombinatorialComplex(G)
+        >>> CCC = CombinatorialComplex(G)
         >>> d = {(1, 2): {'color': 'red', 'attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3} }
-        >>> CC.set_cell_attributes(d)
-        >>> cell_color = CC.get_cell_attributes('color')
+        >>> CCC.set_cell_attributes(d)
+        >>> cell_color = CCC.get_cell_attributes('color')
         >>> cell_color[frozenset({0, 1})]
         'blue'
         """
@@ -479,6 +478,8 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
+        rank : int
+        to_rank: int, optional
         incidence_type : {'up', 'down'}, default='up'
         sparse : bool, default=True
         index : bool, default=False
@@ -522,11 +523,10 @@ class CombinatorialComplex(ColoredHyperGraph):
                 uidset = self.skeleton(rank)
                 children = self.skeleton(rank - 1)
             else:
-                raise TopoNetXError("incidence_type must be 'up' or 'down' ")
+                raise ValueError(
+                    "Invalid value for incidence_type. Must be 'up' or 'down'"
+                )
         else:
-            assert (
-                rank != to_rank
-            )  # incidence is defined between two skeletons of different ranks
             if (
                 rank < to_rank
             ):  # up incidence is defined between two skeletons of different ranks
@@ -549,7 +549,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         sparse: bool = True,
         index: bool = False,
     ):
-        """Compute incidence matrix for the CC between rank and to_rank skeleti.
+        """Compute incidence matrix for the CCC between rank and to_rank skeleti.
 
         Parameters
         ----------
@@ -557,7 +557,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
+        index : bool, optional
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
 
@@ -578,14 +578,13 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        r,k : int, int
+        rank ,via_rank : int, int
             Two ranks for skeletons in the input Colored Hypergraph
-        s : int, list, optional, default : 1
+        s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
-        index: boolean, optional, default: False
-            If True, will return a rowdict of row to node uid
-        index : book, default=False
-            indicate weather to return the indices of the adjacency matrix.
+        index: bool, default=False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
 
         Returns
         -------
@@ -607,7 +606,8 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CHG.adjacency_matrix(0, 1)
         """
         if via_rank is not None:
-            assert rank < via_rank
+            if rank > via_rank:
+                raise ValueError("rank must be greater than via_rank")
         if index:
             B, row, col = self.incidence_matrix(
                 rank, via_rank, sparse=True, index=index
@@ -624,7 +624,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
 
         Return
@@ -659,19 +659,18 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        r,k : two ranks for skeletons in the input Colored Hypergraph, such that r>k
+        rank , via_rank : two ranks for skeletons in the input Colored Hypergraph, such that r>k
 
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
-        index: boolean, optional, default: False
-            if True, will return a rowdict of row to node uid
+        index: bool, optional
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
 
         weight: bool, default=True
             If False all nonzero entries are 1.
             If True adjacency matrix will depend on weighted incidence matrix,
-        index : book, default=False
-            indicate weather to return the indices of the adjacency matrix.
 
         Returns
         -------
@@ -685,7 +684,8 @@ class CombinatorialComplex(ColoredHyperGraph):
             coadjacency_matrix : scipy.sparse.csr.csr_matrix
         """
         if via_rank is not None:
-            assert rank > via_rank
+            if rank < via_rank:
+                raise ValueError("rank must be greater than via_rank")
         if index:
             B, row, col = self.incidence_matrix(
                 via_rank, rank, incidence_type="down", sparse=True, index=index
@@ -730,7 +730,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         self._max_complex.difference_update({HyperEdge(hyperedge_, rank=rank)})
 
     def remove_cell(self, cell):
-        """Remove a single cell from CC.
+        """Remove a single cell from CCC.
 
         Parameters
         ----------
@@ -749,7 +749,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         super().remove_cell(cell)
 
     def remove_cells(self, cell_set):
-        """Remove cells from CC.
+        """Remove cells from CCC.
 
         Parameters
         ----------
@@ -772,26 +772,26 @@ class CombinatorialComplex(ColoredHyperGraph):
         -------
         CombinatorialComplex
         """
-        CC = CombinatorialComplex(name=self.name, graph_based=self.graph_based)
+        CCC = CombinatorialComplex(name=self.name, graph_based=self.graph_based)
         for cell in self.cells:
-            CC.add_cell(cell, self.cells.get_rank(cell))
-        return CC
+            CCC.add_cell(cell, self.cells.get_rank(cell))
+        return CCC
 
     def is_connected(self, s=1, cells=False):
         """Determine if combintorial complex is :term:`s-connected <s-connected, s-node-connected>`.
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
 
-        cells: boolean, optional, default: False
+        cells: bool, default=False
             If True, will determine if s-cell-connected.
             For s=1 s-cell-connected is the same as s-connected.
 
         Returns
         -------
-        is_connected : boolean
+        is_connected : bool
 
         Notes
         -----
@@ -821,24 +821,22 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        singles : list
+        list
             A list of cells uids.
         """
-        singletons = []
         for cell in self.cells:
             zero_elements = self.cells[cell].skeleton(0)
             if len(zero_elements) == 1:
                 for n in zero_elements:
                     if self.degree(n) == 1:
-                        singletons.append(cell)
-        return singletons
+                        yield cell
 
     def remove_singletons(self, name=None):
         """Construct new CHG with singleton cells removed.
 
         Parameters
         ----------
-        name: str, optional, default: None
+        name: str, optional
 
         Returns
         -------
@@ -856,11 +854,11 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
-        cells : boolean, optional, default: True
+        cells : bool, default=True
             If True will return cell components, if False will return node components
-        return_singletons : bool, optional, default : False
+        return_singletons : bool, default=False
 
         Notes
         -----
@@ -910,9 +908,9 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
-        cells : boolean, optional, cells=False
+        cells : bool, default=False
             Determines if cell or node components are desired. Returns
             subgraphs equal to the CHG restricted to each set of nodes(cells) in the
             s-connected components or s-cell-connected components
@@ -1003,7 +1001,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
 
         Returns
@@ -1030,7 +1028,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
 
         Returns
@@ -1047,9 +1045,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         comps = []
         for c in nx.connected_components(G):
             diamc = nx.diameter(G.subgraph(c))
-            temp = set()
-            for e in c:
-                temp.add(coldict[e])
+            temp = {coldict[e] for e in c}
             comps.append(temp)
             diams.append(diamc)
         loc = np.argmax(diams)
