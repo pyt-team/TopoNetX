@@ -215,7 +215,9 @@ class TestCombinatorialComplex:
         CC.add_cell([2, 6, 4], rank=2)
         with pytest.raises(ValueError) as exp:
             CC.incidence_matrix(2, incidence_type="wrong")
-        assert str(exp.value) == "incidence_type must be 'up' or 'down' "
+        assert (
+            str(exp.value) == "Invalid value for incidence_type. Must be 'up' or 'down'"
+        )
 
     def test_incidence_matrix_with_equal_rank(self):
         """Test generating an incidence matrix by having equal rank."""
