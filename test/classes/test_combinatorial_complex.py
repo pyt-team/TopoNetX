@@ -213,9 +213,11 @@ class TestCombinatorialComplex:
         CC.add_cell([1, 2, 4, 3], rank=2)
         CC.add_cell([2, 5], rank=1)
         CC.add_cell([2, 6, 4], rank=2)
-        with pytest.raises(TopoNetXError) as exp:
+        with pytest.raises(ValueError) as exp:
             CC.incidence_matrix(2, incidence_type="wrong")
-        assert str(exp.value) == "incidence_type must be 'up' or 'down' "
+        assert (
+            str(exp.value) == "Invalid value for incidence_type. Must be 'up' or 'down'"
+        )
 
     def test_incidence_matrix_with_equal_rank(self):
         """Test generating an incidence matrix by having equal rank."""
@@ -322,7 +324,7 @@ class TestCombinatorialComplex:
         with pytest.raises(KeyError) as exp:
             node = 7
             assert CC.degree(node, 2)
-        assert str(exp.value) == "'Node 7 not in CC.'"
+        assert str(exp.value) == "'Node 7 not in CCC.'"
         assert CC.degree(1, rank=None) == 5
 
     def test_size(self):
@@ -337,7 +339,7 @@ class TestCombinatorialComplex:
         assert CC.size(1) == 1
         with pytest.raises(TopoNetXError) as exp:
             CC.size(frozenset([1, 2, 3]))
-        assert str(exp.value) == "Input cell is not in cells of the CC"
+        assert str(exp.value) == "Input cell is not in cells of the CCC"
 
     def test_num_nodes_and_cells(self):
         """Test for number of nodes and number of cells."""
@@ -387,7 +389,7 @@ class TestCombinatorialComplex:
         }
         with pytest.raises(KeyError) as exp:
             example.remove_nodes([1])
-        assert str(exp.value) == "'node 1 not in CC'"
+        assert str(exp.value) == "'node 1 not in CCC'"
         example.remove_nodes([2, 5])
         assert example._complex_set.hyperedge_dict == {
             0: {
@@ -559,4 +561,4 @@ class TestCombinatorialComplex:
         assert CC.diameter() == 1
         with pytest.raises(TopoNetXError) as exp:
             CC.diameter(s=2)
-        assert str(exp.value) == "CC is not s-connected. s=2"
+        assert str(exp.value) == "CCC is not s-connected. s=2"

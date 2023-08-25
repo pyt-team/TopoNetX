@@ -553,10 +553,14 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
+        rank : int
+        to_rank: int, optional
+        incidence_type : {'up', 'down'}, default='up'
         weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
+        sparse : bool, default=True
         index : bool, optional
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
@@ -578,7 +582,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        rank ,via_rank : int, int
+        rank, via_rank : int, int
             Two ranks for skeletons in the input Colored Hypergraph
         s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
