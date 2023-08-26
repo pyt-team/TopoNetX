@@ -41,8 +41,7 @@ class ColoredHyperGraph(Complex):
     name : str, optional
         An identifiable name for the Colored Hypergraph.
     ranks : Collection, optional
-        when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
-        size as cells.
+        Represent the color of cells.
     weight : array-like, optional
         User specified weight corresponding to setsytem of type pandas.DataFrame,
         length must equal number of rows in dataframe.
@@ -454,18 +453,19 @@ class ColoredHyperGraph(Complex):
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             hyperedge_set = frozenset({hyperedge})
         elif isinstance(hyperedge, Iterable) or isinstance(hyperedge, HyperEdge):
-            hyperedge_ = (
-                hyperedge.elements
-                if isinstance(hyperedge, HyperEdge)
-                else frozenset(hyperedge)
-            )
-            if not all(isinstance(i, Hashable) for i in hyperedge_):
-                raise ValueError("every element hyperedge must be hashable.")
-            if rank == 0 and len(hyperedge_) > 1:
+            if isinstance(hyperedge, HyperEdge):
+                hyperedge_set = hyperedge.elements
+            else:
+                if not all(isinstance(i, Hashable) for i in hyperedge):
+                    raise ValueError(
+                        f"Input hyperedge {hyperedge} contain non-hashable elements."
+                    )
+                hyperedge_set = frozenset(hyperedge)
+
+            if rank == 0 and len(hyperedge_set) > 1:
                 raise ValueError(
-                    "rank must be positive for higher order hyperedges, got rank = 0"
+                    "rank must be positive for hyperedges containing more than 1 element, got rank = 0"
                 )
-            hyperedge_set = hyperedge_
         else:
             raise ValueError("Invalid hyperedge type")
         self._add_hyperedge_helper(hyperedge_set, rank, **attr)
@@ -684,13 +684,20 @@ class ColoredHyperGraph(Complex):
 
     def add_hyperedge_with_its_nodes(self, hyperedge_, rank, **attr):
         """Adding nodes of hyperedge helper method."""
-        self._complex_set.hyperedge_dict[rank][hyperedge_].update(attr)
-        for i in hyperedge_:
+        if rank == 0:
             if 0 not in self._complex_set.hyperedge_dict:
                 self._complex_set.hyperedge_dict[0] = {}
+                self._complex_set.hyperedge_dict[0][hyperedge_] = {"weight": 1}
+            self._complex_set.hyperedge_dict[0][hyperedge_].update(**attr)
 
-            if i not in self._complex_set.hyperedge_dict[0]:
-                self._complex_set.hyperedge_dict[0][frozenset({i})] = {"weight": 1}
+        else:
+            self._complex_set.hyperedge_dict[rank][hyperedge_].update(**attr)
+            for i in hyperedge_:
+                if 0 not in self._complex_set.hyperedge_dict:
+                    self._complex_set.hyperedge_dict[0] = {}
+
+                if i not in self._complex_set.hyperedge_dict[0]:
+                    self._complex_set.hyperedge_dict[0][frozenset({i})] = {"weight": 1}
 
     def _add_hyperedge_helper(self, hyperedge_, rank, **attr):
         """Add hyperedge.
@@ -964,7 +971,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        r,k : two ranks for skeletons in the input Colored Hypergraph, such that r>k
+        r,k : two ranks for skeletons in the input Colored Hypergraph
 
         s : int, list, optional, default : 1
             Minimum number of edges shared by neighbors with node.
