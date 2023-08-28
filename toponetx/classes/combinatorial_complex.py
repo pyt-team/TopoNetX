@@ -148,7 +148,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().__setitem__(cell, attr)
 
     @property
-    def __shortstr__(self):
+    def __shortstr__(self) -> str:
         """Return the short string generic representation."""
         return "CCC"
 
@@ -436,7 +436,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 hyperedge._properties
             )
 
-    def add_cell(self, cell, rank=None, **attr):
+    def add_cell(self, cell, rank=None, **attr) -> None:
         """Add a single cells to combinatorial complex.
 
         Parameters
@@ -733,7 +733,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
         self._max_complex.difference_update({HyperEdge(hyperedge_, rank=rank)})
 
-    def remove_cell(self, cell):
+    def remove_cell(self, cell) -> None:
         """Remove a single cell from CCC.
 
         Parameters
@@ -752,7 +752,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         super().remove_cell(cell)
 
-    def remove_cells(self, cell_set):
+    def remove_cells(self, cell_set) -> None:
         """Remove cells from CCC.
 
         Parameters
