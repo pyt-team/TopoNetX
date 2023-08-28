@@ -181,11 +181,11 @@ class ColoredHyperGraph(Complex):
         return max(self._complex_set.allranks)
 
     @property
-    def __shortstr__(self):
+    def __shortstr__(self) -> str:
         """Return the short string generic representation."""
         return "CHG"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return detailed string representation."""
         return f"Colored Hypergraph with {len(self.nodes)} nodes and hyperedges with colors {self.ranks} and sizes {self.shape} "
 
@@ -193,7 +193,7 @@ class ColoredHyperGraph(Complex):
         """Return string representation."""
         return f"ColoredHyperGraph(name='{self.name}')"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of nodes."""
         return len(self.nodes)
 
@@ -201,7 +201,7 @@ class ColoredHyperGraph(Complex):
         """Iterate over the nodes."""
         return iter(self.nodes)
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         """Return true/false indicating if item is in self.nodes.
 
         Parameters
@@ -490,7 +490,7 @@ class ColoredHyperGraph(Complex):
         rank = self._complex_set.get_rank(hyperedge_)
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
 
-    def _add_node(self, node, **attr):
+    def _add_node(self, node, **attr) -> None:
         """
         Add one node as a hyperedge.
 
@@ -507,7 +507,7 @@ class ColoredHyperGraph(Complex):
         """
         self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
-    def add_node(self, node, **attr):
+    def add_node(self, node, **attr) -> None:
         """
         Add a node.
 
@@ -524,7 +524,7 @@ class ColoredHyperGraph(Complex):
         """
         self._add_node(node, **attr)
 
-    def set_node_attributes(self, values, name=None):
+    def set_node_attributes(self, values, name=None) -> None:
         """
         Set node attributes.
 
@@ -554,7 +554,7 @@ class ColoredHyperGraph(Complex):
                     pass
             return
 
-    def set_cell_attributes(self, values, name=None):
+    def set_cell_attributes(self, values, name=None) -> None:
         """Set cell attributes.
 
         Parameters
@@ -682,7 +682,7 @@ class ColoredHyperGraph(Complex):
                 if name in self.cells[cell].properties
             }
 
-    def add_hyperedge_with_its_nodes(self, hyperedge_, rank, **attr):
+    def add_hyperedge_with_its_nodes(self, hyperedge_, rank, **attr) -> None:
         """Adding nodes of hyperedge helper method."""
         if rank == 0:
             if 0 not in self._complex_set.hyperedge_dict:
@@ -699,7 +699,7 @@ class ColoredHyperGraph(Complex):
                 if i not in self._complex_set.hyperedge_dict[0]:
                     self._complex_set.hyperedge_dict[0][frozenset({i})] = {"weight": 1}
 
-    def _add_hyperedge_helper(self, hyperedge_, rank, **attr):
+    def _add_hyperedge_helper(self, hyperedge_, rank, **attr) -> None:
         """Add hyperedge.
 
         Parameters
@@ -723,7 +723,7 @@ class ColoredHyperGraph(Complex):
             self._complex_set.hyperedge_dict[rank][hyperedge_] = {}
             self.add_hyperedge_with_its_nodes(hyperedge_, rank, **attr)
 
-    def add_cell(self, cell, rank=None, **attr):
+    def add_cell(self, cell, rank=None, **attr) -> None:
         """Add a single cells to Colored Hypergraph.
 
         Parameters
@@ -777,7 +777,7 @@ class ColoredHyperGraph(Complex):
             for cell in cells:
                 self.add_cell(cell, ranks)
 
-    def remove_cell(self, cell):
+    def remove_cell(self, cell) -> None:
         """Remove a single cell from CHG.
 
         Parameters
@@ -804,7 +804,7 @@ class ColoredHyperGraph(Complex):
         """Get adjacency structure dictionary."""
         return sparse_array_to_neighborhood_dict(self.adjacency_matrix(i, j))
 
-    def remove_cells(self, cell_set):
+    def remove_cells(self, cell_set) -> None:
         """Remove cells from CHG.
 
         Parameters
@@ -1062,7 +1062,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def from_networkx_graph(self, G):
+    def from_networkx_graph(self, G) -> None:
         """Construct a Colored Hypergraph from a networkx graph.
 
         Parameters
