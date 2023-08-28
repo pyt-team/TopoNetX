@@ -11,121 +11,121 @@ from toponetx.exception import TopoNetXError
 class TestCombinatorialComplex:
     """Test CombinatorialComplex class."""
 
-    def test_init_empty_cc(self):
-        """Test creation of an empty CC."""
-        CC = CombinatorialComplex()
-        assert len(CC) == 0
+    def test_init_empty_ccc(self):
+        """Test creation of an empty CCC."""
+        CCC = CombinatorialComplex()
+        assert len(CCC) == 0
 
     def test_init_from_lists(self):
-        """Test creation of a CC from a list of cells."""
-        CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
-        assert len(CC.cells) == 6
-        assert (1, 2, 3) in CC.cells
-        assert (2, 3, 4) in CC.cells
+        """Test creation of a CCC from a list of cells."""
+        CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        assert len(CCC.cells) == 6
+        assert (1, 2, 3) in CCC.cells
+        assert (2, 3, 4) in CCC.cells
 
     def test_init_from_abstract_cells(self):
-        """Test creation of a CC from abstract cells."""
+        """Test creation of a CCC from abstract cells."""
         y1 = HyperEdge(elements=[1, 2], rank=1)
         y2 = HyperEdge(elements=[2, 4], rank=1)
         y3 = HyperEdge(elements=[3, 5], rank=1)
         y4 = HyperEdge(elements=[4, 5], rank=1)
         y5 = HyperEdge(elements=[5, 7], rank=1)
 
-        CC = CombinatorialComplex(cells=[y1, y2, y3, y4, y5])
+        CCC = CombinatorialComplex(cells=[y1, y2, y3, y4, y5])
 
-        assert y1 in CC.cells
-        assert y2 in CC.cells
-        assert y3 in CC.cells
-        assert y4 in CC.cells
-        assert y5 in CC.cells
+        assert y1 in CCC.cells
+        assert y2 in CCC.cells
+        assert y3 in CCC.cells
+        assert y4 in CCC.cells
+        assert y5 in CCC.cells
 
     def test_init_from_networkx_graph(self):
-        """Test creation of a CC from a networkx graph."""
+        """Test creation of a CCC from a networkx graph."""
         G = nx.Graph()
         G.add_edge(0, 1)
         G.add_edge(0, 3)
         G.add_edge(0, 4)
         G.add_edge(1, 4)
 
-        CC = CombinatorialComplex(cells=G)
+        CCC = CombinatorialComplex(cells=G)
 
-        assert (0, 1) in CC.cells
-        assert (0, 3) in CC.cells
-        assert (0, 4) in CC.cells
-        assert (1, 4) in CC.cells
-        assert (0, 5) not in CC.cells
+        assert (0, 1) in CCC.cells
+        assert (0, 3) in CCC.cells
+        assert (0, 4) in CCC.cells
+        assert (1, 4) in CCC.cells
+        assert (0, 5) not in CCC.cells
 
         G = nx.Graph()
         G.add_edge(5, 7)
         G.add_edge("a", "b")
 
-        CC.from_networkx_graph(G)
+        CCC.from_networkx_graph(G)
 
-        assert "a" in CC.cells
+        assert "a" in CCC.cells
 
     def test_add_cell(self):
-        """Test adding a cell to a CC."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2, 3], rank=2)
-        assert (1, 2, 3) in CC.cells
+        """Test adding a cell to a CCC."""
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2, 3], rank=2)
+        assert (1, 2, 3) in CCC.cells
         with pytest.raises(ValueError) as ex:
-            CC.add_cell(HyperEdge([1]), 3)
+            CCC.add_cell(HyperEdge([1]), 3)
         assert len(str(ex.value)) > 0
 
     def test_add_cells_from(self):
-        """Test adding multiple cells to a CC."""
-        CC = CombinatorialComplex()
-        CC.add_cells_from([[2, 3, 4], [3, 4, 5]], ranks=2)
+        """Test adding multiple cells to a CCC."""
+        CCC = CombinatorialComplex()
+        CCC.add_cells_from([[2, 3, 4], [3, 4, 5]], ranks=2)
 
-        assert (2, 3, 4) in CC.cells
-        assert (3, 4, 5) in CC.cells
+        assert (2, 3, 4) in CCC.cells
+        assert (3, 4, 5) in CCC.cells
 
     def test_remove_cell(self):
-        """Test removing a cell from a CC."""
-        CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
-        CC.remove_cell([1, 2, 3])
+        """Test removing a cell from a CCC."""
+        CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CCC.remove_cell([1, 2, 3])
 
-        assert (1, 2, 3) not in CC.cells
-        assert (2, 3, 4) in CC.cells
+        assert (1, 2, 3) not in CCC.cells
+        assert (2, 3, 4) in CCC.cells
 
     def test_remove_cells(self):
-        """Test removing multiple cells from a CC."""
-        CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
-        CC.remove_cells([[1, 2, 3], [2, 3, 4]])
+        """Test removing multiple cells from a CCC."""
+        CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CCC.remove_cells([[1, 2, 3], [2, 3, 4]])
 
-        assert (1, 2, 3) not in CC.cells
-        assert (2, 3, 4) not in CC.cells
+        assert (1, 2, 3) not in CCC.cells
+        assert (2, 3, 4) not in CCC.cells
 
     def test_incidence_matrix(self):
         """Test generating an incidence matrix."""
-        CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
 
-        B = CC.incidence_matrix(rank=0, to_rank=2)
+        B = CCC.incidence_matrix(rank=0, to_rank=2)
         assert B.shape == (4, 2)
         assert (B.T[0].todense() == [1, 1, 1, 0]).all()
         assert (B.T[1].todense() == [0, 1, 1, 1]).all()
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 2, 3, 4], rank=2)
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3, 2], rank=1)
-        CC.add_cell([1, 2, 3, 4], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        B, row, col = CC.incidence_matrix(1, index=True)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 2, 3, 4], rank=2)
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3, 2], rank=1)
+        CCC.add_cell([1, 2, 3, 4], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        B, row, col = CCC.incidence_matrix(1, index=True)
         assert B[(frozenset({1, 2}))] == 0
         assert B[(frozenset({1, 2, 3}))] == 1
         assert B[(frozenset({2, 5}))] == 2
 
     def test_incidence_matrix_to_rank_none(self):
         """Test generating an incidence matrix without setting the to_rank parameter."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        B = CC.incidence_matrix(0)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        B = CCC.incidence_matrix(0)
         assert B.shape == (6, 3)
         assert (
             B.todense()
@@ -134,13 +134,13 @@ class TestCombinatorialComplex:
 
     def test_adjacency_matrix(self):
         """Test generating an adjacency matrix."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        A02 = CC.adjacency_matrix(0, 2)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        A02 = CCC.adjacency_matrix(0, 2)
         assert A02.shape == (6, 6)
         assert (
             A02.todense()
@@ -156,25 +156,25 @@ class TestCombinatorialComplex:
 
     def test_coadjacency_matrix(self):
         """Test generating a coadjacency matrix."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        CA10 = CC.coadjacency_matrix(1, 0)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        CA10 = CCC.coadjacency_matrix(1, 0)
         assert CA10.shape == (3, 3)
         assert (CA10.todense() == [[0, 1, 1], [1, 0, 0], [1, 0, 0]]).all()
 
     def test_clone(self):
         """Test the clone method of CombinatorialComplex."""
-        CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
-        CC2 = CC.clone()
-        assert len(CC2.cells) == 6
-        assert (1, 2, 3) in CC2.cells
-        assert (2, 3, 4) in CC2.cells
-        CC2.remove_cell([1, 2, 3])
-        assert len(CC.cells) == 6
+        CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CCC2 = CCC.clone()
+        assert len(CCC2.cells) == 6
+        assert (1, 2, 3) in CCC2.cells
+        assert (2, 3, 4) in CCC2.cells
+        CCC2.remove_cell([1, 2, 3])
+        assert len(CCC.cells) == 6
 
     def test_combinatorial_complex_init(self):
         """Test the init method of CombinatorialComplex class."""
@@ -183,65 +183,65 @@ class TestCombinatorialComplex:
 
     def test_incidence_matrix_to_rank_down(self):
         """Test generating an incidence matrix by setting the down_rank parameter."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        B = CC.incidence_matrix(2, 0, incidence_type="down")
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        B = CCC.incidence_matrix(2, 0, incidence_type="down")
         assert B.shape == (6, 2)
         assert (B.todense() == [[1, 0], [1, 1], [1, 0], [1, 1], [0, 0], [0, 1]]).all()
 
     def test_incidence_matrix_to_rank_down_without_rank(self):
         """Test generating an incidence matrix by setting the down_rank parameter without mentioning rank."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        B = CC.incidence_matrix(2, incidence_type="down")
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        B = CCC.incidence_matrix(2, incidence_type="down")
         assert B.shape == (3, 2)
         assert (B.todense() == [[1, 0], [1, 0], [0, 0]]).all()
 
     def test_incidence_matrix_to_rank_with_wrong_incidence_type(self):
         """Test generating an incidence matrix by mentioning wrong rank."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
         with pytest.raises(ValueError) as exp:
-            CC.incidence_matrix(2, incidence_type="wrong")
+            CCC.incidence_matrix(2, incidence_type="wrong")
         assert (
             str(exp.value) == "Invalid value for incidence_type. Must be 'up' or 'down'"
         )
 
     def test_incidence_matrix_with_equal_rank(self):
         """Test generating an incidence matrix by having equal rank."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
         with pytest.raises(ValueError) as exp:
-            CC.incidence_matrix(1, 1)
+            CCC.incidence_matrix(1, 1)
         assert (
             str(exp.value) == "incidence must be computed for k!=r, got equal r and k."
         )
 
     def test_incidence_dict(self):
         """Test generating an incidence dictionary."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        assert CC.incidence_dict == {
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        assert CCC.incidence_dict == {
             1: {
                 frozenset({1, 2}): {"weight": 1},
                 frozenset({1, 3}): {"weight": 1},
@@ -267,101 +267,101 @@ class TestCombinatorialComplex:
 
         Gets the highest rank of the cells in the CombinatorialComplex object.
         """
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=3)
-        assert CC.dim == 3
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=3)
+        assert CCC.dim == 3
 
     def test_repr(self):
         """Test the represntation function of the CombinatorialComplex object by mentioning a name."""
-        CC = CombinatorialComplex(name="sampleobject")
-        assert repr(CC) == "CombinatorialComplex(name='sampleobject')"
+        CCC = CombinatorialComplex(name="sampleobject")
+        assert repr(CCC) == "CombinatorialComplex(name='sampleobject')"
 
     def test_contains(self):
         """Test whether the contains method works correctly."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        assert [(1)] in CC.nodes
-        assert [2] in CC.nodes
-        assert [3] in CC.nodes
-        assert [4] in CC.nodes
-        assert [5] in CC.nodes
-        assert [6] in CC.nodes
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        assert [(1)] in CCC.nodes
+        assert [2] in CCC.nodes
+        assert [3] in CCC.nodes
+        assert [4] in CCC.nodes
+        assert [5] in CCC.nodes
+        assert [6] in CCC.nodes
 
     def test_set_item(self):
         """Test for set_item method of the CombinatorialComplex object."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1], rank=3)
-        CC.add_cell([1, 2], rank=3)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1], rank=3)
+        CCC.add_cell([1, 2], rank=3)
         # Updating an node attribute present in the CombinatorialComplex object.
-        CC.__setitem__([1], {"weights": 1})
+        CCC.__setitem__([1], {"weights": 1})
         # Setting a cell attribute present in the CombinatorialComplex object.
-        CC.__setitem__([1, 2], {"weights": 1})
-        assert CC._complex_set.hyperedge_dict[3][frozenset([1, 2])] == {"weights": 1}
-        assert CC.nodes[1]["weights"] == 1
+        CCC.__setitem__([1, 2], {"weights": 1})
+        assert CCC._complex_set.hyperedge_dict[3][frozenset([1, 2])] == {"weights": 1}
+        assert CCC.nodes[1]["weights"] == 1
 
     def test_degree(self):
         """Test for the degree function."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        CC.add_cell([1, 2], rank=2)
-        assert CC.degree(1) == 2
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        CCC.add_cell([1, 2], rank=2)
+        assert CCC.degree(1) == 2
         with pytest.raises(TopoNetXError) as exp:
-            CC.degree(1, -1)
+            CCC.degree(1, -1)
         assert str(exp.value) == "Rank must be positive"
-        assert CC.degree(2, 2) == 3
+        assert CCC.degree(2, 2) == 3
         with pytest.raises(KeyError) as exp:
             node = 7
-            assert CC.degree(node, 2)
-        assert str(exp.value) == "'Node 7 not in CCC.'"
-        assert CC.degree(1, rank=None) == 5
+            assert CCC.degree(node, 2)
+        assert str(exp.value) == f"'Node 7 not in {CCC.__shortstr__}.'"
+        assert CCC.degree(1, rank=None) == 5
 
     def test_size(self):
         """Test for the size function."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        CC.add_cell([1, 2], rank=2)
-        assert CC.size(1) == 1
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        CCC.add_cell([1, 2], rank=2)
+        assert CCC.size(1) == 1
         with pytest.raises(TopoNetXError) as exp:
-            CC.size(frozenset([1, 2, 3]))
-        assert str(exp.value) == "Input cell is not in cells of the CCC"
+            CCC.size(frozenset([1, 2, 3]))
+        assert str(exp.value) == f"Input cell is not in cells of the {CCC.__shortstr__}"
 
     def test_num_nodes_and_cells(self):
         """Test for number of nodes and number of cells."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        CC.add_cell([1, 2], rank=2)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        CCC.add_cell([1, 2], rank=2)
         y1 = HyperEdge([1, 2], rank=1)
         y2 = HyperEdge([1, 3], rank=1)
-        assert CC.number_of_nodes() == 6
-        assert CC.number_of_nodes([1, 2]) == 2
-        assert CC.number_of_cells() == 12
-        assert CC.number_of_cells([y1, y2]) == 2
+        assert CCC.number_of_nodes() == 6
+        assert CCC.number_of_nodes([1, 2]) == 2
+        assert CCC.number_of_cells() == 12
+        assert CCC.number_of_cells([y1, y2]) == 2
 
     def test_order(self):
         """Test for the order function."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2, 3, 4, 5, 6, 7, 8], rank=1)
-        assert CC.order() == 8
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2, 3, 4, 5, 6, 7, 8], rank=1)
+        assert CCC.order() == 8
 
     def test_remove_nodes(self):
         """Test for the remove_node and remove_nodes methods."""
@@ -389,7 +389,7 @@ class TestCombinatorialComplex:
         }
         with pytest.raises(KeyError) as exp:
             example.remove_nodes([1])
-        assert str(exp.value) == "'node 1 not in CCC'"
+        assert str(exp.value) == f"'node 1 not in {example.__shortstr__}'"
         example.remove_nodes([2, 5])
         assert example._complex_set.hyperedge_dict == {
             0: {
@@ -425,18 +425,18 @@ class TestCombinatorialComplex:
 
     def test_set_cell_attributes(self):
         """Test for the set_cell_attributes method."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3, 2], rank=1)
-        CC.add_cell([1, 2, 3, 4], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3, 2], rank=1)
+        CCC.add_cell([1, 2, 3, 4], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
         d = {(1, 2, 3, 4): "red", (1, 2, 3): "blue"}
-        CC.set_cell_attributes(d, name="color")
-        assert CC.cells[(1, 2, 3, 4)]["color"] == "red"
+        CCC.set_cell_attributes(d, name="color")
+        assert CCC.cells[(1, 2, 3, 4)]["color"] == "red"
         d = {(1, 2): {"attr1": "blue", "size": "large"}}
-        CC.set_cell_attributes(d)
-        assert CC.cells[(1, 2)]["attr1"] == "blue"
+        CCC.set_cell_attributes(d)
+        assert CCC.cells[(1, 2)]["attr1"] == "blue"
 
     def test_set_node_attributes(self):
         """Test for the set and get nodes attributes method."""
@@ -458,9 +458,9 @@ class TestCombinatorialComplex:
 
     def test_add_cells(self):
         """Test for the add_cells method."""
-        CC = CombinatorialComplex()
-        CC.add_cells_from([[1, 2], [1, 3, 2], [1, 2, 3, 4]], ranks=[1, 1, 2])
-        assert CC._complex_set.hyperedge_dict == {
+        CCC = CombinatorialComplex()
+        CCC.add_cells_from([[1, 2], [1, 3, 2], [1, 2, 3, 4]], ranks=[1, 1, 2])
+        assert CCC._complex_set.hyperedge_dict == {
             1: {frozenset({1, 2}): {"weight": 1}, frozenset({1, 2, 3}): {"weight": 1}},
             0: {
                 frozenset({1}): {"weight": 1},
@@ -471,17 +471,17 @@ class TestCombinatorialComplex:
             2: {frozenset({1, 2, 3, 4}): {"weight": 1}},
         }
         with pytest.raises(TopoNetXError) as exp:
-            CC.add_cells_from([[1, 4]], ranks=[1, 1])
+            CCC.add_cells_from([[1, 4]], ranks=[1, 1])
         assert str(exp.value) == "cells and ranks must have equal number of elements"
-        CC = CombinatorialComplex()
-        CC.add_cells_from(
+        CCC = CombinatorialComplex()
+        CCC.add_cells_from(
             [
                 HyperEdge([1, 2], rank=1),
                 HyperEdge([1, 3, 2], rank=1),
                 HyperEdge([1, 2, 3, 4], rank=2),
             ]
         )
-        assert CC._complex_set.hyperedge_dict == {
+        assert CCC._complex_set.hyperedge_dict == {
             1: {frozenset({1, 2}): {"weight": 1}, frozenset({1, 2, 3}): {"weight": 1}},
             0: {
                 frozenset({1}): {"weight": 1},
@@ -491,9 +491,9 @@ class TestCombinatorialComplex:
             },
             2: {frozenset({1, 2, 3, 4}): {"weight": 1}},
         }
-        CC = CombinatorialComplex()
+        CCC = CombinatorialComplex()
         with pytest.raises(ValueError) as exp:
-            CC.add_cells_from(
+            CCC.add_cells_from(
                 [[1, 2], HyperEdge([1, 3, 2], rank=1), HyperEdge([1, 2, 3, 4], rank=2)]
             )
         assert (
@@ -501,7 +501,7 @@ class TestCombinatorialComplex:
             == "input must be an HyperEdge [1, 2] object when rank is None"
         )
         with pytest.raises(ValueError) as exp:
-            CC.add_cells_from([HyperEdge([1, 3, 2], rank=1), HyperEdge([1, 2, 3, 4])])
+            CCC.add_cells_from([HyperEdge([1, 3, 2], rank=1), HyperEdge([1, 2, 3, 4])])
         assert (
             str(exp.value)
             == "input HyperEdge Nodes set: (1, 2, 3, 4), attrs: {} has None rank"
@@ -509,13 +509,13 @@ class TestCombinatorialComplex:
 
     def test_adjacency_incidence_structure_dict(self):
         """Test for the incidence and adjacency structure dictionaries."""
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3], rank=1)
-        CC.add_cell([1, 2, 4, 3], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        dict1 = CC.get_all_incidence_structure_dict()
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3], rank=1)
+        CCC.add_cell([1, 2, 4, 3], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        dict1 = CCC.get_all_incidence_structure_dict()
         assert list(dict1["B_0_1"].keys()) == [0, 1, 2]
         assert list(dict1["B_0_1"].values()) == [
             [0, 1],
@@ -527,25 +527,25 @@ class TestCombinatorialComplex:
 
     def test_cell_node_adjacency_matrix(self):
         """Test for the cells adjacency matrix method."""
-        CC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
-        B = CC.incidence_matrix(rank=0, to_rank=2)
+        CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        B = CCC.incidence_matrix(rank=0, to_rank=2)
         assert B.shape == (4, 2)
         assert (B.T[0].todense() == [1, 1, 1, 0]).all()
         assert (B.T[1].todense() == [0, 1, 1, 1]).all()
-        CC = CombinatorialComplex()
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 2, 3, 4], rank=2)
-        CC.add_cell([1, 2], rank=1)
-        CC.add_cell([1, 3, 2], rank=1)
-        CC.add_cell([1, 2, 3, 4], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        CC.add_cell([2, 6, 4], rank=2)
-        B, row, col = CC.incidence_matrix(1, index=True)
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 2, 3, 4], rank=2)
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3, 2], rank=1)
+        CCC.add_cell([1, 2, 3, 4], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        B, row, col = CCC.incidence_matrix(1, index=True)
         assert B[(frozenset({1, 2}))] == 0
         assert B[(frozenset({1, 2, 3}))] == 1
         assert B[(frozenset({2, 5}))] == 2
         assert (
-            CC.cell_adjacency_matrix().todense()
+            CCC.cell_adjacency_matrix().todense()
             == [
                 [0, 1, 1, 0, 0, 0],
                 [1, 0, 1, 0, 1, 0],
@@ -556,9 +556,9 @@ class TestCombinatorialComplex:
             ]
         ).all()
         (
-            CC.node_adjacency_matrix().todense() == [[0, 1, 1], [1, 0, 1], [1, 1, 0]]
+            CCC.node_adjacency_matrix().todense() == [[0, 1, 1], [1, 0, 1], [1, 1, 0]]
         ).all()
-        assert CC.diameter() == 1
+        assert CCC.diameter() == 1
         with pytest.raises(TopoNetXError) as exp:
-            CC.diameter(s=2)
-        assert str(exp.value) == "CCC is not s-connected. s=2"
+            CCC.diameter(s=2)
+        assert str(exp.value) == f"{CCC.__shortstr__} is not s-connected. s=2"
