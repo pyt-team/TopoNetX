@@ -202,7 +202,7 @@ class ColoredHyperGraph(Complex):
         return iter(self.nodes)
 
     def __contains__(self, item):
-        """Return boolean indicating if item is in self.nodes.
+        """Return true/false indicating if item is in self.nodes.
 
         Parameters
         ----------
@@ -269,7 +269,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        node_set : an interable of Entities, optional, default: None
+        node_set : an interable of Entities, optional
             If None, then return the number of nodes in the CHG.
 
         Returns
@@ -312,7 +312,7 @@ class ColoredHyperGraph(Complex):
         ----------
         node : hashable
             Identifier for the node.
-        rank : int, optional, default: 1
+        rank : int, optional
             Smallest size of cell to consider in degree
 
         Returns
@@ -559,10 +559,10 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        values : TYPE
-            DESCRIPTION.
-        name : TYPE, optional
-            DESCRIPTION. The default is None.
+        values : dict
+            dictionary of attributes/properties to set for the cell.
+        name : str, optional
+            name of the attribute/property to set for the cell. The default is None.
 
         Returns
         -------
@@ -833,10 +833,16 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
+        rank : int
+        to_rank: int
         sparse : bool, default=True
         index : bool, default=False
             If True return will include a dictionary of children uid : row number
             and element uid : column number
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
 
         Returns
         -------
@@ -883,11 +889,13 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
+        rank : int
+        to_rank: int
         weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
+        index : bool, default False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
 
@@ -906,13 +914,13 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        r,k : int, int
+        rank, via_rank : int, int
             Two ranks for skeletons in the input Colored Hypergraph
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
-        index: boolean, optional, default: False
+        index: bool, optional
             If True, will return a rowdict of row to node uid
-        index : book, default=False
+        index : bool, optional
             indicate weather to return the indices of the adjacency matrix.
 
         Returns
@@ -950,7 +958,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
         Return
@@ -971,19 +979,17 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        r,k : two ranks for skeletons in the input Colored Hypergraph
+        rank, via_rank : two ranks for skeletons in the input Colored Hypergraph
 
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
-        index: boolean, optional, default: False
+        index: bool, optional
             if True, will return a rowdict of row to node uid
 
         weight: bool, default=True
             If False all nonzero entries are 1.
             If True adjacency matrix will depend on weighted incidence matrix,
-        index : book, default=False
-            indicate weather to return the indices of the adjacency matrix.
 
         Returns
         -------
@@ -1093,16 +1099,16 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
-        cells: boolean, optional, default: False
+        cells: bool, optional
             If True, will determine if s-cell-connected.
             For s=1 s-cell-connected is the same as s-connected.
 
         Returns
         -------
-        is_connected : boolean
+        is_connected : bool
 
         Notes
         -----
@@ -1143,7 +1149,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        name: str, optional, default: None
+        name: str, optional
 
         Returns
         -------
@@ -1161,11 +1167,11 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
-        cells : boolean, optional, default: True
+        cells : bool, optional
             If True will return cell components, if False will return node components
-        return_singletons : bool, optional, default : False
+        return_singletons : bool, optional
 
         Notes
         -----
@@ -1200,9 +1206,9 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
-        cells : boolean, optional, cells=False
+        cells : bool, optional
             Determines if cell or node components are desired. Returns
             subgraphs equal to the CHG restricted to each set of nodes(cells) in the
             s-connected components or s-cell-connected components
@@ -1285,7 +1291,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
         Returns
@@ -1300,7 +1306,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
         Returns
