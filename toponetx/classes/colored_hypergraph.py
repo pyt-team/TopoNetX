@@ -1,7 +1,7 @@
 """Creation and manipulation of a Colored Hypergraph."""
 
 from collections.abc import Collection, Hashable, Iterable
-from typing import Literal
+from typing import Literal, Optional
 
 import networkx as nx
 import numpy as np
@@ -524,7 +524,7 @@ class ColoredHyperGraph(Complex):
         """
         self._add_node(node, **attr)
 
-    def set_node_attributes(self, values, name=None) -> None:
+    def set_node_attributes(self, values, name: Optional[str] = None) -> None:
         """
         Set node attributes.
 
@@ -554,7 +554,7 @@ class ColoredHyperGraph(Complex):
                     pass
             return
 
-    def set_cell_attributes(self, values, name=None) -> None:
+    def set_cell_attributes(self, values, name: Optional[str] = None) -> None:
         """Set cell attributes.
 
         Parameters
@@ -611,7 +611,7 @@ class ColoredHyperGraph(Complex):
                     pass
             return
 
-    def get_node_attributes(self, name):
+    def get_node_attributes(self, name: str):
         """Get node attributes.
 
         Parameters
@@ -645,7 +645,7 @@ class ColoredHyperGraph(Complex):
             if name in self.nodes.nodes[node]
         }
 
-    def get_cell_attributes(self, name, rank=None):
+    def get_cell_attributes(self, name: str, rank=None):
         """Get node attributes from graph.
 
         Parameters
@@ -909,7 +909,7 @@ class ColoredHyperGraph(Complex):
         """
         return self._incidence_matrix(rank, to_rank, sparse=sparse, index=index)
 
-    def adjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def adjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Sparse weighted :term:`s-adjacency matrix`.
 
         Parameters
@@ -953,7 +953,7 @@ class ColoredHyperGraph(Complex):
             return A, row
         return A
 
-    def cell_adjacency_matrix(self, index=False, s=1):
+    def cell_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the cell adjacency matrix.
 
         Parameters
@@ -968,11 +968,11 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def node_adjacency_matrix(self, index=False, s=1):
+    def node_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the node adjacency matrix."""
         raise NotImplementedError()
 
-    def coadjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix.
 
         The sparse weighted :term:`s-coadjacency matrix`
@@ -1026,7 +1026,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def restrict_to_cells(self, cell_set, name=None):
+    def restrict_to_cells(self, cell_set, name: Optional[str] = None):
         """Construct a Colored Hypergraph using a subset of the cells.
 
         Parameters
@@ -1041,7 +1041,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def restrict_to_nodes(self, node_set, name=None):
+    def restrict_to_nodes(self, node_set, name: Optional[str] = None):
         """Restrict to a set of nodes.
 
         Constructs a new Colored Hypergraph  by restricting the
@@ -1094,7 +1094,7 @@ class ColoredHyperGraph(Complex):
         for edge in G.edges:
             self.add_cell(edge, rank=1)
 
-    def is_connected(self, s=1, cells=False):
+    def is_connected(self, s: int = 1, cells: bool = False):
         """Determine if Colored Hypergraph is :term:`s-connected <s-connected, s-node-connected>`.
 
         Parameters
@@ -1144,7 +1144,7 @@ class ColoredHyperGraph(Complex):
                         singletons.append(cell)
         return singletons
 
-    def remove_singletons(self, name=None):
+    def remove_singletons(self, name: Optional[str] = None):
         """Construct new CHG with singleton cells removed.
 
         Parameters
