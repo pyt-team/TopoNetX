@@ -1,7 +1,7 @@
 """Creation and manipulation of a combinatorial complex."""
 
 from collections.abc import Collection, Hashable, Iterable, Iterator
-from typing import Literal
+from typing import Literal, Optional
 
 import networkx as nx
 import numpy as np
@@ -148,7 +148,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().__setitem__(cell, attr)
 
     @property
-    def __shortstr__(self):
+    def __shortstr__(self) -> str:
         """Return the short string generic representation."""
         return "CCC"
 
@@ -436,7 +436,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 hyperedge._properties
             )
 
-    def add_cell(self, cell, rank=None, **attr):
+    def add_cell(self, cell, rank=None, **attr) -> None:
         """Add a single cells to combinatorial complex.
 
         Parameters
@@ -577,7 +577,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             rank, to_rank, incidence_type=incidence_type, sparse=sparse, index=index
         )
 
-    def adjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def adjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Sparse weighted :term:`s-adjacency matrix`.
 
         Parameters
@@ -623,7 +623,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             return A, row
         return A
 
-    def cell_adjacency_matrix(self, index=False, s=1):
+    def cell_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the cell adjacency matrix.
 
         Parameters
@@ -647,7 +647,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         A = incidence_to_adjacency(B.transpose(), s=s)
         return A
 
-    def node_adjacency_matrix(self, index=False, s=1):
+    def node_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the node adjacency matrix."""
         B = self.incidence_matrix(rank=0, to_rank=None, index=index)
         if index:
@@ -656,7 +656,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         A = incidence_to_adjacency(B, s=s)
         return A
 
-    def coadjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix.
 
         The sparse weighted :term:`s-coadjacency matrix`
@@ -733,7 +733,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
         self._max_complex.difference_update({HyperEdge(hyperedge_, rank=rank)})
 
-    def remove_cell(self, cell):
+    def remove_cell(self, cell) -> None:
         """Remove a single cell from CCC.
 
         Parameters
@@ -752,7 +752,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         super().remove_cell(cell)
 
-    def remove_cells(self, cell_set):
+    def remove_cells(self, cell_set) -> None:
         """Remove cells from CCC.
 
         Parameters
@@ -781,7 +781,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             CCC.add_cell(cell, self.cells.get_rank(cell))
         return CCC
 
-    def is_connected(self, s=1, cells=False):
+    def is_connected(self, s: int = 1, cells: bool = False):
         """Determine if combintorial complex is :term:`s-connected <s-connected, s-node-connected>`.
 
         Parameters
@@ -835,7 +835,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                     if self.degree(n) == 1:
                         yield cell
 
-    def remove_singletons(self, name=None):
+    def remove_singletons(self, name: Optional[str] = None):
         """Construct new CHG with singleton cells removed.
 
         Parameters
