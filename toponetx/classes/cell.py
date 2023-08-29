@@ -1,4 +1,4 @@
-"""Cell and CellView classes."""
+"""Cell class."""
 
 from collections import Counter, deque
 from collections.abc import Collection, Iterable, Sequence
