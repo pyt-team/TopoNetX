@@ -105,7 +105,6 @@ class CombinatorialComplex(ColoredHyperGraph):
                 raise TypeError(
                     f"Input cells must be given as Iterable, got {type(cells)}."
                 )
-
             if not isinstance(cells, Graph):
                 if ranks is None:
                     for cell in cells:
@@ -428,7 +427,6 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         self._max_complex.add(HyperEdge(hyperedge_set, rank=rank))
         self._add_hyperedge_helper(hyperedge_set, rank, **attr)
-        # This is O(N) time complexity to add a hyper edge with O(N) space complexity
         if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_set]:
             self._complex_set.hyperedge_dict[rank][hyperedge_set]["weight"] = 1
         if isinstance(hyperedge, HyperEdge):
@@ -716,7 +714,28 @@ class CombinatorialComplex(ColoredHyperGraph):
         -------
         Combinatorial Complex : CombinatorialComplex
         """
-        return super().add_cells_from(cells, ranks)
+        if ranks is None:
+            for cell in cells:
+                if not isinstance(cell, HyperEdge):
+                    raise ValueError(
+                        f"input must be an HyperEdge {cell} object when rank is None"
+                    )
+                if cell.rank is None:
+                    raise ValueError(f"input HyperEdge {cell} has None rank")
+                self.add_cell(cell, cell.rank)
+        else:
+            if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
+
+                if len(cells) != len(ranks):
+                    raise TopoNetXError(
+                        "cells and ranks must have equal number of elements"
+                    )
+                else:
+                    for cell, rank in zip(cells, ranks):
+                        self.add_cell(cell, rank)
+        if isinstance(cells, Iterable) and isinstance(ranks, int):
+            for cell in cells:
+                self.add_cell(cell, ranks)
 
     def _remove_hyperedge(self, hyperedge) -> None:
         if hyperedge not in self.cells:

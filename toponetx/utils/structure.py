@@ -22,8 +22,9 @@ function, it also allows for optional dictionaries that map the
 indices in S and T to other values.
 """
 
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from collections.abc import Iterable
+from operator import itemgetter
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -144,9 +145,6 @@ def incidence_to_adjacency(B, s: int | None = None, signed: bool = False):
 
 def compute_set_incidence(children, uidset, sparse: bool = True, index: bool = False):
     """Compute set-based incidence."""
-    from collections import OrderedDict
-    from operator import itemgetter
-
     ndict = dict(zip(children, range(len(children))))
     edict = dict(zip(uidset, range(len(uidset))))
 
