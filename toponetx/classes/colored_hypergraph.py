@@ -1,7 +1,7 @@
 """Creation and manipulation of a Colored Hypergraph."""
 
 from collections.abc import Collection, Hashable, Iterable
-from typing import Literal
+from typing import Literal, Optional
 
 import networkx as nx
 import numpy as np
@@ -174,11 +174,11 @@ class ColoredHyperGraph(Complex):
         return max(self._complex_set.allranks)
 
     @property
-    def __shortstr__(self):
+    def __shortstr__(self) -> str:
         """Return the short string generic representation."""
         return "CHG"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return detailed string representation."""
         return f"Colored Hypergraph with {len(self.nodes)} nodes and hyperedges with colors {self.ranks} and sizes {self.shape} "
 
@@ -186,7 +186,7 @@ class ColoredHyperGraph(Complex):
         """Return string representation."""
         return f"ColoredHyperGraph(name='{self.name}')"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of nodes."""
         return len(self.nodes)
 
@@ -194,8 +194,8 @@ class ColoredHyperGraph(Complex):
         """Iterate over the nodes."""
         return iter(self.nodes)
 
-    def __contains__(self, item):
-        """Return boolean indicating if item is in self.nodes.
+    def __contains__(self, item) -> bool:
+        """Return true/false indicating if item is in self.nodes.
 
         Parameters
         ----------
@@ -263,7 +263,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        node_set : an interable of Entities, optional, default: None
+        node_set : an interable of Entities, optional
             If None, then return the number of nodes in the CHG.
 
         Returns
@@ -306,7 +306,7 @@ class ColoredHyperGraph(Complex):
         ----------
         node : hashable
             Identifier for the node.
-        rank : int, optional, default: 1
+        rank : int, optional
             Smallest size of cell to consider in degree
 
         Returns
@@ -480,7 +480,7 @@ class ColoredHyperGraph(Complex):
         rank = self._complex_set.get_rank(hyperedge_)
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
 
-    def _add_node(self, node, **attr):
+    def _add_node(self, node, **attr) -> None:
         """
         Add one node as a hyperedge.
 
@@ -500,7 +500,7 @@ class ColoredHyperGraph(Complex):
         else:
             self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
-    def add_node(self, node, **attr):
+    def add_node(self, node, **attr) -> None:
         """
         Add a node.
 
@@ -517,7 +517,7 @@ class ColoredHyperGraph(Complex):
         """
         self._add_node(node, **attr)
 
-    def set_node_attributes(self, values, name=None):
+    def set_node_attributes(self, values, name: Optional[str] = None) -> None:
         """
         Set node attributes.
 
@@ -547,15 +547,15 @@ class ColoredHyperGraph(Complex):
                     pass
             return
 
-    def set_cell_attributes(self, values, name=None):
+    def set_cell_attributes(self, values, name: Optional[str] = None) -> None:
         """Set cell attributes.
 
         Parameters
         ----------
-        values : TYPE
-            DESCRIPTION.
-        name : TYPE, optional
-            DESCRIPTION. The default is None.
+        values : dict
+            dictionary of attributes/properties to set for the cell.
+        name : str, optional
+            name of the attribute/property to set for the cell. The default is None.
 
         Returns
         -------
@@ -604,7 +604,7 @@ class ColoredHyperGraph(Complex):
                     pass
             return
 
-    def get_node_attributes(self, name):
+    def get_node_attributes(self, name: str):
         """Get node attributes.
 
         Parameters
@@ -638,7 +638,7 @@ class ColoredHyperGraph(Complex):
             if name in self.nodes.nodes[node]
         }
 
-    def get_cell_attributes(self, name, rank=None):
+    def get_cell_attributes(self, name: str, rank=None):
         """Get node attributes from graph.
 
         Parameters
@@ -675,8 +675,8 @@ class ColoredHyperGraph(Complex):
                 if name in self.cells[cell].properties
             }
 
-    def _add_nodes_of_hyperedge(self, hyperedge_, rank, **attr):
-        """Adding nodes of hyperedge method."""
+    def add_hyperedge_with_its_nodes(self, hyperedge_, rank, **attr) -> None:
+        """Adding nodes of hyperedge helper method."""
         if rank == 0:
             if 0 not in self._complex_set.hyperedge_dict:
                 self._complex_set.hyperedge_dict[0] = {}
@@ -803,7 +803,7 @@ class ColoredHyperGraph(Complex):
             for cell in cells:
                 self.add_cell(cell, ranks)
 
-    def remove_cell(self, cell):
+    def remove_cell(self, cell) -> None:
         """Remove a single cell from CHG.
 
         Parameters
@@ -830,7 +830,7 @@ class ColoredHyperGraph(Complex):
         """Get adjacency structure dictionary."""
         return sparse_array_to_neighborhood_dict(self.adjacency_matrix(i, j))
 
-    def remove_cells(self, cell_set):
+    def remove_cells(self, cell_set) -> None:
         """Remove cells from CHG.
 
         Parameters
@@ -859,10 +859,16 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
+        rank : int
+        to_rank: int
         sparse : bool, default=True
         index : bool, default=False
             If True return will include a dictionary of children uid : row number
             and element uid : column number
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
 
         Returns
         -------
@@ -910,11 +916,13 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
+        rank : int
+        to_rank: int
         weight : bool, default=False
             If False all nonzero entries are 1.
             If True and self.static all nonzero entries are filled by
             self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
+        index : bool, default False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
 
@@ -962,18 +970,18 @@ class ColoredHyperGraph(Complex):
                 all_other_ranks = all_other_ranks + self.skeleton(i)
         return compute_set_incidence(children, all_other_ranks, sparse, index)
 
-    def adjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def adjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Sparse weighted :term:`s-adjacency matrix`.
 
         Parameters
         ----------
-        r,k : int, int
+        rank, via_rank : int, int
             Two ranks for skeletons in the input Colored Hypergraph
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
-        index: boolean, optional, default: False
+        index: bool, optional
             If True, will return a rowdict of row to node uid
-        index : book, default=False
+        index : bool, optional
             indicate weather to return the indices of the adjacency matrix.
 
         Returns
@@ -1006,12 +1014,12 @@ class ColoredHyperGraph(Complex):
             return A, row
         return A
 
-    def cell_adjacency_matrix(self, index=False, s=1):
+    def cell_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the cell adjacency matrix.
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
         Return
@@ -1021,30 +1029,28 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def node_adjacency_matrix(self, index=False, s=1):
+    def node_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the node adjacency matrix."""
         raise NotImplementedError()
 
-    def coadjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix.
 
         The sparse weighted :term:`s-coadjacency matrix`
 
         Parameters
         ----------
-        r,k : two ranks for skeletons in the input Colored Hypergraph
+        rank, via_rank : two ranks for skeletons in the input Colored Hypergraph
 
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
-        index: boolean, optional, default: False
+        index: bool, optional
             if True, will return a rowdict of row to node uid
 
         weight: bool, default=True
             If False all nonzero entries are 1.
             If True adjacency matrix will depend on weighted incidence matrix,
-        index : book, default=False
-            indicate weather to return the indices of the adjacency matrix.
 
         Returns
         -------
@@ -1081,7 +1087,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def restrict_to_cells(self, cell_set, name=None):
+    def restrict_to_cells(self, cell_set, name: Optional[str] = None):
         """Construct a Colored Hypergraph using a subset of the cells.
 
         Parameters
@@ -1096,7 +1102,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def restrict_to_nodes(self, node_set, name=None):
+    def restrict_to_nodes(self, node_set, name: Optional[str] = None):
         """Restrict to a set of nodes.
 
         Constructs a new Colored Hypergraph  by restricting the
@@ -1117,7 +1123,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def from_networkx_graph(self, G):
+    def from_networkx_graph(self, G) -> None:
         """Construct a Colored Hypergraph from a networkx graph.
 
         Parameters
@@ -1147,21 +1153,21 @@ class ColoredHyperGraph(Complex):
             u, v = edge
             self.add_cell([u, v], 1, **G.get_edge_data(u, v))
 
-    def is_connected(self, s=1, cells=False):
+    def is_connected(self, s: int = 1, cells: bool = False):
         """Determine if Colored Hypergraph is :term:`s-connected <s-connected, s-node-connected>`.
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
-        cells: boolean, optional, default: False
+        cells: bool, optional
             If True, will determine if s-cell-connected.
             For s=1 s-cell-connected is the same as s-connected.
 
         Returns
         -------
-        is_connected : boolean
+        is_connected : bool
 
         Notes
         -----
@@ -1197,12 +1203,12 @@ class ColoredHyperGraph(Complex):
                         singletons.append(cell)
         return singletons
 
-    def remove_singletons(self, name=None):
+    def remove_singletons(self, name: Optional[str] = None):
         """Construct new CHG with singleton cells removed.
 
         Parameters
         ----------
-        name: str, optional, default: None
+        name: str, optional
 
         Returns
         -------
@@ -1220,11 +1226,11 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
-        cells : boolean, optional, default: True
+        cells : bool, optional
             If True will return cell components, if False will return node components
-        return_singletons : bool, optional, default : False
+        return_singletons : bool, optional
 
         Notes
         -----
@@ -1259,9 +1265,9 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
-        cells : boolean, optional, cells=False
+        cells : bool, optional
             Determines if cell or node components are desired. Returns
             subgraphs equal to the CHG restricted to each set of nodes(cells) in the
             s-connected components or s-cell-connected components
@@ -1344,7 +1350,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
         Returns
@@ -1359,7 +1365,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
         Returns
