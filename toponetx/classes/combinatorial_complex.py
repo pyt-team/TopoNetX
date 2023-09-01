@@ -100,6 +100,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         self._node_membership = dict()
         self._max_complex = set()
         self._complex_set = HyperEdgeView()
+
         if cells is not None:
             if not isinstance(cells, Iterable):
                 raise TypeError(
@@ -143,8 +144,18 @@ class CombinatorialComplex(ColoredHyperGraph):
         return f"CombinatorialComplex(name='{self.name}')"
 
     def __setitem__(self, cell, attr):
-        """Set the attributes of a cell in the CCC."""
-        return super().__setitem__(cell, attr)
+        """Set the attributes of a hyperedge or node in the CCC."""
+        if cell in self.nodes:
+            self.nodes[cell].update(attr)
+            return
+        # we now check if the input is a cell in the CCC
+        elif cell in self.cells:
+            hyperedge_ = HyperEdgeView._to_frozen_set(cell)
+            rank = self.cells.get_rank(hyperedge_)
+            if hyperedge_ in self._complex_set.hyperedge_dict[rank]:
+                self._complex_set.hyperedge_dict[rank][hyperedge_] = attr
+        else:
+            raise KeyError(f"input {cell} is not in the complex")
 
     @property
     def __shortstr__(self) -> str:
@@ -164,6 +175,31 @@ class CombinatorialComplex(ColoredHyperGraph):
         int
         """
         return super().number_of_nodes(node_set)
+
+    @property
+    def nodes(self):
+        """
+        Object associated with self.elements.
+
+        Returns
+        -------
+        NodeView
+
+        """
+        return NodeView(
+            self._complex_set.hyperedge_dict, cell_type=HyperEdge, colored_nodes=False
+        )
+
+    @property
+    def cells(self):
+        """
+        Object associated with self._cells.
+
+        Returns
+        -------
+        HyperEdgeView
+        """
+        return self._complex_set
 
     def number_of_cells(self, cell_set=None) -> int:
         """Compute the number of cells in cell_set belonging to the CCC.
@@ -279,7 +315,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         the entire dictionary will be used to update edge attributes:
 
         >>> G = nx.path_graph(3)
-        >>> CCC = NestedCombinatorialComplex(G)
+        >>> CCC = CombinatorialComplex(G)
         >>> d = {(1, 2): {'color': 'red','attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3}}
         >>> CCC.set_cell_attributes(d)
         >>> CCC.cells[(0, 1)]['color']
@@ -306,7 +342,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CCC = NestedCombinatorialComplex(G)
+        >>> CCC = CombinatorialComplex(G)
         >>> d = {0: {'color': 'red', 'attr2': 1 },1: {'color': 'blue', 'attr2': 3} }
         >>> CCC.set_node_attributes(d)
         >>> CCC.get_node_attributes('color')
@@ -314,7 +350,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CCC = NestedCombinatorialComplex(G)
+        >>> CCC = CombinatorialComplex(G)
         >>> nodes_color = CCC.get_node_attributes('color')
         >>> nodes_color[1]
         'blue'
@@ -348,12 +384,46 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().get_cell_attributes(name, rank)
 
     def _add_node(self, node, **attr) -> None:
-        """Add one node as hyperedge."""
-        self._add_hyperedge(hyperedge=node, rank=0, **attr)
+        """Add one node as a hyperedge of rank 0."""
+        if node in self:
+            self._complex_set.hyperedge_dict[0][frozenset({node})].update(**attr)
+        else:
+            self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
     def add_node(self, node, **attr) -> None:
-        """Add a node."""
+        """Add a node to a CCC."""
         self._add_node(node, **attr)
+
+    def _add_nodes_of_hyperedge(self, hyperedge_):
+        """Adding nodes of a hyperedge."""
+        for i in hyperedge_:
+            if 0 not in self._complex_set.hyperedge_dict:
+                self._complex_set.hyperedge_dict[0] = {}
+            if i not in self._complex_set.hyperedge_dict[0]:
+                self._complex_set.hyperedge_dict[0][frozenset({i})] = {"weight": 1}
+
+    def _add_hyperedge_helper(self, hyperedge_, rank, **attr):
+        """Add hyperedge.
+
+        Parameters
+        ----------
+        hyperedge_ : frozenset of elements
+        rank : int
+        attr : arbitrary attrs
+
+        Returns
+        -------
+        None.
+        """
+        if rank not in self._complex_set.hyperedge_dict:
+            self._complex_set.hyperedge_dict[rank] = {}
+        if hyperedge_ not in self._complex_set.hyperedge_dict[rank]:
+            self._complex_set.hyperedge_dict[rank][hyperedge_] = {}
+            self._complex_set.hyperedge_dict[rank][hyperedge_] = {"weight": 1}
+            self._complex_set.hyperedge_dict[rank][hyperedge_].update(**attr)
+        else:
+            self._complex_set.hyperedge_dict[rank][hyperedge_].update(**attr)
+        self._add_nodes_of_hyperedge(hyperedge_)
 
     def _add_hyperedge(self, hyperedge, rank, **attr):
         """Add hyperedge.
@@ -427,6 +497,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         self._max_complex.add(HyperEdge(hyperedge_set, rank=rank))
         self._add_hyperedge_helper(hyperedge_set, rank, **attr)
+        self._complex_set.hyperedge_dict[rank][hyperedge_set].update(**attr)
         if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_set]:
             self._complex_set.hyperedge_dict[rank][hyperedge_set]["weight"] = 1
         if isinstance(hyperedge, HyperEdge):
@@ -604,8 +675,8 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> G.add_edge(0,3)
         >>> G.add_edge(0,4)
         >>> G.add_edge(1, 4)
-        >>> CHG = CombinatrialComplex(cells=G)
-        >>> CHG.adjacency_matrix(0, 1)
+        >>> CCC = CombinatrialComplex(cells=G)
+        >>> CCC.adjacency_matrix(0, 1)
         """
         if via_rank is not None:
             if rank > via_rank:
@@ -780,7 +851,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        Combinatorial Complex : NestedCombinatorialComplex
+        CombinatorialComplex : Combinatorial Complex
         """
         super().remove_cells(cell_set)
 
@@ -818,15 +889,15 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Notes
         -----
-        A CHG is s node connected if for any two nodes v0,vn
+        A CCC is s node connected if for any two nodes v0,vn
         there exists a sequence of nodes v0,v1,v2,...,v(n-1),vn
         such that every consecutive pair of nodes v(i),v(i+1)
         share at least s cell.
 
         Examples
         --------
-        >>> CHG = CombinatorialComplex(cells=E)
-        >>> CHG.is_connected()
+        >>> CCC = CombinatorialComplex(cells=E)
+        >>> CCC.is_connected()
         """
         B = self.incidence_matrix(rank=0, to_rank=None, incidence_type="up")
         if cells:
@@ -855,7 +926,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                         yield cell
 
     def remove_singletons(self, name: Optional[str] = None):
-        """Construct new CHG with singleton cells removed.
+        """Construct new CCC with singleton cells removed.
 
         Parameters
         ----------
@@ -863,7 +934,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        new CHG : CHG
+        new CombinatorialComplex
         """
         cells = [cell for cell in self.cells if cell not in self.singletons()]
         return self.restrict_to_cells(cells)
@@ -890,7 +961,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         An s-cell-component has the property that for any two cells e1 and e2
         there is a sequence of cells starting with e1 and ending with e2
         such that pairwise adjacent cells in the sequence intersect in at least
-        s nodes. If s=1 these are the path components of the CHG.
+        s nodes. If s=1 these are the path components of the CCC.
 
         If cells=False this method returns s-node-connected components.
         A list of sets of uids of the nodes which are s-walk connected.
@@ -903,7 +974,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         ------
         s_connected_components : iterator
             Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
-            components of CHG.
+            components of CCC.
         """
         if cells:
             A, coldict = self.cell_adjacency_matrix(s=s, index=True)
@@ -935,7 +1006,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             Minimum number of edges shared by neighbors with node.
         cells : bool, default=False
             Determines if cell or node components are desired. Returns
-            subgraphs equal to the CHG restricted to each set of nodes(cells) in the
+            subgraphs equal to the CCC restricted to each set of nodes(cells) in the
             s-connected components or s-cell-connected components
         return_singletons : bool, optional
 
@@ -1058,7 +1129,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         -------
         maximum diameter : int
         list of diameters : list
-            List of cell_diameters for s-cell component subgraphs in CHG
+            List of cell_diameters for s-cell component subgraphs in CCC
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
         """
@@ -1089,7 +1160,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Raises
         ------
         TopoNetXError
-            If CHG is not s-cell-connected
+            If CCC is not s-cell-connected
 
         Notes
         -----
@@ -1134,7 +1205,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         if nx.is_connected(G):
             return nx.diameter(G)
         else:
-            raise TopoNetXError(f"CHG is not s-connected. s={s}")
+            raise TopoNetXError(f"CCC is not s-connected. s={s}")
 
     def distance(self, source, target, s: int = 1) -> int:
         """Return shortest s-walk distance between two nodes.
@@ -1142,9 +1213,9 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         source : node.uid or node
-            a node in the CHG
+            a node in the CCC
         target : node.uid or node
-            a node in the CHG
+            a node in the CCC
         s : int
             the number of cells
 

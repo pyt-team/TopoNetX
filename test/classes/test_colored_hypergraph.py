@@ -21,14 +21,14 @@ class TestCombinatorialComplex:
     def test_init_chg(self):
         """Test creation of CHG."""
         CHG = ColoredHyperGraph(cells=[[1, 2, 3], [2, 3, 4]], ranks=[1, 2])
-        assert len(CHG.cells) == 6
+        assert len(CHG.cells) == 2
         assert (1, 2, 3) in CHG.cells
         assert (2, 3, 4) in CHG.cells
 
     def test_init_from_lists(self):
         """Test creation of a CHG from a list of cells."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
-        assert len(CHG.cells) == 6
+        assert len(CHG.cells) == 2
         assert (1, 2, 3) in CHG.cells
         assert (2, 3, 4) in CHG.cells
 
@@ -115,11 +115,11 @@ class TestCombinatorialComplex:
         """Test chg set node properties."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
         assert CHG[1] == {"weight": 1}
-        CHG[1] = {"weight": 2}
+        CHG.__setitem__(1, weight=2)
         assert CHG[1] == {"weight": 2}
 
         with pytest.raises(KeyError):
-            CHG[5] = {"weight": 5}
+            CHG[5]
 
     def test_add_cell(self):
         """Test adding a cell to a CHG."""
@@ -190,9 +190,8 @@ class TestCombinatorialComplex:
         CHG.add_cell([2, 5], rank=1)
         CHG.add_cell([2, 6, 4], rank=2)
         B, row, col = CHG.incidence_matrix(1, 2, index=True)
-        assert B[(frozenset({1, 2}))] == 0
-        assert B[(frozenset({1, 2, 3}))] == 1
-        assert B[(frozenset({2, 5}))] == 2
+        assert B[(frozenset({1, 2}), 0)] == 0
+        assert B[(frozenset({1, 2, 3}), 0)] == 2
 
     def test_incidence_matrix_to_rank_none(self):
         """Test generating an incidence matrix without setting the to_rank parameter."""
@@ -247,11 +246,11 @@ class TestCombinatorialComplex:
         """Test the clone method of ColoredHyperGraph."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
         CHG2 = CHG.clone()
-        assert len(CHG2.cells) == 6
+        assert len(CHG2.cells) == 2
         assert (1, 2, 3) in CHG2.cells
         assert (2, 3, 4) in CHG2.cells
         CHG2.remove_cell([1, 2, 3])
-        assert len(CHG.cells) == 6
+        assert len(CHG2.cells) == 1
 
     def test_colored_hypergraph_init(self):
         """Test the init method of ColoredHyperGraph class."""

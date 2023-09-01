@@ -446,14 +446,14 @@ class TestCombinatorialComplex:
         d = {node: {"color": "red", "attr2": 1}}
         example1.set_node_attributes(d)
         assert example1.nodes.nodes[frozenset({node})]["color"] == "red"
-        example1.get_node_attributes("color") == {frozenset({4}): "red"}
+        example1.get_node_attributes("color") == {4: "red"}
         node = 6
         d = {node: "red"}
         example1.set_node_attributes(d, "color")
         # assert example1.nodes.
         assert example1.get_node_attributes("color") == {
-            frozenset({4}): "red",
-            frozenset({6}): "red",
+            4: "red",
+            6: "red",
         }
 
     def test_add_cells(self):
