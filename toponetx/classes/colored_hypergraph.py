@@ -1,7 +1,7 @@
 """Creation and manipulation of a Colored Hypergraph."""
 
 from collections.abc import Collection, Hashable, Iterable
-from typing import Literal
+from typing import Literal, Optional
 
 import networkx as nx
 import numpy as np
@@ -10,11 +10,12 @@ from scipy.sparse import csr_matrix
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
-from toponetx.classes.reportviews import HyperEdgeView, NodeView
+from toponetx.classes.reportviews import ColoredHyperEdgeView, NodeView
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import (
+    compute_set_incidence,
     incidence_to_adjacency,
     sparse_array_to_neighborhood_dict,
 )
@@ -25,7 +26,7 @@ __all__ = ["ColoredHyperGraph"]
 class ColoredHyperGraph(Complex):
     """Class for ColoredHyperGraph Complex.
 
-    A Colored Hypergraph (CHG) is a triple CHG = (S, X, c) where:
+    A Colored Hypergraph (CHG) is a triplet CHG = (S, X, c) where:
     - S is an abstract set of entities,
     - X a subset of the power set of X, and
     - c is the a color function that associates for every set x in X a color, a positive integer.
@@ -40,14 +41,7 @@ class ColoredHyperGraph(Complex):
     name : str, optional
         An identifiable name for the Colored Hypergraph.
     ranks : Collection, optional
-        when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
-        size as cells.
-    weight : array-like, optional
-        User specified weight corresponding to setsytem of type pandas.DataFrame,
-        length must equal number of rows in dataframe.
-        If None, weight for all rows is assumed to be 1.
-    graph_based : bool, default=False
-        When true rank 1 edges must have cardinality equals to 1
+        Represent the color of cells.
     kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
@@ -72,7 +66,6 @@ class ColoredHyperGraph(Complex):
     >>> CHG.add_cell([3, 4], rank=1)
     >>> CHG.add_cell([1, 2, 3, 4], rank=2)
     >>> CHG.add_cell([1, 2, 4], rank=2)
-    >>> CHG.add_cell([3, 4], rank=2)
     >>> CHG.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
     """
 
@@ -80,15 +73,13 @@ class ColoredHyperGraph(Complex):
         self,
         cells: Collection | None = None,
         name: str = "",
-        ranks: Collection | None = None,
-        graph_based: bool = False,
+        ranks: Collection | int | None = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
 
         self.name = name
-        self.graph_based = graph_based
-        self._complex_set = HyperEdgeView()
+        self._complex_set = ColoredHyperEdgeView()
 
         if cells is not None:
             if not isinstance(cells, Iterable):
@@ -100,12 +91,9 @@ class ColoredHyperGraph(Complex):
                 if ranks is None:
                     for cell in cells:
                         if not isinstance(cell, HyperEdge):
-                            raise ValueError(
-                                f"input must be an HyperEdge {cell} object when rank is None"
-                            )
-                        if cell.rank is None:
-                            raise ValueError(f"input HyperEdge {cell} has None rank")
-                        self.add_cell(cell, rank=cell.rank)
+                            self.add_cell(cell, rank=1)
+                        else:
+                            self.add_cell(cell, rank=cell.rank)
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
                         if len(cells) != len(ranks):
@@ -146,7 +134,9 @@ class ColoredHyperGraph(Complex):
         NodeView
 
         """
-        return NodeView(self._complex_set.hyperedge_dict, cell_type=HyperEdge)
+        return NodeView(
+            self._complex_set.hyperedge_dict, cell_type=HyperEdge, colored_nodes=True
+        )
 
     @property
     def incidence_dict(self):
@@ -186,11 +176,11 @@ class ColoredHyperGraph(Complex):
         return max(self._complex_set.allranks)
 
     @property
-    def __shortstr__(self):
+    def __shortstr__(self) -> str:
         """Return the short string generic representation."""
         return "CHG"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return detailed string representation."""
         return f"Colored Hypergraph with {len(self.nodes)} nodes and hyperedges with colors {self.ranks} and sizes {self.shape} "
 
@@ -198,7 +188,7 @@ class ColoredHyperGraph(Complex):
         """Return string representation."""
         return f"ColoredHyperGraph(name='{self.name}')"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of nodes."""
         return len(self.nodes)
 
@@ -206,8 +196,8 @@ class ColoredHyperGraph(Complex):
         """Iterate over the nodes."""
         return iter(self.nodes)
 
-    def __contains__(self, item):
-        """Return boolean indicating if item is in self.nodes.
+    def __contains__(self, item) -> bool:
+        """Return true/false indicating if item is in self.nodes.
 
         Parameters
         ----------
@@ -225,17 +215,17 @@ class ColoredHyperGraph(Complex):
             d["B_0_" + str(r)] = B0r
         return d
 
-    def __setitem__(self, cell, attr):
+    def __setitem__(self, cell, **attr):
         """Set the attributes of a hyperedge or node in the CHG."""
         if cell in self.nodes:
-            self.nodes[cell].update(attr)
-            return
+            self.nodes[cell].update(**attr)
         # we now check if the input is a cell in the CHG
         elif cell in self.cells:
-            hyperedge_ = HyperEdgeView._to_frozen_set(cell)
+            hyperedge_ = ColoredHyperEdgeView._to_frozen_set(cell)
             rank = self.cells.get_rank(hyperedge_)
             if hyperedge_ in self._complex_set.hyperedge_dict[rank]:
-                self._complex_set.hyperedge_dict[rank][hyperedge_] = attr
+                self._complex_set.hyperedge_dict[rank][hyperedge_].update(**attr)
+
         else:
             raise KeyError(f"input {cell} is not in the complex")
 
@@ -250,6 +240,8 @@ class ColoredHyperGraph(Complex):
         -------
         dictionary of attrs associated with node
         """
+        if node not in self.nodes:
+            raise KeyError(f"Node {node} is not in the complex.")
         return self.nodes[node]
 
     def size(self, cell):
@@ -274,7 +266,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        node_set : an interable of Entities, optional, default: None
+        node_set : an interable of Entities, optional
             If None, then return the number of nodes in the CHG.
 
         Returns
@@ -317,7 +309,7 @@ class ColoredHyperGraph(Complex):
         ----------
         node : hashable
             Identifier for the node.
-        rank : int, optional, default: 1
+        rank : int, optional
             Smallest size of cell to consider in degree
 
         Returns
@@ -415,7 +407,7 @@ class ColoredHyperGraph(Complex):
             if self.cells.hyperedge_dict[key] == {}:
                 del self.cells.hyperedge_dict[key]
 
-    def _add_hyperedge(self, hyperedge, rank, **attr):
+    def _add_hyperedge(self, hyperedge, rank, key=None, **attr):
         """Add hyperedge.
 
         Parameters
@@ -424,6 +416,8 @@ class ColoredHyperGraph(Complex):
             a cell in a colored hypergraph
         rank : int
             the rank of a hyperedge, must be zero when the hyperedge is Hashable.
+        key : hashable identifier, optional (default=lowest unused integer)
+            Used to distinguish coloredhyperedges among nodes.
         **attr : attr associated with hyperedge
 
         Returns
@@ -458,27 +452,22 @@ class ColoredHyperGraph(Complex):
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             hyperedge_set = frozenset({hyperedge})
         elif isinstance(hyperedge, Iterable) or isinstance(hyperedge, HyperEdge):
-            hyperedge_ = (
-                hyperedge.elements
-                if isinstance(hyperedge, HyperEdge)
-                else frozenset(hyperedge)
-            )
-            if not all(isinstance(i, Hashable) for i in hyperedge_):
-                raise ValueError("every element hyperedge must be hashable.")
-            if rank == 0 and len(hyperedge_) > 1:
+            if isinstance(hyperedge, HyperEdge):
+                hyperedge_set = hyperedge.elements
+            else:
+                if not all(isinstance(i, Hashable) for i in hyperedge):
+                    raise ValueError(
+                        f"Input hyperedge {hyperedge} contain non-hashable elements."
+                    )
+                hyperedge_set = frozenset(hyperedge)
+
+            if rank == 0 and len(hyperedge_set) > 1:
                 raise ValueError(
-                    "rank must be positive for higher order hyperedges, got rank = 0"
+                    "rank must be positive for hyperedges containing more than 1 element, got rank = 0"
                 )
-            hyperedge_set = hyperedge_
         else:
             raise ValueError("Invalid hyperedge type")
-        self._add_hyperedge_helper(hyperedge_set, rank, **attr)
-        if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_set]:
-            self._complex_set.hyperedge_dict[rank][hyperedge_set]["weight"] = 1
-        if isinstance(hyperedge, HyperEdge):
-            self._complex_set.hyperedge_dict[rank][hyperedge_set].update(
-                hyperedge._properties
-            )
+        self._add_hyperedge_helper(hyperedge_set, rank, key, **attr)
 
     def _remove_hyperedge(self, hyperedge):
         if hyperedge not in self.cells:
@@ -494,7 +483,7 @@ class ColoredHyperGraph(Complex):
         rank = self._complex_set.get_rank(hyperedge_)
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
 
-    def _add_node(self, node, **attr):
+    def _add_node(self, node, **attr) -> None:
         """
         Add one node as a hyperedge.
 
@@ -509,9 +498,13 @@ class ColoredHyperGraph(Complex):
         -------
         None
         """
-        self._add_hyperedge(hyperedge=node, rank=0, **attr)
+        if node in self:
+            print("here")
+            self._complex_set.hyperedge_dict[0][frozenset({node})].update(**attr)
+        else:
+            self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
-    def add_node(self, node, **attr):
+    def add_node(self, node, **attr) -> None:
         """
         Add a node.
 
@@ -528,7 +521,7 @@ class ColoredHyperGraph(Complex):
         """
         self._add_node(node, **attr)
 
-    def set_node_attributes(self, values, name=None):
+    def set_node_attributes(self, values, name: Optional[str] = None) -> None:
         """
         Set node attributes.
 
@@ -558,15 +551,15 @@ class ColoredHyperGraph(Complex):
                     pass
             return
 
-    def set_cell_attributes(self, values, name=None):
+    def set_cell_attributes(self, values, name: Optional[str] = None) -> None:
         """Set cell attributes.
 
         Parameters
         ----------
-        values : TYPE
-            DESCRIPTION.
-        name : TYPE, optional
-            DESCRIPTION. The default is None.
+        values : dict
+            dictionary of attributes/properties to set for the cell.
+        name : str, optional
+            name of the attribute/property to set for the cell. The default is None.
 
         Returns
         -------
@@ -582,9 +575,9 @@ class ColoredHyperGraph(Complex):
         >>> CHG.add_cell([1, 2, 3, 4], rank=2)
         >>> CHG.add_cell([1, 2, 4], rank=2,)
         >>> CHG.add_cell([3, 4], rank=2)
-        >>> d = {(1, 2, 3, 4): 'red', (1, 2, 3): 'blue', (3, 4): 'green'}
+        >>> d = {((1, 2, 3, 4),0): 'red', ((1, 2, 4),0): 'blue', ((3, 4),0): 'green'}
         >>> CHG.set_cell_attributes(d, name='color')
-        >>> CHG.cells[(3, 4)]['color']
+        >>> CHG.cells[((3, 4),0)]['color']
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -592,9 +585,9 @@ class ColoredHyperGraph(Complex):
 
         >>> G = nx.path_graph(3)
         >>> CHG = ColoredHyperGraph(G)
-        >>> d = {(1, 2): {'color': 'red','attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3}}
+        >>> d = {((1, 2),0): {'color': 'red','attr2': 1}, ((0, 1),0): {'color': 'blue', 'attr2': 3}}
         >>> CHG.set_cell_attributes(d)
-        >>> CHG.cells[(0, 1)]['color']
+        >>> CHG.cells[((0, 1),0)]['color']
         'blue'
         3
 
@@ -615,7 +608,7 @@ class ColoredHyperGraph(Complex):
                     pass
             return
 
-    def get_node_attributes(self, name):
+    def get_node_attributes(self, name: str):
         """Get node attributes.
 
         Parameters
@@ -630,7 +623,7 @@ class ColoredHyperGraph(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CHG = NestedColoredHyperGraph(G)
+        >>> CHG = ColoredHyperGraph(G)
         >>> d = {0: {'color': 'red', 'attr2': 1 },1: {'color': 'blue', 'attr2': 3} }
         >>> CHG.set_node_attributes(d)
         >>> CHG.get_node_attributes('color')
@@ -638,18 +631,18 @@ class ColoredHyperGraph(Complex):
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CHG = NestedColoredHyperGraph(G)
+        >>> CHG = ColoredHyperGraph(G)
         >>> nodes_color = CHG.get_node_attributes('color')
         >>> nodes_color[1]
         'blue'
         """
         return {
-            node: self.nodes.nodes[node][name]
-            for node in self.nodes.nodes
-            if name in self.nodes.nodes[node]
+            tuple(node)[0]: self.nodes[node][name]
+            for node in self.nodes
+            if name in self.nodes[node]
         }
 
-    def get_cell_attributes(self, name, rank=None):
+    def get_cell_attributes(self, name: str, rank=None):
         """Get node attributes from graph.
 
         Parameters
@@ -667,10 +660,10 @@ class ColoredHyperGraph(Complex):
         --------
         >>> G = nx.path_graph(3)
         >>> CHG = ColoredHyperGraph(G)
-        >>> d = {(1, 2): {'color': 'red', 'attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3} }
+        >>> d = {((1, 2),0): {'color': 'red', 'attr2': 1}, ((0, 1),0): {'color': 'blue', 'attr2': 3} }
         >>> CHG.set_cell_attributes(d)
         >>> cell_color = CHG.get_cell_attributes('color')
-        >>> cell_color[frozenset({0, 1})]
+        >>> cell_color[(frozenset({0, 1}), 0)]
         'blue'
         """
         if rank is not None:
@@ -681,22 +674,50 @@ class ColoredHyperGraph(Complex):
             }
         else:
             return {
-                cell: self.cells[cell].properties[name]
+                cell: self.cells[cell][name]
                 for cell in self.cells
-                if name in self.cells[cell].properties
+                if name in self.cells[cell]
             }
 
-    def add_hyperedge_with_its_nodes(self, hyperedge_, rank, **attr):
-        """Adding nodes of hyperedge helper method."""
-        self._complex_set.hyperedge_dict[rank][hyperedge_].update(attr)
+    def _add_nodes_of_hyperedge(self, hyperedge_) -> None:
+        """Adding nodes of a hyperedge."""
+        if 0 not in self._complex_set.hyperedge_dict:
+            self._complex_set.hyperedge_dict[0] = {}
         for i in hyperedge_:
-            if 0 not in self._complex_set.hyperedge_dict:
-                self._complex_set.hyperedge_dict[0] = {}
-
             if i not in self._complex_set.hyperedge_dict[0]:
-                self._complex_set.hyperedge_dict[0][frozenset({i})] = {"weight": 1}
+                self._complex_set.hyperedge_dict[0][frozenset({i})] = {}
+                self._complex_set.hyperedge_dict[0][frozenset({i})][0] = {"weight": 1}
 
-    def _add_hyperedge_helper(self, hyperedge_, rank, **attr):
+    def new_hyperedge_key(self, hyperedge, rank):
+        """Add hyperedge new key.
+
+        Notes
+        -----
+        In the standard ColoredHyperGraph class the new key is the number of existing
+        hyperedges between the nodes that define that hyperedge
+        (increased if necessary to ensure unused).
+        The first hyperedge will have key 0, then 1, etc. If an hyperedge is removed
+        further new_hyperedge_keys may not be in this order.
+
+        Parameters
+        ----------
+        hyperedge :representing node elements of the hyperedge
+        rank : rank (color) of the input hyperedge
+
+        Returns
+        -------
+        key : int
+        """
+        try:
+            keydict = self._complex_set.hyperedge_dict[rank][hyperedge]
+        except KeyError:
+            return 0
+        key = len(keydict)
+        while key in keydict:
+            key += 1
+        return key
+
+    def _add_hyperedge_helper(self, hyperedge_, rank, key=None, **attr):
         """Add hyperedge.
 
         Parameters
@@ -709,18 +730,22 @@ class ColoredHyperGraph(Complex):
         -------
         None.
         """
-        if rank in self._complex_set.hyperedge_dict:
-            if hyperedge_ in self._complex_set.hyperedge_dict[rank]:
-                self.add_hyperedge_with_its_nodes(hyperedge_, rank, **attr)
-            else:
-                self._complex_set.hyperedge_dict[rank][hyperedge_] = {}
-                self.add_hyperedge_with_its_nodes(hyperedge_, rank, **attr)
-        else:
+        if rank not in self._complex_set.hyperedge_dict:
             self._complex_set.hyperedge_dict[rank] = {}
+        if key is None:
+            key = self.new_hyperedge_key(hyperedge_, rank)
+        if hyperedge_ not in self._complex_set.hyperedge_dict[rank]:
             self._complex_set.hyperedge_dict[rank][hyperedge_] = {}
-            self.add_hyperedge_with_its_nodes(hyperedge_, rank, **attr)
+            self._complex_set.hyperedge_dict[rank][hyperedge_][key] = {"weight": 1}
+            self._complex_set.hyperedge_dict[rank][hyperedge_][key].update(**attr)
+        elif key is not self._complex_set.hyperedge_dict[rank][hyperedge_]:
+            self._complex_set.hyperedge_dict[rank][hyperedge_][key] = {"weight": 1}
+            self._complex_set.hyperedge_dict[rank][hyperedge_][key].update(**attr)
+        else:
+            self._complex_set.hyperedge_dict[rank][hyperedge_][key].update(**attr)
+        self._add_nodes_of_hyperedge(hyperedge_)
 
-    def add_cell(self, cell, rank=None, **attr):
+    def add_cell(self, cell, rank=None, key=None, **attr):
         """Add a single cells to Colored Hypergraph.
 
         Parameters
@@ -733,19 +758,10 @@ class ColoredHyperGraph(Complex):
         -------
         Colored Hypergraph : ColoredHyperGraph
         """
-        if self.graph_based:
-            if rank == 1:
-                if not isinstance(cell, Iterable):
-                    TopoNetXError(
-                        "Rank 1 cells in graph-based ColoredHyperGraph must be Iterable."
-                    )
-                if len(cell) != 2:
-                    TopoNetXError(
-                        f"Rank 1 cells in graph-based ColoredHyperGraph must have size equalt to 1 got {cell}."
-                    )
-
-        self._add_hyperedge(cell, rank, **attr)
-        return self
+        if rank is None:
+            self._add_hyperedge(cell, 1, key, **attr)
+        else:
+            self._add_hyperedge(cell, rank, key, **attr)
 
     def add_cells_from(self, cells, ranks=None):
         """Add cells to Colored Hypergraph.
@@ -763,12 +779,9 @@ class ColoredHyperGraph(Complex):
         if ranks is None:
             for cell in cells:
                 if not isinstance(cell, HyperEdge):
-                    raise ValueError(
-                        f"input must be an HyperEdge {cell} object when rank is None"
-                    )
-                if cell.rank is None:
-                    raise ValueError(f"input HyperEdge {cell} has None rank")
-                self.add_cell(cell, cell.rank)
+                    self.add_cell(cell, cell.rank)
+                else:
+                    self.add_cell(cell, rank=None)
         else:
             if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
 
@@ -783,7 +796,7 @@ class ColoredHyperGraph(Complex):
             for cell in cells:
                 self.add_cell(cell, ranks)
 
-    def remove_cell(self, cell):
+    def remove_cell(self, cell) -> None:
         """Remove a single cell from CHG.
 
         Parameters
@@ -810,7 +823,7 @@ class ColoredHyperGraph(Complex):
         """Get adjacency structure dictionary."""
         return sparse_array_to_neighborhood_dict(self.adjacency_matrix(i, j))
 
-    def remove_cells(self, cell_set):
+    def remove_cells(self, cell_set) -> None:
         """Remove cells from CHG.
 
         Parameters
@@ -824,72 +837,10 @@ class ColoredHyperGraph(Complex):
         for cell in cell_set:
             self.remove_cell(cell)
 
-    def _incidence_matrix_helper(
-        self, children, uidset, sparse: bool = True, index: bool = False
-    ):
-        """Help compute the incidence matrix."""
-        from collections import OrderedDict
-        from operator import itemgetter
-
-        ndict = dict(zip(children, range(len(children))))
-        edict = dict(zip(uidset, range(len(uidset))))
-
-        ndict = OrderedDict(sorted(ndict.items(), key=itemgetter(1)))
-        edict = OrderedDict(sorted(edict.items(), key=itemgetter(1)))
-
-        r_hyperedge_dict = {j: children[j] for j in range(len(children))}
-        k_hyperedge_dict = {i: uidset[i] for i in range(len(uidset))}
-
-        r_hyperedge_dict = OrderedDict(
-            sorted(r_hyperedge_dict.items(), key=itemgetter(0))
-        )
-        k_hyperedge_dict = OrderedDict(
-            sorted(k_hyperedge_dict.items(), key=itemgetter(0))
-        )
-
-        if len(ndict) != 0:
-
-            # if index:
-            #     rowdict = {v: k for k, v in ndict.items()}
-            #     coldict = {v: k for k, v in edict.items()}
-
-            if sparse:
-                # Create csr sparse matrix
-                rows = list()
-                cols = list()
-                data = list()
-                for n in ndict:
-                    for e in edict:
-                        if n <= e:
-                            data.append(1)
-                            rows.append(ndict[n])
-                            cols.append(edict[e])
-                MP = csr_matrix(
-                    (data, (rows, cols)),
-                    shape=(len(r_hyperedge_dict), len(k_hyperedge_dict)),
-                )
-            else:
-                # Create an np.matrix
-                MP = np.zeros((len(children), len(uidset)), dtype=int)
-                for e in k_hyperedge_dict:
-                    for n in r_hyperedge_dict:
-                        if r_hyperedge_dict[n] <= k_hyperedge_dict[e]:
-                            MP[ndict[n], edict[e]] = 1
-            if index:
-                return ndict, edict, MP
-            else:
-                return MP
-        else:
-            if index:
-                return {}, {}, np.zeros(1)
-            else:
-                return np.zeros(1)
-
     def _incidence_matrix(
         self,
         rank,
         to_rank,
-        incidence_type: Literal["up", "down"] = "up",
         weight=None,
         sparse: bool = True,
         index: bool = False,
@@ -901,11 +852,16 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        incidence_type : {'up', 'down'}, default='up'
+        rank : int
+        to_rank: int
         sparse : bool, default=True
         index : bool, default=False
             If True return will include a dictionary of children uid : row number
             and element uid : column number
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
 
         Returns
         -------
@@ -936,37 +892,46 @@ class ColoredHyperGraph(Complex):
         """
         if rank == to_rank:
             raise ValueError("incidence must be computed for k!=r, got equal r and k.")
-        if to_rank is None:
-            if incidence_type == "up":
-                children = self.skeleton(rank)
-                uidset = self.skeleton(rank + 1)
-            elif incidence_type == "down":
-                uidset = self.skeleton(rank)
-                children = self.skeleton(rank - 1)
-            else:
-                raise TopoNetXError("incidence_type must be 'up' or 'down' ")
-        else:
-            assert (
-                rank != to_rank
-            )  # incidence is defined between two skeletons of different ranks
-            if (
-                rank < to_rank
-            ):  # up incidence is defined between two skeletons of different ranks
-                children = self.skeleton(rank)
-                uidset = self.skeleton(to_rank)
+        children = self.skeleton(rank)
+        uidset = self.skeleton(to_rank)
 
-            elif (
-                rank > to_rank
-            ):  # up incidence is defined between two skeletons of different ranks
-                children = self.skeleton(to_rank)
-                uidset = self.skeleton(rank)
-        return self._incidence_matrix_helper(children, uidset, sparse, index)
+        return compute_set_incidence(children, uidset, sparse, index)
 
     def incidence_matrix(
         self,
         rank,
-        to_rank=None,
-        incidence_type: str = "up",
+        to_rank,
+        weight=None,
+        sparse: bool = True,
+        index: bool = False,
+    ):
+        """Compute incidence matrix for the CHG indexed by nodes x cells.
+
+        Parameters
+        ----------
+        rank : int
+        to_rank: int
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+        index : bool, default False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        row dictionary : dict
+            Dictionary identifying rows with nodes
+        column dictionary : dict
+            Dictionary identifying columns with cells
+        """
+        return self._incidence_matrix(rank, to_rank, sparse=sparse, index=index)
+
+    def all_ranks_incidence_matrix(
+        self,
+        rank,
         weight=None,
         sparse: bool = True,
         index: bool = False,
@@ -991,22 +956,25 @@ class ColoredHyperGraph(Complex):
         column dictionary : dict
             Dictionary identifying columns with cells
         """
-        return self._incidence_matrix(
-            rank, to_rank, incidence_type=incidence_type, sparse=sparse, index=index
-        )
+        children = self.skeleton(rank)
+        all_other_ranks = []
+        for i in self.ranks:
+            if i is not rank:
+                all_other_ranks = all_other_ranks + self.skeleton(i)
+        return compute_set_incidence(children, all_other_ranks, sparse, index)
 
-    def adjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def adjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Sparse weighted :term:`s-adjacency matrix`.
 
         Parameters
         ----------
-        r,k : int, int
+        rank, via_rank : int, int
             Two ranks for skeletons in the input Colored Hypergraph
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
-        index: boolean, optional, default: False
+        index: bool, optional
             If True, will return a rowdict of row to node uid
-        index : book, default=False
+        index : bool, optional
             indicate weather to return the indices of the adjacency matrix.
 
         Returns
@@ -1028,27 +996,23 @@ class ColoredHyperGraph(Complex):
         >>> CHG = ColoredHyperGraph(cells=G)
         >>> CHG.adjacency_matrix(0, 1)
         """
-        if via_rank is not None:
-            assert rank < via_rank
         if index:
             B, row, col = self.incidence_matrix(
                 rank, via_rank, sparse=True, index=index
             )
         else:
-            B = self.incidence_matrix(
-                rank, via_rank, incidence_type="up", sparse=True, index=index
-            )
+            B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
         A = incidence_to_adjacency(B.T, s=s)
         if index:
             return A, row
         return A
 
-    def cell_adjacency_matrix(self, index=False, s=1):
+    def cell_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the cell adjacency matrix.
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
         Return
@@ -1056,48 +1020,30 @@ class ColoredHyperGraph(Complex):
           all cells adjacency_matrix : scipy.sparse.csr.csr_matrix
 
         """
-        B = self.incidence_matrix(
-            rank=0, to_rank=None, incidence_type="up", index=index
-        )
-        if index:
+        raise NotImplementedError()
 
-            A = incidence_to_adjacency(B[0].transpose(), s=s)
-
-            return A, B[2]
-        A = incidence_to_adjacency(B.transpose(), s=s)
-        return A
-
-    def node_adjacency_matrix(self, index=False, s=1):
+    def node_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the node adjacency matrix."""
-        B = self.incidence_matrix(
-            rank=0, to_rank=None, incidence_type="up", index=index
-        )
-        if index:
-            A = incidence_to_adjacency(B[0], s=s)
-            return A, B[1]
-        A = incidence_to_adjacency(B, s=s)
-        return A
+        raise NotImplementedError()
 
-    def coadjacency_matrix(self, rank, via_rank, s=1, index=False):
+    def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix.
 
         The sparse weighted :term:`s-coadjacency matrix`
 
         Parameters
         ----------
-        r,k : two ranks for skeletons in the input Colored Hypergraph, such that r>k
+        rank, via_rank : two ranks for skeletons in the input Colored Hypergraph
 
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
-        index: boolean, optional, default: False
+        index: bool, optional
             if True, will return a rowdict of row to node uid
 
         weight: bool, default=True
             If False all nonzero entries are 1.
             If True adjacency matrix will depend on weighted incidence matrix,
-        index : book, default=False
-            indicate weather to return the indices of the adjacency matrix.
 
         Returns
         -------
@@ -1110,16 +1056,12 @@ class ColoredHyperGraph(Complex):
 
             coadjacency_matrix : scipy.sparse.csr.csr_matrix
         """
-        if via_rank is not None:
-            assert rank > via_rank
         if index:
             B, row, col = self.incidence_matrix(
-                via_rank, rank, incidence_type="down", sparse=True, index=index
+                via_rank, rank, sparse=True, index=index
             )
         else:
-            B = self.incidence_matrix(
-                rank, via_rank, incidence_type="down", sparse=True, index=index
-            )
+            B = self.incidence_matrix(via_rank, rank, sparse=True, index=index)
         A = incidence_to_adjacency(B)
         if index:
             return A, col
@@ -1138,7 +1080,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def restrict_to_cells(self, cell_set, name=None):
+    def restrict_to_cells(self, cell_set, name: Optional[str] = None):
         """Construct a Colored Hypergraph using a subset of the cells.
 
         Parameters
@@ -1153,10 +1095,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-        # RNS = self.cells.restrict_to(element_subset=cell_set, name=name)
-        # return NestedColoredHyperGraph(cells=RNS, name=name)
-
-    def restrict_to_nodes(self, node_set, name=None):
+    def restrict_to_nodes(self, node_set, name: Optional[str] = None):
         """Restrict to a set of nodes.
 
         Constructs a new Colored Hypergraph  by restricting the
@@ -1177,7 +1116,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def from_networkx_graph(self, G):
+    def from_networkx_graph(self, G) -> None:
         """Construct a Colored Hypergraph from a networkx graph.
 
         Parameters
@@ -1197,33 +1136,31 @@ class ColoredHyperGraph(Complex):
         >>> G.add_edge(0, 1)
         >>> G.add_edge(0,4)
         >>> G.add_edge(0,7)
-        >>> CX = ColoredHyperGraph()
-        >>> CX.from_networkx_graph(G)
-        >>> CX.nodes
-        RankedEntitySet(:Nodes,[0, 1, 4, 7],{'weight': 1.0})
-        >>> CX.cells
-        RankedEntitySet(:Cells,[(0, 1), (0, 7), (0, 4)],{'weight': 1.0})
+        >>> CHG = ColoredHyperGraph()
+        >>> CHG.from_networkx_graph(G)
+        >>> CHG.nodes
         """
-        for node in G.nodes:
-            self.add_node(node)
+        for node in G.nodes:  # cells is a networkx graph
+            self.add_node(node, **G.nodes[node])
         for edge in G.edges:
-            self.add_cell(edge, rank=1)
+            u, v = edge
+            self.add_cell([u, v], 1, **G.get_edge_data(u, v))
 
-    def is_connected(self, s=1, cells=False):
+    def is_connected(self, s: int = 1, cells: bool = False):
         """Determine if Colored Hypergraph is :term:`s-connected <s-connected, s-node-connected>`.
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
-        cells: boolean, optional, default: False
+        cells: bool, optional
             If True, will determine if s-cell-connected.
             For s=1 s-cell-connected is the same as s-connected.
 
         Returns
         -------
-        is_connected : boolean
+        is_connected : bool
 
         Notes
         -----
@@ -1237,13 +1174,7 @@ class ColoredHyperGraph(Complex):
         >>> CHG = ColoredHyperGraph(cells=E)
         >>> CHG.is_connected()
         """
-        B = self.incidence_matrix(rank=0, to_rank=None, incidence_type="up")
-        if cells:
-            A = incidence_to_adjacency(B, s=s)
-        else:
-            A = incidence_to_adjacency(B.transpose(), s=s)
-        G = nx.from_scipy_sparse_matrix(A)
-        return nx.is_connected(G)
+        raise NotImplementedError()
 
     def singletons(self):
         """Return a list of singleton cell.
@@ -1265,12 +1196,12 @@ class ColoredHyperGraph(Complex):
                         singletons.append(cell)
         return singletons
 
-    def remove_singletons(self, name=None):
+    def remove_singletons(self, name: Optional[str] = None):
         """Construct new CHG with singleton cells removed.
 
         Parameters
         ----------
-        name: str, optional, default: None
+        name: str, optional
 
         Returns
         -------
@@ -1288,11 +1219,11 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
-        cells : boolean, optional, default: True
+        cells : bool, optional
             If True will return cell components, if False will return node components
-        return_singletons : bool, optional, default : False
+        return_singletons : bool, optional
 
         Notes
         -----
@@ -1316,22 +1247,7 @@ class ColoredHyperGraph(Complex):
             Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
             components of CHG.
         """
-        if cells:
-            A, coldict = self.cell_adjacency_matrix(s=s, index=True)
-            G = nx.from_scipy_sparse_matrix(A)
-
-            for c in nx.connected_components(G):
-                if not return_singletons and len(c) == 1:
-                    continue
-                yield {coldict[n] for n in c}
-        else:
-            A, rowdict = self.node_adjacency_matrix(s=s, index=True)
-            G = nx.from_scipy_sparse_matrix(A)
-            for c in nx.connected_components(G):
-                if not return_singletons:
-                    if len(c) == 1:
-                        continue
-                yield {rowdict[n] for n in c}
+        raise NotImplementedError()
 
     def s_component_subgraphs(
         self, s: int = 1, cells: bool = True, return_singletons: bool = False
@@ -1342,9 +1258,9 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
-        cells : boolean, optional, cells=False
+        cells : bool, optional
             Determines if cell or node components are desired. Returns
             subgraphs equal to the CHG restricted to each set of nodes(cells) in the
             s-connected components or s-cell-connected components
@@ -1356,13 +1272,7 @@ class ColoredHyperGraph(Complex):
             Iterator returns subgraphs generated by the cells (or nodes) in the
             s-cell(node) components.
         """
-        for idx, c in enumerate(
-            self.s_components(s=s, cells=cells, return_singletons=return_singletons)
-        ):
-            if cells:
-                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
-            else:
-                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
+        raise NotImplementedError()
 
     def s_components(
         self, s: int = 1, cells: bool = True, return_singletons: bool = True
@@ -1375,9 +1285,7 @@ class ColoredHyperGraph(Complex):
         --------
         s_connected_components
         """
-        return self.s_connected_components(
-            s=s, cells=cells, return_singletons=return_singletons
-        )
+        raise NotImplementedError()
 
     def connected_components(self, cells: bool = False, return_singletons: bool = True):
         """Compute s-connected components.
@@ -1390,7 +1298,7 @@ class ColoredHyperGraph(Complex):
         --------
         s_connected_components
         """
-        return self.s_connected_components(cells=cells, return_singletons=True)
+        raise NotImplementedError()
 
     def connected_component_subgraphs(self, return_singletons: bool = True):
         """Compute s-component subgraphs with s=1.
@@ -1403,7 +1311,7 @@ class ColoredHyperGraph(Complex):
         --------
         s_component_subgraphs
         """
-        return self.s_component_subgraphs(return_singletons=return_singletons)
+        raise NotImplementedError()
 
     def components(self, cells: bool = False, return_singletons: bool = True):
         """Compute s-connected components for s=1.
@@ -1417,7 +1325,7 @@ class ColoredHyperGraph(Complex):
         --------
         s_connected_components
         """
-        return self.s_connected_components(s=1, cells=cells)
+        raise NotImplementedError()
 
     def component_subgraphs(self, return_singletons: bool = False):
         """Compute s-component subgraphs wth s=1.
@@ -1428,14 +1336,14 @@ class ColoredHyperGraph(Complex):
         --------
         s_component_subgraphs
         """
-        return self.s_component_subgraphs(return_singletons=return_singletons)
+        raise NotImplementedError()
 
     def node_diameters(self, s: int = 1):
         """Return node diameters of the connected components.
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
         Returns
@@ -1443,26 +1351,14 @@ class ColoredHyperGraph(Complex):
         list of the diameters of the s-components and
         list of the s-component nodes
         """
-        A, coldict = self.node_adjacency_matrix(s=s, index=True)
-        G = nx.from_scipy_sparse_matrix(A)
-        diams = []
-        comps = []
-        for c in nx.connected_components(G):
-            diamc = nx.diameter(G.subgraph(c))
-            temp = set()
-            for e in c:
-                temp.add(coldict[e])
-            comps.append(temp)
-            diams.append(diamc)
-        loc = np.argmax(diams)
-        return diams[loc], diams, comps
+        raise NotImplementedError()
 
     def cell_diameters(self, s: int = 1):
         """Return the cell diameters of the s_cell_connected component subgraphs.
 
         Parameters
         ----------
-        s : int, list, optional, default : 1
+        s : int, list, optional
             Minimum number of edges shared by neighbors with node.
 
         Returns
@@ -1473,19 +1369,7 @@ class ColoredHyperGraph(Complex):
         list of component : list
             List of the cell uids in the s-cell component subgraphs.
         """
-        A, coldict = self.cell_adjacency_matrix(s=s, index=True)
-        G = nx.from_scipy_sparse_matrix(A)
-        diams = []
-        comps = []
-        for c in nx.connected_components(G):
-            diamc = nx.diameter(G.subgraph(c))
-            temp = set()
-            for e in c:
-                temp.add(coldict[e])
-            comps.append(temp)
-            diams.append(diamc)
-        loc = np.argmax(diams)
-        return diams[loc], diams, comps
+        raise NotImplementedError()
 
     def diameter(self, s: int = 1) -> int:
         """Return the length of the longest shortest s-walk between nodes.
@@ -1511,12 +1395,7 @@ class ColoredHyperGraph(Complex):
         nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
         are s-adjacent. If the graph is not connected, an error will be raised.
         """
-        A = self.node_adjacency_matrix(s=s)
-        G = nx.from_scipy_sparse_matrix(A)
-        if nx.is_connected(G):
-            return nx.diameter(G)
-        else:
-            raise TopoNetXError(f"{self.__shortstr__} is not s-connected. s={s}")
+        raise NotImplementedError()
 
     def cell_diameter(self, s: int = 1) -> int:
         """Return length of the longest shortest s-walk between cells.
@@ -1542,12 +1421,7 @@ class ColoredHyperGraph(Complex):
         cells e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
         are s-adjacent. If the graph is not connected, an error will be raised.
         """
-        A = self.cell_adjacency_matrix(s=s)
-        G = nx.from_scipy_sparse_matrix(A)
-        if nx.is_connected(G):
-            return nx.diameter(G)
-        else:
-            raise TopoNetXError(f"CHG is not s-connected. s={s}")
+        raise NotImplementedError()
 
     def distance(self, source, target, s: int = 1) -> int:
         """Return shortest s-walk distance between two nodes.
@@ -1629,7 +1503,7 @@ class ColoredHyperGraph(Complex):
         -------
         ColoredHyperGraph
         """
-        CHG = ColoredHyperGraph(name=self.name, graph_based=self.graph_based)
-        for cell in self.cells:
-            CHG.add_cell(cell, self.cells.get_rank(cell))
+        CHG = ColoredHyperGraph(name=self.name)
+        for cell, key in self.cells:
+            CHG.add_cell(cell, key=key, rank=self.cells.get_rank(cell))
         return CHG

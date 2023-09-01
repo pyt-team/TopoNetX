@@ -1,7 +1,7 @@
 """Creation and manipulation of a combinatorial complex."""
 
 from collections.abc import Collection, Hashable, Iterable, Iterator
-from typing import Literal
+from typing import Literal, Optional
 
 import networkx as nx
 import numpy as np
@@ -16,6 +16,7 @@ from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import (
+    compute_set_incidence,
     incidence_to_adjacency,
     sparse_array_to_neighborhood_dict,
 )
@@ -26,15 +27,15 @@ __all__ = ["CombinatorialComplex"]
 class CombinatorialComplex(ColoredHyperGraph):
     """Class for Combinatorial Complex.
 
-    A Combinatorial Complex (CC) is a triple CC = (S, X, rk) where:
+    A Combinatorial Complex (CCC) is a triple CCC = (S, X, rk) where:
     - S is an abstract set of entities,
     - X a subset of the power set of X, and
     - rk is the a rank function that associates for every set x in X a rank, a positive integer.
 
     The rank function rk must satisfy x <= y then rk(x) <= rk(y).
-    We call this condition the CC condition.
+    We call this condition the CCC condition.
 
-    A CC is a generlization of graphs, hypergraphs, cellular and simplicial complexes.
+    A CCC is a generlization of graphs, hypergraphs, cellular and simplicial complexes.
 
     Parameters
     ----------
@@ -71,17 +72,17 @@ class CombinatorialComplex(ColoredHyperGraph):
     --------
     Define an empty combinatorial complex:
 
-    >>> CC = CombinatorialComplex()
+    >>> CCC = CombinatorialComplex()
 
     Add cells to the combinatorial complex:
 
-    >>> CC = CombinatorialComplex()
-    >>> CC.add_cell([1, 2], rank=1)
-    >>> CC.add_cell([3, 4], rank=1)
-    >>> CC.add_cell([1, 2, 3, 4], rank=2)
-    >>> CC.add_cell([1, 2, 4], rank=2)
-    >>> CC.add_cell([3, 4], rank=2)
-    >>> CC.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
+    >>> CCC = CombinatorialComplex()
+    >>> CCC.add_cell([1, 2], rank=1)
+    >>> CCC.add_cell([3, 4], rank=1)
+    >>> CCC.add_cell([1, 2, 3, 4], rank=2)
+    >>> CCC.add_cell([1, 2, 4], rank=2)
+    >>> CCC.add_cell([3, 4], rank=2)
+    >>> CCC.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
     """
 
     def __init__(
@@ -99,12 +100,12 @@ class CombinatorialComplex(ColoredHyperGraph):
         self._node_membership = dict()
         self._max_complex = set()
         self._complex_set = HyperEdgeView()
+
         if cells is not None:
             if not isinstance(cells, Iterable):
                 raise TypeError(
                     f"Input cells must be given as Iterable, got {type(cells)}."
                 )
-
             if not isinstance(cells, Graph):
                 if ranks is None:
                     for cell in cells:
@@ -143,21 +144,31 @@ class CombinatorialComplex(ColoredHyperGraph):
         return f"CombinatorialComplex(name='{self.name}')"
 
     def __setitem__(self, cell, attr):
-        """Set the attributes of a cell in the CC."""
-        return super().__setitem__(cell, attr)
+        """Set the attributes of a hyperedge or node in the CCC."""
+        if cell in self.nodes:
+            self.nodes[cell].update(attr)
+            return
+        # we now check if the input is a cell in the CCC
+        elif cell in self.cells:
+            hyperedge_ = HyperEdgeView._to_frozen_set(cell)
+            rank = self.cells.get_rank(hyperedge_)
+            if hyperedge_ in self._complex_set.hyperedge_dict[rank]:
+                self._complex_set.hyperedge_dict[rank][hyperedge_] = attr
+        else:
+            raise KeyError(f"input {cell} is not in the complex")
 
     @property
-    def __shortstr__(self):
+    def __shortstr__(self) -> str:
         """Return the short string generic representation."""
-        return "CC"
+        return "CCC"
 
     def number_of_nodes(self, node_set=None) -> int:
-        """Compute the number of nodes in node_set belonging to the CC.
+        """Compute the number of nodes in node_set belonging to the CCC.
 
         Parameters
         ----------
-        node_set : an interable of Entities, optional, default: None
-            If None, then return the number of nodes in the CC.
+        node_set : an interable of Entities, optional
+            If None, then return the number of nodes in the CCC.
 
         Returns
         -------
@@ -165,8 +176,33 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         return super().number_of_nodes(node_set)
 
+    @property
+    def nodes(self):
+        """
+        Object associated with self.elements.
+
+        Returns
+        -------
+        NodeView
+
+        """
+        return NodeView(
+            self._complex_set.hyperedge_dict, cell_type=HyperEdge, colored_nodes=False
+        )
+
+    @property
+    def cells(self):
+        """
+        Object associated with self._cells.
+
+        Returns
+        -------
+        HyperEdgeView
+        """
+        return self._complex_set
+
     def number_of_cells(self, cell_set=None) -> int:
-        """Compute the number of cells in cell_set belonging to the CC.
+        """Compute the number of cells in cell_set belonging to the CCC.
 
         Parameters
         ----------
@@ -183,7 +219,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """Return shape.
 
         This is:
-        (number of cells[i], for i in range(0,dim(CC))  )
+        (number of cells[i], for i in range(0,dim(CCC))  )
 
         Returns
         -------
@@ -192,7 +228,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().shape()
 
     def order(self):
-        """Compute the number of nodes in the CC.
+        """Compute the number of nodes in the CCC.
 
         Returns
         -------
@@ -201,7 +237,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().order()
 
     def _remove_node_helper(self, node) -> None:
-        """Remove node from cells. Assumes node is present in the CC."""
+        """Remove node from cells. Assumes node is present in the CCC."""
         # Removing node in hyperedgeview
         for key in list(self.cells.hyperedge_dict.keys()):
             for key_rank in list(self.cells.hyperedge_dict[key].keys()):
@@ -227,14 +263,14 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         node_set : an iterable of hashables
-            Nodes in CC
+            Nodes in CCC
         """
         return super().remove_nodes(node_set)
 
     def remove_node(self, node) -> None:
         """Remove node from cells.
 
-        This also deletes any reference in the nodes of the CC.
+        This also deletes any reference in the nodes of the CCC.
         This also deletes cell references in higher ranks for the particular node.
 
         Parameters
@@ -252,10 +288,9 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        values : TYPE
-            DESCRIPTION.
-        name : TYPE, optional
-            DESCRIPTION. The default is None.
+        values : dict
+        Dictionary of cell attributes to set keyed by cell name.
+        name : str, optional
 
         Returns
         -------
@@ -267,23 +302,23 @@ class CombinatorialComplex(ColoredHyperGraph):
         to assign a cell attribute to store the value of that property for
         each cell:
 
-        >>> CC = CombinatorialComplex()
-        >>> CC.add_cell([1, 2, 3, 4], rank=2)
-        >>> CC.add_cell([1, 2, 4], rank=2,)
-        >>> CC.add_cell([3, 4], rank=2)
+        >>> CCC = CombinatorialComplex()
+        >>> CCC.add_cell([1, 2, 3, 4], rank=2)
+        >>> CCC.add_cell([1, 2, 4], rank=2,)
+        >>> CCC.add_cell([3, 4], rank=2)
         >>> d = {(1, 2, 3, 4): 'red', (1, 2, 3): 'blue', (3, 4): 'green'}
-        >>> CC.set_cell_attributes(d, name='color')
-        >>> CC.cells[(3, 4)]['color']
+        >>> CCC.set_cell_attributes(d, name='color')
+        >>> CCC.cells[(3, 4)]['color']
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
         the entire dictionary will be used to update edge attributes:
 
         >>> G = nx.path_graph(3)
-        >>> CC = NestedCombinatorialComplex(G)
+        >>> CCC = CombinatorialComplex(G)
         >>> d = {(1, 2): {'color': 'red','attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3}}
-        >>> CC.set_cell_attributes(d)
-        >>> CC.cells[(0, 1)]['color']
+        >>> CCC.set_cell_attributes(d)
+        >>> CCC.cells[(0, 1)]['color']
         'blue'
         3
 
@@ -307,16 +342,16 @@ class CombinatorialComplex(ColoredHyperGraph):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = NestedCombinatorialComplex(G)
+        >>> CCC = CombinatorialComplex(G)
         >>> d = {0: {'color': 'red', 'attr2': 1 },1: {'color': 'blue', 'attr2': 3} }
-        >>> CC.set_node_attributes(d)
-        >>> CC.get_node_attributes('color')
+        >>> CCC.set_node_attributes(d)
+        >>> CCC.get_node_attributes('color')
         {0: 'red', 1: 'blue'}
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CC = NestedCombinatorialComplex(G)
-        >>> nodes_color = CC.get_node_attributes('color')
+        >>> CCC = CombinatorialComplex(G)
+        >>> nodes_color = CCC.get_node_attributes('color')
         >>> nodes_color[1]
         'blue'
         """
@@ -339,22 +374,56 @@ class CombinatorialComplex(ColoredHyperGraph):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = CombinatorialComplex(G)
+        >>> CCC = CombinatorialComplex(G)
         >>> d = {(1, 2): {'color': 'red', 'attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3} }
-        >>> CC.set_cell_attributes(d)
-        >>> cell_color = CC.get_cell_attributes('color')
+        >>> CCC.set_cell_attributes(d)
+        >>> cell_color = CCC.get_cell_attributes('color')
         >>> cell_color[frozenset({0, 1})]
         'blue'
         """
         return super().get_cell_attributes(name, rank)
 
     def _add_node(self, node, **attr) -> None:
-        """Add one node as hyperedge."""
-        self._add_hyperedge(hyperedge=node, rank=0, **attr)
+        """Add one node as a hyperedge of rank 0."""
+        if node in self:
+            self._complex_set.hyperedge_dict[0][frozenset({node})].update(**attr)
+        else:
+            self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
     def add_node(self, node, **attr) -> None:
-        """Add a node."""
+        """Add a node to a CCC."""
         self._add_node(node, **attr)
+
+    def _add_nodes_of_hyperedge(self, hyperedge_):
+        """Adding nodes of a hyperedge."""
+        for i in hyperedge_:
+            if 0 not in self._complex_set.hyperedge_dict:
+                self._complex_set.hyperedge_dict[0] = {}
+            if i not in self._complex_set.hyperedge_dict[0]:
+                self._complex_set.hyperedge_dict[0][frozenset({i})] = {"weight": 1}
+
+    def _add_hyperedge_helper(self, hyperedge_, rank, **attr):
+        """Add hyperedge.
+
+        Parameters
+        ----------
+        hyperedge_ : frozenset of elements
+        rank : int
+        attr : arbitrary attrs
+
+        Returns
+        -------
+        None.
+        """
+        if rank not in self._complex_set.hyperedge_dict:
+            self._complex_set.hyperedge_dict[rank] = {}
+        if hyperedge_ not in self._complex_set.hyperedge_dict[rank]:
+            self._complex_set.hyperedge_dict[rank][hyperedge_] = {}
+            self._complex_set.hyperedge_dict[rank][hyperedge_] = {"weight": 1}
+            self._complex_set.hyperedge_dict[rank][hyperedge_].update(**attr)
+        else:
+            self._complex_set.hyperedge_dict[rank][hyperedge_].update(**attr)
+        self._add_nodes_of_hyperedge(hyperedge_)
 
     def _add_hyperedge(self, hyperedge, rank, **attr):
         """Add hyperedge.
@@ -428,7 +497,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         self._max_complex.add(HyperEdge(hyperedge_set, rank=rank))
         self._add_hyperedge_helper(hyperedge_set, rank, **attr)
-        # This is O(N) time complexity to add a hyper edge with O(N) space complexity
+        self._complex_set.hyperedge_dict[rank][hyperedge_set].update(**attr)
         if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_set]:
             self._complex_set.hyperedge_dict[rank][hyperedge_set]["weight"] = 1
         if isinstance(hyperedge, HyperEdge):
@@ -436,7 +505,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 hyperedge._properties
             )
 
-    def add_cell(self, cell, rank=None, **attr):
+    def add_cell(self, cell, rank=None, **attr) -> None:
         """Add a single cells to combinatorial complex.
 
         Parameters
@@ -447,9 +516,261 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        Combinatorial Complex : CombinatorialComplex
+        combinatorial complex : combinatorial complex
         """
-        return super().add_cell(cell, rank, **attr)
+        if self.graph_based:
+            if rank == 1:
+                if not isinstance(cell, Iterable):
+                    TopoNetXError(
+                        "Rank 1 cells in graph-based combinatorial complex  must be Iterable."
+                    )
+                if len(cell) != 2:
+                    TopoNetXError(
+                        f"Rank 1 cells in graph-based combinatorial complex must have size equalt to 1 got {cell}."
+                    )
+
+        self._add_hyperedge(cell, rank=rank, **attr)
+
+    def _incidence_matrix(
+        self,
+        rank,
+        to_rank,
+        incidence_type: Literal["up", "down"] = "up",
+        weight=None,
+        sparse: bool = True,
+        index: bool = False,
+    ):
+        """Compute incidence matrix.
+
+        An incidence matrix indexed by r-ranked hyperedges k-ranked hyperedges
+        r !=k, when k is None incidence_type will be considered instead
+
+        Parameters
+        ----------
+        rank : int
+        to_rank: int, optional
+        incidence_type : {'up', 'down'}, default='up'
+        sparse : bool, default=True
+        index : bool, default=False
+            If True return will include a dictionary of children uid : row number
+            and element uid : column number
+
+        Returns
+        -------
+        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        row dictionary : dict
+            Dictionary identifying row with item in entityset's children
+        column dictionary : dict
+            Dictionary identifying column with item in entityset's uidset
+
+        Notes
+        -----
+        Incidence_matrix method  is a method for generating the incidence matrix of a ColoredHyperGraph.
+        An incidence matrix is a matrix that describes the relationships between the hyperedges
+        of a complex. In this case, the incidence_matrix method generates a matrix where
+        the rows correspond to the hyperedges of the complex and the columns correspond to the faces
+        . The entries in the matrix are either 0 or 1,
+        depending on whether a hyperedge contains a given face or not.
+        For example, if hyperedge i contains face j, then the entry in the ith
+        row and jth column of the matrix will be 1, otherwise it will be 0.
+
+        To generate the incidence matrix, the incidence_matrix method first creates
+        a dictionary where the keys are the faces of the complex and the values are
+        the hyperedges that contain that face. This allows the method to quickly look up
+        which hyperedges contain a given face. The method then iterates over the hyperedges in
+        the HyperEdgeView instance, and for each hyperedge, it checks which faces it contains.
+        For each face that the hyperedge contains, the method increments the corresponding entry
+        in the matrix. Finally, the method returns the completed incidence matrix.
+        """
+        if rank == to_rank:
+            raise ValueError("incidence must be computed for k!=r, got equal r and k.")
+        if to_rank is None:
+            if incidence_type == "up":
+                children = self.skeleton(rank)
+                uidset = self.skeleton(rank + 1)
+            elif incidence_type == "down":
+                uidset = self.skeleton(rank)
+                children = self.skeleton(rank - 1)
+            else:
+                raise ValueError(
+                    "Invalid value for incidence_type. Must be 'up' or 'down'"
+                )
+        else:
+            if (
+                rank < to_rank
+            ):  # up incidence is defined between two skeletons of different ranks
+                children = self.skeleton(rank)
+                uidset = self.skeleton(to_rank)
+
+            elif (
+                rank > to_rank
+            ):  # up incidence is defined between two skeletons of different ranks
+                children = self.skeleton(to_rank)
+                uidset = self.skeleton(rank)
+        return compute_set_incidence(children, uidset, sparse, index)
+
+    def incidence_matrix(
+        self,
+        rank,
+        to_rank=None,
+        incidence_type: str = "up",
+        weight=None,
+        sparse: bool = True,
+        index: bool = False,
+    ):
+        """Compute incidence matrix for the CCC between rank and to_rank skeleti.
+
+        Parameters
+        ----------
+        rank : int
+        to_rank: int, optional
+        incidence_type : {'up', 'down'}, default='up'
+        weight : bool, default=False
+            If False all nonzero entries are 1.
+            If True and self.static all nonzero entries are filled by
+            self.cells.cell_weight dictionary values.
+        sparse : bool, default=True
+        index : bool, optional
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        row dictionary : dict
+            Dictionary identifying rows with nodes
+        column dictionary : dict
+            Dictionary identifying columns with cells
+        """
+        return self._incidence_matrix(
+            rank, to_rank, incidence_type=incidence_type, sparse=sparse, index=index
+        )
+
+    def adjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
+        """Sparse weighted :term:`s-adjacency matrix`.
+
+        Parameters
+        ----------
+        rank, via_rank : int, int
+            Two ranks for skeletons in the input combinatorial complex
+        s : int, list, default=1
+            Minimum number of edges shared by neighbors with node.
+        index: bool, default=False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        If index is True
+            adjacency_matrix : scipy.sparse.csr.csr_matrix
+            row dictionary : dict
+
+        If index if False
+            adjacency_matrix : scipy.sparse.csr.csr_matrix
+
+        Examples
+        --------
+        >>> G = Graph() # networkx graph
+        >>> G.add_edge(0, 1)
+        >>> G.add_edge(0,3)
+        >>> G.add_edge(0,4)
+        >>> G.add_edge(1, 4)
+        >>> CCC = CombinatrialComplex(cells=G)
+        >>> CCC.adjacency_matrix(0, 1)
+        """
+        if via_rank is not None:
+            if rank > via_rank:
+                raise ValueError("rank must be greater than via_rank")
+        if index:
+            B, row, col = self.incidence_matrix(
+                rank, via_rank, sparse=True, index=index
+            )
+        else:
+            B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
+        A = incidence_to_adjacency(B.T, s=s)
+        if index:
+            return A, row
+        return A
+
+    def cell_adjacency_matrix(self, index: bool = False, s: int = 1):
+        """Compute the cell adjacency matrix.
+
+        Parameters
+        ----------
+        s : int, list, default=1
+            Minimum number of edges shared by neighbors with node.
+
+        Return
+        ------
+          all cells adjacency_matrix : scipy.sparse.csr.csr_matrix
+
+        """
+        B = self.incidence_matrix(
+            rank=0, to_rank=None, incidence_type="up", index=index
+        )
+        if index:
+
+            A = incidence_to_adjacency(B[0].transpose(), s=s)
+
+            return A, B[2]
+        A = incidence_to_adjacency(B.transpose(), s=s)
+        return A
+
+    def node_adjacency_matrix(self, index: bool = False, s: int = 1):
+        """Compute the node adjacency matrix."""
+        B = self.incidence_matrix(rank=0, to_rank=None, index=index)
+        if index:
+            A = incidence_to_adjacency(B[0], s=s)
+            return A, B[1]
+        A = incidence_to_adjacency(B, s=s)
+        return A
+
+    def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
+        """Compute the coadjacency matrix.
+
+        The sparse weighted :term:`s-coadjacency matrix`
+
+        Parameters
+        ----------
+        rank , via_rank : two ranks for skeletons in the input combinatorial complex , such that r>k
+
+        s : int, list, optional
+            Minimum number of edges shared by neighbors with node.
+
+        index: bool, optional
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        weight: bool, default=True
+            If False all nonzero entries are 1.
+            If True adjacency matrix will depend on weighted incidence matrix,
+
+        Returns
+        -------
+        If index is True
+            coadjacency_matrix : scipy.sparse.csr.csr_matrix
+
+            row dictionary : dict
+
+        If index if False
+
+            coadjacency_matrix : scipy.sparse.csr.csr_matrix
+        """
+        if via_rank is not None:
+            if rank < via_rank:
+                raise ValueError("rank must be greater than via_rank")
+        if index:
+            B, row, col = self.incidence_matrix(
+                via_rank, rank, incidence_type="down", sparse=True, index=index
+            )
+        else:
+            B = self.incidence_matrix(
+                rank, via_rank, incidence_type="down", sparse=True, index=index
+            )
+        A = incidence_to_adjacency(B)
+        if index:
+            return A, col
+        return A
 
     def add_cells_from(self, cells, ranks=None) -> None:
         """Add cells to combinatorial complex.
@@ -464,7 +785,28 @@ class CombinatorialComplex(ColoredHyperGraph):
         -------
         Combinatorial Complex : CombinatorialComplex
         """
-        return super().add_cells_from(cells, ranks)
+        if ranks is None:
+            for cell in cells:
+                if not isinstance(cell, HyperEdge):
+                    raise ValueError(
+                        f"input must be an HyperEdge {cell} object when rank is None"
+                    )
+                if cell.rank is None:
+                    raise ValueError(f"input HyperEdge {cell} has None rank")
+                self.add_cell(cell, cell.rank)
+        else:
+            if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
+
+                if len(cells) != len(ranks):
+                    raise TopoNetXError(
+                        "cells and ranks must have equal number of elements"
+                    )
+                else:
+                    for cell, rank in zip(cells, ranks):
+                        self.add_cell(cell, rank)
+        if isinstance(cells, Iterable) and isinstance(ranks, int):
+            for cell in cells:
+                self.add_cell(cell, ranks)
 
     def _remove_hyperedge(self, hyperedge) -> None:
         if hyperedge not in self.cells:
@@ -481,8 +823,8 @@ class CombinatorialComplex(ColoredHyperGraph):
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
         self._max_complex.difference_update({HyperEdge(hyperedge_, rank=rank)})
 
-    def remove_cell(self, cell):
-        """Remove a single cell from CC.
+    def remove_cell(self, cell) -> None:
+        """Remove a single cell from CCC.
 
         Parameters
         ----------
@@ -500,8 +842,8 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         super().remove_cell(cell)
 
-    def remove_cells(self, cell_set):
-        """Remove cells from CC.
+    def remove_cells(self, cell_set) -> None:
+        """Remove cells from CCC.
 
         Parameters
         ----------
@@ -509,7 +851,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        Combinatorial Complex : NestedCombinatorialComplex
+        CombinatorialComplex : Combinatorial Complex
         """
         super().remove_cells(cell_set)
 
@@ -524,7 +866,412 @@ class CombinatorialComplex(ColoredHyperGraph):
         -------
         CombinatorialComplex
         """
-        CC = CombinatorialComplex(name=self.name, graph_based=self.graph_based)
+        CCC = CombinatorialComplex(name=self.name, graph_based=self.graph_based)
         for cell in self.cells:
-            CC.add_cell(cell, self.cells.get_rank(cell))
-        return CC
+            CCC.add_cell(cell, self.cells.get_rank(cell))
+        return CCC
+
+    def is_connected(self, s: int = 1, cells: bool = False):
+        """Determine if combintorial complex is :term:`s-connected <s-connected, s-node-connected>`.
+
+        Parameters
+        ----------
+        s : int, list, default=1
+            Minimum number of edges shared by neighbors with node.
+
+        cells: bool, default=False
+            If True, will determine if s-cell-connected.
+            For s=1 s-cell-connected is the same as s-connected.
+
+        Returns
+        -------
+        is_connected : bool
+
+        Notes
+        -----
+        A CCC is s node connected if for any two nodes v0,vn
+        there exists a sequence of nodes v0,v1,v2,...,v(n-1),vn
+        such that every consecutive pair of nodes v(i),v(i+1)
+        share at least s cell.
+
+        Examples
+        --------
+        >>> CCC = CombinatorialComplex(cells=E)
+        >>> CCC.is_connected()
+        """
+        B = self.incidence_matrix(rank=0, to_rank=None, incidence_type="up")
+        if cells:
+            A = incidence_to_adjacency(B, s=s)
+        else:
+            A = incidence_to_adjacency(B.transpose(), s=s)
+        G = nx.from_scipy_sparse_matrix(A)
+        return nx.is_connected(G)
+
+    def singletons(self):
+        """Return a list of singleton cell.
+
+        A singleton cell is a cell of
+        size 1 with a node of degree 1.
+
+        Returns
+        -------
+        list
+            A list of cells uids.
+        """
+        for cell in self.cells:
+            zero_elements = self.cells[cell].skeleton(0)
+            if len(zero_elements) == 1:
+                for n in zero_elements:
+                    if self.degree(n) == 1:
+                        yield cell
+
+    def remove_singletons(self, name: Optional[str] = None):
+        """Construct new CCC with singleton cells removed.
+
+        Parameters
+        ----------
+        name: str, optional
+
+        Returns
+        -------
+        new CombinatorialComplex
+        """
+        cells = [cell for cell in self.cells if cell not in self.singletons()]
+        return self.restrict_to_cells(cells)
+
+    def s_connected_components(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = False
+    ):
+        """Return a generator for s-cell-connected components.
+
+        or the :term:`s-node-connected components <s-connected component, s-node-connected component>`.
+
+        Parameters
+        ----------
+        s : int, list, default=1
+            Minimum number of edges shared by neighbors with node.
+        cells : bool, default=True
+            If True will return cell components, if False will return node components
+        return_singletons : bool, default=False
+
+        Notes
+        -----
+        If cells=True, this method returns the s-cell-connected components as
+        lists of lists of cell uids.
+        An s-cell-component has the property that for any two cells e1 and e2
+        there is a sequence of cells starting with e1 and ending with e2
+        such that pairwise adjacent cells in the sequence intersect in at least
+        s nodes. If s=1 these are the path components of the CCC.
+
+        If cells=False this method returns s-node-connected components.
+        A list of sets of uids of the nodes which are s-walk connected.
+        Two nodes v1 and v2 are s-walk-connected if there is a
+        sequence of nodes starting with v1 and ending with v2 such that pairwise
+        adjacent nodes in the sequence share s cells. If s=1 these are the
+        path components of the combinatorial complex .
+
+        Yields
+        ------
+        s_connected_components : iterator
+            Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
+            components of CCC.
+        """
+        if cells:
+            A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+            G = nx.from_scipy_sparse_matrix(A)
+
+            for c in nx.connected_components(G):
+                if not return_singletons and len(c) == 1:
+                    continue
+                yield {coldict[n] for n in c}
+        else:
+            A, rowdict = self.node_adjacency_matrix(s=s, index=True)
+            G = nx.from_scipy_sparse_matrix(A)
+            for c in nx.connected_components(G):
+                if not return_singletons:
+                    if len(c) == 1:
+                        continue
+                yield {rowdict[n] for n in c}
+
+    def s_component_subgraphs(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = False
+    ):
+        """Return a generator for the induced subgraphs of s_connected components.
+
+        Removes singletons unless return_singletons is set to True.
+
+        Parameters
+        ----------
+        s : int, list, default=1
+            Minimum number of edges shared by neighbors with node.
+        cells : bool, default=False
+            Determines if cell or node components are desired. Returns
+            subgraphs equal to the CCC restricted to each set of nodes(cells) in the
+            s-connected components or s-cell-connected components
+        return_singletons : bool, optional
+
+        Yields
+        ------
+        s_component_subgraphs : iterator
+            Iterator returns subgraphs generated by the cells (or nodes) in the
+            s-cell(node) components.
+        """
+        for idx, c in enumerate(
+            self.s_components(s=s, cells=cells, return_singletons=return_singletons)
+        ):
+            if cells:
+                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
+            else:
+                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
+
+    def s_components(
+        self, s: int = 1, cells: bool = True, return_singletons: bool = True
+    ):
+        """Compute s-connected components.
+
+        Same as s_connected_components.
+
+        See Also
+        --------
+        s_connected_components
+        """
+        return self.s_connected_components(
+            s=s, cells=cells, return_singletons=return_singletons
+        )
+
+    def connected_components(self, cells: bool = False, return_singletons: bool = True):
+        """Compute s-connected components.
+
+        Same as :meth:`s_connected_components`,
+        with s=1, but nodes are returned
+        by default. Return iterator.
+
+        See Also
+        --------
+        s_connected_components
+        """
+        return self.s_connected_components(cells=cells, return_singletons=True)
+
+    def connected_component_subgraphs(self, return_singletons: bool = True):
+        """Compute s-component subgraphs with s=1.
+
+        Same as :meth:`s_component_subgraphs` with s=1.
+
+        Returns iterator.
+
+        See Also
+        --------
+        s_component_subgraphs
+        """
+        return self.s_component_subgraphs(return_singletons=return_singletons)
+
+    def components(self, cells: bool = False, return_singletons: bool = True):
+        """Compute s-connected components for s=1.
+
+        Same as :meth:`s_connected_components` with s=1.
+
+        But nodes are returned
+        by default. Return iterator.
+
+        See Also
+        --------
+        s_connected_components
+        """
+        return self.s_connected_components(s=1, cells=cells)
+
+    def component_subgraphs(self, return_singletons: bool = False):
+        """Compute s-component subgraphs wth s=1.
+
+        Same as :meth:`s_components_subgraphs` with s=1. Returns iterator.
+
+        See Also
+        --------
+        s_component_subgraphs
+        """
+        return self.s_component_subgraphs(return_singletons=return_singletons)
+
+    def node_diameters(self, s: int = 1):
+        """Return node diameters of the connected components.
+
+        Parameters
+        ----------
+        s : int, list, default=1
+            Minimum number of edges shared by neighbors with node.
+
+        Returns
+        -------
+        list of the diameters of the s-components and
+        list of the s-component nodes
+        """
+        A, coldict = self.node_adjacency_matrix(s=s, index=True)
+        G = nx.from_scipy_sparse_matrix(A)
+        diams = []
+        comps = []
+        for c in nx.connected_components(G):
+            diamc = nx.diameter(G.subgraph(c))
+            temp = set()
+            for e in c:
+                temp.add(coldict[e])
+            comps.append(temp)
+            diams.append(diamc)
+        loc = np.argmax(diams)
+        return diams[loc], diams, comps
+
+    def cell_diameters(self, s: int = 1):
+        """Return the cell diameters of the s_cell_connected component subgraphs.
+
+        Parameters
+        ----------
+        s : int, list, default=1
+            Minimum number of edges shared by neighbors with node.
+
+        Returns
+        -------
+        maximum diameter : int
+        list of diameters : list
+            List of cell_diameters for s-cell component subgraphs in CCC
+        list of component : list
+            List of the cell uids in the s-cell component subgraphs.
+        """
+        A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+        G = nx.from_scipy_sparse_matrix(A)
+        diams = []
+        comps = []
+        for c in nx.connected_components(G):
+            diamc = nx.diameter(G.subgraph(c))
+            temp = {coldict[e] for e in c}
+            comps.append(temp)
+            diams.append(diamc)
+        loc = np.argmax(diams)
+        return diams[loc], diams, comps
+
+    def diameter(self, s: int = 1) -> int:
+        """Return the length of the longest shortest s-walk between nodes.
+
+        Parameters
+        ----------
+        s : int, default=1
+            Minimum number of edges shared by neighbors with node.
+
+        Returns
+        -------
+        int
+
+        Raises
+        ------
+        TopoNetXError
+            If CCC is not s-cell-connected
+
+        Notes
+        -----
+        Two nodes are s-adjacent if they share s cells.
+        Two nodes v_start and v_end are s-walk connected if there is a sequence of
+        nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
+        are s-adjacent. If the graph is not connected, an error will be raised.
+        """
+        A = self.node_adjacency_matrix(s=s)
+        G = nx.from_scipy_sparse_matrix(A)
+        if nx.is_connected(G):
+            return nx.diameter(G)
+        else:
+            raise TopoNetXError(f"{self.__shortstr__} is not s-connected. s={s}")
+
+    def cell_diameter(self, s: int = 1) -> int:
+        """Return length of the longest shortest s-walk between cells.
+
+        Parameters
+        ----------
+        s : int, default=1
+            Minimum number of edges shared by neighbors with node.
+
+        Return
+        ------
+        int
+
+        Raises
+        ------
+        TopoNetXError
+            If combinatorial complex is not s-cell-connected
+
+        Notes
+        -----
+        Two cells are s-adjacent if they share s nodes.
+        Two nodes e_start and e_end are s-walk connected if there is a sequence of
+        cells e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
+        are s-adjacent. If the graph is not connected, an error will be raised.
+        """
+        A = self.cell_adjacency_matrix(s=s)
+        G = nx.from_scipy_sparse_matrix(A)
+        if nx.is_connected(G):
+            return nx.diameter(G)
+        else:
+            raise TopoNetXError(f"CCC is not s-connected. s={s}")
+
+    def distance(self, source, target, s: int = 1) -> int:
+        """Return shortest s-walk distance between two nodes.
+
+        Parameters
+        ----------
+        source : node.uid or node
+            a node in the CCC
+        target : node.uid or node
+            a node in the CCC
+        s : int
+            the number of cells
+
+        Returns
+        -------
+        int
+
+        See Also
+        --------
+        cell_distance
+
+        Notes
+        -----
+        The s-distance is the shortest s-walk length between the nodes.
+        An s-walk between nodes is a sequence of nodes that pairwise share
+        at least s cells. The length of the shortest s-walk is 1 less than
+        the number of nodes in the path sequence.
+
+        Uses the networkx shortest_path_length method on the graph
+        generated by the s-adjacency matrix.
+
+        """
+        raise NotImplementedError()
+
+    def cell_distance(self, source, target, s: int = 1):
+        """Return the shortest s-walk distance between two cells.
+
+        Parameters
+        ----------
+        source : cell.uid or cell
+            an cell in the combinatorial complex
+        target : cell.uid or cell
+            an cell in the combinatorial complex
+        s : int, default=1
+            the number of intersections between pairwise consecutive cells
+
+        Returns
+        -------
+        int
+            The shortest s-walk cell distance between `source` and `target`.
+            A shortest s-walk is computed as a sequence of cells,
+            the s-walk distance is the number of cells in the sequence
+            minus 1. If no such path exists returns np.inf.
+
+        See Also
+        --------
+        distance
+
+        Notes
+        -----
+        The s-distance is the shortest s-walk length between the cells.
+        An s-walk between cells is a sequence of cells such that consecutive pairwise
+        cells intersect in at least s nodes. The length of the shortest s-walk is 1 less than
+        the number of cells in the path sequence.
+
+        Uses the networkx shortest_path_length method on the graph
+        generated by the s-cell_adjacency matrix.
+        """
+        raise NotImplementedError()
