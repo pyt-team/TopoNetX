@@ -182,7 +182,7 @@ class ColoredHyperGraph(Complex):
 
     def __str__(self) -> str:
         """Return detailed string representation."""
-        return f"Colored Hypergraph with {len(self.nodes)} nodes and hyperedges with colors {self.ranks} and sizes {self.shape} "
+        return f"Colored Hypergraph with {len(self.nodes)} nodes and hyperedges with colors {self.ranks[1:]} and sizes {self.shape[1:]} "
 
     def __repr__(self) -> str:
         """Return string representation."""
@@ -302,43 +302,62 @@ class ColoredHyperGraph(Complex):
         """
         return len(self.nodes)
 
-    def degree(self, node, rank: int = 1) -> int:
-        """Compute the number of cells of certain rank that contain node.
+    def degree(self, node, rank: int = 1, s: int = 0) -> int:
+        """Compute the number of cells of certain rank (or all ranks) that contain node.
 
         Parameters
         ----------
         node : hashable
             Identifier for the node.
         rank : int, optional
+               The rank at which the degree of the node is computed.
+               When None, degree of the input node is computed with respect to cells of all ranks.
+        s : int, optional
             Smallest size of cell to consider in degree
+
 
         Returns
         -------
         int
-            Number of cells of certain rank that contain node.
+            Number of cells of certain rank (or all ranks) that contain node.
         """
         if node not in self.nodes:
             raise KeyError(f"Node {node} not in {self.__shortstr__}.")
         if isinstance(rank, int):
             if rank >= 0:
-                return sum(
-                    [
-                        1 if node in x else 0
-                        for x in self._complex_set.hyperedge_dict[rank].keys()
-                    ]
-                )
+                if rank in self._complex_set.hyperedge_dict.keys():
+                    return sum(
+                        [
+                            len(self._complex_set.hyperedge_dict[rank][x])
+                            if node in x
+                            else 0
+                            for x in self._complex_set.hyperedge_dict[rank].keys()
+                            if len(x) >= s
+                        ]
+                    )
+                else:
+                    raise TopoNetXError(
+                        f"There are no cells in the colored hypergraph with rank {rank}"
+                    )
+
             else:
                 raise TopoNetXError("Rank must be positive")
         elif rank is None:
             rank_list = self._complex_set.hyperedge_dict.keys()
             value = 0
             for rank in rank_list:
-                value += sum(
-                    [
-                        1 if node in x else 0
-                        for x in self._complex_set.hyperedge_dict[rank].keys()
-                    ]
-                )
+                if rank == 0:
+                    continue
+                else:
+                    value += sum(
+                        [
+                            len(self._complex_set.hyperedge_dict[rank][x])
+                            if node in x
+                            else 0
+                            for x in self._complex_set.hyperedge_dict[rank].keys()
+                            if len(x) >= s
+                        ]
+                    )
             return value
 
     def _remove_node(self, node) -> None:
@@ -778,7 +797,7 @@ class ColoredHyperGraph(Complex):
         """
         if ranks is None:
             for cell in cells:
-                if not isinstance(cell, HyperEdge):
+                if isinstance(cell, HyperEdge):
                     self.add_cell(cell, cell.rank)
                 else:
                     self.add_cell(cell, rank=None)
@@ -1189,10 +1208,10 @@ class ColoredHyperGraph(Complex):
         """
         singletons = []
         for cell in self.cells:
-            zero_elements = self.cells[cell].skeleton(0)
+            zero_elements = cell[0]
             if len(zero_elements) == 1:
                 for n in zero_elements:
-                    if self.degree(n) == 1:
+                    if self.degree(n, None) == 1:
                         singletons.append(cell)
         return singletons
 

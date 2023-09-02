@@ -77,7 +77,7 @@ class TestCombinatorialComplex:
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
         assert (
             str(CHG)
-            == f"Colored Hypergraph with {len(CHG.nodes)} nodes and hyperedges with colors {CHG.ranks} and sizes {CHG.shape} "
+            == f"Colored Hypergraph with {len(CHG.nodes)} nodes and hyperedges with colors {CHG.ranks[1:]} and sizes {CHG.shape[1:]} "
         )
 
     def test_chg_repr(self):

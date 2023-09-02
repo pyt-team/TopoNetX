@@ -325,7 +325,7 @@ class TestCombinatorialComplex:
             node = 7
             assert CCC.degree(node, 2)
         assert str(exp.value) == f"'Node 7 not in {CCC.__shortstr__}.'"
-        assert CCC.degree(1, rank=None) == 5
+        assert CCC.degree(1, rank=None) == 4
 
     def test_size(self):
         """Test for the size function."""

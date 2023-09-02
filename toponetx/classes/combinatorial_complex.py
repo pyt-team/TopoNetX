@@ -157,6 +157,15 @@ class CombinatorialComplex(ColoredHyperGraph):
         else:
             raise KeyError(f"input {cell} is not in the complex")
 
+    def __contains__(self, item) -> bool:
+        """Return true/false indicating if item is in self.nodes.
+
+        Parameters
+        ----------
+        item : hashable or HyperEdge
+        """
+        return item in self.nodes
+
     @property
     def __shortstr__(self) -> str:
         """Return the short string generic representation."""
@@ -215,6 +224,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         return super().number_of_cells(cell_set)
 
+    @property
     def shape(self):
         """Return shape.
 
@@ -225,7 +235,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         -------
         tuple of ints
         """
-        return super().shape()
+        return self._complex_set.shape
 
     def order(self):
         """Compute the number of nodes in the CCC.
@@ -915,15 +925,29 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        list
+        singles : list
             A list of cells uids.
+
+        Example
+        -------
+        >>> CCC = CombinatorialComplex()
+        >>> CCC.add_cell([1, 2], rank=1)
+        >>> CCC.add_cell([3, 4], rank=1)
+        >>> CCC.add_cell([9],rank=9)
+        >>> CCC.singletons()
+
         """
-        for cell in self.cells:
-            zero_elements = self.cells[cell].skeleton(0)
-            if len(zero_elements) == 1:
-                for n in zero_elements:
-                    if self.degree(n) == 1:
-                        yield cell
+        singletons = []
+        for k, cells in self.cells.hyperedge_dict.items():
+            if k == 0:
+                continue
+            else:
+                for cell in cells:
+                    if len(cell) == 1:
+                        for n in cell:
+                            if self.degree(n, None) == 1:
+                                singletons.append(cell)
+        return singletons
 
     def remove_singletons(self, name: Optional[str] = None):
         """Construct new CCC with singleton cells removed.
