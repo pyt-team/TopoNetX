@@ -302,7 +302,7 @@ class ColoredHyperGraph(Complex):
         """
         return len(self.nodes)
 
-    def degree(self, node, rank: int = 1, s=0) -> int:
+    def degree(self, node, rank: int = 1, s: int = 0) -> int:
         """Compute the number of cells of certain rank (or all ranks) that contain node.
 
         Parameters
@@ -1208,14 +1208,10 @@ class ColoredHyperGraph(Complex):
         """
         singletons = []
         for cell in self.cells:
-            if len(cell) == 2:
-                if isinstance(cell[0], Iterable) and isinstance(cell[1], Hashable):
-                    zero_elements = cell[0]
-                else:
-                    zero_elements = cell
+            zero_elements = cell[0]
             if len(zero_elements) == 1:
                 for n in zero_elements:
-                    if self.degree(n) == 1:
+                    if self.degree(n, None) == 1:
                         singletons.append(cell)
         return singletons
 
