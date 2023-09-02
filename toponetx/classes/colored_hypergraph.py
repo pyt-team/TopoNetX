@@ -1208,7 +1208,11 @@ class ColoredHyperGraph(Complex):
         """
         singletons = []
         for cell in self.cells:
-            zero_elements = self.cells[cell].skeleton(0)
+            if len(cell) == 2:
+                if isinstance(cell[0], Iterable) and isinstance(cell[1], Hashable):
+                    zero_elements = cell[0]
+                else:
+                    zero_elements = cell
             if len(zero_elements) == 1:
                 for n in zero_elements:
                     if self.degree(n) == 1:
