@@ -224,6 +224,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         return super().number_of_cells(cell_set)
 
+    @property
     def shape(self):
         """Return shape.
 
@@ -234,7 +235,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         -------
         tuple of ints
         """
-        return super().shape()
+        return self._complex_set.shape
 
     def order(self):
         """Compute the number of nodes in the CCC.

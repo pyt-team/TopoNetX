@@ -182,7 +182,7 @@ class ColoredHyperGraph(Complex):
 
     def __str__(self) -> str:
         """Return detailed string representation."""
-        return f"Colored Hypergraph with {len(self.nodes)} nodes and hyperedges with colors {self.ranks} and sizes {self.shape} "
+        return f"Colored Hypergraph with {len(self.nodes)} nodes and hyperedges with colors {self.ranks[1:]} and sizes {self.shape[1:]} "
 
     def __repr__(self) -> str:
         """Return string representation."""
