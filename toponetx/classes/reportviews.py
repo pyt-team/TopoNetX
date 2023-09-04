@@ -519,19 +519,34 @@ class HyperEdgeView:
         elif level == "upper" or level == "up":
             elements = []
             for rank_i in self.allranks:
-                if rank_i >= rank:
+                if rank_i > rank:
                     elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
 
         elif level == "lower" or level == "down":
             elements = []
             for rank_i in self.allranks:
+                if rank_i < rank:
+                    elements = elements + list(self.hyperedge_dict[rank_i].keys())
+            return sorted(elements)
+
+        elif level == "uppereq" or level == "upeq":
+            elements = []
+            for rank_i in self.allranks:
+                if rank_i >= rank:
+                    elements = elements + list(self.hyperedge_dict[rank_i].keys())
+            return sorted(elements)
+
+        elif level == "lowereq" or level == "downeq":
+            elements = []
+            for rank_i in self.allranks:
                 if rank_i <= rank:
                     elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
+
         else:
             raise TopoNetXError(
-                "level must be None, equal, 'upper', 'lower', 'up', or 'down' "
+                "level must be None, equal, 'uppereq', 'lowereq', 'upeq', 'downeq', 'uppereq', 'lower', 'up', or 'down'  "
             )
 
     def get_rank(self, e):

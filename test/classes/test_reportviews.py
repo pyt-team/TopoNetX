@@ -320,7 +320,7 @@ class TestReportViews_HyperEdgeView:
 
         assert hev.skeleton(rank=3) == []
 
-        assert hev.skeleton(rank=0, level="upper") == [
+        assert hev.skeleton(rank=0, level="uppereq") == [
             frozenset({1}),
             frozenset({2}),
             frozenset({3}),
@@ -328,11 +328,11 @@ class TestReportViews_HyperEdgeView:
             frozenset({1, 2, 3, 4}),
         ]
 
-        assert hev.skeleton(rank=2, level="upper") == [frozenset({1, 2, 3, 4})]
+        assert hev.skeleton(rank=2, level="uppereq") == [frozenset({1, 2, 3, 4})]
 
-        assert hev.skeleton(rank=3, level="upper") == []
+        assert hev.skeleton(rank=3, level="uppereq") == []
 
-        assert hev.skeleton(rank=0, level="up") == [
+        assert hev.skeleton(rank=0, level="upeq") == [
             frozenset({1}),
             frozenset({2}),
             frozenset({3}),
@@ -340,18 +340,18 @@ class TestReportViews_HyperEdgeView:
             frozenset({1, 2, 3, 4}),
         ]
 
-        assert hev.skeleton(rank=2, level="up") == [frozenset({1, 2, 3, 4})]
+        assert hev.skeleton(rank=2, level="upeq") == [frozenset({1, 2, 3, 4})]
 
-        assert hev.skeleton(rank=3, level="up") == []
+        assert hev.skeleton(rank=3, level="upeq") == []
 
-        assert hev.skeleton(rank=0, level="down") == [
+        assert hev.skeleton(rank=0, level="downeq") == [
             frozenset({1}),
             frozenset({2}),
             frozenset({3}),
             frozenset({4}),
         ]
 
-        assert hev.skeleton(rank=2, level="down") == [
+        assert hev.skeleton(rank=2, level="downeq") == [
             frozenset({1}),
             frozenset({2}),
             frozenset({3}),
@@ -359,14 +359,14 @@ class TestReportViews_HyperEdgeView:
             frozenset({1, 2, 3, 4}),
         ]
 
-        assert hev.skeleton(rank=0, level="lower") == [
+        assert hev.skeleton(rank=0, level="lowereq") == [
             frozenset({1}),
             frozenset({2}),
             frozenset({3}),
             frozenset({4}),
         ]
 
-        assert hev.skeleton(rank=2, level="lower") == [
+        assert hev.skeleton(rank=2, level="lowereq") == [
             frozenset({1}),
             frozenset({2}),
             frozenset({3}),
@@ -379,7 +379,7 @@ class TestReportViews_HyperEdgeView:
 
         assert (
             str(exp_exception.value)
-            == "level must be None, equal, 'upper', 'lower', 'up', or 'down' "
+            == "level must be None, equal, 'uppereq', 'lowereq', 'upeq', 'downeq', 'uppereq', 'lower', 'up', or 'down'  "
         )
 
     def test_hyper_edge_view_get_rank(self):

@@ -6,7 +6,7 @@ from typing import Literal, Optional
 import networkx as nx
 import numpy as np
 from networkx import Graph
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_array, csr_matrix, diags
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
@@ -409,7 +409,6 @@ class ColoredHyperGraph(Complex):
             else:
                 raise TypeError("node {node} must be a HyperEdge or a hashable object")
         self._remove_node_helper(copy_set)
-        return self
 
     def _remove_node_helper(self, node) -> None:
         """Remove node from cells. Assumes node is present in the CHG."""
@@ -1016,14 +1015,14 @@ class ColoredHyperGraph(Complex):
         >>> CHG.adjacency_matrix(0, 1)
         """
         if index:
-            B, row, col = self.incidence_matrix(
+            row, col, B = self.incidence_matrix(
                 rank, via_rank, sparse=True, index=index
             )
         else:
             B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
         A = incidence_to_adjacency(B.T, s=s)
         if index:
-            return A, row
+            return row, A
         return A
 
     def cell_adjacency_matrix(self, index: bool = False, s: int = 1):
@@ -1076,15 +1075,86 @@ class ColoredHyperGraph(Complex):
             coadjacency_matrix : scipy.sparse.csr.csr_matrix
         """
         if index:
-            B, row, col = self.incidence_matrix(
+            row, col, B = self.incidence_matrix(
                 via_rank, rank, sparse=True, index=index
             )
         else:
             B = self.incidence_matrix(via_rank, rank, sparse=True, index=index)
         A = incidence_to_adjacency(B)
         if index:
-            return A, col
+            return col, A
         return A
+
+    def degree_matrix(self, rank: int, index: bool = False):
+        """Degree of each node in CHG.
+
+        Parameters
+        ----------
+        rank : the rank (color) in the CHG to which the laplacian matrix is computed
+        index: bool, default: False
+
+        Returns
+        -------
+        if index is True:
+            return rowdict, degree matrix
+        else:
+            return degree matrix
+        """
+        if rank < 1:
+            raise ValueError(
+                "rank for the degree matrix must be larger or equal to 1, got {rank}"
+            )
+
+        rowdict, _, M = self.incidence_matrix(0, rank, index=True)
+        if M.shape == (0, 0):
+            D = np.zeros(self.num_nodes)
+        else:
+            D = np.ravel(np.sum(M, axis=1))
+
+        return (rowdict, D) if index else D
+
+    def laplacian_matrix(self, rank, sparse=False, index=False):
+        """Laplacian matrix, see [1].
+
+        Parameters
+        ----------
+        rank : the rank (color) in the CHG to which the laplacian matrix is computed
+        sparse: bool, default: False
+            Specifies whether the output matrix is a scipy sparse matrix or a numpy matrix.
+        index: bool, default: False
+
+        Returns
+        -------
+        L_d : numpy array
+            Array of dim (N, N), where N is number of nodes in the CHG
+        if index is True:
+            return rowdict
+
+
+        References
+        ----------
+        .. [1] Lucas, M., Cencetti, G., & Battiston, F. (2020).
+            Multiorder Laplacian for synchronization in higher-order networks.
+            Physical Review Research, 2(3), 033410.
+        """
+        if rank < 1:
+            raise ValueError(
+                "rank for the laplacian matrix must be larger or equal to 1, got {rank}"
+            )
+
+        row_dict, A = self.adjacency_matrix(0, rank, index=True)
+
+        if A.shape == (0, 0):
+            L = csr_array((0, 0)) if sparse else np.empty((0, 0))
+            return ({}, L) if index else L
+
+        if sparse:
+            K = csr_array(diags(self.degree_matrix(rank)))
+        else:
+            K = np.diag(self.degree_matrix(rank))
+        L = K - A
+
+        return (row_dict, L) if index else L
 
     @classmethod
     def from_trimesh(cls, mesh) -> "ColoredHyperGraph":
