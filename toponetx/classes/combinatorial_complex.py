@@ -1029,7 +1029,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             components of CCC.
         """
         if cells:
-            A, coldict = self.cell_adjacency_matrix(s=s, index=True)
+            A, coldict = self.cell_to_all_node_coadjacency_matrix(s=s, index=True)
             G = nx.from_scipy_sparse_matrix(A)
 
             for c in nx.connected_components(G):
@@ -1037,7 +1037,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                     continue
                 yield {coldict[n] for n in c}
         else:
-            A, rowdict = self.node_adjacency_matrix(s=s, index=True)
+            A, rowdict = self.node_to_all_cell_adjacency_matrix(s=s, index=True)
             G = nx.from_scipy_sparse_matrix(A)
             for c in nx.connected_components(G):
                 if not return_singletons:
