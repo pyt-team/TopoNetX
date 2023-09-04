@@ -1045,7 +1045,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                         continue
                 yield {rowdict[n] for n in c}
 
-    def s_component_subgraphs(
+    def s_component_subcomplexes(
         self, s: int = 1, cells: bool = True, return_singletons: bool = False
     ):
         """Return a generator for the induced subgraphs of s_connected components.
@@ -1072,9 +1072,9 @@ class CombinatorialComplex(ColoredHyperGraph):
             self.s_components(s=s, cells=cells, return_singletons=return_singletons)
         ):
             if cells:
-                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
+                yield self.restrict_to_cells(list(c), name=f"{self.name}:{idx}")
             else:
-                yield self.restrict_to_cells(c, name=f"{self.name}:{idx}")
+                yield self.restrict_to_cells(list(c), name=f"{self.name}:{idx}")
 
     def s_components(
         self, s: int = 1, cells: bool = True, return_singletons: bool = True
@@ -1102,9 +1102,9 @@ class CombinatorialComplex(ColoredHyperGraph):
         --------
         s_connected_components
         """
-        return self.s_connected_components(cells=cells, return_singletons=True)
+        return self.s_connected_components(s=1, cells=cells, return_singletons=True)
 
-    def connected_component_subgraphs(self, return_singletons: bool = True):
+    def connected_component_subcomplexes(self, return_singletons: bool = True):
         """Compute s-component subgraphs with s=1.
 
         Same as :meth:`s_component_subgraphs` with s=1.
