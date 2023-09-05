@@ -3,7 +3,7 @@
 
 import abc
 from collections.abc import Collection, Iterator
-from typing import Any
+from typing import Any, Hashable
 
 __all__ = ["Atom", "Complex"]
 
@@ -13,15 +13,20 @@ class Atom(abc.ABC):
 
     Parameters
     ----------
-    elements : Collection
+    elements : Collection[Hashable]
         The elements in the atom.
     name : str, optional
-        A name for the atom.
+        Name of the atom.
     kwargs : keyword arguments, optional
         Additional attributes to be associated with the atom.
     """
 
-    def __init__(self, elements: Collection, name: str = "", **kwargs) -> None:
+    elements: Collection[Hashable]
+    name: str
+
+    def __init__(
+        self, elements: Collection[Hashable], name: str = "", **kwargs
+    ) -> None:
         self.elements = elements
         self.name = name
 
@@ -129,7 +134,7 @@ class Complex(abc.ABC):
     Parameters
     ----------
     name : str, optional
-        Optional name for the complex.
+        Name of the complex.
     kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
@@ -150,13 +155,11 @@ class Complex(abc.ABC):
     @abc.abstractmethod
     def nodes(self):
         """Return the node container."""
-        pass
 
     @property
     @abc.abstractmethod
     def dim(self) -> int:
         """Return dimension of the complex."""
-        pass
 
     @property
     @abc.abstractmethod
@@ -168,17 +171,14 @@ class Complex(abc.ABC):
         tuple of ints
             The number of elements for each rank. If the complex is empty, an empty tuple is returned.
         """
-        pass
 
     @abc.abstractmethod
     def skeleton(self, rank: int):
         """Return dimension of the complex."""
-        pass
 
     @abc.abstractmethod
     def __str__(self) -> str:
         """Print basic string representation."""
-        pass
 
     @abc.abstractmethod
     def __repr__(self) -> str:
@@ -191,12 +191,10 @@ class Complex(abc.ABC):
         -------
         str
         """
-        pass
 
     @abc.abstractmethod
     def __len__(self) -> int:
         """Return number of nodes."""
-        pass
 
     @abc.abstractmethod
     def clone(self) -> "Complex":
@@ -205,17 +203,14 @@ class Complex(abc.ABC):
     @abc.abstractmethod
     def __iter__(self) -> Iterator:
         """Return an iterator over the nodes."""
-        pass
 
     @abc.abstractmethod
     def __contains__(self, item: Any) -> bool:
         """Check whether the complex contains an item."""
-        pass
 
     @abc.abstractmethod
     def __getitem__(self, key):
         """Get item."""
-        pass
 
     @abc.abstractmethod
     def remove_nodes(self, node_set) -> None:
@@ -223,24 +218,19 @@ class Complex(abc.ABC):
 
         Any elements that become invalid due to the removal of nodes are also removed.
         """
-        pass
 
     @abc.abstractmethod
     def add_node(self, node) -> None:
         """Add node to the complex."""
-        pass
 
     @abc.abstractmethod
     def incidence_matrix(self):
         """Return incidence matrix of the complex."""
-        pass
 
     @abc.abstractmethod
     def adjacency_matrix(self):
         """Return adjacency matrix of the complex."""
-        pass
 
     @abc.abstractmethod
     def coadjacency_matrix(self):
         """Return coadjacency matrix of the complex."""
-        pass
