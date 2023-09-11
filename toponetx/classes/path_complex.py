@@ -135,7 +135,7 @@ class PathComplex(Complex):
     @property
     def nodes(self):
         """Nodes."""
-        return NodeView(self._simplex_set.faces_dict, cell_type=Path)
+        return NodeView(self._path_set.faces_dict, cell_type=Path)
 
     @property
     def paths(self) -> PathView:
@@ -174,7 +174,7 @@ class PathComplex(Complex):
         Set of p-paths of dimension n.
         """
         if rank < len(self._path_set.faces_dict) and rank >= 0:
-            return sorted(path for path in self._simplex_set.faces_dict[rank].keys())
+            return sorted(path for path in self._path_set.faces_dict[rank].keys())
         if rank < 0:
             raise ValueError(f"input must be a postive integer, got {rank}")
         raise ValueError(f"input {rank} exceeds max dim")
@@ -220,12 +220,12 @@ class PathComplex(Complex):
                 f"input dimenion cannat be larger than the dimension of the complex, got {rank}"
             )
         if rank == 0:
-            A = sp.sparse.lil_matrix(0, len(self.nodes))
+            A = sp.sparse.lil_matrix((0, len(self.nodes)))
             if index:
                 node_index = {node: i for i, node in enumerate(sorted(self.nodes))}
-                return {}, node_index, abs(A.asformat("csr"))
+                return {}, node_index, abs(A.asformat("csc"))
             else:
-                return abs(A.asformat("csr"))
+                return abs(A.asformat("csc"))
         else:
             idx_p_minus_1, idx_p, values = [], [], []
             path_minus_1_dict = {
@@ -252,14 +252,14 @@ class PathComplex(Complex):
         if index:
             if signed:
                 return (
-                    idx_p_minus_1,
-                    idx_p,
+                    path_minus_1_dict,
+                    path_dict,
                     boundary,
                 )
             else:
                 return (
-                    idx_p_minus_1,
-                    idx_p,
+                    path_minus_1_dict,
+                    path_dict,
                     abs(boundary),
                 )
         else:
@@ -442,3 +442,19 @@ if __name__ == "__main__":
     G.add_edges_from([(0, 1), (1, 2), (2, 3), (3, 1)])
     pc = PathComplex(G)
     print(pc._path_set.faces_dict)
+
+    row0, col0, B0 = pc.incidence_matrix(0, index=True)
+    print(row0, col0)
+    print(B0.todense())
+
+    row1, col1, B1 = pc.incidence_matrix(1, index=True)
+    print(row1, col1)
+    print(B1.todense())
+
+    row2, col2, B2 = pc.incidence_matrix(2, index=True, signed=False)
+    print(row2, col2)
+    print(B2.todense())
+
+    row3, col3, B3 = pc.incidence_matrix(3, index=True)
+    print(row3, col3)
+    print(B3.todense())
