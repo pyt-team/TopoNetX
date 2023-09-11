@@ -76,6 +76,7 @@ class PathComplex(Complex):
         **attr,
     ) -> None:
         """TODO: docstring."""
+        new_paths = set()
         if isinstance(path, int) or isinstance(path, str):
             path = [
                 path,
@@ -97,14 +98,14 @@ class PathComplex(Complex):
                     )
             else:
                 path_ = path.elements
-            self._update_faces_dict_length(
+            new_path = self._update_faces_dict_length(
                 path_
             )  # add dict corresponding to the path dimension
 
             if (
-                self._path_set.max_dim < len(path) - 1
+                self._path_set.max_dim < len(path_) - 1
             ):  # update max dimension for PathView()
-                self._path_set.max_dim = len(path) - 1
+                self._path_set.max_dim = len(path_) - 1
 
             if (
                 path_ in self._path_set.faces_dict[len(path_) - 1]
@@ -114,10 +115,18 @@ class PathComplex(Complex):
                 return
 
             # update sub-sequence of the path to _path_set.faces_dict if not available
-            for length in range(len(path), 0, -1):
-                for i in range(0, len(path) - length + 1):
-                    sub_path = tuple(path[i : i + length])
-                    self._update_faces_dict_entry(sub_path)
+            for length in range(len(path_), 0, -1):
+                for i in range(0, len(path_) - length + 1):
+                    sub_path = path_[i : i + length]
+                    if not self.reserve_sequence_order and sub_path[0] > sub_path[-1]:
+                        sub_path = sub_path[::-1]
+                    sub_path = tuple(sub_path)
+                    new_path = self._update_faces_dict_entry(sub_path)
+                    if new_path is not None:
+                        new_paths.add(new_path)
+            # update allowed paths
+            if len(new_paths) > 0:
+                self.allowed_paths.update(new_paths)
 
             if isinstance(path, Path):  # update attrbiutes for PathView()
                 self._path_set.faces_dict[len(path_) - 1][path_] = path._properties
@@ -349,6 +358,7 @@ class PathComplex(Complex):
 
     def _remove_path(self, path: Tuple) -> None:
         del self._path_set.faces_dict[len(path) - 1][path]
+        self.allowed_paths.remove(path)
         if (
             len(self._path_set.faces_dict[len(path) - 1]) == 0
             and self._path_set.max_dim == len(path) - 1
@@ -361,10 +371,13 @@ class PathComplex(Complex):
             for _ in range(diff):
                 self._path_set.faces_dict.append(dict())
 
-    def _update_faces_dict_entry(self, path) -> None:
+    def _update_faces_dict_entry(self, path):
         dim = len(path) - 1
         if path not in self._path_set.faces_dict[dim]:  # Not in faces_dict
             self._path_set.faces_dict[dim][path] = dict()
+            return path
+        else:
+            return None
 
     def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self._path_set.
@@ -457,7 +470,41 @@ if __name__ == "__main__":
     print(row1, col1)
     print(B1.todense())
 
-    row2, col2, B2 = pc.incidence_matrix(2, index=True, signed=False)
+    row2, col2, B2 = pc.incidence_matrix(2, index=True)
+    print(row2, col2)
+    print(B2.todense())
+
+    row3, col3, B3 = pc.incidence_matrix(3, index=True)
+    print(row3, col3)
+    print(B3.todense())
+
+    pc.add_paths_from([(0, 2), (0, 4, 5), (6, 7)])
+    print(pc._path_set.faces_dict)
+    print("AAAAA")
+    row2, col2, B2 = pc.incidence_matrix(2, index=True)
+    print(row2, col2)
+    print(B2.todense())
+
+    row3, col3, B3 = pc.incidence_matrix(3, index=True)
+    print(row3, col3)
+    print(B3.todense())
+
+    print("+++++++++++++")
+    print("Shape", pc.shape)
+    print("Dim", pc.dim)
+    print("Nodes", pc.nodes)
+    print("Skeleton(0)", pc.skeleton(0))
+    print("Skeleton(1)", pc.skeleton(1))
+    print("Skeleton(2)", pc.skeleton(2))
+    print("Skeleton(3)", pc.skeleton(3))
+    print("Paths", pc.paths)
+    print("Number of paths", len(pc))
+    print("test 0,1,2 in pc", (0, 1, 2) in pc)
+    print("+++++++++++++")
+    path = Path([0, 5, 4])
+    pc.add_path(path)
+    print("AAAAA")
+    row2, col2, B2 = pc.incidence_matrix(2, index=True)
     print(row2, col2)
     print(B2.todense())
 
