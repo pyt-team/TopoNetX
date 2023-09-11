@@ -236,7 +236,13 @@ class PathComplex(Complex):
             }  # path2idx dict
             for path, idx_path in path_dict.items():
                 for i, _ in enumerate(path):
-                    boundary_path = tuple(path[0:i] + path[(i + 1) :])
+                    boundary_path = path[0:i] + path[(i + 1) :]
+                    if (
+                        not self.reserve_sequence_order
+                        and boundary_path[0] > boundary_path[-1]
+                    ):
+                        boundary_path = boundary_path[::-1]
+                    boundary_path = tuple(boundary_path)
                     if boundary_path in self.allowed_paths:
                         idx_p_minus_1.append(path_minus_1_dict[boundary_path])
                         idx_p.append(idx_path)
