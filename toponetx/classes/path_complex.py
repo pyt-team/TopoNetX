@@ -52,7 +52,7 @@ class PathComplex(Complex):
                 self.add_path((u, v), data)
 
             self.add_paths_from(
-                allowed_paths, update_features=False
+                self.allowed_paths, update_features=False
             )  # we don't want to erase the features of 0-paths and 1-paths. Assume  higher dimensional paths have no features.
 
         # elif isinstance(paths, Iterable[Union[List, Tuple]]):
@@ -76,7 +76,7 @@ class PathComplex(Complex):
         **attr,
     ) -> None:
         """TODO: docstring."""
-        if isinstance(path, Hashable):
+        if isinstance(path, int) or isinstance(path, str):
             path = [
                 path,
             ]
@@ -87,11 +87,13 @@ class PathComplex(Complex):
                     raise ValueError("A p-path cannot contain duplicate nodes.")
                 if (
                     len(path_) > 1
-                    and path_[0] > path_[1]
+                    and path_[0] > path_[-1]
                     and not self.reserve_sequence_order
                 ):
                     raise ValueError(
-                        "A p-path must have the first index, got {}".format(path)
+                        "A p-path must have the first index smaller than the last index, got {}".format(
+                            path
+                        )
                     )
             else:
                 path_ = path.elements
@@ -410,19 +412,27 @@ class PathComplex(Complex):
         all_edges_list = list(tuple(edge) for edge in graph.edges)
         allowed_paths.extend(all_nodes_list)
         allowed_paths.extend(all_edges_list)
-        for i in range(len(graph.nodes)):
-            for j in range(i + 1, len(graph.nodes)):
+
+        node_ls = list(graph.nodes)
+        for src_idx in range(len(node_ls)):
+            for tgt_idx in range(src_idx + 1, len(node_ls)):
                 all_simple_paths = list(
                     nx.all_simple_paths(
-                        graph, graph.nodes[i], graph.nodes[j], cutoff=max_rank
+                        graph,
+                        source=node_ls[src_idx],
+                        target=node_ls[tgt_idx],
+                        cutoff=max_rank,
                     )
                 )
-                if not reserve_sequence_order:
-                    all_simple_paths = [
-                        path[::-1] if path[0] > path[-1] else path
-                        for path in all_simple_paths
-                    ]
-                allowed_paths.append(tuple(all_simple_paths))
+
+                for i in range(len(all_simple_paths)):
+                    path = all_simple_paths[i]
+                    if not reserve_sequence_order:
+                        all_simple_paths[i] = path[::-1] if path[0] > path[-1] else path
+                    all_simple_paths[i] = tuple(all_simple_paths[i])
+
+                if len(all_simple_paths) > 0:
+                    allowed_paths.extend(all_simple_paths)
         return set(allowed_paths)
 
 
