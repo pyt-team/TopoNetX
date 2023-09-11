@@ -66,7 +66,8 @@ class PathComplex(Complex):
         self, paths: Set[Union[List, Tuple, "Path"]], update_features: bool = False
     ) -> None:
         """TODO: docstring."""
-        for p in paths:
+        paths_clone = paths.copy()
+        for p in paths_clone:
             self.add_path(p, update_features=update_features)
 
     def add_path(
@@ -459,7 +460,7 @@ if __name__ == "__main__":
     G = nx.Graph()
     G.add_nodes_from([0, 1, 2, 3])
     G.add_edges_from([(0, 1), (1, 2), (2, 3), (3, 1)])
-    pc = PathComplex(G)
+    pc = PathComplex(G, reserve_sequence_order=True)
     print(pc._path_set.faces_dict)
 
     row0, col0, B0 = pc.incidence_matrix(0, index=True)
@@ -478,7 +479,7 @@ if __name__ == "__main__":
     print(row3, col3)
     print(B3.todense())
 
-    pc.add_paths_from([(0, 2), (0, 4, 5), (6, 7)])
+    pc.add_paths_from([(0, 2), (0, 4, 5), (7, 6)])
     print(pc._path_set.faces_dict)
     print("AAAAA")
     row2, col2, B2 = pc.incidence_matrix(2, index=True)
