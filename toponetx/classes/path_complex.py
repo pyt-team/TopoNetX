@@ -230,12 +230,12 @@ class PathComplex(Complex):
                 f"input dimenion cannat be larger than the dimension of the complex, got {rank}"
             )
         if rank == 0:
-            A = sp.sparse.lil_matrix((0, len(self.nodes)))
+            boundary = sp.sparse.lil_matrix((0, len(self.nodes)))
             if index:
                 node_index = {node: i for i, node in enumerate(sorted(self.nodes))}
-                return {}, node_index, abs(A.asformat("csc"))
+                return {}, node_index, abs(boundary.tocoo())
             else:
-                return abs(A.asformat("csc"))
+                return abs(boundary.tocoo())
         else:
             idx_p_minus_1, idx_p, values = [], [], []
             path_minus_1_dict = {
@@ -314,9 +314,9 @@ class PathComplex(Complex):
             L_up = abs(L_up)
 
         if index:
-            return row, L_up
+            return row, L_up.tolil()
         else:
-            return L_up
+            return L_up.tolil()
 
     def down_laplacian_matrix(
         self, rank: int, signed: bool = True, index: bool = False
@@ -512,3 +512,7 @@ if __name__ == "__main__":
     row3, col3, B3 = pc.incidence_matrix(3, index=True)
     print(row3, col3)
     print(B3.todense())
+    print("+++++++++++++")
+    print("Adjacency(0)", pc.adjacency_matrix(0))
+    print("Adjacency(1)", pc.adjacency_matrix(1))
+    print("Adjacency(2)", pc.adjacency_matrix(2))
