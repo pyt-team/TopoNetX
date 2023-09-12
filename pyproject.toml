@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools", "wheel", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -73,11 +73,6 @@ repository="https://github.com/pyt-team/TopoNetX"
 [tool.setuptools.dynamic]
 version = {attr = "toponetx.__version__"}
 
-[tool.setuptools.package-data]
-* = ["*.obj", "*.npy"]
-
-[options.package_data]
-* = *.obj, *.npy
 
 [tool.setuptools.packages.find]
 include = [
@@ -107,4 +102,4 @@ per-file-ignores = [
 [tool.coverage.report]
 exclude_lines = ["pragma: not covered", "@overload"]
 
-[tool.setuptools_scm]
+[tool.setuptools-scm]
