@@ -1,18 +1,15 @@
 """TODO: docstring."""
 from collections.abc import Hashable, Iterable, Iterator
-from itertools import chain, combinations
-from typing import Any, List, Set, Tuple, Union
-from warnings import warn
+from itertools import chain
+from typing import List, Set, Tuple, Union
 
 import networkx as nx
 import numpy as np
 import scipy as sp
-from hypernetx import Hypergraph
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.path import Path
 from toponetx.classes.reportviews import NodeView, PathView
-from toponetx.exception import TopoNetXError
 
 __all__ = ["PathComplex"]
 
