@@ -1025,7 +1025,7 @@ class ColoredHyperGraph(Complex):
             return row, A
         return A
 
-    def cell_adjacency_matrix(self, index: bool = False, s: int = 1):
+    def cell_to_all_node_adjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the cell adjacency matrix.
 
         Parameters
@@ -1040,7 +1040,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def node_adjacency_matrix(self, index: bool = False, s: int = 1):
+    def node_to_all_cell_coadjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the node adjacency matrix."""
         raise NotImplementedError()
 
@@ -1118,7 +1118,7 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        rank : the rank (color) in the CHG to which the laplacian matrix is computed
+        rank : the rank ( or color) in the complex to which the laplacian matrix is computed
         sparse: bool, default: False
             Specifies whether the output matrix is a scipy sparse matrix or a numpy matrix.
         index: bool, default: False
@@ -1235,36 +1235,6 @@ class ColoredHyperGraph(Complex):
             u, v = edge
             self.add_cell([u, v], 1, **G.get_edge_data(u, v))
 
-    def is_connected(self, s: int = 1, cells: bool = False):
-        """Determine if Colored Hypergraph is :term:`s-connected <s-connected, s-node-connected>`.
-
-        Parameters
-        ----------
-        s : int, list, optional
-            Minimum number of edges shared by neighbors with node.
-
-        cells: bool, optional
-            If True, will determine if s-cell-connected.
-            For s=1 s-cell-connected is the same as s-connected.
-
-        Returns
-        -------
-        is_connected : bool
-
-        Notes
-        -----
-        A CHG is s node connected if for any two nodes v0,vn
-        there exists a sequence of nodes v0,v1,v2,...,v(n-1),vn
-        such that every consecutive pair of nodes v(i),v(i+1)
-        share at least s cell.
-
-        Examples
-        --------
-        >>> CHG = ColoredHyperGraph(cells=E)
-        >>> CHG.is_connected()
-        """
-        raise NotImplementedError()
-
     def singletons(self):
         """Return a list of singleton cell.
 
@@ -1298,288 +1268,6 @@ class ColoredHyperGraph(Complex):
         """
         cells = [cell for cell in self.cells if cell not in self.singletons()]
         return self.restrict_to_cells(cells)
-
-    def s_connected_components(
-        self, s: int = 1, cells: bool = True, return_singletons: bool = False
-    ):
-        """Return a generator for s-cell-connected components.
-
-        or the :term:`s-node-connected components <s-connected component, s-node-connected component>`.
-
-        Parameters
-        ----------
-        s : int, list, optional
-            Minimum number of edges shared by neighbors with node.
-        cells : bool, optional
-            If True will return cell components, if False will return node components
-        return_singletons : bool, optional
-
-        Notes
-        -----
-        If cells=True, this method returns the s-cell-connected components as
-        lists of lists of cell uids.
-        An s-cell-component has the property that for any two cells e1 and e2
-        there is a sequence of cells starting with e1 and ending with e2
-        such that pairwise adjacent cells in the sequence intersect in at least
-        s nodes. If s=1 these are the path components of the CHG.
-
-        If cells=False this method returns s-node-connected components.
-        A list of sets of uids of the nodes which are s-walk connected.
-        Two nodes v1 and v2 are s-walk-connected if there is a
-        sequence of nodes starting with v1 and ending with v2 such that pairwise
-        adjacent nodes in the sequence share s cells. If s=1 these are the
-        path components of the ColoredHyperGraph .
-
-        Yields
-        ------
-        s_connected_components : iterator
-            Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
-            components of CHG.
-        """
-        raise NotImplementedError()
-
-    def s_component_subgraphs(
-        self, s: int = 1, cells: bool = True, return_singletons: bool = False
-    ):
-        """Return a generator for the induced subgraphs of s_connected components.
-
-        Removes singletons unless return_singletons is set to True.
-
-        Parameters
-        ----------
-        s : int, list, optional
-            Minimum number of edges shared by neighbors with node.
-        cells : bool, optional
-            Determines if cell or node components are desired. Returns
-            subgraphs equal to the CHG restricted to each set of nodes(cells) in the
-            s-connected components or s-cell-connected components
-        return_singletons : bool, optional
-
-        Yields
-        ------
-        s_component_subgraphs : iterator
-            Iterator returns subgraphs generated by the cells (or nodes) in the
-            s-cell(node) components.
-        """
-        raise NotImplementedError()
-
-    def s_components(
-        self, s: int = 1, cells: bool = True, return_singletons: bool = True
-    ):
-        """Compute s-connected components.
-
-        Same as s_connected_components.
-
-        See Also
-        --------
-        s_connected_components
-        """
-        raise NotImplementedError()
-
-    def connected_components(self, cells: bool = False, return_singletons: bool = True):
-        """Compute s-connected components.
-
-        Same as :meth:`s_connected_components`,
-        with s=1, but nodes are returned
-        by default. Return iterator.
-
-        See Also
-        --------
-        s_connected_components
-        """
-        raise NotImplementedError()
-
-    def connected_component_subgraphs(self, return_singletons: bool = True):
-        """Compute s-component subgraphs with s=1.
-
-        Same as :meth:`s_component_subgraphs` with s=1.
-
-        Returns iterator.
-
-        See Also
-        --------
-        s_component_subgraphs
-        """
-        raise NotImplementedError()
-
-    def components(self, cells: bool = False, return_singletons: bool = True):
-        """Compute s-connected components for s=1.
-
-        Same as :meth:`s_connected_components` with s=1.
-
-        But nodes are returned
-        by default. Return iterator.
-
-        See Also
-        --------
-        s_connected_components
-        """
-        raise NotImplementedError()
-
-    def component_subgraphs(self, return_singletons: bool = False):
-        """Compute s-component subgraphs wth s=1.
-
-        Same as :meth:`s_components_subgraphs` with s=1. Returns iterator.
-
-        See Also
-        --------
-        s_component_subgraphs
-        """
-        raise NotImplementedError()
-
-    def node_diameters(self, s: int = 1):
-        """Return node diameters of the connected components.
-
-        Parameters
-        ----------
-        s : int, list, optional
-            Minimum number of edges shared by neighbors with node.
-
-        Returns
-        -------
-        list of the diameters of the s-components and
-        list of the s-component nodes
-        """
-        raise NotImplementedError()
-
-    def cell_diameters(self, s: int = 1):
-        """Return the cell diameters of the s_cell_connected component subgraphs.
-
-        Parameters
-        ----------
-        s : int, list, optional
-            Minimum number of edges shared by neighbors with node.
-
-        Returns
-        -------
-        maximum diameter : int
-        list of diameters : list
-            List of cell_diameters for s-cell component subgraphs in CHG
-        list of component : list
-            List of the cell uids in the s-cell component subgraphs.
-        """
-        raise NotImplementedError()
-
-    def diameter(self, s: int = 1) -> int:
-        """Return the length of the longest shortest s-walk between nodes.
-
-        Parameters
-        ----------
-        s : int, default=1
-            Minimum number of edges shared by neighbors with node.
-
-        Returns
-        -------
-        int
-
-        Raises
-        ------
-        TopoNetXError
-            If CHG is not s-cell-connected
-
-        Notes
-        -----
-        Two nodes are s-adjacent if they share s cells.
-        Two nodes v_start and v_end are s-walk connected if there is a sequence of
-        nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
-        are s-adjacent. If the graph is not connected, an error will be raised.
-        """
-        raise NotImplementedError()
-
-    def cell_diameter(self, s: int = 1) -> int:
-        """Return length of the longest shortest s-walk between cells.
-
-        Parameters
-        ----------
-        s : int, default=1
-            Minimum number of edges shared by neighbors with node.
-
-        Return
-        ------
-        int
-
-        Raises
-        ------
-        TopoNetXError
-            If ColoredHyperGraph is not s-cell-connected
-
-        Notes
-        -----
-        Two cells are s-adjacent if they share s nodes.
-        Two nodes e_start and e_end are s-walk connected if there is a sequence of
-        cells e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
-        are s-adjacent. If the graph is not connected, an error will be raised.
-        """
-        raise NotImplementedError()
-
-    def distance(self, source, target, s: int = 1) -> int:
-        """Return shortest s-walk distance between two nodes.
-
-        Parameters
-        ----------
-        source : node.uid or node
-            a node in the CHG
-        target : node.uid or node
-            a node in the CHG
-        s : int
-            the number of cells
-
-        Returns
-        -------
-        int
-
-        See Also
-        --------
-        cell_distance
-
-        Notes
-        -----
-        The s-distance is the shortest s-walk length between the nodes.
-        An s-walk between nodes is a sequence of nodes that pairwise share
-        at least s cells. The length of the shortest s-walk is 1 less than
-        the number of nodes in the path sequence.
-
-        Uses the networkx shortest_path_length method on the graph
-        generated by the s-adjacency matrix.
-
-        """
-        raise NotImplementedError()
-
-    def cell_distance(self, source, target, s: int = 1):
-        """Return the shortest s-walk distance between two cells.
-
-        Parameters
-        ----------
-        source : cell.uid or cell
-            an cell in the colored hypergraph
-        target : cell.uid or cell
-            an cell in the colored hypergraph
-        s : int, default=1
-            the number of intersections between pairwise consecutive cells
-
-        Returns
-        -------
-        int
-            The shortest s-walk cell distance between `source` and `target`.
-            A shortest s-walk is computed as a sequence of cells,
-            the s-walk distance is the number of cells in the sequence
-            minus 1. If no such path exists returns np.inf.
-
-        See Also
-        --------
-        distance
-
-        Notes
-        -----
-        The s-distance is the shortest s-walk length between the cells.
-        An s-walk between cells is a sequence of cells such that consecutive pairwise
-        cells intersect in at least s nodes. The length of the shortest s-walk is 1 less than
-        the number of cells in the path sequence.
-
-        Uses the networkx shortest_path_length method on the graph
-        generated by the s-cell_adjacency matrix.
-        """
-        raise NotImplementedError()
 
     def clone(self) -> "ColoredHyperGraph":
         """Return a copy of the simplex.
