@@ -74,7 +74,10 @@ repository="https://github.com/pyt-team/TopoNetX"
 version = {attr = "toponetx.__version__"}
 
 [tool.setuptools.package-data]
-datasets = ["*.obj", "*.npy"]
+* = ["*.obj", "*.npy"]
+
+[options.package_data]
+* = *.obj, *.npy
 
 [tool.setuptools.packages.find]
 include = [
