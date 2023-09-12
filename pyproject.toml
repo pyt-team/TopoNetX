@@ -24,7 +24,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11"
 ]
 
-[tool.setuptools_scm]
 
 requires-python = ">= 3.10"
 dependencies=[
@@ -104,3 +103,5 @@ per-file-ignores = [
 
 [tool.coverage.report]
 exclude_lines = ["pragma: not covered", "@overload"]
+
+[tool.setuptools_scm]
