@@ -859,6 +859,8 @@ class PathView(SimplexView):
         if isinstance(path, Path):
             if path.elements in self.faces_dict[len(path) - 1]:
                 return self.faces_dict[len(path) - 1][path.elements]
+            else:
+                raise KeyError(f"input {path} is not in the path dictionary")
         elif isinstance(path, Iterable):
             path = tuple(path)
             if path in self.faces_dict[len(path) - 1]:
@@ -866,8 +868,10 @@ class PathView(SimplexView):
             else:
                 raise KeyError(f"input {path} is not in the path dictionary")
         elif isinstance(path, Hashable):
-            if tuple(path) in self:
-                return self.faces_dict[0][[path]]
+            if tuple([path]) in self:
+                return self.faces_dict[0][tuple([path])]
+            else:
+                raise KeyError(f"input {path} is not in the path dictionary")
 
     def __contains__(self, item) -> bool:
         """Check if a path is in the path view."""
@@ -877,7 +881,7 @@ class PathView(SimplexView):
                 return False
             return item in self.faces_dict[len(item) - 1]
         elif isinstance(item, Hashable):
-            return [item] in self.faces_dict[0]
+            return tuple([item]) in self.faces_dict[0]
         return False
 
     def __repr__(self) -> str:

@@ -46,41 +46,33 @@ class PathComplex(Complex):
 
             # get feature of nodes and edges if available
             for path, data in paths.nodes(data=True):
-                self.add_path((path,), data)
+                self.add_path(path, **data)
             for u, v, data in paths.edges(
                 data=True
             ):  # so far, path complex only supports undirected graph
                 if (str(u) > str(v)) and not reserve_sequence_order:
                     u, v = v, u
-                self.add_path((u, v), data)
+                self.add_path((u, v), **data)
 
-            self.add_paths_from(
-                self.allowed_paths, update_features=False
-            )  # we don't want to erase the features of 0-paths and 1-paths. Assume  higher dimensional paths have no features.
+            # add all simple paths
+            self.add_paths_from(self.allowed_paths)
 
         elif isinstance(paths, list) or isinstance(paths, tuple):
             if len(paths) > 0:
                 paths = [tuple(path) for path in paths]
-                self.add_paths_from(set(paths), update_features=False)
+                self.add_paths_from(set(paths))
         elif paths is not None:
             raise TypeError(
                 "Input paths must be a graph or an iterable of paths as lists or tuples."
             )
 
-    def add_paths_from(
-        self, paths: Set[Union[List, Tuple, "Path"]], update_features: bool = False
-    ) -> None:
+    def add_paths_from(self, paths: Set[Union[List, Tuple, "Path"]]) -> None:
         """TODO: docstring."""
         paths_clone = paths.copy()
         for p in paths_clone:
-            self.add_path(p, update_features=update_features)
+            self.add_path(p)
 
-    def add_path(
-        self,
-        path: Union[Hashable, List, Tuple, "Path"],
-        update_features: bool = True,
-        **attr,
-    ) -> None:
+    def add_path(self, path: Union[Hashable, List, Tuple, "Path"], **attr) -> None:
         """TODO: docstring."""
         new_paths = set()
         if isinstance(path, int) or isinstance(path, str):
@@ -116,7 +108,11 @@ class PathComplex(Complex):
             if (
                 path_ in self._path_set.faces_dict[len(path_) - 1]
             ):  # path is already in the complex, just update the properties if needed
-                if update_features:
+                if isinstance(path, Path):  # update attrbiutes for PathView()
+                    self._path_set.faces_dict[len(path_) - 1][path_].update(
+                        path._properties
+                    )
+                else:
                     self._path_set.faces_dict[len(path_) - 1][path_].update(attr)
                 return
 
@@ -137,9 +133,11 @@ class PathComplex(Complex):
                 self.allowed_paths.update(new_paths)
 
             if isinstance(path, Path):  # update attrbiutes for PathView()
-                self._path_set.faces_dict[len(path_) - 1][path_] = path._properties
+                self._path_set.faces_dict[len(path_) - 1][path_].update(
+                    path._properties
+                )
             else:
-                self._path_set.faces_dict[len(path_) - 1][path_] = attr
+                self._path_set.faces_dict[len(path_) - 1][path_].update(attr)
 
     @property
     def dim(self) -> int:
@@ -562,3 +560,26 @@ if __name__ == "__main__":
     pc = PathComplex([[0, 1, 2], [1, 2], [1, 3], [0]])
     print(pc.paths)
     print(pc.dim)
+
+    pc.add_path(4, weight=53)
+    print(pc.paths)
+    print(pc[4])
+    print(pc[1, 2])
+
+    pc.add_path(4, weight=21)
+    print(pc[4])
+
+    print(pc.remove_nodes([4]))
+    print(pc.paths)
+
+    pc.add_path([1, 2], weight=3)
+    print(pc[[1, 2]])
+
+    path = pc[[1, 2]]
+    path.update(weight=5)
+    print(pc[[1, 2]])
+
+    path = Path([1, 2], weight=6)
+    pc.add_path(path)
+    print(pc[[1, 2]])
+    print(pc.paths)
