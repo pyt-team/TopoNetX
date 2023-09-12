@@ -22,7 +22,7 @@ class PathComplex(Complex):
         paths=None,
         name: str = "",
         reserve_sequence_order: bool = False,
-        allowed_paths: List[Union[List, Tuple]] = None,
+        allowed_paths: List[Tuple] = None,
         max_rank: int = 3,
         **kwargs,
     ) -> None:
@@ -30,13 +30,19 @@ class PathComplex(Complex):
 
         self._path_set = PathView()
         self.reserve_sequence_order = reserve_sequence_order
-        self.allowed_paths = set()
+        if allowed_paths is not None:
+            self.allowed_paths = set(allowed_paths)
+        else:
+            self.allowed_paths = set()
 
         if isinstance(paths, nx.Graph):
             # compute allowed_paths in order to construct boundary incidence matrix/adj matrix.
-            self.allowed_paths = self.compute_allowed_paths(
-                paths, reserve_sequence_order=reserve_sequence_order, max_rank=max_rank
-            )
+            if self.allowed_paths is not None:
+                self.allowed_paths = self.compute_allowed_paths(
+                    paths,
+                    reserve_sequence_order=reserve_sequence_order,
+                    max_rank=max_rank,
+                )
 
             # get feature of nodes and edges if available
             for path, data in paths.nodes(data=True):
@@ -44,7 +50,7 @@ class PathComplex(Complex):
             for u, v, data in paths.edges(
                 data=True
             ):  # so far, path complex only supports undirected graph
-                if (u > v) and not reserve_sequence_order:
+                if (str(u) > str(v)) and not reserve_sequence_order:
                     u, v = v, u
                 self.add_path((u, v), data)
 
@@ -88,7 +94,7 @@ class PathComplex(Complex):
                     raise ValueError("A p-path cannot contain duplicate nodes.")
                 if (
                     len(path_) > 1
-                    and path_[0] > path_[-1]
+                    and str(path_[0]) > str(path_[-1])
                     and not self.reserve_sequence_order
                 ):
                     raise ValueError(
@@ -118,7 +124,9 @@ class PathComplex(Complex):
             for length in range(len(path_), 0, -1):
                 for i in range(0, len(path_) - length + 1):
                     sub_path = path_[i : i + length]
-                    if not self.reserve_sequence_order and sub_path[0] > sub_path[-1]:
+                    if not self.reserve_sequence_order and str(sub_path[0]) > str(
+                        sub_path[-1]
+                    ):
                         sub_path = sub_path[::-1]
                     sub_path = tuple(sub_path)
                     new_path = self._update_faces_dict_entry(sub_path)
@@ -183,7 +191,10 @@ class PathComplex(Complex):
         Set of p-paths of dimension n.
         """
         if rank < len(self._path_set.faces_dict) and rank >= 0:
-            return sorted(path for path in self._path_set.faces_dict[rank].keys())
+            tmp = (path for path in self._path_set.faces_dict[rank].keys())
+            return sorted(
+                tmp, key=lambda x: tuple(map(str, x))
+            )  # lexicographic comparison
         if rank < 0:
             raise ValueError(f"input must be a postive integer, got {rank}")
         raise ValueError(f"input {rank} exceeds max dim")
@@ -231,7 +242,10 @@ class PathComplex(Complex):
         if rank == 0:
             boundary = sp.sparse.lil_matrix((0, len(self.nodes)))
             if index:
-                node_index = {node: i for i, node in enumerate(sorted(self.nodes))}
+                node_index = {
+                    node: i
+                    for i, node in enumerate(sorted(self.nodes, key=lambda x: str(x)))
+                }
                 return {}, node_index, abs(boundary.tocoo())
             else:
                 return abs(boundary.tocoo())
@@ -246,9 +260,8 @@ class PathComplex(Complex):
             for path, idx_path in path_dict.items():
                 for i, _ in enumerate(path):
                     boundary_path = path[0:i] + path[(i + 1) :]
-                    if (
-                        not self.reserve_sequence_order
-                        and boundary_path[0] > boundary_path[-1]
+                    if not self.reserve_sequence_order and str(boundary_path[0]) > str(
+                        boundary_path[-1]
                     ):
                         boundary_path = boundary_path[::-1]
                     boundary_path = tuple(boundary_path)
@@ -427,8 +440,14 @@ class PathComplex(Complex):
     ) -> Set[Union[List, Tuple]]:
         """TODO: docstring."""
         allowed_paths = list()
-        all_nodes_list = list(tuple([node]) for node in graph.nodes)
-        all_edges_list = list(tuple(edge) for edge in graph.edges)
+        all_nodes_list = list(
+            tuple([node]) for node in sorted(graph.nodes, key=lambda x: str(x))
+        )
+        all_edges_list = list()
+        for edge in graph.edges:
+            if not reserve_sequence_order and str(edge[0]) > str(edge[1]):
+                edge = edge[::-1]
+            all_edges_list.append(edge)
         allowed_paths.extend(all_nodes_list)
         allowed_paths.extend(all_edges_list)
 
@@ -447,7 +466,9 @@ class PathComplex(Complex):
                 for i in range(len(all_simple_paths)):
                     path = all_simple_paths[i]
                     if not reserve_sequence_order:
-                        all_simple_paths[i] = path[::-1] if path[0] > path[-1] else path
+                        all_simple_paths[i] = (
+                            path[::-1] if str(path[0]) > str(path[-1]) else path
+                        )
                     all_simple_paths[i] = tuple(all_simple_paths[i])
 
                 if len(all_simple_paths) > 0:
@@ -457,8 +478,8 @@ class PathComplex(Complex):
 
 if __name__ == "__main__":
     G = nx.Graph()
-    G.add_nodes_from([0, 1, 2, 3])
-    G.add_edges_from([(0, 1), (1, 2), (2, 3), (3, 1)])
+    G.add_nodes_from([2, 3, 67, 89])
+    G.add_edges_from([(67, 89), (2, 89), (2, 3), (3, 89)])
     pc = PathComplex(G)
     print(pc._path_set.faces_dict)
 
