@@ -1,4 +1,4 @@
-"""TODO: docstring."""
+"""Path complex."""
 from collections.abc import Hashable, Iterable, Iterator
 from itertools import chain
 from typing import List, Set, Tuple, Union
@@ -15,7 +15,11 @@ __all__ = ["PathComplex"]
 
 
 class PathComplex(Complex):
-    """TODO: docstring."""
+    """A class representing a path complex.
+
+    Class for constructing path complexes from graphs or iterables of paths.
+    The path complex is a simplicial complex if certain conditions are met (https://arxiv.org/pdf/1207.2834.pdf).
+    """
 
     def __init__(
         self,
@@ -26,6 +30,24 @@ class PathComplex(Complex):
         max_rank: int = 3,
         **kwargs,
     ) -> None:
+        """Class representing a path complex.
+
+        Parameters
+        ----------
+        paths : nx.Graph or iterable of paths
+            The paths in the path complex. If a graph is provided, the path complex will be constructed from the graph, and allowed paths are automatically computed.
+        name : str, optional
+            A name for the path complex.
+        reserve_sequence_order : bool, default=False
+            If True, reserve the order of the sub-sequence of nodes in the p-path. Else, the sub-sequence of nodes in the p-path will
+            be reversed if the first index is larger than the last index.
+        allowed_paths : List[Tuple], optional
+            A list of allowed boundaries. If None, only obvioys boundaries are constructed (sub-sequences where the first or the last index is omitted).
+        max_rank : int, default=3
+            The maximal length of a path in the path complex.
+        attr: keyword arguments, optional
+            Additional attributes to be associated with the path complex.
+        """
         super().__init__(name=name, **kwargs)
 
         self._path_set = PathView()
@@ -67,7 +89,7 @@ class PathComplex(Complex):
             )
 
     def add_paths_from(self, paths: Set[Union[List, Tuple, "Path"]]) -> None:
-        """TODO: docstring."""
+        """Add paths from an iterable of paths."""
         if isinstance(paths, Hashable):
             raise TypeError("Paths must be an iterable of paths as lists or tuples.")
         paths_clone = paths.copy()
@@ -75,7 +97,7 @@ class PathComplex(Complex):
             self.add_path(p)
 
     def add_path(self, path: Union[Hashable, List, Tuple, "Path"], **attr) -> None:
-        """TODO: docstring."""
+        """Add path to the path complex."""
         new_paths = set()
         if isinstance(path, int) or isinstance(path, str):
             path = [
@@ -224,7 +246,7 @@ class PathComplex(Complex):
             self.add_path([node], **attr)
 
     def remove_nodes(self, node_set: Iterable[Hashable]) -> None:
-        """TODO: docstring."""
+        """Remove nodes from the path complex."""
         removed_paths = set()
         for path in self:  # iterate over all paths
             if any(
@@ -236,7 +258,7 @@ class PathComplex(Complex):
             self._remove_path(path)
 
     def incidence_matrix(self, rank, signed: bool = True, index: bool = False):
-        """TODO: docstring."""
+        """Compute incidence matrix of the path complex."""
         if rank < 0:
             raise ValueError(f"input dimension d must be positive integer, got {rank}")
         if rank > self.dim:
@@ -314,7 +336,7 @@ class PathComplex(Complex):
             return self.incidence_matrix(rank, signed=signed, index=False).T
 
     def up_laplacian_matrix(self, rank: int, signed: bool = True, index: bool = False):
-        """TODO: docstring."""
+        """Compute up laplacian matrix of the path complex."""
         if rank == 0:
             row, col, B_next = self.incidence_matrix(rank + 1, index=True)
             L_up = B_next @ B_next.transpose()
@@ -337,7 +359,7 @@ class PathComplex(Complex):
     def down_laplacian_matrix(
         self, rank: int, signed: bool = True, index: bool = False
     ):
-        """TODO: docstring."""
+        """Compute down laplacian matrix of the path complex."""
         if rank <= self.dim and rank > 0:
             row, column, B = self.incidence_matrix(rank, index=True)
             L_down = B.transpose() @ B
@@ -353,7 +375,7 @@ class PathComplex(Complex):
             return L_down
 
     def adjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
-        """TODO: docstring."""
+        """Compute adjacency matrix of the path complex."""
         ind, L_up = self.up_laplacian_matrix(rank, signed=signed, index=True)
         L_up.setdiag(0)
 
@@ -364,7 +386,7 @@ class PathComplex(Complex):
         return L_up
 
     def coadjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
-        """TODO: docstring."""
+        """Compute coadjacency matrix of the path complex."""
         ind, L_down = self.down_laplacian_matrix(rank, signed=signed, index=True)
         L_down.setdiag(0)
         if not signed:
@@ -442,7 +464,7 @@ class PathComplex(Complex):
     def compute_allowed_paths(
         graph: nx.Graph, reserve_sequence_order: bool = False, max_rank: int = 3
     ) -> Set[Union[List, Tuple]]:
-        """TODO: docstring."""
+        """Compute allowed paths from a graph."""
         allowed_paths = list()
         all_nodes_list = list(
             tuple([node]) for node in sorted(graph.nodes, key=lambda x: str(x))
@@ -478,129 +500,3 @@ class PathComplex(Complex):
                 if len(all_simple_paths) > 0:
                     allowed_paths.extend(all_simple_paths)
         return set(allowed_paths)
-
-
-if __name__ == "__main__":
-    # G = nx.Graph()
-    # G.add_nodes_from([2, 3, 67, 89])
-    # G.add_edges_from([(67, 89), (2, 89), (2, 3), (3, 89)])
-    # pc = PathComplex(G)
-    # print(pc._path_set.faces_dict)
-
-    # row0, col0, B0 = pc.incidence_matrix(0, index=True)
-    # print(row0, col0)
-    # print(B0.todense())
-
-    # row1, col1, B1 = pc.incidence_matrix(1, index=True)
-    # print(row1, col1)
-    # print(B1.todense())
-
-    # row2, col2, B2 = pc.incidence_matrix(2, index=True)
-    # print(row2, col2)
-    # print(B2.todense())
-
-    # row3, col3, B3 = pc.incidence_matrix(3, index=True)
-    # print(row3, col3)
-    # print(B3.todense())
-
-    # # pc.add_paths_from([(0, 2), (0, 4, 5), (6, 7)])
-    # # print(pc._path_set.faces_dict)
-    # # print("AAAAA")
-    # # row2, col2, B2 = pc.incidence_matrix(2, index=True)
-    # # print(row2, col2)
-    # # print(B2.todense())
-
-    # # row3, col3, B3 = pc.incidence_matrix(3, index=True)
-    # # print(row3, col3)
-    # # print(B3.todense())
-
-    # print("+++++++++++++")
-    # print("Shape", pc.shape)
-    # print("Dim", pc.dim)
-    # print("Nodes", pc.nodes)
-    # print("Skeleton(0)", pc.skeleton(0))
-    # print("Skeleton(1)", pc.skeleton(1))
-    # print("Skeleton(2)", pc.skeleton(2))
-    # print("Skeleton(3)", pc.skeleton(3))
-    # print("Paths", pc.paths)
-    # print("Number of paths", len(pc))
-    # print("test 0,1,2 in pc", (0, 1, 2) in pc)
-    # print("+++++++++++++")
-    # path = Path([0, 5, 4])
-    # pc.add_path(path)
-    # print("AAAAA")
-    # row2, col2, B2 = pc.incidence_matrix(2, index=True)
-    # print(row2, col2)
-    # print(B2.todense())
-
-    # row3, col3, B3 = pc.incidence_matrix(3, index=True)
-    # print(row3, col3)
-    # print(B3.todense())
-    # print("+++++++++++++")
-    # row0, A0 = pc.up_laplacian_matrix(0, index=True, signed=False)
-    # print(row0)
-    # print(A0.todense())
-    # row1, A1 = pc.up_laplacian_matrix(1, index=True)
-    # print(row1)
-    # print(A1.todense())
-    # row2, A2 = pc.up_laplacian_matrix(2, index=True)
-    # print(row2)
-    # print(A2.todense())
-
-    # print("+++++++++++++")
-    # row0, A0 = pc.adjacency_matrix(0, index=True)
-    # print(row0)
-    # print(A0.todense())
-    # row1, A1 = pc.adjacency_matrix(1, index=True)
-    # print(row1)
-    # print(A1.todense())
-    # row2, A2 = pc.adjacency_matrix(2, index=True)
-    # print(row2)
-    # print(A2.todense())
-
-    # print("+++++++++++++")
-    # # pc.remove_nodes([1,2])
-    # # print(pc.paths)
-    # # print(pc.dim)
-
-    # pc = PathComplex([[0, 1, 2], [1, 2], [1, 3], [0]])
-    # print(pc.paths)
-    # print(pc.dim)
-
-    # pc.add_path(4, weight=53)
-    # print(pc.paths)
-    # print(pc[4])
-    # print(pc[1, 2])
-
-    # pc.add_path(4, weight=21)
-    # print(pc[4])
-
-    # print(pc.remove_nodes([4]))
-    # print(pc.paths)
-
-    # pc.add_path([1, 2], weight=3)
-    # print(pc[[1, 2]])
-
-    # path = pc[[1, 2]]
-    # path.update(weight=5)
-    # print(pc[[1, 2]])
-
-    # path = Path([1, 2], weight=6)
-    # pc.add_path(path)
-    # print(pc[[1, 2]])
-    # print(pc.paths)
-
-    PX = PathComplex([[1, 2, 3], [1, 2, 4]])
-    print(PX.nodes.nodes)
-    print((1,) in PX.nodes.nodes)
-
-    G = nx.Graph()
-    G.add_edge(1, 2)
-    G.add_edge(2, 3)
-    PX = PathComplex(G)
-
-    PX = PathComplex([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-    row, col, B = PX.incidence_matrix(2, signed=False, index=True)
-    print(row)
-    print(col)
-    print(PX.incidence_matrix(2, signed=False).todense())

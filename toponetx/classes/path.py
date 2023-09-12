@@ -26,6 +26,8 @@ class Path(Atom):
     reserve_sequence_order : bool, default=False
         If True, reserve the order of the sub-sequence of nodes in the p-path.
         Else, the sub-sequence of nodes in the p-path will be reversed if the first index is larger than the last index.
+    allowed_paths : List[Tuple], optional
+        A list of allowed boundaries. If None, all possible boundaries are constructed (similarly to simplex).
     attr: keyword arguments, optional
         Additional attributes to be associated with the p-path.
     """
@@ -116,21 +118,3 @@ class Path(Atom):
     def __str__(self) -> str:
         """Return string representation of p-paths."""
         return f"Node set: {self.elements}, Boundaries: {self.boundary}, Attributes: {self._properties}"
-
-
-if __name__ == "__main__":
-    p = Path([1, 2, 3, 4, 5])
-    print(p)
-
-    p = Path([1, 2, 3, 4, 5], construct_boundaries=True)
-    print(p)
-
-    p = Path([5, 4, 3, 2, 1], construct_boundaries=True, reserve_sequence_order=False)
-    print(p)
-
-    p = Path([2], construct_boundaries=True)
-    print(p)
-
-    p_clone = p.clone()
-    print(p_clone)
-    print(p_clone.boundary)
