@@ -17,7 +17,7 @@ class Path(Atom):
 
     Parameters
     ----------
-    elements: Sequence
+    elements: Sequence[Hashable]
         The nodes in the p-path.
     name : str, optional
         A name for the p-path.
@@ -26,7 +26,7 @@ class Path(Atom):
     reserve_sequence_order : bool, default=False
         If True, reserve the order of the sub-sequence of nodes in the p-path.
         Else, the sub-sequence of nodes in the p-path will be reversed if the first index is larger than the last index.
-    allowed_paths : Iterable[tuple], optional
+    allowed_paths : Iterable[tuple[Hashable]], optional
         A list of allowed boundaries. If None, all possible boundaries are constructed (similarly to simplex).
     attr: keyword arguments, optional
         Additional attributes to be associated with the p-path.
@@ -38,7 +38,7 @@ class Path(Atom):
         name: str = "",
         construct_boundaries: bool = False,
         reserve_sequence_order: bool = False,
-        allowed_paths: Iterable[tuple] = None,
+        allowed_paths: Iterable[tuple[Hashable]] = None,
         **attr,
     ) -> None:
         self.__check_inputs(elements, reserve_sequence_order)
@@ -61,9 +61,26 @@ class Path(Atom):
     def construct_path_boundaries(
         elements: Sequence[Hashable],
         reserve_sequence_order: bool = False,
-        allowed_paths: Iterable[tuple] = None,
-    ) -> list[tuple]:
-        """Return list of p-path objects representing the boundaries."""
+        allowed_paths: Iterable[tuple[Hashable]] = None,
+    ) -> list[tuple[Hashable]]:
+        """
+        Return list of p-path objects representing the boundaries.
+
+        Parameters
+        ----------
+        elements: Sequence[Hashable]
+            The nodes in the p-path.
+        reserve_sequence_order : bool, default=False
+            If True, reserve the order of the sub-sequence of nodes in the p-path.
+            Else, the sub-sequence of nodes in the p-path will be reversed if the first index is larger than the last index.
+        allowed_paths : Iterable[tuple[Hashable]], optional
+            A list of allowed boundaries. If None, all possible boundaries are constructed (similarly to simplex).
+
+        Returns
+        -------
+        boundaries : list[tuple[Hashable]]
+            List of p-path objects representing the boundaries.
+        """
         boundaries = list()
         for i in range(len(elements)):
             boundary = list(elements[0:i] + elements[(i + 1) :])
@@ -78,12 +95,26 @@ class Path(Atom):
         return boundaries
 
     @property
-    def boundary(self) -> list[tuple]:
-        """Return list of p-path objects representing the boundaries."""
+    def boundary(self) -> list[tuple[Hashable]]:
+        """
+        Return list of p-path objects representing the boundaries.
+
+        Returns
+        -------
+        boundaries : list[tuple[Hashable]]
+            List of p-path objects representing the boundaries.
+        """
         return self._boundaries
 
     def clone(self) -> "Path":
-        """Return a copy of the p-path."""
+        """
+        Return a shallow copy of the p-path.
+
+        Returns
+        -------
+        Path
+            A shallow copy of the p-path.
+        """
         return Path(
             self.elements,
             name=self.name,
@@ -92,7 +123,18 @@ class Path(Atom):
         )
 
     def __check_inputs(self, elements: Any, reserve_sequence_order: bool):
-        """Sanity check for inputs, as sequence order matters."""
+        """
+        Sanity check for inputs, as sequence order matters.
+
+        Parameters
+        ----------
+        elements: Any
+            The nodes in the p-path.
+        reserve_sequence_order : bool
+            If True, reserve the order of the sub-sequence of nodes in the p-path.
+            Else, the sub-sequence of nodes in the p-path will be reversed if the first index is larger than the last index.
+            This variable is only used for sanity check on the input.
+        """
         for i in elements:
             if not isinstance(i, Hashable):
                 raise ValueError(f"All nodes of a p-path must be hashable, got {i}")

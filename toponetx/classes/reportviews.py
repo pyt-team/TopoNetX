@@ -843,7 +843,7 @@ class PathView(SimplexView):
             name
         )  # self.faces_dict is a list of dictionary of allowed paths
 
-    def __getitem__(self, path: Hashable | Sequence | Path):
+    def __getitem__(self, path: Hashable | Sequence[Hashable] | Path):
         """Get the dictionary of properties associated with the given path.
 
         Parameters
@@ -875,8 +875,20 @@ class PathView(SimplexView):
             else:
                 raise KeyError(f"input {path} is not in the path dictionary")
 
-    def __contains__(self, item: Sequence | Hashable) -> bool:
-        """Check if a path is in the path view."""
+    def __contains__(self, item: Sequence[Hashable] | Hashable) -> bool:
+        """
+        Check if a path is in the path view.
+
+        Parameters
+        ----------
+        item : Sequence[Hashable] or Hashable
+            The path to be checked for membership in the path view
+
+        Returns
+        -------
+        bool
+            True if the path is in the path view, False otherwise
+        """
         if isinstance(item, Sequence):
             item = tuple(item)
             if not 0 < len(item) <= self.max_dim + 1:
@@ -896,7 +908,7 @@ class PathView(SimplexView):
 
     def __str__(self) -> str:
         """Return detailed string representation of the path view."""
-        all_paths: list[tuple[int, ...]] = []
+        all_paths: list[tuple[int | str, ...]] = []
         for i in range(len(self.faces_dict)):
             all_paths += [tuple(j) for j in self.faces_dict[i]]
 
