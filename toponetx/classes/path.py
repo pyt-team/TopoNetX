@@ -36,7 +36,7 @@ class Path(Atom):
         name: str = "",
         construct_boundaries: bool = False,
         reserve_sequence_order: bool = False,
-        allowed_paths: List[Union[List, Tuple]] = None,
+        allowed_paths: List[Tuple] = None,
         **attr,
     ) -> None:
         self.__check_inputs(elements)
@@ -55,14 +55,14 @@ class Path(Atom):
             self._boundaries = list()
 
     @staticmethod
-    def construct_path_boundaries(
+    def construct_path_boundaries(  # when allowed_paths is not specified, all possible boundaries are constructed similarly to cliques.
         elements: Collection,
         reserve_sequence_order: bool = False,
         allowed_paths: List[Tuple] = None,
     ) -> List[Tuple]:
         """Return list of p-path objects representing the boundaries."""
         boundaries = list()
-        for i in range(1, len(elements)):
+        for i in range(len(elements)):
             boundary = list(elements[0:i] + elements[(i + 1) :])
             if (
                 not reserve_sequence_order
