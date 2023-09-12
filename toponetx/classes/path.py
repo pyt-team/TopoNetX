@@ -1,7 +1,7 @@
 """Path class."""
 
-from collections.abc import Collection, Hashable
-from typing import Any, List, Tuple, Union
+from collections.abc import Hashable, Iterable, Sequence
+from typing import Any
 
 from toponetx.classes.complex import Atom
 
@@ -17,7 +17,7 @@ class Path(Atom):
 
     Parameters
     ----------
-    elements: Collection
+    elements: Sequence
         The nodes in the p-path.
     name : str, optional
         A name for the p-path.
@@ -26,7 +26,7 @@ class Path(Atom):
     reserve_sequence_order : bool, default=False
         If True, reserve the order of the sub-sequence of nodes in the p-path.
         Else, the sub-sequence of nodes in the p-path will be reversed if the first index is larger than the last index.
-    allowed_paths : List[Tuple], optional
+    allowed_paths : Iterable[tuple], optional
         A list of allowed boundaries. If None, all possible boundaries are constructed (similarly to simplex).
     attr: keyword arguments, optional
         Additional attributes to be associated with the p-path.
@@ -34,11 +34,11 @@ class Path(Atom):
 
     def __init__(
         self,
-        elements: Union[List, Tuple],
+        elements: Sequence[Hashable],
         name: str = "",
         construct_boundaries: bool = False,
         reserve_sequence_order: bool = False,
-        allowed_paths: List[Tuple] = None,
+        allowed_paths: Iterable[tuple] = None,
         **attr,
     ) -> None:
         self.__check_inputs(elements, reserve_sequence_order)
@@ -58,11 +58,11 @@ class Path(Atom):
             self._boundaries = list()
 
     @staticmethod
-    def construct_path_boundaries(  # when allowed_paths is not specified, all possible boundaries are constructed similarly to cliques.
-        elements: Collection,
+    def construct_path_boundaries(
+        elements: Sequence[Hashable],
         reserve_sequence_order: bool = False,
-        allowed_paths: List[Tuple] = None,
-    ) -> List[Tuple]:
+        allowed_paths: Iterable[tuple] = None,
+    ) -> list[tuple]:
         """Return list of p-path objects representing the boundaries."""
         boundaries = list()
         for i in range(len(elements)):
@@ -78,7 +78,7 @@ class Path(Atom):
         return boundaries
 
     @property
-    def boundary(self) -> List[Tuple]:
+    def boundary(self) -> list[tuple]:
         """Return list of p-path objects representing the boundaries."""
         return self._boundaries
 
@@ -96,7 +96,7 @@ class Path(Atom):
         for i in elements:
             if not isinstance(i, Hashable):
                 raise ValueError(f"All nodes of a p-path must be hashable, got {i}")
-        if not isinstance(elements, List) and not isinstance(elements, Tuple):
+        if not isinstance(elements, list) and not isinstance(elements, tuple):
             raise ValueError(
                 f"Elements of a p-path must be a list or tuple, got {type(elements)}"
             )

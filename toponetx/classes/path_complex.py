@@ -1,7 +1,6 @@
 """Path complex."""
-from collections.abc import Hashable, Iterable, Iterator
+from collections.abc import Hashable, Iterable, Iterator, Sequence
 from itertools import chain
-from typing import List, Set, Tuple, Union
 
 import networkx as nx
 import numpy as np
@@ -23,10 +22,10 @@ class PathComplex(Complex):
 
     def __init__(
         self,
-        paths=None,
+        paths: nx.Graph | Iterable[Sequence] = None,
         name: str = "",
         reserve_sequence_order: bool = False,
-        allowed_paths: List[Tuple] = None,
+        allowed_paths: Iterable[tuple] = None,
         max_rank: int = 3,
         **kwargs,
     ) -> None:
@@ -41,8 +40,8 @@ class PathComplex(Complex):
         reserve_sequence_order : bool, default=False
             If True, reserve the order of the sub-sequence of nodes in the p-path. Else, the sub-sequence of nodes in the p-path will
             be reversed if the first index is larger than the last index.
-        allowed_paths : List[Tuple], optional
-            A list of allowed boundaries. If None, only obvioys boundaries are constructed (sub-sequences where the first or the last index is omitted).
+        allowed_paths : Iterable[tuple], optional
+            An iterable of allowed boundaries. If None, only obvious boundaries are constructed (sub-sequences where the first or the last index is omitted).
         max_rank : int, default=3
             The maximal length of a path in the path complex.
         attr: keyword arguments, optional
@@ -51,16 +50,16 @@ class PathComplex(Complex):
         super().__init__(name=name, **kwargs)
 
         self._path_set = PathView()
-        self.reserve_sequence_order = reserve_sequence_order
+        self._reserve_sequence_order = reserve_sequence_order
         if allowed_paths is not None:
-            self.allowed_paths = set(allowed_paths)
+            self._allowed_paths = set(allowed_paths)
         else:
-            self.allowed_paths = set()
+            self._allowed_paths = set()
 
         if isinstance(paths, nx.Graph):
             # compute allowed_paths in order to construct boundary incidence matrix/adj matrix.
-            if self.allowed_paths is not None:
-                self.allowed_paths = self.compute_allowed_paths(
+            if self._allowed_paths is not None:
+                self._allowed_paths = self.compute_allowed_paths(
                     paths,
                     reserve_sequence_order=reserve_sequence_order,
                     max_rank=max_rank,
@@ -77,7 +76,7 @@ class PathComplex(Complex):
                 self.add_path((u, v), **data)
 
             # add all simple paths
-            self.add_paths_from(self.allowed_paths)
+            self.add_paths_from(self._allowed_paths)
 
         elif isinstance(paths, list) or isinstance(paths, tuple):
             if len(paths) > 0:
@@ -88,22 +87,22 @@ class PathComplex(Complex):
                 "Input paths must be a graph or an iterable of paths as lists or tuples."
             )
 
-    def add_paths_from(self, paths: Set[Union[List, Tuple, "Path"]]) -> None:
+    def add_paths_from(self, paths: Iterable[Sequence | Path]) -> None:
         """Add paths from an iterable of paths."""
         if isinstance(paths, Hashable):
-            raise TypeError("Paths must be an iterable of paths as lists or tuples.")
+            raise TypeError("Paths must be a iterable of paths as lists, tuples.")
         paths_clone = paths.copy()
         for p in paths_clone:
             self.add_path(p)
 
-    def add_path(self, path: Union[Hashable, List, Tuple, "Path"], **attr) -> None:
+    def add_path(self, path: Hashable | Sequence[Hashable] | Path, **attr) -> None:
         """Add path to the path complex."""
         new_paths = set()
         if isinstance(path, int) or isinstance(path, str):
             path = [
                 path,
             ]
-        if isinstance(path, List) or isinstance(path, Tuple) or isinstance(path, Path):
+        if isinstance(path, list) or isinstance(path, tuple) or isinstance(path, Path):
             if not isinstance(path, Path):  # path is a list or tuple
                 path_ = tuple(path)
                 if len(path) != len(set(path)):
@@ -111,7 +110,7 @@ class PathComplex(Complex):
                 if (
                     len(path_) > 1
                     and str(path_[0]) > str(path_[-1])
-                    and not self.reserve_sequence_order
+                    and not self._reserve_sequence_order
                 ):
                     raise ValueError(
                         "A p-path must have the first index smaller than the last index, got {}".format(
@@ -146,7 +145,7 @@ class PathComplex(Complex):
             for length in range(len(path_), 0, -1):
                 for i in range(0, len(path_) - length + 1):
                     sub_path = path_[i : i + length]
-                    if not self.reserve_sequence_order and str(sub_path[0]) > str(
+                    if not self._reserve_sequence_order and str(sub_path[0]) > str(
                         sub_path[-1]
                     ):
                         sub_path = sub_path[::-1]
@@ -156,7 +155,7 @@ class PathComplex(Complex):
                         new_paths.add(new_path)
             # update allowed paths
             if len(new_paths) > 0:
-                self.allowed_paths.update(new_paths)
+                self._allowed_paths.update(new_paths)
 
             if isinstance(path, Path):  # update attrbiutes for PathView()
                 self._path_set.faces_dict[len(path_) - 1][path_].update(
@@ -209,7 +208,7 @@ class PathComplex(Complex):
         """
         return PathComplex(self.paths, name=self.name)
 
-    def skeleton(self, rank):
+    def skeleton(self, rank: int):
         """Compute skeleton.
 
         Returns
@@ -225,7 +224,7 @@ class PathComplex(Complex):
             raise ValueError(f"input must be a postive integer, got {rank}")
         raise ValueError(f"input {rank} exceeds max dim")
 
-    def add_node(self, node: Union[Hashable, Path], **attr) -> None:
+    def add_node(self, node: Hashable | Path, **attr) -> None:
         """Add node to the path complex.
 
         Parameters
@@ -286,12 +285,12 @@ class PathComplex(Complex):
             for path, idx_path in path_dict.items():
                 for i, _ in enumerate(path):
                     boundary_path = path[0:i] + path[(i + 1) :]
-                    if not self.reserve_sequence_order and str(boundary_path[0]) > str(
+                    if not self._reserve_sequence_order and str(boundary_path[0]) > str(
                         boundary_path[-1]
                     ):
                         boundary_path = boundary_path[::-1]
                     boundary_path = tuple(boundary_path)
-                    if boundary_path in self.allowed_paths:
+                    if boundary_path in self._allowed_paths:
                         idx_p_minus_1.append(path_minus_1_dict[boundary_path])
                         idx_p.append(idx_path)
                         values.append((-1) ** i)
@@ -322,7 +321,7 @@ class PathComplex(Complex):
             else:
                 return abs(boundary)
 
-    def coincidence_matrix(self, rank, signed: bool = True, index: bool = False):
+    def coincidence_matrix(self, rank: int, signed: bool = True, index: bool = False):
         """Compute coincidence matrix of the path complex.
 
         This is also called the coboundary matrix.
@@ -395,22 +394,22 @@ class PathComplex(Complex):
             return ind, L_down
         return L_down
 
-    def _remove_path(self, path: Tuple) -> None:
+    def _remove_path(self, path: tuple[Hashable]) -> None:
         del self._path_set.faces_dict[len(path) - 1][path]
-        self.allowed_paths.remove(path)
+        self._allowed_paths.remove(path)
         if (
             len(self._path_set.faces_dict[len(path) - 1]) == 0
             and self._path_set.max_dim == len(path) - 1
         ):  # update max dimension for PathView() if highest dimension is empty
             self._path_set.max_dim -= 1
 
-    def _update_faces_dict_length(self, path) -> None:
+    def _update_faces_dict_length(self, path: tuple[Hashable]) -> None:
         if len(path) > len(self._path_set.faces_dict):
             diff = len(path) - len(self._path_set.faces_dict)
             for _ in range(diff):
                 self._path_set.faces_dict.append(dict())
 
-    def _update_faces_dict_entry(self, path):
+    def _update_faces_dict_entry(self, path: tuple[Hashable]):
         dim = len(path) - 1
         if path not in self._path_set.faces_dict[dim]:  # Not in faces_dict
             self._path_set.faces_dict[dim][path] = dict()
@@ -418,16 +417,16 @@ class PathComplex(Complex):
         else:
             return None
 
-    def __contains__(self, item) -> bool:
+    def __contains__(self, item: Sequence | Hashable) -> bool:
         """Return boolean indicating if item is in self._path_set.
 
         Parameters
         ----------
-        item : tuple, list
+        item : tuple, list, int, or str
         """
         return item in self._path_set
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Sequence | Hashable):
         """Get p-path."""
         if item in self:
             return self._path_set[item]
@@ -463,7 +462,7 @@ class PathComplex(Complex):
     @staticmethod
     def compute_allowed_paths(
         graph: nx.Graph, reserve_sequence_order: bool = False, max_rank: int = 3
-    ) -> Set[Union[List, Tuple]]:
+    ) -> set[list | tuple]:
         """Compute allowed paths from a graph."""
         allowed_paths = list()
         all_nodes_list = list(

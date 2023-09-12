@@ -3,7 +3,7 @@
 Such as:
 HyperEdgeView, CellView, SimplexView, NodeView.
 """
-from collections.abc import Collection, Hashable, Iterable, Iterator
+from collections.abc import Collection, Hashable, Iterable, Iterator, Sequence
 from itertools import chain
 
 from toponetx.classes.cell import Cell
@@ -843,13 +843,15 @@ class PathView(SimplexView):
             name
         )  # self.faces_dict is a list of dictionary of allowed paths
 
-    def __getitem__(self, path):
+    def __getitem__(self, path: Hashable | Sequence | Path):
         """Get the dictionary of properties associated with the given path.
 
         Parameters
         ----------
-        path : tuple, list or Path
+        path : int, str, tuple, list or Path
             A tuple or list of nodes representing a path.
+            It can also be a Path object.
+            It can also be a single node represented by int or str.
 
         Returns
         -------
@@ -873,9 +875,9 @@ class PathView(SimplexView):
             else:
                 raise KeyError(f"input {path} is not in the path dictionary")
 
-    def __contains__(self, item) -> bool:
+    def __contains__(self, item: Sequence | Hashable) -> bool:
         """Check if a path is in the path view."""
-        if isinstance(item, Iterable):
+        if isinstance(item, Sequence):
             item = tuple(item)
             if not 0 < len(item) <= self.max_dim + 1:
                 return False
@@ -886,7 +888,7 @@ class PathView(SimplexView):
 
     def __repr__(self) -> str:
         """Return string representation that can be used to recreate it."""
-        all_paths: list[tuple[int, ...]] = []
+        all_paths: list[tuple[int | str, ...]] = []
         for i in range(len(self.faces_dict)):
             all_paths += [tuple(j) for j in self.faces_dict[i]]
 
@@ -899,12 +901,3 @@ class PathView(SimplexView):
             all_paths += [tuple(j) for j in self.faces_dict[i]]
 
         return f"PathView({all_paths})"
-
-
-if __name__ == "__main__":
-    view = PathView()
-    view.faces_dict.append({(0,): {"weight": 1}})
-    view.max_dim = 0
-    view.faces_dict.append({(0, 1): {"weight": 1}})
-    view.max_dim = 1
-    print(view)
