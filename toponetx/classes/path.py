@@ -39,12 +39,13 @@ class Path(Atom):
         allowed_paths: List[Tuple] = None,
         **attr,
     ) -> None:
-        self.__check_inputs(elements)
+        self.__check_inputs(elements, reserve_sequence_order)
         super().__init__(tuple(elements), name, **attr)
         if len(set(elements)) != len(self.elements):
             raise ValueError("A p-path cannot contain duplicate nodes.")
 
         self.construct_boundaries = construct_boundaries
+        self.reserve_sequence_order = reserve_sequence_order
         if construct_boundaries:
             self._boundaries = self.construct_path_boundaries(
                 elements,
@@ -88,7 +89,7 @@ class Path(Atom):
             **self._properties,
         )
 
-    def __check_inputs(self, elements: Any):
+    def __check_inputs(self, elements: Any, reserve_sequence_order: bool):
         """Sanity check for inputs, as sequence order matters."""
         for i in elements:
             if not isinstance(i, Hashable):
@@ -96,6 +97,16 @@ class Path(Atom):
         if not isinstance(elements, List) and not isinstance(elements, Tuple):
             raise ValueError(
                 f"Elements of a p-path must be a list or tuple, got {type(elements)}"
+            )
+        if (
+            not reserve_sequence_order
+            and len(elements) > 1
+            and elements[0] > elements[-1]
+        ):
+            raise ValueError(
+                "A p-path must have the first index smaller than the last index, got {}".format(
+                    elements
+                )
             )
 
     def __repr__(self) -> str:

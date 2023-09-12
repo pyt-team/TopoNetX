@@ -52,6 +52,14 @@ class TestPath:
         )
         assert len(s.boundary) == 2
 
+        with pytest.raises(ValueError):
+            s = Path((3, 2, 1), reserve_sequence_order=False)
+
+        s = Path((1, 3, 2), reserve_sequence_order=False, construct_boundaries=True)
+        assert (2, 3) in s.boundary
+        assert (1, 2) in s.boundary
+        assert (1, 3) in s.boundary
+
         s = Path((1, 2, 3), construct_boundaries=False)
         assert len(s.boundary) == 0
 
