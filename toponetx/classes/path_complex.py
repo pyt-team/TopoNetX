@@ -33,7 +33,7 @@ class PathComplex(Complex):
 
         self._path_set = PathView()
         self.reserve_sequence_order = reserve_sequence_order
-        self.allowed_paths = allowed_paths
+        self.allowed_paths = set()
 
         if isinstance(paths, nx.Graph):
             # compute allowed_paths in order to construct boundary incidence matrix/adj matrix.
@@ -55,8 +55,10 @@ class PathComplex(Complex):
                 self.allowed_paths, update_features=False
             )  # we don't want to erase the features of 0-paths and 1-paths. Assume  higher dimensional paths have no features.
 
-        # elif isinstance(paths, Iterable[Union[List, Tuple]]):
-        #     # TODO: implement this
+        elif isinstance(paths, list) or isinstance(paths, tuple):
+            if len(paths) > 0:
+                paths = [tuple(path) for path in paths]
+                self.add_paths_from(set(paths), update_features=False)
         elif paths is not None:
             raise TypeError(
                 "Input paths must be a graph or an iterable of paths as lists or tuples."
@@ -460,7 +462,7 @@ if __name__ == "__main__":
     G = nx.Graph()
     G.add_nodes_from([0, 1, 2, 3])
     G.add_edges_from([(0, 1), (1, 2), (2, 3), (3, 1)])
-    pc = PathComplex(G, reserve_sequence_order=True)
+    pc = PathComplex(G)
     print(pc._path_set.faces_dict)
 
     row0, col0, B0 = pc.incidence_matrix(0, index=True)
@@ -479,40 +481,66 @@ if __name__ == "__main__":
     print(row3, col3)
     print(B3.todense())
 
-    pc.add_paths_from([(0, 2), (0, 4, 5), (7, 6)])
-    print(pc._path_set.faces_dict)
-    print("AAAAA")
-    row2, col2, B2 = pc.incidence_matrix(2, index=True)
-    print(row2, col2)
-    print(B2.todense())
+    # pc.add_paths_from([(0, 2), (0, 4, 5), (7, 6)])
+    # print(pc._path_set.faces_dict)
+    # print("AAAAA")
+    # row2, col2, B2 = pc.incidence_matrix(2, index=True)
+    # print(row2, col2)
+    # print(B2.todense())
 
-    row3, col3, B3 = pc.incidence_matrix(3, index=True)
-    print(row3, col3)
-    print(B3.todense())
+    # row3, col3, B3 = pc.incidence_matrix(3, index=True)
+    # print(row3, col3)
+    # print(B3.todense())
+
+    # print("+++++++++++++")
+    # print("Shape", pc.shape)
+    # print("Dim", pc.dim)
+    # print("Nodes", pc.nodes)
+    # print("Skeleton(0)", pc.skeleton(0))
+    # print("Skeleton(1)", pc.skeleton(1))
+    # print("Skeleton(2)", pc.skeleton(2))
+    # print("Skeleton(3)", pc.skeleton(3))
+    # print("Paths", pc.paths)
+    # print("Number of paths", len(pc))
+    # print("test 0,1,2 in pc", (0, 1, 2) in pc)
+    # print("+++++++++++++")
+    # path = Path([0, 5, 4])
+    # pc.add_path(path)
+    # print("AAAAA")
+    # row2, col2, B2 = pc.incidence_matrix(2, index=True)
+    # print(row2, col2)
+    # print(B2.todense())
+
+    # row3, col3, B3 = pc.incidence_matrix(3, index=True)
+    # print(row3, col3)
+    # print(B3.todense())
+    print("+++++++++++++")
+    row0, A0 = pc.up_laplacian_matrix(0, index=True, signed=False)
+    print(row0)
+    print(A0.todense())
+    row1, A1 = pc.up_laplacian_matrix(1, index=True)
+    print(row1)
+    print(A1.todense())
+    row2, A2 = pc.up_laplacian_matrix(2, index=True)
+    print(row2)
+    print(A2.todense())
 
     print("+++++++++++++")
-    print("Shape", pc.shape)
-    print("Dim", pc.dim)
-    print("Nodes", pc.nodes)
-    print("Skeleton(0)", pc.skeleton(0))
-    print("Skeleton(1)", pc.skeleton(1))
-    print("Skeleton(2)", pc.skeleton(2))
-    print("Skeleton(3)", pc.skeleton(3))
-    print("Paths", pc.paths)
-    print("Number of paths", len(pc))
-    print("test 0,1,2 in pc", (0, 1, 2) in pc)
-    print("+++++++++++++")
-    path = Path([0, 5, 4])
-    pc.add_path(path)
-    print("AAAAA")
-    row2, col2, B2 = pc.incidence_matrix(2, index=True)
-    print(row2, col2)
-    print(B2.todense())
+    row0, A0 = pc.adjacency_matrix(0, index=True)
+    print(row0)
+    print(A0.todense())
+    row1, A1 = pc.adjacency_matrix(1, index=True)
+    print(row1)
+    print(A1.todense())
+    row2, A2 = pc.adjacency_matrix(2, index=True)
+    print(row2)
+    print(A2.todense())
 
-    row3, col3, B3 = pc.incidence_matrix(3, index=True)
-    print(row3, col3)
-    print(B3.todense())
     print("+++++++++++++")
-    print("Adjacency(0)", pc.adjacency_matrix(0))
-    print("Adjacency(1)", pc.adjacency_matrix(1))
-    print("Adjacency(2)", pc.adjacency_matrix(2))
+    # pc.remove_nodes([1,2])
+    # print(pc.paths)
+    # print(pc.dim)
+
+    pc = PathComplex([[0, 1, 2], [1, 2], [1, 3], [0]])
+    print(pc.paths)
+    print(pc.dim)
