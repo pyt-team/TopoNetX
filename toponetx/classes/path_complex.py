@@ -26,7 +26,7 @@ class PathComplex(Complex):
 
     Parameters
     ----------
-    paths : nx.Graph or Iterable[Sequence[Hashable]
+    paths : nx.Graph or Iterable[Sequence[Hashable]]
         The paths in the path complex. If a graph is provided, the path complex will be constructed from the graph, and allowed paths are automatically computed.
     name : str, optional
         A name for the path complex.
@@ -111,8 +111,13 @@ class PathComplex(Complex):
 
         elif isinstance(paths, list) or isinstance(paths, tuple):
             if len(paths) > 0:
-                paths = [tuple(path) for path in paths]
-                self.add_paths_from(set(paths))
+                if (
+                    isinstance(paths[0], int)
+                    or isinstance(paths[0], str)
+                    or isinstance(paths[0], list)
+                ):
+                    paths = [tuple(path) for path in paths]
+            self.add_paths_from(set(paths))
         elif paths is not None:
             raise TypeError(
                 "Input paths must be a graph or an iterable of paths as lists or tuples."

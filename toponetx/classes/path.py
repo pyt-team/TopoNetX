@@ -74,6 +74,8 @@ class Path(Atom):
         **attr,
     ) -> None:
         self.__check_inputs(elements, reserve_sequence_order)
+        if isinstance(elements, int) or isinstance(elements, str):
+            elements = [elements]
         super().__init__(tuple(elements), name, **attr)
         if len(set(elements)) != len(self.elements):
             raise ValueError("A p-path cannot contain duplicate nodes.")
@@ -181,23 +183,26 @@ class Path(Atom):
             Else, the sub-sequence of nodes in the elementary p-path will be reversed if the first index is larger than the last index.
             This variable is only used for sanity check on the input.
         """
-        for i in elements:
-            if not isinstance(i, Hashable):
-                raise ValueError(f"All nodes of a p-path must be hashable, got {i}")
-        if not isinstance(elements, list) and not isinstance(elements, tuple):
-            raise ValueError(
-                f"Elements of an elementary p-path must be a list or tuple, got {type(elements)}"
-            )
-        if (
-            not reserve_sequence_order
-            and len(elements) > 1
-            and str(elements[0]) > str(elements[-1])
-        ):
-            raise ValueError(
-                "An elementary p-path must have the first index smaller than the last index, got {}".format(
-                    elements
+        if isinstance(elements, Sequence):
+            for i in elements:
+                if not isinstance(i, Hashable):
+                    raise ValueError(f"All nodes of a p-path must be hashable, got {i}")
+            if not isinstance(elements, list) and not isinstance(elements, tuple):
+                raise ValueError(
+                    f"Elements of an elementary p-path must be a list or tuple, got {type(elements)}"
                 )
-            )
+            if (
+                not reserve_sequence_order
+                and len(elements) > 1
+                and str(elements[0]) > str(elements[-1])
+            ):
+                raise ValueError(
+                    "An elementary p-path must have the first index smaller than the last index, got {}".format(
+                        elements
+                    )
+                )
+        elif isinstance(elements, Hashable):
+            pass
 
     def __repr__(self) -> str:
         """Return string representation of elementary p-paths."""
