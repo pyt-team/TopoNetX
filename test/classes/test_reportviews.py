@@ -536,6 +536,10 @@ class TestReportViews_PathView:
 
         with pytest.raises(KeyError):
             self.path_view.__getitem__(4)
+        with pytest.raises(KeyError):
+            self.path_view.__getitem__((4, 3))
+        with pytest.raises(KeyError):
+            self.path_view.__getitem__(Path((1, 3)))
 
     def test_contains(self):
         """Test the __contains__ method of the PathView class."""
@@ -543,6 +547,8 @@ class TestReportViews_PathView:
         assert self.path_view.__contains__((1,)) is True
         assert self.path_view.__contains__(Path(1)) is True
         assert self.path_view.__contains__((1, 2, 3, 4)) is False
+        assert self.path_view.__contains__(Path((1, 2, 4))) is False
+        assert self.path_view.__contains__(set((1, 2, 3))) is False
 
     def test_repr(self):
         """Test __repr__ method of the PathView class."""

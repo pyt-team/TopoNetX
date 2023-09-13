@@ -68,6 +68,12 @@ class TestPathComplex:
         with pytest.raises(ValueError):
             PX.add_path([3, 2])
 
+        with pytest.raises(ValueError):
+            PX.add_path([3, 2, 2])
+
+        with pytest.raises(ValueError):
+            PX.add_path([3, 2, 3])
+
         PX = PathComplex(reserve_sequence_order=True)
         PX.add_path([3, 2, 1])
         assert [3, 2, 1] in PX.paths
@@ -96,6 +102,23 @@ class TestPathComplex:
         assert 1 in PX.paths
         assert 2 in PX.paths
         assert 3 in PX.paths
+
+        PX = PathComplex(G, allowed_paths=[[1], [2], [3], [1, 2]])
+        assert [2, 3] in PX.paths
+        assert PX._allowed_paths == set([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
+
+        G = nx.Graph()
+        G.add_edge(3, 2)
+        PX = PathComplex(G)
+        assert [2, 3] in PX.paths
+        assert [3, 2] not in PX.paths
+
+    def test_clone(self):
+        """Test clone."""
+        PX = PathComplex([[1, 2, 3], [1, 2, 4]])
+        PX_clone = PX.clone()
+        assert set(PX_clone.paths) == set(PX.paths)
+        assert PX_clone is not PX
 
     def test_skeleton_raise_errors(self):
         """Test skeleton raise errors."""
@@ -146,6 +169,12 @@ class TestPathComplex:
         PX[[1, 2, 5]]["heat"] = 66
         assert PX[[1, 2, 5]] == {"heat": 66}
 
+    def test_get_len_(self):
+        """Test get size of the path complex."""
+        PX = PathComplex()
+        PX.add_paths_from([[1, 2, 3], [1, 2, 4]])
+        assert len(PX) == 9
+
     def test_add_paths_from(self):
         """Test add paths from graph."""
         PX = PathComplex()
@@ -170,6 +199,13 @@ class TestPathComplex:
         with pytest.raises(TypeError):
             PX.add_node([1, 2])
 
+        PX.add_node(Path(2))
+        assert 2 in PX.paths
+        assert [2] in PX.paths
+
+        with pytest.raises(ValueError):
+            PX.add_node(Path([2, 3]))
+
     def test_remove_nodes(self):
         """Test remove_nodes method."""
         PX = PathComplex([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
@@ -184,6 +220,7 @@ class TestPathComplex:
         PX = PathComplex(
             [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
         )
+        assert np.all(PX.incidence_matrix(0).todense == np.zeros((0, len(PX.nodes))))
         assert np.all(
             PX.incidence_matrix(1, signed=False).todense()
             == np.array([[1, 0, 0, 0], [1, 1, 1, 0], [0, 1, 0, 1], [0, 0, 1, 1]])
@@ -192,5 +229,149 @@ class TestPathComplex:
             PX.incidence_matrix(2, signed=False).todense()
             == np.array(
                 [[1, 1, 0, 0, 0], [1, 0, 1, 1, 1], [0, 1, 1, 1, 1], [0, 0, 1, 1, 1]]
+            )
+        )
+
+        with pytest.raises(ValueError):
+            PX.incidence_matrix(-1)
+
+        with pytest.raises(ValueError):
+            PX.incidence_matrix(3)
+
+        row, col, B = PX.incidence_matrix(0, index=True)
+        assert row == {}
+        assert col == {(0,): 0, (1,): 1, (2,): 2, (3,): 3}
+        assert np.all(B.todense() == np.zeros((0, len(PX.nodes))))
+
+        row, col, B = PX.incidence_matrix(1, index=True)
+        assert row == {(0,): 0, (1,): 1, (2,): 2, (3,): 3}
+        assert col == {(0, 1): 0, (1, 2): 1, (1, 3): 2, (2, 3): 3}
+        assert np.all(
+            B.todense()
+            == np.array([[-1, 0, 0, 0], [1, -1, -1, 0], [0, 1, 0, -1], [0, 0, 1, 1]])
+        )
+
+        row, col, B = PX.incidence_matrix(2, index=True)
+        assert row == {(0, 1): 0, (1, 2): 1, (1, 3): 2, (2, 3): 3}
+        assert col == {
+            (0, 1, 2): 0,
+            (0, 1, 3): 1,
+            (1, 2, 3): 2,
+            (1, 3, 2): 3,
+            (2, 1, 3): 4,
+        }
+        assert np.all(
+            B.todense()
+            == np.array(
+                [[1, 1, 0, 0, 0], [1, 0, 1, -1, 1], [0, 1, -1, 1, 1], [0, 0, 1, 1, -1]]
+            )
+        )
+
+    def test_up_laplacian_matrix(self):
+        """Test up laplacian matrix."""
+        PX = PathComplex(
+            [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        )
+        with pytest.raises(ValueError):
+            PX.up_laplacian_matrix(-1)
+        with pytest.raises(ValueError):
+            PX.up_laplacian_matrix(2)
+
+        row, L_up = PX.up_laplacian_matrix(0, index=True)
+        row_B, col_B, B = PX.incidence_matrix(1, index=True)
+        L_up_tmp = B.todense() @ B.todense().T
+
+        assert np.all(L_up.todense() == L_up_tmp)
+        assert row == row_B
+
+        L_up = PX.up_laplacian_matrix(1)
+        B = PX.incidence_matrix(2)
+        L_up_tmp = B.todense() @ B.todense().T
+
+        assert np.all(L_up.todense() == L_up_tmp)
+
+        L_up = PX.up_laplacian_matrix(1, signed=True)
+        B = PX.incidence_matrix(2, signed=True)
+        L_up_tmp = B.todense() @ B.todense().T
+
+        assert np.all(L_up.todense() == L_up_tmp)
+
+    def test_down_laplacian_matrix(self):
+        """Test down laplacian matrix."""
+        PX = PathComplex(
+            [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        )
+        with pytest.raises(ValueError):
+            PX.down_laplacian_matrix(0)
+        with pytest.raises(ValueError):
+            PX.down_laplacian_matrix(3)
+
+        row, L_down = PX.down_laplacian_matrix(1, index=True)
+        row_B, col_B, B = PX.incidence_matrix(1, index=True)
+        L_down_tmp = B.todense().T @ B.todense()
+
+        assert np.all(L_down.todense() == L_down_tmp)
+        assert row == row_B
+
+        L_down = PX.down_laplacian_matrix(2)
+        B = PX.incidence_matrix(2)
+        L_down_tmp = B.todense().T @ B.todense()
+
+        assert np.all(L_down.todense() == L_down_tmp)
+
+        L_down = PX.down_laplacian_matrix(2, signed=True)
+        B = PX.incidence_matrix(2, signed=True)
+        L_down_tmp = B.todense().T @ B.todense()
+
+        assert np.all(L_down.todense() == L_down_tmp)
+
+    def test_adjacency_matrix(self):
+        """Test adjacency matrix."""
+        PX = PathComplex(
+            [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        )
+        with pytest.raises(ValueError):
+            PX.adjacency_matrix(-1)
+        with pytest.raises(ValueError):
+            PX.adjacency_matrix(2)
+
+        adj_0 = PX.adjacency_matrix(0, signed=False).todense()
+        assert np.all(
+            adj_0 == np.array([[0, 1, 0, 0], [1, 0, 1, 1], [0, 1, 0, 1], [0, 1, 1, 0]])
+        )
+
+        adj_1 = PX.adjacency_matrix(1, signed=False).todense()
+
+        assert np.all(
+            adj_1 == np.array([[0, 1, 1, 0], [1, 0, 1, 1], [1, 1, 0, 1], [0, 1, 1, 0]])
+        )
+
+    def test_coadjacency_matrix(self):
+        """Test coadjacency matrix."""
+        PX = PathComplex(
+            [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        )
+        with pytest.raises(ValueError):
+            PX.coadjacency_matrix(0)
+        with pytest.raises(ValueError):
+            PX.coadjacency_matrix(3)
+
+        coadj_1 = PX.coadjacency_matrix(1, signed=False).todense()
+        assert np.all(
+            coadj_1
+            == np.array([[0, 1, 1, 0], [1, 0, 1, 1], [1, 1, 0, 1], [0, 1, 1, 0]])
+        )
+
+        coadj_2 = PX.coadjacency_matrix(2, signed=False).todense()
+        assert np.all(
+            coadj_2
+            == np.array(
+                [
+                    [0, 1, 1, 1, 1],
+                    [1, 0, 1, 1, 1],
+                    [1, 1, 0, 1, 1],
+                    [1, 1, 1, 0, 1],
+                    [1, 1, 1, 1, 0],
+                ]
             )
         )

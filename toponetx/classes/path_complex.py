@@ -83,17 +83,27 @@ class PathComplex(Complex):
         self._path_set = PathView()
         self._reserve_sequence_order = reserve_sequence_order
         if allowed_paths is not None:
-            self._allowed_paths = set(allowed_paths)
+            if len(allowed_paths) > 0:
+                for i in range(
+                    len(allowed_paths)
+                ):  # make sure list does not contain list
+                    if isinstance(allowed_paths[i], list):
+                        allowed_paths[i] = tuple(allowed_paths[i])
+                self._allowed_paths = set(allowed_paths)
+            else:
+                self._allowed_paths = set()
         else:
             self._allowed_paths = set()
 
         if isinstance(paths, nx.Graph):
             # compute allowed_paths in order to construct boundary incidence matrix/adj matrix.
             if self._allowed_paths is not None:
-                self._allowed_paths = self.compute_allowed_paths(
-                    paths,
-                    reserve_sequence_order=reserve_sequence_order,
-                    max_rank=max_rank,
+                self._allowed_paths.update(
+                    self.compute_allowed_paths(
+                        paths,
+                        reserve_sequence_order=reserve_sequence_order,
+                        max_rank=max_rank,
+                    )
                 )
 
             # get feature of nodes and edges if available
@@ -300,7 +310,7 @@ class PathComplex(Complex):
         -------
         PathComplex
         """
-        return PathComplex(self.paths, name=self.name)
+        return PathComplex(list(self.paths), name=self.name)
 
     def skeleton(self, rank: int) -> set[tuple[Hashable]]:
         """Compute skeleton.
@@ -457,10 +467,7 @@ class PathComplex(Complex):
         If `index` is True, return a tuple of (idx_p, up_laplacian_matrix).
         If `index` is False, return up_laplacian_matrix.
         """
-        if rank == 0:
-            row, col, B_next = self.incidence_matrix(rank + 1, index=True)
-            L_up = B_next @ B_next.transpose()
-        elif rank < self.dim:
+        if 0 <= rank < self.dim:
             row, col, B_next = self.incidence_matrix(rank + 1, index=True)
             L_up = B_next @ B_next.transpose()
         else:
@@ -506,9 +513,9 @@ class PathComplex(Complex):
         if not signed:
             L_down = abs(L_down)
         if index:
-            return row, L_down
+            return row, L_down.tolil()
         else:
-            return L_down
+            return L_down.tolil()
 
     def adjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
         """

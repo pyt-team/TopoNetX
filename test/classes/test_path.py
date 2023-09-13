@@ -17,6 +17,17 @@ class TestPath:
         assert s.name == ""
         assert s._properties == {}
 
+    def test_invalid_inputs(self):
+        """Test invalid inputs."""
+        with pytest.raises(ValueError):
+            _ = Path([[1], 2, 3])
+
+        with pytest.raises(ValueError):
+            _ = Path(Path((1, 2, 3)))
+
+        with pytest.raises(ValueError):
+            _ = Path(frozenset((1, 2, 3)))
+
     def test_duplicate_nodes(self):
         """Test creation of path with duplicate nodes."""
         with pytest.raises(ValueError):

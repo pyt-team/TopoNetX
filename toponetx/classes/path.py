@@ -184,13 +184,13 @@ class Path(Atom):
             This variable is only used for sanity check on the input.
         """
         if isinstance(elements, Sequence):
-            for i in elements:
-                if not isinstance(i, Hashable):
-                    raise ValueError(f"All nodes of a p-path must be hashable, got {i}")
             if not isinstance(elements, list) and not isinstance(elements, tuple):
                 raise ValueError(
                     f"Elements of an elementary p-path must be a list or tuple, got {type(elements)}"
                 )
+            for i in elements:
+                if not isinstance(i, Hashable):
+                    raise ValueError(f"All nodes of a p-path must be hashable, got {i}")
             if (
                 not reserve_sequence_order
                 and len(elements) > 1
@@ -202,7 +202,12 @@ class Path(Atom):
                     )
                 )
         elif isinstance(elements, Hashable):
-            pass
+            if isinstance(elements, int) or isinstance(elements, str):
+                pass
+            else:
+                raise ValueError(
+                    f"Elements of an elementary p-path must be a list or tuple, got {type(elements)}"
+                )
 
     def __repr__(self) -> str:
         """Return string representation of elementary p-paths."""
