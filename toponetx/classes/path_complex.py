@@ -16,8 +16,13 @@ __all__ = ["PathComplex"]
 class PathComplex(Complex):
     """A class representing a path complex.
 
-    Class for constructing path complexes from graphs or iterables of paths.
-    The path complex is a simplicial complex if certain conditions are met (https://arxiv.org/pdf/1207.2834.pdf).
+    A path complex contains elementary p-paths that span the space of simple paths. Path complexes are a topological structure whose
+    building blocks are paths, which are essentially different from simplicial complexes and cell complexes. If certain conditions are met, path complexes can generalize
+    simplicial complexes.
+
+    For example, a triangle with three vertices 1, 2, and 3 can be represented as a simplicial complex (1, 2, 3). Similarly, it can be represented as a path complex (1, 2, 3) whose
+    boundary 1-paths are (1, 2), (2, 3), and (1, 3). Another example is a simple path (1, 2, 3). In this case, we cannot lift the simple path to a 2-dimensional simplicial complex, as
+    triangle does not exist. However, we can still represent the simple path as a path complex (1, 2, 3) whose boundary 1-paths are (1, 2) and (2, 3) (1-path (1,3) does not exist).
 
     Parameters
     ----------
@@ -26,14 +31,41 @@ class PathComplex(Complex):
     name : str, optional
         A name for the path complex.
     reserve_sequence_order : bool, default=False
-        If True, reserve the order of the sub-sequence of nodes in the p-path. Else, the sub-sequence of nodes in the p-path will
+        If True, reserve the order of the sub-sequence of nodes in the elementary p-path. Else, the sub-sequence of nodes in the elementary p-path will
         be reversed if the first index is larger than the last index.
     allowed_paths : Iterable[tuple[Hashable]], optional
-        An iterable of allowed boundaries. If None, only obvious boundaries are constructed (sub-sequences where the first or the last index is omitted).
+        An iterable of allowed boundaries.
+        If None and the input is a Graph, allowed paths are automatically computed by enumerating all simple paths in the graph whose length is less than or equal to max_rank.
+        If None and the input is not a Graph, allowed paths contain the input paths, their truncated subsequences (sub-sequences where the first
+        or the last index is omitted), and any sub-sequences of the truncated subsequences in a recursive manner.
     max_rank : int, default=3
         The maximal length of a path in the path complex.
     attr: keyword arguments, optional
         Additional attributes to be associated with the path complex.
+
+    Notes
+    -----
+    - By the definition established by (https://arxiv.org/pdf/1207.2834.pdf), a path complex P is a non-empty collection of elementary p-paths such that for any sequence
+    of vertices in a finite non-empty set V that belong to P, the truncated sequence of vertices (which is sometimes referred to as obvious boundaries) also belongs to P.
+    The truncated sequences are sub-sequences of the original elementary p-path where the first or the last index is omitted. For instance, if we have an elementary p-path (1, 2, 3),
+    the truncated sequences are (1,2) and (2,3).
+    - Our path complex is different from the path complex defined in (https://arxiv.org/pdf/1207.2834.pdf). In our path complex, elementary p-paths span the space of simple paths.
+    The path complex originally proposed has elementary p-paths that span the space of boundary-invariant paths.
+    - The path complex is a simplicial complex if certain conditions are met (https://arxiv.org/pdf/1207.2834.pdf).
+
+    Examples
+    --------
+    >>> PC = PathComplex([(1, 2, 3)])
+    >>> PC.paths
+    PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
+    >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+    >>> PC.paths
+    PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
+    >>> G = nx.Graph()
+    >>> G.add_edges_from([(1, 2), (2, 3), (1, 3)])
+    >>> PC = PathComplex(G)
+    >>> PC.paths
+    PathView([(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 3, 2), (1, 2, 3), (2, 1, 3)])
     """
 
     def __init__(
@@ -88,12 +120,24 @@ class PathComplex(Complex):
 
     def add_paths_from(self, paths: Iterable[Sequence[Hashable] | Path]) -> None:
         """
-        Add paths from an iterable of paths.
+        Add elementary paths from an iterable of elementary paths.
+
+        An elementary p-path is a sequence of nodes (n1, ..., np) where p is the length of the sequence. In a path complex,
+        for every elementary p-path in the path complex, their truncated sequences (n2, ..., np) and (n1, ..., np-1) are also in the path complex.
 
         Parameters
         ----------
         paths : Iterable[Sequence[Hashable] or Path]
             an iterable of paths as lists, tuples, or Path objects.
+
+        Examples
+        --------
+        >>> PC = PathComplex([(1, 2, 3)])
+        >>> PC.paths
+        PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
+        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+        >>> PC.paths
+        PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
         """
         if isinstance(paths, Hashable):
             raise TypeError("Paths must be a iterable of paths as lists, tuples.")
@@ -103,9 +147,12 @@ class PathComplex(Complex):
 
     def add_path(self, path: Hashable | Sequence[Hashable] | Path, **attr) -> None:
         """
-        Add path to the path complex.
+        Add an elementary path to the path complex.
 
-        This method automatically initializes any obvious sub-paths (sub-paths where the first or last index is omitted) of the path if not available.
+        An elementary p-path is a sequence of nodes (n1, ..., np) where p is the length of the sequence. In a path complex,
+        for every elementary p-path in the path complex, their truncated sequences (n2, ..., np) and (n1, ..., np-1) are also in the path complex.
+
+        This method automatically initializes any obvious sub-paths (sub-paths where the first or last index is omitted) of the elementary path if not available.
         In order to add non-obvious sub-paths, manually add the sub-paths.
 
         Parameters
@@ -113,6 +160,16 @@ class PathComplex(Complex):
         path : Hashable or Sequence[Hashable] or Path
             a Hashable or Sequence[Hashable] or Path representing a path in a path complex.
         attr : keyword arguments, optional
+
+        Examples
+        --------
+        >>> PC = PathComplex([(1, 2, 3)])
+        >>> PC.paths
+        PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
+        >>> PC.add_path((1, 2, 4))
+        >>> PC.paths
+        PathView([(1,), (2,), (3,), (4,), (1, 2), (2, 3), (2, 4), (1, 2, 3), (1, 2, 4)])
+
         """
         new_paths = set()
         if isinstance(path, int) or isinstance(path, str):
@@ -123,14 +180,16 @@ class PathComplex(Complex):
             if not isinstance(path, Path):  # path is a list or tuple
                 path_ = tuple(path)
                 if len(path) != len(set(path)):
-                    raise ValueError("A p-path cannot contain duplicate nodes.")
+                    raise ValueError(
+                        "An elementary p-path cannot contain duplicate nodes."
+                    )
                 if (
                     len(path_) > 1
                     and str(path_[0]) > str(path_[-1])
                     and not self._reserve_sequence_order
                 ):
                     raise ValueError(
-                        "A p-path must have the first index smaller than the last index, got {}".format(
+                        "An elementary p-path must have the first index smaller than the last index, got {}".format(
                             path
                         )
                     )
@@ -185,7 +244,7 @@ class PathComplex(Complex):
         Returns
         -------
         int
-            This is the highest dimension of any p-path in the complex.
+            This is the highest dimension of any elementary p-path in the complex.
         """
         return self._path_set.max_dim
 
@@ -205,12 +264,12 @@ class PathComplex(Complex):
     @property
     def paths(self) -> PathView:
         """
-        Set of all p-paths.
+        Set of all elementary p-paths.
 
         Returns
         -------
         PathView
-            A view of all p-paths in the path complex.
+            A view of all elementary p-paths in the path complex.
         """
         return self._path_set
 
@@ -218,7 +277,7 @@ class PathComplex(Complex):
     def shape(self) -> tuple[int, ...]:
         """Shape of path complex.
 
-        (number of p-paths[i], for i in range(0,dim(Pc)))
+        (number of elementary p-paths for each dimension d, for d in range(0,dim(Pc)))
 
         Returns
         -------
@@ -244,7 +303,7 @@ class PathComplex(Complex):
         Returns
         -------
         set[tuple[Hashable]]
-            Set of p-paths of dimension specified by `rank`.
+            Set of elementary p-paths of dimension specified by `rank`.
         """
         if rank < len(self._path_set.faces_dict) and rank >= 0:
             tmp = (path for path in self._path_set.faces_dict[rank].keys())
@@ -374,33 +433,6 @@ class PathComplex(Complex):
                 return boundary
             else:
                 return abs(boundary)
-
-    def coincidence_matrix(self, rank: int, signed: bool = True, index: bool = False):
-        """Compute coincidence matrix of the path complex.
-
-        This is also called the coboundary matrix.
-
-        Parameters
-        ----------
-        rank : int
-            The dimension of the coincidence matrix.
-        signed : bool, default=True
-            If True, return signed coincidence matrix. Else, return absolute coincidence matrix.
-        index : bool, default=False
-            If True, return coincidence matrix with indices. Else, return coincidence matrix without indices.
-
-        Returns
-        -------
-        If `index` is True, return a tuple of (idx_p, idx_p_plus_1, coincidence_matrix).
-        If `index` is False, return coincidence_matrix.
-        """
-        if index:
-            idx_faces, idx_paths, boundary = self.incidence_matrix(
-                rank, signed=signed, index=True
-            )
-            return idx_faces, idx_paths, boundary.T
-        else:
-            return self.incidence_matrix(rank, signed=signed, index=False).T
 
     def up_laplacian_matrix(self, rank: int, signed: bool = True, index: bool = False):
         """
@@ -560,17 +592,17 @@ class PathComplex(Complex):
 
     def __getitem__(self, item: Sequence[Hashable] | Hashable):
         """
-        Get p-path.
+        Get the elementary p-path.
 
         Parameters
         ----------
         item : Sequence[Hashable] | Hashable
-            A p-path or a node in the path complex.
+            An elementary p-path or a node in the path complex.
         """
         if item in self:
             return self._path_set[item]
         else:
-            raise KeyError("path is not in the path complex")
+            raise KeyError("The elementary p-path is not in the path complex")
 
     def __iter__(self) -> Iterator:
         """Iterate over all faces of the path complex.
@@ -582,7 +614,7 @@ class PathComplex(Complex):
         return chain.from_iterable(self._path_set.faces_dict)
 
     def __len__(self) -> int:
-        """Return the number of p-paths in the path complex.
+        """Return the number of elementary p-paths in the path complex.
 
         Returns
         -------
@@ -605,13 +637,16 @@ class PathComplex(Complex):
         """
         Compute allowed paths from a graph.
 
+        Allowed paths are automatically computed by enumerating all simple paths in the graph whose length is less than
+        or equal to max_rank. Allowed paths allow us to restrict the boundary of an elementary p-path to only sequences that exist in the graph.
+
         Parameters
         ----------
         graph : nx.Graph
             A graph.
         reserve_sequence_order : bool, default=False
-            If True, reserve the order of the sub-sequence of nodes in the p-path.
-            Else, the sub-sequence of nodes in the p-path will be reversed if the first index is larger than the last index.
+            If True, reserve the order of the sub-sequence of nodes in the elmentary p-path.
+            Else, the sub-sequence of nodes in the elementary p-path will be reversed if the first index is larger than the last index.
         max_rank : int, default=3
             The maximal length of a path in the path complex.
 
@@ -619,6 +654,14 @@ class PathComplex(Complex):
         -------
         set[list | tuple]
             A set of allowed paths.
+
+        Examples
+        --------
+        >>> G = nx.Graph()
+        >>> G.add_edges_from([(1, 2), (2, 3), (1, 3), (0, 1)])
+        >>> allowed_paths = PathComplex.compute_allowed_paths(G, max_rank = 2)
+        >>> allowed_paths
+        {(0, 1), (1, 3), (1, 2), (2,), (1, 3, 2), (0, 1, 2), (0, 1, 3), (1, 2, 3), (2, 1, 3), (2, 3), (1,), (0,), (3,)}
         """
         allowed_paths = list()
         all_nodes_list = list(
