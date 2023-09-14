@@ -689,7 +689,7 @@ class SimplicialComplex(Complex):
         return edges
 
     def incidence_matrix(
-        self, rank, signed: bool = True, weight=None, index: bool = False
+        self, rank, signed: bool = True, weight: str | None = None, index: bool = False
     ):
         """Compute incidence matrix of the simplicial complex.
 
@@ -895,7 +895,7 @@ class SimplicialComplex(Complex):
         return sp.sparse.csr_matrix(diags_sqrt @ (L_hodge @ diags_sqrt))
 
     def up_laplacian_matrix(
-        self, rank, signed: bool = True, weight=None, index: bool = False
+        self, rank, signed: bool = True, weight: str | None = None, index: bool = False
     ):
         """Compute the up Laplacian matrix of the simplicial complex.
 
@@ -908,10 +908,8 @@ class SimplicialComplex(Complex):
                        adjacency matrices from the hodge-laplacian
                        typically higher-order adjacency matrices' entries are
                        typically positive.
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
@@ -925,7 +923,8 @@ class SimplicialComplex(Complex):
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
         """
-        weight = None  # this feature is not supported in this version
+        if weight is not None:
+            raise ValueError("`weight` is not supported in this version")
 
         if rank == 0:
             row, col, B_next = self.incidence_matrix(
@@ -996,7 +995,7 @@ class SimplicialComplex(Complex):
         return L_down
 
     def adjacency_matrix(
-        self, rank, signed: bool = False, weight=None, index: bool = False
+        self, rank, signed: bool = False, weight: str | None = None, index: bool = False
     ):
         """Compute the adjacency matrix of the simplicial complex.
 
@@ -1014,7 +1013,8 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([3, 4, 8])
         >>> adj1 = SC.adjacency_matrix(1)
         """
-        weight = None  # this feature is not supported in this version
+        if weight is not None:
+            raise ValueError("`weight` is not supported in this version")
 
         ind, L_up = self.up_laplacian_matrix(
             rank, signed=signed, weight=weight, index=True
