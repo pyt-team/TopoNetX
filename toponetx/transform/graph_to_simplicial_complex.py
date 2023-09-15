@@ -1,5 +1,5 @@
 """Methods to lift a graph to a simplicial complex."""
-from itertools import takewhile, combinations
+from itertools import combinations, takewhile
 from warnings import warn
 
 import networkx as nx

@@ -209,4 +209,3 @@ class TestGraphToSimplicialComplex:
                 assert simplex in sc
             for simplex in unexpected_simplices:
                 assert simplex not in sc
-
