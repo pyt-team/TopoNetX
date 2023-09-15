@@ -1,5 +1,6 @@
 """Methods to lift a graph to a simplicial complex."""
 from itertools import combinations, takewhile
+from typing import Optional
 from warnings import warn
 
 import networkx as nx
@@ -30,7 +31,6 @@ def graph_to_neighbor_complex(G: nx.Graph) -> SimplicialComplex:
     -----
     This type of simplicial complexes can have very large dimension ( dimension = max_i(len (G.neighbors(i))) )
     and it is a function of the distribution of the valency of the graph.
-
     """
     simplices = []
     for node in G:
@@ -97,7 +97,9 @@ def graph_2_clique_complex(
     return graph_to_clique_complex(G, max_dim)
 
 
-def weighted_graph_to_vietoris_rips_complex(G, r, max_dim=None):
+def weighted_graph_to_vietoris_rips_complex(
+    G: nx.Graph, r: float, max_dim: Optional[int] = None
+):
     """Get the Vietoris-Rips complex of radius r of a weighted undirected graph.
 
     The Vietoris-Rips complex of radius
@@ -133,7 +135,7 @@ def weighted_graph_to_vietoris_rips_complex(G, r, max_dim=None):
     possible_cliques = (
         all_cliques
         if max_dim is None
-        else filter(lambda face: len(face) <= max_dim, all_cliques)
+        else takewhile(lambda face: len(face) <= max_dim, all_cliques)
     )
     vr_cliques = filter(is_in_vr_complex, possible_cliques)
     return SimplicialComplex(list(vr_cliques))
