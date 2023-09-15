@@ -98,7 +98,7 @@ def graph_2_clique_complex(
 
 
 def weighted_graph_to_vietoris_rips_complex(
-    G: nx.Graph, r: float, max_dim: Optional[int] = None
+    G: nx.Graph, r: float, max_dim: int | None = None
 ):
     """Get the Vietoris-Rips complex of radius r of a weighted undirected graph.
 
