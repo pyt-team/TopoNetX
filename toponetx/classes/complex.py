@@ -2,11 +2,108 @@
 
 
 import abc
+from collections.abc import Collection, Iterator
+from typing import Any, Hashable
 
-__all__ = ["Complex"]
+__all__ = ["Atom", "Complex"]
 
 
-class Complex:
+class Atom(abc.ABC):
+    """Abstract class representing an atom in a complex.
+
+    Parameters
+    ----------
+    elements : Collection[Hashable]
+        The elements in the atom.
+    name : str, optional
+        Name of the atom.
+    kwargs : keyword arguments, optional
+        Additional attributes to be associated with the atom.
+    """
+
+    elements: Collection[Hashable]
+    name: str
+
+    def __init__(
+        self, elements: Collection[Hashable], name: str = "", **kwargs
+    ) -> None:
+        self.elements = elements
+        self.name = name
+
+        self._properties = dict()
+        self._properties.update(kwargs)
+
+    def __len__(self) -> int:
+        """Return the number of elements in the atom."""
+        return len(self.elements)
+
+    def __iter__(self) -> Iterator:
+        """Return an iterator over the elements in the atom.
+
+        Returns
+        -------
+        Iterator
+        """
+        return iter(self.elements)
+
+    def __contains__(self, item: Any) -> bool:
+        """Return True if the given element is contained in this atom.
+
+        Parameters
+        ----------
+        item : Any
+            The item to be checked.
+
+        Returns
+        -------
+        bool
+        """
+        return item in self.elements
+
+    def __getitem__(self, item: Any) -> Any:
+        """Return the property with the given name.
+
+        Parameters
+        ----------
+        item : Any
+            The name of the property.
+
+        Returns
+        -------
+        Any
+            The value of the property.
+
+        Raises
+        ------
+        KeyError
+            If the property does not exist.
+        """
+        return self._properties[item]
+
+    def __setitem__(self, key: Any, value: Any) -> None:
+        """Set the property with the given name to the given value.
+
+        Parameters
+        ----------
+        key : Any
+            The name of the property.
+        value : Any
+            The value of the property.
+        """
+        self._properties[key] = value
+
+    def update(self, attributes: dict) -> None:
+        """Update the properties of the atom.
+
+        Parameters
+        ----------
+        attributes : dict
+            The properties to be updated.
+        """
+        self._properties.update(attributes)
+
+
+class Complex(abc.ABC):
     """Abstract class representing a complex.
 
     A complex is a space that is constructed by attaching lower-dimensional
@@ -33,22 +130,36 @@ class Complex:
     structure consisting of a set of points, a subset of the power set of points, and a ranking function
     that assigns a rank to each subset based on its size. These classes are used in many areas of mathematics
     and computer science, such as geometric modeling, data analysis, and machine learning.
+
+    Parameters
+    ----------
+    name : str, optional
+        Name of the complex.
+    kwargs : keyword arguments, optional
+        Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
     """
 
-    def __init__(self) -> None:
-        pass
+    complex: dict[Any, Any]
+
+    def __init__(self, name: str = "", **kwargs) -> None:
+        self.name = name
+        self.complex = dict()
+        self.complex.update(kwargs)
 
     @property
     @abc.abstractmethod
     def nodes(self):
         """Return the node container."""
-        pass
 
     @property
     @abc.abstractmethod
     def dim(self) -> int:
         """Return dimension of the complex."""
-        pass
 
     @property
     @abc.abstractmethod
@@ -60,46 +171,46 @@ class Complex:
         tuple of ints
             The number of elements for each rank. If the complex is empty, an empty tuple is returned.
         """
-        pass
 
     @abc.abstractmethod
-    def skeleton(self, rank):
+    def skeleton(self, rank: int):
         """Return dimension of the complex."""
-        pass
 
     @abc.abstractmethod
-    def __str__(self):
+    def __str__(self) -> str:
         """Print basic string representation."""
-        pass
 
     @abc.abstractmethod
-    def __repr__(self):
-        """Print detailed string representation."""
-        pass
+    def __repr__(self) -> str:
+        """Printable representation of the complex.
+
+        Makes an attempt to return a string that would produce an object with the same value when passed to ``eval()``,
+        but may not be possible for all objects.
+
+        Returns
+        -------
+        str
+        """
 
     @abc.abstractmethod
     def __len__(self) -> int:
         """Return number of nodes."""
-        pass
 
     @abc.abstractmethod
     def clone(self) -> "Complex":
         """Clone complex."""
 
     @abc.abstractmethod
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Return an iterator over the nodes."""
-        pass
 
     @abc.abstractmethod
-    def __contains__(self, item):
+    def __contains__(self, item: Any) -> bool:
         """Check whether the complex contains an item."""
-        pass
 
     @abc.abstractmethod
-    def __getitem__(self, node):
+    def __getitem__(self, key):
         """Get item."""
-        pass
 
     @abc.abstractmethod
     def remove_nodes(self, node_set) -> None:
@@ -107,24 +218,73 @@ class Complex:
 
         Any elements that become invalid due to the removal of nodes are also removed.
         """
-        pass
 
     @abc.abstractmethod
-    def add_node(self, node):
+    def add_node(self, node) -> None:
         """Add node to the complex."""
-        pass
 
     @abc.abstractmethod
-    def incidence_matrix(self):
-        """Return incidence matrix of the complex."""
-        pass
+    def incidence_matrix(
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
+        """Return incidence matrix of the complex.
+
+        Parameters
+        ----------
+        rank : int
+            The rank of the atoms to consider.
+        signed : bool, default=True
+            If True, the incidence matrix is signed, otherwise it is unsigned.
+        weight : str, optional
+            The name of the property to use as weights for the incidence matrix.
+        index : bool, default=False
+            If True, the incidence matrix is indexed by the nodes of the complex.
+        """
 
     @abc.abstractmethod
-    def adjacency_matrix(self):
-        """Return adjacency matrix of the complex."""
-        pass
+    def adjacency_matrix(
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
+        """Return adjacency matrix of the complex.
+
+        Parameters
+        ----------
+        rank : int
+            The rank of the atoms to consider.
+        signed : bool, default=True
+            If True, the adjacency matrix is signed, otherwise it is unsigned.
+        weight : str, optional
+            The name of the property to use as weights for the adjacency matrix.
+        index : bool, default=False
+            If True, the adjacency matrix is indexed by the atoms of the complex.
+        """
 
     @abc.abstractmethod
-    def coadjacency_matrix(self):
-        """Return coadjacency matrix of the complex."""
-        pass
+    def coadjacency_matrix(
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
+        """Return coadjacency matrix of the complex.
+
+        Parameters
+        ----------
+        rank : int
+            The rank of the atoms to consider.
+        signed : bool, default=True
+            If True, the adjacency matrix is signed, otherwise it is unsigned.
+        weight : str, optional
+            The name of the property to use as weights for the adjacency matrix.
+        index : bool, default=False
+            If True, the adjacency matrix is indexed by the atoms of the complex.
+        """

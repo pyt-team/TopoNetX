@@ -1,15 +1,16 @@
-"""Cell and CellView classes."""
+"""Cell class."""
 
 from collections import Counter, deque
-from collections.abc import Iterable
+from collections.abc import Collection, Iterable, Sequence
 from itertools import zip_longest
+from typing import Literal
 
-import numpy as np
+from toponetx.classes.complex import Atom
 
 __all__ = ["Cell"]
 
 
-class Cell:
+class Cell(Atom):
     """Class representing a 2D cell.
 
     A 2D cell is an elementary building block used to build a 2D cell complex, whether regular or non-regular.
@@ -49,20 +50,23 @@ class Cell:
     >>> v2 = (1, 1)
     >>> v3 = (0, 1)
     # create the cell with the vertices and edges
-    >>> cell = Cell([v0, v1, v2, v3],type="square")
+    >>> cell = Cell([v0, v1, v2, v3], type="square")
     >>> cell["type"]
-    >>> print(list(cell.boundary))
+    >>> list(cell.boundary)
     [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
     ((0, 1), (0, 0))]
     """
 
-    def __init__(self, elements, name: str = "", regular=True, **attr) -> None:
-        self.name = name
+    def __init__(
+        self, elements: Collection, name: str = "", regular: bool = True, **attr
+    ) -> None:
+        super().__init__(tuple(elements), name, **attr)
+
         self._regular = regular
         elements = list(elements)
         self._boundary = list(
             zip_longest(elements, elements[1:] + [elements[0]])
-        )  # list of edges define the boundary of the 2d cell
+        )  # list of edges defines the boundary of the 2d cell
         if len(elements) <= 1:
             raise ValueError(
                 f"cell must contain at least 2 edges, got {len(elements)+1}"
@@ -78,54 +82,11 @@ class Cell:
                     )
                 _adjdict[e[0]] = e[1]
         else:
-
             for e in self._boundary:
                 if e[0] == e[1]:
                     raise ValueError(
                         f"self loops are not permitted, got {(e[0],e[1])} as an edge in the cell's boundary"
                     )
-
-        self._elements = tuple(elements)
-        self.properties = dict()
-        self.properties.update(attr)
-
-    def __getitem__(self, item):
-        """Retrieve the value associated with the given key in the properties dictionary.
-
-        Parameters
-        ----------
-        item : hashable
-            The key to retrieve from the properties dictionary.
-
-        Returns
-        -------
-        The value associated with the given key in the properties dictionary.
-
-        Raises
-        ------
-        KeyError:
-            If the given key is not in the properties dictionary.
-        """
-        if item not in self.properties:
-            raise KeyError(f"attr {item} is not an attr in the cell {self.name}")
-        else:
-            return self.properties[item]
-
-    def __setitem__(self, key, item):
-        """Set the value associated with the given key in the properties dictionary.
-
-        Parameters
-        ----------
-        key : hashable
-            The key to set in the properties dictionary.
-        item : hashable
-            The value to associate with the given key in the properties dictionary.
-
-        Returns
-        -------
-        None
-        """
-        self.properties[key] = item
 
     def clone(self) -> "Cell":
         """Clone the Cell with all properties.
@@ -138,18 +99,18 @@ class Cell:
         -------
         Cell
         """
-        return Cell(self.elements, self.name, self._regular, **self.properties)
+        return Cell(self.elements, self.name, self._regular, **self._properties)
 
     @staticmethod
-    def is_valid_cell(elements, regular=False):
+    def is_valid_cell(elements: Sequence, regular: bool = False) -> bool:
         """Check if a 2D cell defined by a list of elements is valid.
 
         Parameters
         ----------
-        elements : list
+        elements : Sequence
             List of elements defining the cell.
-        regular : bool, optional
-            Indicates if the cell is regular. Default is False.
+        regular : bool, default=False
+            Indicates if the cell is regular.
 
         Returns
         -------
@@ -177,10 +138,13 @@ class Cell:
         return True
 
     @property
-    def is_regular(self):
+    def is_regular(self) -> bool:
         """Check if a cell is regular.
 
-        Return true is the Cell is a regular cell, and False otherwise
+        Returns
+        -------
+        bool
+            True if the Cell is regular, and False otherwise
         """
         if self._regular:  # condition enforced
             return True
@@ -193,27 +157,7 @@ class Cell:
 
         return True
 
-    def __len__(self) -> int:
-        """Get the number of elements in the cell.
-
-        Returns
-        -------
-        int
-            The number of elements in the cell.
-        """
-        return len(self._elements)
-
-    def __iter__(self):
-        """Iterate over the elements in the cell.
-
-        Returns
-        -------
-        iterator
-            An iterator over the elements in the cell.
-        """
-        return iter(self._elements)
-
-    def sign(self, edge):
+    def sign(self, edge) -> Literal[-1, 1]:
         """Compute the sign of the edge with respect to the cell.
 
         This takes an edge as input and computes the sign of the edge with respect to the cell.
@@ -254,10 +198,6 @@ class Cell:
 
         raise ValueError(f"The input {edge} is not a valid edge")
 
-    def __contains__(self, e):
-        """Check if the complex contains e."""
-        return e in self._elements
-
     def __repr__(self) -> str:
         """Return string representation of regular cell."""
         return f"Cell({self.elements})"
@@ -274,11 +214,6 @@ class Cell:
         """
         return iter(self._boundary)
 
-    @property
-    def elements(self):
-        """Return elements of the cell."""
-        return self._elements
-
     def reverse(self):
         """Reverse the sequence of nodes that defines the cell.
 
@@ -287,11 +222,14 @@ class Cell:
         Cell
             New cell with the new reversed elements.
         """
-        c = Cell(self._elements[::-1], name=self.name, regular=self._regular)
-        c.properties = self.properties
-        return c
+        return Cell(
+            self.elements[::-1],
+            name=self.name,
+            regular=self._regular,
+            **self._properties,
+        )
 
-    def is_homotopic_to(self, cell):
+    def is_homotopic_to(self, cell) -> bool:
         """Check if self is homotopic to input cell.
 
         Parameters
@@ -308,7 +246,7 @@ class Cell:
         )
 
     @staticmethod
-    def _are_homotopic(cell1, cell):
+    def _are_homotopic(cell1, cell) -> bool:
         """Check if cell1 is homotopic to input cell.
 
         Parameters
@@ -355,6 +293,6 @@ class Cell:
                 return True
         return False
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation of regular cell."""
-        return f"Nodes set:{self._elements}, boundary edges:{self.boundary}, attrs:{self.properties}"
+        return f"Nodes set:{self.elements}, boundary edges:{self.boundary}, attrs:{self._properties}"

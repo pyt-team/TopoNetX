@@ -1,4 +1,10 @@
 """Methods to lift a graph to a simplicial complex."""
+from itertools import takewhile, combinations
+from warnings import warn
+
+import networkx as nx
+
+from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = [
     "graph_to_clique_complex",
@@ -6,14 +12,8 @@ __all__ = [
     "weighted_graph_to_vietoris_rips_complex",
 ]
 
-import itertools
 
-import networkx as nx
-
-from toponetx import SimplicialComplex
-
-
-def graph_to_neighbor_complex(G):
+def graph_to_neighbor_complex(G: nx.Graph) -> SimplicialComplex:
     """Get the neighbor complex of a graph.
 
     Parameters
@@ -32,14 +32,16 @@ def graph_to_neighbor_complex(G):
     and it is a function of the distribution of the valency of the graph.
 
     """
-    neighbors = []
-    for i in G.nodes():
-        N = list(G.neighbors(i)) + [i]  # each simplex is the node and its n-hop nbhd
-        neighbors.append(N)
-    return SimplicialComplex(neighbors)
+    simplices = []
+    for node in G:
+        # each simplex is the node and its n-hop neighbors
+        simplices.append(list(G.neighbors(node)) + [node])
+    return SimplicialComplex(simplices)
 
 
-def graph_to_clique_complex(G, max_dim=None):
+def graph_to_clique_complex(
+    G: nx.Graph, max_dim: int | None = None
+) -> SimplicialComplex:
     """Get the clique complex of a graph.
 
     Parameters
@@ -56,12 +58,43 @@ def graph_to_clique_complex(G, max_dim=None):
     SimplicialComplex
         The clique simplicial complex of dimension dim of the graph G.
     """
-    if max_dim is None:
-        lst = nx.enumerate_all_cliques(G)
-        return SimplicialComplex(list(lst))
+    cliques = nx.enumerate_all_cliques(G)
 
-    lst = filter(lambda face: len(face) <= max_dim, nx.enumerate_all_cliques(G))
-    return SimplicialComplex(list(lst))
+    # `nx.enumerate_all_cliques` returns cliques in ascending order of size. Abort calling the generator once we reach
+    # cliques larger than the requested max dimension.
+    if max_dim is not None:
+        cliques = takewhile(lambda clique: len(clique) <= max_dim, cliques)
+
+    SC = SimplicialComplex(cliques)
+
+    # copy attributes of the input graph
+    for node in G.nodes:
+        SC[[node]].update(G.nodes[node])
+    for edge in G.edges:
+        SC[edge].update(G.edges[edge])
+    SC.complex.update(G.graph)
+
+    return SC
+
+
+def graph_2_neighbor_complex(G) -> SimplicialComplex:
+    warn(
+        "`graph_2_neighbor_complex` is deprecated and will be removed in a future version, use `graph_to_neighbor_complex` instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return graph_to_neighbor_complex(G)
+
+
+def graph_2_clique_complex(
+    G: nx.Graph, max_dim: int | None = None
+) -> SimplicialComplex:
+    warn(
+        "`graph_2_clique_complex` is deprecated and will be removed in a future version, use `graph_to_clique_complex` instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return graph_to_clique_complex(G, max_dim)
 
 
 def weighted_graph_to_vietoris_rips_complex(G, r, max_dim=None):
@@ -92,7 +125,7 @@ def weighted_graph_to_vietoris_rips_complex(G, r, max_dim=None):
     """
 
     def is_in_vr_complex(clique):
-        edges = itertools.combinations(clique, 2)
+        edges = combinations(clique, 2)
         edge_weights_lower_than_r = all(G[u][v]["weight"] <= r for u, v in edges)
         return edge_weights_lower_than_r
 

@@ -68,7 +68,7 @@ Test functions should be located in files whose filenames start with `test_`. Fo
       def test_capital_case():
          assert add(4, 5) == 9
 
-Use an `assert` statement to check that the function under test returns the correct output. 
+Use an `assert` statement to check that the function under test returns the correct output.
 
 Run Tests
 ~~~~~~~~~
@@ -76,7 +76,7 @@ Run Tests
 Install `pytest` which is the software tools used to run tests:
 
     .. code-block:: bash
-    
+
       $ pip install -e .[dev]
 
 Then run the test using:
@@ -84,11 +84,11 @@ Then run the test using:
     .. code-block:: bash
 
       $ pytest test_add.py
-      
+
 Verify that the code you have added does not break `TopoNetX` by running all the tests.
 
     .. code-block:: bash
-    
+
       $ pytest test/
 
 Write Documentation
@@ -97,7 +97,7 @@ Write Documentation
 Building the documentation requires installing specific requirements.
 
     .. code-block:: bash
-    
+
       $ pip install -e .[doc]
 
 Intro to Docstrings
@@ -107,7 +107,7 @@ A docstring is a well-formatted description of your function/class/module which 
 its purpose, usage, and other information.
 
 There are different markdown languages/formats used for docstrings in Python. The most common
-three are reStructuredText, numpy, and google docstring styles. For toponet, we are
+three are reStructuredText, numpy, and google docstring styles. For TopoNetX, we are
 using the numpy docstring standard.
 When writing up your docstrings, please review the `NumPy docstring guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_
 to understand the role and syntax of each section. Following this syntax is important not only for readability,

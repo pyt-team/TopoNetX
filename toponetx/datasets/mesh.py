@@ -8,7 +8,8 @@ from typing import Literal, overload
 import numpy as np
 import requests
 
-from toponetx import CellComplex, SimplicialComplex
+from toponetx.classes.cell_complex import CellComplex
+from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = ["stanford_bunny", "shrec_16", "coseg"]
 
@@ -38,23 +39,23 @@ COSEG_DS_MAP = {
 
 
 @overload
-def stanford_bunny(complex_type: Literal["cell"] = ...) -> CellComplex:
+def stanford_bunny(complex_type: Literal["cell"]) -> CellComplex:
     ...
 
 
 @overload
-def stanford_bunny(complex_type: Literal["simplicial"] = ...) -> SimplicialComplex:
+def stanford_bunny(complex_type: Literal["simplicial"]) -> SimplicialComplex:
     ...
 
 
 def stanford_bunny(
-    complex_type: Literal["cell", "simplicial"] = "simplicial"
+    complex_type: Literal["cell", "simplicial"]
 ) -> CellComplex | SimplicialComplex:
     """Load the Stanford Bunny mesh as a complex.
 
     Parameters
     ----------
-    complex_type : {'cell', 'simplicial'}, default='simplicial'
+    complex_type : {'cell', 'simplicial'}
         The type of complex to load. Supported values are
         "simplicial complex" and "cell complex".
         The default is "simplicial complex".
@@ -94,12 +95,12 @@ def shrec_16(size: Literal["full", "small"] = "full"):
     Notes
     -----
     Each npz file stores 5 keys:
-    "complexes",label","node_feat","edge_feat" and "face_feat".
+    "complexes","node_feat","edge_feat", "face_feat" and mesh label".
     complex : stores the simplicial complex of the mesh
-    label :  stores the label of the mesh
-    node_feat : stores 6 dim node feature vector: position and normal of the each node in the mesh
-    edge_feat : stores 10 dim edge feature vector: diheral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
-    face_feat : face area, face normal, face angle
+    node_feat : stores a 6 dim node feature vector: position and normal of the each node in the mesh
+    edge_feat : stores a 10 dim edge feature vector: dihedral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
+    face_feat : stores a 7-dimensional face feature vector: face area (1 feat), face normal (3 feat), face angles (3 feat)
+    mesh label : stores the label of the mesh
 
     Raises
     ------
@@ -174,7 +175,7 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
     complex : stores the simplicial complex of the mesh
     node_feat : stores a 6-dimensional node feature vector: position and normal of each node in the mesh
     edge_feat : stores a 10-dimensional edge feature vector: dihedral angle, edge span, 2 edge angles in the triangle, 6 edge ratios.
-    face_feat : stores face area, face normal, face angle
+    face_feat : stores a 7-dimensional face feature vector: face area (1 feat), face normal (3 feat), face angles (3 feat)
     face_label : stores the label of mesh segmentation as a face label
 
     Data Source

@@ -3,16 +3,14 @@
 The class also supports attaching arbitrary attributes and data to cells.
 """
 
-from collections.abc import Hashable
-from itertools import combinations
-from typing import Iterable
+from collections.abc import Hashable, Iterable, Iterator
+from itertools import chain, combinations
 from warnings import warn
 
 import networkx as nx
 import numpy as np
 from gudhi import SimplexTree
 from hypernetx import Hypergraph
-from networkx import Graph
 from scipy.sparse import coo_matrix, dok_matrix
 
 from toponetx.classes.complex import Complex
@@ -27,7 +25,7 @@ class SimplicialComplex(Complex):
     """Class representing a simplicial complex.
 
     Class for construction boundary operators, Hodge Laplacians,
-    higher order (co)adjacency operators from collection of
+    higher order (co)adjacency operators from a collection of
     simplices.
 
     A simplicial complex is a topological space of a specific kind, constructed by
@@ -49,7 +47,7 @@ class SimplicialComplex(Complex):
     which are a type of topological space constructed by "gluing together" points, line segments,
     triangles, and higher-dimensional counterparts. The class provides methods for computing boundary
     operators, Hodge Laplacians, and higher-order adjacency operators on the simplicial complex.
-    It also allows for compatibility with the NetworkX and gudhi libraries.
+    It also allows for compatibility with NetworkX and the GUDHI library.
 
     Features
     --------
@@ -65,10 +63,17 @@ class SimplicialComplex(Complex):
 
     Parameters
     ----------
-    simplices : list, optional,  default: None
+    simplices : list, optional
         list of maximal simplices that define the simplicial complex
-    name : hashable, optional, default: None
+    name : hashable, optional
         If None then a placeholder '' will be inserted as name
+    kwargs : keyword arguments, optional
+        Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
 
     Notes
     -----
@@ -82,52 +87,45 @@ class SimplicialComplex(Complex):
 
     >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
 
-    TopoNetX is also compatible with NetworkX, allowing users to create a simplicial complex from a NetworkX graph:
+    TopoNetX is also compatible with NetworkX, allowing users to create a simplicial complex from a NetworkX graph.
+    Existing node and edge attributes are copied to the simplicial complex:
 
-    >>> G = Graph() # networkx G
+    >>> G = nx.Graph()
     >>> G.add_edge(0, 1, weight=4)
-    >>> G.add_edge(0, 3)
-    >>> G.add_edge(0, 4)
-    >>> G.add_edge(1, 4)
+    >>> G.add_edges_from([(0, 3), (0, 4), (1, 4)])
     >>> SC = SimplicialComplex(simplices=G)
     >>> SC.add_simplex([1, 2, 3])
     >>> SC.simplices
     SimplexView([(0,), (1,), (3,), (4,), (2,), (0, 1), (0, 3), (0, 4), (1, 4), (1, 2), (1, 3), (2, 3), (1, 2, 3)])
+    >>> SC[(0, 1)]["weight"]
+    4
     """
 
-    def __init__(self, simplices=None, name: str = "", **attr):
-        super().__init__()
-
-        self.name = name
+    def __init__(self, simplices=None, name: str = "", **kwargs) -> None:
+        super().__init__(name, **kwargs)
 
         self._simplex_set = SimplexView()
 
-        self.complex = dict()  # dictionary for simplicial complex attributes
-
-        if simplices is not None:
-
-            if not isinstance(simplices, Iterable):
-                raise TypeError(
-                    f"Input simplices must be given as Iterable, got {type(simplices)}."
-                )
-
-        if isinstance(simplices, Graph):
-
-            _simplices = []
-            for simplex in simplices:  # simplices is a networkx G
-                _simplices.append(([simplex], simplices.nodes[simplex]))
-            for edge in simplices.edges:
-                u, v = edge
-                _simplices.append((edge, simplices.get_edge_data(u, v)))
+        if isinstance(simplices, nx.Graph):
+            _simplices = {}
+            for simplex, data in simplices.nodes(
+                data=True
+            ):  # `simplices` is a networkx graph
+                _simplices[(simplex,)] = data
+            for u, v, data in simplices.edges(data=True):
+                _simplices[(u, v)] = data
 
             simplices = []
-            for simplex in _simplices:
-                s1 = Simplex(simplex[0], **simplex[1])
+            for simplex, data in _simplices.items():
+                s1 = Simplex(simplex, **data)
                 simplices.append(s1)
-
-        if simplices is not None:
-            if isinstance(simplices, Iterable):
-                self.add_simplices_from(simplices)
+            self.add_simplices_from(simplices)
+        elif isinstance(simplices, Iterable):
+            self.add_simplices_from(simplices)
+        elif simplices is not None:
+            raise TypeError(
+                f"Input simplices must be given as Iterable, got {type(simplices)}."
+            )
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -139,10 +137,7 @@ class SimplicialComplex(Complex):
         -------
         tuple of ints
         """
-        return tuple(
-            len(self._simplex_set.faces_dict[i])
-            for i in range(len(self._simplex_set.faces_dict))
-        )
+        return self._simplex_set.shape
 
     @property
     def dim(self) -> int:
@@ -171,7 +166,7 @@ class SimplicialComplex(Complex):
         return NodeView(self._simplex_set.faces_dict, cell_type=Simplex)
 
     @property
-    def simplices(self):
+    def simplices(self) -> SimplexView:
         """Set of all simplices."""
         return self._simplex_set
 
@@ -190,7 +185,7 @@ class SimplicialComplex(Complex):
         Raises
         ------
         ValueError
-            If simplex is not in simplicial complex.
+            If simplex is not in the simplicial complex.
 
         Examples
         --------
@@ -216,12 +211,14 @@ class SimplicialComplex(Complex):
         Set of simplices of dimension n.
         """
         if rank < len(self._simplex_set.faces_dict) and rank >= 0:
-            return sorted(tuple(i) for i in self._simplex_set.faces_dict[rank].keys())
+            return sorted(
+                tuple(sorted(i)) for i in self._simplex_set.faces_dict[rank].keys()
+            )
         if rank < 0:
             raise ValueError(f"input must be a postive integer, got {rank}")
         raise ValueError(f"input {rank} exceeds max dim")
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return detailed string representation."""
         return f"Simplicial Complex with shape {self.shape} and dimension {self.dim}"
 
@@ -246,33 +243,16 @@ class SimplicialComplex(Complex):
         else:
             raise KeyError("simplex is not in the simplicial complex")
 
-    def __setitem__(self, simplex, **attr):
-        """Set attributes to a simplex."""
-        if isinstance(simplex, Simplex):
-            if simplex.nodes in self.faces_dict[len(simplex) - 1]:
-                self.faces_dict[len(simplex) - 1].update(attr)
-        elif isinstance(simplex, Iterable):
-            simplex = frozenset(simplex)
-            self.faces_dict[len(simplex) - 1].update(attr)
-        elif isinstance(simplex, Hashable):
-            if frozenset({simplex}) in self:
-                self.faces_dict[0].update(attr)
-        else:
-            raise TypeError("Input simplex must be Simplex, Iterable or Hashable.")
-
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Iterate over all faces of the simplicial complex.
 
         Returns
         -------
         dict_keyiterator
         """
-        all_simplices = []
-        for i in range(len(self._simplex_set.faces_dict)):
-            all_simplices = all_simplices + list(self._simplex_set.faces_dict[i].keys())
-        return iter(all_simplices)
+        return chain.from_iterable(self._simplex_set.faces_dict)
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self.face_set.
 
         Parameters
@@ -281,88 +261,70 @@ class SimplicialComplex(Complex):
         """
         return item in self._simplex_set
 
-    def _update_faces_dict_length(self, simplex):
-
+    def _update_faces_dict_length(self, simplex) -> None:
         if len(simplex) > len(self._simplex_set.faces_dict):
             diff = len(simplex) - len(self._simplex_set.faces_dict)
             for _ in range(diff):
                 self._simplex_set.faces_dict.append(dict())
 
-    def _update_faces_dict_entry(self, face, simplex_, maximal_faces, **attr):
+    def _update_faces_dict_entry(self, face, simplex, maximal_faces) -> None:
         """Update faces dictionary entry.
 
         Parameters
         ----------
         face :  an iterable, typically a list, tuple, set or a Simplex
         simplex : an iterable, typically a list, tuple, set or a Simplex
-        **attr : attrs associated with the input simplex
 
         Notes
         -----
-        the input 'face' is a face of the input 'simplex'.
+        the input `face` is a face of the input `simplex`.
         """
+        face = frozenset(face)
         k = len(face)
-        if frozenset(sorted(face)) not in self._simplex_set.faces_dict[k - 1]:
-            if len(face) == len(simplex_):
 
-                self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))] = {
+        if face not in self._simplex_set.faces_dict[k - 1]:
+            if k == len(simplex):
+                self._simplex_set.faces_dict[k - 1][face] = {
                     "is_maximal": True,
                     "membership": set(),
                 }
             else:
-                self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))] = {
+                self._simplex_set.faces_dict[k - 1][face] = {
                     "is_maximal": False,
-                    "membership": set({simplex_}),
+                    "membership": {simplex},
                 }
         else:
-            if len(face) != len(simplex_):
-                if self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                    "is_maximal"
-                ]:
-
-                    maximal_faces.add(frozenset(sorted(face)))
-                    self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                        "is_maximal"
-                    ] = False
-                    self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
+            if k != len(simplex):
+                self._simplex_set.faces_dict[k - 1][face]["membership"].add(simplex)
+                if self._simplex_set.faces_dict[k - 1][face]["is_maximal"]:
+                    maximal_faces.add(face)
+                    self._simplex_set.faces_dict[k - 1][face]["is_maximal"] = False
+                else:
+                    # make sure all children of previous maximal simplices do not have that membership anymore
+                    self._simplex_set.faces_dict[k - 1][face][
                         "membership"
-                    ].add(simplex_)
-
-                else:  # make sure all children of previous maximal simplices do
-                    # not have that membership  anymore
-                    d = self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                        "membership"
-                    ].copy()
-                    for f in d:
-                        if f in maximal_faces:
-                            self._simplex_set.faces_dict[k - 1][
-                                frozenset(sorted(face))
-                            ]["membership"].remove(f)
-                    self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                        "is_maximal"
-                    ] = False
-                    self._simplex_set.faces_dict[k - 1][frozenset(sorted(face))][
-                        "membership"
-                    ].add(simplex_)
-
-            else:
-                self._simplex_set.faces_dict[k - 1][simplex_].update(attr)
+                    ] -= maximal_faces
 
     @staticmethod
-    def get_boundaries(simplices, min_dim=None, max_dim=None):
-        """Get boundaries of simplices.
+    def get_boundaries(
+        simplices: Iterable, min_dim=None, max_dim=None
+    ) -> set[frozenset]:
+        """Get boundaries of the given simplices.
 
         Parameters
         ----------
-        simplices : list
-            DESCRIPTION. list or of simplices, typically integers.
-        min_dim : int, constrain the max dimension of faces
-        max_dim : int, constrain the max dimension of faces
+        simplices : Iterable
+            Iterable of simplices for which to compute the boundaries.
+        min_dim : int, optional
+            constrain the max dimension of faces
+        max_dim : int, optional
+            constrain the max dimension of faces
 
         Returns
         -------
-        face_set : set
-            DESCRIPTION. list of tuples or all faces at all levels (subsets) of the input list of simplices
+        set of frozensets
+            Set of simplices that are boundaries of the given simplices. If `min_dim` or `max_dim` are given, only
+            simplices with dimension in the given range are returned.
         """
         if not isinstance(simplices, Iterable):
             raise TypeError(
@@ -371,29 +333,30 @@ class SimplicialComplex(Complex):
 
         face_set = set()
         for simplex in simplices:
-            numnodes = len(simplex)
-            for r in range(numnodes, 0, -1):
+            start = (
+                min(max_dim + 1, len(simplex)) if max_dim is not None else len(simplex)
+            )
+            end = min_dim if min_dim is not None else 0
+
+            for r in range(start, end, -1):
                 for face in combinations(simplex, r):
-                    if max_dim is None and min_dim is None:
-                        face_set.add(frozenset(sorted(face)))
-                    elif max_dim is not None and min_dim is not None:
-                        if len(face) <= max_dim + 1 and len(face) >= min_dim + 1:
-                            face_set.add(frozenset(sorted(face)))
-                    elif max_dim is not None and min_dim is None:
-                        if len(face) <= max_dim + 1:
-                            face_set.add(frozenset(sorted(face)))
-                    elif max_dim is None and min_dim is not None:
-                        if len(face) >= min_dim + 1:
-                            face_set.add(frozenset(sorted(face)))
+                    face_set.add(frozenset(face))
 
         return face_set
 
-    def remove_maximal_simplex(self, simplex):
+    def remove_maximal_simplex(self, simplex) -> None:
         """Remove maximal simplex from simplicial complex.
 
-        Note
-        -----
-        Only maximal simplices are allowed to be deleted. Otherwise, raise ValueError
+        Parameters
+        ----------
+        simplex : Iterable
+
+        Raises
+        ------
+        KeyError
+            If simplex is not in simplicial complex.
+        ValueError
+            If simplex is not maximal.
 
         Examples
         --------
@@ -404,20 +367,18 @@ class SimplicialComplex(Complex):
         """
         if isinstance(simplex, Iterable):
             if not isinstance(simplex, Simplex):
-                simplex_ = frozenset(
-                    sorted(simplex)
-                )  # put the simplex in canonical order
+                simplex_ = frozenset(simplex)
             else:
-                simplex_ = simplex.nodes
+                simplex_ = simplex.elements
         if simplex_ in self._simplex_set.faces_dict[len(simplex_) - 1]:
-            if self.__getitem__(simplex)["is_maximal"]:
+            if self.is_maximal(simplex):
                 del self._simplex_set.faces_dict[len(simplex_) - 1][simplex_]
                 faces = Simplex(simplex_).faces
                 for s in faces:
                     if len(s) == len(simplex_):
                         continue
                     else:
-                        s = s.nodes
+                        s = s.elements
                         self._simplex_set.faces_dict[len(s) - 1][s]["membership"] -= {
                             simplex_
                         }
@@ -494,25 +455,25 @@ class SimplicialComplex(Complex):
         else:
             self.add_simplex([node], **attr)
 
-    def add_simplex(self, simplex, **attr):
-        """Add simplex to simplicial complex."""
+    def add_simplex(self, simplex, **attr) -> None:
+        """Add simplex to simplicial complex.
+
+        Parameters
+        ----------
+        simplex : Hashable or Iterable or Simplex or str
+            a Hashable or Iterable or Simplex in a simplicial complex.
+        """
         if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
             simplex = [simplex]
         if isinstance(simplex, str):
             simplex = [simplex]
         if isinstance(simplex, Iterable) or isinstance(simplex, Simplex):
             if not isinstance(simplex, Simplex):
-                for x in simplex:
-                    if not isinstance(x, Hashable):
-                        raise TypeError("all element of simplex must be hashable")
-
-                simplex_ = frozenset(
-                    sorted(simplex)
-                )  # put the simplex in cananical order
+                simplex_ = frozenset(simplex)
                 if len(simplex_) != len(simplex):
                     raise ValueError("a simplex cannot contain duplicate nodes")
             else:
-                simplex_ = simplex.nodes
+                simplex_ = simplex.elements
             self._update_faces_dict_length(simplex_)
 
             if (
@@ -529,17 +490,16 @@ class SimplicialComplex(Complex):
 
             for r in range(numnodes, 0, -1):
                 for face in combinations(simplex_, r):
-                    self._update_faces_dict_entry(face, simplex_, maximal_faces, **attr)
+                    self._update_faces_dict_entry(face, simplex_, maximal_faces)
+            self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(attr)
             if isinstance(simplex, Simplex):
                 self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(
-                    simplex.properties
+                    simplex._properties
                 )
             else:
                 self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(attr)
-        else:
-            raise TypeError("input type must be iterable, or Simplex")
 
-    def add_simplices_from(self, simplices):
+    def add_simplices_from(self, simplices) -> None:
         """Add simplices from iterable to simplicial complex."""
         for s in simplices:
             self.add_simplex(s)
@@ -586,19 +546,17 @@ class SimplicialComplex(Complex):
         """
         return self.get_cofaces(simplex, 0)
 
-    def set_simplex_attributes(self, values, name=None):
+    def set_simplex_attributes(self, values, name: str | None = None) -> None:
         """Set simplex attributes.
 
         Parameters
         ----------
-        values : TYPE
-            DESCRIPTION.
-        name : TYPE, optional
-            DESCRIPTION. The default is None.
-
-        Returns
-        -------
-        None.
+        values : dict
+            Either provide a mapping from simplices to values or a dict of dicts. In the former case, the attribute
+            `name` for each simplex is set to the corresponding value. In the latter case, the entire dictionary
+            is used to update the attributes of the simplices.
+        name : str, optional
+            The name of the attribute to set.
 
         Examples
         --------
@@ -650,7 +608,7 @@ class SimplicialComplex(Complex):
                     pass
             return
 
-    def get_node_attributes(self, name):
+    def get_node_attributes(self, name: str):
         """Get node attributes from combinatorial complex.
 
         Parameters
@@ -674,7 +632,7 @@ class SimplicialComplex(Complex):
         """
         return {tuple(n): self[n][name] for n in self.skeleton(0) if name in self[n]}
 
-    def get_simplex_attributes(self, name, rank=None):
+    def get_simplex_attributes(self, name: str, rank=None):
         """Get node attributes from simplical complex.
 
         Parameters
@@ -730,7 +688,9 @@ class SimplicialComplex(Complex):
         edges = zip(rows.tolist(), cols.tolist())
         return edges
 
-    def incidence_matrix(self, rank, signed=True, weight=None, index=False):
+    def incidence_matrix(
+        self, rank, signed: bool = True, weight: str | None = None, index: bool = False
+    ):
         """Compute incidence matrix of the simplicial complex.
 
         Getting the matrix that correpodnds to the boundary matrix of the input SC.
@@ -769,7 +729,7 @@ class SimplicialComplex(Complex):
                 idx_simplices.append(idx_simplex)
                 values.append((-1) ** i)
                 face = frozenset(simplex).difference({left_out})
-                idx_faces.append(simplex_dict_d_minus_1[tuple(face)])
+                idx_faces.append(simplex_dict_d_minus_1[tuple(sorted(face))])
         assert len(values) == (rank + 1) * len(simplex_dict_d)
         boundary = coo_matrix(
             (values, (idx_faces, idx_simplices)),
@@ -798,7 +758,9 @@ class SimplicialComplex(Complex):
             else:
                 return abs(boundary)
 
-    def coincidence_matrix(self, rank, signed=True, weight=None, index=False):
+    def coincidence_matrix(
+        self, rank, signed: bool = True, weight=None, index: bool = False
+    ):
         """Compute coincidence matrix of the simplicial complex.
 
         This is also called the coboundary matrix.
@@ -813,20 +775,24 @@ class SimplicialComplex(Complex):
                 rank, signed=signed, weight=weight, index=False
             ).T
 
-    def hodge_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
+    def hodge_laplacian_matrix(
+        self, rank, signed: bool = True, weight=None, index: bool = False
+    ):
         """Compute hodge-laplacian matrix for the simplicial complex.
 
         Parameters
         ----------
-        d : int, dimension of the Laplacian matrix.
-        signed : bool, is true return absolute value entry of the Laplacian matrix
+        d : int
+            Dimension of the Laplacian matrix.
+        signed : bool, default=True
+            Whether to return the signed or unsigned hodge laplacian.
             This is useful when one needs to obtain higher-order
             adjacency matrices from the hodge-laplacian
             typically higher-order adjacency matrices' entries are
             typically positive.
         weight : bool, default=False
-        index : boolean, optional, default False
-            Indicates wheather to return the indices that define the incidence matrix.
+        index : bool, default=False
+            Indicates whether to return the indices that define the incidence matrix.
 
         Returns
         -------
@@ -928,7 +894,9 @@ class SimplicialComplex(Complex):
 
         return sp.sparse.csr_matrix(diags_sqrt @ (L_hodge @ diags_sqrt))
 
-    def up_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
+    def up_laplacian_matrix(
+        self, rank, signed: bool = True, weight: str | None = None, index: bool = False
+    ):
         """Compute the up Laplacian matrix of the simplicial complex.
 
         Parameters
@@ -940,10 +908,8 @@ class SimplicialComplex(Complex):
                        adjacency matrices from the hodge-laplacian
                        typically higher-order adjacency matrices' entries are
                        typically positive.
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
@@ -957,7 +923,8 @@ class SimplicialComplex(Complex):
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
         """
-        weight = None  # this feature is not supported in this version
+        if weight is not None:
+            raise ValueError("`weight` is not supported in this version")
 
         if rank == 0:
             row, col, B_next = self.incidence_matrix(
@@ -980,7 +947,9 @@ class SimplicialComplex(Complex):
             return row, L_up
         return L_up
 
-    def down_laplacian_matrix(self, rank, signed=True, weight=None, index=False):
+    def down_laplacian_matrix(
+        self, rank, signed: bool = True, weight=None, index: bool = False
+    ):
         """Compute the down Laplacian matrix of the simplicial complex.
 
         Parameters
@@ -1025,7 +994,9 @@ class SimplicialComplex(Complex):
             return column, L_down
         return L_down
 
-    def adjacency_matrix(self, rank, signed=False, weight=None, index=False):
+    def adjacency_matrix(
+        self, rank, signed: bool = False, weight: str | None = None, index: bool = False
+    ):
         """Compute the adjacency matrix of the simplicial complex.
 
         The method takes a rank parameter, which is the rank of the simplicial complex,
@@ -1042,7 +1013,8 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([3, 4, 8])
         >>> adj1 = SC.adjacency_matrix(1)
         """
-        weight = None  # this feature is not supported in this version
+        if weight is not None:
+            raise ValueError("`weight` is not supported in this version")
 
         ind, L_up = self.up_laplacian_matrix(
             rank, signed=signed, weight=weight, index=True
@@ -1055,7 +1027,9 @@ class SimplicialComplex(Complex):
             return ind, L_up
         return L_up
 
-    def coadjacency_matrix(self, rank, signed=False, weight=None, index=False):
+    def coadjacency_matrix(
+        self, rank, signed: bool = False, weight=None, index: bool = False
+    ):
         """Compute the coadjacency matrix of the simplicial complex."""
         weight = None  # this feature is not supported in this version
 
@@ -1069,7 +1043,7 @@ class SimplicialComplex(Complex):
             return ind, L_down
         return L_down
 
-    def add_elements_from_nx_graph(self, G):
+    def add_elements_from_nx_graph(self, G) -> None:
         """Add elements from a networkx graph to self."""
         _simplices = []
         for edge in G.edges:
@@ -1079,19 +1053,19 @@ class SimplicialComplex(Complex):
 
         self.add_simplices_from(_simplices)
 
-    def restrict_to_simplices(self, cell_set, name=None):
+    def restrict_to_simplices(self, cell_set, name: str = "") -> "SimplicialComplex":
         """Construct a simplicial complex using a subset of the simplices.
 
         Parameters
         ----------
         cell_set: iterable of hashables or simplices
             A subset of elements of the simplicial complex
-
         name: str, optional
 
         Returns
         -------
-        new simplicial Complex : SimplicialComplex
+        SimplicialComplex
+            New simplicial complex instance restricted to the simplices in `cell_set`
 
         Examples
         --------
@@ -1108,11 +1082,9 @@ class SimplicialComplex(Complex):
             if cell in self:
                 rns.append(cell)
 
-        SC = SimplicialComplex(simplices=rns, name=name)
+        return SimplicialComplex(simplices=rns, name=name)
 
-        return SC
-
-    def restrict_to_nodes(self, node_set, name=None):
+    def restrict_to_nodes(self, node_set, name: str = ""):
         """Construct a new simplicial complex by restricting the simplices.
 
         The simplices are restricted to the nodes referenced by node_set.
@@ -1210,7 +1182,7 @@ class SimplicialComplex(Complex):
         --------
         >>> from gudhi import SimplexTree
         >>> tree = SimplexTree()
-        >>> tree.insert([1,2,3,5])
+        >>> _ = tree.insert([1,2,3,5])
         >>> SC = SimplicialComplex.from_gudhi(tree)
         """
         SC = cls()
@@ -1225,11 +1197,9 @@ class SimplicialComplex(Complex):
         Examples
         --------
         >>> import trimesh
-        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
-                               faces=[[0, 1, 2]],
-                               process=False)
+        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]], faces=[[0, 1, 2]], process=False)
         >>> SC = SimplicialComplex.from_trimesh(mesh)
-        >>> print(SC.nodes0)
+        >>> print(SC.nodes)
         >>> print(SC.simplices)
         >>> SC[(0)]['position']
         """
@@ -1254,7 +1224,9 @@ class SimplicialComplex(Complex):
         return SC
 
     @classmethod
-    def load_mesh(cls, file_path, process=False, force=None) -> "SimplicialComplex":
+    def load_mesh(
+        cls, file_path, process: bool = False, force: bool | None = None
+    ) -> "SimplicialComplex":
         """Load a mesh.
 
         Parameters
@@ -1287,7 +1259,7 @@ class SimplicialComplex(Complex):
         mesh = trimesh.load_mesh(file_path, process=process, force=None)
         return cls.from_trimesh(mesh)
 
-    def is_triangular_mesh(self):
+    def is_triangular_mesh(self) -> bool:
         """Check if the simplicial complex is a triangular mesh."""
         if self.dim <= 2:
 
@@ -1299,7 +1271,7 @@ class SimplicialComplex(Complex):
         else:
             return False
 
-    def to_trimesh(self, vertex_position_name="position"):
+    def to_trimesh(self, vertex_position_name: str = "position"):
         """Convert simplicial complex to trimesh object."""
         import trimesh
 
@@ -1319,7 +1291,7 @@ class SimplicialComplex(Complex):
                 faces=self.get_all_maximal_simplices(), vertices=vertices, process=False
             )
 
-    def to_spharapy(self, vertex_position_name="position"):
+    def to_spharapy(self, vertex_position_name: str = "position"):
         """Convert to sharapy.
 
         Examples
@@ -1350,7 +1322,7 @@ class SimplicialComplex(Complex):
 
             return tm.TriMesh(self.get_all_maximal_simplices(), vertices)
 
-    def laplace_beltrami_operator(self, mode="inv_euclidean"):
+    def laplace_beltrami_operator(self, mode: str = "inv_euclidean"):
         """Compute a laplacian matrix for a triangular mesh.
 
         The method creates a laplacian matrix for a triangular
@@ -1415,7 +1387,7 @@ class SimplicialComplex(Complex):
         Parameters
         ----------
         H : hyernetx hypergraph
-        Hypergraph.
+            The hypergraph to compute the simplicial complex closure of.
 
         Returns
         -------

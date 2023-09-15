@@ -1,5 +1,7 @@
 """Test Complex class."""
 
+from abc import ABCMeta
+
 import pytest
 
 from toponetx.classes.complex import Complex
@@ -8,123 +10,54 @@ from toponetx.classes.complex import Complex
 class TestComplex:
     """Test the Complex abstract class."""
 
-    class ConcreteComplex(Complex):
-        """Concrete implementation of the Complex abstract class for tests."""
+    def test_complex_is_abstract(self):
+        """Tests if the Complex abstract class is abstract."""
+        with pytest.raises(TypeError) as exp_exception:
+            Complex()
 
-        @property
-        def nodes(self):
-            """Nodes."""
-            raise NotImplementedError()
+        assert "Can't instantiate abstract class Complex with abstract methods" in str(
+            exp_exception.value
+        )
 
-        @property
-        def dim(self) -> int:
-            """Dimension."""
-            raise NotImplementedError()
+        assert isinstance(Complex, ABCMeta)
 
-        def shape(self):
-            """Compute shape."""
-            raise NotImplementedError()
+    def test_complex_has_abstract_methods(self):
+        """Tests if the Complex abstract class has all the abstract methods."""
+        abstract_methods = Complex.__abstractmethods__
+        abstract_methods = sorted(list(abstract_methods))
+        assert abstract_methods == [
+            "__contains__",
+            "__getitem__",
+            "__iter__",
+            "__len__",
+            "__repr__",
+            "__str__",
+            "add_node",
+            "adjacency_matrix",
+            "clone",
+            "coadjacency_matrix",
+            "dim",
+            "incidence_matrix",
+            "nodes",
+            "remove_nodes",
+            "shape",
+            "skeleton",
+        ]
 
-        def skeleton(self, rank):
-            """Compute rank-skeleton."""
-            raise NotImplementedError()
+    def test_complex_inheritance_check(self):
+        """Test that the abstract class is forcing implementation in all children classes."""
 
-        def __str__(self):
-            """Compute string representation."""
-            raise NotImplementedError()
+        class ExampleClass(Complex):
+            def __init__(self, name: str = "", *args, **kwargs) -> None:
+                super().__init__(name, *args, **kwargs)
 
-        def __repr__(self):
-            """Compute string representation."""
-            raise NotImplementedError()
+            def clone(self):
+                return NotImplementedError
 
-        def __len__(self) -> int:
-            """Compute number of nodes."""
-            raise NotImplementedError()
+        with pytest.raises(TypeError) as exp_exception:
+            ExampleClass()
 
-        def clone(self):
-            """Clone the complex."""
-            raise NotImplementedError()
-
-        def __iter__(self):
-            """Iterate over the nodes."""
-            raise NotImplementedError()
-
-        def __contains__(self, item):
-            """Check if a node is in the complex."""
-            raise NotImplementedError()
-
-        def __getitem__(self, node):
-            """Get the node object from the complex."""
-            raise NotImplementedError()
-
-        def remove_nodes(self, node_set) -> None:
-            """Remove nodes from the complex."""
-            raise NotImplementedError()
-
-        def add_node(self, node):
-            """Add a node to the complex."""
-            raise NotImplementedError()
-
-        def incidence_matrix(self):
-            """Compute the incidence matrix."""
-            raise NotImplementedError()
-
-        def adjacency_matrix(self):
-            """Compute the adjacency matrix."""
-            raise NotImplementedError()
-
-        def coadjacency_matrix(self):
-            """Compute the coadjacency matrix."""
-            raise NotImplementedError()
-
-    def test_abstract_methods(self):
-        """Test that abstract methods raise NotImplementedError()."""
-        complex_obj = self.ConcreteComplex()
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.nodes
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.dim
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.shape()
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.skeleton(0)
-
-        with pytest.raises(NotImplementedError):
-            str(complex_obj)
-
-        with pytest.raises(NotImplementedError):
-            repr(complex_obj)
-
-        with pytest.raises(NotImplementedError):
-            len(complex_obj)
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.clone()
-
-        with pytest.raises(NotImplementedError):
-            iter(complex_obj)
-
-        with pytest.raises(NotImplementedError):
-            1 in complex_obj
-
-        with pytest.raises(NotImplementedError):
-            complex_obj["node"]
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.remove_nodes([1, 2, 3])
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.add_node("node")
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.incidence_matrix()
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.adjacency_matrix()
-
-        with pytest.raises(NotImplementedError):
-            complex_obj.coadjacency_matrix()
+        assert (
+            "Can't instantiate abstract class ExampleClass with abstract methods"
+            in str(exp_exception.value)
+        )
