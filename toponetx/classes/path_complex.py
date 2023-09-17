@@ -5,7 +5,9 @@ from itertools import chain
 import networkx as nx
 import numpy as np
 import scipy as sp
+from hypernetx import Hypergraph
 
+from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.path import Path
 from toponetx.classes.reportviews import NodeView, PathView
@@ -471,7 +473,6 @@ class PathComplex(Complex):
             row, col, B_next = self.incidence_matrix(rank + 1, index=True)
             L_up = B_next @ B_next.transpose()
         else:
-
             raise ValueError(
                 f"Rank should larger than 0 and <= {self.dim - 1} (maximal dimension-1), got {rank}."
             )
@@ -569,6 +570,14 @@ class PathComplex(Complex):
         if index:
             return ind, L_down
         return L_down
+
+    def to_hypergraph(self) -> Hypergraph:
+        """Return a hypergraph representation of the path complex."""
+        G = []
+        for rank in range(1, self.dim + 1):
+            edge = [list(path) for path in self.skeleton(rank)]
+            G = G + edge
+        return Hypergraph(G, static=True)
 
     def _remove_path(self, path: tuple[Hashable]) -> None:
         del self._path_set.faces_dict[len(path) - 1][path]
