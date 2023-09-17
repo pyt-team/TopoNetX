@@ -224,13 +224,67 @@ class Complex(abc.ABC):
         """Add node to the complex."""
 
     @abc.abstractmethod
-    def incidence_matrix(self):
-        """Return incidence matrix of the complex."""
+    def incidence_matrix(
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
+        """Return incidence matrix of the complex.
+
+        Parameters
+        ----------
+        rank : int
+            The rank of the atoms to consider.
+        signed : bool, default=True
+            If True, the incidence matrix is signed, otherwise it is unsigned.
+        weight : str, optional
+            The name of the property to use as weights for the incidence matrix.
+        index : bool, default=False
+            If True, the incidence matrix is indexed by the nodes of the complex.
+        """
 
     @abc.abstractmethod
-    def adjacency_matrix(self):
-        """Return adjacency matrix of the complex."""
+    def adjacency_matrix(
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
+        """Return adjacency matrix of the complex.
+
+        Parameters
+        ----------
+        rank : int
+            The rank of the atoms to consider.
+        signed : bool, default=True
+            If True, the adjacency matrix is signed, otherwise it is unsigned.
+        weight : str, optional
+            The name of the property to use as weights for the adjacency matrix.
+        index : bool, default=False
+            If True, the adjacency matrix is indexed by the atoms of the complex.
+        """
 
     @abc.abstractmethod
-    def coadjacency_matrix(self):
-        """Return coadjacency matrix of the complex."""
+    def coadjacency_matrix(
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
+        """Return coadjacency matrix of the complex.
+
+        Parameters
+        ----------
+        rank : int
+            The rank of the atoms to consider.
+        signed : bool, default=True
+            If True, the adjacency matrix is signed, otherwise it is unsigned.
+        weight : str, optional
+            The name of the property to use as weights for the adjacency matrix.
+        index : bool, default=False
+            If True, the adjacency matrix is indexed by the atoms of the complex.
+        """

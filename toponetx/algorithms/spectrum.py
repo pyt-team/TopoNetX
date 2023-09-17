@@ -201,14 +201,15 @@ def laplacian_spectrum(matrix, weight: str = "weight"):
 
 
 def cell_complex_hodge_laplacian_spectrum(
-    CX: CellComplex, rank: int, weight: str = "weight"
+    CX: CellComplex, rank: int, weight: str | None = None
 ):
     """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
-    matrix : scipy sparse matrix
-    weight : str or None, optional (default='weight')
+    CX : CellComplex
+    rank : int
+    weight : str, optional
         If None, then each cell has weight 1.
 
     Returns
@@ -218,7 +219,7 @@ def cell_complex_hodge_laplacian_spectrum(
 
     Examples
     --------
-    >>> from toponetx import CellComplex
+    >>> from toponetx.classes import CellComplex
     >>> CX = CellComplex()
     >>> CX.add_cell([1,2,3,4],rank=2)
     >>> CX.add_cell([2,3,4,5],rank=2)
@@ -229,13 +230,14 @@ def cell_complex_hodge_laplacian_spectrum(
 
 
 def simplicial_complex_hodge_laplacian_spectrum(
-    SC: SimplicialComplex, rank, weight: str = "weight"
+    SC: SimplicialComplex, rank: int, weight: str = "weight"
 ):
     """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
-    matrix : scipy sparse matrix
+    SC : SimplicialComplex
+    rank : int
     weight : str or None, optional (default='weight')
         If None, then each cell has weight 1.
 
@@ -246,7 +248,7 @@ def simplicial_complex_hodge_laplacian_spectrum(
 
     Examples
     --------
-    >>> from toponetx import SimplicialComplex
+    >>> from toponetx.classes import SimplicialComplex
     >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
     >>> spectrum=simplicial_complex_hodge_laplacian_spectrum(SC,1)
     """
@@ -284,14 +286,15 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
 
 
 def simplicial_complex_adjacency_spectrum(
-    SC: SimplicialComplex, dim: int, weight: str = "weight"
+    SC: SimplicialComplex, dim: int, weight: str | None = None
 ):
     """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
-    matrix : scipy sparse matrix
-    weight : str or None, optional (default='weight')
+    SC : SimplicialComplex
+    dim : int
+    weight : str, optional
         If None, then each cell has weight 1.
 
     Returns

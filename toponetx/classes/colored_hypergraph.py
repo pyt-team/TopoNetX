@@ -919,7 +919,7 @@ class ColoredHyperGraph(Complex):
         self,
         rank,
         to_rank,
-        weight=None,
+        weight: str | None = None,
         sparse: bool = True,
         index: bool = False,
     ):
@@ -929,10 +929,8 @@ class ColoredHyperGraph(Complex):
         ----------
         rank : int
         to_rank: int
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : bool, default False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
@@ -950,7 +948,7 @@ class ColoredHyperGraph(Complex):
     def all_ranks_incidence_matrix(
         self,
         rank,
-        weight=None,
+        weight: str | None = None,
         sparse: bool = True,
         index: bool = False,
     ):
@@ -958,10 +956,8 @@ class ColoredHyperGraph(Complex):
 
         Parameters
         ----------
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : boolean, optional, default False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
