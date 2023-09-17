@@ -1325,19 +1325,18 @@ class CellComplex(Complex):
         return True
 
     def node_to_all_cell_incidence_matrix(
-        self, weight: bool = False, index: bool = False
+        self, weight: str | None = None, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Nodes/cells incidence matrix for the indexed by nodes X cells.
 
         Parameters
         ----------
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : boolean, default=False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
+
         Returns
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
@@ -1362,7 +1361,7 @@ class CellComplex(Complex):
             return A.asformat("csc")
 
     def node_to_all_cell_adjacnecy_matrix(
-        self, s: int | None = None, weight: bool = False, index: bool = False
+        self, s: int | None = None, weight: str | None = None, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Nodes s-adjacency matrix where adjacency is computed with respect to 2-cells.
 
@@ -1371,13 +1370,12 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
-        index : boolean, optional, default False
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : boolean, default=False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
+
         Returns
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
@@ -1414,7 +1412,7 @@ class CellComplex(Complex):
             )
 
     def all_cell_to_node_codjacnecy_matrix(
-        self, s: int | None = None, weight: bool = False, index: bool = False
+        self, s: int | None = None, weight: str | None = None, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """All cells s-coadjacency matrix where coadjacency is computed with respect to 0-cells.
 
@@ -1423,11 +1421,11 @@ class CellComplex(Complex):
         Parameters
         ----------
         weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+            If not given, all nonzero entries are 1.
+
         index : boolean, optional, default False
             If True return will include a dictionary of cell uid
+
         Returns
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
@@ -1446,7 +1444,11 @@ class CellComplex(Complex):
             )
 
     def incidence_matrix(
-        self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Incidence matrix for the cx indexed by nodes x cells.
 
@@ -1456,10 +1458,8 @@ class CellComplex(Complex):
             The rank for which an incidence matrix should be computed.
         signed : bool, default=True
             Whether the returned incidence matrix should be signed (i.e., respect orientations) or unsigned.
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : boolean, optional, default False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
@@ -1600,7 +1600,11 @@ class CellComplex(Complex):
             raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
 
     def hodge_laplacian_matrix(
-        self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Compute the hodge-laplacian matrix for the CX.
 
@@ -1614,10 +1618,8 @@ class CellComplex(Complex):
             adjacency matrices from the hodge-laplacian
             higher-order adjacency matrices' entries are
             typically positive.
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : boolean, default False
             indicates whether to return the indices that define the Laplacian matrix
 
@@ -1693,7 +1695,11 @@ class CellComplex(Complex):
             )
 
     def up_laplacian_matrix(
-        self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
     ):
         """Compute up laplacian.
 
@@ -1706,10 +1712,8 @@ class CellComplex(Complex):
                        adjacency matrices from the hodge-laplacian
                        typically higher-order adjacency matrices' entries are
                        typically positive.
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
@@ -1737,7 +1741,8 @@ class CellComplex(Complex):
         >>> print(index)
         >>> print(L1_up)
         """
-        weight = None  # this feature is not supported in this version
+        if weight is not None:
+            raise ValueError("Weighted Laplacian is not supported in this version.")
 
         if rank == 0:
             row, col, B_next = self.incidence_matrix(
@@ -1763,7 +1768,11 @@ class CellComplex(Complex):
             return L_up
 
     def down_laplacian_matrix(
-        self, rank: int, signed: bool = True, weight: bool = False, index: bool = False
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
     ):
         """Compute down laplacian.
 
@@ -1776,10 +1785,8 @@ class CellComplex(Complex):
                        adjacency matrices from the hodge-laplacian
                        typically higher-order adjacency matrices' entries are
                        typically positive.
-        weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : boolean, optional, default False
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
@@ -1798,16 +1805,17 @@ class CellComplex(Complex):
         >>> import networkx as nx
         >>> G = nx.path_graph(3)
         >>> CX = CellComplex(G)
-        >>> CX.add_cell([1,2,3,4], rank=2)
-        >>> CX.add_cell([1,2,3,4], rank=2)
-        >>> CX.add_cell([2,3,4,1], rank=2)
-        >>> CX.add_cell([1,2,4], rank=2,)
-        >>> CX.add_cell([3,4,8], rank=2)
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([1, 2, 3, 4], rank=2)
+        >>> CX.add_cell([2, 3, 4, 1], rank=2)
+        >>> CX.add_cell([1, 2, 4], rank=2,)
+        >>> CX.add_cell([3, 4, 8], rank=2)
         >>> CX.down_laplacian_matrix(2)
         """
-        weight = None  # this feature is not supported in this version
+        if weight:
+            raise ValueError("Weighted Laplacian is not supported in this version.")
 
-        if rank <= self.dim and rank > 0:
+        if 0 < rank <= self.dim:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
@@ -1821,7 +1829,13 @@ class CellComplex(Complex):
         else:
             return L_down
 
-    def adjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
+    def adjacency_matrix(
+        self,
+        rank: int,
+        signed: bool = False,
+        weight: str | None = None,
+        index: bool = False,
+    ):
         """Compute adjacency matrix for a given rank."""
         if index:
             ind, _, incidence = self.incidence_matrix(
@@ -1837,16 +1851,19 @@ class CellComplex(Complex):
         else:
             return incidence_to_adjacency(incidence)
 
-    def coadjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
+    def coadjacency_matrix(
+        self,
+        rank: int,
+        signed: bool = False,
+        weight: str | None = None,
+        index: bool = False,
+    ):
         """Compute coadjacency matrix for a given rank."""
         if index:
             _, ind, incidence = self.incidence_matrix(rank, signed=signed, index=True)
-        else:
-            incidence = self.incidence_matrix(rank, signed=signed)
-
-        if index:
             return ind, incidence_to_adjacency(incidence)
         else:
+            incidence = self.incidence_matrix(rank, signed=signed)
             return incidence_to_adjacency(incidence)
 
     def restrict_to_cells(
@@ -2100,7 +2117,7 @@ class CellComplex(Complex):
         """Euler characteristics of the cell complex."""
         return len(self.nodes) - len(self.edges) + len(self.cells)
 
-    def remove_singletons(self) -> "CellComplex":
+    def remove_singletons(self) -> None:
         """Remove singleton nodes (see `CellComplex.singletons()`)."""
         for node in self.singletons():
             self._G.remove_node(node)
@@ -2546,14 +2563,12 @@ class CellComplex(Complex):
         first_ind = np.min(mesh.faces)
 
         if first_ind == 0:
-
             CX.set_cell_attributes(
                 dict(zip(range(len(mesh.vertices)), mesh.vertices)),
                 name="position",
                 rank=0,
             )
         else:  # first index starts at 1.
-
             CX.set_cell_attributes(
                 dict(
                     zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
