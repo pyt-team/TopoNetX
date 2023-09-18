@@ -180,8 +180,20 @@ class TestPathComplex:
         PX.add_path([1, 2, 5], heat=55)
         assert PX[[1, 2, 5]] == {"heat": 55}
 
-        PX[[1, 2, 5]]["heat"] = 66
+        PX.set_path_attributes({(1, 2, 5): 66}, "heat")
         assert PX[[1, 2, 5]] == {"heat": 66}
+
+        PX.set_path_attributes({(1, 2, 5): {"heat": 77, "color": "red"}})
+        assert PX[[1, 2, 5]] == {"heat": 77, "color": "red"}
+
+        PX.set_path_attributes({1: 88, (1, 2, 5): 99}, "heat")
+        assert PX[1] == {"heat": 88}
+        assert PX.nodes[1] == {"heat": 88}
+        assert PX[[1, 2, 5]] == {"heat": 99, "color": "red"}
+
+        PX.set_path_attributes({(1, 2): {"heat": 100, "color": "red"}})
+        assert PX[[1, 2]] == {"heat": 100, "color": "red"}
+        assert PX.edges[[1, 2]] == {"heat": 100, "color": "red"}
 
         PX.add_path(6, heat=77)
         assert PX[6] == {"heat": 77}
@@ -229,6 +241,8 @@ class TestPathComplex:
             PX.set_edge_attributes({(4, 5, 6): {"heat": 55}})
         with pytest.raises(TypeError):
             PX.set_edge_attributes({(4, 5): [5]})
+        with pytest.raises(TypeError):
+            PX.set_path_attributes({(4, 5): [5]})
 
     def test_get_len_(self):
         """Test get size of the path complex."""
@@ -546,3 +560,20 @@ class TestPathComplex:
 
         assert PX.get_edge_attributes("weight") == {(0, 1): 32, (1, 2): 98}
         assert PX.get_edge_attributes("color") == {(1, 3): "red", (2, 3): "blue"}
+
+    def test_get_path_attributes(self):
+        """Test get_path_attributes."""
+        PX = PathComplex()
+        PX.add_paths_from([[0, 1]])
+        PX.add_path([0, 1, 2], weight=43)
+        PX.add_path([0, 1, 3], weight=98)
+        PX.add_path([1, 2, 3], color="red")
+        PX.add_path([1, 3, 2], color="blue")
+        PX.add_path([2, 1, 3], color="green")
+
+        assert PX.get_path_attributes("weight") == {(0, 1, 2): 43, (0, 1, 3): 98}
+        assert PX.get_path_attributes("color") == {
+            (1, 2, 3): "red",
+            (1, 3, 2): "blue",
+            (2, 1, 3): "green",
+        }

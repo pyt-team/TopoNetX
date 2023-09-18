@@ -837,7 +837,7 @@ class PathComplex(Complex):
                 elif isinstance(node, int) or isinstance(node, str):
                     self._G.nodes[node][name] = value
 
-    def get_edge_attributes(self, name: str) -> dict[tuple[Hashable], Hashable]:
+    def get_edge_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
         """Get edge attributes from a path complex.
 
         Parameters
@@ -847,7 +847,7 @@ class PathComplex(Complex):
 
         Returns
         -------
-        dict[tuple[Hashable], Hashable]
+        dict[tuple[Hashable], Any]
             A dictionary of edge and its associated value for the given attribute name.
 
         Examples
@@ -919,6 +919,92 @@ class PathComplex(Complex):
                 self[edge][name] = value
                 if isinstance(edge, tuple) or isinstance(edge, list):
                     self._G.edges[edge[0], edge[1]][name] = value
+
+    def get_path_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
+        """Get path attributes from a path complex.
+
+        Parameters
+        ----------
+        name : str
+            The name of the path attribute.
+
+        Returns
+        -------
+        dict[tuple[Hashable], Any]
+            A dictionary of path and its associated value for the given attribute name.
+
+        Examples
+        --------
+        >>> PX = PathComplex()
+        >>> PX.add_paths_from([[0, 1]])
+        >>> PX.add_path([0, 1, 2], weight=43)
+        >>> PX.add_path([0, 1, 3], weight=98)
+        >>> PX.add_path([1, 2, 3], color="red")
+        >>> PX.add_path([1, 3, 2], color="blue")
+        >>> PX.add_path([2, 1, 3], color="green")
+        >>> PX.get_path_attributes("weight")
+        {(0, 1, 2): 43, (0, 1, 3): 98}
+        >>> PX.get_path_attributes("color")
+        {(1, 2, 3): "red", (1, 3, 2): "blue", (2, 1, 3): "green"}
+        """
+        return {
+            tuple(p): self[p][name]
+            for dim in range(0, self.dim + 1)
+            for p in self.skeleton(dim)
+            if name in self[p]
+        }
+
+    def set_path_attributes(
+        self,
+        values: dict[Sequence[Hashable], Hashable | dict[Hashable, Any]],
+        name: str | None = None,
+    ) -> None:
+        """Set path attributes for a path complex.
+
+        Parameters
+        ----------
+        values : dict[Sequence[Hashable], Hashable | dict[Hashable, Any]]
+            A dictionary of path and its associated attribute values.
+        name : str
+            The name of the path attribute.
+
+        Examples
+        --------
+        >>> PX = PathComplex([[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
+        >>> PX.set_path_attributes({(0, 1, 2): {"weight": 43, "color": "red"}, (0, 1, 3): {"weight": 98, "color": "blue"}})
+        >>> PX.get_path_attributes("weight")
+        {(0, 1, 2): 43, (0, 1, 3): 98}
+        >>> PX.get_path_attributes("color")
+        {(0, 1, 2): "red", (0, 1, 3): "blue"}
+        >>> PX.set_path_attributes({0: 55}, "weight")
+        >>> PX.get_path_attributes("weight")
+        {(0,): 55, (0, 1, 2): 43, (0, 1, 3): 98}
+        >>> PX.set_path_attributes({(0, 1): "red"}, "color")
+        >>> PX.get_path_attributes("color")
+        {(0, 1): 'red', (0, 1, 2): 'red', (0, 1, 3): 'blue'}
+        """
+        if name is None:
+            for path, value in values.items():
+                if isinstance(value, dict):
+                    for k, v in value.items():
+                        if len(path) == 1:
+                            self.set_node_attributes({path: {k: v}})
+                        elif len(path) == 2:
+                            self.set_edge_attributes({path: {k: v}})
+                        else:
+                            self[path][k] = v
+                else:
+                    raise TypeError(
+                        "Input values must be a dictionary of path and its associated attribute values."
+                    )
+        else:
+            for path, value in values.items():
+                if isinstance(path, int) or isinstance(path, str) or len(path) == 1:
+                    self.set_node_attributes({path: {name: value}})
+                elif len(path) == 2:
+                    self.set_edge_attributes({path: {name: value}})
+                else:
+                    self[path][name] = value
 
     def _remove_path(self, path: tuple[Hashable]) -> None:
         del self._path_set.faces_dict[len(path) - 1][path]
