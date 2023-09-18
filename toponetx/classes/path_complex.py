@@ -383,7 +383,13 @@ class PathComplex(Complex):
 
         self._G.remove_nodes_from(node_set)
 
-    def incidence_matrix(self, rank: int, signed: bool = True, index: bool = False):
+    def incidence_matrix(
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
         """
         Compute incidence matrix of the path complex.
 
@@ -393,6 +399,8 @@ class PathComplex(Complex):
             The dimension of the incidence matrix.
         signed : bool, default=True
             If True, return signed incidence matrix. Else, return absolute incidence matrix.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : bool, default=False
             If True, return incidence matrix with indices. Else, return incidence matrix without indices.
 
@@ -464,7 +472,13 @@ class PathComplex(Complex):
             else:
                 return abs(boundary)
 
-    def up_laplacian_matrix(self, rank: int, signed: bool = True, index: bool = False):
+    def up_laplacian_matrix(
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
         """
         Compute up laplacian matrix of the path complex.
 
@@ -474,6 +488,8 @@ class PathComplex(Complex):
             The dimension of the up laplacian matrix.
         signed : bool, default=True
             If True, return signed up laplacian matrix. Else, return absolute up laplacian matrix.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : bool, default=False
             If True, return up laplacian matrix with indices. Else, return up laplacian matrix without indices.
 
@@ -482,8 +498,13 @@ class PathComplex(Complex):
         If `index` is True, return a tuple of (idx_p, up_laplacian_matrix).
         If `index` is False, return up_laplacian_matrix.
         """
+        if weight is not None:
+            raise ValueError("Weighted Laplacian is not supported in this version.")
+
         if 0 <= rank < self.dim:
-            row, col, B_next = self.incidence_matrix(rank + 1, index=True)
+            row, col, B_next = self.incidence_matrix(
+                rank + 1, weight=weight, index=True
+            )
             L_up = B_next @ B_next.transpose()
         else:
             raise ValueError(
@@ -498,7 +519,11 @@ class PathComplex(Complex):
             return L_up.tolil()
 
     def down_laplacian_matrix(
-        self, rank: int, signed: bool = True, index: bool = False
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
     ):
         """
         Compute down laplacian matrix of the path complex.
@@ -509,6 +534,8 @@ class PathComplex(Complex):
             The dimension of the down laplacian matrix.
         signed : bool, default=True
             If True, return signed down laplacian matrix. Else, return absolute down laplacian matrix.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
         index : bool, default=False
             If True, return down laplacian matrix with indices. Else, return down laplacian matrix without indices.
 
@@ -517,8 +544,11 @@ class PathComplex(Complex):
         If `index` is True, return a tuple of (idx_p, down_laplacian_matrix).
         If `index` is False, return down_laplacian_matrix.
         """
+        if weight is not None:
+            raise ValueError("Weighted Laplacian is not supported in this version.")
+
         if rank <= self.dim and rank > 0:
-            row, column, B = self.incidence_matrix(rank, index=True)
+            row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
@@ -531,7 +561,13 @@ class PathComplex(Complex):
         else:
             return L_down.tolil()
 
-    def adjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
+    def adjacency_matrix(
+        self,
+        rank: int,
+        signed: bool = False,
+        weight: str | None = None,
+        index: bool = False,
+    ):
         """
         Compute adjacency matrix of the path complex.
 
@@ -558,7 +594,13 @@ class PathComplex(Complex):
             return ind, L_up
         return L_up
 
-    def coadjacency_matrix(self, rank: int, signed: bool = False, index: bool = False):
+    def coadjacency_matrix(
+        self,
+        rank: int,
+        signed: bool = False,
+        weight: str | None = None,
+        index: bool = False,
+    ):
         """
         Compute coadjacency matrix of the path complex.
 
