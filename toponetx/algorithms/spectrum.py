@@ -10,6 +10,7 @@ from scipy.sparse import diags
 
 from toponetx.classes import CombinatorialComplex
 from toponetx.classes.cell_complex import CellComplex
+from toponetx.classes.path_complex import PathComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = [
@@ -255,6 +256,26 @@ def simplicial_complex_hodge_laplacian_spectrum(
     return laplacian_spectrum(SC.hodge_laplacian_matrix(rank=rank))
 
 
+def path_complex_hodge_laplacian_spectrum(
+    PC: PathComplex, rank: int, weight: str = "weight"
+):
+    """Return eigenvalues of the Laplacian of PC.
+
+    Parameters
+    ----------
+    PC : PathComplex
+    rank : int
+    weight : str or None, optional (default='weight')
+        If None, then each cell has weight 1.
+
+    Returns
+    -------
+    evals : NumPy array
+        Eigenvalues.
+    """
+    return laplacian_spectrum(PC.hodge_laplacian_matrix(rank=rank, signed=True))
+
+
 def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
     """Return eigenvalues of the adjacency matrix of CX.
 
@@ -303,6 +324,26 @@ def simplicial_complex_adjacency_spectrum(
         Eigenvalues.
     """
     return laplacian_spectrum(SC.adjacency_matrix(rank=dim, weight=weight))
+
+
+def path_complex_adjacency_spectrum(
+    PC: PathComplex, dim: int, weight: str | None = None
+):
+    """Return eigenvalues of the adjacency matrix of PC.
+
+    Parameters
+    ----------
+    PC : PathComplex
+    dim : int
+    weight : str, optional
+        If None, then each cell has weight 1.
+
+    Returns
+    -------
+    evals : NumPy array
+        Eigenvalues.
+    """
+    return laplacian_spectrum(PC.adjacency_matrix(rank=dim, weight=weight, signed=True))
 
 
 def combinatorial_complex_adjacency_spectrum(CC: CombinatorialComplex, r, k):
