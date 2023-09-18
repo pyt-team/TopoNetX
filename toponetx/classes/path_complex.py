@@ -698,6 +698,32 @@ class PathComplex(Complex):
             G = G + edge
         return Hypergraph(G, static=True)
 
+    def restrict_to_nodes(self, node_set: Iterable[Hashable], name: str = ""):
+        """Return a new path complex restricted to a subset of nodes."""
+        if len(node_set) == 0:
+            raise ValueError("Input node_set cannot be empty.")
+        node_set = set(node_set)
+        new_paths = []
+        for path in self:
+            if all(node in node_set for node in path):
+                new_paths.append(path)
+        return PathComplex(new_paths, name=name)
+
+    def restrict_to_paths(self, path_set: Iterable[Sequence[Hashable]], name: str = ""):
+        """Return a new path complex restricted to a subset of paths."""
+        new_path_set = []
+        if len(path_set) == 0:
+            raise ValueError("Input path_set cannot be empty.")
+        else:
+            for path in path_set:
+                new_path_set.append(tuple(path))
+        new_path_set = set(new_path_set)
+        new_paths = []
+        for path in self:
+            if path in new_path_set:
+                new_paths.append(path)
+        return PathComplex(new_paths, name=name)
+
     def _remove_path(self, path: tuple[Hashable]) -> None:
         del self._path_set.faces_dict[len(path) - 1][path]
         self._allowed_paths.remove(path)

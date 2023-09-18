@@ -457,3 +457,32 @@ class TestPathComplex:
 
         assert len(HG.edges) == len(expected_results.edges)
         assert set(HG.nodes) == set(expected_results.nodes)
+
+    def test_restrict_to_nodes(self):
+        """Test restrict_to_nodes."""
+        PX = PathComplex(
+            [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]], max_rank=3
+        )
+        res = PX.restrict_to_nodes([0, 1, 2])
+        assert len(res.paths) == 6
+        assert len(res.nodes) == 3
+        assert len(res.edges) == 2
+
+        res = PX.restrict_to_nodes([1, 2, 3])
+        assert len(res.paths) == 9
+        assert len(res.nodes) == 3
+        assert len(res.edges) == 3
+
+        with pytest.raises(ValueError):
+            PX.restrict_to_nodes([])
+
+    def test_restrict_to_paths(self):
+        """Test restrict_to_paths."""
+        PX = PathComplex(
+            [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]], max_rank=3
+        )
+
+        res = PX.restrict_to_paths([[0, 1], [1, 2, 3]])
+        assert len(res.paths) == 8
+        assert len(res.nodes) == 4
+        assert len(res.edges) == 3
