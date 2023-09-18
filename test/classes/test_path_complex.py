@@ -168,8 +168,8 @@ class TestPathComplex:
         assert (repr(PX)) == "PathComplex(name='PX')"
         assert PX.name == "PX"
 
-    def test_getittem(self):
-        """Test getitem."""
+    def test_getittem_set_attributes(self):
+        """Test getitem and set_attributes methods."""
         PX = PathComplex([[1, 2, 3], [1, 2, 4]])
         assert PX[[1, 2, 3]] == {}
         assert PX[1] == {}
@@ -187,13 +187,48 @@ class TestPathComplex:
         assert PX[6] == {"heat": 77}
         assert PX.nodes[6] == {"heat": 77}
 
+        PX.set_node_attributes({6: 88, 5: 22}, "heat")
+        assert PX[6] == {"heat": 88}
+        assert PX.nodes[6] == {"heat": 88}
+        assert PX[5] == {"heat": 22}
+        assert PX.nodes[5] == {"heat": 22}
+
+        PX.set_node_attributes({6: 99, (5,): 33}, "heat")
+        assert PX[6] == {"heat": 99}
+        assert PX.nodes[6] == {"heat": 99}
+        assert PX[5] == {"heat": 33}
+        assert PX.nodes[5] == {"heat": 33}
+
+        PX.set_node_attributes({6: {"heat": 100, "color": "red"}, (5,): {"heat": 34}})
+        assert PX[6] == {"heat": 100, "color": "red"}
+        assert PX.nodes[6] == {"heat": 100, "color": "red"}
+        assert PX[5] == {"heat": 34}
+        assert PX.nodes[5] == {"heat": 34}
+
         PX.add_path([4, 5], heat=77)
         assert PX[[4, 5]] == {"heat": 77}
         assert PX.edges[(4, 5)] == {"heat": 77}
 
-        # TODO: set attribute here
-        # assert PX[[4, 5]] == {"heat": 88}
-        # assert PX.edges[(4, 5)] == {"heat": 88}
+        PX.set_edge_attributes({(4, 5): 88}, "heat")
+        assert PX[[4, 5]] == {"heat": 88}
+        assert PX.edges[(4, 5)] == {"heat": 88}
+
+        PX.set_edge_attributes({(4, 5): {"heat": 99, "color": "red"}})
+        assert PX[[4, 5]] == {"heat": 99, "color": "red"}
+        assert PX.edges[(4, 5)] == {"heat": 99, "color": "red"}
+
+        with pytest.raises(ValueError):
+            PX.set_node_attributes({(4, 5): 55}, name="heat")
+        with pytest.raises(ValueError):
+            PX.set_node_attributes({(4, 5): {"heat": 55}})
+        with pytest.raises(TypeError):
+            PX.set_node_attributes({(4,): [5]})
+        with pytest.raises(ValueError):
+            PX.set_edge_attributes({(4, 5, 6): 55}, name="heat")
+        with pytest.raises(ValueError):
+            PX.set_edge_attributes({(4, 5, 6): {"heat": 55}})
+        with pytest.raises(TypeError):
+            PX.set_edge_attributes({(4, 5): [5]})
 
     def test_get_len_(self):
         """Test get size of the path complex."""
@@ -486,3 +521,28 @@ class TestPathComplex:
         assert len(res.paths) == 8
         assert len(res.nodes) == 4
         assert len(res.edges) == 3
+
+    def test_get_node_attributes(self):
+        """Test get_node_attributes."""
+        PX = PathComplex()
+        PX.add_node(0)
+        PX.add_node(1, heat=55)
+        PX.add_node(2, heat=66)
+        PX.add_node(3, color="red")
+        PX.add_node(2, color="blue")
+        PX.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
+
+        assert PX.get_node_attributes("heat") == {(1,): 55, (2,): 66}
+        assert PX.get_node_attributes("color") == {(2,): "blue", (3,): "red"}
+
+    def test_get_edge_attributes(self):
+        """Test get_edge_attributes."""
+        PX = PathComplex()
+        PX.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
+        PX.add_path([0, 1], weight=32)
+        PX.add_path([1, 2], weight=98)
+        PX.add_path([1, 3], color="red")
+        PX.add_path([2, 3], color="blue")
+
+        assert PX.get_edge_attributes("weight") == {(0, 1): 32, (1, 2): 98}
+        assert PX.get_edge_attributes("color") == {(1, 3): "red", (2, 3): "blue"}
