@@ -692,7 +692,17 @@ class PathComplex(Complex):
         return L_down
 
     def to_hypergraph(self) -> Hypergraph:
-        """Return a hypergraph representation of the path complex."""
+        """Return a hypergraph representation of the path complex.
+
+        Examples
+        --------
+        >>> PX = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
+        >>> HG = PX.to_hypergraph()
+        >>> HG
+        Hypergraph({'e0': [0, 1], 'e1': [1, 2], 'e2': [1, 3], 'e3': [2, 3],
+        'e4': [0, 1, 2], 'e5': [0, 1, 3], 'e6': [1, 2, 3], 'e7': [1, 3, 2],
+        'e8': [2, 1, 3]},name=)
+        """
         G = []
         for rank in range(1, self.dim + 1):
             edge = [list(path) for path in self.skeleton(rank)]
@@ -700,7 +710,15 @@ class PathComplex(Complex):
         return Hypergraph(G, static=True)
 
     def restrict_to_nodes(self, node_set: Iterable[Hashable], name: str = ""):
-        """Return a new path complex restricted to a subset of nodes."""
+        """Return a new path complex restricted to a subset of nodes.
+
+        Examples
+        --------
+        >>> PX = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
+        >>> PC = PX.restrict_to_nodes([0,1,3])
+        >>> PC.paths
+        PathView([(0,), (1,), (3,), (0, 1), (1, 3), (0, 1, 3)])
+        """
         if len(node_set) == 0:
             raise ValueError("Input node_set cannot be empty.")
         node_set = set(node_set)
@@ -711,7 +729,15 @@ class PathComplex(Complex):
         return PathComplex(new_paths, name=name)
 
     def restrict_to_paths(self, path_set: Iterable[Sequence[Hashable]], name: str = ""):
-        """Return a new path complex restricted to a subset of paths."""
+        """Return a new path complex restricted to a subset of paths.
+
+        Examples
+        --------
+        >>> PX = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
+        >>> PC = PX.restrict_to_paths([[1,2,3]])
+        >>> PC.paths
+        PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
+        """
         new_path_set = []
         if len(path_set) == 0:
             raise ValueError("Input path_set cannot be empty.")
