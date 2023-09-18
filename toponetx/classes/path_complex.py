@@ -389,7 +389,7 @@ class PathComplex(Complex):
         signed: bool = True,
         weight: str | None = None,
         index: bool = False,
-    ):
+    ) -> tuple[dict, dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
         """
         Compute incidence matrix of the path complex.
 
@@ -478,7 +478,7 @@ class PathComplex(Complex):
         signed: bool = True,
         weight: str | None = None,
         index: bool = False,
-    ):
+    ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
         """
         Compute up laplacian matrix of the path complex.
 
@@ -524,7 +524,7 @@ class PathComplex(Complex):
         signed: bool = True,
         weight: str | None = None,
         index: bool = False,
-    ):
+    ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
         """
         Compute down laplacian matrix of the path complex.
 
@@ -561,13 +561,77 @@ class PathComplex(Complex):
         else:
             return L_down.tolil()
 
+    def hodge_laplacian_matrix(
+        self,
+        rank: int,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
+        """
+        Compute Hodge Laplacian matrix of the path complex.
+
+        Parameters
+        ----------
+        rank : int
+            The dimension of the Hodge Laplacian matrix.
+        signed : bool, default=False
+            If True, return signed Hodge Laplacian matrix. Else, return absolute Hodge Laplacian matrix.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : bool, default=False
+            If True, return Hodge Laplacian matrix with indices. Else, return Hodge Laplacian matrix without indices.
+
+        Returns
+        -------
+        Laplacian: scipy.sparse.lil_matrix
+        when index is True, return a tuple of (idx_p, Laplacian)
+        when index is False, return Laplacian
+        """
+        if rank == 0:
+            row, column, B_next = self.incidence_matrix(
+                rank + 1, weight=weight, index=True
+            )
+            L_hodge = B_next @ B_next.transpose()
+            if not signed:
+                L_hodge = abs(L_hodge)
+            if index:
+                return row, L_hodge
+            else:
+                return L_hodge
+        elif rank < self.dim:
+            row, column, B_next = self.incidence_matrix(
+                rank + 1, weight=weight, index=True
+            )
+            row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
+            L_hodge = B_next @ B_next.transpose() + B.transpose() @ B
+            if not signed:
+                L_hodge = abs(L_hodge)
+            if index:
+                return column, L_hodge
+            else:
+                return L_hodge
+        elif rank == self.dim:
+            row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
+            L_hodge = B.transpose() @ B
+            if not signed:
+                L_hodge = abs(L_hodge)
+            if index:
+                return column, L_hodge
+            else:
+                return L_hodge
+        else:
+            raise ValueError(
+                f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
+            )
+
     def adjacency_matrix(
         self,
         rank: int,
         signed: bool = False,
         weight: str | None = None,
         index: bool = False,
-    ):
+    ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
         """
         Compute adjacency matrix of the path complex.
 
@@ -600,7 +664,7 @@ class PathComplex(Complex):
         signed: bool = False,
         weight: str | None = None,
         index: bool = False,
-    ):
+    ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
         """
         Compute coadjacency matrix of the path complex.
 

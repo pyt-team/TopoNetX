@@ -362,6 +362,25 @@ class TestPathComplex:
 
         assert np.all(L_down.todense() == L_down_tmp)
 
+    def test_hodge_laplacian_matrix(self):
+        """Test hodge laplacian matrix."""
+        PX = PathComplex(
+            [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        )
+
+        assert np.all(
+            PX.hodge_laplacian_matrix(0).todense()
+            == PX.up_laplacian_matrix(0).todense()
+        )
+        assert np.all(
+            PX.hodge_laplacian_matrix(2).todense()
+            == PX.down_laplacian_matrix(2).todense()
+        )
+        assert np.all(
+            PX.hodge_laplacian_matrix(1).todense()
+            == (PX.up_laplacian_matrix(1) + PX.down_laplacian_matrix(1)).todense()
+        )
+
     def test_adjacency_matrix(self):
         """Test adjacency matrix."""
         PX = PathComplex(
