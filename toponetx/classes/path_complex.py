@@ -6,17 +6,18 @@ import networkx as nx
 import numpy as np
 import scipy as sp
 from hypernetx import Hypergraph
+from networkx.classes.reportviews import EdgeView, NodeView
 
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.path import Path
-from toponetx.classes.reportviews import NodeView, PathView
+from toponetx.classes.reportviews import PathView
 
 __all__ = ["PathComplex"]
 
 
 class PathComplex(Complex):
-    """A class representing a path complex.
+    """A class representing a path complex based on simple paths as proposed in (https://arxiv.org/abs/2308.06838). The original path complex is defined in (https://arxiv.org/pdf/1207.2834.pdf).
 
     A path complex contains elementary p-paths that span the space of simple paths. Path complexes are a topological structure whose
     building blocks are paths, which are essentially different from simplicial complexes and cell complexes. If certain conditions are met, path complexes can generalize
@@ -83,6 +84,7 @@ class PathComplex(Complex):
         super().__init__(name=name, **kwargs)
 
         self._path_set = PathView()
+        self._G = nx.Graph()
         self._reserve_sequence_order = reserve_sequence_order
         if allowed_paths is not None:
             if len(allowed_paths) > 0:
@@ -99,6 +101,7 @@ class PathComplex(Complex):
 
         if isinstance(paths, nx.Graph):
             # compute allowed_paths in order to construct boundary incidence matrix/adj matrix.
+            self._G = paths
             if self._allowed_paths is not None:
                 self._allowed_paths.update(
                     self.compute_allowed_paths(
@@ -210,7 +213,7 @@ class PathComplex(Complex):
                             path
                         )
                     )
-            else:
+            else:  # path is a Path object
                 path_ = path.elements
             self._update_faces_dict_length(
                 path_
@@ -224,35 +227,34 @@ class PathComplex(Complex):
             if (
                 path_ in self._path_set.faces_dict[len(path_) - 1]
             ):  # path is already in the complex, just update the properties if needed
-                if isinstance(path, Path):  # update attrbiutes for PathView()
-                    self._path_set.faces_dict[len(path_) - 1][path_].update(
-                        path._properties
-                    )
-                else:
-                    self._path_set.faces_dict[len(path_) - 1][path_].update(attr)
+                self._update_attributes(path, **attr)
                 return
-
-            for length in range(len(path_), 0, -1):
-                for i in range(0, len(path_) - length + 1):
-                    sub_path = path_[i : i + length]
-                    if not self._reserve_sequence_order and str(sub_path[0]) > str(
-                        sub_path[-1]
-                    ):
-                        sub_path = sub_path[::-1]
-                    sub_path = tuple(sub_path)
-                    new_path = self._update_faces_dict_entry(sub_path)
-                    if new_path is not None:
-                        new_paths.add(new_path)
-            # update allowed paths
-            if len(new_paths) > 0:
-                self._allowed_paths.update(new_paths)
-
-            if isinstance(path, Path):  # update attrbiutes for PathView()
-                self._path_set.faces_dict[len(path_) - 1][path_].update(
-                    path._properties
-                )
             else:
-                self._path_set.faces_dict[len(path_) - 1][path_].update(attr)
+                # update sub-paths
+                for length in range(len(path_), 0, -1):
+                    for i in range(0, len(path_) - length + 1):
+                        sub_path = path_[i : i + length]
+                        if not self._reserve_sequence_order and str(sub_path[0]) > str(
+                            sub_path[-1]
+                        ):
+                            sub_path = sub_path[::-1]
+                        sub_path = tuple(sub_path)
+
+                        # add to _G
+                        if len(sub_path) == 1:
+                            self._G.add_node(sub_path[0])
+                        elif len(sub_path) == 2:
+                            self._G.add_edge(sub_path[0], sub_path[1])
+
+                        # expand _path_set if necessary. keep track of newly added paths to expend _allowed_paths
+                        new_path = self._update_faces_dict_entry(sub_path)
+                        if new_path is not None:
+                            new_paths.add(new_path)
+                # update allowed paths
+                if len(new_paths) > 0:
+                    self._allowed_paths.update(new_paths)
+
+                self._update_attributes(path, **attr)
 
     @property
     def dim(self) -> int:
@@ -266,7 +268,7 @@ class PathComplex(Complex):
         return self._path_set.max_dim
 
     @property
-    def nodes(self):
+    def nodes(self) -> NodeView:
         """Nodes.
 
         Returns
@@ -274,9 +276,18 @@ class PathComplex(Complex):
         NodeView
             A view of all nodes in the path complex.
         """
-        return NodeView(
-            self._path_set.faces_dict, cell_type=Path
-        )  # TODO: fix NodeView class as frozenset is too restricted for Path
+        return self._G.nodes
+
+    @property
+    def edges(self) -> EdgeView:
+        """Edges.
+
+        Returns
+        -------
+        EdgeView
+            A view of all edges in the path complex.
+        """
+        return self._G.edges
 
     @property
     def paths(self) -> PathView:
@@ -370,6 +381,8 @@ class PathComplex(Complex):
         for path in removed_paths:
             self._remove_path(path)
 
+        self._G.remove_nodes_from(node_set)
+
     def incidence_matrix(self, rank: int, signed: bool = True, index: bool = False):
         """
         Compute incidence matrix of the path complex.
@@ -398,7 +411,7 @@ class PathComplex(Complex):
             boundary = sp.sparse.lil_matrix((0, len(self.nodes)))
             if index:
                 node_index = {
-                    node: i
+                    tuple([node]): i
                     for i, node in enumerate(sorted(self.nodes, key=lambda x: str(x)))
                 }
                 return {}, node_index, abs(boundary.tocoo())
@@ -601,6 +614,24 @@ class PathComplex(Complex):
             return path
         else:
             return None
+
+    def _update_attributes(self, path, **attr):
+        if not isinstance(path, Path):  # path is a list or tuple
+            path_ = tuple(path)
+        else:  # path is a Path object
+            path_ = path.elements
+        if isinstance(path, Path):  # update attributes for PathView() and _G
+            self._path_set.faces_dict[len(path_) - 1][path_].update(path._properties)
+            if len(path_) == 1:
+                self._G.add_node(path_[0], **path._properties)
+            elif len(path_) == 2:
+                self._G.add_edge(path_[0], path_[1], **path._properties)
+        else:
+            self._path_set.faces_dict[len(path_) - 1][path_].update(attr)
+            if len(path_) == 1:
+                self._G.add_node(path_[0], **attr)
+            elif len(path_) == 2:
+                self._G.add_edge(path_[0], path_[1], **attr)
 
     def __contains__(self, item: Sequence[Hashable] | Hashable) -> bool:
         """Return boolean indicating if item is in self._path_set.

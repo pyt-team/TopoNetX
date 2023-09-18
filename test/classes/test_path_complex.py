@@ -18,6 +18,7 @@ class TestPathComplex:
         PX = PathComplex()
         assert len(PX.paths) == 0
         assert len(PX.nodes) == 0
+        assert len(PX.edges) == 0
         assert PX.dim == -1
 
     def test_iterable_paths(self):
@@ -46,9 +47,19 @@ class TestPathComplex:
         PX = PathComplex([[1, 2, 3], [1, 2, 4]])
         nodes = PX.nodes
         assert len(nodes) == 4
-        assert (1,) in nodes.nodes
-        assert (2,) in nodes.nodes
-        assert (6,) not in nodes.nodes
+        assert 1 in nodes
+        assert 2 in nodes
+        assert 6 not in nodes
+
+    def test_edges_property(self):
+        """Test edges property."""
+        PX = PathComplex([[1, 2, 3], [1, 2, 4]])
+        edges = PX.edges
+        assert len(edges) == 3
+        assert (1, 2) in edges
+        assert (2, 3) in edges
+        assert (2, 4) in edges
+        assert (1, 3) not in edges
 
     def test_path_property(self):
         """Test path property."""
@@ -145,6 +156,8 @@ class TestPathComplex:
         """Test add str nodes."""
         PX = PathComplex([[1, 2, 3], [2, 4, "a"]])
         assert "a" in PX.paths
+        assert "a" in PX.nodes
+        assert [4, "a"] in PX.edges
 
         with pytest.raises(ValueError):
             PX.add_path(["a", 1, 2])
@@ -170,6 +183,18 @@ class TestPathComplex:
         PX[[1, 2, 5]]["heat"] = 66
         assert PX[[1, 2, 5]] == {"heat": 66}
 
+        PX.add_path(6, heat=77)
+        assert PX[6] == {"heat": 77}
+        assert PX.nodes[6] == {"heat": 77}
+
+        PX.add_path([4, 5], heat=77)
+        assert PX[[4, 5]] == {"heat": 77}
+        assert PX.edges[(4, 5)] == {"heat": 77}
+
+        # TODO: set attribute here
+        # assert PX[[4, 5]] == {"heat": 88}
+        # assert PX.edges[(4, 5)] == {"heat": 88}
+
     def test_get_len_(self):
         """Test get size of the path complex."""
         PX = PathComplex()
@@ -186,6 +211,12 @@ class TestPathComplex:
         assert 1 in PX.paths
         assert 2 in PX.paths
         assert 3 in PX.paths
+        assert 1 in PX.nodes
+        assert 2 in PX.nodes
+        assert 3 in PX.nodes
+        assert 4 in PX.nodes
+        assert [1, 2] in PX.edges
+        assert [2, 4] in PX.edges
 
         with pytest.raises(TypeError):
             PX.add_paths_from(1)
@@ -196,6 +227,7 @@ class TestPathComplex:
         PX.add_node(1)
         assert 1 in PX.paths
         assert [1] in PX.paths
+        assert 1 in PX.nodes
 
         with pytest.raises(TypeError):
             PX.add_node([1, 2])
@@ -203,6 +235,7 @@ class TestPathComplex:
         PX.add_node(Path(2))
         assert 2 in PX.paths
         assert [2] in PX.paths
+        assert 2 in PX.nodes
 
         with pytest.raises(ValueError):
             PX.add_node(Path([2, 3]))
@@ -215,6 +248,9 @@ class TestPathComplex:
         assert 1 not in PX.paths
         assert [1, 2] not in PX.paths
         assert [1, 3] not in PX.paths
+        assert 1 not in PX.nodes
+        assert [1, 2] not in PX.edges
+        assert [1, 3] not in PX.edges
 
     def test_incidence_matrix(self):
         """Test incidence matrix."""
