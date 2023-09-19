@@ -696,8 +696,8 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PX = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> HG = PX.to_hypergraph()
+        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
+        >>> HG = PC.to_hypergraph()
         >>> HG
         Hypergraph({'e0': [0, 1], 'e1': [1, 2], 'e2': [1, 3], 'e3': [2, 3],
         'e4': [0, 1, 2], 'e5': [0, 1, 3], 'e6': [1, 2, 3], 'e7': [1, 3, 2],
@@ -714,8 +714,8 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PX = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> PC = PX.restrict_to_nodes([0,1,3])
+        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
+        >>> PC = PC.restrict_to_nodes([0,1,3])
         >>> PC.paths
         PathView([(0,), (1,), (3,), (0, 1), (1, 3), (0, 1, 3)])
         """
@@ -733,8 +733,8 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PX = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> PC = PX.restrict_to_paths([[1,2,3]])
+        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
+        >>> PC = PC.restrict_to_paths([[1,2,3]])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
         """
@@ -766,16 +766,16 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PX = PathComplex()
-        >>> PX.add_node(0)
-        >>> PX.add_node(1, heat=55)
-        >>> PX.add_node(2, heat=66)
-        >>> PX.add_node(3, color="red")
-        >>> PX.add_node(2, color="blue")
-        >>> PX.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PX.get_node_attributes("heat")
+        >>> PC = PathComplex()
+        >>> PC.add_node(0)
+        >>> PC.add_node(1, heat=55)
+        >>> PC.add_node(2, heat=66)
+        >>> PC.add_node(3, color="red")
+        >>> PC.add_node(2, color="blue")
+        >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
+        >>> PC.get_node_attributes("heat")
         {(1, ): 55, (2, ): 66}
-        >>> PX.get_node_attributes("color")
+        >>> PC.get_node_attributes("color")
         {(2, ): "blue", (3, ): "red"}
         """
         return {tuple(n): self[n][name] for n in self.skeleton(0) if name in self[n]}
@@ -797,17 +797,17 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PX = PathComplex()
-        >>> PX.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PX.set_node_attributes({(1, ): {"heat": 55, "color": "red"}, (2, ): {"heat": 66, "color": "blue"}})
-        >>> PX[1]
+        >>> PC = PathComplex()
+        >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
+        >>> PC.set_node_attributes({(1, ): {"heat": 55, "color": "red"}, (2, ): {"heat": 66, "color": "blue"}})
+        >>> PC[1]
         {'heat': 55, 'color': 'red'}
-        >>> PX[2]
+        >>> PC[2]
         {'heat': 66, 'color': 'blue'}
-        >>> PX.set_node_attributes({(1, ): 58, (2, ): 60}, name="heat")
-        >>> PX[1]
+        >>> PC.set_node_attributes({(1, ): 58, (2, ): 60}, name="heat")
+        >>> PC[1]
         {'heat': 58, 'color': 'red'}
-        >>> PX[2]
+        >>> PC[2]
         {'heat': 60, 'color': 'blue'}
         """
         if name is None:
@@ -852,15 +852,15 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PX = PathComplex()
-        >>> PX.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PX.add_path([0, 1], weight=32)
-        >>> PX.add_path([1, 2], weight=98)
-        >>> PX.add_path([1, 3], color="red")
-        >>> PX.add_path([2, 3], color="blue")
-        >>> PX.get_edge_attributes("weight")
+        >>> PC = PathComplex()
+        >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
+        >>> PC.add_path([0, 1], weight=32)
+        >>> PC.add_path([1, 2], weight=98)
+        >>> PC.add_path([1, 3], color="red")
+        >>> PC.add_path([2, 3], color="blue")
+        >>> PC.get_edge_attributes("weight")
         {(0, 1): 32, (1, 2): 98}
-        >>> PX.get_edge_attributes("color")
+        >>> PC.get_edge_attributes("color")
         {(1, 3): "red", (2, 3): "blue"}
         """
         return {tuple(e): self[e][name] for e in self.skeleton(1) if name in self[e]}
@@ -882,21 +882,21 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PX = PathComplex()
-        >>> PX.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PX.add_path([0, 1], weight=32)
-        >>> PX.add_path([1, 2], weight=98)
-        >>> PX.add_path([1, 3], color="red")
-        >>> PX.add_path([2, 3], color="blue")
-        >>> PX.get_edge_attributes("weight")
+        >>> PC = PathComplex()
+        >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
+        >>> PC.add_path([0, 1], weight=32)
+        >>> PC.add_path([1, 2], weight=98)
+        >>> PC.add_path([1, 3], color="red")
+        >>> PC.add_path([2, 3], color="blue")
+        >>> PC.get_edge_attributes("weight")
         {(0, 1): 32, (1, 2): 98}
-        >>> PX.set_edge_attributes({(0, 1): 33}, name="weight")
-        >>> PX.get_edge_attributes("weight")
+        >>> PC.set_edge_attributes({(0, 1): 33}, name="weight")
+        >>> PC.get_edge_attributes("weight")
         {(0, 1): 33, (1, 2): 98}
-        >>> PX.set_edge_attributes({(1, 3): {"weight": 55, "color": "yellow"}, (2, 3): {"weight": 66, "color": "blue"}})
-        >>> PX[1, 3]
+        >>> PC.set_edge_attributes({(1, 3): {"weight": 55, "color": "yellow"}, (2, 3): {"weight": 66, "color": "blue"}})
+        >>> PC[1, 3]
         {'color': 'yellow', 'weight': 55}
-        >>> PX[2, 3]
+        >>> PC[2, 3]
         {'color': 'blue', 'weight': 66}
         """
         if name is None:
@@ -935,16 +935,16 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PX = PathComplex()
-        >>> PX.add_paths_from([[0, 1]])
-        >>> PX.add_path([0, 1, 2], weight=43)
-        >>> PX.add_path([0, 1, 3], weight=98)
-        >>> PX.add_path([1, 2, 3], color="red")
-        >>> PX.add_path([1, 3, 2], color="blue")
-        >>> PX.add_path([2, 1, 3], color="green")
-        >>> PX.get_path_attributes("weight")
+        >>> PC = PathComplex()
+        >>> PC.add_paths_from([[0, 1]])
+        >>> PC.add_path([0, 1, 2], weight=43)
+        >>> PC.add_path([0, 1, 3], weight=98)
+        >>> PC.add_path([1, 2, 3], color="red")
+        >>> PC.add_path([1, 3, 2], color="blue")
+        >>> PC.add_path([2, 1, 3], color="green")
+        >>> PC.get_path_attributes("weight")
         {(0, 1, 2): 43, (0, 1, 3): 98}
-        >>> PX.get_path_attributes("color")
+        >>> PC.get_path_attributes("color")
         {(1, 2, 3): "red", (1, 3, 2): "blue", (2, 1, 3): "green"}
         """
         return {
@@ -970,17 +970,17 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PX = PathComplex([[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PX.set_path_attributes({(0, 1, 2): {"weight": 43, "color": "red"}, (0, 1, 3): {"weight": 98, "color": "blue"}})
-        >>> PX.get_path_attributes("weight")
+        >>> PC = PathComplex([[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
+        >>> PC.set_path_attributes({(0, 1, 2): {"weight": 43, "color": "red"}, (0, 1, 3): {"weight": 98, "color": "blue"}})
+        >>> PC.get_path_attributes("weight")
         {(0, 1, 2): 43, (0, 1, 3): 98}
-        >>> PX.get_path_attributes("color")
+        >>> PC.get_path_attributes("color")
         {(0, 1, 2): "red", (0, 1, 3): "blue"}
-        >>> PX.set_path_attributes({0: 55}, "weight")
-        >>> PX.get_path_attributes("weight")
+        >>> PC.set_path_attributes({0: 55}, "weight")
+        >>> PC.get_path_attributes("weight")
         {(0,): 55, (0, 1, 2): 43, (0, 1, 3): 98}
-        >>> PX.set_path_attributes({(0, 1): "red"}, "color")
-        >>> PX.get_path_attributes("color")
+        >>> PC.set_path_attributes({(0, 1): "red"}, "color")
+        >>> PC.get_path_attributes("color")
         {(0, 1): 'red', (0, 1, 2): 'red', (0, 1, 3): 'blue'}
         """
         if name is None:
