@@ -684,7 +684,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        rank, via_rank : int, int
+        rank, via_rank : int
             Two ranks for skeletons in the input combinatorial complex
         s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
