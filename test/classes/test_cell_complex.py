@@ -1528,7 +1528,7 @@ class TestCellComplex:
         with pytest.raises(ValueError) as exp_exception:
             CX.add_cell(1, rank=2)
 
-        assert str(exp_exception.value) == "invalid input"
+        assert str(exp_exception.value) == "invalid input, input 1 must be iterable"
 
         with pytest.raises(ValueError) as exp_exception:
             CX.add_cell({1, 5, 2, 3}, rank=4)
