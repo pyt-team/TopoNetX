@@ -56,6 +56,7 @@ class PathComplex(Complex):
     - Our path complex is different from the path complex defined in (https://arxiv.org/pdf/1207.2834.pdf). In our path complex, elementary p-paths span the space of simple paths.
     The path complex originally proposed has elementary p-paths that span the space of boundary-invariant paths.
     - The path complex is a simplicial complex if certain conditions are met (https://arxiv.org/pdf/1207.2834.pdf).
+    - Unlike hypergraphs, combinatorial, simplicial, and cell complexes, path complexes take into account the order of sequences.
 
     Examples
     --------
@@ -690,24 +691,6 @@ class PathComplex(Complex):
         if index:
             return ind, L_down
         return L_down
-
-    def to_hypergraph(self) -> Hypergraph:
-        """Return a hypergraph representation of the path complex.
-
-        Examples
-        --------
-        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> HG = PC.to_hypergraph()
-        >>> HG
-        Hypergraph({'e0': [0, 1], 'e1': [1, 2], 'e2': [1, 3], 'e3': [2, 3],
-        'e4': [0, 1, 2], 'e5': [0, 1, 3], 'e6': [1, 2, 3], 'e7': [1, 3, 2],
-        'e8': [2, 1, 3]},name=)
-        """
-        G = []
-        for rank in range(1, self.dim + 1):
-            edge = [list(path) for path in self.skeleton(rank)]
-            G = G + edge
-        return Hypergraph(G, static=True)
 
     def restrict_to_nodes(self, node_set: Iterable[Hashable], name: str = ""):
         """Return a new path complex restricted to a subset of nodes.
