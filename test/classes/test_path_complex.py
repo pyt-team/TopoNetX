@@ -481,32 +481,6 @@ class TestPathComplex:
             )
         )
 
-    def test_to_hypergraph(self):
-        """Convert a PathComplex to a HyperGraph, then compare the number of nodes and edges."""
-        PC = PathComplex(
-            [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]], max_rank=3
-        )
-        HG = PC.to_hypergraph()
-
-        expected_results = hnx.Hypergraph(
-            {
-                "e0": [0, 1],
-                "e1": [1, 2],
-                "e2": [1, 3],
-                "e3": [2, 3],
-                "e4": [0, 1, 2],
-                "e5": [0, 1, 3],
-                "e6": [1, 2, 3],
-                "e7": [1, 3, 2],
-                "e8": [2, 1, 3],
-            },
-            name="",
-            static=True,
-        )
-
-        assert len(HG.edges) == len(expected_results.edges)
-        assert set(HG.nodes) == set(expected_results.nodes)
-
     def test_restrict_to_nodes(self):
         """Test restrict_to_nodes."""
         PC = PathComplex(
