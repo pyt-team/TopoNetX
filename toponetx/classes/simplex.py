@@ -1,6 +1,7 @@
 """Simplex Class."""
 
-from collections.abc import Collection, Hashable, Iterable, Iterator
+import warnings
+from collections.abc import Collection, Hashable, Iterable
 from itertools import combinations
 from typing import Any
 
@@ -41,8 +42,14 @@ class Simplex(Atom):
     """
 
     def __init__(
-        self, elements: Collection, name: str = "", construct_tree: bool = True, **attr
+        self, elements: Collection, name: str = "", construct_tree: bool = False, **attr
     ) -> None:
+        if construct_tree is not False:
+            warnings.warn(
+                "The `construct_tree` argument is deprecated.",
+                DeprecationWarning,
+            )
+
         for i in elements:
             if not isinstance(i, Hashable):
                 raise ValueError(f"All nodes of a simplex must be hashable, got {i}")
@@ -50,12 +57,6 @@ class Simplex(Atom):
         super().__init__(frozenset(sorted(elements)), name, **attr)
         if len(elements) != len(self.elements):
             raise ValueError("A simplex cannot contain duplicate nodes.")
-
-        self.construct_tree = construct_tree
-        if construct_tree:
-            self._faces = self.construct_simplex_tree(elements)
-        else:
-            self._faces = frozenset()
 
     def __contains__(self, item: Any) -> bool:
         """Return True if the given element is a subset of the nodes.
@@ -89,6 +90,10 @@ class Simplex(Atom):
     @staticmethod
     def construct_simplex_tree(elements: Collection) -> frozenset["Simplex"]:
         """Return set of Simplex objects representing the faces."""
+        warnings.warn(
+            "`Simplex.construct_simplex_tree` is deprecated.", DeprecationWarning
+        )
+
         faceset = set()
         for r in range(len(elements), 0, -1):
             for face in combinations(elements, r):
@@ -100,6 +105,11 @@ class Simplex(Atom):
     @property
     def boundary(self) -> frozenset["Simplex"]:
         """Return a set of Simplex objects representing the boundary faces."""
+        warnings.warn(
+            "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
+            DeprecationWarning,
+        )
+
         return frozenset(
             Simplex(elements, construct_tree=False)
             for elements in combinations(self.elements, len(self) - 1)
@@ -127,10 +137,12 @@ class Simplex(Atom):
         frozenset[Simplex]
             The set of faces of the simplex.
         """
-        if self.construct_tree:
-            return self._faces
-        else:
-            return Simplex.construct_simplex_tree(self.elements)
+        warnings.warn(
+            "`Simplex.faces` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
+            DeprecationWarning,
+        )
+
+        return Simplex.construct_simplex_tree(self.elements)
 
     def __repr__(self) -> str:
         """Return string representation of the simplex.

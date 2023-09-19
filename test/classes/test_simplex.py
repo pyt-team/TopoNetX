@@ -13,9 +13,11 @@ class TestSimplex:
         s = Simplex((1,))
         assert len(s) == 1
         assert tuple(s) == (1,)
-        assert s.construct_tree is True
         assert s.name == ""
         assert s._properties == {}
+
+        with pytest.deprecated_call():
+            _ = Simplex((1,), construct_tree=True)
 
     def test_duplicate_nodes(self):
         """Test creation of simplex with duplicate nodes."""
@@ -33,8 +35,9 @@ class TestSimplex:
     def test_boundary(self):
         """Test the boundary property of the simplex."""
         s = Simplex((1, 2, 3))
-        boundary = s.boundary
-        assert len(boundary) == 3
+        with pytest.deprecated_call():
+            boundary = s.boundary
+            assert len(boundary) == 3
 
     def test_representation(self):
         """Test the string representation of the simplex."""
@@ -68,12 +71,14 @@ class TestSimplex:
     def test_faces(self):
         """Test getting faces from simplex."""
         s = Simplex((1, 2, 3), constuct_tree=False)
-        faces = s.faces
-        assert len(faces) == 7
+        with pytest.deprecated_call():
+            faces = s.faces
+            assert len(faces) == 7
 
         s = Simplex((1, 2, 3), constuct_tree=True)
-        faces = s.faces
-        assert len(faces) == 7
+        with pytest.deprecated_call():
+            faces = s.faces
+            assert len(faces) == 7
 
     def test_clone(self):
         """Test clone method."""
