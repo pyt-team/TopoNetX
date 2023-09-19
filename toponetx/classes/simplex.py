@@ -103,10 +103,11 @@ class Simplex(Atom):
 
         Returns
         -------
-        A frozenset representing boundary simplices.
+        frozenset[Simplex]
+            A frozenset representing boundary simplices.
 
-        Example
-        -------
+        Examples
+        --------
         For a n-simplex [1,2,3], the boundary is all the n-1 subsets of [1,2,3] :
             (1,2), (2,3), (3,1).
         """

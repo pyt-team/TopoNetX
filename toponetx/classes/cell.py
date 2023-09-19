@@ -212,8 +212,8 @@ class Cell(Atom):
         -------
         Iterator of tuple representing boundary edges given in cyclic order.
 
-        Example
-        -------
+        Examples
+        --------
         For a cell [1,2,3,4,5], the boundary is the edges that define that cell :
             (1,2), (2,3), (3,4), (4,5) and (5,1).
         """
