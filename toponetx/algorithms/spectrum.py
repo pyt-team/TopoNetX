@@ -202,13 +202,13 @@ def laplacian_spectrum(matrix, weight: str = "weight"):
 
 
 def cell_complex_hodge_laplacian_spectrum(
-    CX: CellComplex, rank: int, weight: str | None = None
+    CC: CellComplex, rank: int, weight: str | None = None
 ):
     """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
-    CX : CellComplex
+    CC : CellComplex
     rank : int
     weight : str, optional
         If None, then each cell has weight 1.
@@ -221,13 +221,13 @@ def cell_complex_hodge_laplacian_spectrum(
     Examples
     --------
     >>> from toponetx.classes import CellComplex
-    >>> CX = CellComplex()
-    >>> CX.add_cell([1,2,3,4],rank=2)
-    >>> CX.add_cell([2,3,4,5],rank=2)
-    >>> CX.add_cell([5,6,7,8],rank=2)
-    >>> cell_complex_hodge_laplacian_spectrum(CX,1)
+    >>> CC = CellComplex()
+    >>> CC.add_cell([1,2,3,4],rank=2)
+    >>> CC.add_cell([2,3,4,5],rank=2)
+    >>> CC.add_cell([5,6,7,8],rank=2)
+    >>> cell_complex_hodge_laplacian_spectrum(CC,1)
     """
-    return laplacian_spectrum(CX.hodge_laplacian_matrix(rank=rank, weight=weight))
+    return laplacian_spectrum(CC.hodge_laplacian_matrix(rank=rank, weight=weight))
 
 
 def simplicial_complex_hodge_laplacian_spectrum(
@@ -276,12 +276,12 @@ def path_complex_hodge_laplacian_spectrum(
     return laplacian_spectrum(PC.hodge_laplacian_matrix(rank=rank, signed=True))
 
 
-def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
-    """Return eigenvalues of the adjacency matrix of CX.
+def cell_complex_adjacency_spectrum(CCC: CellComplex, rank):
+    """Return eigenvalues of the adjacency matrix of the cell complex.
 
     Parameters
     ----------
-    CX : CellComplex
+    CC : CellComplex
     rank : int
         rank of the cells to take the adjacency from:
         - 0-cells are nodes
@@ -297,13 +297,13 @@ def cell_complex_adjacency_spectrum(CX: CellComplex, rank):
     Examples
     --------
     >>> from toponetx import CellComplex
-    >>> CX = CellComplex()
-    >>> CX.add_cell([1,2,3,4],rank=2)
-    >>> CX.add_cell([2,3,4,5],rank=2)
-    >>> CX.add_cell([5,6,7,8],rank=2)
-    >>> cell_complex_adjacency_spectrum(CX,1)
+    >>> CC = CellComplex()
+    >>> CC.add_cell([1,2,3,4],rank=2)
+    >>> CC.add_cell([2,3,4,5],rank=2)
+    >>> CC.add_cell([5,6,7,8],rank=2)
+    >>> cell_complex_adjacency_spectrum(CC,1)
     """
-    return laplacian_spectrum(CX.adjacency_matrix(rank=rank))
+    return laplacian_spectrum(CCC.adjacency_matrix(rank=rank))
 
 
 def simplicial_complex_adjacency_spectrum(
@@ -346,14 +346,14 @@ def path_complex_adjacency_spectrum(
     return laplacian_spectrum(PC.adjacency_matrix(rank=dim, weight=weight, signed=True))
 
 
-def combinatorial_complex_adjacency_spectrum(CC: CombinatorialComplex, r, k):
-    """Return eigenvalues of the adjacency matrix of CC.
+def combinatorial_complex_adjacency_spectrum(CCC: CombinatorialComplex, rank, via_rank):
+    """Return eigenvalues of the adjacency matrix of the combinatorial complex.
 
     Parameters
     ----------
-    matrix : scipy sparse matrix
-    weight : str or None, default='weight'
-        If None, then each cell has weight 1.
+    CCC : CombinatorialComplex
+    rank : int
+    via_rank : int
 
     Returns
     -------
@@ -363,7 +363,7 @@ def combinatorial_complex_adjacency_spectrum(CC: CombinatorialComplex, r, k):
     Examples
     --------
     >>> from toponetx import CombinatorialComplex
-    >>> CC = CombinatorialComplex(cells=[[1,2,3],[2,3], [0] ],ranks=[2,1,0] )
-    >>> s = laplacian_spectrum( CC.adjacency_matrix( 0,2) )
+    >>> CCC = CombinatorialComplex(cells=[[1, 2, 3], [2, 3], [0]],ranks=[2, 1, 0])
+    >>> s = laplacian_spectrum(CCC.adjacency_matrix(0, 2))
     """
-    return laplacian_spectrum(CC.adjacency_matrix(r, k))
+    return laplacian_spectrum(CCC.adjacency_matrix(rank, via_rank))
