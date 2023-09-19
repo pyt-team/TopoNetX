@@ -100,11 +100,10 @@ class Simplex(Atom):
     @property
     def boundary(self) -> frozenset["Simplex"]:
         """Return a set of Simplex objects representing the boundary faces."""
-        if self.construct_tree:
-            return frozenset(i for i in self._faces if len(i) == len(self) - 1)
-        else:
-            faces = Simplex.construct_simplex_tree(self.elements)
-            return frozenset(i for i in faces if len(i) == len(self) - 1)
+        return frozenset(
+            Simplex(elements, construct_tree=False)
+            for elements in combinations(self.elements, len(self) - 1)
+        )
 
     def sign(self, face) -> int:
         """Calculate the sign of the simplex with respect to a given face.
