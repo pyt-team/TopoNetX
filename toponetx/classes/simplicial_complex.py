@@ -1444,27 +1444,21 @@ class SimplicialComplex(Complex):
     def to_combinatorial_complex(self):
         """Convert a simplicial complex to a combinatorial complex.
 
-        Parameters
-        ----------
-        dynamic: bool, optional, default is false
-            when True returns DynamicCombinatorialComplex
-            when False returns CombinatorialComplex
-
         Examples
         --------
         >>> c1 = Simplex((1, 2, 3))
         >>> c2 = Simplex((1, 2, 3))
         >>> c3 = Simplex((1, 2, 4))
         >>> SC = SimplicialComplex([c1, c2, c3])
-        >>> CC = SC.to_combinatorial_complex()
+        >>> CCC = SC.to_combinatorial_complex()
         """
         from toponetx.classes.combinatorial_complex import CombinatorialComplex
 
-        CC = CombinatorialComplex()
+        CCC = CombinatorialComplex()
         for rank in range(1, self.dim + 1):
             for cell in self.skeleton(rank):
-                CC.add_cell(cell, rank=len(cell) - 1, **self[cell])
-        return CC
+                CCC.add_cell(cell, rank=len(cell) - 1, **self[cell])
+        return CCC
 
     def clone(self) -> "SimplicialComplex":
         """Return a copy of the simplicial complex.

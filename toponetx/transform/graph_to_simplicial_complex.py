@@ -49,9 +49,7 @@ def graph_to_clique_complex(
     G : networkx graph
         Input graph.
     max_dim : int, optional
-        The max dimension of the cliques in
-        the output clique complex.
-        The default is None indicate max dimension.
+        The max dimension of the cliques in the output clique complex.
 
     Returns
     -------
