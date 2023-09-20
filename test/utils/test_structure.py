@@ -2,11 +2,13 @@
 
 from collections import defaultdict
 
+import numpy as np
 import pytest
 from scipy.sparse import csr_matrix
 
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.utils.structure import (
+    compute_set_incidence,
     incidence_to_adjacency,
     neighborhood_list_to_neighborhood_dict,
     sparse_array_to_neighborhood_dict,
@@ -88,6 +90,9 @@ class TestStructure:
         )
         assert out == d
 
+        with pytest.raises(ValueError):
+            out = neighborhood_list_to_neighborhood_dict(neighborhood_list, d, None)
+
     def test_neighborhood_list_to_neighborhood_with_dict(self):
         """Test that neighborhood_list_to_neighborhood_dict works correctly with specified node dictionary."""
         node_dict = {1: "a", 2: "b", 3: "c"}
@@ -141,3 +146,45 @@ class TestStructure:
         assert (
             adj != expected_adj
         ).nnz == 0  # tests sparsity of difference -> if the difference has no non-zero entries, it is the same
+
+    def test_compute_set_incidence(self):
+        """Test compute_set_incidence."""
+        # Basic functionality
+        children = [1, 2, 3]
+        uidset = [10, 11, 12]
+        result = compute_set_incidence(children, uidset)
+        assert np.array_equal(
+            result.toarray(), np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
+        )
+
+        # Sparse matrix and index
+        children = [1, 2]
+        uidset = [10, 12]
+        result_ndict, result_edict, result_MP = compute_set_incidence(
+            children, uidset, sparse=True, index=True
+        )
+        assert isinstance(result_MP, csr_matrix)
+        assert result_MP.shape == (len(children), len(uidset))
+        assert len(result_ndict) == len(children)
+        assert len(result_edict) == len(uidset)
+
+        # Non-sparse matrix
+        children = [1, 2, 3]
+        uidset = [10, 11, 12]
+        result_MP = compute_set_incidence(children, uidset, sparse=False)
+        assert isinstance(result_MP, np.ndarray)
+        assert result_MP.shape == (len(children), len(uidset))
+
+        # Empty input without index
+        children = []
+        uidset = []
+        result = compute_set_incidence(children, uidset)
+        assert result.size == 1
+
+        # Empty input with index
+        children = []
+        uidset = []
+        result_ndict, result_edict, result = compute_set_incidence(
+            children, uidset, index=True
+        )
+        assert result.size == 1
