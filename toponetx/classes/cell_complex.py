@@ -453,7 +453,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        node_set : an iterable of nodes, optional, default: None
+        node_set : an iterable of nodes, optional
             If None, then return the number of nodes in cell complex.
 
         Returns
@@ -471,7 +471,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        edge_set : an iterable of optional, default: None
+        edge_set : an iterable of edges, optional
             If None, then return the number of edges in cell complex.
 
         Returns
@@ -497,7 +497,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        cell_set : an iterable of cells, optional, default: None
+        cell_set : an iterable of cells, optional
             cells can be represented as a `tuple`, `list`, or `Cell` object
             If None, then return the number of cells in cell complex.
 
@@ -592,7 +592,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        cell complex : Cell Complex
+        cell_complex : Cell Complex
         """
         for node in node_set:
             self.remove_node(node)
@@ -616,8 +616,10 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        u_of_edge: Hashable, first node of edge
-        v_of_edge: Hashable, second node of edge
+        u_of_edge : hashable
+            first node of edge
+        v_of_edge : hashable
+            second node of edge
         **attr: attributes to add to the edge
         """
         self._G.add_edge(u_of_edge, v_of_edge, **attr)
@@ -734,7 +736,7 @@ class CellComplex(Complex):
         ----------
         cell_set : iterable of hashables or Cell
             For hashables the cells returned will be empty.
-        rank : int (optional), default is None
+        rank : int, optional
                when each element in cell_set is an iterable then
                rank must be a number that indicates the rank
                of the added cells.
@@ -755,7 +757,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        Cell Complex : CellComplex
+        cell_complex : CellComplex
 
         Notes
         -----
@@ -778,7 +780,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        cell complex : CellComplex
+        cell_complex : CellComplex
         """
         for cell in cell_set:
             self.remove_cell(cell)
@@ -789,7 +791,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        cell complex : CellComplex
+        cell_complex : CellComplex
         """
         for cell in self.cells:
             self.remove_cell(cell)
@@ -809,7 +811,7 @@ class CellComplex(Complex):
             either contains cell -> value (if `name` is specified)
             or nested dict with cell -> (attribute -> value) (if `name == None`)
             (where cell can be of any dimension)
-        name : str or None
+        name : str, optional
 
         Notes
         -----
@@ -1245,10 +1247,6 @@ class CellComplex(Complex):
         ------
         Remove all 2d- cells that are homotopic (equivalent to each other)
 
-        Returns
-        -------
-        None.
-
         Examples
         --------
         >>> import networkx as nx
@@ -1366,9 +1364,11 @@ class CellComplex(Complex):
 
         Parameters
         ----------
+        s : int
+            The dimension of the cells to consider.
         weight : str, optional
             If not given, all nonzero entries are 1.
-        index : boolean, default=False
+        index : bool, default=False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
 
@@ -1416,10 +1416,12 @@ class CellComplex(Complex):
         they share a vertex
         Parameters
         ----------
-        weight : bool, default=False
+        s : int
+            The dimension of the cells to consider.
+        weight : bool, optional
             If not given, all nonzero entries are 1.
 
-        index : boolean, optional, default False
+        index : bool, optional
             If True return will include a dictionary of cell uid
 
         Returns
@@ -1716,7 +1718,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        up Laplacian : scipy.sparse.csr.csr_matrix
+        up_laplacian : scipy.sparse.csr.csr_matrix
 
         when index is true:
             return also a list : list
@@ -1789,7 +1791,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        down Laplacian : scipy.sparse.csr.csr_matrix
+        down_laplacian : scipy.sparse.csr.csr_matrix
 
         when index is true:
             return also a list : list
@@ -1832,7 +1834,27 @@ class CellComplex(Complex):
         weight: str | None = None,
         index: bool = False,
     ):
-        """Compute adjacency matrix for a given rank."""
+        """Compute adjacency matrix for a given rank.
+
+        Parameters
+        ----------
+        rank : int
+            The rank for which an adjacency matrix should be computed.
+        signed : bool, default=False
+            Whether the returned adjacency matrix should be signed (i.e., respect orientations) or unsigned.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : boolean, default=False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The adjacency matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, adjacency matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        """
         if index:
             ind, _, incidence = self.incidence_matrix(
                 rank + 1, signed=signed, index=True
@@ -1854,7 +1876,27 @@ class CellComplex(Complex):
         weight: str | None = None,
         index: bool = False,
     ):
-        """Compute coadjacency matrix for a given rank."""
+        """Compute coadjacency matrix for a given rank.
+
+        Parameters
+        ----------
+        rank : int
+            The rank for which an coadjacency matrix should be computed.
+        signed : bool, default=False
+            Whether the returned coadjacency matrix should be signed (i.e., respect orientations) or unsigned.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : boolean, default=False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The coadjacency matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, coadjacency matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        """
         if index:
             _, ind, incidence = self.incidence_matrix(rank, signed=signed, index=True)
             return ind, incidence_to_adjacency(incidence)
@@ -1884,7 +1926,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        new cell complex : CellComplex
+        new_cell_complex : CellComplex
 
         Examples
         --------
@@ -1951,7 +1993,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        new Cell Complex : Cellcomplex
+        new_cell_complex : Cellcomplex
 
         Examples
         --------
@@ -1984,7 +2026,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        Combinatorial Complex : CombinatorialComplex
+        combinatorial_complex : CombinatorialComplex
 
         Examples
         --------
@@ -2008,6 +2050,10 @@ class CellComplex(Complex):
 
     def to_hypergraph(self):
         """Convert to hypergraph.
+
+        Returns
+        -------
+        hypergraph : Hypergraph
 
         Examples
         --------
@@ -2048,13 +2094,13 @@ class CellComplex(Complex):
         ----------
         s: int, optional, default: 1
 
-        cells: boolean, optional, default: False
+        cells: bool, optional, default: False
             If True, will determine if s-cell-connected.
             For s=1 s-cell-connected is the same as s-connected.
 
         Returns
         -------
-        is_connected : boolean
+        is_connected : bool
 
         Notes
         -----
@@ -2072,7 +2118,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        new clone of the Cell Complex : Cellcomplex
+        clone_cell_complex : Cellcomplex
 
         Examples
         --------
@@ -2091,7 +2137,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        cell complex : CellComplex
+        cell_complex : CellComplex
             A list of cells uids.
 
         Examples
@@ -2133,7 +2179,7 @@ class CellComplex(Complex):
         ----------
         s : int
             The width of the connections.
-        cells : bool, optional, default=True
+        cells : bool, optional
             Determines if cells or nodes will be the vertices in the line graph.
 
         Returns
@@ -2259,7 +2305,9 @@ class CellComplex(Complex):
 
         Same as s_connected_component` with s=1, but nodes returned.
 
-        Return iterator.
+        Returns
+        -------
+        s_connected_components : iterator
 
         See Also
         --------
@@ -2279,7 +2327,11 @@ class CellComplex(Complex):
     def connected_component_subcomplexes(self, return_singletons=True):
         """Compute connected component subgraphs with s=1.
 
-        Same as :meth:`s_component_subcomplexes` with s=1. Returns iterator.
+        Same as :meth:`s_component_subcomplexes` with s=1.
+
+        Returns
+        -------
+        subgraphs: iterator
 
         See Also
         --------
@@ -2299,10 +2351,12 @@ class CellComplex(Complex):
     def node_diameters(self):
         """Return the node diameters of the connected components in cell complex.
 
-        Parameters
-        ----------
-        list of the diameters of the s-components and
-        list of the s-component nodes
+        Returns
+        -------
+        diameters : list
+            list of the diameters of the s-components
+        components : list
+            list of the s-component nodes
 
         Example
         -------
@@ -2332,12 +2386,10 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        s : int, optional, default: 1
+        s : int, optional
 
         Returns
         -------
-        maximum diameter : int
-
         list of diameters : list
             List of cell_diameters for s-cell component subcomplexes in the cell complex.
 
@@ -2371,7 +2423,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        s : int, optional, default: 1
+        s : int, optional
 
         Returns
         -------
@@ -2438,7 +2490,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        s-walk distance : int
+        s_walk_distance : int
 
         See Also
         --------
@@ -2527,6 +2579,11 @@ class CellComplex(Complex):
     def from_networkx_graph(self, G: nx.Graph) -> None:
         """Add edges and nodes from a graph G to self.
 
+        Parameters
+        ----------
+        G : nx.Graph
+            A NetworkX graph.
+
         Examples
         --------
         >>> CC = CellComplex()
@@ -2543,6 +2600,11 @@ class CellComplex(Complex):
     @classmethod
     def from_trimesh(cls, mesh) -> "CellComplex":
         """Convert from trimesh object.
+
+        Parameters
+        ----------
+        mesh : trimesh.Trimesh
+            A trimesh object.
 
         Examples
         --------
