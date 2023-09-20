@@ -52,7 +52,13 @@ def sparse_array_to_neighborhood_list(
 
     Parameters
     ----------
-    ``sparse_array``:  sparse array representing the higher order structure between S and T cells
+    sparse_array:  sparse array representing the higher order structure between S and T cells
+    src_dict: dictionary mapping the indices in S to other values
+    dst_dict: dictionary mapping the indices in T to other values
+
+    Returns
+    -------
+    zip : zip object of the form (s,t) where s and t are indices representing a cell in a higher order structure
     """
     src_idx, dst_idx = sparse_array.nonzero()
 
@@ -77,7 +83,16 @@ def neighborhood_list_to_neighborhood_dict(
 
     Parameters
     ----------
-        ``n_list`` (``list[tuple[int, int]]``): neighborhood list.
+        n_list : list[tuple[int, int]]
+            neighborhood list.
+        src_dict: dict
+            dictionary mapping the indices in S to other values
+        dst_dict: dictionary mapping the indices in T to other values
+
+    Returns
+    -------
+        neighborhood_dict : dict[int, list[int]]
+            neighborhood dictionary.
     """
     neighborhood_dict = defaultdict(list)
     if src_dict is None and dst_dict is None:
@@ -106,7 +121,17 @@ def sparse_array_to_neighborhood_dict(
 
     Parameters
     ----------
-        ``sparse_array``:  sparse array representing the higher order structure between S and T cells
+        sparse_array: sparse array
+            sparse array representing the higher order structure between S and T cells
+        src_dict: dict
+            dictionary mapping the indices in S to other values
+        dst_dict: dict
+            dictionary mapping the indices in T to other values
+
+    Returns
+    -------
+        neighborhood_dict : dict[int, list[int]]
+            neighborhood dictionary.
     """
     return neighborhood_list_to_neighborhood_dict(
         sparse_array_to_neighborhood_list(sparse_array, src_dict, dst_dict)
@@ -125,7 +150,7 @@ def incidence_to_adjacency(B, s: int | None = None, signed: bool = False):
         incidence matrix of 0's and 1's
     s : int, list, optional, default : 1
         Minimum number of edges shared by neighbors with node.
-    signed : bool
+    signed : bool, optional
 
     Returns
     -------
@@ -144,7 +169,28 @@ def incidence_to_adjacency(B, s: int | None = None, signed: bool = False):
 
 
 def compute_set_incidence(children, uidset, sparse: bool = True, index: bool = False):
-    """Compute set-based incidence."""
+    """Compute set-based incidence.
+
+    Parameters
+    ----------
+    children : list
+        List of children.
+    uidset : list
+        List of uidset.
+    sparse : bool, optional
+        If True, return a sparse matrix.
+    index : bool, optional
+        If True, return the index dictionaries.
+
+    Returns
+    -------
+    ndict : dict
+        Index dictionary for children.
+    edict : dict
+        Index dictionary for uidset.
+    MP : scipy.sparse.csr.csr_matrix
+        Set-based incidence matrix.
+    """
     ndict = dict(zip(children, range(len(children))))
     edict = dict(zip(uidset, range(len(uidset))))
 
