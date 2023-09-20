@@ -239,7 +239,7 @@ class CellComplex(Complex):
 
     def __str__(self) -> str:
         """Return detailed string representation."""
-        return f"Cell Complex with {len(self.nodes)} nodes, {len(self.edges)} edges  and {len(self.cells)} 2-cells "
+        return f"Cell Complex with {len(self.nodes)} nodes, {len(self.edges)} edges and {len(self.cells)} 2-cells "
 
     def __repr__(self) -> str:
         """Return string representation."""
@@ -712,10 +712,10 @@ class CellComplex(Complex):
                         self._insert_cell(Cell(cell, regular=self._regular), **attr)
                     else:
                         raise ValueError(
-                            f"Invalid cycle condition for cell {cell}. This input cell is not inserted, check if edges of the input cell are in the 1-skeleton."
+                            f"Invalid cycle condition for cell {cell}. This input cell is not inserted, check if cell is irregular or if boundary edges of the cell are in the complex."
                         )
                 else:
-                    raise ValueError("invalid input")
+                    raise ValueError(f"invalid input, input {cell} must be iterable")
             else:
                 raise ValueError(
                     f"Add cell only supports adding cells of dimensions 0,1 or 2-- got {rank}",

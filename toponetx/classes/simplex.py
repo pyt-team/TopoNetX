@@ -104,6 +104,18 @@ class Simplex(Atom):
 
     @property
     def boundary(self) -> frozenset["Simplex"]:
+        """Return the set of the set of all n-1 faces in of the input n-simplex.
+
+        Returns
+        -------
+        frozenset[Simplex]
+            A frozenset representing boundary simplices.
+
+        Examples
+        --------
+        For a n-simplex [1,2,3], the boundary is all the n-1 subsets of [1,2,3] :
+            (1,2), (2,3), (3,1).
+        """
         """Return a set of Simplex objects representing the boundary faces."""
         warnings.warn(
             "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
