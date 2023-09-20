@@ -1327,7 +1327,7 @@ class CellComplex(Complex):
         ----------
         weight : str, optional
             If not given, all nonzero entries are 1.
-        index : boolean, default=False
+        index : bool, default=False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
 
@@ -1458,7 +1458,7 @@ class CellComplex(Complex):
             Whether the returned incidence matrix should be signed (i.e., respect orientations) or unsigned.
         weight : str, optional
             If not given, all nonzero entries are 1.
-        index : boolean, optional, default False
+        index : bool, optional
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
 
@@ -1618,7 +1618,7 @@ class CellComplex(Complex):
             typically positive.
         weight : str, optional
             If not given, all nonzero entries are 1.
-        index : boolean, default False
+        index : bool, default False
             indicates whether to return the indices that define the Laplacian matrix
 
         Returns
@@ -1712,7 +1712,7 @@ class CellComplex(Complex):
                        typically positive.
         weight : str, optional
             If not given, all nonzero entries are 1.
-        index : boolean, optional, default False
+        index : bool, optional
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
 
@@ -1785,7 +1785,7 @@ class CellComplex(Complex):
                        typically positive.
         weight : str, optional
             If not given, all nonzero entries are 1.
-        index : boolean, optional, default False
+        index : bool, optional
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
 
@@ -1844,7 +1844,7 @@ class CellComplex(Complex):
             Whether the returned adjacency matrix should be signed (i.e., respect orientations) or unsigned.
         weight : str, optional
             If not given, all nonzero entries are 1.
-        index : boolean, default=False
+        index : bool, default=False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
 
@@ -1886,7 +1886,7 @@ class CellComplex(Complex):
             Whether the returned coadjacency matrix should be signed (i.e., respect orientations) or unsigned.
         weight : str, optional
             If not given, all nonzero entries are 1.
-        index : boolean, default=False
+        index : bool, default=False
             If True return will include a dictionary of node uid : row number
             and cell uid : column number
 
@@ -2092,9 +2092,9 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        s: int, optional, default: 1
+        s: int, optional
 
-        cells: bool, optional, default: False
+        cells: bool, optional
             If True, will determine if s-cell-connected.
             For s=1 s-cell-connected is the same as s-connected.
 
@@ -2203,10 +2203,10 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        s : int, optional, default: 1
-        cells : boolean, optional, default: True
+        s : int, optional
+        cells : bool, optional
             If True will return cell components, if False will return node components
-        return_singletons : bool, optional, default : False
+        return_singletons : bool, optional
 
         Notes
         -----
@@ -2268,8 +2268,8 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        s : int, optional, default: 1
-        cells : boolean, optional, cells=False
+        s : int, optional
+        cells : bool, optional
             Determines if cell or node components are desired. Returns
             subcomplexes equal to the cell complex restricted to each set of nodes(cells) in the
             s-connected components or s-cell-connected components
@@ -2452,7 +2452,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        s : int, optional, default: 1
+        s : int, optional
 
         Return
         ------
