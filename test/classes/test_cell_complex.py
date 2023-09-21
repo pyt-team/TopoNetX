@@ -956,6 +956,19 @@ class TestCellComplex:
         assert CX.degree(7) == 2
         assert CX.degree(8) == 2
 
+        with pytest.raises(NotImplementedError):
+            CX.degree(node=1, rank=2)
+
+    def test_cell_neighbors(self):
+        """Test the cell neighbours of cell complex."""
+        CX = CellComplex()
+        CX.add_cell([1, 2, 3, 4], rank=2)
+        CX.add_cell([2, 3, 4, 5], rank=2)
+        CX.add_cell([5, 6, 7, 8], rank=2)
+
+        with pytest.raises(NotImplementedError):
+            CX.cell_neighbors(1)
+
     def test_size(self):
         """Test the size of the cell complex."""
         CX = CellComplex()
@@ -1040,6 +1053,60 @@ class TestCellComplex:
         test_filtration = {3: 2, 1: 4, (2, 3): 3.4, (1, 2, 3): 7.6}
         CX.set_filtration(test_filtration, "test")
         assert CX.get_filtration("test") == test_filtration
+
+        with pytest.raises(ValueError):
+            test_filtration = {"dummy": "test"}
+            CX.set_filtration(test_filtration, "test")
+
+    def test_set_node_attributes(self):
+        """Test setting node attributes."""
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        d = {1: {"color": "red", "attr2": 1}, 2: {"color": "blue", "attr2": 3}}
+        CC.set_node_attributes(d)
+
+        assert CC.nodes[1]["color"] == "red"
+        assert CC.nodes[2]["color"] == "blue"
+        assert CC.nodes[1]["attr2"] == 1
+
+    def test_get_node_attributes(self):
+        """Test getting node attributes."""
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        d = {1: {"color": "red", "attr2": 1}, 2: {"color": "blue", "attr2": 3}}
+        CC.set_node_attributes(d)
+
+        assert CC.get_node_attributes("color") == {1: "red", 2: "blue"}
+
+    def test_set_edge_attributes(self):
+        """Test setting edge attributes."""
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        d = {
+            (1, 2): {"color": "red", "attr2": 1},
+            (2, 3): {"color": "blue", "attr2": 3},
+        }
+        CC.set_edge_attributes(d)
+
+        assert CC.edges[(1, 2)]["color"] == "red"
+        assert CC.edges[(2, 3)]["color"] == "blue"
+        assert CC.edges[(1, 2)]["attr2"] == 1
+
+    def test_get_edge_attributes(self):
+        """Test getting edge attributes."""
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        d = {
+            (1, 2): {"color": "red", "attr2": 1},
+            (2, 3): {"color": "blue", "attr2": 3},
+        }
+        CC.set_edge_attributes(d)
+
+        assert CC.get_edge_attributes("color") == {(1, 2): "red", (2, 3): "blue"}
 
     def test_to_hypergraph(self):
         """Test the conversion of a cell complex to a hypergraph."""

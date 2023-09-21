@@ -160,20 +160,20 @@ class TestStructure:
         # Sparse matrix and index
         children = [1, 2]
         uidset = [10, 12]
-        result_ndict, result_edict, result_MP = compute_set_incidence(
+        result_ndict, result_edict, result_mp = compute_set_incidence(
             children, uidset, sparse=True, index=True
         )
-        assert isinstance(result_MP, csr_matrix)
-        assert result_MP.shape == (len(children), len(uidset))
+        assert isinstance(result_mp, csr_matrix)
+        assert result_mp.shape == (len(children), len(uidset))
         assert len(result_ndict) == len(children)
         assert len(result_edict) == len(uidset)
 
         # Non-sparse matrix
         children = [1, 2, 3]
         uidset = [10, 11, 12]
-        result_MP = compute_set_incidence(children, uidset, sparse=False)
-        assert isinstance(result_MP, np.ndarray)
-        assert result_MP.shape == (len(children), len(uidset))
+        result_mp = compute_set_incidence(children, uidset, sparse=False)
+        assert isinstance(result_mp, np.ndarray)
+        assert result_mp.shape == (len(children), len(uidset))
 
         # Empty input without index
         children = []
@@ -184,7 +184,7 @@ class TestStructure:
         # Empty input with index
         children = []
         uidset = []
-        result_ndict, result_edict, result = compute_set_incidence(
+        result_ndict, result_edict, result_mp = compute_set_incidence(
             children, uidset, index=True
         )
         assert result.size == 1
