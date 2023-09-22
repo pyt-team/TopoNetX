@@ -106,6 +106,8 @@ def diameter(cplex) -> int:
     Parameters
     ----------
     s : int, optional
+        the number of intersections between pairwise consecutive cells
+
 
     Returns
     -------
@@ -151,6 +153,7 @@ def cell_diameter(cplex, s: int = None) -> int:
     Parameters
     ----------
     s : int, optional
+        the number of intersections between pairwise consecutive cells
 
     Return
     ------

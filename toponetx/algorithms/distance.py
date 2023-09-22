@@ -27,7 +27,7 @@ def distance(cmplex, source, target, s=1):
     target : node
         a node in the input complex
     s : int
-        the number of cells
+        the number of intersections between pairwise consecutive cells
 
     Returns
     -------
