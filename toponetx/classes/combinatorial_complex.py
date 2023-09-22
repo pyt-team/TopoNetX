@@ -297,8 +297,9 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         values : dict
-        Dictionary of cell attributes to set keyed by cell name.
+            Dictionary of cell attributes to set keyed by cell name.
         name : str, optional
+           Attribute name
 
         Returns
         -------
@@ -403,7 +404,16 @@ class CombinatorialComplex(ColoredHyperGraph):
         self._add_node(node, **attr)
 
     def _add_nodes_of_hyperedge(self, hyperedge_):
-        """Adding nodes of a hyperedge."""
+        """Adding nodes of a hyperedge.
+
+        Parameters
+        ----------
+        hyperedge_ : frozenset of elements
+
+        Returns
+        -------
+        None.
+        """
         for i in hyperedge_:
             if 0 not in self._complex_set.hyperedge_dict:
                 self._complex_set.hyperedge_dict[0] = {}

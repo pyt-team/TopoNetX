@@ -851,7 +851,7 @@ class ColoredHyperGraph(Complex):
 
         Returns
         -------
-        Colored Hypergraph : NestedColoredHyperGraph
+        Colored Hypergraph : ColoredHyperGraph
         """
         for cell in cell_set:
             self.remove_cell(cell)
@@ -1207,7 +1207,7 @@ class ColoredHyperGraph(Complex):
 
         Returns
         -------
-        new Colored Hypergraph : NestedColoredHyperGraph
+        new Colored Hypergraph : ColoredHyperGraph
         """
         from toponetx.classes.combinatorial_complex import CombinatorialComplex
 
@@ -1243,7 +1243,7 @@ class ColoredHyperGraph(Complex):
 
         Returns
         -------
-        new Colored Hypergraph : NestedColoredHyperGraph
+        new Colored Hypergraph : ColoredHyperGraph
 
         """
         from toponetx.classes.combinatorial_complex import CombinatorialComplex
