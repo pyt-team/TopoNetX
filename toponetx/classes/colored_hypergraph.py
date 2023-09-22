@@ -5,9 +5,11 @@ from typing import Literal, Optional
 
 import networkx as nx
 import numpy as np
+import scipy.sparse
 from networkx import Graph
 from scipy.sparse import csr_array, csr_matrix, diags
 
+import toponetx as tnx
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.reportviews import ColoredHyperEdgeView, NodeView
@@ -517,7 +519,6 @@ class ColoredHyperGraph(Complex):
         None
         """
         if node in self:
-            print("here")
             self._complex_set.hyperedge_dict[0][frozenset({node})].update(**attr)
         else:
             self._add_hyperedge(hyperedge=node, rank=0, **attr)
@@ -945,6 +946,28 @@ class ColoredHyperGraph(Complex):
         """
         return self._incidence_matrix(rank, to_rank, sparse=sparse, index=index)
 
+    def node_to_all_cell_incidence_matrix(
+        self, weight: str | None = None, index: bool = False
+    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
+        """Nodes/all cells incidence matrix for the indexed by nodes X cells.
+
+        Parameters
+        ----------
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : bool, default=False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The incidence matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, incidence matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        """
+        return self.all_ranks_incidence_matrix(0, weight=weight, index=index)
+
     def all_ranks_incidence_matrix(
         self,
         rank,
@@ -952,7 +975,7 @@ class ColoredHyperGraph(Complex):
         sparse: bool = True,
         index: bool = False,
     ):
-        """Compute incidence matrix for the CHG indexed by nodes x cells.
+        """Compute incidence matrix for the CHG indexed by cells of rank n X all other cells.
 
         Parameters
         ----------
@@ -1011,34 +1034,42 @@ class ColoredHyperGraph(Complex):
         >>> CHG.adjacency_matrix(0, 1)
         """
         if index:
-            row, col, B = self.incidence_matrix(
-                rank, via_rank, sparse=True, index=index
-            )
+            row, col, B = self.node_to_all_cell_incidence_matrix(index=index)
         else:
-            B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
+            B = self.node_to_all_cell_incidence_matrix(index=index)
         A = incidence_to_adjacency(B.T, s=s)
         if index:
             return row, A
         return A
 
-    def cell_to_all_node_adjacency_matrix(self, index: bool = False, s: int = 1):
+    def all_cell_to_node_codjacnecy_matrix(self, index: bool = False, s: int = None):
         """Compute the cell adjacency matrix.
 
         Parameters
         ----------
-        s : int, list, optional
+        s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
 
         Return
         ------
-          all cells adjacency_matrix : scipy.sparse.csr.csr_matrix
+          all cells coadjacency_matrix : scipy.sparse.csr.csr_matrix
 
         """
-        raise NotImplementedError()
+        B = self.node_to_all_cell_incidence_matrix(index=index)
+        if index:
+            A = incidence_to_adjacency(B[-1], s=s)
+            return B[1], A
+        A = incidence_to_adjacency(B, s=s)
+        return A
 
-    def node_to_all_cell_coadjacency_matrix(self, index: bool = False, s: int = 1):
-        """Compute the node adjacency matrix."""
-        raise NotImplementedError()
+    def node_to_all_cell_adjacnecy_matrix(self, index: bool = False, s: int = None):
+        """Compute the node/all cell adjacency matrix."""
+        B = self.node_to_all_cell_incidence_matrix(index=index)
+        if index:
+            A = incidence_to_adjacency(B[-1].T, s=s)
+            return B[0], A
+        A = incidence_to_adjacency(B.T, s=s)
+        return A
 
     def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix.
@@ -1178,7 +1209,23 @@ class ColoredHyperGraph(Complex):
         -------
         new Colored Hypergraph : NestedColoredHyperGraph
         """
-        raise NotImplementedError()
+        from toponetx.classes.combinatorial_complex import CombinatorialComplex
+
+        if isinstance(self, ColoredHyperGraph) and not isinstance(
+            self, CombinatorialComplex
+        ):
+            chg = ColoredHyperGraph(name)
+        elif isinstance(self, CombinatorialComplex):
+            chg = CombinatorialComplex(name)
+        valid_cells = []
+        for c in cell_set:
+            if c in self.cells:
+                valid_cells.append(c)
+        for c in valid_cells:
+            if not isinstance(c, Iterable):
+                raise ValueError(f"each element in cell_set must be Iterable, got {c}")
+            chg.add_cell(c, rank=self.cells.get_rank(c))
+        return chg
 
     def restrict_to_nodes(self, node_set, name: Optional[str] = None):
         """Restrict to a set of nodes.
@@ -1199,7 +1246,25 @@ class ColoredHyperGraph(Complex):
         new Colored Hypergraph : NestedColoredHyperGraph
 
         """
-        raise NotImplementedError()
+        from toponetx.classes.combinatorial_complex import CombinatorialComplex
+
+        if isinstance(self, ColoredHyperGraph) and not isinstance(
+            self, CombinatorialComplex
+        ):
+            chg = ColoredHyperGraph(name)
+        elif isinstance(self, CombinatorialComplex):
+            chg = CombinatorialComplex(name)
+        node_set = frozenset(node_set)
+        for i in self.ranks:
+            if i != 0:
+                for cell in self.skeleton(i):
+                    if isinstance(cell, frozenset):
+                        c_set = cell
+                    else:
+                        c_set = cell[0]
+                    if c_set <= node_set:
+                        chg.add_cell(c_set, rank=i)
+        return chg
 
     def from_networkx_graph(self, G) -> None:
         """Construct a Colored Hypergraph from a networkx graph.
