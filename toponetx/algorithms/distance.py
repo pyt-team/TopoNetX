@@ -21,13 +21,14 @@ def distance(complex, source, target, s=1):
 
     Parameters
     ----------
-    complex : Complex, supported complexes are cell/combintorial and hypegraphs
-    source : a hashable represeting a node in the complex
+    complex : Complex.
+        Supported complexes are cell/combintorial and hypegraphs.
+    source : Hashable
         A node in the input complex.
-    target : a hashable represeting a node
+    target : Hashable
         A node in the input complex.
-    s : int
-        the number of intersections between pairwise consecutive cells
+    s : int, optional
+        The number of intersections between pairwise consecutive cells.
 
     Returns
     -------
@@ -85,10 +86,10 @@ def cell_distance(complex, source, target, s=1):
     ----------
     complex : Complex
         Supported complexes are cell/combintorial and hypegraphs.
-    source : an iterable repreesting a cell in the input complex
-        A cell in the input complex.
-    target : an iterable repreesting a cell in the input complex
-        A cell in the input complex.
+    source : Iterable
+        A  Iterable repreesting a cell in the input complex cell complex.
+    target : Iterable
+        A  Iterable repreesting a cell in the input complex cell complex.
     s : int
         The number of intersections between pairwise consecutive cells.
 

@@ -64,6 +64,7 @@ def cell_diameters(complex, s=1):
     complex : Complex
         Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
+        The number of intersections between pairwise consecutive cells.
 
     Returns
     -------

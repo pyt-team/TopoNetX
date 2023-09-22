@@ -354,7 +354,7 @@ class TestCellComplex:
         assert np.allclose(result[1].toarray(), expected_result.toarray())
 
     def test_all_cell_to_node_coadjacnecy_matrix(self):
-        """Test all cell to node codjacnecy matrix."""
+        """Test all cell to node coadjacnecy matrix."""
         CC = CellComplex()  # Initialize your class object
 
         # Add some cells to the complex

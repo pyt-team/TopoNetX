@@ -76,7 +76,7 @@ def s_connected_components(
     >>> list(s_connected_components(CCC, s=1,cells=False))
     """
     if not isinstance(complex, (CellComplex, ColoredHyperGraph, CombinatorialComplex)):
-        raise ValueError("Input complex {complex} is not supported.")
+        raise ValueError(f"Input complex {complex} is not supported.")
 
     if cells:
         cell_dict, A = complex.all_cell_to_node_coadjacnecy_matrix(s=s, index=True)
@@ -126,7 +126,7 @@ def s_component_subcomplexes(complex, s=1, cells=True, return_singletons=False):
         subcomplexes equal to the cell complex restricted to each set of nodes(cells) in the
         s-connected components or s-cell-connected components.
     return_singletons : bool, optional
-                        When True, returns singletons connected components
+        When True, returns singletons connected components.
 
     Yields
     ------
@@ -167,8 +167,10 @@ def connected_components(complex, cells=False, return_singletons=True):
     ----------
     complex : Complex
         Supported complexes are cell/combintorial and hypegraphs.
+    cells : bool, optional
+        If True will return cell components, if False will return node components.
     return_singletons : bool, optional
-                        When True, returns singletons connected components.
+        When True, returns singletons connected components.
 
     Returns
     -------
@@ -197,9 +199,11 @@ def connected_component_subcomplexes(complex, return_singletons=True):
 
     Parameters
     ----------
-    complex : Complex, supported complexes are cell/combintorial and hypegraphs
+    complex : Complex
+        Supported complexes are cell/combintorial and hypegraphs.
     return_singletons : bool, optional
-                        When True, returns singletons connected components
+        When True, returns singletons connected components
+
     Returns
     -------
     subcomplexes: iterator
