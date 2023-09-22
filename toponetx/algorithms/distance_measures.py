@@ -20,9 +20,9 @@ def node_diameters(complex):
     Returns
     -------
     diameters : list
-        list of the diameters of the s-components
+        List of the diameters of the s-components.
     components : list
-        list of the s-component nodes
+        List of the s-component nodes.
 
     Example
     -------
@@ -61,7 +61,8 @@ def cell_diameters(complex, s=1):
 
     Parameters
     ----------
-    complex : Complex, supported complexes are cell/combintorial and hypegraphs
+    complex : Complex
+        Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
 
     Returns
@@ -106,9 +107,10 @@ def diameter(complex) -> int:
 
     Parameters
     ----------
-    complex : Complex, supported complexes are cell/combintorial and hypegraphs
+    complex : Complex
+        Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
-        the number of intersections between pairwise consecutive cells
+        The number of intersections between pairwise consecutive cells.
 
     Returns
     -------
@@ -153,9 +155,10 @@ def cell_diameter(complex, s: int = None) -> int:
 
     Parameters
     ----------
-    complex : Complex, supported complexes are cell/combintorial and hypegraphs
+    complex : Complex
+        Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
-        the number of intersections between pairwise consecutive cells
+        The number of intersections between pairwise consecutive cells.
 
     Return
     ------
