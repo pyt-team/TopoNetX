@@ -16,7 +16,7 @@ from toponetx.exception import TopoNetXError
 __all__ = ["distance", "cell_distance"]
 
 
-def distance(cmplex, source, target, s=1):
+def distance(complex, source, target, s=1):
     """Return shortest s-walk distance between two nodes in the cell complex.
 
     Parameters
@@ -58,7 +58,7 @@ def distance(cmplex, source, target, s=1):
     >>> CHG = CC.to_colored_hypergraph()
     >>> list(node_diameters(CHG))
     """
-    if not isinstance(cmplex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+    if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
         raise ValueError("Input complex {cplex} is not supported.")
     if isinstance(source, Cell):
         source = source.elements
@@ -68,7 +68,7 @@ def distance(cmplex, source, target, s=1):
         source = tuple(source)
     if isinstance(target, Iterable):
         target = tuple(target)
-    rowdict, A = cmplex.node_to_all_cell_adjacnecy_matrix(index=True)
+    rowdict, A = complex.node_to_all_cell_adjacnecy_matrix(index=True)
     G = nx.from_scipy_sparse_array(A)
     try:
         path = nx.shortest_path_length(G, rowdict[source], rowdict[target])
@@ -78,7 +78,7 @@ def distance(cmplex, source, target, s=1):
         return np.inf
 
 
-def cell_distance(cmplex, source, target, s=1):
+def cell_distance(complex, source, target, s=1):
     """Return the shortest s-walk distance between two cells in the cell complex.
 
     Parameters
@@ -125,18 +125,18 @@ def cell_distance(cmplex, source, target, s=1):
     >>> CCC = CC.to_combinatorial_complex()
     >>> cell_distance(CCC, frozenset({2, 3}) ,frozenset({6, 7}))
     """
-    if not isinstance(cmplex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError("Input complex {cplex} is not supported.")
+    if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+        raise ValueError("Input complex {complex} is not supported.")
     if isinstance(source, (Cell, HyperEdge)):
         source = source.elements
     if isinstance(target, (Cell, HyperEdge)):
         target = target.elements
-    if isinstance(cmplex, CellComplex):
+    if isinstance(complex, CellComplex):
         if isinstance(source, Iterable):
             source = tuple(source)
         if isinstance(target, Iterable):
             target = tuple(target)
-    cell_dict, A = cmplex.all_cell_to_node_codjacnecy_matrix(s=s, index=True)
+    cell_dict, A = complex.all_cell_to_node_codjacnecy_matrix(s=s, index=True)
     G = nx.from_scipy_sparse_array(A)
     try:
         path_distance = nx.shortest_path_length(G, cell_dict[source], cell_dict[target])

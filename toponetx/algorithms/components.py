@@ -192,7 +192,8 @@ def connected_component_subcomplexes(complex, return_singletons=True):
     Parameters
     ----------
     complex : Complex, supported complexes are cell/combintorial and hypegraphs
-
+    return_singletons : bool, optional
+                        When True, returns singletons connected components
     Returns
     -------
     subcomplexes: iterator
