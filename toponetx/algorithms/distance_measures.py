@@ -85,7 +85,7 @@ def cell_diameters(complex, s=1):
     """
     if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
         raise ValueError("Input complex {complex} is not supported.")
-    coldict, A = complex.all_cell_to_node_codjacnecy_matrix(index=True)
+    coldict, A = complex.all_cell_to_node_coadjacnecy_matrix(index=True)
     coldict = {v: k for k, v in coldict.items()}
 
     G = nx.from_scipy_sparse_array(A)
@@ -186,7 +186,7 @@ def cell_diameter(complex, s: int = None) -> int:
     """
     if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
         raise ValueError("Input complex {complex} is not supported.")
-    A = complex.all_cell_to_node_codjacnecy_matrix()
+    A = complex.all_cell_to_node_coadjacnecy_matrix()
     G = nx.from_scipy_sparse_array(A)
     if nx.is_connected(G):
         return nx.diameter(G)

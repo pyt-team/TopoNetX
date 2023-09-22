@@ -1413,7 +1413,7 @@ class CellComplex(Complex):
                 self.node_to_all_cell_incidence_matrix(weight, index).T, s
             )
 
-    def all_cell_to_node_codjacnecy_matrix(
+    def all_cell_to_node_coadjacnecy_matrix(
         self, s: int | None = None, weight: str | None = None, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """All cells s-coadjacency matrix where coadjacency is computed with respect to 0-cells.
@@ -1442,7 +1442,7 @@ class CellComplex(Complex):
         Example
         -------
         >>> CX = CellComplex([ [1,2,3,4],[2,3,6]])
-        >>> index, m = CX.all_cell_to_node_codjacnecy_matrix(s=1,index=True)
+        >>> index, m = CX.all_cell_to_node_coadjacnecy_matrix(s=1,index=True)
         >>> # m_ij iff cell i is coadjacency to cell j. Dimension of cells i,j are arbirary
         >>> print(m.todense(),index)
         """
@@ -2239,7 +2239,7 @@ class CellComplex(Complex):
                 "s must be a positive integer larger than 1, got type of s None."
             )
         if cells:
-            M = self.all_cell_to_node_codjacnecy_matrix(s=s)
+            M = self.all_cell_to_node_coadjacnecy_matrix(s=s)
         else:
             M = self.node_to_all_cell_adjacnecy_matrix(s=s)
 

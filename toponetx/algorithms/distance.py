@@ -136,7 +136,7 @@ def cell_distance(complex, source, target, s=1):
             source = tuple(source)
         if isinstance(target, Iterable):
             target = tuple(target)
-    cell_dict, A = complex.all_cell_to_node_codjacnecy_matrix(s=s, index=True)
+    cell_dict, A = complex.all_cell_to_node_coadjacnecy_matrix(s=s, index=True)
     G = nx.from_scipy_sparse_array(A)
     try:
         path_distance = nx.shortest_path_length(G, cell_dict[source], cell_dict[target])

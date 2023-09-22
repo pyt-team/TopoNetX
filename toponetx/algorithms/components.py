@@ -77,7 +77,7 @@ def s_connected_components(
         raise ValueError("Input complex {complex} is not supported.")
 
     if cells:
-        cell_dict, A = complex.all_cell_to_node_codjacnecy_matrix(s=s, index=True)
+        cell_dict, A = complex.all_cell_to_node_coadjacnecy_matrix(s=s, index=True)
         cell_dict = {v: k for k, v in cell_dict.items()}
         G = nx.from_scipy_sparse_array(A)
 

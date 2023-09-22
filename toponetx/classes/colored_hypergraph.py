@@ -1042,7 +1042,7 @@ class ColoredHyperGraph(Complex):
             return row, A
         return A
 
-    def all_cell_to_node_codjacnecy_matrix(self, index: bool = False, s: int = None):
+    def all_cell_to_node_coadjacnecy_matrix(self, index: bool = False, s: int = None):
         """Compute the cell adjacency matrix.
 
         Parameters

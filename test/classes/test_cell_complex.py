@@ -353,7 +353,7 @@ class TestCellComplex:
         assert result[0] == expected_node_index
         assert np.allclose(result[1].toarray(), expected_result.toarray())
 
-    def test_all_cell_to_node_codjacnecy_matrix(self):
+    def test_all_cell_to_node_coadjacnecy_matrix(self):
         """Test all cell to node codjacnecy matrix."""
         CC = CellComplex()  # Initialize your class object
 
@@ -362,7 +362,7 @@ class TestCellComplex:
         CC.add_cell([3, 4, 5], rank=2)
 
         # Test the function without index
-        result = CC.all_cell_to_node_codjacnecy_matrix(
+        result = CC.all_cell_to_node_coadjacnecy_matrix(
             s=None, weight=False, index=False
         )
         expected_result = scipy.sparse.csc_matrix(
@@ -382,7 +382,9 @@ class TestCellComplex:
         assert np.allclose(result.toarray(), expected_result.toarray())
 
         # Test the function with index
-        result = CC.all_cell_to_node_codjacnecy_matrix(s=None, weight=False, index=True)
+        result = CC.all_cell_to_node_coadjacnecy_matrix(
+            s=None, weight=False, index=True
+        )
         expected_cell_index = {
             (1, 2): 0,
             (1, 4): 1,
