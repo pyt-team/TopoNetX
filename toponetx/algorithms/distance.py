@@ -1,5 +1,6 @@
-"""Module to distance between nodes or cells on topological domains."""
+"""Module to compute distance between nodes or cells on topological domains."""
 from collections.abc import Collection, Hashable, Iterable, Iterator
+from typing import Union
 from warnings import warn
 
 import networkx as nx
@@ -9,6 +10,7 @@ from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.exception import TopoNetXError
@@ -16,7 +18,7 @@ from toponetx.exception import TopoNetXError
 __all__ = ["distance", "cell_distance"]
 
 
-def distance(complex, source, target, s=1):
+def distance(complex: Complex, source: Hashable, target: Hashable, s: int = 1) -> int:
     """Return shortest s-walk distance between two nodes in the cell complex.
 
     Parameters
@@ -60,7 +62,7 @@ def distance(complex, source, target, s=1):
     >>> list(node_diameters(CHG))
     """
     if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError("Input complex {cplex} is not supported.")
+        raise ValueError(f"Input complex {complex} is not supported.")
     if isinstance(source, Cell):
         source = source.elements
     if isinstance(target, Cell):
@@ -79,17 +81,22 @@ def distance(complex, source, target, s=1):
         return np.inf
 
 
-def cell_distance(complex, source, target, s=1):
+def cell_distance(
+    complex: Complex,
+    source: Union[Iterable, HyperEdge, Cell],
+    target: Union[Iterable, HyperEdge, Cell],
+    s: int = 1,
+) -> int:
     """Return the shortest s-walk distance between two cells in the cell complex.
 
     Parameters
     ----------
     complex : Complex
         Supported complexes are cell/combintorial and hypegraphs.
-    source : Iterable
-        A  Iterable repreesting a cell in the input complex cell complex.
-    target : Iterable
-        A  Iterable repreesting a cell in the input complex cell complex.
+    source : Union[Iterable, HyperEdge, Cell]
+        An Iterable representing a cell in the input complex cell complex.
+    target : Union[Iterable, HyperEdge, Cell]
+        An Iterable representing a cell in the input complex cell complex.
     s : int
         The number of intersections between pairwise consecutive cells.
 
@@ -128,7 +135,7 @@ def cell_distance(complex, source, target, s=1):
     >>> cell_distance(CCC, frozenset({2, 3}) ,frozenset({6, 7}))
     """
     if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError("Input complex {complex} is not supported.")
+        raise ValueError(f"Input complex {complex} is not supported.")
     if isinstance(source, (Cell, HyperEdge)):
         source = source.elements
     if isinstance(target, (Cell, HyperEdge)):
