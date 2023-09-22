@@ -2042,7 +2042,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        combinatorial_complex : CombinatorialComplex
+        CombinatorialComplex
 
         Examples
         --------

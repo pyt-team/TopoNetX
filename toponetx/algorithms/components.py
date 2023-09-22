@@ -34,6 +34,7 @@ def s_connected_components(
     cells : bool, optional
         If True will return cell components, if False will return node components.
     return_singletons : bool, optional
+        When True, returns singletons connected components.
 
     Notes
     -----

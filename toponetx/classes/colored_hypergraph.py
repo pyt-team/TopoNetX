@@ -1207,7 +1207,7 @@ class ColoredHyperGraph(Complex):
 
         Returns
         -------
-        new Colored Hypergraph : ColoredHyperGraph
+        ColoredHyperGraph
         """
         from toponetx.classes.combinatorial_complex import CombinatorialComplex
 
@@ -1243,7 +1243,7 @@ class ColoredHyperGraph(Complex):
 
         Returns
         -------
-        new Colored Hypergraph : ColoredHyperGraph
+        ColoredHyperGraph
 
         """
         from toponetx.classes.combinatorial_complex import CombinatorialComplex
@@ -1325,7 +1325,7 @@ class ColoredHyperGraph(Complex):
 
         Returns
         -------
-        new CHG : CHG
+        ColoredHyperGraph
         """
         cells = [cell for cell in self.cells if cell not in self.singletons()]
         return self.restrict_to_cells(cells)
