@@ -21,12 +21,13 @@ __all__ = [
 
 
 def s_connected_components(
-    cplex, s: int = 1, cells: bool = True, return_singletons: bool = False
+    complex, s: int = 1, cells: bool = True, return_singletons: bool = False
 ):
     """Return generator for the s-connected components.
 
     Parameters
     ----------
+    complex : Complex, supported complexes are cell/combintorial and hypegraphs
     s : int, optional
     cells : bool, optional
         If True will return cell components, if False will return node components
@@ -72,26 +73,26 @@ def s_connected_components(
     >>> CCC = CC.to_combinatorial_complex()
     >>> list(s_connected_components(CCC, s=1,cells=False))
     """
-    if not isinstance(cplex, (CellComplex, ColoredHyperGraph, CombinatorialComplex)):
-        raise ValueError("Input complex {cplex} is not supported.")
+    if not isinstance(complex, (CellComplex, ColoredHyperGraph, CombinatorialComplex)):
+        raise ValueError("Input complex {complex} is not supported.")
 
     if cells:
-        cell_dict, A = cplex.all_cell_to_node_codjacnecy_matrix(s=s, index=True)
+        cell_dict, A = complex.all_cell_to_node_codjacnecy_matrix(s=s, index=True)
         cell_dict = {v: k for k, v in cell_dict.items()}
         G = nx.from_scipy_sparse_array(A)
 
         for c in nx.connected_components(G):
             if not return_singletons and len(c) == 1:
                 continue
-            if isinstance(cplex, CellComplex):
+            if isinstance(complex, CellComplex):
                 yield {cell_dict[n] for n in c}
             else:
                 yield {tuple(cell_dict[n]) for n in c}
 
     else:
-        node_dict, A = cplex.node_to_all_cell_adjacnecy_matrix(s=s, index=True)
-        if isinstance(cplex, ColoredHyperGraph) and not isinstance(
-            cplex, CombinatorialComplex
+        node_dict, A = complex.node_to_all_cell_adjacnecy_matrix(s=s, index=True)
+        if isinstance(complex, ColoredHyperGraph) and not isinstance(
+            complex, CombinatorialComplex
         ):
             node_dict = {v: k[0] for k, v in node_dict.items()}
         else:
@@ -101,19 +102,20 @@ def s_connected_components(
             if not return_singletons:
                 if len(c) == 1:
                     continue
-            if isinstance(cplex, CellComplex):
+            if isinstance(complex, CellComplex):
                 yield {node_dict[n] for n in c}
             else:
                 yield {tuple(node_dict[n])[0] for n in c}
 
 
-def s_component_subcomplexes(cplex, s=1, cells=True, return_singletons=False):
+def s_component_subcomplexes(complex, s=1, cells=True, return_singletons=False):
     """Return a generator for the induced subcomplexes of s_connected components.
 
     Removes singletons unless return_singletons is set to True.
 
     Parameters
     ----------
+    complex : Complex, supported complexes are cell/combintorial and hypegraphs
     s : int, optional
     cells : bool, optional
         Determines if cell or node components are desired. Returns
@@ -142,19 +144,23 @@ def s_component_subcomplexes(cplex, s=1, cells=True, return_singletons=False):
     """
     for idx, c in enumerate(
         s_connected_components(
-            cplex, s=s, cells=cells, return_singletons=return_singletons
+            complex, s=s, cells=cells, return_singletons=return_singletons
         )
     ):
         if cells:
-            yield cplex.restrict_to_cells(list(c))
+            yield complex.restrict_to_cells(list(c))
         else:
-            yield cplex.restrict_to_nodes(list(c))
+            yield complex.restrict_to_nodes(list(c))
 
 
-def connected_components(cmplex, cells=False, return_singletons=True):
+def connected_components(complex, cells=False, return_singletons=True):
     """Compute s-connected components with s=1.
 
     Same as s_connected_component` with s=1, but nodes returned.
+
+    Parameters
+    ----------
+    complex : Complex, supported complexes are cell/combintorial and hypegraphs
 
     Returns
     -------
@@ -173,13 +179,17 @@ def connected_components(cmplex, cells=False, return_singletons=True):
     >>> CC.add_cell([4,5],rank=1)
     >>> list(CC.connected_components(CC,cells=False))
     """
-    return s_connected_components(cmplex, s=1, cells=cells, return_singletons=True)
+    return s_connected_components(complex, s=1, cells=cells, return_singletons=True)
 
 
-def connected_component_subcomplexes(cplex, return_singletons=True):
+def connected_component_subcomplexes(complex, return_singletons=True):
     """Compute connected component subgraphs with s=1.
 
     Same as :meth:`s_component_subcomplexes` with s=1.
+
+    Parameters
+    ----------
+    complex : Complex, supported complexes are cell/combintorial and hypegraphs
 
     Returns
     -------
@@ -198,4 +208,4 @@ def connected_component_subcomplexes(cplex, return_singletons=True):
     >>> CC.add_cell([4,5],rank=1)
     >>> list(connected_component_subcomplexes(CC))
     """
-    return s_component_subcomplexes(cplex, return_singletons=return_singletons)
+    return s_component_subcomplexes(complex, return_singletons=return_singletons)

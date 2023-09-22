@@ -21,10 +21,11 @@ def distance(cmplex, source, target, s=1):
 
     Parameters
     ----------
-    source : node.uid or node
-        a node in the cell complex
-    target : node.uid or node
-        a node in the cell complex
+    complex : Complex, supported complexes are cell/combintorial and hypegraphs
+    source : node
+        a node in the input complex
+    target : node
+        a node in the input complex
     s : int
         the number of cells
 
@@ -82,10 +83,11 @@ def cell_distance(cmplex, source, target, s=1):
 
     Parameters
     ----------
-    source : cell.uid or cell
-        a cell in the cell complex
-    target : cell.uid or cell
-        a cell in the cell complex
+    complex : Complex, supported complexes are cell/combintorial and hypegraphs
+    source : a cell
+        a cell in the input complex
+    target : a cell
+        a cell in the input complex
     s : int
         the number of intersections between pairwise consecutive cells
 
