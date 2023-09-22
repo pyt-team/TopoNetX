@@ -14,7 +14,7 @@ from toponetx.exception import TopoNetXError
 __all__ = ["node_diameters", "cell_diameters", "diameter", "cell_diameter"]
 
 
-def node_diameters(cplex):
+def node_diameters(complex):
     """Return the node diameters of the connected components in cell complex.
 
     Returns
@@ -35,9 +35,9 @@ def node_diameters(cplex):
     >>> CHG = CC.to_colored_hypergraph()
     >>> list(node_diameters(CHG))
     """
-    node_dict, A = cplex.node_to_all_cell_adjacnecy_matrix(index=True)
-    if isinstance(cplex, ColoredHyperGraph) and not isinstance(
-        cplex, CombinatorialComplex
+    node_dict, A = complex.node_to_all_cell_adjacnecy_matrix(index=True)
+    if isinstance(complex, ColoredHyperGraph) and not isinstance(
+        complex, CombinatorialComplex
     ):
         node_dict = {v: k[0] for k, v in node_dict.items()}
     else:
@@ -56,11 +56,12 @@ def node_diameters(cplex):
     return diams, comps
 
 
-def cell_diameters(cplex, s=1):
+def cell_diameters(complex, s=1):
     """Return the cell diameters of the s_cell_connected component subgraphs.
 
     Parameters
     ----------
+    complex : Complex, supported complexes are cell/combintorial and hypegraphs
     s : int, optional
 
     Returns
@@ -82,9 +83,9 @@ def cell_diameters(cplex, s=1):
     >>> CHG = CC.to_colored_hypergraph()
     >>> list(cell_diameters(CHG))
     """
-    if not isinstance(cplex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError("Input complex {cplex} is not supported.")
-    coldict, A = cplex.all_cell_to_node_codjacnecy_matrix(index=True)
+    if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+        raise ValueError("Input complex {complex} is not supported.")
+    coldict, A = complex.all_cell_to_node_codjacnecy_matrix(index=True)
     coldict = {v: k for k, v in coldict.items()}
 
     G = nx.from_scipy_sparse_array(A)
@@ -100,14 +101,14 @@ def cell_diameters(cplex, s=1):
     return diams, comps
 
 
-def diameter(cplex) -> int:
+def diameter(complex) -> int:
     """Return length of the longest shortest s-walk between nodes.
 
     Parameters
     ----------
+    complex : Complex, supported complexes are cell/combintorial and hypegraphs
     s : int, optional
         the number of intersections between pairwise consecutive cells
-
 
     Returns
     -------
@@ -138,20 +139,21 @@ def diameter(cplex) -> int:
     >>> diameter(CHG)
 
     """
-    if not isinstance(cplex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError("Input complex {cplex} is not supported.")
-    A = cplex.node_to_all_cell_adjacnecy_matrix()
+    if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+        raise ValueError("Input complex {complex} is not supported.")
+    A = complex.node_to_all_cell_adjacnecy_matrix()
     G = nx.from_scipy_sparse_array(A)
     if nx.is_connected(G):
         return nx.diameter(G)
     raise TopoNetXError("cc is not connected.")
 
 
-def cell_diameter(cplex, s: int = None) -> int:
+def cell_diameter(complex, s: int = None) -> int:
     """Return the length of the longest shortest s-walk between cells.
 
     Parameters
     ----------
+    complex : Complex, supported complexes are cell/combintorial and hypegraphs
     s : int, optional
         the number of intersections between pairwise consecutive cells
 
@@ -182,9 +184,9 @@ def cell_diameter(cplex, s: int = None) -> int:
     >>> CHG = CC.to_colored_hypergraph()
     >>> cell_diameter(CHG)
     """
-    if not isinstance(cplex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError("Input complex {cplex} is not supported.")
-    A = cplex.all_cell_to_node_codjacnecy_matrix()
+    if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+        raise ValueError("Input complex {complex} is not supported.")
+    A = complex.all_cell_to_node_codjacnecy_matrix()
     G = nx.from_scipy_sparse_array(A)
     if nx.is_connected(G):
         return nx.diameter(G)
