@@ -21,27 +21,27 @@ class TestDistanceMeasures:
 
     def test_node_diameters(self):
         """Test for the node_diameters method."""
-        CX = CellComplex()  # Initialize your class object
+        CC = CellComplex()  # Initialize your class object
 
         # Add some cells to the complex
-        CX.add_cell([2, 3, 4], rank=2)
-        CX.add_cell([5, 6, 7], rank=2)
+        CC.add_cell([2, 3, 4], rank=2)
+        CC.add_cell([5, 6, 7], rank=2)
 
         # Test the function
-        result = list(node_diameters(CX))
+        result = list(node_diameters(CC))
         expected_result = [[1, 1], [{2, 3, 4}, {5, 6, 7}]]
         assert result == expected_result
 
     def test_cell_diameters(self):
         """Test for the cell_diameters method."""
-        CX = CellComplex()  # Initialize your class object
+        CC = CellComplex()  # Initialize your class object
 
         # Add some cells to the complex
-        CX.add_cell([2, 3, 4], rank=2)
-        CX.add_cell([5, 6, 7], rank=2)
+        CC.add_cell([2, 3, 4], rank=2)
+        CC.add_cell([5, 6, 7], rank=2)
 
         # Test the function
-        result = list(cell_diameters(CX))
+        result = list(cell_diameters(CC))
         expected_result = [
             [1, 1],
             [{(2, 3), (2, 3, 4), (2, 4), (3, 4)}, {(5, 6), (5, 6, 7), (5, 7), (6, 7)}],
@@ -50,27 +50,27 @@ class TestDistanceMeasures:
 
     def test_diameter(self):
         """Test for the diameter method."""
-        CX = CellComplex()  # Initialize your class object
+        CC = CellComplex()  # Initialize your class object
 
         # Add some cells to the complex
-        CX.add_cell([2, 3, 4], rank=2)
-        CX.add_cell([5, 6, 7], rank=2)
-        CX.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 3, 4], rank=2)
+        CC.add_cell([5, 6, 7], rank=2)
+        CC.add_cell([2, 5], rank=1)
         # Test the function
-        result = diameter(CX)
+        result = diameter(CC)
         expected_result = 3
         assert result == expected_result
 
     def test_cell_diameter(self):
         """Test for the cell_diameter method."""
-        CX = CellComplex()  # Initialize your class object
+        CC = CellComplex()  # Initialize your class object
 
         # Add some cells to the complex
-        CX.add_cell([2, 3, 4], rank=2)
-        CX.add_cell([5, 6, 7], rank=2)
-        CX.add_cell([2, 5], rank=1)
+        CC.add_cell([2, 3, 4], rank=2)
+        CC.add_cell([5, 6, 7], rank=2)
+        CC.add_cell([2, 5], rank=1)
 
         # Test the function
-        result = cell_diameter(CX)
+        result = cell_diameter(CC)
         expected_result = 4
         assert result == expected_result
