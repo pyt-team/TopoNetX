@@ -30,6 +30,7 @@ def s_connected_components(
     complex : Complex
         Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
+        The number of intersections between pairwise consecutive cells.
     cells : bool, optional
         If True will return cell components, if False will return node components.
     return_singletons : bool, optional
@@ -119,11 +120,13 @@ def s_component_subcomplexes(complex, s=1, cells=True, return_singletons=False):
     complex : Complex
         Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
+        The number of intersections between pairwise consecutive cells.
     cells : bool, optional
         Determines if cell or node components are desired. Returns
         subcomplexes equal to the cell complex restricted to each set of nodes(cells) in the
         s-connected components or s-cell-connected components.
     return_singletons : bool, optional
+                        When True, returns singletons connected components
 
     Yields
     ------
@@ -162,9 +165,10 @@ def connected_components(complex, cells=False, return_singletons=True):
 
     Parameters
     ----------
-    complex : Complex, supported complexes are cell/combintorial and hypegraphs
+    complex : Complex
+        Supported complexes are cell/combintorial and hypegraphs.
     return_singletons : bool, optional
-                        When True, returns singletons connected components,
+                        When True, returns singletons connected components.
 
     Returns
     -------
