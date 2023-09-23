@@ -1142,7 +1142,17 @@ class TestCellComplex:
         )
         CC.add_cell([3, 4, 8], rank=2)
         CC.set_cell_attributes(d, 2)
+
+        with pytest.raises(TopoNetXError):
+            CC.set_cell_attributes(d, 4)
+
+        # should not throw error
+        CC.set_cell_attributes({(5, 6, 7): {"color": "red"}}, 2)
+
         attributes = CC.get_cell_attributes("color", 2)
+
+        with pytest.raises(TopoNetXError):
+            attributes = CC.get_cell_attributes("color", 4)
         assert attributes == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
 
     def test_remove_equivalent_cells(self):
@@ -1171,6 +1181,11 @@ class TestCellComplex:
         assert CC.is_insertable_cycle([1, 2, 3, 4])
         assert not CC.is_insertable_cycle([1, 2, 3, 4, 1, 2])
         assert not CC.is_insertable_cycle([1, 2, 1])
+
+        with pytest.warns():
+            CC.is_insertable_cycle([1], warnings_dis=True)
+        with pytest.warns():
+            CC.is_insertable_cycle([6, 7, 8], warnings_dis=True)
 
     def test_incidence_matrix(self):
         """Unit test for the incidence_matrix method."""
@@ -1379,6 +1394,9 @@ class TestCellComplex:
         with pytest.raises(ValueError):
             cx.get_cell_data(["C"], 2, "invalid_attribute")
 
+        with pytest.raises(KeyError):
+            cx.get_cell_data(["D", "F"], 2, "invalid_attribute")
+
         with pytest.raises(TypeError):
             cx.get_cell_data("C", 2, "invalid_attribute")
 
@@ -1409,7 +1427,16 @@ class TestCellComplex:
         assert cx.cells[("A", "B", "C")]["attribute_name"] == "Value C"
 
         with pytest.raises(KeyError):
+            cx.set_cell_data("D", 0, "attribute_name", "Value D")
+
+        with pytest.raises(KeyError):
             cx.set_cell_data("D", 1, "attribute_name", "Value D")
+
+        with pytest.raises(KeyError):
+            cx.set_cell_data(["D", "E"], 2, "attribute_name", "Value D")
+
+        with pytest.raises(ValueError):
+            cx.set_cell_data("A", 3, "attribute_name", "Value A")
 
     def test_get_cell_data_after_set(self):
         """Test the get_cell_data method after setting cell data."""
@@ -1452,6 +1479,10 @@ class TestCellComplex:
 
         assert result.shape == (6, 6)
 
+        result = CC.hodge_laplacian_matrix(rank, False, weight, index)
+
+        assert result.shape == (6, 6)
+
         # Test case 2: Rank is 0 with index=True
         index = True
 
@@ -1459,10 +1490,16 @@ class TestCellComplex:
 
         assert len(result) == 6
 
+        result, index_list = CC.hodge_laplacian_matrix(rank, False, weight, index)
+
+        assert len(result) == 6
+
         # Test case 3: Rank is 1 and maxdim is 2
         rank = 1
 
         result = CC.hodge_laplacian_matrix(rank, signed, weight, index)
+
+        result = CC.hodge_laplacian_matrix(rank, False, weight, index)
 
         # Test case 4: Rank is 1 and maxdim is 2 with index=True
         index = True
@@ -1476,6 +1513,8 @@ class TestCellComplex:
         rank = 2
 
         result = CC.hodge_laplacian_matrix(rank, signed, weight, index)
+
+        result = CC.hodge_laplacian_matrix(rank, False, weight, index)
 
         # Test case 6: Rank is 2 and maxdim is 2 with index=True
         index = True
