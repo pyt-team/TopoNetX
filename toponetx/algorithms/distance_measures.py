@@ -129,8 +129,8 @@ def diameter(complex: Complex) -> int:
     nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
     are s-adjacent. If the cell complex is not connected, an error will be raised.
 
-    Example
-    -------
+    Examples
+    --------
     >>> CC = CellComplex()
     >>> CC.add_cell([2,3,4],rank=2)
     >>> CC.add_cell([5,6,7],rank=2)
@@ -140,7 +140,6 @@ def diameter(complex: Complex) -> int:
     >>> diameter(CCC)
     >>> CHG = CC.to_colored_hypergraph()
     >>> diameter(CHG)
-
     """
     if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
         raise ValueError(f"Input complex {complex} is not supported.")
@@ -177,8 +176,8 @@ def cell_diameter(complex: Complex, s: int = None) -> int:
     cells (one or two dimensional) e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
     are s-coadjacent. If the cell complex is not connected, an error will be raised.
 
-    Example
-    -------
+    Examples
+    --------
     >>> CC = CellComplex()
     >>> CC.add_cell([2,3,4],rank=2)
     >>> CC.add_cell([5,6,7],rank=2)
