@@ -24,7 +24,10 @@ from networkx.utils import pairwise
 from scipy.sparse import csc_matrix
 
 from toponetx.classes.cell import Cell
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
+from toponetx.classes.combinatorial_complex import (
+    ColoredHyperGraph,
+    CombinatorialComplex,
+)
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import CellView
 from toponetx.exception import TopoNetXError
@@ -1321,7 +1324,7 @@ class CellComplex(Complex):
     def node_to_all_cell_incidence_matrix(
         self, weight: str | None = None, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
-        """Nodes/cells incidence matrix for the indexed by nodes X cells.
+        """Nodes/all cells incidence matrix for the indexed by nodes X cells.
 
         Parameters
         ----------
@@ -1359,9 +1362,6 @@ class CellComplex(Complex):
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Nodes s-adjacency matrix where adjacency is computed with respect to 2-cells.
 
-        Two nodes are s-adjacent iff there exists a cell (1 dimensional or 2 dimensional)
-        share contain them.
-
         Parameters
         ----------
         s : int
@@ -1377,18 +1377,24 @@ class CellComplex(Complex):
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
             The adjacency matrix, if `index` is False, otherwise
             index of nodes, adjacency matrix, if 'index' is True
+
+        Note
+        ----
+        Two nodes are s-adjacent iff there exists a cell (1 dimensional or 2 dimensional)
+        share contain them.
+
         Examples
         --------
         >>> CC = CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([3, 4, 5], rank=2)
-        >>> CC.node_to_all_cell_adjacency_matrix().todense()
+        >>> CC.node_to_all_cell_adjacnecy_matrix().todense()
         matrix([[0., 2., 1., 2., 0.],
                 [2., 0., 2., 1., 0.],
                 [1., 2., 0., 3., 2.],
                 [2., 1., 3., 0., 2.],
                 [0., 0., 2., 2., 0.]])
-        >>> # observe the contrast with the regular adjacency matrix
+        >>> # observe the contrast with the regular 0-adjacency matrix
         >>> CC.adjacency_matrix(0).todense()
         matrix([[0., 1., 0., 1., 0.],
                 [1., 0., 1., 0., 0.],
@@ -1407,13 +1413,11 @@ class CellComplex(Complex):
                 self.node_to_all_cell_incidence_matrix(weight, index).T, s
             )
 
-    def all_cell_to_node_codjacnecy_matrix(
+    def all_cell_to_node_coadjacnecy_matrix(
         self, s: int | None = None, weight: str | None = None, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """All cells s-coadjacency matrix where coadjacency is computed with respect to 0-cells.
 
-        Two cells (1 dimensional or 2 dimensional) are s-coadjacent iff
-        they share a vertex
         Parameters
         ----------
         s : int
@@ -1429,6 +1433,18 @@ class CellComplex(Complex):
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
             The adjacency matrix, if `index` is False, otherwise
             index of cells, adjacency matrix, if 'index' is True
+
+        Note
+        ----
+        Two cells (1 dimensional or 2 dimensional) are s-coadjacent iff
+        they share a vertex.
+
+        Example
+        -------
+        >>> CX = CellComplex([ [1,2,3,4],[2,3,6]])
+        >>> index, m = CX.all_cell_to_node_coadjacnecy_matrix(s=1,index=True)
+        >>> # m_ij iff cell i is coadjacency to cell j. Dimension of cells i,j are arbirary
+        >>> print(m.todense(),index)
         """
         if index:
             node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
@@ -2026,7 +2042,7 @@ class CellComplex(Complex):
 
         Returns
         -------
-        combinatorial_complex : CombinatorialComplex
+        CombinatorialComplex
 
         Examples
         --------
@@ -2047,6 +2063,37 @@ class CellComplex(Complex):
             CCC.add_node(c, **self.get_cell_data(c, 0))
 
         return CCC
+
+    def to_colored_hypergraph(self):
+        """Convert to colored hypergraph.
+
+        A cell complex is a type of combinatorial complex.
+        The rank of an element in a cell complex is its dimension, so vertices have rank 0,
+        edges have rank 1, and faces have rank 2.
+
+        Returns
+        -------
+        combinatorial_complex : CombinatorialComplex
+
+        Examples
+        --------
+        >>> CC = CellComplex()
+        >>> CC.add_cell([1,2,3,4],rank=2,weight = 1)
+        >>> CC.add_cell([2,3,4,5],rank=2,weight = 4)
+        >>> CC.add_cell([5,6,7,8],rank=2,weight = 0)
+        >>> CC.add_node(0,color='red')
+        >>> CCC = CC.to_colored_hypergraph()
+        >>> CCC.cells
+        """
+        CHG = ColoredHyperGraph()
+        for c in self.cells:
+            CHG.add_cell(c, rank=2, **self.get_cell_data(c, 2))
+        for c in self.edges:
+            CHG.add_cell(c, rank=1, **self.get_cell_data(c, 1))
+        for c in self.nodes:
+            CHG.add_node(c, **self.get_cell_data(c, 0))
+
+        return CHG
 
     def to_hypergraph(self):
         """Convert to hypergraph.
@@ -2192,389 +2239,11 @@ class CellComplex(Complex):
                 "s must be a positive integer larger than 1, got type of s None."
             )
         if cells:
-            M = self.all_cell_to_node_codjacnecy_matrix(s=s)
+            M = self.all_cell_to_node_coadjacnecy_matrix(s=s)
         else:
             M = self.node_to_all_cell_adjacnecy_matrix(s=s)
 
         return nx.from_scipy_sparse_array(M)
-
-    def s_connected_components(self, s=1, cells=True, return_singletons=False):
-        """Return generator for the s-connected components.
-
-        Parameters
-        ----------
-        s : int, optional
-        cells : bool, optional
-            If True will return cell components, if False will return node components
-        return_singletons : bool, optional
-
-        Notes
-        -----
-        If cells=True, this method returns the s-cell-connected components as
-        lists of lists of cell uids.
-        An s-cell-component has the property that for any two cells e1 and e2
-        there is a sequence of cells starting with e1 and ending with e2
-        such that pairwise adjacent cells in the sequence intersect in at least
-        s nodes. If s=1 these are the path components of the cell complex.
-
-        If cells=False this method returns s-node-connected components.
-        A list of sets of uids of the nodes which are s-walk connected.
-        Two nodes v1 and v2 are s-walk-connected if there is a
-        sequence of nodes starting with v1 and ending with v2 such that pairwise
-        adjacent nodes in the sequence share s cells. If s=1 these are the
-        path components of the cell complex .
-
-        Yields
-        ------
-        s_connected_components : iterator
-            Iterator returns sets of uids of the cells (or nodes) in the s-cells(node)
-            components of the cell complex.
-
-        Example
-        -------
-        >>> CC = CellComplex()
-        >>> CC.add_cell([2,3,4],rank=2)
-        >>> CC.add_cell([5,6,7],rank=2)
-        >>> list(CC.s_connected_components(s=1,cells=False))
-        >>> #  [{2, 3, 4}, {5, 6, 7}]
-        >>> CC.add_cell([4,5],rank=1)
-        >>> list(CC.s_connected_components(s=1,cells=False))
-        >>> # [{2, 3, 4, 5, 6, 7}]
-
-        """
-        if cells:
-            cell_dict, A = self.all_cell_to_node_codjacnecy_matrix(s=s, index=True)
-            cell_dict = {v: k for k, v in cell_dict.items()}
-            G = nx.from_scipy_sparse_array(A)
-
-            for c in nx.connected_components(G):
-                if not return_singletons and len(c) == 1:
-                    continue
-                yield {cell_dict[n] for n in c}
-        else:
-            node_dict, A = self.node_to_all_cell_adjacnecy_matrix(s=s, index=True)
-            node_dict = {v: k for k, v in node_dict.items()}
-            G = nx.from_scipy_sparse_array(A)
-            for c in nx.connected_components(G):
-                if not return_singletons:
-                    if len(c) == 1:
-                        continue
-                yield {node_dict[n] for n in c}
-
-    def s_component_subcomplexes(self, s=1, cells=True, return_singletons=False):
-        """Return a generator for the induced subcomplexes of s_connected components.
-
-        Removes singletons unless return_singletons is set to True.
-
-        Parameters
-        ----------
-        s : int, optional
-        cells : bool, optional
-            Determines if cell or node components are desired. Returns
-            subcomplexes equal to the cell complex restricted to each set of nodes(cells) in the
-            s-connected components or s-cell-connected components
-        return_singletons : bool, optional
-
-        Yields
-        ------
-        s_component_subcomplexes : iterator
-            Iterator returns subcomplexes generated by the cells (or nodes) in the
-            s-cell(node) components of cell complex.
-
-        Example
-        -------
-        >>> CC = CellComplex()
-        >>> CC.add_cell([2,3,4],rank=2)
-        >>> CC.add_cell([5,6,7],rank=2)
-        >>> list(CC.s_component_subcomplexes(s=1,cells=False))
-        >>> CC.add_cell([4,5],rank=1)
-        >>> list(CC.s_component_subcomplexes(s=1,cells=False))
-        """
-        for idx, c in enumerate(
-            self.s_connected_components(
-                s=s, cells=cells, return_singletons=return_singletons
-            )
-        ):
-            if cells:
-                yield self.restrict_to_cells(list(c), name=f"{self.name}:{idx}")
-            else:
-                yield self.restrict_to_nodes(list(c), name=f"{self.name}:{idx}")
-
-    def connected_components(self, cells=False, return_singletons=True):
-        """Compute s-connected components with s=1.
-
-        Same as s_connected_component` with s=1, but nodes returned.
-
-        Returns
-        -------
-        s_connected_components : iterator
-
-        See Also
-        --------
-        s_connected_components
-
-        Example
-        -------
-        >>> CC = CellComplex()
-        >>> CC.add_cell([2,3,4],rank=2)
-        >>> CC.add_cell([5,6,7],rank=2)
-        >>> list(CC.connected_components(s=1,cells=False))
-        >>> CC.add_cell([4,5],rank=1)
-        >>> list(CC.connected_components(s=1,cells=False))
-        """
-        return self.s_connected_components(s=1, cells=cells, return_singletons=True)
-
-    def connected_component_subcomplexes(self, return_singletons=True):
-        """Compute connected component subgraphs with s=1.
-
-        Same as :meth:`s_component_subcomplexes` with s=1.
-
-        Returns
-        -------
-        subgraphs: iterator
-
-        See Also
-        --------
-        s_component_subcomplexes
-
-        Example
-        -------
-        >>> CC = CellComplex()
-        >>> CC.add_cell([2,3,4],rank=2)
-        >>> CC.add_cell([5,6,7],rank=2)
-        >>> list(CC.connected_component_subcomplexes())
-        >>> CC.add_cell([4,5],rank=1)
-        >>> list(CC.connected_component_subcomplexes())
-        """
-        return self.s_component_subcomplexes(return_singletons=return_singletons)
-
-    def node_diameters(self):
-        """Return the node diameters of the connected components in cell complex.
-
-        Returns
-        -------
-        diameters : list
-            list of the diameters of the s-components
-        components : list
-            list of the s-component nodes
-
-        Example
-        -------
-        >>> CC = CellComplex()
-        >>> CC.add_cell([2,3,4],rank=2)
-        >>> CC.add_cell([5,6,7],rank=2)
-        >>> list(CC.node_diameters())
-
-        """
-        coldict, A = self.node_to_all_cell_adjacnecy_matrix(index=True)
-        coldict = {v: k for k, v in coldict.items()}
-
-        G = nx.from_scipy_sparse_array(A)
-        diams = []
-        comps = []
-        for c in nx.connected_components(G):
-            diamc = nx.diameter(G.subgraph(c))
-            temp = set()
-            for e in c:
-                temp.add(coldict[e])
-            comps.append(temp)
-            diams.append(diamc)
-        return diams, comps
-
-    def cell_diameters(self, s=1):
-        """Return the cell diameters of the s_cell_connected component subgraphs.
-
-        Parameters
-        ----------
-        s : int, optional
-
-        Returns
-        -------
-        list of diameters : list
-            List of cell_diameters for s-cell component subcomplexes in the cell complex.
-
-        list of component : list
-            List of the cell uids in the s-cell component subcomplexes.
-
-        Example
-        -------
-        >>> CC = CellComplex()
-        >>> CC.add_cell([2,3,4],rank=2)
-        >>> CC.add_cell([5,6,7],rank=2)
-        >>> list(CC.cell_diameters())
-        """
-        coldict, A = self.all_cell_to_node_codjacnecy_matrix(index=True)
-        coldict = {v: k for k, v in coldict.items()}
-
-        G = nx.from_scipy_sparse_array(A)
-        diams = []
-        comps = []
-        for c in nx.connected_components(G):
-            diamc = nx.diameter(G.subgraph(c))
-            temp = set()
-            for e in c:
-                temp.add(coldict[e])
-            comps.append(temp)
-            diams.append(diamc)
-        return diams, comps
-
-    def diameter(self) -> int:
-        """Return length of the longest shortest s-walk between nodes.
-
-        Parameters
-        ----------
-        s : int, optional
-
-        Returns
-        -------
-        diameter : int
-
-        Raises
-        ------
-        TopoNetXError
-            If the cell complex is not s-cell-connected
-
-        Notes
-        -----
-        Two nodes are s-adjacent if they share s cells.
-        Two nodes v_start and v_end are s-walk connected if there is a sequence of
-        nodes v_start, v_1, v_2, ... v_n-1, v_end such that consecutive nodes
-        are s-adjacent. If the cell complex is not connected, an error will be raised.
-        """
-        A = self.node_to_all_cell_adjacnecy_matrix()
-        G = nx.from_scipy_sparse_array(A)
-        if nx.is_connected(G):
-            return nx.diameter(G)
-        raise TopoNetXError("cc is not connected.")
-
-    def cell_diameter(self, s: int = 1) -> int:
-        """Return the length of the longest shortest s-walk between cells.
-
-        Parameters
-        ----------
-        s : int, optional
-
-        Return
-        ------
-        cell_diameter : int
-
-        Raises
-        ------
-        TopoNetXError
-            If cell complex is not s-cell-connected
-
-        Notes
-        -----
-        Two cells are s-coadjacent if they share s nodes.
-        Two nodes e_start and e_end are s-walk connected if there is a sequence of
-        cells (one or two dimensional) e_start, e_1, e_2, ... e_n-1, e_end such that consecutive cells
-        are s-coadjacent. If the cell complex is not connected, an error will be raised.
-        """
-        A = self.all_cell_to_node_codjacnecy_matrix()
-        G = nx.from_scipy_sparse_array(A)
-        if nx.is_connected(G):
-            return nx.diameter(G)
-        raise TopoNetXError(f"cell complex is not s-connected. s={s}")
-
-    def distance(self, source, target, s=1):
-        """Return shortest s-walk distance between two nodes in the cell complex.
-
-        Parameters
-        ----------
-        source : node.uid or node
-            a node in the cell complex
-        target : node.uid or node
-            a node in the cell complex
-        s : int
-            the number of cells
-
-        Returns
-        -------
-        s_walk_distance : int
-
-        See Also
-        --------
-        cell_distance
-
-        Notes
-        -----
-        The s-distance is the shortest s-walk length between the nodes.
-        An s-walk between nodes is a sequence of nodes that pairwise share
-        at least s cells. The length of the shortest s-walk is 1 less than
-        the number of nodes in the path sequence.
-
-        Uses the networkx shortest_path_length method on the graph
-        generated by the s-adjacency matrix.
-        """
-        if isinstance(source, Cell):
-            source = source.elements
-        if isinstance(target, Cell):
-            target = target.elements
-        if isinstance(source, Iterable):
-            source = tuple(source)
-        if isinstance(target, Iterable):
-            target = tuple(target)
-        rowdict, A = self.node_to_all_cell_adjacnecy_matrix(index=True)
-        G = nx.from_scipy_sparse_array(A)
-        try:
-            path = nx.shortest_path_length(G, rowdict[source], rowdict[target])
-            return path
-        except Exception:
-            warnings.warn(f"No {s}-path between {source} and {target}")
-            return np.inf
-
-    def cell_distance(self, source, target, s=1):
-        """Return the shortest s-walk distance between two cells in the cell complex.
-
-        Parameters
-        ----------
-        source : cell.uid or cell
-            a cell in the cell complex
-        target : cell.uid or cell
-            a cell in the cell complex
-        s : int
-            the number of intersections between pairwise consecutive cells
-
-        Returns
-        -------
-        int
-            Shortest s-walk cell distance between `source` and `target`.
-            A shortest s-walk is computed as a sequence of cells,
-            the s-walk distance is the number of cells in the sequence
-            minus 1. If no such path exists returns np.inf.
-
-        See Also
-        --------
-        distance
-
-        Notes
-        -----
-        The s-distance is the shortest s-walk length between the cells.
-        An s-walk between cells is a sequence of cells such that consecutive pairwise
-        cells intersect in at least s nodes. The length of the shortest s-walk is 1 less than
-        the number of cells in the path sequence.
-
-        Uses the networkx shortest_path_length method on the graph
-        generated by the s-cell_adjacency matrix.
-        """
-        if isinstance(source, Cell):
-            source = source.elements
-        if isinstance(target, Cell):
-            target = target.elements
-        if isinstance(source, Iterable):
-            source = tuple(source)
-        if isinstance(target, Iterable):
-            target = tuple(target)
-        cell_dict, A = self.all_cell_to_node_codjacnecy_matrix(s=s, index=True)
-        G = nx.from_scipy_sparse_array(A)
-        try:
-            path_distance = nx.shortest_path_length(
-                G, cell_dict[source], cell_dict[target]
-            )
-            return path_distance
-        except Exception:
-            warnings.warn(f"No {s}-path between {source} and {target}")
-            return np.inf
 
     def from_networkx_graph(self, G: nx.Graph) -> None:
         """Add edges and nodes from a graph G to self.

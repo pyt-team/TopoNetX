@@ -353,8 +353,8 @@ class TestCellComplex:
         assert result[0] == expected_node_index
         assert np.allclose(result[1].toarray(), expected_result.toarray())
 
-    def test_all_cell_to_node_codjacnecy_matrix(self):
-        """Test all cell to node codjacnecy matrix."""
+    def test_all_cell_to_node_coadjacnecy_matrix(self):
+        """Test all cell to node coadjacnecy matrix."""
         CC = CellComplex()  # Initialize your class object
 
         # Add some cells to the complex
@@ -362,7 +362,8 @@ class TestCellComplex:
         CC.add_cell([3, 4, 5], rank=2)
 
         # Test the function without index
-        result = CC.all_cell_to_node_codjacnecy_matrix(
+
+        result = CC.all_cell_to_node_coadjacnecy_matrix(
             s=None, weight=False, index=False
         )
         expected_result = scipy.sparse.csc_matrix(
@@ -382,7 +383,11 @@ class TestCellComplex:
         assert np.allclose(result.toarray(), expected_result.toarray())
 
         # Test the function with index
-        result = CC.all_cell_to_node_codjacnecy_matrix(s=None, weight=False, index=True)
+
+        result = CC.all_cell_to_node_coadjacnecy_matrix(
+            s=None, weight=False, index=True
+        )
+
         expected_cell_index = {
             (1, 2): 0,
             (1, 4): 1,
@@ -411,192 +416,6 @@ class TestCellComplex:
         assert isinstance(result[0], dict)
         assert result[0] == expected_cell_index
         assert np.allclose(result[1].toarray(), expected_result.toarray())
-
-    def test_s_connected_components(self):
-        """Test_s_connected_components."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-
-        # Test the function with cells=True
-        result = list(CC.s_connected_components(s=1, cells=True))
-        expected_result = [
-            {(2, 3), (2, 3, 4), (2, 4), (3, 4)},
-            {(5, 6), (5, 6, 7), (5, 7), (6, 7)},
-        ]
-        assert result == expected_result
-
-        # Test the function with cells=False
-        result = list(CC.s_connected_components(s=1, cells=False))
-        expected_result = [{2, 3, 4}, {5, 6, 7}]
-        assert result == expected_result
-
-        # Test the function with return_singletons=True
-        result = list(
-            CC.s_connected_components(s=1, cells=False, return_singletons=True)
-        )
-        expected_result = [{2, 3, 4}, {5, 6, 7}]
-        assert result == expected_result
-
-        # Test the function with return_singletons=False
-        result = list(
-            CC.s_connected_components(s=2, cells=False, return_singletons=False)
-        )
-        expected_result = [{2, 3, 4}, {5, 6, 7}]
-        assert result == expected_result
-
-    def test_s_component_subcomplexes(self):
-        """Test_s_component_subcomplexes."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-
-        # Test the function with cells=True
-        result = list(CC.s_component_subcomplexes(s=1, cells=True))
-        expected_result = [CellComplex(), CellComplex()]
-        expected_result[0].add_cell([2, 3, 4], rank=2)
-        expected_result[1].add_cell([5, 6, 7], rank=2)
-        assert len(result[0].cells) == len(expected_result[0].cells)
-        assert len(result[1].cells) == len(expected_result[1].cells)
-
-        CC = CellComplex()
-        # Test the function with return_singletons=False
-        result = list(
-            CC.s_component_subcomplexes(s=1, cells=False, return_singletons=False)
-        )
-        expected_result = []
-        assert result == expected_result
-
-    def test_connected_components(self):
-        """Test_connected_components."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-
-        # Test the function with cells=False and return_singletons=True
-        result = list(CC.connected_components(cells=True, return_singletons=True))
-        expected_result = [
-            {(2, 3), (2, 3, 4), (2, 4), (3, 4)},
-            {(5, 6), (5, 6, 7), (5, 7), (6, 7)},
-        ]
-        assert result == expected_result
-
-        CC = CellComplex()
-        # Test the function with cells=False and return_singletons=False
-        result = list(CC.connected_components(cells=False, return_singletons=False))
-        expected_result = []
-        assert result == expected_result
-
-    def test_connected_component_subcomplexes(self):
-        """Test_connected_component_subcomplexes."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-
-        # Test the function with return_singletons=True
-        result = list(CC.connected_component_subcomplexes(return_singletons=True))
-        expected_result = [CellComplex(), CellComplex()]
-        expected_result[0].add_cell([2, 3, 4], rank=2)
-        expected_result[1].add_cell([5, 6, 7], rank=2)
-        assert len(result[0].cells) == len(expected_result[0].cells)
-        assert len(result[1].cells) == len(expected_result[1].cells)
-
-        # Test the function with return_singletons=False
-        CC = CellComplex()  # Initialize your class object
-        result = list(CC.connected_component_subcomplexes(return_singletons=False))
-        expected_result = []
-        assert result == expected_result
-
-    def test_node_diameters(self):
-        """Test for the node_diameters method."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-
-        # Test the function
-        result = list(CC.node_diameters())
-        expected_result = [[1, 1], [{2, 3, 4}, {5, 6, 7}]]
-        assert result == expected_result
-
-    def test_cell_diameters(self):
-        """Test for the cell_diameters method."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-
-        # Test the function
-        result = list(CC.cell_diameters())
-        expected_result = [
-            [1, 1],
-            [{(2, 3), (2, 3, 4), (2, 4), (3, 4)}, {(5, 6), (5, 6, 7), (5, 7), (6, 7)}],
-        ]
-        assert result == expected_result
-
-    def test_diameter(self):
-        """Test for the diameter method."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-        CC.add_cell([2, 5], rank=1)
-        # Test the function
-        result = CC.diameter()
-        expected_result = 3
-        assert result == expected_result
-
-    def test_cell_diameter(self):
-        """Test for the cell_diameter method."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-        CC.add_cell([2, 5], rank=1)
-
-        # Test the function
-        result = CC.cell_diameter()
-        expected_result = 4
-        assert result == expected_result
-
-    def test_distance(self):
-        """Test for the distance method."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-
-        # Test the function
-        result = CC.distance(2, 3)
-        expected_result = 1
-        assert result == expected_result
-
-    def test_cell_distance(self):
-        """Test for the cell_distance method."""
-        CC = CellComplex()  # Initialize your class object
-
-        # Add some cells to the complex
-        CC.add_cell([2, 3, 4], rank=2)
-        CC.add_cell([5, 6, 7], rank=2)
-        CC.add_cell([2, 5], rank=1)
-
-        # Test the function
-        result = CC.cell_distance((2, 3, 4), (5, 6, 7))
-        expected_result = 2
-        assert result == expected_result
 
     def test_from_networkx_graph(self):
         """Test for the from_networkx_graph method."""
@@ -717,12 +536,12 @@ class TestCellComplex:
         expected = L1_up + L1_down
         np.testing.assert_array_equal(L1_hodge.toarray(), expected.toarray())
 
-    def test_init_empty_abstrcct_cell(self):
+    def test_init_empty_abstract_cell(self):
         """Test empty cell complex."""
         cc = CellComplex([], rank=0)
         assert len(cc.nodes) == 0
 
-    def test_init_nonempty_abstrcct_cell(self):
+    def test_init_nonempty_abstract_cell(self):
         """Test non-empty cell complex cells."""
         cc1 = CellComplex((1, 2, 3))
         cc2 = CellComplex(("a", "b", "c", "d"))
@@ -856,53 +675,53 @@ class TestCellComplex:
 
     def test_repr(self):
         """Test the string representation of the cell complex."""
-        cx = CellComplex(name="test")
-        assert repr(cx) == "CellComplex(name='test')"
+        CC = CellComplex(name="test")
+        assert repr(CC) == "CellComplex(name='test')"
 
     def test_len(self):
         """Test the length of the cell complex."""
-        cx = CellComplex()
-        cx.add_cell([1, 2, 3], rank=2)
-        assert len(cx) == 3
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3], rank=2)
+        assert len(CC) == 3
 
     def test_iter(self):
         """Test the iterator of the cell complex."""
-        cx = CellComplex()
-        cx.add_cell([1, 2, 3], rank=2)
-        cx.add_cell([2, 3, 4], rank=2)
-        assert set(iter(cx)) == {1, 2, 3, 4}
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3], rank=2)
+        CC.add_cell([2, 3, 4], rank=2)
+        assert set(iter(CC)) == {1, 2, 3, 4}
 
     def test_cell_equivalence_class(self):
         """Test the cell equivalence class method."""
-        cx = CellComplex()
-        cx.add_cell([1, 2, 3, 4], rank=2)
-        cx.add_cell([2, 3, 4, 1], rank=2)
-        cx.add_cell([1, 2, 3, 4], rank=2)
-        cx.add_cell([1, 2, 3, 6], rank=2)
-        cx.add_cell([3, 4, 1, 2], rank=2)
-        cx.add_cell([4, 3, 2, 1], rank=2)
-        cx.add_cell([1, 2, 7, 3], rank=2)
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([2, 3, 4, 1], rank=2)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([1, 2, 3, 6], rank=2)
+        CC.add_cell([3, 4, 1, 2], rank=2)
+        CC.add_cell([4, 3, 2, 1], rank=2)
+        CC.add_cell([1, 2, 7, 3], rank=2)
         c1 = Cell((1, 2, 3, 4, 5))
-        cx.add_cell(c1, rank=2)
+        CC.add_cell(c1, rank=2)
 
-        equivalence_classes = cx._cell_equivalence_class()
+        equivalence_classes = CC._cell_equivalence_class()
 
         assert len(equivalence_classes) == 4
 
     def test__remove_equivalent_cells(self):
         """Test the remove equivalent cells method."""
-        cx = CellComplex()
-        cx.add_cell((1, 2, 3, 4), rank=2)
-        cx.add_cell((2, 3, 4, 1), rank=2)
-        cx.add_cell((1, 2, 3, 4), rank=2)
-        cx.add_cell((1, 2, 3, 6), rank=2)
-        cx.add_cell((3, 4, 1, 2), rank=2)
-        cx.add_cell((4, 3, 2, 1), rank=2)
-        cx.add_cell((1, 2, 7, 3), rank=2)
+        CC = CellComplex()
+        CC.add_cell((1, 2, 3, 4), rank=2)
+        CC.add_cell((2, 3, 4, 1), rank=2)
+        CC.add_cell((1, 2, 3, 4), rank=2)
+        CC.add_cell((1, 2, 3, 6), rank=2)
+        CC.add_cell((3, 4, 1, 2), rank=2)
+        CC.add_cell((4, 3, 2, 1), rank=2)
+        CC.add_cell((1, 2, 7, 3), rank=2)
         c1 = Cell((1, 2, 3, 4, 5))
-        cx.add_cell(c1, rank=2)
-        cx._remove_equivalent_cells()
-        assert len(cx.cells) == 4
+        CC.add_cell(c1, rank=2)
+        CC._remove_equivalent_cells()
+        assert len(CC.cells) == 4
 
     def test_get_cell_attributes2(self):
         """Test the remove equivalent cells method."""
@@ -1143,6 +962,8 @@ class TestCellComplex:
         CC.add_cell([3, 4, 8], rank=2)
         CC.set_cell_attributes(d, 2)
 
+        attributes = CC.get_cell_attributes("color", 2)
+
         with pytest.raises(TopoNetXError):
             CC.set_cell_attributes(d, 4)
 
@@ -1153,6 +974,7 @@ class TestCellComplex:
 
         with pytest.raises(TopoNetXError):
             attributes = CC.get_cell_attributes("color", 4)
+
         assert attributes == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
 
     def test_remove_equivalent_cells(self):
@@ -1182,8 +1004,6 @@ class TestCellComplex:
         assert not CC.is_insertable_cycle([1, 2, 3, 4, 1, 2])
         assert not CC.is_insertable_cycle([1, 2, 1])
 
-        with pytest.warns():
-            CC.is_insertable_cycle([1], warnings_dis=True)
         with pytest.warns():
             CC.is_insertable_cycle([6, 7, 8], warnings_dis=True)
 
@@ -1367,96 +1187,97 @@ class TestCellComplex:
 
     def test_get_cell_data(self):
         """Test the get_cell_data method of CellComplex."""
-        cx = CellComplex()
+        CC = CellComplex()
 
-        cx.add_node("A", **{"attribute_name": "Value A"})
-        cx.add_node("B", **{"attribute_name": "Value B"})
+        CC.add_node("A", **{"attribute_name": "Value A"})
+        CC.add_node("B", **{"attribute_name": "Value B"})
 
-        cx.add_edge("A", "B", **{"attribute_name": "Value AB"})
+        CC.add_edge("A", "B", **{"attribute_name": "Value AB"})
 
-        cx.add_cell(["A", "B", "C"], rank=2, **{"attribute_name": "Value C"})
+        CC.add_cell(["A", "B", "C"], rank=2, **{"attribute_name": "Value C"})
 
-        data = cx.get_cell_data("A", 0, "attribute_name")
+        data = CC.get_cell_data("A", 0, "attribute_name")
         assert data == "Value A"
 
-        data = cx.get_cell_data(("A", "B"), 1, "attribute_name")
+        data = CC.get_cell_data(("A", "B"), 1, "attribute_name")
         assert data == "Value AB"
 
-        data = cx.get_cell_data("B", 0)
+        data = CC.get_cell_data("B", 0)
         assert data == {"attribute_name": "Value B"}
 
         with pytest.raises(KeyError):
-            cx.get_cell_data("D", 1, "attribute_name")
+            CC.get_cell_data("D", 1, "attribute_name")
 
         with pytest.raises(KeyError):
-            cx.get_cell_data("A", 0, "invalid_attribute")
+            CC.get_cell_data("A", 0, "invalid_attribute")
 
         with pytest.raises(ValueError):
-            cx.get_cell_data(["C"], 2, "invalid_attribute")
+            CC.get_cell_data(["C"], 2, "invalid_attribute")
 
         with pytest.raises(KeyError):
-            cx.get_cell_data(["D", "F"], 2, "invalid_attribute")
+            CC.get_cell_data(["D", "F"], 2, "invalid_attribute")
 
         with pytest.raises(TypeError):
-            cx.get_cell_data("C", 2, "invalid_attribute")
+            CC.get_cell_data("C", 2, "invalid_attribute")
 
         with pytest.raises(KeyError):
-            cx.get_cell_data("E", 0)
+            CC.get_cell_data("E", 0)
 
         with pytest.raises(ValueError):
-            cx.get_cell_data("A", 3, "attribute_name")
+            CC.get_cell_data("A", 3, "attribute_name")
 
     def test_set_cell_data(self):
         """Test the set_cell_data method of CellComplex."""
-        cx = CellComplex()
+        CC = CellComplex()
 
-        cx.add_node("A")
-        cx.add_node("B")
+        CC.add_node("A")
+        CC.add_node("B")
 
-        cx.add_edge("A", "B")
+        CC.add_edge("A", "B")
 
-        cx.add_cell(["A", "B", "C"], rank=2)
+        CC.add_cell(["A", "B", "C"], rank=2)
 
-        cx.set_cell_data("A", 0, "attribute_name", "Value A")
-        assert cx.nodes["A"]["attribute_name"] == "Value A"
+        CC.set_cell_data("A", 0, "attribute_name", "Value A")
+        assert CC.nodes["A"]["attribute_name"] == "Value A"
 
-        cx.set_cell_data(("A", "B"), 1, "attribute_name", "Value AB")
-        assert cx.edges[("A", "B")]["attribute_name"] == "Value AB"
+        CC.set_cell_data(("A", "B"), 1, "attribute_name", "Value AB")
+        assert CC.edges[("A", "B")]["attribute_name"] == "Value AB"
 
-        cx.set_cell_data(["A", "B", "C"], 2, "attribute_name", "Value C")
-        assert cx.cells[("A", "B", "C")]["attribute_name"] == "Value C"
-
-        with pytest.raises(KeyError):
-            cx.set_cell_data("D", 0, "attribute_name", "Value D")
+        CC.set_cell_data(["A", "B", "C"], 2, "attribute_name", "Value C")
+        assert CC.cells[("A", "B", "C")]["attribute_name"] == "Value C"
 
         with pytest.raises(KeyError):
-            cx.set_cell_data("D", 1, "attribute_name", "Value D")
+
+            CC.set_cell_data("D", 0, "attribute_name", "Value D")
 
         with pytest.raises(KeyError):
-            cx.set_cell_data(["D", "E"], 2, "attribute_name", "Value D")
+            CC.set_cell_data("D", 1, "attribute_name", "Value D")
+
+        with pytest.raises(KeyError):
+            CC.set_cell_data(["D", "E"], 2, "attribute_name", "Value D")
 
         with pytest.raises(ValueError):
-            cx.set_cell_data("A", 3, "attribute_name", "Value A")
+            CC.set_cell_data("A", 3, "attribute_name", "Value A")
 
     def test_get_cell_data_after_set(self):
         """Test the get_cell_data method after setting cell data."""
-        cx = CellComplex()
+        CC = CellComplex()
 
-        cx.add_node("A")
+        CC.add_node("A")
 
-        cx.set_cell_data("A", 0, "attribute_name", "Value A")
+        CC.set_cell_data("A", 0, "attribute_name", "Value A")
 
-        data = cx.get_cell_data("A", 0, "attribute_name")
+        data = CC.get_cell_data("A", 0, "attribute_name")
         assert data == "Value A"
 
     def test_get_cell_data_without_attr(self):
         """Test the get_cell_data method without specifying an attribute name."""
-        cx = CellComplex()
+        CC = CellComplex()
 
-        cx.add_node("A")
-        cx.add_node("B", **{"attribute_name": "Value B"})
+        CC.add_node("A")
+        CC.add_node("B", **{"attribute_name": "Value B"})
 
-        data = cx.get_cell_data("A", 0)
+        data = CC.get_cell_data("A", 0)
         assert len(data) == 0
 
     def test_hodge_laplacian_matrix(self):
@@ -1479,8 +1300,6 @@ class TestCellComplex:
 
         assert result.shape == (6, 6)
 
-        result = CC.hodge_laplacian_matrix(rank, False, weight, index)
-
         assert result.shape == (6, 6)
 
         # Test case 2: Rank is 0 with index=True
@@ -1490,16 +1309,12 @@ class TestCellComplex:
 
         assert len(result) == 6
 
-        result, index_list = CC.hodge_laplacian_matrix(rank, False, weight, index)
-
         assert len(result) == 6
 
         # Test case 3: Rank is 1 and maxdim is 2
         rank = 1
 
         result = CC.hodge_laplacian_matrix(rank, signed, weight, index)
-
-        result = CC.hodge_laplacian_matrix(rank, False, weight, index)
 
         # Test case 4: Rank is 1 and maxdim is 2 with index=True
         index = True
@@ -1513,8 +1328,6 @@ class TestCellComplex:
         rank = 2
 
         result = CC.hodge_laplacian_matrix(rank, signed, weight, index)
-
-        result = CC.hodge_laplacian_matrix(rank, False, weight, index)
 
         # Test case 6: Rank is 2 and maxdim is 2 with index=True
         index = True
