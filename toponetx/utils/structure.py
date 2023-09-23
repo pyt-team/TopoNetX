@@ -226,7 +226,7 @@ def compute_set_incidence(children, uidset, sparse: bool = True, index: bool = F
             for e in k_hyperedge_dict:
                 for n in r_hyperedge_dict:
                     if r_hyperedge_dict[n] <= k_hyperedge_dict[e]:
-                        MP[ndict[n], edict[e]] = 1
+                        MP[ndict[r_hyperedge_dict[n]], edict[k_hyperedge_dict[e]]] = 1
         if index:
             return ndict, edict, MP
         else:

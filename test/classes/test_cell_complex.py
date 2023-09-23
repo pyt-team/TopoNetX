@@ -353,8 +353,10 @@ class TestCellComplex:
         assert result[0] == expected_node_index
         assert np.allclose(result[1].toarray(), expected_result.toarray())
 
+
     def test_all_cell_to_node_coadjacnecy_matrix(self):
         """Test all cell to node coadjacnecy matrix."""
+
         CC = CellComplex()  # Initialize your class object
 
         # Add some cells to the complex
@@ -362,7 +364,9 @@ class TestCellComplex:
         CC.add_cell([3, 4, 5], rank=2)
 
         # Test the function without index
+
         result = CC.all_cell_to_node_coadjacnecy_matrix(
+
             s=None, weight=False, index=False
         )
         expected_result = scipy.sparse.csc_matrix(
@@ -382,9 +386,11 @@ class TestCellComplex:
         assert np.allclose(result.toarray(), expected_result.toarray())
 
         # Test the function with index
+
         result = CC.all_cell_to_node_coadjacnecy_matrix(
             s=None, weight=False, index=True
         )
+
         expected_cell_index = {
             (1, 2): 0,
             (1, 4): 1,
@@ -772,6 +778,21 @@ class TestCellComplex:
         assert CC.degree(7) == 2
         assert CC.degree(8) == 2
 
+
+        with pytest.raises(NotImplementedError):
+            CC.degree(node=1, rank=2)
+
+    def test_cell_neighbors(self):
+        """Test the cell neighbours of cell complex."""
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([2, 3, 4, 5], rank=2)
+        CC.add_cell([5, 6, 7, 8], rank=2)
+
+        with pytest.raises(NotImplementedError):
+            CC.cell_neighbors(1)
+
+
     def test_size(self):
         """Test the size of the cell complex."""
         CC = CellComplex()
@@ -857,6 +878,62 @@ class TestCellComplex:
         CC.set_filtration(test_filtration, "test")
         assert CC.get_filtration("test") == test_filtration
 
+
+        with pytest.raises(ValueError):
+            test_filtration = {"dummy": "test"}
+            CC.set_filtration(test_filtration, "test")
+
+    def test_set_node_attributes(self):
+        """Test setting node attributes."""
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        d = {1: {"color": "red", "attr2": 1}, 2: {"color": "blue", "attr2": 3}}
+        CC.set_node_attributes(d)
+
+        assert CC.nodes[1]["color"] == "red"
+        assert CC.nodes[2]["color"] == "blue"
+        assert CC.nodes[1]["attr2"] == 1
+
+    def test_get_node_attributes(self):
+        """Test getting node attributes."""
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        d = {1: {"color": "red", "attr2": 1}, 2: {"color": "blue", "attr2": 3}}
+        CC.set_node_attributes(d)
+
+        assert CC.get_node_attributes("color") == {1: "red", 2: "blue"}
+
+    def test_set_edge_attributes(self):
+        """Test setting edge attributes."""
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        d = {
+            (1, 2): {"color": "red", "attr2": 1},
+            (2, 3): {"color": "blue", "attr2": 3},
+        }
+        CC.set_edge_attributes(d)
+
+        assert CC.edges[(1, 2)]["color"] == "red"
+        assert CC.edges[(2, 3)]["color"] == "blue"
+        assert CC.edges[(1, 2)]["attr2"] == 1
+
+    def test_get_edge_attributes(self):
+        """Test getting edge attributes."""
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        d = {
+            (1, 2): {"color": "red", "attr2": 1},
+            (2, 3): {"color": "blue", "attr2": 3},
+        }
+        CC.set_edge_attributes(d)
+
+        assert CC.get_edge_attributes("color") == {(1, 2): "red", (2, 3): "blue"}
+
+
     def test_to_hypergraph(self):
         """Test the conversion of a cell complex to a hypergraph."""
         CC = CellComplex([[1, 2, 3], [4, 5]])
@@ -891,7 +968,21 @@ class TestCellComplex:
         )
         CC.add_cell([3, 4, 8], rank=2)
         CC.set_cell_attributes(d, 2)
+
         attributes = CC.get_cell_attributes("color", 2)
+
+
+        with pytest.raises(TopoNetXError):
+            CC.set_cell_attributes(d, 4)
+
+        # should not throw error
+        CC.set_cell_attributes({(5, 6, 7): {"color": "red"}}, 2)
+
+        attributes = CC.get_cell_attributes("color", 2)
+
+        with pytest.raises(TopoNetXError):
+            attributes = CC.get_cell_attributes("color", 4)
+
         assert attributes == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
 
     def test_remove_equivalent_cells(self):
@@ -920,6 +1011,9 @@ class TestCellComplex:
         assert CC.is_insertable_cycle([1, 2, 3, 4])
         assert not CC.is_insertable_cycle([1, 2, 3, 4, 1, 2])
         assert not CC.is_insertable_cycle([1, 2, 1])
+
+        with pytest.warns():
+            CC.is_insertable_cycle([6, 7, 8], warnings_dis=True)
 
     def test_incidence_matrix(self):
         """Unit test for the incidence_matrix method."""
@@ -1128,6 +1222,9 @@ class TestCellComplex:
         with pytest.raises(ValueError):
             CC.get_cell_data(["C"], 2, "invalid_attribute")
 
+        with pytest.raises(KeyError):
+            cx.get_cell_data(["D", "F"], 2, "invalid_attribute")
+
         with pytest.raises(TypeError):
             CC.get_cell_data("C", 2, "invalid_attribute")
 
@@ -1158,7 +1255,18 @@ class TestCellComplex:
         assert CC.cells[("A", "B", "C")]["attribute_name"] == "Value C"
 
         with pytest.raises(KeyError):
-            CC.set_cell_data("D", 1, "attribute_name", "Value D")
+
+            cx.set_cell_data("D", 0, "attribute_name", "Value D")
+
+        with pytest.raises(KeyError):
+            cx.set_cell_data("D", 1, "attribute_name", "Value D")
+
+
+        with pytest.raises(KeyError):
+            cx.set_cell_data(["D", "E"], 2, "attribute_name", "Value D")
+
+        with pytest.raises(ValueError):
+            cx.set_cell_data("A", 3, "attribute_name", "Value A")
 
     def test_get_cell_data_after_set(self):
         """Test the get_cell_data method after setting cell data."""
@@ -1199,6 +1307,10 @@ class TestCellComplex:
 
         result = CC.hodge_laplacian_matrix(rank, signed, weight, index)
 
+
+        assert result.shape == (6, 6)
+
+
         assert result.shape == (6, 6)
 
         # Test case 2: Rank is 0 with index=True
@@ -1206,12 +1318,18 @@ class TestCellComplex:
 
         result, index_list = CC.hodge_laplacian_matrix(rank, signed, weight, index)
 
+
+        assert len(result) == 6
+
+
+
         assert len(result) == 6
 
         # Test case 3: Rank is 1 and maxdim is 2
         rank = 1
 
         result = CC.hodge_laplacian_matrix(rank, signed, weight, index)
+
 
         # Test case 4: Rank is 1 and maxdim is 2 with index=True
         index = True
@@ -1225,6 +1343,7 @@ class TestCellComplex:
         rank = 2
 
         result = CC.hodge_laplacian_matrix(rank, signed, weight, index)
+
 
         # Test case 6: Rank is 2 and maxdim is 2 with index=True
         index = True

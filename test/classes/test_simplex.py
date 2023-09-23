@@ -19,6 +19,19 @@ class TestSimplex:
         with pytest.deprecated_call():
             _ = Simplex((1,), construct_tree=True)
 
+        with pytest.raises(ValueError):
+            s = Simplex([[1, 3], 2])
+
+    def test_simplex_sign(self):
+        """Test simplex sign method."""
+        s = Simplex(
+            [
+                1,
+            ]
+        )
+        with pytest.raises(NotImplementedError):
+            s.sign(face=1)
+
     def test_duplicate_nodes(self):
         """Test creation of simplex with duplicate nodes."""
         with pytest.raises(ValueError):
