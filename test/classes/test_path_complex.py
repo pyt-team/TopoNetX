@@ -267,9 +267,6 @@ class TestPathComplex:
         assert [1, 2] in PC.edges
         assert [2, 4] in PC.edges
 
-        with pytest.raises(TypeError):
-            PC.add_paths_from(1)
-
     def test_add_node(self):
         """Test add node."""
         PC = PathComplex()

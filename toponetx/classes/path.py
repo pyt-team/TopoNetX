@@ -12,11 +12,11 @@ class Path(Atom):
     """Path class.
 
     A class representing an elementary p-path in a path complex, which is the building block for a path complex. By the definition established
-    in the original paper (https://arxiv.org/pdf/1207.2834.pdf), an elementary p-path on a non-empty set of vertices V is any sequence of vertices
+    in the original paper [2]_, an elementary p-path on a non-empty set of vertices V is any sequence of vertices
     with length p + 1.
 
-    Unlike the original paper (https://arxiv.org/pdf/1207.2834.pdf) where elementary p-paths span the regular space of boundary-invariant paths,
-    our elementary p-paths span the space of simple paths with length p.
+    Unlike the original paper [2]_ where elementary p-paths span the regular space of boundary-invariant paths,
+    the elementary p-paths represented by this class span the space of simple paths with length p as proposed in [1]_.
 
     Parameters
     ----------
@@ -47,6 +47,15 @@ class Path(Atom):
     then it will not be included in the boundary of the elementary p-path.
     - When an elementary p-path is created and allowed paths are not specified, its boundary is automatically created by iteratively removing one node at a time
     from the elementary p-path, which is identical to a simplex.
+
+    References
+    ----------
+    .. [1] Truong and Chin.
+        Generalizing Topological Graph Neural Networks with Paths.
+        https://arxiv.org/abs/2308.06838.pdf
+    .. [2] Grigor'yan, Lin, Muranov, and Yau.
+        Homologies of path complexes and digraphs.
+        https://arxiv.org/pdf/1207.2834.pdf
 
     Examples
     --------

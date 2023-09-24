@@ -280,7 +280,9 @@ def path_complex_hodge_laplacian_spectrum(
     np.ndarray
         Eigenvalues.
     """
-    return laplacian_spectrum(PC.hodge_laplacian_matrix(rank=rank, signed=True))
+    return laplacian_spectrum(
+        PC.hodge_laplacian_matrix(rank=rank, signed=True), weight=weight
+    )
 
 
 def cell_complex_adjacency_spectrum(CCC: CellComplex, rank):

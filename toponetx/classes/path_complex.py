@@ -18,7 +18,7 @@ __all__ = ["PathComplex"]
 
 
 class PathComplex(Complex):
-    """A class representing a path complex based on simple paths as proposed in (https://arxiv.org/abs/2308.06838). The original path complex is defined in (https://arxiv.org/pdf/1207.2834.pdf).
+    """A class representing a path complex based on simple paths as proposed in [1]_. The original path complex is defined in [2]_.
 
     A path complex contains elementary p-paths that span the space of simple paths. Path complexes are a topological structure whose
     building blocks are paths, which are essentially different from simplicial complexes and cell complexes. If certain conditions are met, path complexes can generalize
@@ -49,14 +49,24 @@ class PathComplex(Complex):
 
     Notes
     -----
-    - By the definition established by (https://arxiv.org/pdf/1207.2834.pdf), a path complex P is a non-empty collection of elementary p-paths such that for any sequence
+    - By the definition established by [2]_, a path complex P is a non-empty collection of elementary p-paths such that for any sequence
     of vertices in a finite non-empty set V that belong to P, the truncated sequence of vertices (which is sometimes referred to as obvious boundaries) also belongs to P.
     The truncated sequences are sub-sequences of the original elementary p-path where the first or the last index is omitted. For instance, if we have an elementary p-path (1, 2, 3),
     the truncated sequences are (1,2) and (2,3).
-    - Our path complex is different from the path complex defined in (https://arxiv.org/pdf/1207.2834.pdf). In our path complex, elementary p-paths span the space of simple paths.
+    - Path complex in [1]_ is different from the path complex defined in [2]_ in the sense that elementary p-paths span the space of simple paths.
     The path complex originally proposed has elementary p-paths that span the space of boundary-invariant paths.
-    - The path complex is a simplicial complex if certain conditions are met (https://arxiv.org/pdf/1207.2834.pdf).
+    - The path complex is a simplicial complex if certain conditions are met [2]_.
     - Unlike hypergraphs, combinatorial, simplicial, and cell complexes, path complexes take into account the order of sequences.
+
+    References
+    ----------
+    .. [1] Truong and Chin.
+        Generalizing Topological Graph Neural Networks with Paths.
+        https://arxiv.org/abs/2308.06838.pdf
+    .. [2] Grigor'yan, Lin, Muranov, and Yau.
+        Homologies of path complexes and digraphs.
+        https://arxiv.org/pdf/1207.2834.pdf
+
 
     Examples
     --------
@@ -75,10 +85,10 @@ class PathComplex(Complex):
 
     def __init__(
         self,
-        paths: nx.Graph | Iterable[Sequence[Hashable]] = None,
+        paths: nx.Graph | Iterable[Sequence[Hashable]] | None = None,
         name: str = "",
         reserve_sequence_order: bool = False,
-        allowed_paths: Iterable[tuple[Hashable]] = None,
+        allowed_paths: Iterable[tuple[Hashable]] | None = None,
         max_rank: int = 3,
         **kwargs,
     ) -> None:
@@ -161,8 +171,6 @@ class PathComplex(Complex):
         >>> PC.paths
         PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
         """
-        if isinstance(paths, Hashable):
-            raise TypeError("Paths must be a iterable of paths as lists, tuples.")
         paths_clone = paths.copy()
         for p in paths_clone:
             self.add_path(p)
