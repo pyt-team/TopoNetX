@@ -839,9 +839,7 @@ class PathView(SimplexView):
     """
 
     def __init__(self, name: str = "") -> None:
-        super().__init__(
-            name
-        )  # self.faces_dict is a list of dictionary of allowed paths
+        super().__init__(name)
 
     def __getitem__(self, path: Hashable | Sequence[Hashable] | Path):
         """Get the dictionary of properties associated with the given path.

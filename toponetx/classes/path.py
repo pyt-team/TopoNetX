@@ -75,7 +75,7 @@ class Path(Atom):
 
     def __init__(
         self,
-        elements: Sequence[Hashable],
+        elements: Sequence[Hashable] | Hashable,
         name: str = "",
         construct_boundaries: bool = False,
         reserve_sequence_order: bool = False,
@@ -121,7 +121,7 @@ class Path(Atom):
 
         Returns
         -------
-        boundaries : list[tuple[Hashable]]
+        list[tuple[Hashable]]
             List of elementary p-path objects representing the boundaries.
 
         Notes
@@ -158,7 +158,7 @@ class Path(Atom):
 
         Returns
         -------
-        boundaries : list[tuple[Hashable]]
+        list[tuple[Hashable]]
             List of elementary p-path objects representing the boundary (p-1)-paths.
         """
         return self._boundaries
@@ -179,7 +179,7 @@ class Path(Atom):
             **self._properties,
         )
 
-    def __check_inputs(self, elements: Any, reserve_sequence_order: bool):
+    def __check_inputs(self, elements: Any, reserve_sequence_order: bool) -> None:
         """
         Sanity check for inputs, as sequence order matters.
 
@@ -193,10 +193,6 @@ class Path(Atom):
             This variable is only used for sanity check on the input.
         """
         if isinstance(elements, Sequence):
-            if not isinstance(elements, list) and not isinstance(elements, tuple):
-                raise ValueError(
-                    f"Elements of an elementary p-path must be a list or tuple, got {type(elements)}"
-                )
             for i in elements:
                 if not isinstance(i, Hashable):
                     raise ValueError(f"All nodes of a p-path must be hashable, got {i}")
@@ -211,11 +207,9 @@ class Path(Atom):
                     )
                 )
         elif isinstance(elements, Hashable):
-            if isinstance(elements, int) or isinstance(elements, str):
-                pass
-            else:
+            if not isinstance(elements, int) or isinstance(elements, str):
                 raise ValueError(
-                    f"Elements of an elementary p-path must be a list or tuple, got {type(elements)}"
+                    f"Elements of an elementary p-path must be an int or str, got {type(elements)}"
                 )
 
     def __repr__(self) -> str:

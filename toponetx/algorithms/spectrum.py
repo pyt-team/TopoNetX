@@ -190,7 +190,7 @@ def set_laplacian_beltrami_eigenvectors(complex) -> None:
         complex.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
 
 
-def laplacian_spectrum(matrix, weight: str = "weight"):
+def laplacian_spectrum(matrix):
     """Return eigenvalues of the Laplacian matrix.
 
     Parameters
@@ -281,11 +281,11 @@ def path_complex_hodge_laplacian_spectrum(
         Eigenvalues.
     """
     return laplacian_spectrum(
-        PC.hodge_laplacian_matrix(rank=rank, signed=True), weight=weight
+        PC.hodge_laplacian_matrix(rank=rank, signed=True, weight=weight)
     )
 
 
-def cell_complex_adjacency_spectrum(CCC: CellComplex, rank):
+def cell_complex_adjacency_spectrum(CC: CellComplex, rank: int):
     """Return eigenvalues of the adjacency matrix of the cell complex.
 
     Parameters
@@ -312,7 +312,7 @@ def cell_complex_adjacency_spectrum(CCC: CellComplex, rank):
     >>> CC.add_cell([5,6,7,8],rank=2)
     >>> cell_complex_adjacency_spectrum(CC,1)
     """
-    return laplacian_spectrum(CCC.adjacency_matrix(rank=rank))
+    return laplacian_spectrum(CC.adjacency_matrix(rank=rank))
 
 
 def simplicial_complex_adjacency_spectrum(
@@ -352,7 +352,7 @@ def path_complex_adjacency_spectrum(
     np.ndarray
         Eigenvalues.
     """
-    return laplacian_spectrum(PC.adjacency_matrix(rank=dim, weight=weight, signed=True))
+    return laplacian_spectrum(PC.adjacency_matrix(rank=dim, signed=True, weight=weight))
 
 
 def combinatorial_complex_adjacency_spectrum(CCC: CombinatorialComplex, rank, via_rank):
