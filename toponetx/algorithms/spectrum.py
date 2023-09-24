@@ -257,7 +257,7 @@ def simplicial_complex_hodge_laplacian_spectrum(
 
 
 def path_complex_hodge_laplacian_spectrum(
-    PC: PathComplex, rank: int, weight: str = "weight"
+    PC: PathComplex, rank: int, weight: str | None = "weight"
 ):
     """Return eigenvalues of the Laplacian of PC.
 
@@ -265,12 +265,12 @@ def path_complex_hodge_laplacian_spectrum(
     ----------
     PC : PathComplex
     rank : int
-    weight : str or None, optional (default='weight')
+    weight : str or None, default='weight'
         If None, then each cell has weight 1.
 
     Returns
     -------
-    evals : NumPy array
+    np.ndarray
         Eigenvalues.
     """
     return laplacian_spectrum(PC.hodge_laplacian_matrix(rank=rank, signed=True))
@@ -340,7 +340,7 @@ def path_complex_adjacency_spectrum(
 
     Returns
     -------
-    evals : NumPy array
+    np.ndarray
         Eigenvalues.
     """
     return laplacian_spectrum(PC.adjacency_matrix(rank=dim, weight=weight, signed=True))

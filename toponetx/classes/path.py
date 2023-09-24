@@ -70,7 +70,7 @@ class Path(Atom):
         name: str = "",
         construct_boundaries: bool = False,
         reserve_sequence_order: bool = False,
-        allowed_paths: Iterable[tuple[Hashable]] = None,
+        allowed_paths: Iterable[tuple[Hashable]] | None = None,
         **attr,
     ) -> None:
         self.__check_inputs(elements, reserve_sequence_order)
@@ -95,7 +95,7 @@ class Path(Atom):
     def construct_path_boundaries(
         elements: Sequence[Hashable],
         reserve_sequence_order: bool = False,
-        allowed_paths: Iterable[tuple[Hashable]] = None,
+        allowed_paths: Iterable[tuple[Hashable]] | None = None,
     ) -> list[tuple[Hashable]]:
         """
         Return list of elementary p-path objects representing the boundaries.
