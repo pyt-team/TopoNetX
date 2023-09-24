@@ -65,6 +65,7 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components: int):
 
     Returns
     -------
+    k_eigenvals, k_eigenvectors : array
         First k eigevals and eigenvec associated with the hodge laplacian matrix.
 
     Examples
@@ -149,6 +150,12 @@ def set_hodge_laplacian_eigenvector_attrs(
 
 def laplacian_beltrami_eigenvectors(SC, mode: str = "fem"):
     """Compute the first k eigenvectors of the laplacian beltrami matrix.
+
+    Parameters
+    ----------
+    SC : SimplicialComplex object
+    mode : str
+        Mode of the spharapy basis, options: fem, sphara
 
     Examples
     --------
