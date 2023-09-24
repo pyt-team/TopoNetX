@@ -132,6 +132,27 @@ class TestPathComplex:
         assert set(PX_clone.paths) == set(PC.paths)
         assert PX_clone is not PC
 
+    def test_skeleton(self):
+        """Test skeleton."""
+        PC = PathComplex(
+            [
+                [0, 1],
+                [1, 2, 3],
+                [1, 3, 2],
+                [2, 1, 3],
+                [0, 1, 2],
+                [0, 1, 3],
+                [0, 1, 2, 3],
+                [0, 1, 3, 2],
+            ],
+            max_rank=2,
+        )
+        assert PC.skeleton(0) == [(0,), (1,), (2,), (3,)]
+        assert PC.skeleton(1) == [(0, 1), (1, 2), (1, 3), (2, 3)]
+        assert PC.skeleton(2) == [(0, 1, 2), (0, 1, 3), (1, 2, 3), (1, 3, 2), (2, 1, 3)]
+        with pytest.raises(ValueError):
+            PC.skeleton(3)
+
     def test_skeleton_raise_errors(self):
         """Test skeleton raise errors."""
         PC = PathComplex([[1, 2, 3], [1, 3]])

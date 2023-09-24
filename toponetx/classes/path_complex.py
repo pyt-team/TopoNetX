@@ -85,7 +85,7 @@ class PathComplex(Complex):
 
     def __init__(
         self,
-        paths: nx.Graph | Iterable[Sequence[Hashable]] | None = None,
+        paths: nx.Graph | Iterable[Sequence[Hashable] | Path] | None = None,
         name: str = "",
         reserve_sequence_order: bool = False,
         allowed_paths: Iterable[tuple[Hashable]] | None = None,
@@ -137,14 +137,19 @@ class PathComplex(Complex):
             self.add_paths_from(self._allowed_paths)
 
         elif isinstance(paths, list) or isinstance(paths, tuple):
-            if len(paths) > 0:
-                if (
-                    isinstance(paths[0], int)
-                    or isinstance(paths[0], str)
-                    or isinstance(paths[0], list)
-                ):
-                    paths = [tuple(path) for path in paths]
-            self.add_paths_from(set(paths))
+            tmp_paths = []
+            for path in paths:
+                if len(path) <= max_rank + 1:
+                    if (
+                        isinstance(paths[0], int)
+                        or isinstance(paths[0], str)
+                        or isinstance(paths[0], list)
+                        or isinstance(paths[0], tuple)
+                    ):
+                        tmp_paths.append(tuple(path))
+                    else:  # path is a Path object
+                        tmp_paths.append(path)
+            self.add_paths_from(set(tmp_paths))
         elif paths is not None:
             raise TypeError(
                 "Input paths must be a graph or an iterable of paths as lists or tuples."
@@ -333,9 +338,9 @@ class PathComplex(Complex):
         -------
         PathComplex
         """
-        return PathComplex(list(self.paths), name=self.name)
+        return PathComplex(list(self.paths), name=self.name, rank=self.dim)
 
-    def skeleton(self, rank: int) -> set[tuple[Hashable]]:
+    def skeleton(self, rank: int) -> list[tuple[Hashable]]:
         """Compute skeleton.
 
         Returns
