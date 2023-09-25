@@ -119,6 +119,18 @@ class TestPathComplex:
         assert [2, 3] in PC.paths
         assert PC._allowed_paths == set([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
 
+        PC = PathComplex(G, allowed_paths=[])
+        assert [
+            1,
+            2,
+            3,
+        ] in PC.paths  # because constructing from graph and allowed_paths is empty
+        assert [1, 2] in PC.paths
+        assert [2, 3] in PC.paths
+        assert 1 in PC.paths
+        assert 2 in PC.paths
+        assert 3 in PC.paths
+
         G = nx.Graph()
         G.add_edge(3, 2)
         PC = PathComplex(G)
@@ -215,6 +227,21 @@ class TestPathComplex:
         PC.set_path_attributes({(1, 2): {"heat": 100, "color": "red"}})
         assert PC[[1, 2]] == {"heat": 100, "color": "red"}
         assert PC.edges[[1, 2]] == {"heat": 100, "color": "red"}
+
+        PC.set_path_attributes({(1,): {"heat": 200, "color": "red"}})
+        assert PC[[1]] == {"heat": 200, "color": "red"}
+        assert PC.nodes[1] == {"heat": 200, "color": "red"}
+        assert PC[1] == {"heat": 200, "color": "red"}
+
+        PC.set_path_attributes({1: 90, 4: 23}, "heat")
+        assert PC[1] == {"heat": 90, "color": "red"}
+        assert PC.nodes[1] == {"heat": 90, "color": "red"}
+        assert PC[4] == {"heat": 23}
+
+        PC.set_path_attributes({(1, 2): 882, (1, 2, 5): 939}, "heat")
+        assert PC[[1, 2]] == {"heat": 882, "color": "red"}
+        assert PC.edges[[1, 2]] == {"heat": 882, "color": "red"}
+        assert PC[[1, 2, 5]] == {"heat": 939, "color": "red"}
 
         PC.add_path(6, heat=77)
         assert PC[6] == {"heat": 77}
@@ -346,6 +373,10 @@ class TestPathComplex:
         assert row == {}
         assert col == {(0,): 0, (1,): 1, (2,): 2, (3,): 3}
         assert np.all(B.todense() == np.zeros((0, len(PC.nodes))))
+        row, col, B = PC.incidence_matrix(0, index=True, signed=False)
+        assert row == {}
+        assert col == {(0,): 0, (1,): 1, (2,): 2, (3,): 3}
+        assert np.all(B.todense() == np.zeros((0, len(PC.nodes))))
 
         row, col, B = PC.incidence_matrix(1, index=True)
         assert row == {(0,): 0, (1,): 1, (2,): 2, (3,): 3}
@@ -353,6 +384,13 @@ class TestPathComplex:
         assert np.all(
             B.todense()
             == np.array([[-1, 0, 0, 0], [1, -1, -1, 0], [0, 1, 0, -1], [0, 0, 1, 1]])
+        )
+        row, col, B = PC.incidence_matrix(1, index=True, signed=False)
+        assert row == {(0,): 0, (1,): 1, (2,): 2, (3,): 3}
+        assert col == {(0, 1): 0, (1, 2): 1, (1, 3): 2, (2, 3): 3}
+        assert np.all(
+            B.todense()
+            == np.array([[1, 0, 0, 0], [1, 1, 1, 0], [0, 1, 0, 1], [0, 0, 1, 1]])
         )
 
         row, col, B = PC.incidence_matrix(2, index=True)
@@ -370,6 +408,21 @@ class TestPathComplex:
                 [[1, 1, 0, 0, 0], [1, 0, 1, -1, 1], [0, 1, -1, 1, 1], [0, 0, 1, 1, -1]]
             )
         )
+        row, col, B = PC.incidence_matrix(2, index=True, signed=False)
+        assert row == {(0, 1): 0, (1, 2): 1, (1, 3): 2, (2, 3): 3}
+        assert col == {
+            (0, 1, 2): 0,
+            (0, 1, 3): 1,
+            (1, 2, 3): 2,
+            (1, 3, 2): 3,
+            (2, 1, 3): 4,
+        }
+        assert np.all(
+            B.todense()
+            == np.array(
+                [[1, 1, 0, 0, 0], [1, 0, 1, 1, 1], [0, 1, 1, 1, 1], [0, 0, 1, 1, 1]]
+            )
+        )
 
     def test_up_laplacian_matrix(self):
         """Test up laplacian matrix."""
@@ -380,6 +433,8 @@ class TestPathComplex:
             PC.up_laplacian_matrix(-1)
         with pytest.raises(ValueError):
             PC.up_laplacian_matrix(2)
+        with pytest.raises(ValueError):
+            PC.up_laplacian_matrix(1, weight="weight")
 
         row, L_up = PC.up_laplacian_matrix(0, index=True)
         row_B, col_B, B = PC.incidence_matrix(1, index=True)
@@ -409,6 +464,8 @@ class TestPathComplex:
             PC.down_laplacian_matrix(0)
         with pytest.raises(ValueError):
             PC.down_laplacian_matrix(3)
+        with pytest.raises(ValueError):
+            PC.up_laplacian_matrix(1, weight="weight")
 
         row, L_down = PC.down_laplacian_matrix(1, index=True)
         row_B, col_B, B = PC.incidence_matrix(1, index=True)
@@ -448,6 +505,37 @@ class TestPathComplex:
             == (PC.up_laplacian_matrix(1) + PC.down_laplacian_matrix(1)).todense()
         )
 
+        assert np.all(
+            PC.hodge_laplacian_matrix(0, signed=False).todense()
+            == PC.up_laplacian_matrix(0, signed=False).todense()
+        )
+        assert np.all(
+            PC.hodge_laplacian_matrix(2, signed=False).todense()
+            == PC.down_laplacian_matrix(2, signed=False).todense()
+        )
+        assert np.all(
+            PC.hodge_laplacian_matrix(1, signed=False).todense()
+            == abs(
+                PC.up_laplacian_matrix(1, signed=True)
+                + PC.down_laplacian_matrix(1, signed=True)
+            ).todense()
+        )
+
+        row, L_hodge = PC.hodge_laplacian_matrix(0, index=True)
+        assert row == PC.incidence_matrix(0, index=True)[1]
+
+        row, L_hodge = PC.hodge_laplacian_matrix(1, index=True)
+        assert row == PC.incidence_matrix(1, index=True)[1]
+
+        row, L_hodge = PC.hodge_laplacian_matrix(2, index=True)
+        assert row == PC.incidence_matrix(2, index=True)[1]
+
+        with pytest.raises(ValueError):
+            PC.hodge_laplacian_matrix(-1)
+
+        with pytest.raises(ValueError):
+            PC.hodge_laplacian_matrix(3)
+
     def test_adjacency_matrix(self):
         """Test adjacency matrix."""
         PC = PathComplex(
@@ -468,6 +556,12 @@ class TestPathComplex:
         assert np.all(
             adj_1 == np.array([[0, 1, 1, 0], [1, 0, 1, 1], [1, 1, 0, 1], [0, 1, 1, 0]])
         )
+
+        row, adj = PC.adjacency_matrix(0, index=True)
+        assert row == PC.incidence_matrix(0, index=True)[1]
+
+        row, adj = PC.adjacency_matrix(1, index=True)
+        assert row == PC.incidence_matrix(1, index=True)[1]
 
     def test_coadjacency_matrix(self):
         """Test coadjacency matrix."""
@@ -499,6 +593,14 @@ class TestPathComplex:
             )
         )
 
+        row, adj = PC.coadjacency_matrix(1, index=True)
+        assert row == PC.incidence_matrix(0, index=True)[1]
+        assert row == PC.incidence_matrix(1, index=True)[0]
+
+        row, adj = PC.coadjacency_matrix(2, index=True)
+        assert row == PC.incidence_matrix(1, index=True)[1]
+        assert row == PC.incidence_matrix(2, index=True)[0]
+
     def test_restrict_to_nodes(self):
         """Test restrict_to_nodes."""
         PC = PathComplex(
@@ -527,6 +629,9 @@ class TestPathComplex:
         assert len(res.paths) == 8
         assert len(res.nodes) == 4
         assert len(res.edges) == 3
+
+        with pytest.raises(ValueError):
+            PC.restrict_to_paths([])
 
     def test_get_node_attributes(self):
         """Test get_node_attributes."""
