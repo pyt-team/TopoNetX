@@ -465,7 +465,7 @@ class TestPathComplex:
         with pytest.raises(ValueError):
             PC.down_laplacian_matrix(3)
         with pytest.raises(ValueError):
-            PC.up_laplacian_matrix(1, weight="weight")
+            PC.down_laplacian_matrix(1, weight="weight")
 
         row, L_down = PC.down_laplacian_matrix(1, index=True)
         row_B, col_B, B = PC.incidence_matrix(1, index=True)
