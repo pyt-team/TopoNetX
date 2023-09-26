@@ -21,7 +21,7 @@ from hypernetx.classes.entity import Entity
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
 from networkx.utils import pairwise
-from scipy.sparse import csc_matrix
+from scipy.sparse import csc_matrix, csr_matrix
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import (
@@ -1463,7 +1463,7 @@ class CellComplex(Complex):
         signed: bool = True,
         weight: str | None = None,
         index: bool = False,
-    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
+    ) -> scipy.sparse.csr_matrix | tuple[dict, dict, scipy.sparse.csr_matrix]:
         """Incidence matrix for the cell complex indexed by nodes x cells.
 
         Parameters
@@ -1534,14 +1534,14 @@ class CellComplex(Complex):
             if index:
                 node_index = {node: i for i, node in enumerate(sorted(self._G.nodes))}
                 if signed:
-                    return {}, node_index, A.asformat("csc")
+                    return {}, node_index, A.asformat("csr")
                 else:
-                    return {}, node_index, abs(A.asformat("csc"))
+                    return {}, node_index, abs(A.asformat("csr"))
             else:
                 if signed:
-                    return A.asformat("csc")
+                    return A.asformat("csr")
                 else:
-                    return abs(A.asformat("csc"))
+                    return abs(A.asformat("csr"))
 
         elif rank == 1:
             nodelist = sorted(
@@ -1559,14 +1559,14 @@ class CellComplex(Complex):
             if index:
                 edge_index = {tuple(sorted(edge)): i for i, edge in enumerate(edgelist)}
                 if signed:
-                    return node_index, edge_index, A.asformat("csc")
+                    return node_index, edge_index, A.asformat("csr")
                 else:
-                    return node_index, edge_index, abs(A.asformat("csc"))
+                    return node_index, edge_index, abs(A.asformat("csr"))
             else:
                 if signed:
-                    return A.asformat("csc")
+                    return A.asformat("csr")
                 else:
-                    return abs(A.asformat("csc"))
+                    return abs(A.asformat("csr"))
         elif rank == 2:
             edgelist = sorted([sorted(e) for e in self._G.edges])
 
@@ -1602,14 +1602,14 @@ class CellComplex(Complex):
             if index:
                 cell_index = {c.elements: i for i, c in enumerate(self.cells)}
                 if signed:
-                    return edge_index, cell_index, A.asformat("csc")
+                    return edge_index, cell_index, A.asformat("csr")
                 else:
-                    return edge_index, cell_index, abs(A.asformat("csc"))
+                    return edge_index, cell_index, abs(A.asformat("csr"))
             else:
                 if signed:
-                    return A.asformat("csc")
+                    return A.asformat("csr")
                 else:
-                    return abs(A.asformat("csc"))
+                    return abs(A.asformat("csr"))
         else:
             raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
 
@@ -1619,7 +1619,7 @@ class CellComplex(Complex):
         signed: bool = True,
         weight: str | None = None,
         index: bool = False,
-    ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
+    ) -> scipy.sparse.csr_matrix | tuple[dict, dict, scipy.sparse.csr_matrix]:
         """Compute the hodge-laplacian matrix for this cell complex.
 
         Parameters

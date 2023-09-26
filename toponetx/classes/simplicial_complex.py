@@ -11,7 +11,7 @@ import networkx as nx
 import numpy as np
 from gudhi import SimplexTree
 from hypernetx import Hypergraph
-from scipy.sparse import coo_matrix, dok_matrix
+from scipy.sparse import coo_matrix, csr_matrix, dok_matrix
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import NodeView, SimplexView
@@ -731,7 +731,7 @@ class SimplicialComplex(Complex):
                 face = frozenset(simplex).difference({left_out})
                 idx_faces.append(simplex_dict_d_minus_1[tuple(sorted(face))])
         assert len(values) == (rank + 1) * len(simplex_dict_d)
-        boundary = coo_matrix(
+        boundary = csr_matrix(
             (values, (idx_faces, idx_simplices)),
             dtype=np.float32,
             shape=(
