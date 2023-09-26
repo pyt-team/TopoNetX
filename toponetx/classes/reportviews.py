@@ -3,14 +3,12 @@
 Such as:
 HyperEdgeView, CellView, SimplexView, NodeView.
 """
-from collections.abc import Collection, Hashable, Iterable, Iterator
+from collections.abc import Collection, Hashable, Iterable, Iterator, Sequence
 from itertools import chain
-from typing import Any
-
-import numpy as np
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.hyperedge import HyperEdge
+from toponetx.classes.path import Path
 from toponetx.classes.simplex import Simplex
 from toponetx.exception import TopoNetXError
 
@@ -828,3 +826,93 @@ class NodeView:
                 return frozenset(e) in self.nodes
         else:
             return False
+
+
+class PathView(SimplexView):
+    """
+    Path view class.
+
+    Parameters
+    ----------
+    name: str, optional
+        Name of the PathView instance.
+    """
+
+    def __init__(self, name: str = "") -> None:
+        super().__init__(name)
+
+    def __getitem__(self, path: Hashable | Sequence[Hashable] | Path):
+        """Get the dictionary of properties associated with the given path.
+
+        Parameters
+        ----------
+        path : int, str, tuple, list or Path
+            A tuple or list of nodes representing a path.
+            It can also be a Path object.
+            It can also be a single node represented by int or str.
+
+        Returns
+        -------
+        dict or list or dict
+            A dictionary of properties associated with the given path.
+        """
+        if isinstance(path, Path):
+            if path.elements in self.faces_dict[len(path) - 1]:
+                return self.faces_dict[len(path) - 1][path.elements]
+            else:
+                raise KeyError(f"input {path} is not in the path dictionary")
+        elif isinstance(path, Sequence):
+            path = tuple(path)
+            if path in self.faces_dict[len(path) - 1]:
+                return self.faces_dict[len(path) - 1][path]
+            else:
+                raise KeyError(f"input {path} is not in the path dictionary")
+        elif isinstance(path, Hashable):
+            if tuple([path]) in self:
+                return self.faces_dict[0][tuple([path])]
+            else:
+                raise KeyError(f"input {path} is not in the path dictionary")
+
+    def __contains__(self, item: Sequence[Hashable] | Hashable | Path) -> bool:
+        """
+        Check if a path is in the path view.
+
+        Parameters
+        ----------
+        item : Sequence[Hashable] or Hashable
+            The path to be checked for membership in the path view
+
+        Returns
+        -------
+        bool
+            True if the path is in the path view, False otherwise
+        """
+        if isinstance(item, Sequence):
+            item = tuple(item)
+            if not 0 < len(item) <= self.max_dim + 1:
+                return False
+            return item in self.faces_dict[len(item) - 1]
+        elif isinstance(item, Path):
+            item = item.elements
+            if not 0 < len(item) <= self.max_dim + 1:
+                return False
+            return item in self.faces_dict[len(item) - 1]
+        elif isinstance(item, Hashable):
+            return tuple([item]) in self.faces_dict[0]
+        return False
+
+    def __repr__(self) -> str:
+        """Return string representation that can be used to recreate it."""
+        all_paths: list[tuple[int | str, ...]] = []
+        for i in range(len(self.faces_dict)):
+            all_paths += [tuple(j) for j in self.faces_dict[i]]
+
+        return f"PathView({all_paths})"
+
+    def __str__(self) -> str:
+        """Return detailed string representation of the path view."""
+        all_paths: list[tuple[int | str, ...]] = []
+        for i in range(len(self.faces_dict)):
+            all_paths += [tuple(j) for j in self.faces_dict[i]]
+
+        return f"PathView({all_paths})"

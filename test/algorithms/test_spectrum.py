@@ -11,12 +11,19 @@ from toponetx.algorithms.spectrum import (
     hodge_laplacian_eigenvectors,
     laplacian_beltrami_eigenvectors,
     laplacian_spectrum,
+    path_complex_adjacency_spectrum,
+    path_complex_hodge_laplacian_spectrum,
     set_hodge_laplacian_eigenvector_attrs,
     set_laplacian_beltrami_eigenvectors,
     simplicial_complex_adjacency_spectrum,
     simplicial_complex_hodge_laplacian_spectrum,
 )
-from toponetx.classes import CellComplex, CombinatorialComplex, SimplicialComplex
+from toponetx.classes import (
+    CellComplex,
+    CombinatorialComplex,
+    PathComplex,
+    SimplicialComplex,
+)
 from toponetx.datasets.mesh import stanford_bunny
 
 
@@ -101,6 +108,18 @@ class TestSpectrum:
         spectrum = simplicial_complex_hodge_laplacian_spectrum(SC, 1)
         assert len(spectrum) == len(SC.skeleton(1))
 
+    def test_path_complex_hodge_laplacian_spectrum(self):
+        """Test path_complex_hodge_laplacian_spectrum function."""
+        PC = PathComplex(
+            [[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]]
+        )
+        spectrum = path_complex_hodge_laplacian_spectrum(PC, 0)
+        assert len(spectrum) == len(PC.skeleton(0))
+        spectrum = path_complex_hodge_laplacian_spectrum(PC, 1)
+        assert len(spectrum) == len(PC.skeleton(1))
+        spectrum = path_complex_hodge_laplacian_spectrum(PC, 2)
+        assert len(spectrum) == len(PC.skeleton(2))
+
     def test_cell_complex_adjacency_spectrum(self):
         """Test cell_complex_adjacency_spectrum function."""
         CX = CellComplex()
@@ -112,11 +131,21 @@ class TestSpectrum:
 
         assert len(spectrum) == len(CX.skeleton(1))
 
-    def test_simplcial_complex_adjacency_spectrum(self):
+    def test_simplicial_complex_adjacency_spectrum(self):
         """Test simplicial_complex_adjacency_spectrum function."""
         SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
         spectrum = simplicial_complex_adjacency_spectrum(SC, 1)
         assert len(spectrum) == len(SC.skeleton(1))
+
+    def test_path_complex_adjacency_spectrum(self):
+        """Test path_complex_adjacency_spectrum function."""
+        PC = PathComplex(
+            [[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]]
+        )
+        spectrum = path_complex_hodge_laplacian_spectrum(PC, 0)
+        assert len(spectrum) == len(PC.skeleton(0))
+        spectrum = path_complex_adjacency_spectrum(PC, 1)
+        assert len(spectrum) == len(PC.skeleton(1))
 
     def test_combinatorial_complex_adjacency_spectrum(self):
         """Test combinatorial_complex_adjacency_spectrum function."""

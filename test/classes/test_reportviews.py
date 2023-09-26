@@ -2,8 +2,21 @@
 
 import pytest
 
-from toponetx.classes import Cell, CellComplex, CombinatorialComplex, HyperEdge
-from toponetx.classes.reportviews import CellView, HyperEdgeView, NodeView, SimplexView
+from toponetx.classes import (
+    Cell,
+    CellComplex,
+    CombinatorialComplex,
+    HyperEdge,
+    Path,
+    PathComplex,
+)
+from toponetx.classes.reportviews import (
+    CellView,
+    HyperEdgeView,
+    NodeView,
+    PathView,
+    SimplexView,
+)
 from toponetx.exception import TopoNetXError
 
 
@@ -500,3 +513,55 @@ class TestReportViews_HyperEdgeView:
             hev._get_higher_rank(rank=1)
 
         assert str(e.value) == "1 is not in list"
+
+
+class TestReportViews_PathView:
+    """Test the PathView class of the ReportViews module."""
+
+    path_1 = Path((1,), name="path_1", weight=5)
+    path_2 = Path((1, 2), name="path_2", weight=10)
+    path_3 = Path((1, 2, 3), name="path_3")
+
+    pc = PathComplex([path_1, path_2, path_3])
+    path_view = pc.paths
+
+    def test_get_item(self):
+        """Test the __getitem__ method of the PathView class."""
+        assert self.path_view.__getitem__((1,)) == {"weight": 5}
+        assert self.path_view.__getitem__(1) == {"weight": 5}
+        assert self.path_view.__getitem__(Path(1)) == {"weight": 5}
+        assert self.path_view.__getitem__((2, 3)) == {}
+        assert self.path_view.__getitem__((1, 2)) == {"weight": 10}
+        assert self.path_view.__getitem__((1, 2, 3)) == {}
+
+        with pytest.raises(KeyError):
+            self.path_view.__getitem__(4)
+        with pytest.raises(KeyError):
+            self.path_view.__getitem__((4, 3))
+        with pytest.raises(KeyError):
+            self.path_view.__getitem__(Path((1, 3)))
+
+    def test_contains(self):
+        """Test the __contains__ method of the PathView class."""
+        assert self.path_view.__contains__(1) is True
+        assert self.path_view.__contains__((1,)) is True
+        assert self.path_view.__contains__(Path(1)) is True
+        assert self.path_view.__contains__((1, 2, 3, 4)) is False
+        assert self.path_view.__contains__(Path((1, 2, 4))) is False
+        assert self.path_view.__contains__(set((1, 2, 3))) is False
+        assert self.path_view.__contains__([]) is False
+        assert self.path_view.__contains__(Path([1, 2, 3, 4])) is False
+
+    def test_repr(self):
+        """Test __repr__ method of the PathView class."""
+        assert (
+            self.path_view.__repr__()
+            == "PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])"
+        )
+
+    def test_str(self):
+        """Test the __str__ method of the PathView class."""
+        assert (
+            self.path_view.__str__()
+            == "PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])"
+        )

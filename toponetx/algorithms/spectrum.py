@@ -10,6 +10,7 @@ from scipy.sparse import diags
 
 from toponetx.classes import CombinatorialComplex
 from toponetx.classes.cell_complex import CellComplex
+from toponetx.classes.path_complex import PathComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = [
@@ -189,7 +190,7 @@ def set_laplacian_beltrami_eigenvectors(complex) -> None:
         complex.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
 
 
-def laplacian_spectrum(matrix, weight: str = "weight"):
+def laplacian_spectrum(matrix):
     """Return eigenvalues of the Laplacian matrix.
 
     Parameters
@@ -262,7 +263,29 @@ def simplicial_complex_hodge_laplacian_spectrum(
     return laplacian_spectrum(SC.hodge_laplacian_matrix(rank=rank))
 
 
-def cell_complex_adjacency_spectrum(CC: CellComplex, rank):
+def path_complex_hodge_laplacian_spectrum(
+    PC: PathComplex, rank: int, weight: str | None = "weight"
+):
+    """Return eigenvalues of the Laplacian of PC.
+
+    Parameters
+    ----------
+    PC : PathComplex
+    rank : int
+    weight : str or None, default='weight'
+        If None, then each cell has weight 1.
+
+    Returns
+    -------
+    np.ndarray
+        Eigenvalues.
+    """
+    return laplacian_spectrum(
+        PC.hodge_laplacian_matrix(rank=rank, signed=True, weight=weight)
+    )
+
+
+def cell_complex_adjacency_spectrum(CC: CellComplex, rank: int):
     """Return eigenvalues of the adjacency matrix of the cell complex.
 
     Parameters
@@ -310,6 +333,26 @@ def simplicial_complex_adjacency_spectrum(
         Eigenvalues.
     """
     return laplacian_spectrum(SC.adjacency_matrix(rank=dim, weight=weight))
+
+
+def path_complex_adjacency_spectrum(
+    PC: PathComplex, dim: int, weight: str | None = None
+):
+    """Return eigenvalues of the adjacency matrix of PC.
+
+    Parameters
+    ----------
+    PC : PathComplex
+    dim : int
+    weight : str, optional
+        If None, then each cell has weight 1.
+
+    Returns
+    -------
+    np.ndarray
+        Eigenvalues.
+    """
+    return laplacian_spectrum(PC.adjacency_matrix(rank=dim, signed=True, weight=weight))
 
 
 def combinatorial_complex_adjacency_spectrum(CCC: CombinatorialComplex, rank, via_rank):
