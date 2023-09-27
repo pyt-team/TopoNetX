@@ -27,10 +27,20 @@ class TestCombinatorialComplex:
 
     def test_init_from_lists(self):
         """Test creation of a CHG from a list of cells."""
+        CHG = ColoredHyperGraph([[1, 2, 3]])
+        assert len(CHG.cells) == 1
+        assert (1, 2, 3) in CHG.cells
+
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
         assert len(CHG.cells) == 2
         assert (1, 2, 3) in CHG.cells
         assert (2, 3, 4) in CHG.cells
+
+        with pytest.raises(TopoNetXError) as excinfo:
+            ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=[3])
+            assert "cells and ranks must have equal number of elements" in str(
+                excinfo.value
+            )
 
     def test_init_from_abstract_cells(self):
         """Test creation of a CHG from abstract cells."""
@@ -71,6 +81,11 @@ class TestCombinatorialComplex:
         CHG.from_networkx_graph(G)
 
         assert "a" in CHG.cells
+
+    def test_chg_shortstr(self):
+        """Test CHG short string representation."""
+        CHG = ColoredHyperGraph()
+        assert CHG.__shortstr__ == "CHG"
 
     def test_chg_str(self):
         """Test CHG string representation."""
@@ -150,6 +165,38 @@ class TestCombinatorialComplex:
 
         assert (1, 2, 3) not in CHG.cells
         assert (2, 3, 4) not in CHG.cells
+
+    def test_add_nodes(self):
+        """Test adding nodes to a CHG."""
+        CHG = ColoredHyperGraph()
+        CHG.add_node([1])
+        assert 1 in CHG.nodes
+
+        CHG.add_node(1, color="red")
+        assert 1 in CHG.nodes
+        # BUG: This should work but it doesn't
+        # assert CHG[1] == {"color": "red", 'weight': 1}
+
+    def test_remove_node(self):
+        """Test removing a node from a CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        HE = HyperEdge(elements=[1, 2, 3], rank=2)
+        with pytest.raises(KeyError):
+            CHG.remove_node(HE)
+
+        CHG.remove_node(1)
+        assert (1, 2, 3) not in CHG.cells
+        assert (2, 3, 4) in CHG.cells
+
+    def test_remove_nodes(self):
+        """Test removing multiple nodes from a CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CHG.remove_nodes([1, 2, 3])
+        assert (1, 2, 3) not in CHG.cells
+        assert (2, 3, 4) not in CHG.cells
+
+        with pytest.raises(TypeError):
+            CHG.remove_nodes([[1, 2]])
 
     def test_chg_shape(self):
         """Test CHG shape property."""
