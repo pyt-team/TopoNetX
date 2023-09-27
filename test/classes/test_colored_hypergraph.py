@@ -148,10 +148,28 @@ class TestCombinatorialComplex:
     def test_add_cells_from(self):
         """Test adding multiple cells to a CHG."""
         CHG = ColoredHyperGraph()
+        CHG.add_cells_from([[1, 2, 3], [3, 4, 5]])
+        assert (1, 2, 3) in CHG.cells
+        assert (3, 4, 5) in CHG.cells
+
+        CHG = ColoredHyperGraph()
+        HE = HyperEdge(elements=[6, 7, 8], rank=2)
+        CHG.add_cells_from([HE])
+        assert (6, 7, 8) in CHG.cells
+
+        CHG = ColoredHyperGraph()
         CHG.add_cells_from([[2, 3, 4], [3, 4, 5]], ranks=2)
 
         assert (2, 3, 4) in CHG.cells
         assert (3, 4, 5) in CHG.cells
+
+        CHG = ColoredHyperGraph()
+        CHG.add_cells_from([[2, 3, 4], [3, 4, 5]], ranks=[1, 2])
+        assert (2, 3, 4) in CHG.cells
+        assert (3, 4, 5) in CHG.cells
+
+        with pytest.raises(TopoNetXError):
+            CHG.add_cells_from([[2, 3, 4], [3, 4, 5]], ranks=[1, 2, 3])
 
     def test_remove_cell(self):
         """Test removing a cell from a CHG."""
@@ -264,6 +282,9 @@ class TestCombinatorialComplex:
         B, row, col = CHG.incidence_matrix(1, 2, index=True)
         assert B[(frozenset({1, 2}), 0)] == 0
         assert B[(frozenset({1, 2, 3}), 0)] == 2
+
+        with pytest.raises(ValueError):
+            CHG.incidence_matrix(2, 2)
 
     def test_incidence_matrix_to_rank_none(self):
         """Test generating an incidence matrix without setting the to_rank parameter."""
