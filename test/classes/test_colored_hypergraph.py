@@ -142,6 +142,9 @@ class TestCombinatorialComplex:
         CHG.add_cell([1, 2, 3], rank=2)
         assert (1, 2, 3) in CHG.cells
 
+        CHG.add_cell([3, 4, 5])
+        assert (3, 4, 5) in CHG.cells
+
     def test_add_cells_from(self):
         """Test adding multiple cells to a CHG."""
         CHG = ColoredHyperGraph()
@@ -197,6 +200,28 @@ class TestCombinatorialComplex:
 
         with pytest.raises(TypeError):
             CHG.remove_nodes([[1, 2]])
+
+    def test_chg_degree(self):
+        """Test CHG degree property."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        with pytest.raises(TopoNetXError):
+            CHG.degree(2, 1)
+
+    def test_chg_get_cell_attr(self):
+        """Test CHG get_attr method."""
+        G = nx.path_graph(3)
+        CHG = ColoredHyperGraph(G)
+        d = {
+            ((1, 2), 0): {"color": "red", "attr2": 1},
+            ((0, 1), 0): {"color": "blue", "attr2": 3},
+        }
+        CHG.set_cell_attributes(d)
+        cell_color = CHG.get_cell_attributes("color")
+        assert cell_color[(frozenset({0, 1}), 0)] == "blue"
+        assert cell_color[(frozenset({1, 2}), 0)] == "red"
+        attr2 = CHG.get_cell_attributes("attr2")
+        assert attr2[(frozenset({0, 1}), 0)] == 3
+        assert attr2[(frozenset({1, 2}), 0)] == 1
 
     def test_chg_shape(self):
         """Test CHG shape property."""
