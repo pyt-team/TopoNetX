@@ -27,10 +27,20 @@ class TestCombinatorialComplex:
 
     def test_init_from_lists(self):
         """Test creation of a CHG from a list of cells."""
+        CHG = ColoredHyperGraph([[1, 2, 3]])
+        assert len(CHG.cells) == 1
+        assert (1, 2, 3) in CHG.cells
+
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
         assert len(CHG.cells) == 2
         assert (1, 2, 3) in CHG.cells
         assert (2, 3, 4) in CHG.cells
+
+        with pytest.raises(TopoNetXError) as excinfo:
+            ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=[3])
+            assert "cells and ranks must have equal number of elements" in str(
+                excinfo.value
+            )
 
     def test_init_from_abstract_cells(self):
         """Test creation of a CHG from abstract cells."""
@@ -71,6 +81,11 @@ class TestCombinatorialComplex:
         CHG.from_networkx_graph(G)
 
         assert "a" in CHG.cells
+
+    def test_chg_shortstr(self):
+        """Test CHG short string representation."""
+        CHG = ColoredHyperGraph()
+        assert CHG.__shortstr__ == "CHG"
 
     def test_chg_str(self):
         """Test CHG string representation."""
@@ -127,13 +142,34 @@ class TestCombinatorialComplex:
         CHG.add_cell([1, 2, 3], rank=2)
         assert (1, 2, 3) in CHG.cells
 
+        CHG.add_cell([3, 4, 5])
+        assert (3, 4, 5) in CHG.cells
+
     def test_add_cells_from(self):
         """Test adding multiple cells to a CHG."""
+        CHG = ColoredHyperGraph()
+        CHG.add_cells_from([[1, 2, 3], [3, 4, 5]])
+        assert (1, 2, 3) in CHG.cells
+        assert (3, 4, 5) in CHG.cells
+
+        CHG = ColoredHyperGraph()
+        HE = HyperEdge(elements=[6, 7, 8], rank=2)
+        CHG.add_cells_from([HE])
+        assert (6, 7, 8) in CHG.cells
+
         CHG = ColoredHyperGraph()
         CHG.add_cells_from([[2, 3, 4], [3, 4, 5]], ranks=2)
 
         assert (2, 3, 4) in CHG.cells
         assert (3, 4, 5) in CHG.cells
+
+        CHG = ColoredHyperGraph()
+        CHG.add_cells_from([[2, 3, 4], [3, 4, 5]], ranks=[1, 2])
+        assert (2, 3, 4) in CHG.cells
+        assert (3, 4, 5) in CHG.cells
+
+        with pytest.raises(TopoNetXError):
+            CHG.add_cells_from([[2, 3, 4], [3, 4, 5]], ranks=[1, 2, 3])
 
     def test_remove_cell(self):
         """Test removing a cell from a CHG."""
@@ -150,6 +186,60 @@ class TestCombinatorialComplex:
 
         assert (1, 2, 3) not in CHG.cells
         assert (2, 3, 4) not in CHG.cells
+
+    def test_add_nodes(self):
+        """Test adding nodes to a CHG."""
+        CHG = ColoredHyperGraph()
+        CHG.add_node([1])
+        assert 1 in CHG.nodes
+
+        CHG.add_node(1, color="red")
+        assert 1 in CHG.nodes
+        # BUG: This should work but it doesn't
+        # assert CHG[1] == {"color": "red", 'weight': 1}
+
+    def test_remove_node(self):
+        """Test removing a node from a CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        HE = HyperEdge(elements=[1, 2, 3], rank=2)
+        with pytest.raises(KeyError):
+            CHG.remove_node(HE)
+
+        CHG.remove_node(1)
+        assert (1, 2, 3) not in CHG.cells
+        assert (2, 3, 4) in CHG.cells
+
+    def test_remove_nodes(self):
+        """Test removing multiple nodes from a CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CHG.remove_nodes([1, 2, 3])
+        assert (1, 2, 3) not in CHG.cells
+        assert (2, 3, 4) not in CHG.cells
+
+        with pytest.raises(TypeError):
+            CHG.remove_nodes([[1, 2]])
+
+    def test_chg_degree(self):
+        """Test CHG degree property."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        with pytest.raises(TopoNetXError):
+            CHG.degree(2, 1)
+
+    def test_chg_get_cell_attr(self):
+        """Test CHG get_attr method."""
+        G = nx.path_graph(3)
+        CHG = ColoredHyperGraph(G)
+        d = {
+            ((1, 2), 0): {"color": "red", "attr2": 1},
+            ((0, 1), 0): {"color": "blue", "attr2": 3},
+        }
+        CHG.set_cell_attributes(d)
+        cell_color = CHG.get_cell_attributes("color")
+        assert cell_color[(frozenset({0, 1}), 0)] == "blue"
+        assert cell_color[(frozenset({1, 2}), 0)] == "red"
+        attr2 = CHG.get_cell_attributes("attr2")
+        assert attr2[(frozenset({0, 1}), 0)] == 3
+        assert attr2[(frozenset({1, 2}), 0)] == 1
 
     def test_chg_shape(self):
         """Test CHG shape property."""
@@ -192,6 +282,9 @@ class TestCombinatorialComplex:
         B, row, col = CHG.incidence_matrix(1, 2, index=True)
         assert B[(frozenset({1, 2}), 0)] == 0
         assert B[(frozenset({1, 2, 3}), 0)] == 2
+
+        with pytest.raises(ValueError):
+            CHG.incidence_matrix(2, 2)
 
     def test_incidence_matrix_to_rank_none(self):
         """Test generating an incidence matrix without setting the to_rank parameter."""
