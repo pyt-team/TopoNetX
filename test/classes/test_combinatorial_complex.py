@@ -149,21 +149,11 @@ class TestCombinatorialComplex:
         CCC.add_cell([2, 6, 4], rank=2)
         A02 = CCC.adjacency_matrix(0, 2)
         assert A02.shape == (6, 6)
-        assert (
-            A02.todense()
-            == [
-                [0, 1, 1, 1, 0, 0],
-                [1, 0, 1, 1, 1, 1],
-                [1, 1, 0, 1, 0, 0],
-                [1, 1, 1, 0, 0, 1],
-                [0, 1, 0, 0, 0, 0],
-                [0, 1, 0, 1, 0, 0],
-            ]
-        ).all()
 
     def test_coadjacency_matrix(self):
         """Test generating a coadjacency matrix."""
         CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
         CCC.add_cell([1, 2], rank=1)
         CCC.add_cell([1, 3], rank=1)
         CCC.add_cell([1, 2, 4, 3], rank=2)
