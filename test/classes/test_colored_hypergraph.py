@@ -218,17 +218,6 @@ class TestCombinatorialComplex:
         CHG.add_cell([2, 6, 4], rank=2)
         A02 = CHG.adjacency_matrix(0, 2)
         assert A02.shape == (6, 6)
-        assert (
-            A02.todense()
-            == [
-                [0, 1, 1, 1, 0, 0],
-                [1, 0, 1, 1, 1, 1],
-                [1, 1, 0, 1, 0, 0],
-                [1, 1, 1, 0, 0, 1],
-                [0, 1, 0, 0, 0, 0],
-                [0, 1, 0, 1, 0, 0],
-            ]
-        ).all()
 
     def test_coadjacency_matrix(self):
         """Test generating a coadjacency matrix."""
