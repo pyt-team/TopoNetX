@@ -165,6 +165,7 @@ class TestCombinatorialComplex:
         """Test generating a coadjacency matrix."""
         CCC = CombinatorialComplex()
         CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 2], rank=1)
         CCC.add_cell([1, 3], rank=1)
         CCC.add_cell([1, 2, 4, 3], rank=2)
         CCC.add_cell([2, 5], rank=1)
