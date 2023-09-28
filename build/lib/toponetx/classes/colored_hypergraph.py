@@ -1042,7 +1042,6 @@ class ColoredHyperGraph(Complex):
         A = incidence_to_adjacency(B.T)
         if index:
             return col, A
-        print("hi")
         return A
 
     def all_cell_to_node_coadjacnecy_matrix(self, index: bool = False, s: int = None):
