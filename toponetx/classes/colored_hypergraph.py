@@ -1041,8 +1041,8 @@ class ColoredHyperGraph(Complex):
             B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
         A = incidence_to_adjacency(B.T)
         if index:
-            return col, A
-        print("hi")
+            return row, A
+
         return A
 
     def all_cell_to_node_coadjacnecy_matrix(self, index: bool = False, s: int = None):
@@ -1109,7 +1109,7 @@ class ColoredHyperGraph(Complex):
                 rank, via_rank, sparse=True, index=index
             )
         else:
-            B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
+            B = self.incidence_matrix(via_rank, rank, sparse=True, index=index)
         A = incidence_to_adjacency(B)
         if index:
             return col, A

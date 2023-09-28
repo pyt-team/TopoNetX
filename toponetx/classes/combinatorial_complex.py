@@ -723,7 +723,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         if via_rank is not None:
             if rank > via_rank:
                 raise ValueError("rank must be greater than via_rank")
-        print("hiiiii")
         return super().adjacency_matrix(rank, via_rank, s, index)
 
     def coadjacency_matrix(self, rank, via_rank, s: int = None, index: bool = False):
