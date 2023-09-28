@@ -712,12 +712,12 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> G = Graph() # networkx graph
-        >>> G.add_edge(0, 1)
-        >>> G.add_edge(0,3)
-        >>> G.add_edge(0,4)
-        >>> G.add_edge(1, 4)
-        >>> CCC = CombinatorialComplex(cells=G)
+        >>> CCC = CombinatorialComplex()
+        >>> CCC.add_cell([1, 2], rank=1)
+        >>> CCC.add_cell([3, 4], rank=1)
+        >>> CCC.add_cell([1, 2, 3, 4], rank=2)
+        >>> CCC.add_cell([1, 2, 4], rank=2)
+        >>> CCC.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
         >>> CCC.adjacency_matrix(0, 1)
         """
         if via_rank is not None:
@@ -743,7 +743,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         weight: bool, default=True
             If False all nonzero entries are 1.
-            If True adjacency matrix will depend on weighted incidence matrix,
+            If True coadjacency matrix will depend on weighted incidence matrix,
 
         Returns
         -------

@@ -1106,7 +1106,7 @@ class ColoredHyperGraph(Complex):
         """
         if index:
             row, col, B = self.incidence_matrix(
-                rank, via_rank, sparse=True, index=index
+                via_rank, rank, sparse=True, index=index
             )
         else:
             B = self.incidence_matrix(via_rank, rank, sparse=True, index=index)
