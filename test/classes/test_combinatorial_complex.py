@@ -492,24 +492,6 @@ class TestCombinatorialComplex:
             == "input HyperEdge Nodes set: (1, 2, 3, 4), attrs: {} has None rank"
         )
 
-    def test_adjacency_incidence_structure_dict(self):
-        """Test for the incidence and adjacency structure dictionaries."""
-        CCC = CombinatorialComplex()
-        CCC.add_cell([1, 2], rank=1)
-        CCC.add_cell([1, 3], rank=1)
-        CCC.add_cell([1, 2, 4, 3], rank=2)
-        CCC.add_cell([2, 5], rank=1)
-        CCC.add_cell([2, 6, 4], rank=2)
-        dict1 = CCC.get_all_incidence_structure_dict()
-        assert list(dict1["B_0_1"].keys()) == [0, 1, 2]
-        assert list(dict1["B_0_1"].values()) == [
-            [0, 1],
-            [0, 2],
-            [1, 4],
-        ]
-        assert list(dict1["B_0_2"].keys()) == [0, 1]
-        assert list(dict1["B_0_2"].values()) == [[0, 1, 2, 3], [1, 3, 5]]
-
     def test_cell_node_adjacency_matrix(self):
         """Test for the cells adjacency matrix method."""
         CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)

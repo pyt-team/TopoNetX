@@ -934,6 +934,20 @@ class TestCellComplex:
         assert set(hx.nodes) == set(CC.nodes)
         assert len(hx.edges) == len(CC.edges) + len(CC.cells)
 
+    def test_to_combinatorial_complex(self):
+        """Test the conversion of a cell complex to a combinatorial complex."""
+        CC = CellComplex([[1, 2, 3], [4, 5]])
+        ccc = CC.to_combinatorial_complex()
+        assert len(set(ccc.nodes)) == len(set(CC.nodes))
+        assert len(ccc.cells) - len(ccc.nodes) == len(CC.edges) + len(CC.cells)
+
+    def test_to_colored_hypergraph(self):
+        """Test the conversion of a cell complex to a colored hypergraph."""
+        CC = CellComplex([[1, 2, 3], [4, 5]])
+        chg = CC.to_colored_hypergraph()
+        assert len(set(chg.nodes)) == len(set(CC.nodes))
+        assert len(chg.cells) == len(CC.edges) + len(CC.cells)
+
     def test_restrict_to_nodes(self):
         """Test restricting a cell complex to a subset of nodes."""
         CC = CellComplex([[1, 2, 3], [3, 4, 5], [1, 4]])

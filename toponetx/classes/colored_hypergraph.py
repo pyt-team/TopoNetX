@@ -207,16 +207,6 @@ class ColoredHyperGraph(Complex):
         """
         return item in self.nodes
 
-    def get_all_incidence_structure_dict(self):
-        """Get all incidence structure dictionary."""
-        d = {}
-        for r in range(1, self.dim + 1):
-            B0r = sparse_array_to_neighborhood_dict(
-                self.incidence_matrix(rank=0, to_rank=r)
-            )
-            d["B_0_" + str(r)] = B0r
-        return d
-
     def __setitem__(self, cell, **attr):
         """Set the attributes of a hyperedge or node in the CHG."""
         if cell in self.nodes:
@@ -488,6 +478,8 @@ class ColoredHyperGraph(Complex):
         else:
             raise ValueError("Invalid hyperedge type")
         self._add_hyperedge_helper(hyperedge_set, rank, key, **attr)
+        if rank == 0 and hyperedge_set in self._complex_set.hyperedge_dict[0]:
+            self._complex_set.hyperedge_dict[0][hyperedge_set][0].update(**attr)
 
     def _remove_hyperedge(self, hyperedge):
         if hyperedge not in self.cells:
@@ -504,8 +496,7 @@ class ColoredHyperGraph(Complex):
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
 
     def _add_node(self, node, **attr) -> None:
-        """
-        Add one node as a hyperedge.
+        """Add one node as a hyperedge.
 
         Parameters
         ----------
@@ -518,14 +509,13 @@ class ColoredHyperGraph(Complex):
         -------
         None
         """
-        if node in self:
-            self._complex_set.hyperedge_dict[0][frozenset({node})].update(**attr)
+        if node in self.nodes:
+            self._complex_set.hyperedge_dict[0][frozenset({node})][0].update(**attr)
         else:
             self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
     def add_node(self, node, **attr) -> None:
-        """
-        Add a node.
+        """Add a node.
 
         Parameters
         ----------
@@ -541,8 +531,7 @@ class ColoredHyperGraph(Complex):
         self._add_node(node, **attr)
 
     def set_node_attributes(self, values, name: Optional[str] = None) -> None:
-        """
-        Set node attributes.
+        """Set node attributes.
 
         Parameters
         ----------

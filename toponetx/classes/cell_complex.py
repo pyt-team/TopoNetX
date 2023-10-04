@@ -2190,9 +2190,9 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CC = CellComplex()
-        >>> CC.add_cell([1,2,3,4],rank=2,weight=5)
-        >>> CC.add_cell([2,3,4,5],rank=2)
-        >>> CC.add_cell([5,6,7,8],rank=2)
+        >>> CC.add_cell([1, 2, 3, 4], rank=2, weight=5)
+        >>> CC.add_cell([2, 3, 4, 5], rank=2)
+        >>> CC.add_cell([5, 6, 7, 8], rank=2)
         >>> CC.add_node(0)
         >>> CX2 = CC.clone()
         """
@@ -2211,7 +2211,7 @@ class CellComplex(Complex):
         for node in self.singletons():
             self._G.remove_node(node)
 
-    def get_linegraph(self, s=1, cells=True):
+    def get_linegraph(self, s: int = 1, cells: bool = False) -> nx.Graph:
         """Create line graph of self.
 
         If cells=True (default), the cells will be the vertices of the line graph.
@@ -2233,11 +2233,19 @@ class CellComplex(Complex):
         -------
         nx.Graph
             A NetworkX graph representing the s-linegraph of the Cell Complex.
+
+        Examples
+        --------
+        >>> CC = CellComplex()
+        >>> CC.add_cell([0, 1, 2, 3, 4], rank=2)
+        >>> G = CC.get_linegraph()
         """
-        if isinstance(s, None):
-            ValueError(
-                "s must be a positive integer larger than 1, got type of s None."
-            )
+        if not isinstance(s, int) or s < 1:
+            raise ValueError(f"'s' must be a positive integer, got {s}.")
+
+        if not isinstance(cells, bool):
+            raise TypeError(f"'cells' must be a boolean, got {cells}.")
+
         if cells:
             M = self.all_cell_to_node_coadjacnecy_matrix(s=s)
         else:
@@ -2284,25 +2292,15 @@ class CellComplex(Complex):
         >>> CC = CellComplex.from_trimesh(mesh)
         >>> CC[0]['position']
         """
-        # try to see the index of the first vertex
         CC = cls(mesh.faces)
 
         first_ind = np.min(mesh.faces)
 
-        if first_ind == 0:
-            CC.set_cell_attributes(
-                dict(zip(range(len(mesh.vertices)), mesh.vertices)),
-                name="position",
-                rank=0,
-            )
-        else:  # first index starts at 1.
-            CC.set_cell_attributes(
-                dict(
-                    zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
-                ),
-                name="position",
-                rank=0,
-            )
+        CC.set_cell_attributes(
+            dict(zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)),
+            name="position",
+            rank=0,
+        )
 
         return CC
 

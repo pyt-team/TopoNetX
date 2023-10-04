@@ -350,24 +350,3 @@ class TestCombinatorialComplex:
         B = CHG.incidence_matrix(0, 2)
         assert B.shape == (6, 2)
         assert (B.todense() == [[1, 0], [1, 1], [1, 0], [1, 1], [0, 0], [0, 1]]).all()
-
-    def test_adjacency_incidence_structure_dict(self):
-        """Test for the incidence and adjacency structure dictionaries."""
-        CHG = ColoredHyperGraph()
-        CHG.add_cell([1, 2], rank=1)
-        CHG.add_cell([1, 3], rank=1)
-        CHG.add_cell([1, 2, 4, 3], rank=2)
-        CHG.add_cell([2, 5], rank=1)
-        CHG.add_cell([2, 6, 4], rank=2)
-        dict1 = CHG.get_all_incidence_structure_dict()
-        assert list(dict1["B_0_1"].keys()) == [0, 1, 2]
-        assert list(dict1["B_0_1"].values()) == [
-            [0, 1],
-            [0, 2],
-            [1, 4],
-        ]
-        assert list(dict1["B_0_2"].keys()) == [0, 1]
-        assert list(dict1["B_0_2"].values()) == [[0, 1, 2, 3], [1, 3, 5]]
-
-
-#: TODO add tests for CHG not covered by CC tests
