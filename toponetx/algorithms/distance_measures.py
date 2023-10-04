@@ -11,7 +11,6 @@ from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.simplicial_complex import SimplicialComplex
-from toponetx.exception import TopoNetXError
 
 __all__ = ["node_diameters", "cell_diameters", "diameter", "cell_diameter"]
 
@@ -88,7 +87,7 @@ def cell_diameters(complex: Complex, s: int = 1) -> Tuple[List[int], List[Set[in
     >>> list(cell_diameters(CHG))
     """
     if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError(f"Input complex {complex} is not supported.")
+        raise TypeError(f"Input complex {complex} is not supported.")
     coldict, A = complex.all_cell_to_node_coadjacnecy_matrix(index=True)
     coldict = {v: k for k, v in coldict.items()}
 
@@ -119,7 +118,7 @@ def diameter(complex: Complex) -> int:
 
     Raises
     ------
-    TopoNetXError
+    RuntimeError
         If the cell complex is not s-cell-connected
 
     Notes
@@ -142,12 +141,12 @@ def diameter(complex: Complex) -> int:
     >>> diameter(CHG)
     """
     if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError(f"Input complex {complex} is not supported.")
+        raise TypeError(f"Input complex {complex} is not supported.")
     A = complex.node_to_all_cell_adjacnecy_matrix()
     G = nx.from_scipy_sparse_array(A)
     if nx.is_connected(G):
         return nx.diameter(G)
-    raise TopoNetXError("cc is not connected.")
+    raise RuntimeError("cc is not connected.")
 
 
 def cell_diameter(complex: Complex, s: int = None) -> int:
@@ -166,7 +165,7 @@ def cell_diameter(complex: Complex, s: int = None) -> int:
 
     Raises
     ------
-    TopoNetXError
+    RuntimeError
         If cell complex is not s-cell-connected
 
     Notes
@@ -189,9 +188,9 @@ def cell_diameter(complex: Complex, s: int = None) -> int:
     >>> cell_diameter(CHG)
     """
     if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError(f"Input complex {complex} is not supported.")
+        raise TypeError(f"Input complex {complex} is not supported.")
     A = complex.all_cell_to_node_coadjacnecy_matrix()
     G = nx.from_scipy_sparse_array(A)
     if nx.is_connected(G):
         return nx.diameter(G)
-    raise TopoNetXError(f"cell complex is not s-connected. s={s}")
+    raise RuntimeError(f"cell complex is not s-connected. s={s}")

@@ -12,7 +12,6 @@ from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.simplicial_complex import SimplicialComplex
-from toponetx.exception import TopoNetXError
 
 __all__ = [
     "s_connected_components",
@@ -79,7 +78,7 @@ def s_connected_components(
     >>> list(s_connected_components(CCC, s=1,cells=False))
     """
     if not isinstance(complex, (CellComplex, ColoredHyperGraph, CombinatorialComplex)):
-        raise ValueError(f"Input complex {complex} is not supported.")
+        raise TypeError(f"Input complex {complex} is not supported.")
 
     if cells:
         cell_dict, A = complex.all_cell_to_node_coadjacnecy_matrix(s=s, index=True)

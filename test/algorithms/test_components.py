@@ -53,6 +53,10 @@ class TestComponents:
         expected_result = [{2, 3, 4}, {5, 6, 7}]
         assert result == expected_result
 
+        # invalid input
+        with pytest.raises(TypeError):
+            list(s_connected_components(SimplicialComplex()))
+
     def test_s_component_subcomplexes(self):
         """Test_s_component_subcomplexes."""
         CC = CellComplex()  # Initialize your class object

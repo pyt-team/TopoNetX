@@ -7,7 +7,6 @@ import pytest
 
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.hyperedge import HyperEdge
-from toponetx.exception import TopoNetXError
 
 
 class TestCombinatorialComplex:
@@ -36,7 +35,7 @@ class TestCombinatorialComplex:
         assert (1, 2, 3) in CHG.cells
         assert (2, 3, 4) in CHG.cells
 
-        with pytest.raises(TopoNetXError) as excinfo:
+        with pytest.raises(ValueError) as excinfo:
             ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=[3])
             assert "cells and ranks must have equal number of elements" in str(
                 excinfo.value
@@ -168,7 +167,7 @@ class TestCombinatorialComplex:
         assert (2, 3, 4) in CHG.cells
         assert (3, 4, 5) in CHG.cells
 
-        with pytest.raises(TopoNetXError):
+        with pytest.raises(ValueError):
             CHG.add_cells_from([[2, 3, 4], [3, 4, 5]], ranks=[1, 2, 3])
 
     def test_remove_cell(self):
@@ -222,7 +221,7 @@ class TestCombinatorialComplex:
     def test_chg_degree(self):
         """Test CHG degree property."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
-        with pytest.raises(TopoNetXError):
+        with pytest.raises(RuntimeError):
             CHG.degree(2, 1)
 
     def test_chg_get_cell_attr(self):

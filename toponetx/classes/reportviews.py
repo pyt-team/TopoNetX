@@ -10,7 +10,6 @@ from toponetx.classes.cell import Cell
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.path import Path
 from toponetx.classes.simplex import Simplex
-from toponetx.exception import TopoNetXError
 
 __all__ = [
     "HyperEdgeView",
@@ -543,7 +542,7 @@ class HyperEdgeView:
             return sorted(elements)
 
         else:
-            raise TopoNetXError(
+            raise ValueError(
                 "level must be None, equal, 'uppereq', 'lowereq', 'upeq', 'downeq', 'uppereq', 'lower', 'up', or 'down'  "
             )
 

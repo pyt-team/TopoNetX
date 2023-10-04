@@ -13,7 +13,6 @@ from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.simplicial_complex import SimplicialComplex
-from toponetx.exception import TopoNetXError
 
 __all__ = ["distance", "cell_distance"]
 

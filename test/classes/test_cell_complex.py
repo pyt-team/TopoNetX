@@ -7,7 +7,6 @@ import scipy
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
-from toponetx.exception import TopoNetXError
 
 
 class TestCellComplex:
@@ -617,7 +616,7 @@ class TestCellComplex:
         assert len(cc.edges) == 1
         assert len(cc.nodes) == 2
 
-        with pytest.raises(TopoNetXError):
+        with pytest.raises(RuntimeError):
             cc.remove_node(980)
 
     def test_add_cells_from_list_cells(self):
@@ -978,7 +977,7 @@ class TestCellComplex:
 
         attributes = CC.get_cell_attributes("color", 2)
 
-        with pytest.raises(TopoNetXError):
+        with pytest.raises(ValueError):
             CC.set_cell_attributes(d, 4)
 
         # should not throw error
@@ -986,7 +985,7 @@ class TestCellComplex:
 
         attributes = CC.get_cell_attributes("color", 2)
 
-        with pytest.raises(TopoNetXError):
+        with pytest.raises(ValueError):
             attributes = CC.get_cell_attributes("color", 4)
 
         assert attributes == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
@@ -1261,7 +1260,6 @@ class TestCellComplex:
         assert CC.cells[("A", "B", "C")]["attribute_name"] == "Value C"
 
         with pytest.raises(KeyError):
-
             CC.set_cell_data("D", 0, "attribute_name", "Value D")
 
         with pytest.raises(KeyError):
@@ -1375,12 +1373,12 @@ class TestCellComplex:
         assert CC.dim == 0
 
     def test_skeleton_method_exception(self):
-        """Test if the skeleton method raises a TopoNetXError exception."""
-        with pytest.raises(TopoNetXError):
+        """Test if the skeleton method raises an exception."""
+        with pytest.raises(ValueError):
             CC = CellComplex()
             CC.skeleton(rank=4)
 
-        with pytest.raises(TopoNetXError):
+        with pytest.raises(ValueError):
             CC = CellComplex()
             CC.skeleton(rank=3)
 
@@ -1426,12 +1424,12 @@ class TestCellComplex:
     def test_add_cell_regularity_conditions(self):
         """Test regularity conditions for add cell method."""
         CC = CellComplex()
-        with pytest.raises(TopoNetXError) as exp_exception:
+        with pytest.raises(RuntimeError) as exp_exception:
             CC.add_cell((1, 1, 2, 3), rank=0)
 
         assert (
             str(exp_exception.value)
-            == "Use add_node to insert nodes or zero ranked cells."
+            == "Use `add_node` to insert nodes or zero ranked cells."
         )
 
         with pytest.raises(ValueError) as exp_exception:

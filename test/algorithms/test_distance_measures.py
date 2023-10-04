@@ -48,6 +48,10 @@ class TestDistanceMeasures:
         ]
         assert result == expected_result
 
+        # invalid input
+        with pytest.raises(TypeError):
+            cell_diameters(SimplicialComplex())
+
     def test_diameter(self):
         """Test for the diameter method."""
         CC = CellComplex()  # Initialize your class object
@@ -60,6 +64,15 @@ class TestDistanceMeasures:
         result = diameter(CC)
         expected_result = 3
         assert result == expected_result
+
+        # invalid input
+        with pytest.raises(TypeError):
+            diameter(SimplicialComplex())
+
+        # diameter is not defined for non-connected complexes
+        CC.add_cell([10, 22], rank=1)
+        with pytest.raises(RuntimeError):
+            _ = diameter(CC)
 
     def test_cell_diameter(self):
         """Test for the cell_diameter method."""
@@ -74,3 +87,12 @@ class TestDistanceMeasures:
         result = cell_diameter(CC)
         expected_result = 4
         assert result == expected_result
+
+        # invalid input
+        with pytest.raises(TypeError):
+            cell_diameter(SimplicialComplex())
+
+        # cell diameter is not defined for non-connected complexes
+        CC.add_cell([10, 22], rank=1)
+        with pytest.raises(RuntimeError):
+            _ = cell_diameter(CC)

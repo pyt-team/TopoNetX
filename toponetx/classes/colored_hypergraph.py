@@ -15,7 +15,6 @@ from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.reportviews import ColoredHyperEdgeView, NodeView
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
-from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import (
     compute_set_incidence,
     incidence_to_adjacency,
@@ -99,7 +98,7 @@ class ColoredHyperGraph(Complex):
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
                         if len(cells) != len(ranks):
-                            raise TopoNetXError(
+                            raise ValueError(
                                 "cells and ranks must have equal number of elements"
                             )
                         else:
@@ -248,7 +247,7 @@ class ColoredHyperGraph(Complex):
         size : int
         """
         if cell not in self.cells:
-            raise TopoNetXError(
+            raise ValueError(
                 "Input cell is not in cells of the {}".format(self.__shortstr__)
             )
         return len(self._complex_set[cell])
@@ -328,12 +327,12 @@ class ColoredHyperGraph(Complex):
                         ]
                     )
                 else:
-                    raise TopoNetXError(
+                    raise RuntimeError(
                         f"There are no cells in the colored hypergraph with rank {rank}"
                     )
 
             else:
-                raise TopoNetXError("Rank must be positive")
+                raise ValueError("Rank must be positive")
         elif rank is None:
             rank_list = self._complex_set.hyperedge_dict.keys()
             value = 0
@@ -792,9 +791,8 @@ class ColoredHyperGraph(Complex):
                     self.add_cell(cell, rank=None)
         else:
             if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-
                 if len(cells) != len(ranks):
-                    raise TopoNetXError(
+                    raise ValueError(
                         "cells and ranks must have equal number of elements"
                     )
                 else:

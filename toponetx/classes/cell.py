@@ -183,20 +183,21 @@ class Cell(Atom):
         ValueError
             If the input edge is not valid.
         TypeError
-            If the input edge is not an iterable.
+            If the input edge is not iterable.
         """
         if not isinstance(edge, Iterable):
             raise TypeError(f"The input {edge} must be iterable.")
 
+        edge = tuple(edge)
         if len(edge) == 2:
             if tuple(edge) in self.boundary:
                 return 1
             elif tuple(edge)[::-1] in self.boundary:
                 return -1
             else:
-                raise KeyError(f"the input {edge} is not in the boundary of the cell")
+                raise KeyError(f"Ihe input {edge} is not in the boundary of the cell.")
 
-        raise ValueError(f"The input {edge} is not a valid edge")
+        raise ValueError(f"The input {edge} is not a valid edge.")
 
     def __repr__(self) -> str:
         """Return string representation of regular cell."""
