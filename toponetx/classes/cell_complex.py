@@ -2211,7 +2211,7 @@ class CellComplex(Complex):
         for node in self.singletons():
             self._G.remove_node(node)
 
-    def get_linegraph(self, s=1, cells=True):
+    def get_linegraph(self, s: int = 1, cells: bool = False) -> nx.Graph:
         """Create line graph of self.
 
         If cells=True (default), the cells will be the vertices of the line graph.
@@ -2233,9 +2233,19 @@ class CellComplex(Complex):
         -------
         nx.Graph
             A NetworkX graph representing the s-linegraph of the Cell Complex.
+
+        Examples
+        --------
+        >>> CC = CellComplex()
+        >>> CC.add_cell([0,1,2,3,4],rank=2)
+        >>> G = CC.get_linegraph()
         """
-        if not isinstance(s, int):
-            ValueError("s must be a positive integer larger than 1.")
+        if not isinstance(s, int) or s < 1:
+            raise TopoNetXError(f"'s' must be a positive integer, got {s}.")
+
+        if not isinstance(cells, bool):
+            raise TopoNetXError(f"'cells' must be a boolean, got {cells}.")
+
         if cells:
             M = self.all_cell_to_node_coadjacnecy_matrix(s=s)
         else:
