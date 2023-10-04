@@ -2190,9 +2190,9 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CC = CellComplex()
-        >>> CC.add_cell([1,2,3,4],rank=2,weight=5)
-        >>> CC.add_cell([2,3,4,5],rank=2)
-        >>> CC.add_cell([5,6,7,8],rank=2)
+        >>> CC.add_cell([1, 2, 3, 4], rank=2, weight=5)
+        >>> CC.add_cell([2, 3, 4, 5], rank=2)
+        >>> CC.add_cell([5, 6, 7, 8], rank=2)
         >>> CC.add_node(0)
         >>> CX2 = CC.clone()
         """
@@ -2237,14 +2237,14 @@ class CellComplex(Complex):
         Examples
         --------
         >>> CC = CellComplex()
-        >>> CC.add_cell([0,1,2,3,4],rank=2)
+        >>> CC.add_cell([0, 1, 2, 3, 4], rank=2)
         >>> G = CC.get_linegraph()
         """
         if not isinstance(s, int) or s < 1:
-            raise TopoNetXError(f"'s' must be a positive integer, got {s}.")
+            raise ValueError(f"'s' must be a positive integer, got {s}.")
 
         if not isinstance(cells, bool):
-            raise TopoNetXError(f"'cells' must be a boolean, got {cells}.")
+            raise TypeError(f"'cells' must be a boolean, got {cells}.")
 
         if cells:
             M = self.all_cell_to_node_coadjacnecy_matrix(s=s)
