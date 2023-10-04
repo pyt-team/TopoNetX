@@ -14,7 +14,6 @@ from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.datasets.mesh import stanford_bunny
-from toponetx.exception import TopoNetXError
 
 
 class TestSimplicialComplex:
@@ -636,7 +635,7 @@ class TestSimplicialComplex:
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 4])
         SC.add_simplex([3, 4, 8])
-        with pytest.raises(TopoNetXError):
+        with pytest.raises(RuntimeError):
             SC.to_trimesh()
 
     def test_laplace_beltrami_operator(self):

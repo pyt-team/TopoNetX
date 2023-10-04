@@ -30,7 +30,6 @@ from toponetx.classes.combinatorial_complex import (
 )
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import CellView
-from toponetx.exception import TopoNetXError
 from toponetx.utils import incidence_to_adjacency
 
 __all__ = ["CellComplex"]
@@ -208,14 +207,24 @@ class CellComplex(Complex):
         return len(self.nodes), len(self.edges), len(self.cells)
 
     def skeleton(self, rank: int):
-        """Compute skeleton."""
+        """Compute skeleton.
+
+        Parameters
+        ----------
+        rank : {0, 1, 2}
+
+        Raises
+        ------
+        ValueError
+            If `rank` is not 0, 1 or 2.
+        """
         if rank == 0:
             return self.nodes
         if rank == 1:
             return self.edges
         if rank == 2:
             return self.cells
-        raise TopoNetXError("Only dimensions 0,1, and 2 are supported.")
+        raise ValueError("Only dimensions 0,1, and 2 are supported.")
 
     @property
     def is_regular(self) -> bool:
@@ -358,7 +367,6 @@ class CellComplex(Complex):
                 elif j in all_inserted_cells:
                     continue
                 else:
-
                     if c1.is_homotopic_to(c2):
                         equiv_classes[c1].add(j)
                         all_inserted_cells.add(j)
@@ -446,7 +454,6 @@ class CellComplex(Complex):
 
         else:
             if cell in self.cells:
-
                 return len(cell)
             else:
                 raise KeyError(f" the key {cell} is not a key for an existing cell ")
@@ -571,11 +578,11 @@ class CellComplex(Complex):
 
         Raises
         ------
-        TopoNetXError
+        RuntimeError
             If the given node does not exist in the cell complex.
         """
         if node not in self.nodes:
-            raise TopoNetXError("The given node does not exist in the cell complex.")
+            raise RuntimeError("The given node does not exist in the cell complex.")
         # Remove the node from the cell complex
         self._G.remove_node(node)
         # Remove any cells that contain the node
@@ -590,12 +597,8 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        node_set : an iterable of hashables or Entities
-            Nodes in CX
-
-        Returns
-        -------
-        cell_complex : Cell Complex
+        node_set : iterable of hashables or Entities
+            Nodes in the cell complex
         """
         for node in node_set:
             self.remove_node(node)
@@ -679,20 +682,20 @@ class CellComplex(Complex):
                     if cell.is_regular:
                         self._insert_cell(cell, **attr)
                     else:
-                        raise TopoNetXError(
+                        raise RuntimeError(
                             "input cell violates the regularity condition."
                         )
                 else:
                     self._insert_cell(cell, **attr)
             else:
-                raise TopoNetXError(
+                raise RuntimeError(
                     "input cell violates the regularity condition, make sure cell is regular or change complex to non-regular"
                 )
 
         else:
             if rank == 0:
-                raise TopoNetXError(
-                    "Use add_node to insert nodes or zero ranked cells."
+                raise RuntimeError(
+                    "Use `add_node` to insert nodes or zero ranked cells."
                 )
             elif rank == 1:
                 if len(cell) != 2:
@@ -710,7 +713,6 @@ class CellComplex(Complex):
                     if self.is_insertable_cycle(
                         cell, check_skeleton=check_skeleton, warnings_dis=True
                     ):
-
                         edges_cell = set(zip_longest(cell, cell[1:] + [cell[0]]))
                         for edge in edges_cell:
                             self._G.add_edges_from(edges_cell)
@@ -833,7 +835,6 @@ class CellComplex(Complex):
         d_nodes, d_edges, d_cells = [{}, {}, {}]
 
         for k, v in values.items():
-
             # to do, make sure v is a number
 
             if not isinstance(v, (int, float)):
@@ -1065,10 +1066,8 @@ class CellComplex(Complex):
                         pass
 
             else:
-
                 for cell, d in values.items():
                     try:
-
                         if len(cell) == 2:
                             if isinstance(cell[0], Iterable) and isinstance(
                                 cell[1], int
@@ -1080,7 +1079,6 @@ class CellComplex(Complex):
                             self.cells[cell], list
                         ):  # all cells with same key get same attrs
                             for i in range(len(self.cells[cell])):
-
                                 self.cells[cell][i].update(d)
                         else:
                             self.cells[cell].update(d)
@@ -1088,7 +1086,7 @@ class CellComplex(Complex):
                         pass
                 return
         else:
-            raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
+            raise ValueError(f"Rank must be 0, 1 or 2, got {rank}")
 
     def get_cell_attributes(self, name: str, rank: int) -> dict[Hashable | tuple, Any]:
         """Get node attributes from graph.
@@ -1135,7 +1133,7 @@ class CellComplex(Complex):
                         d[n.elements] = self.cells[n.elements][name]
 
             return d
-        raise TopoNetXError(f"Rank must be 0, 1 or 2, got {rank}")
+        raise ValueError(f"Rank must be 0, 1 or 2, got {rank}")
 
     def set_cell_data(self, cell, rank, attr_name: str, attr_value):
         """Set data for a specific cell in the complex.
@@ -1352,7 +1350,6 @@ class CellComplex(Complex):
                 if n in c:
                     A[ni, cj] = 1
         if index:
-
             return node_index, all_cell_index, A.asformat("csc")
         else:
             return A.asformat("csc")
@@ -1669,7 +1666,6 @@ class CellComplex(Complex):
                 else:
                     return abs(L_hodge)
         elif rank < 2:  # rank == 1, return L1
-
             if self.dim == 2:
                 edge_list, cell_list, B_next = self.incidence_matrix(
                     rank + 1, weight=weight, index=True
@@ -1686,7 +1682,6 @@ class CellComplex(Complex):
                 return L_hodge
 
         elif rank == 2 and self.dim == 2:
-
             edge_list, cell_list, B = self.incidence_matrix(
                 rank, weight=weight, index=True
             )
@@ -1769,7 +1764,6 @@ class CellComplex(Complex):
             )
             L_up = B_next @ B_next.transpose()
         else:
-
             raise ValueError(
                 f"Rank should larger than 0 and <= {self.dim - 1} (maximal dimension cells-1), got {rank}."
             )

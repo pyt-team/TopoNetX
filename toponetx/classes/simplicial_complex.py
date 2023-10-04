@@ -16,7 +16,6 @@ from scipy.sparse import coo_matrix, csr_matrix, dok_matrix
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import NodeView, SimplexView
 from toponetx.classes.simplex import Simplex
-from toponetx.exception import TopoNetXError
 
 __all__ = ["SimplicialComplex"]
 
@@ -600,7 +599,6 @@ class SimplicialComplex(Complex):
                     pass
 
         else:
-
             for simplex, d in values.items():
                 try:
                     self[simplex].update(d)
@@ -1161,12 +1159,10 @@ class SimplicialComplex(Complex):
         first_ind = np.min(mesh.trilist)
 
         if first_ind == 0:
-
             SC.set_simplex_attributes(
                 dict(zip(range(len(vertices)), vertices)), name="position"
             )
         else:  # first index starts at 1.
-
             SC.set_simplex_attributes(
                 dict(zip(range(first_ind, len(vertices) + first_ind), vertices)),
                 name="position",
@@ -1208,12 +1204,10 @@ class SimplicialComplex(Complex):
         first_ind = np.min(mesh.faces)
 
         if first_ind == 0:
-
             SC.set_simplex_attributes(
                 dict(zip(range(len(mesh.vertices)), mesh.vertices)), name="position"
             )
         else:  # first index starts at 1.
-
             SC.set_simplex_attributes(
                 dict(
                     zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
@@ -1262,7 +1256,6 @@ class SimplicialComplex(Complex):
     def is_triangular_mesh(self) -> bool:
         """Check if the simplicial complex is a triangular mesh."""
         if self.dim <= 2:
-
             lst = self.get_all_maximal_simplices()
             for i in lst:
                 if len(i) == 2:  # gas edges that are not part of a face
@@ -1276,11 +1269,10 @@ class SimplicialComplex(Complex):
         import trimesh
 
         if not self.is_triangular_mesh():
-            raise TopoNetXError(
+            raise RuntimeError(
                 "input simplicial complex has dimension higher than 2 and hence it cannot be converted to a trimesh object"
             )
         else:
-
             vertices = list(
                 dict(
                     sorted(self.get_node_attributes(vertex_position_name).items())
@@ -1308,12 +1300,11 @@ class SimplicialComplex(Complex):
         import spharapy.trimesh as tm
 
         if not self.is_triangular_mesh():
-            raise TopoNetXError(
+            raise RuntimeError(
                 "input simplicial complex has dimension higher than 2 and hence it cannot be converted to a trimesh object"
             )
 
         else:
-
             vertices = list(
                 dict(
                     sorted(self.get_node_attributes(vertex_position_name).items())

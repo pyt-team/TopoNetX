@@ -14,7 +14,6 @@ from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.reportviews import HyperEdgeView, NodeView
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
-from toponetx.exception import TopoNetXError
 from toponetx.utils.structure import (
     compute_set_incidence,
     incidence_to_adjacency,
@@ -116,7 +115,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
                         if len(cells) != len(ranks):
-                            raise TopoNetXError(
+                            raise ValueError(
                                 "cells and ranks must have equal number of elements"
                             )
                         else:
@@ -788,9 +787,8 @@ class CombinatorialComplex(ColoredHyperGraph):
                 self.add_cell(cell, cell.rank)
         else:
             if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-
                 if len(cells) != len(ranks):
-                    raise TopoNetXError(
+                    raise ValueError(
                         "cells and ranks must have equal number of elements"
                     )
                 else:
@@ -830,12 +828,12 @@ class CombinatorialComplex(ColoredHyperGraph):
         if self.graph_based:
             if rank == 1:
                 if not isinstance(cell, Iterable):
-                    TopoNetXError(
+                    TypeError(
                         "Rank 1 cells in graph-based CombinatorialComplex must be Iterable."
                     )
                 if len(cell) != 2:
-                    TopoNetXError(
-                        f"Rank 1 cells in graph-based CombinatorialComplex must have size equalt to 1 got {cell}."
+                    ValueError(
+                        f"Rank 1 cells in graph-based CombinatorialComplex must have size equal to 1 got {cell}."
                     )
 
         self._add_hyperedge(cell, rank, **attr)

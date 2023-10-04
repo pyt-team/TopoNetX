@@ -17,7 +17,6 @@ from toponetx.classes.reportviews import (
     PathView,
     SimplexView,
 )
-from toponetx.exception import TopoNetXError
 
 
 class TestReportViews_CellView:
@@ -387,7 +386,7 @@ class TestReportViews_HyperEdgeView:
             frozenset({1, 2, 3, 4}),
         ]
 
-        with pytest.raises(TopoNetXError) as exp_exception:
+        with pytest.raises(ValueError) as exp_exception:
             hev.skeleton(rank=2, level="should_raise_error")
 
         assert (

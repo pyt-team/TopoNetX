@@ -5,7 +5,6 @@ import pytest
 
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.hyperedge import HyperEdge
-from toponetx.exception import TopoNetXError
 
 
 class TestCombinatorialComplex:
@@ -306,7 +305,7 @@ class TestCombinatorialComplex:
         CCC.add_cell([2, 6, 4], rank=2)
         CCC.add_cell([1, 2], rank=2)
         assert CCC.degree(1) == 1
-        with pytest.raises(TopoNetXError) as exp:
+        with pytest.raises(ValueError) as exp:
             CCC.degree(1, -1)
         assert str(exp.value) == "Rank must be positive"
         assert CCC.degree(2, 2) == 3
@@ -326,7 +325,7 @@ class TestCombinatorialComplex:
         CCC.add_cell([2, 6, 4], rank=2)
         CCC.add_cell([1, 2], rank=2)
         assert CCC.size(1) == 1
-        with pytest.raises(TopoNetXError) as exp:
+        with pytest.raises(ValueError) as exp:
             CCC.size(frozenset([1, 2, 3]))
         assert str(exp.value) == f"Input cell is not in cells of the {CCC.__shortstr__}"
 
@@ -455,7 +454,7 @@ class TestCombinatorialComplex:
             },
             2: {frozenset({1, 2, 3, 4}): {"weight": 1}},
         }
-        with pytest.raises(TopoNetXError) as exp:
+        with pytest.raises(ValueError) as exp:
             CCC.add_cells_from([[1, 4]], ranks=[1, 1])
         assert str(exp.value) == "cells and ranks must have equal number of elements"
         CCC = CombinatorialComplex()
