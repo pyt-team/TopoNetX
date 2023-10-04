@@ -2234,10 +2234,8 @@ class CellComplex(Complex):
         nx.Graph
             A NetworkX graph representing the s-linegraph of the Cell Complex.
         """
-        if isinstance(s, None):
-            ValueError(
-                "s must be a positive integer larger than 1, got type of s None."
-            )
+        if not isinstance(s, int):
+            ValueError("s must be a positive integer larger than 1.")
         if cells:
             M = self.all_cell_to_node_coadjacnecy_matrix(s=s)
         else:
@@ -2284,25 +2282,15 @@ class CellComplex(Complex):
         >>> CC = CellComplex.from_trimesh(mesh)
         >>> CC[0]['position']
         """
-        # try to see the index of the first vertex
         CC = cls(mesh.faces)
 
         first_ind = np.min(mesh.faces)
 
-        if first_ind == 0:
-            CC.set_cell_attributes(
-                dict(zip(range(len(mesh.vertices)), mesh.vertices)),
-                name="position",
-                rank=0,
-            )
-        else:  # first index starts at 1.
-            CC.set_cell_attributes(
-                dict(
-                    zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
-                ),
-                name="position",
-                rank=0,
-            )
+        CC.set_cell_attributes(
+            dict(zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)),
+            name="position",
+            rank=0,
+        )
 
         return CC
 
