@@ -160,6 +160,10 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         item : hashable or HyperEdge
+
+        Returns
+        -------
+        bool
         """
         return item in self.nodes
 
@@ -190,7 +194,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         Returns
         -------
         NodeView
-
         """
         return NodeView(
             self._complex_set.hyperedge_dict, cell_type=HyperEdge, colored_nodes=False
@@ -772,7 +775,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        Combinatorial Complex : CombinatorialComplex
+        CombinatorialComplex
         """
         if ranks is None:
             for cell in cells:
@@ -926,7 +929,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        new CombinatorialComplex
+        CombinatorialComplex
         """
         cells = [cell for cell in self.cells if cell not in self.singletons()]
         return self.restrict_to_cells(cells)
