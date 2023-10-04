@@ -22,6 +22,9 @@ class TestCombinatorialComplex:
         assert (1, 2, 3) in CCC.cells
         assert (2, 3, 4) in CCC.cells
 
+        with pytest.raises(ValueError):
+            _ = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=[1])
+
     def test_init_from_abstract_cells(self):
         """Test creation of a CCC from abstract cells."""
         y1 = HyperEdge(elements=[1, 2], rank=1)
