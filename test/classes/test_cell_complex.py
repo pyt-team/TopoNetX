@@ -243,7 +243,7 @@ class TestCellComplex:
         assert (B1[:, 2].T.toarray()[0] == np.array([0, 1, 1, 0, 0])).all()
 
         B1 = CC.incidence_matrix(rank=1, signed=False, index=False)
-        assert type(B1) == scipy.sparse._csr.csr_matrix
+        assert isinstance(B1, scipy.sparse._csr.csr_matrix)
 
         B2_signed = CC.incidence_matrix(rank=2, signed=True)
         B1_signed = CC.incidence_matrix(rank=1, signed=True)
