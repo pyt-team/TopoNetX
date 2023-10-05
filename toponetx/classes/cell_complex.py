@@ -1294,12 +1294,6 @@ class CellComplex(Complex):
         """
         if isinstance(cell, Cell):
             cell = cell.elements
-        if len(cell) <= 1:
-            if warnings_dis:
-                warnings.warn(
-                    f"a 2d cell must contain at least 2 edges, got {len(cell)}"
-                )
-            return False
         if self._regular:
             if len(set(cell)) != len(cell):
                 if warnings_dis:
