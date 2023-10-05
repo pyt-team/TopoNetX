@@ -242,6 +242,9 @@ class TestCellComplex:
         assert (B1[:, 1].T.toarray()[0] == np.array([1, 0, 1, 0, 0])).all()
         assert (B1[:, 2].T.toarray()[0] == np.array([0, 1, 1, 0, 0])).all()
 
+        B1 = CC.incidence_matrix(rank=1, signed=False, index=False)
+        assert type(B1) == scipy.sparse._csr.csr_matrix
+
         B2_signed = CC.incidence_matrix(rank=2, signed=True)
         B1_signed = CC.incidence_matrix(rank=1, signed=True)
 
@@ -255,6 +258,15 @@ class TestCellComplex:
         CC = CellComplex()
         B2 = CC.incidence_matrix(rank=2)
         assert B2.shape == (0, 0)
+
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3], rank=2)
+        CC.add_cell([2, 3, 4], rank=2)
+        CC.add_cell([3, 4, 5], rank=2)
+        B0 = CC.incidence_matrix(rank=0, signed=False, index=True)
+        assert B0[2].shape == (0, 5)
+        B0 = CC.incidence_matrix(rank=0, signed=False, index=False)
+        assert B0.shape == (0, 5)
 
     def test_node_to_all_cell_incidence_matrix(self):
         """Test node_to_all_cell_incidence_matrix."""
@@ -743,6 +755,17 @@ class TestCellComplex:
         CC.set_cell_attributes(d, rank=2)
         cell_color = CC.get_cell_attributes("color", 2)
         assert cell_color == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
+
+    def test_set_cell_attributes(self):
+        """Test the set cell attributes method."""
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([1, 2, 4], rank=2)
+        CC.add_cell([3, 4, 8], rank=2)
+        CC.add_cell([2, 6], rank=2)
+        d = {(1, 2, 3, 4): "red", (1, 2, 4): "blue", (2, 6): "green"}
+        CC.set_cell_attributes(d, rank=2, name="color")
+        assert CC.cells[(2, 6)]["color"] == "green"
 
     def test_remove_cells(self):
         """Test remove cells."""
