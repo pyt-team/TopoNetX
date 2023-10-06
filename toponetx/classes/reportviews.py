@@ -34,11 +34,11 @@ class CellView:
 
         # Initialize a dictionary to hold cells, with keys being the tuple
         # that defines the cell, and values being dictionaries of cell objects
-        # with different properties
-        self._cells = dict()
+        # with different attributes
+        self._cells: dict[tuple[Hashable, ...], dict[int, Cell]] = dict()
 
     def __getitem__(self, cell):
-        """Return the properties of a given cell.
+        """Return the attributes of a given cell.
 
         Parameters
         ----------
@@ -47,8 +47,8 @@ class CellView:
 
         Returns
         -------
-        TYPE : dict or list of dicts
-            The properties associated with the cell.
+        dict or list of dicts
+            The attributes associated with the cell.
 
         Raises
         ------
@@ -56,34 +56,32 @@ class CellView:
             If the cell is not in the cell dictionary.
         """
         if isinstance(cell, Cell):
-
             if cell.elements not in self._cells:
                 raise KeyError(
                     f"cell {cell.__repr__()} is not in the cell dictionary",
                 )
 
-            # If there is only one cell with these elements, return its properties
+            # If there is only one cell with these elements, return its attributes
             elif len(self._cells[cell.elements]) == 1:
                 k = next(iter(self._cells[cell.elements].keys()))
-                return self._cells[cell.elements][k]._properties
+                return self._cells[cell.elements][k]._attributes
 
-            # If there are multiple cells with these elements, return the properties of all cells
+            # If there are multiple cells with these elements, return the attributes of all cells
             else:
                 return [
-                    self._cells[cell.elements][c]._properties
+                    self._cells[cell.elements][c]._attributes
                     for c in self._cells[cell.elements]
                 ]
 
         # If a tuple or list is passed in, assume it represents a cell
         elif isinstance(cell, tuple) or isinstance(cell, list):
-
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
                     k = next(iter(self._cells[cell].keys()))
-                    return self._cells[cell][k]._properties
+                    return self._cells[cell][k]._attributes
                 else:
-                    return [self._cells[cell][c]._properties for c in self._cells[cell]]
+                    return [self._cells[cell][c]._attributes for c in self._cells[cell]]
             else:
                 raise KeyError(f"cell {cell} is not in the cell dictionary")
 
@@ -111,16 +109,15 @@ class CellView:
             If the cell is not in the cell dictionary.
         """
         if isinstance(cell, Cell):
-
             if cell.elements not in self._cells:
                 raise KeyError(f"cell {cell.__repr__()} is not in the cell dictionary")
 
-            # If there is only one cell with these elements, return its properties
+            # If there is only one cell with these elements, return its attributes
             elif len(self._cells[cell.elements]) == 1:
                 k = next(iter(self._cells[cell.elements].keys()))
                 return self._cells[cell.elements][k]
 
-            # If there are multiple cells with these elements, return the properties of all cells
+            # If there are multiple cells with these elements, return the attributes of all cells
             else:
                 return [
                     self._cells[cell.elements][c] for c in self._cells[cell.elements]
@@ -128,7 +125,6 @@ class CellView:
 
         # If a tuple or list is passed in, assume it represents a cell
         elif isinstance(cell, tuple) or isinstance(cell, list):
-
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
@@ -222,8 +218,8 @@ class ColoredHyperEdgeView:
 
         Returns
         -------
-        TYPE : dict or list or dicts
-            return dict of properties associated with that hyperedges
+        dict or list or dicts
+            return dict of attributes associated with that hyperedges
         """
         if isinstance(hyperedge, Iterable):
             if len(hyperedge) == 2:
@@ -442,8 +438,8 @@ class HyperEdgeView:
 
         Returns
         -------
-        TYPE : dict or list or dicts
-            return dict of properties associated with that hyperedges
+        dict or list or dicts
+            return dict of attributes associated with that hyperedges
         """
         hyperedge_ = HyperEdgeView._to_frozen_set(hyperedge)
         rank = self.get_rank(hyperedge_)
@@ -635,7 +631,7 @@ class SimplexView:
         self.faces_dict = []
 
     def __getitem__(self, simplex):
-        """Get the dictionary of properties associated with the given simplex.
+        """Get the dictionary of attributes associated with the given simplex.
 
         Parameters
         ----------
@@ -645,7 +641,7 @@ class SimplexView:
         Returns
         -------
         dict or list or dict
-            A dictionary of properties associated with the given simplex.
+            A dictionary of attributes associated with the given simplex.
         """
         if isinstance(simplex, Simplex):
             if simplex.elements in self.faces_dict[len(simplex) - 1]:
@@ -786,7 +782,7 @@ class NodeView:
         Returns
         -------
         dict or list
-            Dict of properties associated with that cells.
+            Dict of attributes associated with that cells.
         """
         if isinstance(cell, self.cell_type):
             if cell.elements in self.nodes:
@@ -841,7 +837,7 @@ class PathView(SimplexView):
         super().__init__(name)
 
     def __getitem__(self, path: Hashable | Sequence[Hashable] | Path):
-        """Get the dictionary of properties associated with the given path.
+        """Get the dictionary of attributes associated with the given path.
 
         Parameters
         ----------
@@ -853,7 +849,7 @@ class PathView(SimplexView):
         Returns
         -------
         dict or list or dict
-            A dictionary of properties associated with the given path.
+            A dictionary of attributes associated with the given path.
         """
         if isinstance(path, Path):
             if path.elements in self.faces_dict[len(path) - 1]:

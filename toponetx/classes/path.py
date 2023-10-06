@@ -176,7 +176,7 @@ class Path(Atom):
             self.elements,
             name=self.name,
             construct_boundaries=self.construct_boundaries,
-            **self._properties,
+            **self._attributes,
         )
 
     def __check_inputs(self, elements: Any, reserve_sequence_order: bool) -> None:
@@ -218,4 +218,4 @@ class Path(Atom):
 
     def __str__(self) -> str:
         """Return string representation of elementary p-paths."""
-        return f"Node set: {self.elements}, Boundaries: {self.boundary}, Attributes: {self._properties}"
+        return f"Node set: {self.elements}, Boundaries: {self.boundary}, Attributes: {self._attributes}"

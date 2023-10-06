@@ -572,7 +572,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 self._complex_set.hyperedge_dict[rank][hyperedge_set]["weight"] = 1
             if isinstance(hyperedge, HyperEdge):
                 self._complex_set.hyperedge_dict[rank][hyperedge_set].update(
-                    hyperedge._properties
+                    hyperedge._attributes
                 )
 
     def _incidence_matrix(

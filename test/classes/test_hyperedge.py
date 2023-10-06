@@ -70,7 +70,7 @@ class TestHyperEdgeCases:
         attributes = {"color": "red", "weight": 2.5}
         hyperedge = HyperEdge(elements, **attributes)
         expected_str = (
-            f"Nodes set: {tuple(hyperedge.elements)}, attrs: {hyperedge._properties}"
+            f"Nodes set: {tuple(hyperedge.elements)}, attrs: {hyperedge._attributes}"
         )
         assert isinstance(str(hyperedge), str)
         assert str(hyperedge) == expected_str

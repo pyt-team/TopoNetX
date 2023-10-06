@@ -241,7 +241,7 @@ class PathComplex(Complex):
 
             if (
                 path_ in self._path_set.faces_dict[len(path_) - 1]
-            ):  # path is already in the complex, just update the properties if needed
+            ):  # path is already in the complex, just update the attributes if needed
                 self._update_attributes(path, **attr)
                 return
             else:
@@ -1031,11 +1031,11 @@ class PathComplex(Complex):
         else:  # path is a Path object
             path_ = path.elements
         if isinstance(path, Path):  # update attributes for PathView() and _G
-            self._path_set.faces_dict[len(path_) - 1][path_].update(path._properties)
+            self._path_set.faces_dict[len(path_) - 1][path_].update(path._attributes)
             if len(path_) == 1:
-                self._G.add_node(path_[0], **path._properties)
+                self._G.add_node(path_[0], **path._attributes)
             elif len(path_) == 2:
-                self._G.add_edge(path_[0], path_[1], **path._properties)
+                self._G.add_edge(path_[0], path_[1], **path._attributes)
         else:
             self._path_set.faces_dict[len(path_) - 1][path_].update(attr)
             if len(path_) == 1:

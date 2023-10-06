@@ -477,7 +477,7 @@ class SimplicialComplex(Complex):
 
             if (
                 simplex_ in self._simplex_set.faces_dict[len(simplex_) - 1]
-            ):  # simplex is already in the complex, just update the properties if needed
+            ):  # simplex is already in the complex, just update the attributes if needed
                 self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(attr)
                 return
 
@@ -493,7 +493,7 @@ class SimplicialComplex(Complex):
             self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(attr)
             if isinstance(simplex, Simplex):
                 self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(
-                    simplex._properties
+                    simplex._attributes
                 )
             else:
                 self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(attr)

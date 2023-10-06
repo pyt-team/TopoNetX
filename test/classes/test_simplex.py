@@ -14,7 +14,7 @@ class TestSimplex:
         assert len(s) == 1
         assert tuple(s) == (1,)
         assert s.name == ""
-        assert s._properties == {}
+        assert s._attributes == {}
 
         with pytest.deprecated_call():
             _ = Simplex((1,), construct_tree=True)
