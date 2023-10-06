@@ -32,6 +32,18 @@ class TestDistanceMeasures:
         expected_result = [[1, 1], [{2, 3, 4}, {5, 6, 7}]]
         assert result == expected_result
 
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CHG.add_cell([8, 9, 10], rank=2)
+        result = list(node_diameters(CHG))
+        expected_result = [
+            [2, 1],
+            [
+                {frozenset({1}), frozenset({2}), frozenset({3}), frozenset({4})},
+                {frozenset({8}), frozenset({9}), frozenset({10})},
+            ],
+        ]
+        assert result == expected_result
+
     def test_cell_diameters(self):
         """Test for the cell_diameters method."""
         CC = CellComplex()  # Initialize your class object
