@@ -387,7 +387,7 @@ class PathComplex(Complex):
             An iterable of nodes to be removed.
         """
         removed_paths = set()
-        for path in self:  # iterate over all paths
+        for path in self.paths:  # iterate over all paths
             if any(
                 node in path for node in node_set
             ):  # if any node in node_set is in the path, remove the path
@@ -719,7 +719,7 @@ class PathComplex(Complex):
             raise ValueError("Input node_set cannot be empty.")
         node_set = set(node_set)
         new_paths = []
-        for path in self:
+        for path in self.paths:
             if all(node in node_set for node in path):
                 new_paths.append(path)
         return PathComplex(new_paths, name=name)
@@ -742,7 +742,7 @@ class PathComplex(Complex):
                 new_path_set.append(tuple(path))
         new_path_set = set(new_path_set)
         new_paths = []
-        for path in self:
+        for path in self.paths:
             if path in new_path_set:
                 new_paths.append(path)
         return PathComplex(new_paths, name=name)
@@ -1073,7 +1073,7 @@ class PathComplex(Complex):
         -------
         dict_keyiterator
         """
-        return chain.from_iterable(self._path_set.faces_dict)
+        return iter(self.nodes)
 
     def __len__(self) -> int:
         """Return the number of elementary p-paths in the path complex.

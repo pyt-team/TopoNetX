@@ -249,7 +249,7 @@ class SimplicialComplex(Complex):
         -------
         dict_keyiterator
         """
-        return chain.from_iterable(self._simplex_set.faces_dict)
+        return chain.from_iterable(self.nodes)
 
     def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self.face_set.
@@ -426,7 +426,7 @@ class SimplicialComplex(Complex):
         SimplexView([(2,), (3,), (4,), (2, 3), (3, 4)])
         """
         removed_simplices = set()
-        for simplex in self:
+        for simplex in self.simplices:
             if any(node in simplex for node in node_set):
                 removed_simplices.add(simplex)
 
@@ -656,8 +656,14 @@ class SimplicialComplex(Complex):
         {frozenset({1, 2}): 'red', frozenset({2, 3}): 'blue', frozenset({3, 4}): 'black'}
         """
         if rank is None:
-            return {n: self[n][name] for n in self if name in self[n]}
-        return {n: self[n][name] for n in self.skeleton(rank) if name in self[n]}
+            return {
+                n: self.simplices[n][name]
+                for n in self.simplices
+                if name in self.simplices[n]
+            }
+        return {
+            n: self.simplices[n][name] for n in self.skeleton(rank) if name in self[n]
+        }
 
     @staticmethod
     def get_edges_from_matrix(matrix):
@@ -1134,7 +1140,7 @@ class SimplicialComplex(Complex):
         [(2, 5), (1, 2, 3), (1, 2, 4)]
         """
         maximals = []
-        for s in self:
+        for s in self.simplices:
             if self.is_maximal(s):
                 maximals.append(tuple(s))
         return maximals
