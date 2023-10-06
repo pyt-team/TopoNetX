@@ -250,7 +250,7 @@ class SimplicialComplex(Complex):
         -------
         dict_keyiterator
         """
-        return chain.from_iterable(self._simplex_set.faces_dict)
+        return chain.from_iterable(self.nodes)
 
     def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self.face_set.

@@ -1073,7 +1073,7 @@ class PathComplex(Complex):
         -------
         dict_keyiterator
         """
-        return chain.from_iterable(self._path_set.faces_dict)
+        return iter(self.nodes)
 
     def __len__(self) -> int:
         """Return the number of elementary p-paths in the path complex.
