@@ -39,18 +39,56 @@ class TestComponents:
         expected_result = [{2, 3, 4}, {5, 6, 7}]
         assert result == expected_result
 
-        # Test the function with return_singletons=True
-        result = list(
-            s_connected_components(CC, s=1, cells=False, return_singletons=True)
-        )
+        # test with ColoredHyperGraph
+        CHG = CC.to_colored_hypergraph()
+        result = list(s_connected_components(CHG, s=1, cells=True))
+        expected_result = [
+            {
+                (frozenset({3, 4}), 0),
+                (frozenset({2, 4}), 0),
+                (frozenset({2, 3}), 0),
+                (frozenset({2, 3, 4}), 0),
+            },
+            {
+                (frozenset({5, 7}), 0),
+                (frozenset({5, 6, 7}), 0),
+                (frozenset({5, 6}), 0),
+                (frozenset({6, 7}), 0),
+            },
+        ]
+        assert result == expected_result
+
+        result = list(s_connected_components(CHG, s=1, cells=False))
         expected_result = [{2, 3, 4}, {5, 6, 7}]
         assert result == expected_result
 
+        # test cells=True, return_singletons=False
+        CC.add_node(10)
+        result = list(s_connected_components(CC, s=1, cells=True))
+        expected_result = [
+            {(2, 3), (2, 3, 4), (2, 4), (3, 4)},
+            {(5, 6), (5, 6, 7), (5, 7), (6, 7)},
+        ]
+        assert result == expected_result
+
+        # Test the function with return_singletons=True
+        CC2 = CellComplex()
+        CC2.add_cell([1, 2, 3, 4], rank=2)
+        CC2.add_cell([1, 2, 3, 4], rank=2)
+        CC2.add_cell([1, 2, 3, 4], rank=2)
+        CC2.add_node(0)
+        CC2.add_node(10)
+
+        result = list(
+            s_connected_components(CC2, s=1, cells=False, return_singletons=True)
+        )
+        expected_result = [{0}, {1, 2, 3, 4}, {10}]
+
         # Test the function with return_singletons=False
         result = list(
-            s_connected_components(CC, s=2, cells=False, return_singletons=False)
+            s_connected_components(CC2, s=2, cells=False, return_singletons=False)
         )
-        expected_result = [{2, 3, 4}, {5, 6, 7}]
+        expected_result = [{1, 2, 3, 4}]
         assert result == expected_result
 
         # invalid input
