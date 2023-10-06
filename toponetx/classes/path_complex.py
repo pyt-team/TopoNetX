@@ -387,7 +387,7 @@ class PathComplex(Complex):
             An iterable of nodes to be removed.
         """
         removed_paths = set()
-        for path in self:  # iterate over all paths
+        for path in self.paths:  # iterate over all paths
             if any(
                 node in path for node in node_set
             ):  # if any node in node_set is in the path, remove the path

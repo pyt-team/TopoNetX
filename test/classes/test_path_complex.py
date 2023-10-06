@@ -337,7 +337,7 @@ class TestPathComplex:
     def test_remove_nodes(self):
         """Test remove_nodes method."""
         PC = PathComplex([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        assert 1 in PC.paths
+        assert 1 in PC.nodes
         PC.remove_nodes([1])
         assert 1 not in PC.paths
         assert [1, 2] not in PC.paths
