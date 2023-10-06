@@ -296,7 +296,7 @@ class TestPathComplex:
         """Test get size of the path complex."""
         PC = PathComplex()
         PC.add_paths_from([[1, 2, 3], [1, 2, 4]])
-        assert len(PC) == 9
+        assert len(PC) == 4
 
     def test_add_paths_from(self):
         """Test add paths from graph."""

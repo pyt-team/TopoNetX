@@ -427,7 +427,7 @@ class SimplicialComplex(Complex):
         SimplexView([(2,), (3,), (4,), (2, 3), (3, 4)])
         """
         removed_simplices = set()
-        for simplex in self:
+        for simplex in self.simplices:
             if any(node in simplex for node in node_set):
                 removed_simplices.add(simplex)
 
@@ -1136,7 +1136,7 @@ class SimplicialComplex(Complex):
         [(2, 5), (1, 2, 3), (1, 2, 4)]
         """
         maximals = []
-        for s in self:
+        for s in self.simplices:
             if self.is_maximal(s):
                 maximals.append(tuple(s))
         return maximals
