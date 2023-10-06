@@ -719,7 +719,7 @@ class PathComplex(Complex):
             raise ValueError("Input node_set cannot be empty.")
         node_set = set(node_set)
         new_paths = []
-        for path in self:
+        for path in self.paths:
             if all(node in node_set for node in path):
                 new_paths.append(path)
         return PathComplex(new_paths, name=name)
@@ -742,7 +742,7 @@ class PathComplex(Complex):
                 new_path_set.append(tuple(path))
         new_path_set = set(new_path_set)
         new_paths = []
-        for path in self:
+        for path in self.paths:
             if path in new_path_set:
                 new_paths.append(path)
         return PathComplex(new_paths, name=name)
