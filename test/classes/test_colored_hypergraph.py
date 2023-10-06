@@ -194,8 +194,7 @@ class TestCombinatorialComplex:
 
         CHG.add_node(1, color="red")
         assert 1 in CHG.nodes
-        # BUG: This should work but it doesn't
-        # assert CHG[1] == {"color": "red", 'weight': 1}
+        assert CHG[1] == {"color": "red", "weight": 1}
 
     def test_remove_node(self):
         """Test removing a node from a CHG."""
