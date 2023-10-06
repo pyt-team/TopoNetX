@@ -170,7 +170,7 @@ class Simplex(Atom):
         :return: A string representation of the simplex.
         :rtype: str
         """
-        return f"Nodes set: {tuple(self.elements)}, attrs: {self._properties}"
+        return f"Nodes set: {tuple(self.elements)}, attrs: {self._attributes}"
 
     def clone(self) -> "Simplex":
         """Return a copy of the simplex.
@@ -183,4 +183,4 @@ class Simplex(Atom):
         -------
         Simplex
         """
-        return Simplex(self.elements, name=self.name, **self._properties)
+        return Simplex(self.elements, name=self.name, **self._attributes)

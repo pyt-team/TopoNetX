@@ -30,8 +30,8 @@ class Atom(abc.ABC):
         self.elements = elements
         self.name = name
 
-        self._properties = dict()
-        self._properties.update(kwargs)
+        self._attributes = dict()
+        self._attributes.update(kwargs)
 
     def __len__(self) -> int:
         """Return the number of elements in the atom."""
@@ -61,46 +61,46 @@ class Atom(abc.ABC):
         return item in self.elements
 
     def __getitem__(self, item: Any) -> Any:
-        """Return the property with the given name.
+        """Return the attribute with the given name.
 
         Parameters
         ----------
         item : Any
-            The name of the property.
+            The name of the attribute.
 
         Returns
         -------
         Any
-            The value of the property.
+            The value of the attribute.
 
         Raises
         ------
         KeyError
-            If the property does not exist.
+            If the attribute does not exist on this atom.
         """
-        return self._properties[item]
+        return self._attributes[item]
 
     def __setitem__(self, key: Any, value: Any) -> None:
-        """Set the property with the given name to the given value.
+        """Set the attribute with the given name to the given value.
 
         Parameters
         ----------
         key : Any
-            The name of the property.
+            The name of the attribute.
         value : Any
-            The value of the property.
+            The value of the attribute.
         """
-        self._properties[key] = value
+        self._attributes[key] = value
 
     def update(self, attributes: dict) -> None:
-        """Update the properties of the atom.
+        """Update the attributes of the atom.
 
         Parameters
         ----------
         attributes : dict
-            The properties to be updated.
+            The attributes to be updated.
         """
-        self._properties.update(attributes)
+        self._attributes.update(attributes)
 
 
 class Complex(abc.ABC):
@@ -240,7 +240,7 @@ class Complex(abc.ABC):
         signed : bool, default=True
             If True, the incidence matrix is signed, otherwise it is unsigned.
         weight : str, optional
-            The name of the property to use as weights for the incidence matrix.
+            The name of the attribute to use as weights for the incidence matrix.
         index : bool, default=False
             If True, the incidence matrix is indexed by the nodes of the complex.
         """
@@ -262,7 +262,7 @@ class Complex(abc.ABC):
         signed : bool, default=True
             If True, the adjacency matrix is signed, otherwise it is unsigned.
         weight : str, optional
-            The name of the property to use as weights for the adjacency matrix.
+            The name of the attribute to use as weights for the adjacency matrix.
         index : bool, default=False
             If True, the adjacency matrix is indexed by the atoms of the complex.
         """
@@ -284,7 +284,7 @@ class Complex(abc.ABC):
         signed : bool, default=True
             If True, the adjacency matrix is signed, otherwise it is unsigned.
         weight : str, optional
-            The name of the property to use as weights for the adjacency matrix.
+            The name of the attribute to use as weights for the adjacency matrix.
         index : bool, default=False
             If True, the adjacency matrix is indexed by the atoms of the complex.
         """

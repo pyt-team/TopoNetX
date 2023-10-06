@@ -28,7 +28,7 @@ class Cell(Atom):
         By default, the cell is assumed to be regular unless otherwise specified. Self-loops are not allowed in the boundary
         of the cell. If a cell violates the cell complex regularity condition, a ValueError is raised.
     **attr : keyword arguments, optional
-        Properties belonging to the cell can be added as key-value pairs. Both the key and value must be hashable.
+        Attributes belonging to the cell can be added as key-value pairs. Both the key and value must be hashable.
 
     Notes
     -----
@@ -89,7 +89,7 @@ class Cell(Atom):
                     )
 
     def clone(self) -> "Cell":
-        """Clone the Cell with all properties.
+        """Clone the Cell with all attributes.
 
         The clone method by default returns an independent shallow copy of the cell and attributes. That is, if an
         attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
@@ -99,7 +99,7 @@ class Cell(Atom):
         -------
         Cell
         """
-        return Cell(self.elements, self.name, self._regular, **self._properties)
+        return Cell(self.elements, self.name, self._regular, **self._attributes)
 
     @staticmethod
     def is_valid_cell(elements: Sequence, regular: bool = False) -> bool:
@@ -232,7 +232,7 @@ class Cell(Atom):
             self.elements[::-1],
             name=self.name,
             regular=self._regular,
-            **self._properties,
+            **self._attributes,
         )
 
     def is_homotopic_to(self, cell) -> bool:
@@ -301,4 +301,4 @@ class Cell(Atom):
 
     def __str__(self) -> str:
         """Return string representation of regular cell."""
-        return f"Nodes set:{self.elements}, boundary edges:{self.boundary}, attrs:{self._properties}"
+        return f"Nodes set:{self.elements}, boundary edges:{self.boundary}, attrs:{self._attributes}"

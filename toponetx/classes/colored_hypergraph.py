@@ -564,9 +564,9 @@ class ColoredHyperGraph(Complex):
         Parameters
         ----------
         values : dict
-            dictionary of attributes/properties to set for the cell.
+            dictionary of attributes to set for the cell.
         name : str, optional
-            name of the attribute/property to set for the cell. The default is None.
+            name of the attribute to set for the cell.
 
         Returns
         -------

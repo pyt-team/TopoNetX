@@ -54,7 +54,7 @@ class HyperEdge(Atom):
         str
             A string representation of the HyperEdge.
         """
-        return f"Nodes set: {tuple(self.elements)}, attrs: {self._properties}"
+        return f"Nodes set: {tuple(self.elements)}, attrs: {self._attributes}"
 
     def __repr__(self):
         """Return a string representation of the HyperEdge.
