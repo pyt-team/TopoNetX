@@ -24,7 +24,7 @@ class TestComplex:
     def test_complex_has_abstract_methods(self):
         """Tests if the Complex abstract class has all the abstract methods."""
         abstract_methods = Complex.__abstractmethods__
-        abstract_methods = sorted(list(abstract_methods))
+        abstract_methods = sorted(abstract_methods)
         assert abstract_methods == [
             "__contains__",
             "__getitem__",

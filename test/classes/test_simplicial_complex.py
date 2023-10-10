@@ -30,7 +30,7 @@ class TestSimplicialComplex:
         assert sc.shape == (5, 6, 2)
 
         sc = SimplicialComplex()
-        assert sc.shape == tuple()
+        assert sc.shape == ()
 
     def test_dim_property(self):
         """Test dim property."""

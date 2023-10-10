@@ -92,7 +92,6 @@ class PathComplex(Complex):
         max_rank: int = 3,
         **kwargs,
     ) -> None:
-
         super().__init__(name=name, **kwargs)
 
         self._path_set = PathView()
@@ -434,7 +433,7 @@ class PathComplex(Complex):
             boundary = sp.sparse.lil_matrix((0, len(self.nodes)))
             if index:
                 node_index = {
-                    tuple([node]): i
+                    (node,): i
                     for i, node in enumerate(sorted(self.nodes, key=lambda x: str(x)))
                 }
                 return {}, node_index, abs(boundary.tocoo())
@@ -1015,12 +1014,12 @@ class PathComplex(Complex):
         if len(path) > len(self._path_set.faces_dict):
             diff = len(path) - len(self._path_set.faces_dict)
             for _ in range(diff):
-                self._path_set.faces_dict.append(dict())
+                self._path_set.faces_dict.append({})
 
     def _update_faces_dict_entry(self, path: tuple[Hashable]):
         dim = len(path) - 1
         if path not in self._path_set.faces_dict[dim]:  # Not in faces_dict
-            self._path_set.faces_dict[dim][path] = dict()
+            self._path_set.faces_dict[dim][path] = {}
             return path
         else:
             return None
@@ -1125,11 +1124,9 @@ class PathComplex(Complex):
         >>> allowed_paths
         {(0, 1), (1, 3), (1, 2), (2,), (1, 3, 2), (0, 1, 2), (0, 1, 3), (1, 2, 3), (2, 1, 3), (2, 3), (1,), (0,), (3,)}
         """
-        allowed_paths = list()
-        all_nodes_list = list(
-            tuple([node]) for node in sorted(graph.nodes, key=lambda x: str(x))
-        )
-        all_edges_list = list()
+        allowed_paths = []
+        all_nodes_list = [(node,) for node in sorted(graph.nodes, key=lambda x: str(x))]
+        all_edges_list = []
         for edge in graph.edges:
             if not reserve_sequence_order and str(edge[0]) > str(edge[1]):
                 edge = edge[::-1]

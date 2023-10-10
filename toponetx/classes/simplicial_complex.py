@@ -264,7 +264,7 @@ class SimplicialComplex(Complex):
         if len(simplex) > len(self._simplex_set.faces_dict):
             diff = len(simplex) - len(self._simplex_set.faces_dict)
             for _ in range(diff):
-                self._simplex_set.faces_dict.append(dict())
+                self._simplex_set.faces_dict.append({})
 
     def _update_faces_dict_entry(self, face, simplex, maximal_faces) -> None:
         """Update faces dictionary entry.
@@ -1120,9 +1120,7 @@ class SimplicialComplex(Complex):
             for s in self.skeleton(rank):
                 if set(s).issubset(node_set):
                     simplices.append(s)
-        all_sim = simplices + list(
-            [frozenset({i}) for i in node_set if i in self.nodes]
-        )
+        all_sim = simplices + [frozenset({i}) for i in node_set if i in self.nodes]
 
         return SimplicialComplex(all_sim, name=name)
 

@@ -1409,9 +1409,9 @@ class TestCellComplex:
         """Test if the dunder __getitem__ method returns the appropriate neighbors of the given node."""
         CC = CellComplex()
         CC.add_edges_from([(1, 2), (2, 3), (5, 2), (1, 9), (1, 6)])
-        assert sorted(list(CC.__getitem__(1))) == [2, 6, 9]
-        assert sorted(list(CC.__getitem__(2))) == [1, 3, 5]
-        assert sorted(list(CC.__getitem__(6))) == [1]
+        assert sorted(CC.__getitem__(1)) == [2, 6, 9]
+        assert sorted(CC.__getitem__(2)) == [1, 3, 5]
+        assert sorted(CC.__getitem__(6)) == [1]
 
     def test_remove_nodes(self):
         """Test remove nodes method of the class Cell Complex."""
@@ -1433,12 +1433,12 @@ class TestCellComplex:
 
         assert len(CC.cells) == 4
         assert len(CC._cells._cells.keys()) == 2
-        assert sorted(list(CC._cells._cells[(1, 2, 3, 4)].keys())) == [0, 1, 2]
+        assert sorted(CC._cells._cells[(1, 2, 3, 4)].keys()) == [0, 1, 2]
 
         CC._delete_cell((1, 2, 3, 4), key=2)
         assert len(CC.cells) == 3
         assert len(CC._cells._cells.keys()) == 2
-        assert sorted(list(CC._cells._cells[(1, 2, 3, 4)].keys())) == [0, 1]
+        assert sorted(CC._cells._cells[(1, 2, 3, 4)].keys()) == [0, 1]
 
         with pytest.raises(KeyError):
             CC._delete_cell((1, 2, 3, 4), key=10)

@@ -98,7 +98,7 @@ class Path(Atom):
                 allowed_paths=allowed_paths,
             )
         else:
-            self._boundaries = list()
+            self._boundaries = []
 
     @staticmethod
     def construct_path_boundaries(
@@ -138,7 +138,7 @@ class Path(Atom):
         >>> Path.construct_path_boundaries((1, 2, 3), reserve_sequence_order=False, allowed_paths=[(1, 2), (2, 3)])
         [(2, 3), (1, 2)]
         """
-        boundaries = list()
+        boundaries = []
         for i in range(len(elements)):
             boundary = list(elements[0:i] + elements[(i + 1) :])
             if (
