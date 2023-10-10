@@ -32,7 +32,7 @@ class TestPathComplex:
         assert PC.shape == (4, 3, 2)
 
         PC = PathComplex()
-        assert PC.shape == tuple()
+        assert PC.shape == ()
 
     def test_dim_property(self):
         """Test dim property."""
@@ -117,7 +117,7 @@ class TestPathComplex:
 
         PC = PathComplex(G, allowed_paths=[[1], [2], [3], [1, 2]])
         assert [2, 3] in PC.paths
-        assert PC._allowed_paths == set([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
+        assert PC._allowed_paths == {(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)}
 
         PC = PathComplex(G, allowed_paths=[])
         assert [

@@ -30,7 +30,7 @@ class Atom(abc.ABC):
         self.elements = elements
         self.name = name
 
-        self._attributes = dict()
+        self._attributes = {}
         self._attributes.update(kwargs)
 
     def __len__(self) -> int:
@@ -148,7 +148,7 @@ class Complex(abc.ABC):
 
     def __init__(self, name: str = "", **kwargs) -> None:
         self.name = name
-        self.complex = dict()
+        self.complex = {}
         self.complex.update(kwargs)
 
     @property

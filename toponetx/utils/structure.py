@@ -204,12 +204,11 @@ def compute_set_incidence(children, uidset, sparse: bool = True, index: bool = F
     k_hyperedge_dict = OrderedDict(sorted(k_hyperedge_dict.items(), key=itemgetter(0)))
 
     if len(ndict) != 0:
-
         if sparse:
             # Create csr sparse matrix
-            rows = list()
-            cols = list()
-            data = list()
+            rows = []
+            cols = []
+            data = []
             for n in ndict:
                 for e in edict:
                     if n <= e:

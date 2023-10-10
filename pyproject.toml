@@ -49,6 +49,7 @@ lint = [
     "black < 23.0",
     "black[jupyter]",
     "flake8",
+    "flake8-comprehensions",
     "flake8-docstrings",
     "Flake8-pyproject",
     "isort",

@@ -547,7 +547,7 @@ class TestReportViews_PathView:
         assert self.path_view.__contains__(Path(1)) is True
         assert self.path_view.__contains__((1, 2, 3, 4)) is False
         assert self.path_view.__contains__(Path((1, 2, 4))) is False
-        assert self.path_view.__contains__(set((1, 2, 3))) is False
+        assert self.path_view.__contains__({(1, 2, 3)}) is False
         assert self.path_view.__contains__([]) is False
         assert self.path_view.__contains__(Path([1, 2, 3, 4])) is False
 

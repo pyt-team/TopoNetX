@@ -149,7 +149,7 @@ class TestGraphToSimplicialComplex:
                 A tuple containing the lists of the expected and unexpected simplices (first and second lists,
                 respectively) for the Vietoris-Rips complex.
             """
-            expected_vertices = [i for i in range(7)]
+            expected_vertices = list(range(7))
             expected_edges = []
             unexpected_edges = []
             expected_triangles = []

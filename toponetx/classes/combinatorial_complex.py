@@ -94,7 +94,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Complex.__init__(self, **kwargs)
         self.name = name
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
-        self._node_membership = dict()
+        self._node_membership = {}
         self._complex_set = HyperEdgeView()
 
         if cells is not None:

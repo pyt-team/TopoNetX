@@ -35,7 +35,7 @@ class CellView:
         # Initialize a dictionary to hold cells, with keys being the tuple
         # that defines the cell, and values being dictionaries of cell objects
         # with different attributes
-        self._cells: dict[tuple[Hashable, ...], dict[int, Cell]] = dict()
+        self._cells: dict[tuple[Hashable, ...], dict[int, Cell]] = {}
 
     def __getitem__(self, cell):
         """Return the attributes of a given cell.
@@ -395,7 +395,7 @@ class ColoredHyperEdgeView:
     @property
     def allranks(self):
         """All ranks."""
-        return sorted(list(self.hyperedge_dict.keys()))
+        return sorted(self.hyperedge_dict.keys())
 
 
 class HyperEdgeView:
@@ -505,7 +505,7 @@ class HyperEdgeView:
         if level is None or level == "equal":
             elements = []
             if rank in self.allranks:
-                return sorted(list(self.hyperedge_dict[rank].keys()))
+                return sorted(self.hyperedge_dict[rank].keys())
             else:
                 return []
 
@@ -583,7 +583,7 @@ class HyperEdgeView:
     @property
     def allranks(self):
         """All ranks."""
-        return sorted(list(self.hyperedge_dict.keys()))
+        return sorted(self.hyperedge_dict.keys())
 
     def _get_lower_rank(self, rank):
         if len(self.allranks) == 0:
@@ -863,8 +863,8 @@ class PathView(SimplexView):
             else:
                 raise KeyError(f"input {path} is not in the path dictionary")
         elif isinstance(path, Hashable):
-            if tuple([path]) in self:
-                return self.faces_dict[0][tuple([path])]
+            if (path,) in self:
+                return self.faces_dict[0][(path,)]
             else:
                 raise KeyError(f"input {path} is not in the path dictionary")
 
@@ -893,7 +893,7 @@ class PathView(SimplexView):
                 return False
             return item in self.faces_dict[len(item) - 1]
         elif isinstance(item, Hashable):
-            return tuple([item]) in self.faces_dict[0]
+            return (item,) in self.faces_dict[0]
         return False
 
     def __repr__(self) -> str:
