@@ -1908,6 +1908,62 @@ class CellComplex(Complex):
             incidence = self.incidence_matrix(rank, signed=signed)
             return incidence_to_adjacency(incidence)
 
+    def dirac_operator_matrix(
+        self,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
+        """Compute dirac operator matrix matrix.
+
+        Parameters
+        ----------
+        signed : bool, default=False
+            Whether the returned coadjacency matrix should be signed (i.e., respect orientations) or unsigned.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : bool, default=False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The coadjacency matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, coadjacency matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        Examples
+        --------
+        >>> import networkx as nx
+        >>> G = nx.path_graph(3)
+        >>> CC = CellComplex(G)
+        >>> CC.add_cell([1, 2, 3, 4], rank=2)
+        >>> CC.dirac_operator_matrix()
+        """
+        from scipy.sparse import bmat, coo_matrix
+
+        _, index0, B0 = self.incidence_matrix(0, index=True)
+        _, index1, B1 = self.incidence_matrix(1, index=True)
+        index1 = {k: v + len(index0) for k, v in index1.items()}
+        _, index2, B2 = self.incidence_matrix(2, index=True)
+        index2 = {k: v + len(index0) + len(index1) for k, v in index2.items()}
+
+        dirac = bmat([[None, B1, None], [B1.T, None, B2], [None, B2.T, None]])
+
+        if index:
+            d = {}
+            d.update(index0)
+            d.update(index1)
+            d.update(index2)
+            if signed:
+                return d, dirac
+            else:
+                return d, abs(dirac)
+        if signed:
+            return dirac
+        else:
+            return abs(dirac)
+
     def restrict_to_cells(
         self,
         cell_set: Iterable[Cell | tuple],
