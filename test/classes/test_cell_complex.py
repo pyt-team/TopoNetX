@@ -1491,3 +1491,117 @@ class TestCellComplex:
             str(exp_exception.value)
             == "Add cell only supports adding cells of dimensions 0,1 or 2-- got 4"
         )
+
+    def test_linegraphs(self):
+        """Test for the line graphs function of Cell Complex."""
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3], rank=2)
+        CC.add_cell([2, 3, 4], rank=2)
+        CC.add_cell([3, 4, 5], rank=2)
+        with pytest.raises(ValueError):
+            CC.get_linegraph((1, 2, 3, 4, 5, 6))
+        assert [(n, nbrdict) for n, nbrdict in CC.get_linegraph(1).adjacency()] == [
+            (0, {1: {"weight": 1}, 2: {"weight": 1}}),
+            (1, {0: {"weight": 1}, 2: {"weight": 1}, 3: {"weight": 1}}),
+            (
+                2,
+                {
+                    0: {"weight": 1},
+                    1: {"weight": 1},
+                    3: {"weight": 1},
+                    4: {"weight": 1},
+                },
+            ),
+            (3, {1: {"weight": 1}, 2: {"weight": 1}, 4: {"weight": 1}}),
+            (4, {2: {"weight": 1}, 3: {"weight": 1}}),
+        ]
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3], rank=2)
+        assert [
+            (n, nbrdict) for n, nbrdict in CC.get_linegraph(1, cells=True).adjacency()
+        ] == [
+            (0, {1: {"weight": 1}, 2: {"weight": 1}, 3: {"weight": 1}}),
+            (1, {0: {"weight": 1}, 2: {"weight": 1}, 3: {"weight": 1}}),
+            (2, {0: {"weight": 1}, 1: {"weight": 1}, 3: {"weight": 1}}),
+            (3, {0: {"weight": 1}, 1: {"weight": 1}, 2: {"weight": 1}}),
+        ]
+        with pytest.raises(TypeError):
+            CC.get_linegraph(cells=2)
+
+    def test_coadjacencies_edge_cases(self):
+        """Test coadjacency and adjacency function edge cases."""
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        ind, incidence = CC.adjacency_matrix(rank=1, index=True)
+        assert ind == {(1, 2): 0, (1, 4): 1, (2, 3): 2, (3, 4): 3}
+        assert np.any(
+            incidence.todense()
+            == np.array(
+                [
+                    [0.0, 1.0, 1.0, 1.0],
+                    [1.0, 0.0, 1.0, 1.0],
+                    [1.0, 1.0, 0.0, 1.0],
+                    [1.0, 1.0, 1.0, 0.0],
+                ]
+            )
+        )
+        ind, incidence = CC.coadjacency_matrix(1, index=True)
+        assert ind == {(1, 2): 0, (1, 4): 1, (2, 3): 2, (3, 4): 3}
+        assert np.any(
+            incidence.todense()
+            == np.array(
+                [
+                    [0.0, 1.0, 1.0, 1.0],
+                    [1.0, 0.0, 1.0, 1.0],
+                    [1.0, 1.0, 0.0, 1.0],
+                    [1.0, 1.0, 1.0, 0.0],
+                ]
+            )
+        )
+
+    def test_hodge_laplacian_edgecases(self):
+        """Test hodge laplacian edge cases."""
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([3, 4, 5], rank=2)
+        ind, laplacian_matrix = CC.hodge_laplacian_matrix(0, index=True, signed=False)
+        assert ind == {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+        assert np.any(
+            laplacian_matrix.todense()
+            == np.array(
+                [
+                    [2.0, 1.0, 0.0, 1.0, 0.0],
+                    [1.0, 2.0, 1.0, 0.0, 0.0],
+                    [0.0, 1.0, 3.0, 1.0, 1.0],
+                    [1.0, 0.0, 1.0, 3.0, 1.0],
+                    [0.0, 0.0, 1.0, 1.0, 2.0],
+                ]
+            )
+        )
+        ind = CC.hodge_laplacian_matrix(0, index=False, signed=False)
+        assert np.any(
+            ind.todense()
+            == np.array(
+                [
+                    [2.0, 1.0, 0.0, 1.0, 0.0],
+                    [1.0, 2.0, 1.0, 0.0, 0.0],
+                    [0.0, 1.0, 3.0, 1.0, 1.0],
+                    [1.0, 0.0, 1.0, 3.0, 1.0],
+                    [0.0, 0.0, 1.0, 1.0, 2.0],
+                ]
+            )
+        )
+        CC = CellComplex()
+        CC.add_cell([6, 8], rank=1)
+        CC.add_cell([1, 2, 3], rank=2)
+        assert CC.hodge_laplacian_matrix(2).todense() == np.array([[3]])
+        CC = CellComplex()
+        CC.add_node(1)
+        CC.add_edge(1, 2)
+        with pytest.raises(ValueError):
+            CC.hodge_laplacian_matrix(rank=2)
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3], rank=2)
+        assert np.any(
+            CC.hodge_laplacian_matrix(rank=2, signed=False).todense() == np.array([[3]])
+        )
