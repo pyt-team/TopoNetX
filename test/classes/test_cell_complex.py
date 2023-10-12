@@ -473,6 +473,31 @@ class TestCellComplex:
         CC = CellComplex()
         np.testing.assert_array_equal(CC.adjacency_matrix(0), np.zeros((0, 0)))
 
+    def test_dirac_operator_matrix(self):
+        """Test dirac operator."""
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        m = CC.dirac_operator_matrix()
+        size = len(CC.nodes) + len(CC.edges) + len(CC.cells)
+        assert m.shape == (size, size)
+
+        index, m = CC.dirac_operator_matrix(index=True)
+
+        assert 1 in index
+        assert 2 in index
+        assert 3 in index
+        assert 4 in index
+        assert len(index) == size
+
+        index, m = CC.dirac_operator_matrix(index=True, signed=False)
+
+        assert np.prod(m.todense() >= 0) == 1
+
+        m = CC.dirac_operator_matrix(signed=False)
+
+        assert np.prod(m.todense() >= 0) == 1
+
     def test_adjacency_matrix_cell_complex_with_one_cell(self):
         """Test adjacency matrix for a cell complex with one cell."""
         CC = CellComplex()

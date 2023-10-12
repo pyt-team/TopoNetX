@@ -1942,10 +1942,10 @@ class CellComplex(Complex):
         """
         from scipy.sparse import bmat, coo_matrix
 
-        _, index0, B0 = self.incidence_matrix(0, index=True)
-        _, index1, B1 = self.incidence_matrix(1, index=True)
+        _, index0, B0 = self.incidence_matrix(0, weight=weight, index=True)
+        _, index1, B1 = self.incidence_matrix(1, weight=weight, index=True)
         index1 = {k: v + len(index0) for k, v in index1.items()}
-        _, index2, B2 = self.incidence_matrix(2, index=True)
+        _, index2, B2 = self.incidence_matrix(2, weight=weight, index=True)
         index2 = {k: v + len(index0) + len(index1) for k, v in index2.items()}
 
         dirac = bmat([[None, B1, None], [B1.T, None, B2], [None, B2.T, None]])
