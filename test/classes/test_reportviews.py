@@ -5,13 +5,17 @@ import pytest
 from toponetx.classes import (
     Cell,
     CellComplex,
+    ColoredHyperGraph,
     CombinatorialComplex,
     HyperEdge,
     Path,
     PathComplex,
+    Simplex,
+    SimplicialComplex,
 )
 from toponetx.classes.reportviews import (
     CellView,
+    ColoredHyperEdgeView,
     HyperEdgeView,
     NodeView,
     PathView,
@@ -291,6 +295,7 @@ class TestReportViews_HyperEdgeView:
         assert hev_2.__contains__(he_2) is False
         assert hev_2.__contains__(he_3) is True
         assert hev_2.__contains__(he_4) is False
+        assert hev_2.__contains__(he_5) is False
 
     def test_hyper_edge_view_repr(self):
         """Test the __repr__ method for the Hyperedge View Class."""
@@ -512,6 +517,126 @@ class TestReportViews_HyperEdgeView:
             hev._get_higher_rank(rank=1)
 
         assert str(e.value) == "1 is not in list"
+
+
+class TestReportViews_ColoredHyperEdgeView:
+    """Test the ColoredHyperEdgeView class of the ReportViews module."""
+
+    CHG = ColoredHyperGraph([(1, 2), (2, 3), (3, 4)], colors=["red", "green", "blue"])
+    colorhg_view = CHG._complex_set
+
+    def test_getitem(self):
+        """Test the getitem method of the ColoredHyperEdgeView class."""
+        assert self.colorhg_view.__getitem__(((1, 2), 0)) == {"weight": 1}
+        with pytest.raises(KeyError):
+            self.colorhg_view.__getitem__((1, 2))
+
+    def test_repr(self):
+        """Test the repr method."""
+        assert (
+            self.colorhg_view.__repr__()
+            == "ColoredHyperEdgeView([((1, 2), 0), ((2, 3), 0), ((3, 4), 0)])"
+        )
+
+    def test_str(self):
+        """Test the str method."""
+        assert (
+            str(self.colorhg_view)
+            == "ColoredHyperEdgeView([((1, 2), 0), ((2, 3), 0), ((3, 4), 0)])"
+        )
+
+    def test_contains(self):
+        """Test the contains method."""
+        assert ((1, 2), 0) in self.colorhg_view
+        assert self.colorhg_view.__contains__([]) is False
+        assert self.colorhg_view.__contains__(((2, 3), 0)) is True
+        assert self.colorhg_view.__contains__(1) is False
+        assert self.colorhg_view.__contains__(([], 1)) is False
+        assert self.colorhg_view.__contains__(((5, 6), 0)) is False
+        assert self.colorhg_view.__contains__(HyperEdge([1, 2])) is True
+
+    def test_skeleton(self):
+        """Test the skeleton method of ColorHyperGraphView."""
+        assert self.colorhg_view.skeleton(rank=2) == []
+        assert self.colorhg_view.skeleton(rank=1) == [
+            (frozenset({1, 2}), 0),
+            (frozenset({2, 3}), 0),
+            (frozenset({3, 4}), 0),
+        ]
+        assert self.colorhg_view.skeleton(rank=1, store_hyperedge_key=False) == [
+            frozenset({1, 2}),
+            frozenset({2, 3}),
+            frozenset({3, 4}),
+        ]
+
+    def test_get_rank(self):
+        """Test get_rank method."""
+        assert self.colorhg_view.get_rank(HyperEdge([])) == 0
+        assert self.colorhg_view.get_rank(HyperEdge([1, 2])) == 1
+        with pytest.raises(KeyError):
+            self.colorhg_view.get_rank(HyperEdge([5, 6]))
+
+        assert self.colorhg_view.get_rank([]) == 0
+        assert self.colorhg_view.get_rank([1, 2]) == 1
+        with pytest.raises(KeyError):
+            self.colorhg_view.get_rank([5, 6])
+
+        assert self.colorhg_view.get_rank(1) == 0
+        with pytest.raises(KeyError):
+            self.colorhg_view.get_rank(5)
+
+
+class TestReportViews_SimplexView:
+    """Test the SimplexView class of the ReportViews module."""
+
+    SC = SimplicialComplex([(1, 2), (2, 3), (3, 4)])
+    simplex_view = SC.simplices
+
+    def test_getitem(self):
+        """Test __getitem__ method of the SimplexView."""
+        assert self.simplex_view.__getitem__((1, 2)) == {
+            "is_maximal": True,
+            "membership": set(),
+        }
+        with pytest.raises(KeyError):
+            self.simplex_view.__getitem__([5])
+
+    def test_str(self):
+        """Test __str__ method of the SimplexView."""
+        assert (
+            self.simplex_view.__str__()
+            == "SimplexView([(1,), (2,), (3,), (4,), (1, 2), (2, 3), (3, 4)])"
+        )
+
+
+class TestReportViews_NodeView:
+    """Test the NodeView class of the ReportViews module."""
+
+    SC = SimplicialComplex([(1, 2), (2, 3), (3, 4)])
+    node_view = SC.nodes
+    CHG = ColoredHyperGraph([(1, 2), (2, 3), (3, 4)], colors=["red", "green", "blue"])
+    node_view_1 = CHG.nodes
+
+    def test_init_cell_type(self):
+        """Test NodeView init with None cell_type."""
+        with pytest.raises(ValueError):
+            NodeView([(1, 2), (2, 3), (3, 4)], cell_type=None)
+
+    def test_repr(self):
+        """Test the repr of NodeView."""
+        assert self.node_view.__repr__() == "NodeView([(1,), (2,), (3,), (4,)])"
+
+    def test_getitem(self):
+        """Test __getitem__ method of the NodeView."""
+        assert self.node_view.__getitem__(Simplex([1])) == {
+            "is_maximal": False,
+            "membership": {frozenset({1, 2})},
+        }
+        with pytest.raises(KeyError):
+            self.node_view.__getitem__([1, 2])
+
+        # test for nodes of ColoredHyperGraph.
+        assert self.node_view_1.__getitem__([1]) == {"weight": 1}
 
 
 class TestReportViews_PathView:
