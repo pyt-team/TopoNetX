@@ -209,7 +209,7 @@ class SimplicialComplex(Complex):
         -------
         Set of simplices of dimension n.
         """
-        if rank < len(self._simplex_set.faces_dict) and rank >= 0:
+        if len(self._simplex_set.faces_dict) > rank >= 0:
             return sorted(
                 tuple(sorted(i)) for i in self._simplex_set.faces_dict[rank].keys()
             )
@@ -985,7 +985,7 @@ class SimplicialComplex(Complex):
         """
         weight = None  # this feature is not supported in this version
 
-        if rank <= self.dim and rank > 0:
+        if self.dim >= rank > 0:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
