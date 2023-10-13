@@ -1002,11 +1002,13 @@ class SimplicialComplex(Complex):
             return also a list : list
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
-            
+
         Examples
         --------
-        >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
-        >>> SC.up_laplacian_matrix(1)            
+        >>> SC = SimplicialComplex([[1, 2, 3],
+                                    [2, 3, 5],
+                                    [0, 1]])
+        >>> SC.up_laplacian_matrix(1)
         """
         if weight is not None:
             raise ValueError("`weight` is not supported in this version")
