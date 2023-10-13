@@ -1,6 +1,5 @@
 """Module to compute distance between nodes or cells on topological domains."""
-from collections.abc import Collection, Hashable, Iterable, Iterator
-from typing import Union
+from collections.abc import Hashable, Iterable
 from warnings import warn
 
 import networkx as nx
@@ -12,7 +11,6 @@ from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
-from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = ["distance", "cell_distance"]
 
@@ -82,8 +80,8 @@ def distance(complex: Complex, source: Hashable, target: Hashable, s: int = 1) -
 
 def cell_distance(
     complex: Complex,
-    source: Union[Iterable, HyperEdge, Cell],
-    target: Union[Iterable, HyperEdge, Cell],
+    source: Iterable | HyperEdge | Cell,
+    target: Iterable | HyperEdge | Cell,
     s: int = 1,
 ) -> int:
     """Return the shortest s-walk distance between two cells in the cell complex.
@@ -92,9 +90,9 @@ def cell_distance(
     ----------
     complex : Complex
         Supported complexes are cell/combintorial and hypegraphs.
-    source : Union[Iterable, HyperEdge, Cell]
+    source : Iterable or HyperEdge or Cell
         An Iterable representing a cell in the input complex cell complex.
-    target : Union[Iterable, HyperEdge, Cell]
+    target : Iterable or HyperEdge or Cell
         An Iterable representing a cell in the input complex cell complex.
     s : int
         The number of intersections between pairwise consecutive cells.

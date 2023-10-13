@@ -1,21 +1,17 @@
 """Module to distance measures on topological domains."""
-from collections.abc import Collection, Hashable, Iterable, Iterator
-from typing import List, Set, Tuple, Union
-from warnings import warn
+from collections.abc import Hashable
 
 import networkx as nx
-import numpy as np
 
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
-from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = ["node_diameters", "cell_diameters", "diameter", "cell_diameter"]
 
 
-def node_diameters(complex: Complex) -> Tuple[List[int], List[Set[Hashable]]]:
+def node_diameters(complex: Complex) -> tuple[list[int], list[set[Hashable]]]:
     """Return the node diameters of the connected components in cell complex.
 
     Returns
@@ -57,7 +53,7 @@ def node_diameters(complex: Complex) -> Tuple[List[int], List[Set[Hashable]]]:
     return diams, comps
 
 
-def cell_diameters(complex: Complex, s: int = 1) -> Tuple[List[int], List[Set[int]]]:
+def cell_diameters(complex: Complex, s: int = 1) -> tuple[list[int], list[set[int]]]:
     """Return the cell diameters of the s_cell_connected component subgraphs.
 
     Parameters

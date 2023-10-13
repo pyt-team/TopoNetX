@@ -1,7 +1,6 @@
 """Creation and manipulation of a Colored Hypergraph."""
 
 from collections.abc import Collection, Hashable, Iterable
-from typing import Literal, Optional
 
 import networkx as nx
 import numpy as np
@@ -529,7 +528,7 @@ class ColoredHyperGraph(Complex):
         """
         self._add_node(node, **attr)
 
-    def set_node_attributes(self, values, name: Optional[str] = None) -> None:
+    def set_node_attributes(self, values, name: str | None = None) -> None:
         """Set node attributes.
 
         Parameters
@@ -558,7 +557,7 @@ class ColoredHyperGraph(Complex):
                     pass
             return
 
-    def set_cell_attributes(self, values, name: Optional[str] = None) -> None:
+    def set_cell_attributes(self, values, name: str | None = None) -> None:
         """Set cell attributes.
 
         Parameters
@@ -1186,7 +1185,7 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def restrict_to_cells(self, cell_set, name: Optional[str] = None):
+    def restrict_to_cells(self, cell_set, name: str | None = None):
         """Construct a Colored Hypergraph using a subset of the cells.
 
         Parameters
@@ -1217,7 +1216,7 @@ class ColoredHyperGraph(Complex):
             chg.add_cell(c, rank=self.cells.get_rank(c))
         return chg
 
-    def restrict_to_nodes(self, node_set, name: Optional[str] = None):
+    def restrict_to_nodes(self, node_set, name: str | None = None):
         """Restrict to a set of nodes.
 
         Constructs a new Colored Hypergraph  by restricting the
@@ -1306,7 +1305,7 @@ class ColoredHyperGraph(Complex):
                         singletons.append(cell)
         return singletons
 
-    def remove_singletons(self, name: Optional[str] = None):
+    def remove_singletons(self, name: str | None = None):
         """Construct new CHG with singleton cells removed.
 
         Parameters
