@@ -83,7 +83,7 @@ class Path(Atom):
         **attr,
     ) -> None:
         self.__check_inputs(elements, reserve_sequence_order)
-        if isinstance(elements, int) or isinstance(elements, str):
+        if isinstance(elements, (int, str)):
             elements = [elements]
         super().__init__(tuple(elements), name, **attr)
         if len(set(elements)) != len(self.elements):

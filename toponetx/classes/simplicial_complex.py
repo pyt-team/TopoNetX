@@ -466,7 +466,7 @@ class SimplicialComplex(Complex):
             simplex = [simplex]
         if isinstance(simplex, str):
             simplex = [simplex]
-        if isinstance(simplex, Iterable) or isinstance(simplex, Simplex):
+        if isinstance(simplex, (Iterable, Simplex)):
             if not isinstance(simplex, Simplex):
                 simplex_ = frozenset(simplex)
                 if len(simplex_) != len(simplex):

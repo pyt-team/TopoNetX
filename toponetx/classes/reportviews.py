@@ -74,7 +74,7 @@ class CellView:
                 ]
 
         # If a tuple or list is passed in, assume it represents a cell
-        elif isinstance(cell, tuple) or isinstance(cell, list):
+        elif isinstance(cell, (tuple, list)):
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
@@ -124,7 +124,7 @@ class CellView:
                 ]
 
         # If a tuple or list is passed in, assume it represents a cell
-        elif isinstance(cell, tuple) or isinstance(cell, list):
+        elif isinstance(cell, (tuple, list)):
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
@@ -166,14 +166,9 @@ class CellView:
             Whether or not the element is in the cell view.
         """
         while True:
-            if isinstance(e, Cell):
+            if isinstance(e, (Cell, tuple, list)):
                 break
-            elif isinstance(e, tuple):
-                break
-            elif isinstance(e, list):
-                break
-            else:
-                raise TypeError("Input must be of type: tuple, list or a cell.")
+            raise TypeError("Input must be of type: tuple, list or a cell.")
 
         e = Cell(e)
         e_homotopic_to = [e.is_homotopic_to(x) for x in self._cells]

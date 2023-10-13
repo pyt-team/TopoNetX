@@ -503,7 +503,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             if rank != 0:
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             hyperedge_set = frozenset({hyperedge})
-        elif isinstance(hyperedge, Iterable) or isinstance(hyperedge, HyperEdge):
+        elif isinstance(hyperedge, (Iterable, HyperEdge)):
             if isinstance(hyperedge, HyperEdge):
                 hyperedge_ = hyperedge.elements
             else:
