@@ -865,7 +865,7 @@ class TestSimplicialComplex:
 
     def test_dirac_operator_matrix(self):
         """Test dirac operator."""
-        SC= SimplicialComplex()
+        SC = SimplicialComplex()
         SC = SimplicialComplex()
         SC.add_simplex([1, 2, 3, 4])
         SC.add_simplex([1, 2, 4])
@@ -889,7 +889,6 @@ class TestSimplicialComplex:
         m = SC.dirac_operator_matrix(signed=False)
 
         assert np.prod(m.todense() >= 0) == 1
-
 
     def test_coadjacency_matrix(self):
         """Test the coadjacency_matrix method of SimplicialComplex."""
