@@ -863,6 +863,34 @@ class TestSimplicialComplex:
         with pytest.raises(ValueError):
             SC.adjacency_matrix(rank, signed, weight, index)
 
+    def test_dirac_operator_matrix(self):
+        """Test dirac operator."""
+        SC= SimplicialComplex()
+        SC = SimplicialComplex()
+        SC.add_simplex([1, 2, 3, 4])
+        SC.add_simplex([1, 2, 4])
+        SC.add_simplex([3, 4, 8])
+        m = SC.dirac_operator_matrix()
+        size = sum(SC.shape)
+        assert m.shape == (size, size)
+
+        index, m = SC.dirac_operator_matrix(index=True)
+
+        assert (1,) in index
+        assert (2,) in index
+        assert (3,) in index
+        assert (4,) in index
+        assert len(index) == size
+
+        index, m = SC.dirac_operator_matrix(index=True, signed=False)
+
+        assert np.prod(m.todense() >= 0) == 1
+
+        m = SC.dirac_operator_matrix(signed=False)
+
+        assert np.prod(m.todense() >= 0) == 1
+
+
     def test_coadjacency_matrix(self):
         """Test the coadjacency_matrix method of SimplicialComplex."""
         SC = SimplicialComplex()

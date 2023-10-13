@@ -720,7 +720,12 @@ class SimplicialComplex(Complex):
                 (1, len(self._simplex_set.faces_dict[rank].items())), dtype=np.float32
             )
             boundary[0, 0 : len(self._simplex_set.faces_dict[rank].items())] = 1
-            return boundary.tocsr()
+            
+            if index :
+                simplex_dict_d = {simplex: i for i, simplex in enumerate(self.skeleton(0))}
+                return {}, simplex_dict_d, boundary.tocsr()
+            else:
+                return boundary.tocsr()
         idx_simplices, idx_faces, values = [], [], []
 
         simplex_dict_d = {simplex: i for i, simplex in enumerate(self.skeleton(rank))}
@@ -853,8 +858,78 @@ class SimplicialComplex(Complex):
         else:
             return abs(L_hodge)
 
+    def dirac_operator_matrix(
+        self,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
+        """Compute dirac operator matrix matrix.
+
+        Parameters
+        ----------
+        signed : bool, default=False
+            Whether the returned coadjacency matrix should be signed (i.e., respect orientations) or unsigned.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : bool, default=False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The coadjacency matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, coadjacency matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        Examples
+        --------
+        >>> from toponetx.classes import SimplicialComplex
+        >>> SC = SimplicialComplex()
+        >>> SC.add_simplex([1, 2, 3, 4])
+        >>> SC.add_simplex([1, 2, 4])
+        >>> SC.add_simplex([3, 4, 8])
+        >>> SC.dirac_operator_matrix()
+        """
+        from scipy.sparse import bmat, coo_matrix
+        index_set = []
+        incidence = {}
+        for i in range(0,self.dim+1):
+            _,indexi, Bi = self.incidence_matrix(i, weight=weight, index=True)
+            index_set.append(indexi)
+            incidence[(i,i+1)]=Bi
+        dirac = []    
+        for i in range(0,self.dim+1):
+            row = []
+            for j in range(0,self.dim+1):
+                if (i,j) in incidence:    
+                    row.append(incidence[(i,j)])
+                elif (j,i) in incidence:
+                    row.append(incidence[(j,i)].T)
+                else:
+                    row.append(None)   
+            dirac.append(row)        
+        dirac = bmat(dirac)
+        if index:
+            d = {}
+            shift = 0
+            for  i in index_set:
+                i = {k: v + shift for k, v in i.items()}
+                d.update(i)
+                shift = len(d)
+            if signed:
+                return d, dirac
+            else:
+                return d, abs(dirac)
+        if signed:
+            return dirac
+        else:
+            return abs(dirac)
+
+
+
     def normalized_laplacian_matrix(self, rank, weight=None):
-        """Return the normalized hodge Laplacian matrix of G.
+        """Return the normalized hodge Laplacian matrix of simplicial complex .
 
         The normalized hodge Laplacian is the matrix
 
