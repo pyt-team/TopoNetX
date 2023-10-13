@@ -342,7 +342,7 @@ class PathComplex(Complex):
         set[tuple[Hashable]]
             Set of elementary p-paths of dimension specified by `rank`.
         """
-        if rank < len(self._path_set.faces_dict) and rank >= 0:
+        if len(self._path_set.faces_dict) > rank >= 0:
             tmp = (path for path in self._path_set.faces_dict[rank].keys())
             return sorted(
                 tmp, key=lambda x: tuple(map(str, x))
@@ -556,7 +556,7 @@ class PathComplex(Complex):
         if weight is not None:
             raise ValueError("Weighted Laplacian is not supported in this version.")
 
-        if rank <= self.dim and rank > 0:
+        if self.dim >= rank > 0:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
