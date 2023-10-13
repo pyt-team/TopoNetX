@@ -709,10 +709,10 @@ class SimplicialComplex(Complex):
         >>> B2 = SC.incidence_matrix(2)
         """
         if rank < 0:
-            raise ValueError(f"input dimension d must be positive integer, got {rank}")
+            raise ValueError(f"input rank must be positive integer, got {rank}")
         if rank > self.dim:
             raise ValueError(
-                f"input dimenion cannat be larger than the dimension of the complex, got {rank}"
+                f"input rank cannat be larger than the dimension of the complex, got {rank}"
             )
 
         if rank == 0:
@@ -1002,6 +1002,11 @@ class SimplicialComplex(Complex):
             return also a list : list
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
+            
+        Examples
+        --------
+        >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
+        >>> SC.up_laplacian_matrix(1)            
         """
         if weight is not None:
             raise ValueError("`weight` is not supported in this version")
@@ -1011,7 +1016,7 @@ class SimplicialComplex(Complex):
                 rank + 1, weight=weight, index=True
             )
             L_up = B_next @ B_next.transpose()
-        elif rank < self.dim:
+        elif rank < self.dim and rank > 0:
             row, col, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
