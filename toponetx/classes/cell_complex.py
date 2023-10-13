@@ -272,7 +272,7 @@ class CellComplex(Complex):
         return iter(self.nodes)
 
     def __contains__(self, item) -> bool:
-        """Return boolean indicating if item is in self.nodes.
+        """Return boolean indicating if item is in self.nodes, self.edges or self.cells.
 
         Parameters
         ----------
@@ -282,9 +282,9 @@ class CellComplex(Complex):
         Returns
         -------
         bool
-            True if item is in self.nodes, False otherwise.
+            True if item is a cell of dim 0,1,2 is in the complex, False otherwise.
         """
-        return item in self.nodes
+        return item in self.nodes or item in self.edges or item in self.cells
 
     def __getitem__(self, node):
         """Return the neighbors of node.
