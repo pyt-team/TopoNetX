@@ -197,7 +197,7 @@ class ColoredHyperGraph(Complex):
         return iter(self.nodes)
 
     def __contains__(self, item) -> bool:
-        """Return true/false indicating if item is in self.nodes.
+        """Return true/false indicating if item is in self.nodes or self.edges.
 
         Parameters
         ----------

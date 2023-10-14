@@ -709,10 +709,10 @@ class SimplicialComplex(Complex):
         >>> B2 = SC.incidence_matrix(2)
         """
         if rank < 0:
-            raise ValueError(f"input dimension d must be positive integer, got {rank}")
+            raise ValueError(f"input rank must be positive integer, got {rank}")
         if rank > self.dim:
             raise ValueError(
-                f"input dimenion cannat be larger than the dimension of the complex, got {rank}"
+                f"input rank cannat be larger than the dimension of the complex, got {rank}"
             )
 
         if rank == 0:
@@ -720,7 +720,14 @@ class SimplicialComplex(Complex):
                 (1, len(self._simplex_set.faces_dict[rank].items())), dtype=np.float32
             )
             boundary[0, 0 : len(self._simplex_set.faces_dict[rank].items())] = 1
-            return boundary.tocsr()
+
+            if index:
+                simplex_dict_d = {
+                    simplex: i for i, simplex in enumerate(self.skeleton(0))
+                }
+                return {}, simplex_dict_d, boundary.tocsr()
+            else:
+                return boundary.tocsr()
         idx_simplices, idx_faces, values = [], [], []
 
         simplex_dict_d = {simplex: i for i, simplex in enumerate(self.skeleton(rank))}
@@ -853,8 +860,77 @@ class SimplicialComplex(Complex):
         else:
             return abs(L_hodge)
 
+    def dirac_operator_matrix(
+        self,
+        signed: bool = True,
+        weight: str | None = None,
+        index: bool = False,
+    ):
+        """Compute dirac operator matrix matrix.
+
+        Parameters
+        ----------
+        signed : bool, default=False
+            Whether the returned coadjacency matrix should be signed (i.e., respect orientations) or unsigned.
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : bool, default=False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The coadjacency matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, coadjacency matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        Examples
+        --------
+        >>> from toponetx.classes import SimplicialComplex
+        >>> SC = SimplicialComplex()
+        >>> SC.add_simplex([1, 2, 3, 4])
+        >>> SC.add_simplex([1, 2, 4])
+        >>> SC.add_simplex([3, 4, 8])
+        >>> SC.dirac_operator_matrix()
+        """
+        from scipy.sparse import bmat
+
+        index_set = []
+        incidence = {}
+        for i in range(0, self.dim + 1):
+            _, indexi, Bi = self.incidence_matrix(i, weight=weight, index=True)
+            index_set.append(indexi)
+            incidence[(i, i + 1)] = Bi
+        dirac = []
+        for i in range(0, self.dim + 1):
+            row = []
+            for j in range(0, self.dim + 1):
+                if (i, j) in incidence:
+                    row.append(incidence[(i + 1, j + 1)])
+                elif (j, i) in incidence:
+                    row.append(incidence[(j + 1, i + 1)].T)
+                else:
+                    row.append(None)
+            dirac.append(row)
+        dirac = bmat(dirac)
+        if index:
+            d = {}
+            shift = 0
+            for i in index_set:
+                i = {k: v + shift for k, v in i.items()}
+                d.update(i)
+                shift = len(d)
+            if signed:
+                return d, dirac
+            else:
+                return d, abs(dirac)
+        if signed:
+            return dirac
+        else:
+            return abs(dirac)
+
     def normalized_laplacian_matrix(self, rank, weight=None):
-        """Return the normalized hodge Laplacian matrix of G.
+        """Return the normalized hodge Laplacian matrix of simplicial complex .
 
         The normalized hodge Laplacian is the matrix
 
@@ -926,6 +1002,13 @@ class SimplicialComplex(Complex):
             return also a list : list
             list identifying rows with nodes,edges or cells used to index the hodge Laplacian matrix
             depending on the input dimension
+
+        Examples
+        --------
+        >>> SC = SimplicialComplex([[1, 2, 3],
+                                    [2, 3, 5],
+                                    [0, 1]])
+        >>> SC.up_laplacian_matrix(1)
         """
         if weight is not None:
             raise ValueError("`weight` is not supported in this version")
@@ -935,7 +1018,7 @@ class SimplicialComplex(Complex):
                 rank + 1, weight=weight, index=True
             )
             L_up = B_next @ B_next.transpose()
-        elif rank < self.dim:
+        elif rank < self.dim and rank > 0:
             row, col, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
