@@ -258,7 +258,7 @@ class SimplicialComplex(Complex):
         ----------
         item : tuple, list
         """
-        return item in self._simplex_set
+        return item in self.nodes
 
     def _update_faces_dict_length(self, simplex) -> None:
         if len(simplex) > len(self._simplex_set.faces_dict):

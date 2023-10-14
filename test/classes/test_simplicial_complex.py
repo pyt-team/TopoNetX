@@ -10,7 +10,6 @@ import spharapy.trimesh as tm
 from gudhi import SimplexTree
 from scipy.sparse import bmat
 
-
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplex import Simplex

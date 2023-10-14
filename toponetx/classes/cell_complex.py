@@ -284,7 +284,7 @@ class CellComplex(Complex):
         bool
             True if item is a cell of dim 0,1,2 is in the complex, False otherwise.
         """
-        return item in self.nodes or item in self.edges or item in self.cells
+        return item in self.nodes
 
     def __getitem__(self, node):
         """Return the neighbors of node.

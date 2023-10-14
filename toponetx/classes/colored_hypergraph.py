@@ -204,7 +204,7 @@ class ColoredHyperGraph(Complex):
         ----------
         item : hashable or HyperEdge
         """
-        return item in self.nodes or item in self.cells
+        return item in self.nodes
 
     def __setitem__(self, cell, **attr):
         """Set the attributes of a hyperedge or node in the CHG."""
