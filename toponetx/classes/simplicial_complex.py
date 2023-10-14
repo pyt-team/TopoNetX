@@ -906,9 +906,9 @@ class SimplicialComplex(Complex):
             row = []
             for j in range(0, self.dim + 1):
                 if (i, j) in incidence:
-                    row.append(incidence[(i, j)])
+                    row.append(incidence[(i + 1, j + 1)])
                 elif (j, i) in incidence:
-                    row.append(incidence[(j, i)].T)
+                    row.append(incidence[(j + 1, i + 1)].T)
                 else:
                     row.append(None)
             dirac.append(row)

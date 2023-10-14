@@ -8,6 +8,8 @@ import spharapy.datasets as sd
 import spharapy.spharabasis as sb
 import spharapy.trimesh as tm
 from gudhi import SimplexTree
+from scipy.sparse import bmat
+
 
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
@@ -866,8 +868,7 @@ class TestSimplicialComplex:
     def test_dirac_operator_matrix(self):
         """Test dirac operator."""
         SC = SimplicialComplex()
-        SC = SimplicialComplex()
-        SC.add_simplex([1, 2, 3, 4])
+        SC.add_simplex([1, 2, 3])
         SC.add_simplex([1, 2, 4])
         SC.add_simplex([3, 4, 8])
         m = SC.dirac_operator_matrix()
@@ -875,6 +876,18 @@ class TestSimplicialComplex:
         assert m.shape == (size, size)
 
         index, m = SC.dirac_operator_matrix(index=True)
+
+        L = m.dot(m)
+
+        check_L = bmat(
+            [
+                [SC.hodge_laplacian_matrix(0), None, None],
+                [None, SC.hodge_laplacian_matrix(1), None],
+                [None, None, SC.hodge_laplacian_matrix(2)],
+            ]
+        )
+
+        assert np.linalg.norm((check_L - L).todense()) == 0
 
         assert (1,) in index
         assert (2,) in index

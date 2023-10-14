@@ -4,6 +4,7 @@ import networkx as nx
 import numpy as np
 import pytest
 import scipy
+from scipy.sparse import bmat
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
@@ -481,6 +482,18 @@ class TestCellComplex:
         m = CC.dirac_operator_matrix()
         size = len(CC.nodes) + len(CC.edges) + len(CC.cells)
         assert m.shape == (size, size)
+
+        L = m.dot(m)
+
+        check_L = bmat(
+            [
+                [CC.hodge_laplacian_matrix(0), None, None],
+                [None, CC.hodge_laplacian_matrix(1), None],
+                [None, None, CC.hodge_laplacian_matrix(2)],
+            ]
+        )
+
+        assert np.linalg.norm((check_L - L).todense()) == 0
 
         index, m = CC.dirac_operator_matrix(index=True)
 
