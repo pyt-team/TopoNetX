@@ -415,10 +415,10 @@ class HyperEdgeView:
 
     @staticmethod
     def _to_frozen_set(hyperedge):
-        if isinstance(hyperedge, Iterable):
-            hyperedge_ = frozenset(hyperedge)
-        elif isinstance(hyperedge, HyperEdge):
+        if isinstance(hyperedge, HyperEdge):
             hyperedge_ = hyperedge.elements
+        elif isinstance(hyperedge, Iterable):
+            hyperedge_ = frozenset(hyperedge)
         elif isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
             hyperedge_ = frozenset([hyperedge])
         return hyperedge_
@@ -458,20 +458,20 @@ class HyperEdgeView:
         if len(self.hyperedge_dict) == 0:
             return False
         all_ranks = self.allranks
-        if isinstance(e, Iterable):
-            if len(e) == 0:
-                return False
-            else:
-                for i in all_ranks:
-                    if frozenset(e) in self.hyperedge_dict[i]:
-                        return True
-                return False
-        elif isinstance(e, HyperEdge):
+        if isinstance(e, HyperEdge):
             if len(e) == 0:
                 return False
             else:
                 for i in all_ranks:
                     if frozenset(e.elements) in self.hyperedge_dict[i]:
+                        return True
+                return False
+        elif isinstance(e, Iterable):
+            if len(e) == 0:
+                return False
+            else:
+                for i in all_ranks:
+                    if frozenset(e) in self.hyperedge_dict[i]:
                         return True
                 return False
         elif isinstance(e, Hashable):
