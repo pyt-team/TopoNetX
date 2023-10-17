@@ -196,6 +196,18 @@ class TestCombinatorialComplex:
         assert (1, 2, 3) not in CHG.cells
         assert (2, 3, 4) in CHG.cells
 
+        with pytest.raises(KeyError):
+            CHG.remove_cell([1, 2, 3])
+
+        CHG.remove_cell(frozenset({1}))
+        with pytest.raises(KeyError):
+            CHG._complex_set.hyperedge_dict[0][frozenset({1})]
+
+        CHG = ColoredHyperGraph([(1, 2), (2, 3), (3, 4)])
+        CHG.remove_cell(HyperEdge(elements=[1, 2], rank=1))
+
+        assert (1, 2) not in CHG.cells
+
     def test_remove_cells(self):
         """Test removing multiple cells from a CHG."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
