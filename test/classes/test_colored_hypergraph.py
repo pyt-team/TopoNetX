@@ -144,6 +144,24 @@ class TestCombinatorialComplex:
         CHG.add_cell([3, 4, 5])
         assert (3, 4, 5) in CHG.cells
 
+        with pytest.raises(ValueError):
+            CHG.add_cell([1, 2], rank=-1)
+
+        with pytest.raises(ValueError):
+            CHG.add_cell(cell="[1,2]", rank=1)
+
+        with pytest.raises(ValueError):
+            CHG.add_cell(cell=1, rank=1)
+
+        with pytest.raises(ValueError):
+            CHG.add_cell(cell=[1, [2, 3]], rank=1)
+
+        with pytest.raises(ValueError):
+            CHG.add_cell(cell=[1, 2], rank=0)
+
+        with pytest.raises(ValueError):
+            CHG.add_cell(cell=None, rank=1)
+
     def test_add_cells_from(self):
         """Test adding multiple cells to a CHG."""
         CHG = ColoredHyperGraph()
