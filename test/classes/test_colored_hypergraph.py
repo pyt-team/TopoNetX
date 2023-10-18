@@ -4,6 +4,7 @@ import collections
 
 import networkx as nx
 import pytest
+from scipy.sparse import csr_array
 
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.hyperedge import HyperEdge
@@ -340,6 +341,14 @@ class TestCombinatorialComplex:
         A02 = CHG.adjacency_matrix(0, 2)
         assert A02.shape == (6, 6)
 
+        # test with index = True
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        _, adj_mat = CHG.adjacency_matrix(0, 2, index=True)
+        assert (
+            adj_mat.todense()
+            == [[0, 1, 1, 0], [1, 0, 2, 1], [1, 2, 0, 1], [0, 1, 1, 0]]
+        ).all()
+
     def test_coadjacency_matrix(self):
         """Test generating a coadjacency matrix."""
         CHG = ColoredHyperGraph()
@@ -350,6 +359,9 @@ class TestCombinatorialComplex:
         CHG.add_cell([2, 6, 4], rank=2)
         CA10 = CHG.coadjacency_matrix(1, 0)
         assert CA10.shape == (3, 3)
+        assert (CA10.todense() == [[0, 1, 1], [1, 0, 0], [1, 0, 0]]).all()
+
+        _, CA10 = CHG.coadjacency_matrix(1, 0, index=True)
         assert (CA10.todense() == [[0, 1, 1], [1, 0, 0], [1, 0, 0]]).all()
 
     def test_clone(self):
@@ -378,3 +390,71 @@ class TestCombinatorialComplex:
         B = CHG.incidence_matrix(0, 2)
         assert B.shape == (6, 2)
         assert (B.todense() == [[1, 0], [1, 1], [1, 0], [1, 1], [0, 0], [0, 1]]).all()
+
+    def test_new_hyperedge_key(self):
+        """Test adding hyperedge new key."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        assert CHG.new_hyperedge_key(frozenset({1, 2, 3}), 2) == 1
+
+        assert CHG.new_hyperedge_key(frozenset({1, 2, 3}), 1) == 0
+
+    def test_get_incidence_structure_dict(self):
+        """Test get_incidence_structure_dict method of CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        res_dict = CHG.get_incidence_structure_dict(0, 2)
+        assert res_dict == {0: [0, 1, 2], 1: [1, 2, 3]}
+
+    def test_get_adjacency_structure_dict(self):
+        """Test get_adjacency_structure_dict method of CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        res_dict = CHG.get_adjacency_structure_dict(0, 2)
+        assert res_dict == {1: [0, 2, 3], 2: [0, 1, 3], 0: [1, 2], 3: [1, 2]}
+
+    def test_degree_matrix(self):
+        """Test degree matrix method of CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        with pytest.raises(ValueError):
+            CHG.degree_matrix(0)
+        assert (CHG.degree_matrix(1) == [0, 0, 0, 0]).all()
+        assert (CHG.degree_matrix(2) == [1, 2, 2, 1]).all()
+
+        row, D = CHG.degree_matrix(1, index=True)
+        res, _, _ = CHG.incidence_matrix(0, 1, index=True)
+        assert row == res
+
+    def test_laplacian_matrix(self):
+        """Test laplacian matrix method of CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        with pytest.raises(ValueError):
+            CHG.laplacian_matrix(0)
+
+        assert (
+            CHG.laplacian_matrix(1)
+            == [
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+            ]
+        ).all()
+        assert (
+            CHG.laplacian_matrix(2)
+            == [[1, -1, -1, 0], [-1, 2, -2, -1], [-1, -2, 2, -1], [0, -1, -1, 1]]
+        ).all()
+
+        row, L = CHG.laplacian_matrix(1, sparse=True, index=True)
+        res, _ = CHG.adjacency_matrix(0, 1, index=True)
+        assert row == res
+        assert isinstance(L, csr_array)
+
+    def test_singletons(self):
+        """Test singletons of CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CHG.add_cell([9])
+        assert CHG.singletons() == [(frozenset({9}), 0)]
+
+    def test_from_trimesh(self):
+        """Test from_trimesh method of CHG."""
+        with pytest.raises(NotImplementedError):
+            CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+            CHG.from_trimesh(1)
