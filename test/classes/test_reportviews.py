@@ -525,6 +525,9 @@ class TestReportViews_ColoredHyperEdgeView:
     CHG = ColoredHyperGraph([(1, 2), (2, 3), (3, 4)], colors=["red", "green", "blue"])
     colorhg_view = CHG._complex_set
 
+    CHG1 = ColoredHyperGraph()
+    colorhg_view1 = CHG1._complex_set
+
     def test_getitem(self):
         """Test the getitem method of the ColoredHyperEdgeView class."""
         assert self.colorhg_view.__getitem__(((1, 2), 0)) == {"weight": 1}
@@ -554,6 +557,13 @@ class TestReportViews_ColoredHyperEdgeView:
         assert self.colorhg_view.__contains__(([], 1)) is False
         assert self.colorhg_view.__contains__(((5, 6), 0)) is False
         assert self.colorhg_view.__contains__(HyperEdge([1, 2])) is True
+        assert self.colorhg_view.__contains__((HyperEdge([1, 2, 3]), 0)) is False
+        assert self.colorhg_view.__contains__((HyperEdge([1, 2]), 0)) is True
+        assert self.colorhg_view.__contains__((HyperEdge([]), 0)) is False
+
+        # test for empty CHG
+        assert self.colorhg_view1.__contains__(HyperEdge([1, 2])) is False
+        assert self.colorhg_view1.__contains__([]) is False
 
     def test_skeleton(self):
         """Test the skeleton method of ColorHyperGraphView."""
