@@ -572,6 +572,65 @@ class TestCellComplex:
         L2_down = CC.down_laplacian_matrix(rank=2)
         expected = (B2.T).dot(B2)
         np.testing.assert_array_equal(L2_down.toarray(), expected.toarray())
+        CC = CellComplex()
+        CC.add_cell([2, 3, 4], rank=2)
+        CC.add_cell([1, 3, 4], rank=2)
+        with pytest.raises(ValueError):
+            CC.down_laplacian_matrix(rank=2, weight="Hello")
+        with pytest.raises(ValueError):
+            CC.down_laplacian_matrix(rank=3)
+        assert np.any(
+            CC.down_laplacian_matrix(rank=2, signed=False).todense()
+            == np.array([[3.0, 1.0], [1.0, 3.0]])
+        )
+        row, matrix = CC.down_laplacian_matrix(rank=2, index=True)
+        assert row == {(1, 3): 0, (1, 4): 1, (2, 3): 2, (2, 4): 3, (3, 4): 4}
+        assert np.any(matrix == np.array([[3.0, 1.0], [1.0, 3.0]]))
+        with pytest.raises(ValueError):
+            CC.up_laplacian_matrix(rank=2, weight="Hello")
+        with pytest.raises(ValueError):
+            CC.up_laplacian_matrix(rank=3)
+        assert np.any(
+            CC.up_laplacian_matrix(rank=1, signed=False).todense()
+            == np.array(
+                [
+                    [1.0, 1.0, 0.0, 0.0, 1.0],
+                    [1.0, 1.0, 0.0, 0.0, 1.0],
+                    [0.0, 0.0, 1.0, 1.0, 1.0],
+                    [0.0, 0.0, 1.0, 1.0, 1.0],
+                    [1.0, 1.0, 1.0, 1.0, 2.0],
+                ]
+            )
+        )
+        row, matrix = CC.up_laplacian_matrix(rank=1, index=True)
+        assert row == {(1, 3): 0, (1, 4): 1, (2, 3): 2, (2, 4): 3, (3, 4): 4}
+        assert np.any(
+            matrix
+            == np.array(
+                [
+                    [1.0, 1.0, 0.0, 0.0, 1.0],
+                    [1.0, 1.0, 0.0, 0.0, 1.0],
+                    [0.0, 0.0, 1.0, 1.0, 1.0],
+                    [0.0, 0.0, 1.0, 1.0, 1.0],
+                    [1.0, 1.0, 1.0, 1.0, 2.0],
+                ]
+            )
+        )
+        CC = CellComplex(regular=False)
+        CC.add_cell([1, 2, 3, 2], rank=2)
+        CC.add_cell([3, 4, 5, 3, 4, 5], rank=2)
+        assert CC.incidence_matrix(
+            rank=0, index=False, signed=True
+        ).todense().shape == (0, 5)
+        with pytest.raises(ValueError):
+            CC.incidence_matrix(rank=3)
+        CC = CellComplex(regular=False)
+        CC.add_cell([1, 2, 3, 2], rank=2)
+        CC.add_cell([3, 4, 5, 3, 4, 5], rank=2)
+        assert np.any(
+            CC.incidence_matrix(rank=2).todense()
+            == np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 2.0], [0.0, -2.0], [0.0, 2.0]])
+        )
 
     def test_hodge_laplacian_and_up_down_laplacians(self):
         """Test hodge laplacian matrix and up and down laplacians for a cell complex."""
@@ -584,6 +643,13 @@ class TestCellComplex:
         L1_hodge = CC.hodge_laplacian_matrix(rank=1)
         expected = L1_up + L1_down
         np.testing.assert_array_equal(L1_hodge.toarray(), expected.toarray())
+        CC = CellComplex()
+        CC.add_cell([2, 3], rank=1)
+        CC.add_cell([1, 3], rank=1)
+        assert np.any(
+            CC.hodge_laplacian_matrix(rank=1, signed=True).todense()
+            == np.array([[2.0, 1.0], [1.0, 2.0]])
+        )
 
     def test_init_empty_abstract_cell(self):
         """Test empty cell complex."""

@@ -1667,6 +1667,7 @@ class CellComplex(Complex):
                 B = self.incidence_matrix(rank, weight=weight, index=False)
                 L_hodge = B_next @ B_next.transpose() + B.transpose() @ B
             else:
+                B = self.incidence_matrix(rank, weight=weight)
                 L_hodge = B.transpose() @ B
             if not signed:
                 L_hodge = abs(L_hodge)
