@@ -507,14 +507,16 @@ class CombinatorialComplex(ColoredHyperGraph):
             if isinstance(hyperedge, HyperEdge):
                 hyperedge_ = hyperedge.elements
             else:
+                if not all(isinstance(i, Hashable) for i in hyperedge):
+                    raise ValueError(
+                        f"Input hyperedge {hyperedge} contain non-hashable elements."
+                    )
                 hyperedge_ = frozenset(hyperedge)
             if isinstance(hyperedge, HyperEdge):
                 if len(hyperedge) == 1:
                     raise ValueError(
                         f"cells with single elements must have rank 0, got rank {rank} for input cell {hyperedge} "
                     )
-            if not all(isinstance(i, Hashable) for i in hyperedge_):
-                raise ValueError("every element hyperedge must be hashable.")
             if rank == 0 and len(hyperedge_) > 1:
                 raise ValueError(
                     "rank must be positive for higher order hyperedges, got rank = 0"
@@ -724,7 +726,9 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         if via_rank is not None:
             if rank > via_rank:
-                raise ValueError("rank must be greater than via_rank")
+                raise ValueError(
+                    "rank must be lesser than via_rank, must be r<k, got r>k"
+                )
         return super().adjacency_matrix(rank, via_rank, s, index)
 
     def coadjacency_matrix(self, rank, via_rank, s: int = None, index: bool = False):
@@ -828,11 +832,11 @@ class CombinatorialComplex(ColoredHyperGraph):
         if self.graph_based:
             if rank == 1:
                 if not isinstance(cell, Iterable):
-                    TypeError(
+                    raise TypeError(
                         "Rank 1 cells in graph-based CombinatorialComplex must be Iterable."
                     )
                 if len(cell) != 2:
-                    ValueError(
+                    raise ValueError(
                         f"Rank 1 cells in graph-based CombinatorialComplex must have size equal to 1 got {cell}."
                     )
 

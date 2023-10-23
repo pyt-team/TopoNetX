@@ -296,6 +296,7 @@ class TestReportViews_HyperEdgeView:
         assert hev_2.__contains__(he_3) is True
         assert hev_2.__contains__(he_4) is False
         assert hev_2.__contains__(he_5) is False
+        assert hev_2.__contains__(he_6) is False
 
     def test_hyper_edge_view_repr(self):
         """Test the __repr__ method for the Hyperedge View Class."""

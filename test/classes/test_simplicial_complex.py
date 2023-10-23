@@ -116,6 +116,19 @@ class TestSimplicialComplex:
         assert (repr(SC)) == "SimplicialComplex(name='graph complex')"
         assert SC.name == "graph complex"
 
+    def test_iter(self):
+        """Test iter method."""
+        sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
+        assert len(list(sc)) == 5
+        _i = iter(sc)
+        assert next(_i) == 1
+        assert next(_i) == 2
+        assert next(_i) == 3
+        assert next(_i) == 4
+        assert next(_i) == 0
+        with pytest.raises(StopIteration):
+            next(_i)
+
     def test_getittem__(self):
         """Test __getitem__ and __setitem__ methods."""
         G = nx.Graph()
@@ -462,6 +475,9 @@ class TestSimplicialComplex:
         ind, A = SC.adjacency_matrix(rank=0, index=True)
         expected_ind = {(0,): 0, (1,): 1, (2,): 2, (3,): 3, (4,): 4}
         assert ind == expected_ind
+
+        with pytest.raises(ValueError):
+            A = SC.adjacency_matrix(rank=0, weight=1)
 
     def test_get_boundaries(self):
         """Test the get_boundaries method."""
