@@ -507,14 +507,16 @@ class CombinatorialComplex(ColoredHyperGraph):
             if isinstance(hyperedge, HyperEdge):
                 hyperedge_ = hyperedge.elements
             else:
+                if not all(isinstance(i, Hashable) for i in hyperedge):
+                    raise ValueError(
+                        f"Input hyperedge {hyperedge} contain non-hashable elements."
+                    )
                 hyperedge_ = frozenset(hyperedge)
             if isinstance(hyperedge, HyperEdge):
                 if len(hyperedge) == 1:
                     raise ValueError(
                         f"cells with single elements must have rank 0, got rank {rank} for input cell {hyperedge} "
                     )
-            if not all(isinstance(i, Hashable) for i in hyperedge_):
-                raise ValueError("every element hyperedge must be hashable.")
             if rank == 0 and len(hyperedge_) > 1:
                 raise ValueError(
                     "rank must be positive for higher order hyperedges, got rank = 0"
