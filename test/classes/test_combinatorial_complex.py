@@ -23,6 +23,9 @@ class TestCombinatorialComplex:
         assert (2, 3, 4) in CCC.cells
 
         with pytest.raises(ValueError):
+            _ = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=None)
+
+        with pytest.raises(ValueError):
             _ = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=[1])
 
     def test_init_from_abstract_cells(self):
@@ -32,6 +35,7 @@ class TestCombinatorialComplex:
         y3 = HyperEdge(elements=[3, 5], rank=1)
         y4 = HyperEdge(elements=[4, 5], rank=1)
         y5 = HyperEdge(elements=[5, 7], rank=1)
+        y6 = HyperEdge(elements=[9, 8], rank=None)
 
         CCC = CombinatorialComplex(cells=[y1, y2, y3, y4, y5])
 
@@ -40,6 +44,9 @@ class TestCombinatorialComplex:
         assert y3 in CCC.cells
         assert y4 in CCC.cells
         assert y5 in CCC.cells
+
+        with pytest.raises(ValueError):
+            CCC = CombinatorialComplex(cells=[y1, y2, y3, y4, y5, y6])
 
     def test_init_from_networkx_graph(self):
         """Test creation of a CCC from a networkx graph."""
@@ -74,6 +81,27 @@ class TestCombinatorialComplex:
             CCC.add_cell(HyperEdge([1]), 3)
         assert len(str(ex.value)) > 0
 
+        CCC_1 = CombinatorialComplex(graph_based=True)
+        with pytest.raises(ValueError):
+            CCC_1.add_cell(cell=[1, 2, 3], rank=1)
+        with pytest.raises(TypeError):
+            CCC_1.add_cell(cell=1, rank=1)
+
+        with pytest.raises(ValueError):
+            CCC.add_cell([1, 2], rank=-1)
+
+        with pytest.raises(ValueError):
+            CCC.add_cell(cell="[1,2]", rank=1)
+
+        with pytest.raises(ValueError):
+            CCC.add_cell(cell=1, rank=1)
+
+        with pytest.raises(ValueError):
+            CCC.add_cell(cell=[1, [2, 3]], rank=1)
+
+        with pytest.raises(ValueError):
+            CCC.add_cell(cell=[1, 2], rank=0)
+
     def test_add_cells_from(self):
         """Test adding multiple cells to a CCC."""
         CCC = CombinatorialComplex()
@@ -89,6 +117,18 @@ class TestCombinatorialComplex:
 
         assert (1, 2, 3) not in CCC.cells
         assert (2, 3, 4) in CCC.cells
+
+        with pytest.raises(KeyError):
+            CCC.remove_cell([1, 2, 3])
+
+        CCC.remove_cell(frozenset({1}))
+        with pytest.raises(KeyError):
+            CCC._complex_set.hyperedge_dict[0][frozenset({1})]
+
+        CCC = CombinatorialComplex([(1, 2), (2, 3), (3, 4)], ranks=2)
+        CCC.remove_cell(HyperEdge(elements=[1, 2], rank=1))
+
+        assert (1, 2) not in CCC.cells
 
     def test_remove_cells(self):
         """Test removing multiple cells from a CCC."""
@@ -118,6 +158,9 @@ class TestCombinatorialComplex:
         assert B[(frozenset({1, 2}))] == 0
         assert B[(frozenset({1, 2, 3}))] == 1
         assert B[(frozenset({2, 5}))] == 2
+
+        with pytest.raises(ValueError):
+            CCC.incidence_matrix(rank=2, to_rank=0)
 
     def test_incidence_matrix_to_rank_none(self):
         """Test generating an incidence matrix without setting the to_rank parameter."""
@@ -152,6 +195,9 @@ class TestCombinatorialComplex:
         A02 = CCC.adjacency_matrix(0, 2)
         assert A02.shape == (6, 6)
 
+        with pytest.raises(ValueError):
+            CCC.adjacency_matrix(2, 0)
+
     def test_coadjacency_matrix(self):
         """Test generating a coadjacency matrix."""
         CCC = CombinatorialComplex()
@@ -164,6 +210,9 @@ class TestCombinatorialComplex:
         CA10 = CCC.coadjacency_matrix(1, 0)
         assert CA10.shape == (3, 3)
         assert (CA10.todense() == [[0, 1, 1], [1, 0, 0], [1, 0, 0]]).all()
+
+        with pytest.raises(ValueError):
+            CCC.coadjacency_matrix(0, 1)
 
     def test_clone(self):
         """Test the clone method of CombinatorialComplex."""
@@ -297,6 +346,9 @@ class TestCombinatorialComplex:
         CCC.__setitem__([1, 2], {"weights": 1})
         assert CCC._complex_set.hyperedge_dict[3][frozenset([1, 2])] == {"weights": 1}
         assert CCC.nodes[1]["weights"] == 1
+        # Setting a cell attribute not present in the CombinatorialComplex object.
+        with pytest.raises(KeyError):
+            CCC.__setitem__([1, 2, 3], {"weights": 1})
 
     def test_degree(self):
         """Test for the degree function."""
@@ -425,6 +477,21 @@ class TestCombinatorialComplex:
         CCC.set_cell_attributes(d)
         assert CCC.cells[(1, 2)]["attr1"] == "blue"
 
+    def test_get_cell_attributes(self):
+        """Test for get_cell_attributes method."""
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([1, 3, 2], rank=1)
+        CCC.add_cell([1, 2, 3, 4], rank=2)
+        CCC.add_cell([2, 5], rank=1)
+        CCC.add_cell([2, 6, 4], rank=2)
+        d = {(1, 2, 3, 4): "red", (1, 2, 3): "blue"}
+        CCC.set_cell_attributes(d, name="color")
+        assert CCC.get_cell_attributes("color") == {
+            frozenset({1, 2, 3}): "blue",
+            frozenset({1, 2, 3, 4}): "red",
+        }
+
     def test_set_node_attributes(self):
         """Test for the set and get nodes attributes method."""
         example1 = CombinatorialComplex()
@@ -534,3 +601,16 @@ class TestCombinatorialComplex:
                 [1, 1, 1, 2, 0],
             ]
         ).all()
+
+    def test_singletons(self):
+        """Test singletons of CCC."""
+        CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CCC.add_cell([9], rank=1)
+        assert CCC.singletons() == [frozenset({9})]
+
+    def test_remove_singletons(self):
+        """Test remove_singletons of CCC."""
+        CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CCC.add_cell([9], rank=1)
+        CCC = CCC.remove_singletons()
+        assert 9 not in CCC.nodes

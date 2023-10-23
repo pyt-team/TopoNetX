@@ -724,7 +724,9 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         if via_rank is not None:
             if rank > via_rank:
-                raise ValueError("rank must be greater than via_rank")
+                raise ValueError(
+                    "rank must be lesser than via_rank, must be r<k, got r>k"
+                )
         return super().adjacency_matrix(rank, via_rank, s, index)
 
     def coadjacency_matrix(self, rank, via_rank, s: int = None, index: bool = False):
@@ -828,11 +830,11 @@ class CombinatorialComplex(ColoredHyperGraph):
         if self.graph_based:
             if rank == 1:
                 if not isinstance(cell, Iterable):
-                    TypeError(
+                    raise TypeError(
                         "Rank 1 cells in graph-based CombinatorialComplex must be Iterable."
                     )
                 if len(cell) != 2:
-                    ValueError(
+                    raise ValueError(
                         f"Rank 1 cells in graph-based CombinatorialComplex must have size equal to 1 got {cell}."
                     )
 
