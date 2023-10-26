@@ -870,6 +870,30 @@ class TestCellComplex:
         d = {(1, 2, 3, 4): "red", (1, 2, 4): "blue", (2, 6): "green"}
         CC.set_cell_attributes(d, rank=2, name="color")
         assert CC.cells[(2, 6)]["color"] == "green"
+        G = nx.path_graph(3)
+        CC = CellComplex(G)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell(
+            [1, 2, 4],
+            rank=2,
+        )
+        CC.add_cell([3, 4, 8], rank=2)
+        CC.add_cell([4, 5], rank=2)
+        d = {
+            (1, 2, 3, 4): {"color": "red", "attr2": 1},
+            (1, 2, 4): {"color": "blue", "attr2": 3},
+            (4, 5): {"color": "green", "attr2": 4},
+        }
+        CC.set_cell_attributes(d, rank=2)
+        assert CC.cells[(1, 2, 3, 4)][0]["color"] == "red"
+        assert CC.cells[(4, 5)]["color"] == "green"
+        d = {
+            (1, 2, 3, 4): {"color": "red", "attr2": 1},
+            (1, 2, 4): {"color": "blue", "attr2": 3},
+            (4, 5): {"hello": "world"},
+        }
+        CC.set_cell_attributes(d, rank=2)
 
     def test_remove_cells(self):
         """Test remove cells."""
@@ -1708,4 +1732,20 @@ class TestCellComplex:
         CC.add_cell([1, 2, 3], rank=2)
         assert np.any(
             CC.hodge_laplacian_matrix(rank=2, signed=False).todense() == np.array([[3]])
+        )
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        CC.add_cell([3, 4, 5], rank=2)
+        np.any(
+            CC.hodge_laplacian_matrix(1, signed=False).todense()
+            == np.array(
+                [
+                    [3.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                    [0.0, 3.0, 1.0, 0.0, 0.0, 1.0],
+                    [0.0, 1.0, 3.0, 0.0, 1.0, 0.0],
+                    [1.0, 0.0, 0.0, 4.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0, 0.0, 3.0, 0.0],
+                    [0.0, 1.0, 0.0, 0.0, 0.0, 3.0],
+                ]
+            )
         )
