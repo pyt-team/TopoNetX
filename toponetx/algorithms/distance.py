@@ -15,12 +15,12 @@ from toponetx.classes.hyperedge import HyperEdge
 __all__ = ["distance", "cell_distance"]
 
 
-def distance(complex: Complex, source: Hashable, target: Hashable, s: int = 1) -> int:
+def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) -> int:
     """Return shortest s-walk distance between two nodes in the cell complex.
 
     Parameters
     ----------
-    complex : Complex.
+    domain : Complex.
         Supported complexes are cell/combintorial and hypegraphs.
     source : Hashable
         A node in the input complex.
@@ -31,7 +31,7 @@ def distance(complex: Complex, source: Hashable, target: Hashable, s: int = 1) -
 
     Returns
     -------
-    s_walk_distance : int
+    int
 
     See Also
     --------
@@ -58,8 +58,8 @@ def distance(complex: Complex, source: Hashable, target: Hashable, s: int = 1) -
     >>> CHG = CC.to_colored_hypergraph()
     >>> list(node_diameters(CHG))
     """
-    if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError(f"Input complex {complex} is not supported.")
+    if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+        raise ValueError(f"Input complex {domain} is not supported.")
     if isinstance(source, Cell):
         source = source.elements
     if isinstance(target, Cell):
@@ -68,7 +68,7 @@ def distance(complex: Complex, source: Hashable, target: Hashable, s: int = 1) -
         source = tuple(source)
     if isinstance(target, Iterable):
         target = tuple(target)
-    rowdict, A = complex.node_to_all_cell_adjacnecy_matrix(index=True)
+    rowdict, A = domain.node_to_all_cell_adjacnecy_matrix(index=True)
     G = nx.from_scipy_sparse_array(A)
     try:
         path = nx.shortest_path_length(G, rowdict[source], rowdict[target])
@@ -79,7 +79,7 @@ def distance(complex: Complex, source: Hashable, target: Hashable, s: int = 1) -
 
 
 def cell_distance(
-    complex: Complex,
+    domain: Complex,
     source: Iterable | HyperEdge | Cell,
     target: Iterable | HyperEdge | Cell,
     s: int = 1,
@@ -88,7 +88,7 @@ def cell_distance(
 
     Parameters
     ----------
-    complex : Complex
+    domain : Complex
         Supported complexes are cell/combintorial and hypegraphs.
     source : Iterable or HyperEdge or Cell
         An Iterable representing a cell in the input complex cell complex.
@@ -131,18 +131,18 @@ def cell_distance(
     >>> CCC = CC.to_combinatorial_complex()
     >>> cell_distance(CCC, frozenset({2, 3}) ,frozenset({6, 7}))
     """
-    if not isinstance(complex, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
-        raise ValueError(f"Input complex {complex} is not supported.")
+    if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+        raise ValueError(f"Input complex {domain} is not supported.")
     if isinstance(source, (Cell, HyperEdge)):
         source = source.elements
     if isinstance(target, (Cell, HyperEdge)):
         target = target.elements
-    if isinstance(complex, CellComplex):
+    if isinstance(domain, CellComplex):
         if isinstance(source, Iterable):
             source = tuple(source)
         if isinstance(target, Iterable):
             target = tuple(target)
-    cell_dict, A = complex.all_cell_to_node_coadjacnecy_matrix(s=s, index=True)
+    cell_dict, A = domain.all_cell_to_node_coadjacnecy_matrix(s=s, index=True)
     G = nx.from_scipy_sparse_array(A)
     try:
         path_distance = nx.shortest_path_length(G, cell_dict[source], cell_dict[target])

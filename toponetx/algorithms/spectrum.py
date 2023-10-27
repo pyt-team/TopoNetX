@@ -99,7 +99,7 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components: int):
 
 
 def set_hodge_laplacian_eigenvector_attrs(
-    complex,
+    SC: SimplicialComplex,
     dim: int,
     n_components: int,
     laplacian_type: Literal["up", "down", "hodge"] = "hodge",
@@ -109,8 +109,7 @@ def set_hodge_laplacian_eigenvector_attrs(
 
     Parameters
     ----------
-    complex : a SimplicialComplex/CellComplex object
-        Complex.
+    SC : SimplicialComplex
     dim : int
         Dimension of the hodge laplacian to be computed.
     n_components : int
@@ -128,13 +127,13 @@ def set_hodge_laplacian_eigenvector_attrs(
     >>> set_hodge_laplacian_eigenvector_attrs(SC, 1, 2, "down")
     >>> SC.get_simplex_attributes("0.th_eigen", 1)
     """
-    index = complex.skeleton(dim)
+    index = SC.skeleton(dim)
     if laplacian_type == "hodge":
-        L = complex.hodge_laplacian_matrix(dim)
+        L = SC.hodge_laplacian_matrix(dim)
     elif laplacian_type == "up":
-        L = complex.up_laplacian_matrix(dim)
+        L = SC.up_laplacian_matrix(dim)
     elif laplacian_type == "down":
-        L = complex.up_laplacian_matrix(dim)
+        L = SC.up_laplacian_matrix(dim)
     else:
         raise ValueError(
             f"laplacian_type must be up, down or hodge, got {laplacian_type}"
@@ -145,7 +144,7 @@ def set_hodge_laplacian_eigenvector_attrs(
         d = dict(zip(index, vect[i]))
         if normalized:
             d = _normalize(d)
-        complex.set_simplex_attributes(d, str(i) + ".th_eigen")
+        SC.set_simplex_attributes(d, str(i) + ".th_eigen")
 
 
 def laplacian_beltrami_eigenvectors(SC, mode: str = "fem"):
@@ -168,13 +167,12 @@ def laplacian_beltrami_eigenvectors(SC, mode: str = "fem"):
     return eigenvectors, eigenvalues
 
 
-def set_laplacian_beltrami_eigenvectors(complex) -> None:
+def set_laplacian_beltrami_eigenvectors(SC: SimplicialComplex) -> None:
     """Set the laplacian beltrami eigenvectors as simplex attributes.
 
     Parameters
     ----------
-    complex : a SimplicialComplex object
-        Complex.
+    SC : SimplicialComplex
 
     Examples
     --------
@@ -183,11 +181,11 @@ def set_laplacian_beltrami_eigenvectors(complex) -> None:
     >>> set_laplacian_beltrami_eigenvectors(SC)
     >>> vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
     """
-    index = complex.skeleton(0)
-    vect, _ = laplacian_beltrami_eigenvectors(complex)
+    index = SC.skeleton(0)
+    vect, _ = laplacian_beltrami_eigenvectors(SC)
     for i in range(len(vect)):
         d = dict(zip(index, vect[:, i]))
-        complex.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
+        SC.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
 
 
 def laplacian_spectrum(matrix):
