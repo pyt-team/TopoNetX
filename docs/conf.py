@@ -1,7 +1,5 @@
 """Sphinx configuration file."""
 
-import toponetx
-
 project = "TopoNetX"
 copyright = "2022-2023, PyT-Team, Inc."
 author = "PyT-Team Authors"
@@ -13,6 +11,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.githubpages",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
@@ -27,7 +26,7 @@ napoleon_use_ivar = False
 napoleon_use_rtype = False
 napoleon_include_init_with_doc = False
 
-# Configure nbsphinx for notebooks execution
+# Configure nbsphinx for notebook execution
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
     "--InlineBackend.rc={'figure.dpi': 96}",
@@ -112,3 +111,11 @@ texinfo_documents = [
 
 epub_title = project
 epub_exclude_files = ["search.html"]
+
+# Configure intersphinx
+intersphinx_mapping = {
+    "networkx": ("https://networkx.org/documentation/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "python": ("https://docs.python.org/3/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+}
