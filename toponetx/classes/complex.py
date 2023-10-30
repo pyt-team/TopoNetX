@@ -17,7 +17,7 @@ class Atom(abc.ABC):
         The elements in the atom.
     name : str, optional
         Name of the atom.
-    kwargs : keyword arguments, optional
+    **kwargs : keyword arguments, optional
         Additional attributes to be associated with the atom.
     """
 
@@ -135,7 +135,7 @@ class Complex(abc.ABC):
     ----------
     name : str, optional
         Name of the complex.
-    kwargs : keyword arguments, optional
+    **kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
     Attributes
@@ -159,7 +159,12 @@ class Complex(abc.ABC):
     @property
     @abc.abstractmethod
     def dim(self) -> int:
-        """Return dimension of the complex."""
+        """Return dimension of the complex.
+
+        Returns
+        -------
+        int
+        """
 
     @property
     @abc.abstractmethod
@@ -169,16 +174,28 @@ class Complex(abc.ABC):
         Returns
         -------
         tuple of ints
-            The number of elements for each rank. If the complex is empty, an empty tuple is returned.
+            The number of elements for each rank. If the complex is empty, an empty
+            tuple is returned.
         """
 
     @abc.abstractmethod
     def skeleton(self, rank: int):
-        """Return dimension of the complex."""
+        """Return the atoms of given `rank` in this complex.
+
+        Parameters
+        ----------
+        rank : int
+            The rank of the skeleton.
+        """
 
     @abc.abstractmethod
     def __str__(self) -> str:
-        """Print basic string representation."""
+        """Print basic string representation.
+
+        Returns
+        -------
+        str
+        """
 
     @abc.abstractmethod
     def __repr__(self) -> str:
@@ -206,22 +223,43 @@ class Complex(abc.ABC):
 
     @abc.abstractmethod
     def __contains__(self, item: Any) -> bool:
-        """Check whether the complex contains an item."""
+        """Check whether the complex contains an item.
+
+        Parameters
+        ----------
+        item : Any
+            The item to be checked.
+
+        Returns
+        -------
+        bool
+        """
 
     @abc.abstractmethod
     def __getitem__(self, key):
         """Get item."""
 
     @abc.abstractmethod
-    def remove_nodes(self, node_set) -> None:
+    def remove_nodes(self, node_set: Iterator[Hashable]) -> None:
         """Remove the given nodes from the complex.
 
         Any elements that become invalid due to the removal of nodes are also removed.
+
+        Parameters
+        ----------
+        node_set : Iterator[Hashable]
+            The nodes to be removed.
         """
 
     @abc.abstractmethod
-    def add_node(self, node) -> None:
-        """Add node to the complex."""
+    def add_node(self, node: Hashable) -> None:
+        """Add node to the complex.
+
+        Parameters
+        ----------
+        node : Hashable
+            The node to be added.
+        """
 
     @abc.abstractmethod
     def incidence_matrix(

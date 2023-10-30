@@ -7,24 +7,16 @@ author = "PyT-Team Authors"
 extensions = [
     "nbsphinx",
     "nbsphinx_link",
+    "numpydoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
-    "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx_gallery.load_style",
 ]
-
-# Configure napoleon for numpy docstring
-napoleon_google_docstring = False
-napoleon_numpy_docstring = True
-napoleon_use_param = False
-napoleon_use_ivar = False
-napoleon_use_rtype = False
-napoleon_include_init_with_doc = False
 
 # Configure nbsphinx for notebook execution
 nbsphinx_execute_arguments = [
@@ -112,10 +104,15 @@ texinfo_documents = [
 epub_title = project
 epub_exclude_files = ["search.html"]
 
-# Configure intersphinx
+# configure intersphinx
 intersphinx_mapping = {
     "networkx": ("https://networkx.org/documentation/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "python": ("https://docs.python.org/3/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }
+
+# configure numpydoc
+numpydoc_validation_checks = {"all", "GL01", "ES01", "EX01", "SA01"}
+numpydoc_show_class_members = False
+numpydoc_class_members_toctree = False

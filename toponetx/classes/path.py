@@ -31,7 +31,7 @@ class Path(Atom):
         Else, the sub-sequence of nodes in the elementary p-path will be reversed if the first index is larger than the last index.
     allowed_paths : Iterable[tuple[Hashable]], optional
         A list of allowed boundaries of an elementary p-path. If None, all possible boundaries are constructed (similarly to simplex).
-    attr: keyword arguments, optional
+    **kwargs: keyword arguments, optional
         Additional attributes to be associated with the elementary p-path.
 
     Notes
@@ -80,12 +80,12 @@ class Path(Atom):
         construct_boundaries: bool = False,
         reserve_sequence_order: bool = False,
         allowed_paths: Iterable[tuple[Hashable]] | None = None,
-        **attr,
+        **kwargs,
     ) -> None:
         self.__check_inputs(elements, reserve_sequence_order)
         if isinstance(elements, (int, str)):
             elements = [elements]
-        super().__init__(tuple(elements), name, **attr)
+        super().__init__(tuple(elements), name, **kwargs)
         if len(set(elements)) != len(self.elements):
             raise ValueError("A p-path cannot contain duplicate nodes.")
 
@@ -106,8 +106,7 @@ class Path(Atom):
         reserve_sequence_order: bool = False,
         allowed_paths: Iterable[tuple[Hashable]] | None = None,
     ) -> list[tuple[Hashable]]:
-        """
-        Return list of elementary p-path objects representing the boundaries.
+        """Return list of elementary p-path objects representing the boundaries.
 
         Parameters
         ----------
@@ -153,8 +152,10 @@ class Path(Atom):
 
     @property
     def boundary(self) -> list[tuple[Hashable]]:
-        """
-        Return list of elementary (p-1)-path objects representing the elementary (p-1)-path on the boundary of the target elementary p-path.
+        """Return the boundary of this path.
+
+        The boundary of this path are all elementary (p-1)-path objects representing
+        the elementary (p-1)-path on the boundary of the target elementary p-path.
 
         Returns
         -------
@@ -164,8 +165,7 @@ class Path(Atom):
         return self._boundaries
 
     def clone(self) -> "Path":
-        """
-        Return a shallow copy of the elementary p-path.
+        """Return a shallow copy of the elementary p-path.
 
         Returns
         -------
@@ -180,8 +180,7 @@ class Path(Atom):
         )
 
     def __check_inputs(self, elements: Any, reserve_sequence_order: bool) -> None:
-        """
-        Sanity check for inputs, as sequence order matters.
+        """Sanity check for inputs, as sequence order matters.
 
         Parameters
         ----------
@@ -202,14 +201,12 @@ class Path(Atom):
                 and str(elements[0]) > str(elements[-1])
             ):
                 raise ValueError(
-                    "An elementary p-path must have the first index smaller than the last index, got {}".format(
-                        elements
-                    )
+                    f"An elementary p-path must have the first index smaller than the last index, got {elements}."
                 )
         elif isinstance(elements, Hashable):
             if not isinstance(elements, int) or isinstance(elements, str):
                 raise ValueError(
-                    f"Elements of an elementary p-path must be an int or str, got {type(elements)}"
+                    f"Elements of an elementary p-path must be an int or str, got {type(elements)}."
                 )
 
     def __repr__(self) -> str:

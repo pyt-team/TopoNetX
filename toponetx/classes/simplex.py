@@ -11,21 +11,20 @@ __all__ = ["Simplex"]
 
 
 class Simplex(Atom):
-    """
-    A class representing a simplex in a simplicial complex.
+    """A class representing a simplex in a simplicial complex.
 
     This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension. The
     simplex is immutable, and the nodes in the simplex must be hashable and unique.
 
     Parameters
     ----------
-    elements: Collection
+    elements : Collection
         The nodes in the simplex.
     name : str, optional
         A name for the simplex.
     construct_tree : bool, default=True
         If True, construct the entire simplicial tree for the simplex.
-    attr : keyword arguments, optional
+    **kwargs : keyword arguments, optional
         Additional attributes to be associated with the simplex.
 
     Examples
@@ -42,7 +41,11 @@ class Simplex(Atom):
     """
 
     def __init__(
-        self, elements: Collection, name: str = "", construct_tree: bool = False, **attr
+        self,
+        elements: Collection,
+        name: str = "",
+        construct_tree: bool = False,
+        **kwargs,
     ) -> None:
         if construct_tree is not False:
             warnings.warn(
@@ -54,7 +57,7 @@ class Simplex(Atom):
             if not isinstance(i, Hashable):
                 raise ValueError(f"All nodes of a simplex must be hashable, got {i}")
 
-        super().__init__(frozenset(sorted(elements)), name, **attr)
+        super().__init__(frozenset(sorted(elements)), name, **kwargs)
         if len(elements) != len(self.elements):
             raise ValueError("A simplex cannot contain duplicate nodes.")
 
@@ -89,7 +92,18 @@ class Simplex(Atom):
 
     @staticmethod
     def construct_simplex_tree(elements: Collection) -> frozenset["Simplex"]:
-        """Return set of Simplex objects representing the faces."""
+        """Return set of Simplex objects representing the faces.
+
+        Parameters
+        ----------
+        elements : Collection
+            The simplex for which to construct the simplex tree.
+
+        Returns
+        -------
+        frozenset[Simplex]
+            The set of faces of the simplex.
+        """
         warnings.warn(
             "`Simplex.construct_simplex_tree` is deprecated.", DeprecationWarning
         )
@@ -116,7 +130,6 @@ class Simplex(Atom):
         For a n-simplex [1,2,3], the boundary is all the n-1 subsets of [1,2,3] :
             (1,2), (2,3), (3,1).
         """
-        """Return a set of Simplex objects representing the boundary faces."""
         warnings.warn(
             "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
             DeprecationWarning,
@@ -159,16 +172,20 @@ class Simplex(Atom):
     def __repr__(self) -> str:
         """Return string representation of the simplex.
 
-        :return: A string representation of the simplex.
-        :rtype: str
+        Returns
+        -------
+        str
+            A string representation of the simplex.
         """
         return f"Simplex({tuple(self.elements)})"
 
     def __str__(self) -> str:
         """Return string representation of the simplex.
 
-        :return: A string representation of the simplex.
-        :rtype: str
+        Returns
+        -------
+        str
+            A string representation of the simplex.
         """
         return f"Nodes set: {tuple(self.elements)}, attrs: {self._attributes}"
 
@@ -182,5 +199,6 @@ class Simplex(Atom):
         Returns
         -------
         Simplex
+            A copy of this simplex.
         """
         return Simplex(self.elements, name=self.name, **self._attributes)

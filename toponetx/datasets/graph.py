@@ -69,12 +69,11 @@ def karate_club(
     ValueError
         If complex_type is not one of the supported values.
 
-    Note
+    Notes
     -----
     A featured simplicial complex is returned as the clique complex of the graph.
     A featured cell complex is returned as the cell complex obtained by adding the
     independent cycles of graph.
-
     """
     if complex_type == "simplicial":
         g = nx.karate_club_graph()
@@ -140,27 +139,33 @@ def karate_club(
 
 
 def coauthorship() -> SimplicialComplex:
-    """Load the coauthorship network from [SNN20] as a simplicial complex.
+    """Load the coauthorship network as a simplicial complex.
 
-    The coauthorship network is a simplicial complex where a paper with k authors is represented by a (k-1)-simplex.
-    The dataset is pre-processed as in [SNN20]. From the Semantic Scholar Open Research Corpus 80 papers with number of citations between 5 and 10 were sampled.
-    The papers constitute simplices in the complex, which is completed with subsimplices (seen as collaborations between subsets of authors) to form a simplicial complex.
-    An attribute named "citations" is added to each simplex, corresponding to the sum of citations of all papers on which the authors represented by the simplex collaborated.
-    The resulting simplicial complex is of dimension 10 and contains 24552 simplices in total. See [SNN20] for a more detailed description of the dataset.
+    The coauthorship network is a simplicial complex where a paper with k authors is
+    represented by a (k-1)-simplex.
+    The dataset is pre-processed as in [1]_. From the
+    Semantic Scholar Open Research Corpus 80 papers with number of citations between 5
+    and 10 were sampled.
 
-    References
-    ----------
-    [SNN20] Stefania Ebli, Michael Defferrard and Gard Spreemann.
-        Simplicial Neural Networks.
-        Topological Data Analysis and Beyond workshop at NeurIPS.
-        https://arxiv.org/abs/2010.03633
-        https://github.com/stefaniaebli/simplicial_neural_networks
+    The papers constitute simplices in the complex, which is completed with
+    subsimplices (seen as collaborations between subsets of authors) to form a
+    simplicial complex.
+    An attribute named *citations* is added to each simplex, corresponding to the sum
+    of citations of all papers on which the authors represented by the simplex
+    collaborated. The resulting simplicial complex is of dimension 10 and contains
+    24552 simplices in total. See [1]_ for a more detailed description of the dataset.
 
     Returns
     -------
     SimplicialComplex
-        The simplicial complex comes with the attribute "citations", the number of citations attributed to the given collaborations of k authors.
+        The simplicial complex comes with the attribute *citations*, the number of
+        citations attributed to the given collaborations of k authors.
 
+    References
+    ----------
+    .. [1] Stefania Ebli, Michael Defferrard and Gard Spreemann. Simplicial Neural
+        Networks. Topological Data Analysis and Beyond workshop at NeurIPS.
+        https://arxiv.org/abs/2010.03633
     """
     coauthorship = np.load(DIR / "coauthorship.npy", allow_pickle=True)
 

@@ -5,6 +5,7 @@ HyperEdgeView, CellView, SimplexView, NodeView.
 """
 from collections.abc import Collection, Hashable, Iterable, Iterator, Sequence
 from itertools import chain
+from typing import Any, Literal
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.hyperedge import HyperEdge
@@ -89,7 +90,7 @@ class CellView:
             raise TypeError("Input must be a tuple, list or a cell.")
 
     def raw(self, cell: tuple | list | Cell) -> Cell | list[Cell]:
-        """Indexes the raw cell objects analogous to the overall index of CellView.
+        """Index the raw cell objects analogous to the overall index of CellView.
 
         Parameters
         ----------
@@ -98,7 +99,7 @@ class CellView:
 
         Returns
         -------
-        TYPE : Cell or list of Cells
+        Cell or list of Cells
             The raw Cell objects.
             If more than one cell with the same boundary exists, returns a list;
             otherwise a single cell.
@@ -257,8 +258,8 @@ class ColoredHyperEdgeView:
     def __contains__(self, hyperedge: Collection) -> bool:
         """Check if hyperedge is in the hyperedges.
 
-        Note
-        ----
+        Notes
+        -----
         Assumption of input here hyperedge = ( elements of hyperedge, key of hyperedge)
         """
         if len(self.hyperedge_dict) == 0:
@@ -328,8 +329,21 @@ class ColoredHyperEdgeView:
         """
         return f"ColoredHyperEdgeView({[(tuple(x[0]),x[1]) for x in self]})"
 
-    def skeleton(self, rank, store_hyperedge_key=True):
-        """Skeleton of the complex."""
+    def skeleton(self, rank: int, store_hyperedge_key: bool = True):
+        """Skeleton of the complex.
+
+        Parameters
+        ----------
+        rank : int
+            Rank of the skeleton.
+        store_hyperedge_key : bool, default=True
+            Whether to return the hyperedge key or not.
+
+        Returns
+        -------
+        list of frozensets
+            The skeleton of rank `rank`.
+        """
         if rank not in self.hyperedge_dict:
             return []
         if store_hyperedge_key:
@@ -349,43 +363,45 @@ class ColoredHyperEdgeView:
                 ]
             )
 
-    def get_rank(self, e):
-        """Get rank.
+    def get_rank(self, edge):
+        """Get the rank of a given hyperedge.
 
         Parameters
         ----------
-        e : Iterable, Hashable or ColoredHyperEdge
+        edge : Iterable, Hashable or ColoredHyperEdge
+            The edge for which to get the rank.
 
         Returns
         -------
-        int, the rank of the colored hyperedge e
+        int
+            The rank of the given colored hyperedge.
         """
-        if isinstance(e, HyperEdge):
-            if len(e) == 0:
+        if isinstance(edge, HyperEdge):
+            if len(edge) == 0:
                 return 0
             else:
                 for i in list(self.allranks):
-                    if frozenset(e.elements) in self.hyperedge_dict[i]:
+                    if frozenset(edge.elements) in self.hyperedge_dict[i]:
                         return i
-                raise KeyError(f"hyperedge {e.elements} is not in the complex")
-        elif isinstance(e, str):
-            if frozenset({e}) in self.hyperedge_dict[0]:
+                raise KeyError(f"hyperedge {edge.elements} is not in the complex")
+        elif isinstance(edge, str):
+            if frozenset({edge}) in self.hyperedge_dict[0]:
                 return 0
             else:
-                raise KeyError(f"hyperedge {frozenset({e})} is not in the complex")
-        elif isinstance(e, Iterable):
-            if len(e) == 0:
+                raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
+        elif isinstance(edge, Iterable):
+            if len(edge) == 0:
                 return 0
             else:
                 for i in list(self.allranks):
-                    if frozenset(e) in self.hyperedge_dict[i]:
+                    if frozenset(edge) in self.hyperedge_dict[i]:
                         return i
-                raise KeyError(f"hyperedge {e} is not in the complex")
-        elif isinstance(e, Hashable) and not isinstance(e, Iterable):
-            if frozenset({e}) in self.hyperedge_dict[0]:
+                raise KeyError(f"hyperedge {edge} is not in the complex")
+        elif isinstance(edge, Hashable) and not isinstance(edge, Iterable):
+            if frozenset({edge}) in self.hyperedge_dict[0]:
                 return 0
             else:
-                raise KeyError(f"hyperedge {frozenset({e})} is not in the complex")
+                raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
 
     @property
     def allranks(self):
@@ -495,37 +511,63 @@ class HyperEdgeView:
         """
         return f"HyperEdgeView({[tuple(x) for x in self]})"
 
-    def skeleton(self, rank, level=None):
-        """Skeleton of the complex."""
-        if level is None or level == "equal":
-            elements = []
+    def skeleton(
+        self,
+        rank: int,
+        level: Literal[
+            "equal",
+            "upper",
+            "up",
+            "lower",
+            "down",
+            "uppereq",
+            "upeq",
+            "lowereq",
+            "downeq",
+        ] = "equal",
+    ):
+        """Skeleton of the complex.
+
+        Parameters
+        ----------
+        rank : int
+            Rank of the skeleton.
+        level : str, default="equal"
+            Level of the skeleton.
+
+        Returns
+        -------
+        list of frozensets
+            The skeleton of rank `rank`.
+        """
+        if level == "equal":
             if rank in self.allranks:
                 return sorted(self.hyperedge_dict[rank].keys())
             else:
                 return []
 
-        elif level == "upper" or level == "up":
+        elif level in {"upper", "up"}:
             elements = []
             for rank_i in self.allranks:
                 if rank_i > rank:
                     elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
 
-        elif level == "lower" or level == "down":
+        elif level in {"lower", "down"}:
             elements = []
             for rank_i in self.allranks:
                 if rank_i < rank:
                     elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
 
-        elif level == "uppereq" or level == "upeq":
+        elif level in {"uppereq", "upeq"}:
             elements = []
             for rank_i in self.allranks:
                 if rank_i >= rank:
                     elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
 
-        elif level == "lowereq" or level == "downeq":
+        elif level in {"lowereq", "downeq"}:
             elements = []
             for rank_i in self.allranks:
                 if rank_i <= rank:
@@ -534,46 +576,48 @@ class HyperEdgeView:
 
         else:
             raise ValueError(
-                "level must be None, equal, 'uppereq', 'lowereq', 'upeq', 'downeq', 'uppereq', 'lower', 'up', or 'down'  "
+                "level must be 'equal', 'uppereq', 'lowereq', 'upeq', 'downeq', 'uppereq', 'lower', 'up', or 'down'  "
             )
 
-    def get_rank(self, e):
-        """Get rank.
+    def get_rank(self, edge):
+        """Get the rank of a hyperedge.
 
         Parameters
         ----------
-        e : Iterable, Hashable or HyperEdge
+        edge : Iterable, Hashable or HyperEdge
+            The edge for which to get the rank.
 
         Returns
         -------
-        int, the rank of the hyperedge e
+        int
+            The rank of the given hyperedge.
         """
-        if isinstance(e, HyperEdge):
-            if len(e) == 0:
+        if isinstance(edge, HyperEdge):
+            if len(edge) == 0:
                 return 0
             else:
                 for i in list(self.allranks):
-                    if frozenset(e.elements) in self.hyperedge_dict[i]:
+                    if frozenset(edge.elements) in self.hyperedge_dict[i]:
                         return i
-                raise KeyError(f"hyperedge {e.elements} is not in the complex")
-        elif isinstance(e, str):
-            if frozenset({e}) in self.hyperedge_dict[0]:
+                raise KeyError(f"hyperedge {edge.elements} is not in the complex")
+        elif isinstance(edge, str):
+            if frozenset({edge}) in self.hyperedge_dict[0]:
                 return 0
             else:
-                raise KeyError(f"hyperedge {frozenset({e})} is not in the complex")
-        elif isinstance(e, Iterable):
-            if len(e) == 0:
+                raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
+        elif isinstance(edge, Iterable):
+            if len(edge) == 0:
                 return 0
             else:
                 for i in list(self.allranks):
-                    if frozenset(e) in self.hyperedge_dict[i]:
+                    if frozenset(edge) in self.hyperedge_dict[i]:
                         return i
-                raise KeyError(f"hyperedge {e} is not in the complex")
-        elif isinstance(e, Hashable) and not isinstance(e, Iterable):
-            if frozenset({e}) in self.hyperedge_dict[0]:
+                raise KeyError(f"hyperedge {edge} is not in the complex")
+        elif isinstance(edge, Hashable) and not isinstance(edge, Iterable):
+            if frozenset({edge}) in self.hyperedge_dict[0]:
                 return 0
             else:
-                raise KeyError(f"hyperedge {frozenset({e})} is not in the complex")
+                raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
 
     @property
     def allranks(self):
@@ -734,10 +778,22 @@ class SimplexView:
 
 
 class NodeView:
-    """Node view class."""
+    """Node view class.
+
+    Parameters
+    ----------
+    objectdict : dict
+        A dictionary of nodes with their attributes.
+    cell_type : type
+        The type of the cell.
+    colored_nodes : bool, optional
+        Whether or not the nodes are colored.
+    name : str, optional
+        Name of the NodeView instance.
+    """
 
     def __init__(
-        self, objectdict, cell_type, colored_nodes=False, name: str = ""
+        self, objectdict, cell_type, colored_nodes: bool = False, name: str = ""
     ) -> None:
         self.name = name
         if len(objectdict) != 0:
@@ -819,8 +875,7 @@ class NodeView:
 
 
 class PathView(SimplexView):
-    """
-    Path view class.
+    """Path view class.
 
     Parameters
     ----------
@@ -864,8 +919,7 @@ class PathView(SimplexView):
                 raise KeyError(f"input {path} is not in the path dictionary")
 
     def __contains__(self, item: Sequence[Hashable] | Hashable | Path) -> bool:
-        """
-        Check if a path is in the path view.
+        """Check if a path is in the path view.
 
         Parameters
         ----------

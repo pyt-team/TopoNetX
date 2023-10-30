@@ -9,22 +9,21 @@ __all__ = ["HyperEdge"]
 
 
 class HyperEdge(Atom):
-    """Class for a hyperedge (or a set-type cell) in a combinatorial complex or a hyperedge complex.
+    """Class for a hyperedge (or a set-type cell).
 
-    This class represents a set-type cell in a combinatorial complex,
-    which is a set of nodes with optional attributes and a rank.
-    The nodes in a hyperedge must be hashable and unique,
-    and the hyperedge itself is immutable.
+    This class represents a set-type cell in a combinatorial complex, which is a set of
+    nodes with optional attributes and a rank. The nodes in a hyperedge must be
+    hashable and unique, and the hyperedge itself is immutable.
 
     Parameters
     ----------
     elements : iterable of hashables
         The nodes in the hyperedge.
-    rank : int, optional
-        The rank of the hyperedge. Default is None.
     name : str, optional
         The name of the hyperedge.
-    **attr : additional attributes
+    rank : int, optional
+        The rank of the hyperedge. Default is None.
+    **kwargs : additional attributes
         Additional attributes of the hyperedge, as keyword arguments.
 
     Examples
@@ -35,12 +34,14 @@ class HyperEdge(Atom):
     >>> ac3 = HyperEdge(("a", "b", "c"), rank=10)
     """
 
-    def __init__(self, elements: Collection, name: str = "", rank=None, **attr) -> None:
+    def __init__(
+        self, elements: Collection, name: str = "", rank=None, **kwargs
+    ) -> None:
         for i in elements:
             if not isinstance(i, Hashable):
                 raise TypeError("Every element of HyperEdge must be hashable.")
 
-        super().__init__(frozenset(sorted(elements)), name, **attr)
+        super().__init__(frozenset(sorted(elements)), name, **kwargs)
         if len(elements) != len(self.elements):
             raise ValueError("A hyperedge cannot contain duplicate nodes.")
 
@@ -77,7 +78,7 @@ class HyperEdge(Atom):
         return hash((self.elements, self._rank))
 
     def __eq__(self, other):
-        """Return a bool True if and only if all attributes of HyperEdge objects are equal.
+        """Return whether all attributes of HyperEdge objects are equal.
 
         Returns
         -------
@@ -89,7 +90,7 @@ class HyperEdge(Atom):
         return NotImplemented
 
     def __ne__(self, other):
-        """Return a bool True if and only if any attributes of HyperEdge objects are not equal.
+        """Return whether any attributes of HyperEdge objects are not equal.
 
         Returns
         -------
@@ -112,5 +113,4 @@ class HyperEdge(Atom):
         """
         if self._rank is not None:
             return self._rank
-        else:
-            return None
+        return None

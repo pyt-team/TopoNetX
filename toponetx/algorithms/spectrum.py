@@ -5,7 +5,6 @@ import numpy as np
 import scipy as sp
 import scipy.sparse as sparse
 import spharapy.spharabasis as sb
-from numpy import linalg as LA
 from scipy.sparse import diags
 
 from toponetx.classes import CombinatorialComplex
@@ -37,7 +36,7 @@ def _normalize(f):
 
     Returns
     -------
-    f_normalized : callable
+    callable
         A normalized copy of f between [0,1].
     """
     minf = min(f.values())
@@ -52,25 +51,26 @@ def _normalize(f):
     return f_normalized
 
 
-def hodge_laplacian_eigenvectors(hodge_laplacian, n_components: int):
+def hodge_laplacian_eigenvectors(
+    hodge_laplacian, n_components: int
+) -> tuple[np.ndarray, np.ndarray]:
     """Compute the first k eigenvectors of the hodge laplacian matrix.
 
     Parameters
     ----------
-    hodge laplacian : scipy sparse matrix
+    hodge_laplacian : scipy sparse matrix
         Hodge laplacian.
     n_components : int
-        Number of eigenvectors one needs to output, if
-        laplacian.shape[0]<=10, then all eigenvectors will be returned
+        Number of eigenvectors that should be computed.
 
     Returns
     -------
-    k_eigenvals, k_eigenvectors : array
+    k_eigenvals, k_eigenvectors : numpy.ndarray
         First k eigevals and eigenvec associated with the hodge laplacian matrix.
 
     Examples
     --------
-    >>> from toponetx import SimplicialComplex
+    >>> from toponetx.classes import SimplicialComplex
     >>> SC = SimplicialComplex([[ 1, 2, 3], [2, 3, 5], [0, 1]])
     >>> row, column, B1 = SC.incidence_matrix(1, index=True)
     >>> L1 = SC.hodge_laplacian_matrix(1)
@@ -82,7 +82,7 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components: int):
             hodge_laplacian, n_components, M=Diag, which="SM"
         )  # the lowest k eigenstuff
     else:
-        vals, vect = LA.eig(hodge_laplacian.toarray())
+        vals, vect = np.linalg.eig(hodge_laplacian.toarray())
 
     eigenvaluevector = []
     for i in vals.real:
@@ -95,7 +95,7 @@ def hodge_laplacian_eigenvectors(hodge_laplacian, n_components: int):
     finaleigenvectors = []
     for val in eigenvaluevector:
         finaleigenvectors.append(mydict[val])
-    return [np.array(eigenvaluevector).T, np.array(finaleigenvectors).T]
+    return np.array(eigenvaluevector).T, np.array(finaleigenvectors).T
 
 
 def set_hodge_laplacian_eigenvector_attrs(
@@ -104,25 +104,25 @@ def set_hodge_laplacian_eigenvector_attrs(
     n_components: int,
     laplacian_type: Literal["up", "down", "hodge"] = "hodge",
     normalized: bool = True,
-):
+) -> None:
     """Set the hodge laplacian eigenvectors as simplex attributes.
 
     Parameters
     ----------
     SC : SimplicialComplex
+        The simplicial complex for which to compute the hodge laplacian eigenvectors.
     dim : int
         Dimension of the hodge laplacian to be computed.
     n_components : int
-        The number of eigenvectors to be computed
-    laplacian_type : str
-        Type of hodge matrix to be computed,
-        options : up, down, hodge
-    normalized : bool
+        The number of eigenvectors to be computed.
+    laplacian_type : {"up", "down", "hodge"}, default="hodge"
+        Type of hodge matrix to be computed.
+    normalized : bool, default=True
         Normalize the eigenvector or not.
 
     Examples
     --------
-    >>> from toponetx import SimplicialComplex
+    >>> from toponetx.classes import SimplicialComplex
     >>> SC = SimplicialComplex([[1, 2, 3],[2, 3, 5],[0, 1]])
     >>> set_hodge_laplacian_eigenvector_attrs(SC, 1, 2, "down")
     >>> SC.get_simplex_attributes("0.th_eigen", 1)
@@ -147,14 +147,22 @@ def set_hodge_laplacian_eigenvector_attrs(
         SC.set_simplex_attributes(d, str(i) + ".th_eigen")
 
 
-def laplacian_beltrami_eigenvectors(SC, mode: str = "fem"):
+def laplacian_beltrami_eigenvectors(
+    SC: SimplicialComplex, mode: str = "fem"
+) -> tuple[np.ndarray, np.ndarray]:
     """Compute the first k eigenvectors of the laplacian beltrami matrix.
 
     Parameters
     ----------
-    SC : SimplicialComplex object
-    mode : str
-        Mode of the spharapy basis, options: fem, sphara
+    SC : toponetx.classes.SimplicialComplex
+        The simplicial complex for which to compute the beltrami eigenvectors.
+    mode : {"fem", "sphara"}, default="fem"
+        Mode of the spharapy basis.
+
+    Returns
+    -------
+    eigenvectors, eigenvalues : numpy.ndarray
+        Eigenvectors and eigenvalues.
 
     Examples
     --------
@@ -173,10 +181,11 @@ def set_laplacian_beltrami_eigenvectors(SC: SimplicialComplex) -> None:
     Parameters
     ----------
     SC : SimplicialComplex
+        Complex.
 
     Examples
     --------
-    >>> from toponetx import SimplicialComplex
+    >>> from toponetx.classes import SimplicialComplex
     >>> SC = SimplicialComplex.load_mesh("bunny.obj")
     >>> set_laplacian_beltrami_eigenvectors(SC)
     >>> vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
@@ -188,19 +197,17 @@ def set_laplacian_beltrami_eigenvectors(SC: SimplicialComplex) -> None:
         SC.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
 
 
-def laplacian_spectrum(matrix):
+def laplacian_spectrum(matrix) -> np.ndarray:
     """Return eigenvalues of the Laplacian matrix.
 
     Parameters
     ----------
     matrix : scipy sparse matrix
-
-    weight : str or None, optional (default='weight')
-       If None, then each cell has weight 1.
+        The Laplacian matrix.
 
     Returns
     -------
-    evals : NumPy array
+    numpy.ndarray
         Eigenvalues.
     """
     return sp.linalg.eigvalsh(matrix.todense())
@@ -208,19 +215,21 @@ def laplacian_spectrum(matrix):
 
 def cell_complex_hodge_laplacian_spectrum(
     CC: CellComplex, rank: int, weight: str | None = None
-):
+) -> np.ndarray:
     """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
-    CC : CellComplex
+    CC : toponetx.classes.CellComplex
+        The cell complex for which to compute the spectrum.
     rank : int
+        Rank of the cells to compute the Hodge Laplacian for.
     weight : str, optional
         If None, then each cell has weight 1.
 
     Returns
     -------
-    evals : NumPy array
+    numpy.ndarray
         Eigenvalues.
 
     Examples
@@ -237,19 +246,21 @@ def cell_complex_hodge_laplacian_spectrum(
 
 def simplicial_complex_hodge_laplacian_spectrum(
     SC: SimplicialComplex, rank: int, weight: str = "weight"
-):
+) -> np.ndarray:
     """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
-    SC : SimplicialComplex
+    SC : toponetx.classes.SimplicialComplex
+        The simplicial complex for which to compute the spectrum.
     rank : int
+        Rank of the Hodge Laplacian.
     weight : str or None, optional (default='weight')
         If None, then each cell has weight 1.
 
     Returns
     -------
-    evals : NumPy array
+    numpy.ndarray
         Eigenvalues.
 
     Examples
@@ -263,19 +274,19 @@ def simplicial_complex_hodge_laplacian_spectrum(
 
 def path_complex_hodge_laplacian_spectrum(
     PC: PathComplex, rank: int, weight: str | None = "weight"
-):
+) -> np.ndarray:
     """Return eigenvalues of the Laplacian of PC.
 
     Parameters
     ----------
-    PC : PathComplex
+    PC : toponetx.classes.PathComplex
     rank : int
     weight : str or None, default='weight'
         If None, then each cell has weight 1.
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Eigenvalues.
     """
     return laplacian_spectrum(
@@ -288,22 +299,23 @@ def cell_complex_adjacency_spectrum(CC: CellComplex, rank: int):
 
     Parameters
     ----------
-    CC : CellComplex
+    CC : toponetx.classes.CellComplex
+        The cell complex for which to compute the spectrum.
     rank : int
-        rank of the cells to take the adjacency from:
+        Rank of the cells to take the adjacency from:
         - 0-cells are nodes
         - 1-cells are edges
         - 2-cells are polygons
-        currently, no cells of rank > 2 are supported.
+        Currently, no cells of rank > 2 are supported.
 
     Returns
     -------
-    evals : NumPy array
-      Eigenvalues
+    numpy.ndarray
+        Eigenvalues.
 
     Examples
     --------
-    >>> from toponetx import CellComplex
+    >>> from toponetx.classes import CellComplex
     >>> CC = CellComplex()
     >>> CC.add_cell([1,2,3,4],rank=2)
     >>> CC.add_cell([2,3,4,5],rank=2)
@@ -314,62 +326,67 @@ def cell_complex_adjacency_spectrum(CC: CellComplex, rank: int):
 
 
 def simplicial_complex_adjacency_spectrum(
-    SC: SimplicialComplex, dim: int, weight: str | None = None
-):
+    SC: SimplicialComplex, rank: int, weight: str | None = None
+) -> np.ndarray:
     """Return eigenvalues of the Laplacian of G.
 
     Parameters
     ----------
-    SC : SimplicialComplex
-    dim : int
+    SC : toponetx.classes.SimplicialComplex
+        The simplicial complex for which to compute the spectrum.
+    rank : int
+        Rank of the adjacency matrix.
     weight : str, optional
         If None, then each cell has weight 1.
 
     Returns
     -------
-    evals : NumPy array
+    numpy.ndarray
         Eigenvalues.
     """
-    return laplacian_spectrum(SC.adjacency_matrix(rank=dim, weight=weight))
+    return laplacian_spectrum(SC.adjacency_matrix(rank, weight=weight))
 
 
 def path_complex_adjacency_spectrum(
     PC: PathComplex, dim: int, weight: str | None = None
-):
+) -> np.ndarray:
     """Return eigenvalues of the adjacency matrix of PC.
 
     Parameters
     ----------
-    PC : PathComplex
+    PC : toponetx.classes.PathComplex
     dim : int
     weight : str, optional
         If None, then each cell has weight 1.
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Eigenvalues.
     """
     return laplacian_spectrum(PC.adjacency_matrix(rank=dim, signed=True, weight=weight))
 
 
-def combinatorial_complex_adjacency_spectrum(CCC: CombinatorialComplex, rank, via_rank):
+def combinatorial_complex_adjacency_spectrum(
+    CCC: CombinatorialComplex, rank: int, via_rank: int
+) -> np.ndarray:
     """Return eigenvalues of the adjacency matrix of the combinatorial complex.
 
     Parameters
     ----------
-    CCC : CombinatorialComplex
-    rank : int
-    via_rank : int
+    CCC : toponetx.classes.CombinatorialComplex
+        The combinatorial complex for which to compute the spectrum.
+    rank, via_rank : int
+        Rank of the cells to compute the adjacency spectrum for.
 
     Returns
     -------
-    evals : NumPy array
-        Eigenvalues
+    numpy.ndarray
+        Eigenvalues.
 
     Examples
     --------
-    >>> from toponetx import CombinatorialComplex
+    >>> from toponetx.classes import CombinatorialComplex
     >>> CCC = CombinatorialComplex(cells=[[1, 2, 3], [2, 3], [0]],ranks=[2, 1, 0])
     >>> s = laplacian_spectrum(CCC.adjacency_matrix(0, 2))
     """

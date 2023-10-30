@@ -592,7 +592,7 @@ class TestCombinatorialComplex:
             ]
         ).all()
         (
-            CCC.all_cell_to_node_coadjacnecy_matrix().todense()
+            CCC.all_cell_to_node_coadjacency_matrix().todense()
             == [
                 [0, 2, 1, 2, 1],
                 [2, 0, 1, 3, 1],

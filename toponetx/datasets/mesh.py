@@ -23,7 +23,7 @@ SHREC_DS_MAP = {
 }
 
 COSEG_DS_MAP = {
-    "alian": (
+    "alien": (
         "coseg_alien",
         "https://github.com/mhajij/shrec_16/raw/main/coseg_alien.zip",
     ),
@@ -152,6 +152,9 @@ def shrec_16(size: Literal["full", "small"] = "full"):
 def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
     """Load coseg mesh segmentation datasets.
 
+    The coseg dataset was downloaded and processed from the repo:
+    https://github.com/Ideas-Laboratory/shape-coseg-dataset
+
     Parameters
     ----------
     data : {'alien', 'vase', 'chair'}, default='alien'
@@ -177,10 +180,6 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
     edge_feat : stores a 10-dimensional edge feature vector: dihedral angle, edge span, 2 edge angles in the triangle, 6 edge ratios.
     face_feat : stores a 7-dimensional face feature vector: face area (1 feat), face normal (3 feat), face angles (3 feat)
     face_label : stores the label of mesh segmentation as a face label
-
-    Data Source
-    -----------
-    The coseg dataset was downloaded and processed from the repo: https://github.com/Ideas-Laboratory/shape-coseg-dataset
 
     Examples
     --------

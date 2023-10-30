@@ -375,7 +375,7 @@ class TestCellComplex:
 
         # Test the function without index
 
-        result = CC.all_cell_to_node_coadjacnecy_matrix(
+        result = CC.all_cell_to_node_coadjacency_matrix(
             s=None, weight=False, index=False
         )
         expected_result = scipy.sparse.csc_matrix(
@@ -396,7 +396,7 @@ class TestCellComplex:
 
         # Test the function with index
 
-        result = CC.all_cell_to_node_coadjacnecy_matrix(
+        result = CC.all_cell_to_node_coadjacency_matrix(
             s=None, weight=False, index=True
         )
 

@@ -8,7 +8,6 @@ import pytest
 
 
 def _exec_tutorial(path):
-
     file_name = tempfile.NamedTemporaryFile(suffix=".ipynb").name
     args = [
         "jupyter",
