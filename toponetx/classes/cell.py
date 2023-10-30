@@ -131,7 +131,6 @@ class Cell(Atom):
 
                 _adjdict[e[0]] = e[1]
         else:
-
             for e in _boundary:
                 if e[0] == e[1]:
                     return False
