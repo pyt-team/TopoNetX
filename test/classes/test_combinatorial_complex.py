@@ -1,10 +1,12 @@
 """Unit tests for the combinatorial complex class."""
 
+import numpy as np
 import networkx as nx
 import pytest
 
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.hyperedge import HyperEdge
+from scipy.sparse import bmat
 
 
 class TestCombinatorialComplex:
@@ -228,6 +230,28 @@ class TestCombinatorialComplex:
         """Test the init method of CombinatorialComplex class."""
         with pytest.raises(TypeError):
             CombinatorialComplex(cells=1)
+
+    def test_dirac_operator_matrix(self):
+        """Test dirac operator."""
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2, 3, 4], rank=2)
+        CCC.add_cell([1, 2], rank=1)
+        CCC.add_cell([2, 3], rank=1)
+        CCC.add_cell([1, 4], rank=1)
+        CCC.add_cell([3, 4, 8], rank=2)
+        m = CCC.dirac_operator_matrix()
+        size = sum(CCC.shape)
+        assert m.shape == (size, size)
+
+        index, m = CCC.dirac_operator_matrix(index=True)
+
+
+
+        assert frozenset({1, 2}) in index
+        assert len(index) == size
+
+
+        assert np.prod(m.todense() >= 0) == 1
 
     def test_incidence_matrix_to_rank_down_without_rank(self):
         """Test generating an incidence matrix by setting the down_rank parameter without mentioning rank."""

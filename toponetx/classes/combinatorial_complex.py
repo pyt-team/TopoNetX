@@ -767,6 +767,75 @@ class CombinatorialComplex(ColoredHyperGraph):
                 raise ValueError("rank must be greater than via_rank")
         return super().coadjacency_matrix(rank, via_rank, s, index)
 
+
+    def dirac_operator_matrix(
+        self,
+        weight: str | None = None,
+        index: bool = False
+    ):
+        """Compute dirac operator matrix matrix.
+
+        Parameters
+        ----------
+        weight : str, optional
+            If not given, all nonzero entries are 1.
+        index : bool, default=False
+            If True return will include a dictionary of node uid : row number
+            and cell uid : column number
+
+        Returns
+        -------
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The coadjacency matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, coadjacency matrix
+            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        Examples
+        --------
+        >>> from toponetx.classes import SimplicialComplex
+        >>> CCC = CombinatorialComplex()
+        >>> CCC.add_cell([1, 2, 3, 4], rank=2)
+        >>> CCC.add_cell([1, 2], rank=1)
+        >>> CCC.add_cell([2, 3], rank=1)
+        >>> CCC.add_cell([1, 4], rank=1)
+        >>> CCC.add_cell([3, 4, 8], rank=2)
+        >>> CCC.dirac_operator_matrix()
+        """
+        from scipy.sparse import bmat
+
+        index_set = []
+        incidence = {}
+        for i in range(0, self.dim+1 ):
+            for j in range(i+1, self.dim+1 ):
+                indexj, indexi, Bij = self.incidence_matrix(i,j, weight=weight, index=True)
+                incidence[(i, j)] = Bij
+            index_set.append(indexj)
+        index_set.append(indexi)
+        dirac = []
+        for i in range(0, self.dim + 1):
+            row = []
+            for j in range(0, self.dim + 1):
+                if (i, j) in incidence:
+                    row.append(incidence[(i, j)])
+                elif (j, i) in incidence:
+                    row.append(incidence[(j, i)].T)
+                else:
+                    row.append(None)
+            dirac.append(row)
+        dirac = bmat(dirac)
+        if index:
+            d = {}
+            shift = 0
+            for i in index_set:
+                i = {k: v + shift for k, v in i.items()}
+                d.update(i)
+                shift = len(d)
+           
+            return d, dirac
+        else:
+            return dirac
+
+
+
     def add_cells_from(self, cells, ranks=None) -> None:
         """Add cells to combinatorial complex.
 
