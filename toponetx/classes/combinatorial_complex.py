@@ -767,12 +767,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 raise ValueError("rank must be greater than via_rank")
         return super().coadjacency_matrix(rank, via_rank, s, index)
 
-
-    def dirac_operator_matrix(
-        self,
-        weight: str | None = None,
-        index: bool = False
-    ):
+    def dirac_operator_matrix(self, weight: str | None = None, index: bool = False):
         """Compute dirac operator matrix matrix.
 
         Parameters
@@ -804,9 +799,11 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         index_set = []
         incidence = {}
-        for i in range(0, self.dim+1 ):
-            for j in range(i+1, self.dim+1 ):
-                indexj, indexi, Bij = self.incidence_matrix(i,j, weight=weight, index=True)
+        for i in range(0, self.dim + 1):
+            for j in range(i + 1, self.dim + 1):
+                indexj, indexi, Bij = self.incidence_matrix(
+                    i, j, weight=weight, index=True
+                )
                 incidence[(i, j)] = Bij
             index_set.append(indexj)
         index_set.append(indexi)
@@ -829,12 +826,10 @@ class CombinatorialComplex(ColoredHyperGraph):
                 i = {k: v + shift for k, v in i.items()}
                 d.update(i)
                 shift = len(d)
-           
+
             return d, dirac
         else:
             return dirac
-
-
 
     def add_cells_from(self, cells, ranks=None) -> None:
         """Add cells to combinatorial complex.

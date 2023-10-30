@@ -245,11 +245,8 @@ class TestCombinatorialComplex:
 
         index, m = CCC.dirac_operator_matrix(index=True)
 
-
-
         assert frozenset({1, 2}) in index
         assert len(index) == size
-
 
         assert np.prod(m.todense() >= 0) == 1
 
