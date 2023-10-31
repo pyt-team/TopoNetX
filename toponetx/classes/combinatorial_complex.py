@@ -753,14 +753,13 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        If index is True
-            coadjacency_matrix : scipy.sparse.csr.csr_matrix
-
-            row dictionary : dict
-
-        If index if False
-
-            coadjacency_matrix : scipy.sparse.csr.csr_matrix
+        scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
+            The coadjacency matrix, if `index` is False, otherwise
+        row_indices : dict
+            List identifying rows and columns of the coadjacency matrix. Only
+            returned if `index` is True.
+        scipy.sparse.csr.csc_matrix
+            The coadjacency  matrix of this combinatorial complex.
         """
         if via_rank is not None:
             if rank < via_rank:
@@ -782,11 +781,15 @@ class CombinatorialComplex(ColoredHyperGraph):
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
             The dirac operator matrix, if `index` is False, otherwise
-            lower (row) index dict, upper (col) index dict, dirac operator matrix
-            where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
+        row_indices : dict
+            List identifying rows and columns of the dirac operator matrix. Only
+            returned if `index` is True.
+        scipy.sparse.csr.csc_matrix
+            The dirac operator matrix of this combinatorial complex.
+
         Examples
         --------
-        >>> from toponetx.classes import SimplicialComplex
+        >>> from toponetx.classes import CombinatorialComplex
         >>> CCC = CombinatorialComplex()
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
         >>> CCC.add_cell([1, 2], rank=1)
@@ -818,7 +821,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 else:
                     row.append(None)
             dirac.append(row)
-        dirac = bmat(dirac)
+        dirac_mat = bmat(dirac)
         if index:
             d = {}
             shift = 0
@@ -827,9 +830,9 @@ class CombinatorialComplex(ColoredHyperGraph):
                 d.update(i)
                 shift = len(d)
 
-            return d, dirac
+            return d, dirac_mat
         else:
-            return dirac
+            return dirac_mat
 
     def add_cells_from(self, cells, ranks=None) -> None:
         """Add cells to combinatorial complex.
@@ -842,7 +845,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        CombinatorialComplex
+        None
         """
         if ranks is None:
             for cell in cells:
@@ -891,7 +894,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        Combinatorial Complex : CombinatorialComplex
+        None
         """
         if self.graph_based:
             if rank == 1:
@@ -962,8 +965,8 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        singles : list
-            A list of cells uids.
+        singltons : list
+            A list of singletons cells.
 
         Example
         -------
