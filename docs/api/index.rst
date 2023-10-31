@@ -8,6 +8,7 @@ The API reference gives an overview of `TopoNetX`, which consists of several mod
 - `algorithms` implements signal processing techniques on topological domains, such as the eigendecomposition of a laplacian.
 - `datasets` implements utilities to load small datasets on topological domains.
 - `transform` implements functions to transform the topological domain that supports a dataset, effectively "lifting" the dataset onto another domain.
+- `generators` implements functions to generate random topological domains.
 
 
 .. toctree::
@@ -18,3 +19,4 @@ The API reference gives an overview of `TopoNetX`, which consists of several mod
    classes
    transform
    algorithms
+   generators
