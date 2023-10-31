@@ -11,15 +11,15 @@ def load_ppi():
 
     In the graph, high interaction score is represented as low weight.
 
-    Reference
-    ---------
-    https://towardsdatascience.com/visualizing-protein-networks-in-python-58a9b51be9d5
-
     Returns
     -------
     networkx.Graph
         Graph with nodes that are proteins and edges corresponding to their
         chemical interactions.
+
+    References
+    ----------
+    https://towardsdatascience.com/visualizing-protein-networks-in-python-58a9b51be9d5
     """
     protein_list = [
         "TPH1",

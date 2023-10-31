@@ -5,15 +5,11 @@ from collections.abc import Collection, Hashable, Iterable
 import networkx as nx
 import numpy as np
 import scipy.sparse
-from networkx import Graph
-from scipy.sparse import csr_array, csr_matrix, diags
+from scipy.sparse import csr_array, diags
 
-import toponetx as tnx
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.reportviews import ColoredHyperEdgeView, NodeView
-from toponetx.classes.simplex import Simplex
-from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.utils.structure import (
     compute_set_incidence,
     incidence_to_adjacency,
@@ -87,7 +83,7 @@ class ColoredHyperGraph(Complex):
                     f"Input cells must be given as Iterable, got {type(cells)}."
                 )
 
-            if not isinstance(cells, Graph):
+            if not isinstance(cells, nx.Graph):
                 if ranks is None:
                     for cell in cells:
                         if not isinstance(cell, HyperEdge):
@@ -115,8 +111,7 @@ class ColoredHyperGraph(Complex):
 
     @property
     def cells(self):
-        """
-        Object associated with self._cells.
+        """Object associated with self._cells.
 
         Returns
         -------
@@ -126,13 +121,11 @@ class ColoredHyperGraph(Complex):
 
     @property
     def nodes(self):
-        """
-        Object associated with self.elements.
+        """Object associated with self.elements.
 
         Returns
         -------
         NodeView
-
         """
         return NodeView(
             self._complex_set.hyperedge_dict, cell_type=HyperEdge, colored_nodes=True
@@ -261,7 +254,8 @@ class ColoredHyperGraph(Complex):
 
         Returns
         -------
-        number_of_nodes : int
+        int
+            Number of nodes in node_set belonging to the CHG.
         """
         if node_set:
             return len([node for node in node_set if node in self.nodes])
@@ -288,7 +282,8 @@ class ColoredHyperGraph(Complex):
 
         Returns
         -------
-        order : int
+        int
+            The number of nudes in this hypergraph.
         """
         return len(self.nodes)
 
@@ -385,7 +380,7 @@ class ColoredHyperGraph(Complex):
         Parameters
         ----------
         node_set : an iterable of hashables
-            Nodes in CHG
+            The nodes to remove from this colored hypergraph.
         """
         copy_set = set()
         for node in node_set:
@@ -401,7 +396,10 @@ class ColoredHyperGraph(Complex):
         self._remove_node_helper(copy_set)
 
     def _remove_node_helper(self, node) -> None:
-        """Remove node from cells. Assumes node is present in the CHG."""
+        """Remove node from cells.
+
+        This function assumes that the node is present in the CHG.
+        """
         # Removing node in hyperedgeview
         for key in list(self.cells.hyperedge_dict.keys()):
             for key_rank in list(self.cells.hyperedge_dict[key].keys()):
@@ -829,15 +827,12 @@ class ColoredHyperGraph(Complex):
         return sparse_array_to_neighborhood_dict(self.adjacency_matrix(i, j))
 
     def remove_cells(self, cell_set) -> None:
-        """Remove cells from CHG.
+        """Remove cells from this colored hypergraph.
 
         Parameters
         ----------
         cell_set : iterable of hashables
-
-        Returns
-        -------
-        Colored Hypergraph : ColoredHyperGraph
+            The cells to remove from this colored hypergraph.
         """
         for cell in cell_set:
             self.remove_cell(cell)
@@ -870,7 +865,7 @@ class ColoredHyperGraph(Complex):
 
         Returns
         -------
-        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        incidence_matrix : scipy.sparse.csr.csr_matrix or numpy.ndarray
         row dictionary : dict
             Dictionary identifying row with item in entityset's children
         column dictionary : dict
@@ -961,7 +956,7 @@ class ColoredHyperGraph(Complex):
         sparse: bool = True,
         index: bool = False,
     ):
-        """Compute incidence matrix for the CHG indexed by cells of rank n X all other cells.
+        """Compute incidence matrix for the CHG indexed by cells of rank `n` and all other cells.
 
         Parameters
         ----------
@@ -1031,7 +1026,7 @@ class ColoredHyperGraph(Complex):
 
         return A
 
-    def all_cell_to_node_coadjacnecy_matrix(self, index: bool = False, s: int = None):
+    def all_cell_to_node_coadjacency_matrix(self, index: bool = False, s: int = None):
         """Compute the cell adjacency matrix.
 
         Parameters
@@ -1039,10 +1034,9 @@ class ColoredHyperGraph(Complex):
         s : int, list, default=1
             Minimum number of edges shared by neighbors with node.
 
-        Return
-        ------
-          all cells coadjacency_matrix : scipy.sparse.csr.csr_matrix
-
+        Returns
+        -------
+        all cells coadjacency_matrix : scipy.sparse.csr.csr_matrix
         """
         B = self.node_to_all_cell_incidence_matrix(index=index)
         if index:
@@ -1233,7 +1227,6 @@ class ColoredHyperGraph(Complex):
         Returns
         -------
         ColoredHyperGraph
-
         """
         from toponetx.classes.combinatorial_complex import CombinatorialComplex
 
@@ -1305,12 +1298,8 @@ class ColoredHyperGraph(Complex):
                         singletons.append(cell)
         return singletons
 
-    def remove_singletons(self, name: str | None = None):
+    def remove_singletons(self):
         """Construct new CHG with singleton cells removed.
-
-        Parameters
-        ----------
-        name: str, optional
 
         Returns
         -------

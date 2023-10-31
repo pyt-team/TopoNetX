@@ -1,15 +1,12 @@
 """Path complex."""
 from collections.abc import Hashable, Iterable, Iterator, Sequence
-from itertools import chain
 from typing import Any
 
 import networkx as nx
 import numpy as np
 import scipy as sp
-from hypernetx import Hypergraph
 from networkx.classes.reportviews import EdgeView, NodeView
 
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.complex import Complex
 from toponetx.classes.path import Path
 from toponetx.classes.reportviews import PathView
@@ -18,7 +15,9 @@ __all__ = ["PathComplex"]
 
 
 class PathComplex(Complex):
-    """A class representing a path complex based on simple paths as proposed in [1]_. The original path complex is defined in [2]_.
+    """A class representing a path complex based on simple paths as proposed in [1]_.
+
+    The original path complex is defined in [2]_.
 
     A path complex contains elementary p-paths that span the space of simple paths. Path complexes are a topological structure whose
     building blocks are paths, which are essentially different from simplicial complexes and cell complexes. If certain conditions are met, path complexes can generalize
@@ -150,8 +149,7 @@ class PathComplex(Complex):
             )
 
     def add_paths_from(self, paths: Iterable[Sequence[Hashable] | Path]) -> None:
-        """
-        Add elementary paths from an iterable of elementary paths.
+        """Add elementary paths from an iterable of elementary paths.
 
         An elementary p-path is a sequence of nodes (n1, ..., np) where p is the length of the sequence. In a path complex,
         for every elementary p-path in the path complex, their truncated sequences (n2, ..., np) and (n1, ..., np-1) are also in the path complex.
@@ -175,8 +173,7 @@ class PathComplex(Complex):
             self.add_path(p)
 
     def add_path(self, path: Hashable | Sequence[Hashable] | Path, **attr) -> None:
-        """
-        Add an elementary path to the path complex.
+        """Add an elementary path to the path complex.
 
         An elementary p-path is a sequence of nodes (n1, ..., np) where p is the length of the sequence. In a path complex,
         for every elementary p-path in the path complex, their truncated sequences (n2, ..., np) and (n1, ..., np-1) are also in the path complex.
@@ -198,7 +195,6 @@ class PathComplex(Complex):
         >>> PC.add_path((1, 2, 4))
         >>> PC.paths
         PathView([(1,), (2,), (3,), (4,), (1, 2), (2, 3), (2, 4), (1, 2, 3), (1, 2, 4)])
-
         """
         new_paths = set()
         if isinstance(path, (int, str)):
@@ -218,9 +214,7 @@ class PathComplex(Complex):
                     and not self._reserve_sequence_order
                 ):
                     raise ValueError(
-                        "An elementary p-path must have the first index smaller than the last index, got {}".format(
-                            path
-                        )
+                        f"An elementary p-path must have the first index smaller than the last index, got {path}."
                     )
             else:  # path is a Path object
                 path_ = path.elements
@@ -238,32 +232,32 @@ class PathComplex(Complex):
             ):  # path is already in the complex, just update the attributes if needed
                 self._update_attributes(path, **attr)
                 return
-            else:
-                # update sub-paths
-                for length in range(len(path_), 0, -1):
-                    for i in range(0, len(path_) - length + 1):
-                        sub_path = path_[i : i + length]
-                        if not self._reserve_sequence_order and str(sub_path[0]) > str(
-                            sub_path[-1]
-                        ):
-                            sub_path = sub_path[::-1]
-                        sub_path = tuple(sub_path)
 
-                        # add to _G
-                        if len(sub_path) == 1:
-                            self._G.add_node(sub_path[0])
-                        elif len(sub_path) == 2:
-                            self._G.add_edge(sub_path[0], sub_path[1])
+            # update sub-paths
+            for length in range(len(path_), 0, -1):
+                for i in range(0, len(path_) - length + 1):
+                    sub_path = path_[i : i + length]
+                    if not self._reserve_sequence_order and str(sub_path[0]) > str(
+                        sub_path[-1]
+                    ):
+                        sub_path = sub_path[::-1]
+                    sub_path = tuple(sub_path)
 
-                        # expand _path_set if necessary. keep track of newly added paths to expend _allowed_paths
-                        new_path = self._update_faces_dict_entry(sub_path)
-                        if new_path is not None:
-                            new_paths.add(new_path)
-                # update allowed paths
-                if len(new_paths) > 0:
-                    self._allowed_paths.update(new_paths)
+                    # add to _G
+                    if len(sub_path) == 1:
+                        self._G.add_node(sub_path[0])
+                    elif len(sub_path) == 2:
+                        self._G.add_edge(sub_path[0], sub_path[1])
 
-                self._update_attributes(path, **attr)
+                    # expand _path_set if necessary. keep track of newly added paths to expend _allowed_paths
+                    new_path = self._update_faces_dict_entry(sub_path)
+                    if new_path is not None:
+                        new_paths.add(new_path)
+            # update allowed paths
+            if len(new_paths) > 0:
+                self._allowed_paths.update(new_paths)
+
+            self._update_attributes(path, **attr)
 
     @property
     def dim(self) -> int:
@@ -300,8 +294,7 @@ class PathComplex(Complex):
 
     @property
     def paths(self) -> PathView:
-        """
-        Set of all elementary p-paths.
+        """Set of all elementary p-paths.
 
         Returns
         -------
@@ -372,8 +365,7 @@ class PathComplex(Complex):
             self.add_path([node], **attr)
 
     def remove_nodes(self, node_set: Iterable[Hashable]) -> None:
-        """
-        Remove nodes from the path complex.
+        """Remove nodes from the path complex.
 
         Parameters
         ----------
@@ -399,8 +391,7 @@ class PathComplex(Complex):
         weight: str | None = None,
         index: bool = False,
     ) -> tuple[dict, dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
-        """
-        Compute incidence matrix of the path complex.
+        """Compute incidence matrix of the path complex.
 
         Parameters
         ----------
@@ -428,8 +419,7 @@ class PathComplex(Complex):
             boundary = sp.sparse.lil_matrix((0, len(self.nodes)))
             if index:
                 node_index = {
-                    (node,): i
-                    for i, node in enumerate(sorted(self.nodes, key=lambda x: str(x)))
+                    (node,): i for i, node in enumerate(sorted(self.nodes, key=str))
                 }
                 return {}, node_index, abs(boundary.tocoo())
             else:
@@ -488,8 +478,7 @@ class PathComplex(Complex):
         weight: str | None = None,
         index: bool = False,
     ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
-        """
-        Compute up laplacian matrix of the path complex.
+        """Compute up laplacian matrix of the path complex.
 
         Parameters
         ----------
@@ -534,8 +523,7 @@ class PathComplex(Complex):
         weight: str | None = None,
         index: bool = False,
     ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
-        """
-        Compute down laplacian matrix of the path complex.
+        """Compute down laplacian matrix of the path complex.
 
         Parameters
         ----------
@@ -577,8 +565,7 @@ class PathComplex(Complex):
         weight: str | None = None,
         index: bool = False,
     ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
-        """
-        Compute Hodge Laplacian matrix of the path complex.
+        """Compute Hodge Laplacian matrix of the path complex.
 
         Parameters
         ----------
@@ -641,8 +628,7 @@ class PathComplex(Complex):
         weight: str | None = None,
         index: bool = False,
     ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
-        """
-        Compute adjacency matrix of the path complex.
+        """Compute adjacency matrix of the path complex.
 
         Parameters
         ----------
@@ -674,8 +660,7 @@ class PathComplex(Complex):
         weight: str | None = None,
         index: bool = False,
     ) -> tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix:
-        """
-        Compute coadjacency matrix of the path complex.
+        """Compute coadjacency matrix of the path complex.
 
         Parameters
         ----------
@@ -775,8 +760,7 @@ class PathComplex(Complex):
         values: dict[Sequence[Hashable], Hashable | dict[Hashable, Any]],
         name: str | None = None,
     ) -> None:
-        """
-        Set node attributes for a path complex.
+        """Set node attributes for a path complex.
 
         Parameters
         ----------
@@ -860,8 +844,7 @@ class PathComplex(Complex):
         values: dict[Sequence[Hashable], Hashable | dict[Hashable, Any]],
         name: str | None = None,
     ) -> None:
-        """
-        Set edge attributes for a path complex.
+        """Set edge attributes for a path complex.
 
         Parameters
         ----------
@@ -896,7 +879,7 @@ class PathComplex(Complex):
                 if isinstance(value, dict):
                     for k, v in value.items():
                         self[edge][k] = v
-                        if isinstance(edge, tuple) or isinstance(edge, list):
+                        if isinstance(edge, (tuple, list)):
                             self._G.edges[edge[0], edge[1]][k] = v
                 else:
                     raise TypeError(
@@ -1047,8 +1030,7 @@ class PathComplex(Complex):
         return item in self._path_set
 
     def __getitem__(self, item: Sequence[Hashable] | Hashable):
-        """
-        Get the elementary p-path.
+        """Get the elementary p-path.
 
         Parameters
         ----------
@@ -1090,8 +1072,7 @@ class PathComplex(Complex):
     def compute_allowed_paths(
         graph: nx.Graph, reserve_sequence_order: bool = False, max_rank: int = 3
     ) -> set[list | tuple]:
-        """
-        Compute allowed paths from a graph.
+        """Compute allowed paths from a graph.
 
         Allowed paths are automatically computed by enumerating all simple paths in the graph whose length is less than
         or equal to max_rank. Allowed paths allow us to restrict the boundary of an elementary p-path to only sequences that exist in the graph.
@@ -1120,7 +1101,7 @@ class PathComplex(Complex):
         {(0, 1), (1, 3), (1, 2), (2,), (1, 3, 2), (0, 1, 2), (0, 1, 3), (1, 2, 3), (2, 1, 3), (2, 3), (1,), (0,), (3,)}
         """
         allowed_paths = []
-        all_nodes_list = [(node,) for node in sorted(graph.nodes, key=lambda x: str(x))]
+        all_nodes_list = [(node,) for node in sorted(graph.nodes, key=str)]
         all_edges_list = []
         for edge in graph.edges:
             if not reserve_sequence_order and str(edge[0]) > str(edge[1]):

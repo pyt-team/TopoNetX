@@ -668,7 +668,7 @@ class TestSimplicialComplex:
         G = nx.Graph()
         G.add_edge(1, 2, weight=2)
         G.add_edge(3, 4, weight=4)
-        SC = SimplicialComplex.from_nx_graph(G)
+        SC = SimplicialComplex.from_nx(G)
         assert SC[(1, 2)]["weight"] == 2
 
     def test_is_connected(self):

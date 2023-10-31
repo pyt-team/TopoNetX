@@ -18,18 +18,18 @@ def graph_to_neighbor_complex(G: nx.Graph) -> SimplicialComplex:
 
     Parameters
     ----------
-    G : networkx graph
+    G : networkx.Graph
         Input graph.
 
     Returns
     -------
-    SimplicialComplex
+    toponetx.classes.SimplicialComplex
         The neighbor complex of the graph.
 
     Notes
     -----
-    This type of simplicial complexes can have very large dimension ( dimension = max_i(len (G.neighbors(i))) )
-    and it is a function of the distribution of the valency of the graph.
+    This type of simplicial complexes can have very large dimension (max degree of the
+    graph) and it is a function of the distribution of the valency of the graph.
     """
     simplices = []
     for node in G:
@@ -45,7 +45,7 @@ def graph_to_clique_complex(
 
     Parameters
     ----------
-    G : networkx graph
+    G : networks.Graph
         Input graph.
     max_dim : int, optional
         The max dimension of the cliques in the output clique complex.
@@ -97,25 +97,25 @@ def graph_2_clique_complex(
 def weighted_graph_to_vietoris_rips_complex(
     G: nx.Graph, r: float, max_dim: int | None = None
 ):
-    """Get the Vietoris-Rips complex of radius r of a weighted undirected graph.
+    r"""Get the Vietoris-Rips complex of radius r of a weighted undirected graph.
 
-    The Vietoris-Rips complex of radius
-    r is the clique complex given by the cliques of G whose nodes have pairwise distances less or equal than r. All
-    vertices are added to the Vietoris-Rips complex regardless the radius introduced. If G is a clique weighted by a
-    dissimilarity function d that satisfies max_v d(v, v) <= min d(u,v) for u != v, and r >= d(v, v) for all nodes v,
-    then the Vietoris-Rips complex of radius r is the usual Vietoris-Rips abstract simplicial complex of radius r for
-    point clouds with dissimilarities.
+    The Vietoris-Rips complex of radius `r` is the clique complex given by the cliques
+    of `G` whose nodes have pairwise distances less or equal than `r`. All vertices are
+    added to the Vietoris-Rips complex regardless of the radius introduced.
+
+    If `G` is a clique weighted by a dissimilarity function d that satisfies
+    \max_v d(v, v) <= \min d(u,v) for u != v, and r >= d(v, v) for all nodes v,
+    then the Vietoris-Rips complex of radius `r` is the usual Vietoris-Rips abstract
+    simplicial complex of radius `r` for point clouds with dissimilarities.
 
     Parameters
     ----------
-    G : networkx graph
+    G : networkx.Graph
         Weighted undirected input graph. The weights of the edges must be in the attribute 'weight'.
     r : float
         The radius for the Vietoris-Rips simplicial complex computation.
     max_dim : int, optional
-        The max dimension of the cliques in
-        the output clique complex.
-        The default is None indicate max dimension.
+        The max dimension of the cliques in the output clique complex.
 
     Returns
     -------

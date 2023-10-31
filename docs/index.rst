@@ -66,7 +66,7 @@ To learn more about how topological domains are used in deep learning:
 
 - Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub. `Topological Deep Learning: Going Beyond Graph Data <https://arxiv.org/abs/2206.00606>`__.
 
-.. code-block:: language
+.. code-block:: BibTeX
 
    @misc{hajij2023topological,
          title={Topological Deep Learning: Going Beyond Graph Data},
@@ -80,7 +80,7 @@ To learn more about how topological domains are used in deep learning:
 
 - Mathilde Papillon, Sophia Sanborn, Mustafa Hajij, Nina Miolane. `Architectures of Topological Deep Learning: A Survey on Topological Neural Networks <https://arxiv.org/pdf/2304.10031.pdf>`__.
 
-.. code-block:: language
+.. code-block:: BibTeX
 
    @misc{papillon2023architectures,
          title={Architectures of Topological Deep Learning: A Survey on Topological Neural Networks},

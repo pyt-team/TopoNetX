@@ -27,17 +27,18 @@ class Cell(Atom):
         A 2D cell is regular if and only if there is no repetition in the boundary edges that define the cell.
         By default, the cell is assumed to be regular unless otherwise specified. Self-loops are not allowed in the boundary
         of the cell. If a cell violates the cell complex regularity condition, a ValueError is raised.
-    **attr : keyword arguments, optional
+    **kwargs : keyword arguments, optional
         Attributes belonging to the cell can be added as key-value pairs. Both the key and value must be hashable.
 
     Notes
     -----
-    - A cell is defined as an ordered sequence of nodes (n1, ..., nk), where each two consecutive nodes (ni, ni+1)
-    define an edge in the boundary of the cell. Note that the last edge (nk, n1) is also included in the boundary
-    of the cell and is used to close the cell. For instance, if a Cell is defined as `c = Cell((1, 2, 3))`,
-    then `c.boundary` will return `[(1, 2), (2, 3), (3, 1)]`, which consists of three edges.
-    - When cell is created, its boundary is automatically created as a
-    set of edges that encircle the cell.
+    - A cell is defined as an ordered sequence of nodes (n_1, ..., n_k), where each two
+      consecutive nodes (n_i, n_{i+1}) define an edge in the boundary of the cell. Note
+      that the last edge (n_k, n_1) is also included in the boundary of the cell. For
+      instance, if a Cell is defined as `c = Cell((1, 2, 3))`, then `c.boundary` will
+      return `[(1, 2), (2, 3), (3, 1)]`, which consists of three edges.
+    - When a cell is created, its boundary is automatically created as a set of edges
+      that encircle the cell.
 
     Examples
     --------
@@ -58,9 +59,9 @@ class Cell(Atom):
     """
 
     def __init__(
-        self, elements: Collection, name: str = "", regular: bool = True, **attr
+        self, elements: Collection, name: str = "", regular: bool = True, **kwargs
     ) -> None:
-        super().__init__(tuple(elements), name, **attr)
+        super().__init__(tuple(elements), name, **kwargs)
 
         self._regular = regular
         elements = list(elements)
@@ -98,6 +99,7 @@ class Cell(Atom):
         Returns
         -------
         Cell
+            A copy of this cell.
         """
         return Cell(self.elements, self.name, self._regular, **self._attributes)
 
@@ -157,7 +159,7 @@ class Cell(Atom):
         return True
 
     def sign(self, edge) -> Literal[-1, 1]:
-        """Compute the sign of the edge with respect to the cell.
+        """Compute the sign of the given edge with respect to this cell.
 
         This takes an edge as input and computes the sign of the edge with respect to the cell.
 
@@ -168,12 +170,14 @@ class Cell(Atom):
 
         Parameters
         ----------
-        edge: an iterable representing the edge whose sign with respect to the cell is to be computed.
+        edge : Iterable
+            The edge whose sign should be computed.
 
         Returns
         -------
-        1: if the edge is in the boundary of the cell and is in the counterclockwise direction around the cell.
-        -1: if the edge is in the boundary of the cell and is in the clockwise direction around the cell.
+        {1, -1}
+            1: if the edge is in the counterclockwise direction around the cell.
+            -1: if the edge is in the clockwise direction around the cell.
 
         Raises
         ------
@@ -240,6 +244,7 @@ class Cell(Atom):
         Parameters
         ----------
         cell : tuple, list or Cell
+            The cell to check for homotopy.
 
         Returns
         -------

@@ -21,8 +21,8 @@ def node_diameters(domain: Complex) -> tuple[list[int], list[set[Hashable]]]:
     components : list
         List of the s-component nodes.
 
-    Example
-    -------
+    Examples
+    --------
     >>> CC = CellComplex()
     >>> CC.add_cell([2,3,4],rank=2)
     >>> CC.add_cell([5,6,7],rank=2)
@@ -71,8 +71,8 @@ def cell_diameters(domain: Complex, s: int = 1) -> tuple[list[int], list[set[int
     list of component : list
         List of the cell uids in the s-cell component subcomplexes.
 
-    Example
-    -------
+    Examples
+    --------
     >>> CC = CellComplex()
     >>> CC.add_cell([2,3,4],rank=2)
     >>> CC.add_cell([5,6,7],rank=2)
@@ -84,7 +84,7 @@ def cell_diameters(domain: Complex, s: int = 1) -> tuple[list[int], list[set[int
     """
     if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
         raise TypeError(f"Input complex {domain} is not supported.")
-    coldict, A = domain.all_cell_to_node_coadjacnecy_matrix(index=True)
+    coldict, A = domain.all_cell_to_node_coadjacency_matrix(index=True)
     coldict = {v: k for k, v in coldict.items()}
 
     G = nx.from_scipy_sparse_array(A)
@@ -185,7 +185,7 @@ def cell_diameter(domain: Complex, s: int = None) -> int:
     """
     if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
         raise TypeError(f"Input complex {domain} is not supported.")
-    A = domain.all_cell_to_node_coadjacnecy_matrix()
+    A = domain.all_cell_to_node_coadjacency_matrix()
     G = nx.from_scipy_sparse_array(A)
     if nx.is_connected(G):
         return nx.diameter(G)

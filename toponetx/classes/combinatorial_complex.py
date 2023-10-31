@@ -1,24 +1,15 @@
 """Creation and manipulation of a combinatorial complex."""
 
-from collections.abc import Collection, Hashable, Iterable, Iterator
-from typing import Literal
+from collections.abc import Collection, Hashable, Iterable
+from typing import Any, Literal
 
 import networkx as nx
-import numpy as np
-from networkx import Graph
-from scipy.sparse import csr_matrix
 
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.classes.reportviews import HyperEdgeView, NodeView
-from toponetx.classes.simplex import Simplex
-from toponetx.classes.simplicial_complex import SimplicialComplex
-from toponetx.utils.structure import (
-    compute_set_incidence,
-    incidence_to_adjacency,
-    sparse_array_to_neighborhood_dict,
-)
+from toponetx.utils.structure import compute_set_incidence
 
 __all__ = ["CombinatorialComplex"]
 
@@ -36,36 +27,33 @@ class CombinatorialComplex(ColoredHyperGraph):
 
     A CCC is a generlization of graphs, hypergraphs, cellular and simplicial complexes.
 
-    Parameters
-    ----------
-    cells : Collection, optional
-    name : str, optional
-        An identifiable name for the combinatorial complex.
-    ranks : Collection, optional
-        when cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
-        size as cells.
-    weight : array-like, optional
-        User specified weight corresponding to setsytem of type pandas.DataFrame,
-        length must equal number of rows in dataframe.
-        If None, weight for all rows is assumed to be 1.
-    graph_based : bool, default=False
-        When true rank 1 edges must have cardinality equals to 1
-    kwargs : keyword arguments, optional
-        Attributes to add to the complex as key=value pairs.
+    Mathematical Example:
 
-    Attributes
-    ----------
-    complex : dict
-        A dictionary that can be used to store additional information about the complex.
-
-    Mathematical example
-    --------------------
     Let S = {1, 2, 3, 4} be a set of abstract entities.
     Let X = {{1, 2}, {1, 2, 3}, {1, 3}, {1, 4}} be a subset of the power set of S.
     Let rk be the ranking function that assigns the
     length of a set as its rank, i.e. rk({1, 2}) = 2, rk({1, 2, 3}) = 3, etc.
 
     Then, (S, X, rk) is a combinatorial complex.
+
+    Parameters
+    ----------
+    cells : Collection, optional
+        A collection of cells to add to the combinatorial complex.
+    name : str, optional
+        An identifiable name for the combinatorial complex.
+    ranks : Collection, optional
+        When cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
+        size as cells.
+    graph_based : bool, default=False
+        When true rank 1 edges must have cardinality equals to 1.
+    **kwargs : keyword arguments, optional
+        Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
 
     Examples
     --------
@@ -102,7 +90,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 raise TypeError(
                     f"Input cells must be given as Iterable, got {type(cells)}."
                 )
-            if not isinstance(cells, Graph):
+            if not isinstance(cells, nx.Graph):
                 if ranks is None:
                     for cell in cells:
                         if not isinstance(cell, HyperEdge):
@@ -182,13 +170,13 @@ class CombinatorialComplex(ColoredHyperGraph):
         Returns
         -------
         int
+            The number of nodes in node_set belonging to this combinatorial complex.
         """
         return super().number_of_nodes(node_set)
 
     @property
     def nodes(self):
-        """
-        Object associated with self.elements.
+        """Object associated with self.elements.
 
         Returns
         -------
@@ -200,8 +188,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
     @property
     def cells(self):
-        """
-        Object associated with self._cells.
+        """Object associated with self._cells.
 
         Returns
         -------
@@ -220,6 +207,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Returns
         -------
         int
+            The number of cells in cell_set belonging to this combinatorial complex.
         """
         return super().number_of_cells(cell_set)
 
@@ -236,21 +224,52 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         return self._complex_set.shape
 
-    def skeleton(self, rank: int, level=None):
-        """Skeleton of the CCC."""
+    def skeleton(
+        self,
+        rank: int,
+        level: Literal[
+            "equal",
+            "upper",
+            "up",
+            "lower",
+            "down",
+            "uppereq",
+            "upeq",
+            "lowereq",
+            "downeq",
+        ] = "equal",
+    ):
+        """Skeleton of the CCC.
+
+        Parameters
+        ----------
+        rank : int
+            The rank of the skeleton.
+        level : str, default="equal"
+            Level of the skeleton.
+
+        Returns
+        -------
+        list of HyperEdge
+            The skeleton of the CCC.
+        """
         return self._complex_set.skeleton(rank, level=level)
 
-    def order(self):
+    def order(self) -> int:
         """Compute the number of nodes in the CCC.
 
         Returns
         -------
-        order : int
+        int
+            The number of nodes in this combinatorial complex.
         """
         return super().order()
 
     def _remove_node_helper(self, node) -> None:
-        """Remove node from cells. Assumes node is present in the CCC."""
+        """Remove node from cells.
+
+        This function assumes that the node is present in the CCC.
+        """
         # Removing node in hyperedgeview
         for key in list(self.cells.hyperedge_dict.keys()):
             for key_rank in list(self.cells.hyperedge_dict[key].keys()):
@@ -272,9 +291,9 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         node_set : an iterable of hashables
-            Nodes in CCC
+            The nodes to remove from this combinatorial complex.
         """
-        return super().remove_nodes(node_set)
+        super().remove_nodes(node_set)
 
     def remove_node(self, node) -> None:
         """Remove node from cells.
@@ -285,10 +304,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         node : hashable or HyperEdge
-
-        Returns
-        -------
-        Combinatorial Complex : CombinatorialComplex
+            The node to remove from this combinatorial complex.
         """
         super()._remove_node(node)
 
@@ -300,11 +316,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         values : dict
             Dictionary of cell attributes to set keyed by cell name.
         name : str, optional
-           Attribute name
-
-        Returns
-        -------
-        None.
+           Attribute name.
 
         Examples
         --------
@@ -314,7 +326,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         >>> CCC = CombinatorialComplex()
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
-        >>> CCC.add_cell([1, 2, 4], rank=2,)
+        >>> CCC.add_cell([1, 2, 4], rank=2)
         >>> CCC.add_cell([3, 4], rank=2)
         >>> d = {(1, 2, 3, 4): 'red', (1, 2, 3): 'blue', (3, 4): 'green'}
         >>> CCC.set_cell_attributes(d, name='color')
@@ -337,17 +349,18 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         super().set_cell_attributes(values, name)
 
-    def get_node_attributes(self, name: str):
+    def get_node_attributes(self, name: str) -> dict[Hashable, Any]:
         """Get node attributes.
 
         Parameters
         ----------
         name : str
-           Attribute name
+           Attribute name.
 
         Returns
         -------
-        Dictionary of attributes keyed by node.
+        dict[Hashable, Any]
+            Dictionary mapping each node to the value of the given attribute name.
 
         Examples
         --------
@@ -367,7 +380,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         return super().get_node_attributes(name)
 
-    def get_cell_attributes(self, name: str, rank=None):
+    def get_cell_attributes(self, name: str, rank: int | None = None):
         """Get node attributes from graph.
 
         Parameters
@@ -375,11 +388,12 @@ class CombinatorialComplex(ColoredHyperGraph):
         name : str
            Attribute name.
         rank : int
-            rank of the k-cell
+            Restrict the returned attribute values to cells of a specific rank.
 
         Returns
         -------
-        Dictionary of attributes keyed by cell or k-cells if k is not None
+        dict
+            Dictionary of attributes keyed by cell or k-cells if k is not None.
 
         Examples
         --------
@@ -401,7 +415,15 @@ class CombinatorialComplex(ColoredHyperGraph):
             self._add_hyperedge(hyperedge=node, rank=0, **attr)
 
     def add_node(self, node, **attr) -> None:
-        """Add a node to a CCC."""
+        """Add a node to a CCC.
+
+        Parameters
+        ----------
+        node : Hashable
+            The node to add to this combinatorial complex.
+        **attr : keyword arguments, optional
+            Attributes to add to the node as key=value pairs.
+        """
         self._add_node(node, **attr)
 
     def _add_nodes_of_hyperedge(self, hyperedge_):
@@ -594,16 +616,19 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         rank : int
+            For which rank of cells to compute the incidence matrix.
         to_rank: int, optional
         incidence_type : {'up', 'down'}, default='up'
+            Whether to compute the up or down incidence matrix.
         sparse : bool, default=True
+            Whether to return a sparse or dense incidence matrix.
         index : bool, default=False
-            If True return will include a dictionary of children uid : row number
-            and element uid : column number
+            Whether to return the indices of the rows and columns of the incidence
+            matrix.
 
         Returns
         -------
-        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
+        incidence_matrix : scipy.sparse.csr.csr_matrix or numpy.ndarray
         row dictionary : dict
             Dictionary identifying row with item in entityset's children
         column dictionary : dict
@@ -657,10 +682,10 @@ class CombinatorialComplex(ColoredHyperGraph):
 
     def incidence_matrix(
         self,
-        rank,
+        rank: int,
         to_rank=None,
-        incidence_type: str = "up",
-        weight=None,
+        incidence_type: Literal["up", "down"] = "up",
+        weight: str | None = None,
         sparse: bool = True,
         index: bool = False,
     ):
@@ -668,25 +693,26 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        rank : int
-        to_rank: int, optional
-        incidence_type : {'up', 'down'}, default='up'
+        rank, to_rank : int
+            For which rank of cells to compute the incidence matrix.
+        incidence_type : {"up", "down"}, default="up"
+            Whether to compute the up or down incidence matrix.
         weight : bool, default=False
-            If False all nonzero entries are 1.
-            If True and self.static all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+            The name of the cell attribute to use as weights for the incidence matrix.
+            If `None`, all cell weights are considered to be one.
         sparse : bool, default=True
-        index : bool, optional
-            If True return will include a dictionary of node uid : row number
-            and cell uid : column number
+            Whether to return a sparse or dense incidence matrix.
+        index : bool, default=False
+            Whether to return the indices of the rows and columns of the incidence
+            matrix.
 
         Returns
         -------
-        incidence_matrix : scipy.sparse.csr.csr_matrix or np.ndarray
-        row dictionary : dict
-            Dictionary identifying rows with nodes
-        column dictionary : dict
-            Dictionary identifying columns with cells
+        row_indices, col_indices : dict
+            Dictionary assigning each row and column of the incidence matrix to a
+            cell.
+        incidence_matrix : scipy.sparse.csr.csr_matrix
+            The incidence matrix.
         """
         return self._incidence_matrix(
             rank, to_rank, incidence_type=incidence_type, sparse=sparse, index=index
@@ -698,21 +724,20 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         rank, via_rank : int
-            Two ranks for skeletons in the input combinatorial complex
-        s : int, list, default=1
+            Two ranks for skeletons in the input combinatorial complex.
+        s : int, default=1
             Minimum number of edges shared by neighbors with node.
-        index: bool, default=False
-            If True return will include a dictionary of node uid : row number
-            and cell uid : column number
+        index : bool, default=False
+            Whether to return the indices of the rows and columns of the adjacency
+            matrix.
 
         Returns
         -------
-        If index is True
-            adjacency_matrix : scipy.sparse.csr.csr_matrix
-            row dictionary : dict
-
-        If index if False
-            adjacency_matrix : scipy.sparse.csr.csr_matrix
+        indices : list
+            List identifying the rows and columns of the adjacency matrix with the
+            cells of the combinatorial complex. Only returned if `index` is True.
+        adjacency_matrix : scipy.sparse.csr.csr_matrix
+            The adjacency matrix of this combinatorial complex.
 
         Examples
         --------
@@ -738,47 +763,36 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        rank , via_rank : two ranks for skeletons in the input combinatorial complex , such that r>k
-
-        s : int, list, optional
+        rank, via_rank : int
+            Two ranks for skeletons in the input combinatorial complex , such that r>k.
+        s : int, optional
             Minimum number of edges shared by neighbors with node.
-
-        index: bool, optional
-            If True return will include a dictionary of node uid : row number
-            and cell uid : column number
-
-        weight: bool, default=True
-            If False all nonzero entries are 1.
-            If True coadjacency matrix will depend on weighted incidence matrix,
+        index : bool, default=False
+            Whether to return the indices of the rows and columns of the coadjacency
+            matrix.
 
         Returns
         -------
-        If index is True
-            coadjacency_matrix : scipy.sparse.csr.csr_matrix
-
-            row dictionary : dict
-
-        If index if False
-
-            coadjacency_matrix : scipy.sparse.csr.csr_matrix
+        indices : list
+            List identifying the rows and columns of the coadjacency matrix with the
+            cells of the combinatorial complex. Only returned if `index` is True.
+        coadjacency_matrix : scipy.sparse.csr.csr_matrix
+            The coadjacency matrix of this combinatorial complex.
         """
         if via_rank is not None:
             if rank < via_rank:
                 raise ValueError("rank must be greater than via_rank")
         return super().coadjacency_matrix(rank, via_rank, s, index)
 
-    def add_cells_from(self, cells, ranks=None) -> None:
+    def add_cells_from(self, cells, ranks: Iterable[int] | int | None = None) -> None:
         """Add cells to combinatorial complex.
 
         Parameters
         ----------
         cells : iterable of hashables
             For hashables the cells returned will be empty.
-        ranks: Iterable or int. When iterable, len(ranks) == len(cells)
-
-        Returns
-        -------
-        CombinatorialComplex
+        ranks : iterable or int, optional
+            When iterable, len(ranks) == len(cells).
         """
         if ranks is None:
             for cell in cells:
@@ -816,18 +830,17 @@ class CombinatorialComplex(ColoredHyperGraph):
         rank = self._complex_set.get_rank(hyperedge_)
         del self._complex_set.hyperedge_dict[rank][hyperedge_]
 
-    def add_cell(self, cell, rank=None, **attr):
+    def add_cell(self, cell, rank=None, **attr) -> None:
         """Add a single cells to combinatorial complex.
 
         Parameters
         ----------
         cell : hashable, iterable or HyperEdge
             If hashable the cell returned will be empty.
-        rank : rank of a cell
-
-        Returns
-        -------
-        Combinatorial Complex : CombinatorialComplex
+        rank : int
+            Rank of the cell.
+        **attr : keyword arguments, optional
+            Attributes to add to the cell as key=value pairs.
         """
         if self.graph_based:
             if rank == 1:
@@ -848,10 +861,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         cell : hashable or RankedEntity
-
-        Returns
-        -------
-        Combinatorial Complex : CombinatorialComplex
+            The cell to remove from this combinatorial complex.
 
         Notes
         -----
@@ -867,10 +877,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         cell_set : iterable of hashables
-
-        Returns
-        -------
-        CombinatorialComplex : Combinatorial Complex
+            The cells to remove from this combinatorial complex.
         """
         super().remove_cells(cell_set)
 
@@ -884,6 +891,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Returns
         -------
         CombinatorialComplex
+            A copy of this combinatorial complex.
         """
         CCC = CombinatorialComplex(name=self.name, graph_based=self.graph_based)
         for cell in self.cells:
@@ -898,17 +906,16 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Returns
         -------
-        singles : list
+        list
             A list of cells uids.
 
-        Example
-        -------
+        Examples
+        --------
         >>> CCC = CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
         >>> CCC.add_cell([9],rank=9)
         >>> CCC.singletons()
-
         """
         singletons = []
         for k, cells in self.cells.hyperedge_dict.items():
@@ -922,16 +929,13 @@ class CombinatorialComplex(ColoredHyperGraph):
                                 singletons.append(cell)
         return singletons
 
-    def remove_singletons(self, name: str | None = None):
+    def remove_singletons(self):
         """Construct new CCC with singleton cells removed.
-
-        Parameters
-        ----------
-        name: str, optional
 
         Returns
         -------
         CombinatorialComplex
+            A copy of this combinatorial complex with singleton cells removed.
         """
         cells = [cell for cell in self.cells if cell not in self.singletons()]
         return self.restrict_to_cells(cells)

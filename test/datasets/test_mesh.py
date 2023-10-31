@@ -43,7 +43,7 @@ class TestMeshDatasets:
 
     def test_coseg(self):
         """Test coseg."""
-        coseg_data = coseg(data="alian")
+        coseg_data = coseg(data="alien")
 
         assert len(coseg_data["complexes"]) != 0
         assert len(coseg_data["node_feat"]) != 0
