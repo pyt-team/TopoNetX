@@ -773,16 +773,16 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         weight : str, optional
-            If not given, all nonzero entries are 1.
+            The name of the cell attribute to use as weights for the dirac operator
+            matrix. If `None`, the matrix is binary.
         index : bool, default=False
-            If True return will include a dictionary of node uid : row number
-            and cell uid : column number
+            If True return will include a dictionary of all cells in the complex uid
 
         Returns
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
-            The coadjacency matrix, if `index` is False, otherwise
-            lower (row) index dict, upper (col) index dict, coadjacency matrix
+            The dirac operator matrix, if `index` is False, otherwise
+            lower (row) index dict, upper (col) index dict, dirac operator matrix
             where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix
         Examples
         --------
