@@ -32,4 +32,3 @@ def cc_np_complex(n: int, p: float, seed=None) -> CellComplex:
     """
     graph = nx.gnp_random_graph(n, p, seed)
     return homology_cycle_cell_complex(graph)
-
