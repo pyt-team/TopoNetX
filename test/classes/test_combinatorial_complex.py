@@ -216,7 +216,7 @@ class TestCombinatorialComplex:
             CCC.coadjacency_matrix(0, 1)
 
     def test_dirac_operator_matrix(self):
-        """Test dirac operator."""
+        """Test dirac operator matrix."""
         CCC = CombinatorialComplex()
         CCC.add_cell([1, 2, 3, 4], rank=2)
         CCC.add_cell([1, 2], rank=1)
@@ -226,12 +226,9 @@ class TestCombinatorialComplex:
         m = CCC.dirac_operator_matrix()
         size = sum(CCC.shape)
         assert m.shape == (size, size)
-
         index, m = CCC.dirac_operator_matrix(index=True)
-
         assert frozenset({1, 2}) in index
         assert len(index) == size
-
         assert np.prod(m.todense() >= 0) == 1
 
     def test_clone(self):

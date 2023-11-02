@@ -757,7 +757,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().adjacency_matrix(rank, via_rank, s, index)
 
     def coadjacency_matrix(self, rank, via_rank, s: int = None, index: bool = False):
-        """Compute the coadjacency matrix.
+        """Compute the coadjacency matrix of self.
 
         The sparse weighted :term:`s-coadjacency matrix`
 
@@ -785,7 +785,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().coadjacency_matrix(rank, via_rank, s, index)
 
     def dirac_operator_matrix(self, weight: str | None = None, index: bool = False):
-        """Compute dirac operator matrix matrix.
+        """Compute dirac operator matrix of self.
 
         Parameters
         ----------
