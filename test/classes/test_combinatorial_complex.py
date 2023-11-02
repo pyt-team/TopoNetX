@@ -1,7 +1,7 @@
 """Unit tests for the combinatorial complex class."""
 
-import numpy as np
 import networkx as nx
+import numpy as np
 import pytest
 
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
@@ -319,11 +319,7 @@ class TestCombinatorialComplex:
         }
 
     def test_dim(self):
-        """
-        Test for the dimensionality of the CombinatorialComplex object.
-
-        Gets the highest rank of the cells in the CombinatorialComplex object.
-        """
+        """Test for the dimensionality of the CombinatorialComplex object."""
         CCC = CombinatorialComplex()
         CCC.add_cell([1, 2], rank=1)
         CCC.add_cell([1, 3], rank=1)
