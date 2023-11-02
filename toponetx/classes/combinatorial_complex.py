@@ -799,10 +799,10 @@ class CombinatorialComplex(ColoredHyperGraph):
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
             The dirac operator matrix, if `index` is False, otherwise
-        row_indices : dict
+        row_indices, col_indices : dict
             List identifying rows and columns of the dirac operator matrix. Only
             returned if `index` is True.
-        scipy.sparse.csr.csc_matrix
+        dirac_matrix : scipy.sparse.csr.csc_matrix
             The dirac operator matrix of this combinatorial complex.
 
         Examples
