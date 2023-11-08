@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools", "wheel", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -23,6 +23,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11"
 ]
+
+
 requires-python = ">= 3.10"
 dependencies=[
     "gudhi",
@@ -73,6 +75,7 @@ repository="https://github.com/pyt-team/TopoNetX"
 [tool.setuptools.dynamic]
 version = {attr = "toponetx.__version__"}
 
+
 [tool.setuptools.packages.find]
 include = [
     "toponetx",
@@ -100,3 +103,5 @@ per-file-ignores = [
 
 [tool.coverage.report]
 exclude_lines = ["pragma: not covered", "@overload"]
+
+[tool.setuptools-scm]
