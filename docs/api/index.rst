@@ -9,6 +9,7 @@ The API reference gives an overview of `TopoNetX`, which consists of several mod
 - `datasets` implements utilities to load small datasets on topological domains.
 - `transform` implements functions to transform the topological domain that supports a dataset, effectively "lifting" the dataset onto another domain.
 - `generators` implements functions to generate random topological domains.
+- `transform` implements functions to convert a graph to a topological domain: simplicial complexes etc.
 
 
 .. toctree::
@@ -20,3 +21,4 @@ The API reference gives an overview of `TopoNetX`, which consists of several mod
    transform
    algorithms
    generators
+   transform
