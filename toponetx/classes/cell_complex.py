@@ -54,7 +54,7 @@ class CellComplex(Complex):
 
     Mathematically, in TNX a cell complex it a triplet $(V, E, C)$
     where $V$ is a set of nodes, $E$ is a set of edges and $C$ is a set of 2-cells.
-    In TNX each 2-cell C is consists of a finite sequence of nodes $C=(n_1,...,n_k,n_1)$ with $k\geq2$.
+    In TNX each 2-cell C is consists of a finite sequence of nodes $C=(n_1,...,n_k,n_1)$ with $k\geq 2$.
     All edges between two consecutive nodes in C belong to  E.
     Regular cells have unique nodes in C whereas non-regular cells allow for duplication.
 
