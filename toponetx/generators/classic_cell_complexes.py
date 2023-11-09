@@ -1,12 +1,4 @@
-"""Generators for some classic cell complexes lifted from classic graphs in networkx."""
-import random
-
-"""Generate classic cell complexes."""
-
-from collections.abc import Sequence
-from itertools import combinations
-
-import networkx as nx
+"""Generators for some classic cell complexes."""
 
 from toponetx.classes import CellComplex
 from toponetx.classes.cell import Cell
@@ -22,8 +14,7 @@ def single_cell_complex(n: int) -> CellComplex:
 
 
 def pyrmaid_complex(n: int) -> CellComplex:
-    """Generate a pyrmaid cell complex with a base cell of length n and
-    trianglar cell sides connected to a single node."""
+    """Generate a pyrmaid cell complex with a base cell of length n."""
     c = Cell(list(range(1, n)))
     cc = CellComplex([c])
     for i in range(1, n - 1):
