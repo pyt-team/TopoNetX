@@ -35,7 +35,7 @@ __all__ = ["CellComplex"]
 
 
 class CellComplex(Complex):
-    """Class representing a cell complex.
+    r"""Class representing a cell complex.
 
     A cell complex is a mathematical structure that is built up from simple building blocks called cells.
     These cells can be thought of as generalized versions of familiar shapes, such as points, line segments,
@@ -52,9 +52,9 @@ class CellComplex(Complex):
     of 2d cell complexes. If higher dimensional cell complexes are desired
     then one should utilize the class CombinatorialComplex.
 
-    Mathematically, in TNX a cell complex it a triplet (V, E, C)
-    where V is a set of nodes, E is a set of edges and C is a set of 2-cells.
-    In TNX each 2-cell C is consists of a finite sequence of nodes C=(n1,...,nk,n1) with k>=2.
+    Mathematically, in TNX a cell complex it a triplet $(V, E, C)$
+    where $V$ is a set of nodes, $E$ is a set of edges and $C$ is a set of 2-cells.
+    In TNX each 2-cell C is consists of a finite sequence of nodes $C=(n_1,...,n_k,n_1)$ with $k\geq2$.
     All edges between two consecutive nodes in C belong to  E.
     Regular cells have unique nodes in C whereas non-regular cells allow for duplication.
 
@@ -92,6 +92,7 @@ class CellComplex(Complex):
     --------
     Iteratively construct a cell complex:
 
+    >>> from toponetx.classes import CellComplex
     >>> CC = CellComplex()
     >>> CC.add_cell([1, 2, 3, 4], rank=2)
     >>> # the cell [1, 2, 3, 4] consists of the cycle (1,2), (2,3), (3,4), (4,5)
@@ -107,6 +108,7 @@ class CellComplex(Complex):
 
     TopoNetX is also compatible with NetworkX, allowing users to create a cell complex from a NetworkX graph:
 
+    >>> from toponetx.classes import CellComplex
     >>> import networkx as nx
     >>> g = nx.Graph()
     >>> g.add_edge(1, 0)
@@ -119,6 +121,7 @@ class CellComplex(Complex):
     By default, a regular cell complex is constructed. You can change this behaviour using the
     `regular` parameter when constructing the complex.
 
+    >>> from toponetx.classes import CellComplex
     >>> # non-regular cell complex
     >>> # by default CellComplex constructor assumes regular cell complex
     >>> CC = CellComplex(regular=False)

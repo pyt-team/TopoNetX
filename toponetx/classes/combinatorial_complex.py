@@ -15,26 +15,26 @@ __all__ = ["CombinatorialComplex"]
 
 
 class CombinatorialComplex(ColoredHyperGraph):
-    """Class for Combinatorial Complex.
+    r"""Class for Combinatorial Complex.
 
-    A Combinatorial Complex (CCC) is a triple CCC = (S, X, rk) where:
-    - S is an abstract set of entities,
-    - X a subset of the power set of X, and
-    - rk is the a rank function that associates for every set x in X a rank, a positive integer.
+    A Combinatorial Complex (CCC) is a triple $CCC = (S, X, rk)$ where:
+    - $S$ is an abstract set of entities,
+    - $X$ a subset of the power set of $X$, and
+    - $rk$ is the a rank function that associates for every set x in X a rank, a positive integer.
 
-    The rank function rk must satisfy x <= y then rk(x) <= rk(y).
+    The rank function $rk$ must satisfy $x \leq y$ then $rk(x) \leq rk(y)$.
     We call this condition the CCC condition.
 
     A CCC is a generlization of graphs, hypergraphs, cellular and simplicial complexes.
 
     Mathematical Example:
 
-    Let S = {1, 2, 3, 4} be a set of abstract entities.
-    Let X = {{1, 2}, {1, 2, 3}, {1, 3}, {1, 4}} be a subset of the power set of S.
+    Let $S = \{1, 2, 3, 4\}$ be a set of abstract entities.
+    Let $X = \{\{1, 2\}, \{1, 2, 3\}, \{1, 3\}, \{1, 4\}\}$ be a subset of the power set of $S$.
     Let rk be the ranking function that assigns the
-    length of a set as its rank, i.e. rk({1, 2}) = 2, rk({1, 2, 3}) = 3, etc.
+    length of a set as its rank, i.e. $rk(\{1, 2\}) = 2$, $rk(\{1, 2, 3\}) = 3$, etc.
 
-    Then, (S, X, rk) is a combinatorial complex.
+    Then, $(S, X, rk)$ is a combinatorial complex.
 
     Parameters
     ----------
