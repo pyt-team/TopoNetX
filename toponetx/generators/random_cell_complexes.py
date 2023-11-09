@@ -6,11 +6,11 @@ from toponetx.classes import CellComplex
 from toponetx.transform.graph_to_cell_complex import homology_cycle_cell_complex
 
 __all__ = [
-    "cc_np_complex",
+    "np_cell_complex",
 ]
 
 
-def cc_np_complex(n: int, p: float, seed=None) -> CellComplex:
+def np_cell_complex(n: int, p: float, seed=None) -> CellComplex:
     """Generate $CC_{(n,p)}$ complex.
 
     In an $(n,p)$ cell complex, a sample from an Erdős-Rényi graph is drawn, also called $G_{n,p}$,
