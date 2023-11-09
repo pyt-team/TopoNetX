@@ -151,8 +151,8 @@ class PathComplex(Complex):
     def add_paths_from(self, paths: Iterable[Sequence[Hashable] | Path]) -> None:
         """Add elementary paths from an iterable of elementary paths.
 
-        An elementary p-path is a sequence of nodes (n1, ..., np) where p is the length of the sequence. In a path complex,
-        for every elementary p-path in the path complex, their truncated sequences (n2, ..., np) and (n1, ..., np-1) are also in the path complex.
+        An elementary p-path is a sequence of nodes $(n_1, ..., n_p)$ where $p$ is the length of the sequence. In a path complex,
+        for every elementary p-path in the path complex, their truncated sequences $(n_2, ..., n_p)$ and $(n1, ..., n_{p-1})$ are also in the path complex.
 
         Parameters
         ----------
@@ -175,8 +175,8 @@ class PathComplex(Complex):
     def add_path(self, path: Hashable | Sequence[Hashable] | Path, **attr) -> None:
         """Add an elementary path to the path complex.
 
-        An elementary p-path is a sequence of nodes (n1, ..., np) where p is the length of the sequence. In a path complex,
-        for every elementary p-path in the path complex, their truncated sequences (n2, ..., np) and (n1, ..., np-1) are also in the path complex.
+        An elementary p-path is a sequence of nodes $(n_1, ..., n_p)$ where p is the length of the sequence. In a path complex,
+        for every elementary p-path in the path complex, their truncated sequences $(n_2, ..., n_p)$ and $(n_1, ..., n_{p-1})$ are also in the path complex.
 
         This method automatically initializes any obvious sub-paths (sub-paths where the first or last index is omitted) of the elementary path if not available.
         In order to add non-obvious sub-paths, manually add the sub-paths.
