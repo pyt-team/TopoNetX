@@ -55,6 +55,7 @@ class ColoredHyperGraph(Complex):
     >>> CHG = ColoredHyperGraph()
 
     Add cells to the colored hypergraph:
+
     >>> from toponetx.classes.colored_hypergraph import ColoredHyperGraph
     >>> CHG = ColoredHyperGraph()
     >>> CHG.add_cell([1, 2], rank=1)
