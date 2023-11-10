@@ -2,8 +2,8 @@
 from toponetx.generators.random_cell_complexes import np_cell_complex
 
 
-class TestCcNpComplex:
-    """Test the `cc_np_complex` function."""
+class TestNPCellComplex:
+    """Test the `np_cell_complex` function."""
 
     def test_zero_nodes(self):
         """Test `np_cell_complex` for zero nodes."""
