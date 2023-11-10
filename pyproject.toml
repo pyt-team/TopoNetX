@@ -122,3 +122,12 @@ per-file-ignores = [
 
 [tool.coverage.report]
 exclude_lines = ["pragma: not covered", "@overload"]
+
+[tool.numpydoc_validation]
+checks = [
+    "all",
+    "GL01",
+    "ES01",
+    "EX01",
+    "SA01"
+]
