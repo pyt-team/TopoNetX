@@ -60,7 +60,12 @@ test = [
     "pytest",
     "pytest-cov",
     "coverage",
-    "jupyter"
+    "jupyter",
+
+    # mypy and typing stubs
+    "mypy",
+    "pandas-stubs",
+    "types-requests"
 ]
 
 dev = ["TopoNetX[test, lint]"]
@@ -78,6 +83,23 @@ include = [
     "toponetx",
     "toponetx.*"
 ]
+
+[tool.mypy]
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+plugins = "numpy.typing.mypy_plugin"
+
+[[tool.mypy.overrides]]
+module = [
+    "gudhi.*",
+    "hypernetx.*",
+    "networkx.*",
+    "scipy.*",
+    "spharapy.*",
+    "trimesh.*",
+]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "--capture=no"

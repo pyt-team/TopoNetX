@@ -31,6 +31,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -41,9 +42,16 @@ jobs:
       - name: Install main package [pip]
         run: |
           pip install -e .[all]
+
+      - name: Typecheck [mypy]
+        run: |
+          mypy -p toponetx
+        continue-on-error: true
+
       - name: Run tests [pytest]
         run: |
           pytest --cov --cov-report=xml:coverage.xml
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
