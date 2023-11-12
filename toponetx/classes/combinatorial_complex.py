@@ -969,8 +969,7 @@ class CombinatorialComplex(ColoredHyperGraph):
     def singletons(self):
         """Return a list of singleton cell.
 
-        A singleton cell is a cell of
-        size 1 with a node of degree 1.
+        A singleton cell is a node of degree 0.
 
         Returns
         -------
@@ -982,19 +981,13 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC = CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
-        >>> CCC.add_cell([9],rank=9)
+        >>> CCC.add_cell([9],rank=0)
         >>> CCC.singletons()
         """
         singletons = []
-        for k, cells in self.cells.hyperedge_dict.items():
-            if k == 0:
-                continue
-            else:
-                for cell in cells:
-                    if len(cell) == 1:
-                        for n in cell:
-                            if self.degree(n, None) == 1:
-                                singletons.append(cell)
+        for k in self.skeleton(0):
+            if self.degree(tuple(k)[0]) == 0:
+                singletons.append(k)
         return singletons
 
     def remove_singletons(self):
