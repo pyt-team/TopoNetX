@@ -986,7 +986,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         singletons = []
         for k in self.skeleton(0):
-            if self.degree(tuple(k)[0]) == 0:
+            if self.degree(tuple(k)[0],None) == 0:
                 singletons.append(k)
         return singletons
 
