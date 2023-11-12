@@ -526,6 +526,11 @@ class CombinatorialComplex(ColoredHyperGraph):
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             hyperedge_set = frozenset({hyperedge})
         elif isinstance(hyperedge, (Iterable, HyperEdge)):
+            if len(hyperedge) == 1:
+                if rank != 0:
+                    raise ValueError(
+                        f"rank must be zero cells with single element, got rank {rank} with input hyperedge {hyperedge} "
+                    )
             if isinstance(hyperedge, HyperEdge):
                 hyperedge_ = hyperedge.elements
             else:
@@ -534,11 +539,6 @@ class CombinatorialComplex(ColoredHyperGraph):
                         f"Input hyperedge {hyperedge} contain non-hashable elements."
                     )
                 hyperedge_ = frozenset(hyperedge)
-            if isinstance(hyperedge, HyperEdge):
-                if len(hyperedge) == 1:
-                    raise ValueError(
-                        f"cells with single elements must have rank 0, got rank {rank} for input cell {hyperedge} "
-                    )
             if rank == 0 and len(hyperedge_) > 1:
                 raise ValueError(
                     "rank must be positive for higher order hyperedges, got rank = 0"
@@ -969,8 +969,7 @@ class CombinatorialComplex(ColoredHyperGraph):
     def singletons(self):
         """Return a list of singleton cell.
 
-        A singleton cell is a cell of
-        size 1 with a node of degree 1.
+        A singleton cell is a node of degree 0.
 
         Returns
         -------
@@ -982,19 +981,13 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC = CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
-        >>> CCC.add_cell([9],rank=9)
+        >>> CCC.add_cell([9],rank=0)
         >>> CCC.singletons()
         """
         singletons = []
-        for k, cells in self.cells.hyperedge_dict.items():
-            if k == 0:
-                continue
-            else:
-                for cell in cells:
-                    if len(cell) == 1:
-                        for n in cell:
-                            if self.degree(n, None) == 1:
-                                singletons.append(cell)
+        for k in self.skeleton(0):
+            if self.degree(tuple(k)[0], None) == 0:
+                singletons.append(k)
         return singletons
 
     def remove_singletons(self):

@@ -351,7 +351,7 @@ class TestCombinatorialComplex:
     def test_set_item(self):
         """Test for set_item method of the CombinatorialComplex object."""
         CCC = CombinatorialComplex()
-        CCC.add_cell([1], rank=3)
+        CCC.add_cell([1], rank=0)
         CCC.add_cell([1, 2], rank=3)
         # Updating an node attribute present in the CombinatorialComplex object.
         CCC.__setitem__([1], {"weights": 1})
@@ -618,12 +618,12 @@ class TestCombinatorialComplex:
     def test_singletons(self):
         """Test singletons of CCC."""
         CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
-        CCC.add_cell([9], rank=1)
+        CCC.add_cell([9], rank=0)
         assert CCC.singletons() == [frozenset({9})]
 
     def test_remove_singletons(self):
         """Test remove_singletons of CCC."""
         CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
-        CCC.add_cell([9], rank=1)
+        CCC.add_cell([9], rank=0)
         CCC = CCC.remove_singletons()
         assert 9 not in CCC.nodes
