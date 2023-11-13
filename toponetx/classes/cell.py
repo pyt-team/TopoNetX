@@ -61,6 +61,25 @@ class Cell(Atom):
     def __init__(
         self, elements: Collection, name: str = "", regular: bool = True, **kwargs
     ) -> None:
+        """Initialize class representing a 2D cell.
+
+        A 2D cell is an elementary building block used to build a 2D cell complex, whether regular or non-regular.
+
+        Parameters
+        ----------
+        elements : Collection[Hashable]
+            An iterable that contains hashable objects representing the nodes of the cell. The order of the elements is important
+            and defines the cell up to cyclic permutation.
+        name : str, optional
+            A string representing the name of the cell.
+        regular : bool, optional
+            A boolean indicating whether the cell satisfies the regularity condition. The default value is True.
+            A 2D cell is regular if and only if there is no repetition in the boundary edges that define the cell.
+            By default, the cell is assumed to be regular unless otherwise specified. Self-loops are not allowed in the boundary
+            of the cell. If a cell violates the cell complex regularity condition, a ValueError is raised.
+        **kwargs : keyword arguments, optional
+            Attributes belonging to the cell can be added as key-value pairs. Both the key and value must be hashable.
+        """
         super().__init__(tuple(elements), name, **kwargs)
 
         self._regular = regular
@@ -145,7 +164,7 @@ class Cell(Atom):
         Returns
         -------
         bool
-            True if the Cell is regular, and False otherwise
+            True if the Cell is regular, and False otherwise.
         """
         if self._regular:  # condition enforced
             return True
@@ -203,7 +222,13 @@ class Cell(Atom):
         raise ValueError(f"The input {edge} is not a valid edge.")
 
     def __repr__(self) -> str:
-        """Return string representation of regular cell."""
+        """Return string representation of regular cell.
+
+        Returns
+        -------
+        str
+            The string representation of the regular cell.
+        """
         return f"Cell({self.elements})"
 
     @property
@@ -214,7 +239,8 @@ class Cell(Atom):
 
         Returns
         -------
-        Iterator of tuple representing boundary edges given in cyclic order.
+        Iterable[tuple[int, int]]
+            Iterator of tuple representing boundary edges given in cyclic order.
 
         Examples
         --------
@@ -262,11 +288,14 @@ class Cell(Atom):
         Parameters
         ----------
         cell1 : Cell
-        cell : tuple, list or Cell
+            First cell to check for homotopy.
+        cell : tuple | list | Cell
+            Second cell to check for homotopy.
 
         Returns
         -------
-        return True is self is homotopic to input cell and False otherwise.
+        bool
+            Returns True is self is homotopic to input cell and False otherwise.
 
         Notes
         -----
@@ -304,5 +333,11 @@ class Cell(Atom):
         return False
 
     def __str__(self) -> str:
-        """Return string representation of regular cell."""
+        """Return string representation of regular cell.
+
+        Returns
+        -------
+        str
+            Returns string representation of regular cell.
+        """
         return f"Nodes set:{self.elements}, boundary edges:{self.boundary}, attrs:{self._attributes}"
