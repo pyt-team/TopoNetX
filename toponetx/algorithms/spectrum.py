@@ -161,8 +161,10 @@ def laplacian_beltrami_eigenvectors(
 
     Returns
     -------
-    numpy.ndarray
-        Eigenvectors and eigenvalues.
+    k_eigenvectors : numpy.ndarray
+        First k Eigenvectors associated with the hodge laplacian matrix.
+    k_eigenvals : numpy.ndarray
+        First k Eigenvalues associated with the hodge laplacian matrix.
 
     Examples
     --------

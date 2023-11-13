@@ -63,9 +63,6 @@ jobs:
         run: |
           pip install --upgrade pip setuptools wheel
           pip install -e .[doc]
-      - name: Install Pandoc [apt-get]
-        run: |
-          sudo apt-get -y install pandoc
       - name: Checking NumpyDoc Validation for files
         run: |
           pip install pre-commit
