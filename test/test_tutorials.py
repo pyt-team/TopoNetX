@@ -8,6 +8,13 @@ import pytest
 
 
 def _exec_tutorial(path):
+    """Execute the notebooks for testing in the given directory.
+
+    Parameters
+    ----------
+    path : str
+        Path to the tutorials directory.
+    """
     file_name = tempfile.NamedTemporaryFile(suffix=".ipynb").name
     args = [
         "jupyter",
@@ -30,5 +37,11 @@ paths = sorted(glob.glob(f"{TUTORIALS_DIR}/*.ipynb"))
 
 @pytest.mark.parametrize("path", paths)
 def test_tutorial(path):
-    """Test the tutorials."""
+    """Test the tutorials.
+
+    Parameters
+    ----------
+    path : str
+        Path to the tutorials directory.
+    """
     _exec_tutorial(path)
