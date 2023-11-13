@@ -65,7 +65,7 @@ def hodge_laplacian_eigenvectors(
 
     Returns
     -------
-    k_eigenvals, k_eigenvectors : numpy.ndarray
+    numpy.ndarray
         First k eigevals and eigenvec associated with the hodge laplacian matrix.
 
     Examples
@@ -161,7 +161,7 @@ def laplacian_beltrami_eigenvectors(
 
     Returns
     -------
-    eigenvectors, eigenvalues : numpy.ndarray
+    numpy.ndarray
         Eigenvectors and eigenvalues.
 
     Examples
@@ -279,8 +279,10 @@ def path_complex_hodge_laplacian_spectrum(
 
     Parameters
     ----------
-    PC : toponetx.classes.PathComplex
+    PC : PathComplex
+        PathComplex for which to return eigenvalues.
     rank : int
+        Rank of the PathComplex.
     weight : str or None, default='weight'
         If None, then each cell has weight 1.
 
@@ -354,8 +356,10 @@ def path_complex_adjacency_spectrum(
 
     Parameters
     ----------
-    PC : toponetx.classes.PathComplex
+    PC : PathComplex
+        PathComplex for which adjacency matrix is computed.
     dim : int
+        Dimension.
     weight : str, optional
         If None, then each cell has weight 1.
 
