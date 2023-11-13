@@ -31,6 +31,11 @@ jobs:
       - name: Install Pandoc [apt-get]
         run: |
           sudo apt-get -y install pandoc
+      - name: Checking NumpyDoc Validation for files
+        run: |
+          pip install pre-commit
+          pre-commit install
+          pre-commit run --all-files numpydoc-validation
       - name: Generate Docs [Sphinx]
         run: |
           sphinx-build  -b html -D version=latest -D release=latest docs docs/_build
