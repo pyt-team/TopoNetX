@@ -1,3 +1,4 @@
+"""Initialize the classes module of toponetx."""
 from .cell import Cell
 from .cell_complex import CellComplex
 from .colored_hypergraph import ColoredHyperGraph

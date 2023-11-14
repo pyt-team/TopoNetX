@@ -20,7 +20,7 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
 
     Parameters
     ----------
-    domain : Complex.
+    domain : Complex
         Supported complexes are cell/combintorial and hypegraphs.
     source : Hashable
         A node in the input complex.
@@ -32,10 +32,13 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
     Returns
     -------
     int
+        Shortest s-walk distance between two nodes in the cell complex.
 
     See Also
     --------
     cell_distance
+        Method implemented in the library that returns
+        the shortest s-walk distance between two cells in the cell complex.
 
     Notes
     -----
@@ -108,6 +111,8 @@ def cell_distance(
     See Also
     --------
     distance
+        Method implemented in the library that returns
+        shortest s-walk distance between two nodes in the cell complex.
 
     Notes
     -----

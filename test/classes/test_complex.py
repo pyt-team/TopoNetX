@@ -11,7 +11,7 @@ class TestComplex:
     """Test the Complex abstract class."""
 
     def test_complex_is_abstract(self):
-        """Tests if the Complex abstract class is abstract."""
+        """Test if the Complex abstract class is abstract."""
         with pytest.raises(TypeError) as exp_exception:
             Complex()
 
@@ -22,7 +22,7 @@ class TestComplex:
         assert isinstance(Complex, ABCMeta)
 
     def test_complex_has_abstract_methods(self):
-        """Tests if the Complex abstract class has all the abstract methods."""
+        """Test if the Complex abstract class has all the abstract methods."""
         abstract_methods = Complex.__abstractmethods__
         abstract_methods = sorted(abstract_methods)
         assert abstract_methods == [
@@ -48,10 +48,45 @@ class TestComplex:
         """Test that the abstract class is forcing implementation in all children classes."""
 
         class ExampleClass(Complex):
+            """Create an example class to test Complex Class.
+
+            Parameters
+            ----------
+                name : str
+                    Name of the Complex.
+                *args
+                    Positional arguments to be passed to the constructor.
+                **kwargs
+                    Keyword arguments to be passed to the constructor.
+            """
+
             def __init__(self, name: str = "", *args, **kwargs) -> None:
+                """Initialize the example class.
+
+                Parameters
+                ----------
+                name : str
+                    Name of the Complex.
+                *args
+                    Positional arguments to be passed to the constructor.
+                **kwargs
+                    Keyword arguments to be passed to the constructor.
+
+                Returns
+                -------
+                ExampleClass
+                    The example class is initialized and returned.
+                """
                 super().__init__(name, *args, **kwargs)
 
             def clone(self):
+                """Test expected behavior from ExampleClass.
+
+                Returns
+                -------
+                NotImplementedError
+                    Currently NotImplementedError is raised.
+                """
                 return NotImplementedError
 
         with pytest.raises(TypeError) as exp_exception:

@@ -108,7 +108,7 @@ class TestGraphToSimplicialComplex:
             Returns
             -------
             networkx graph
-                A undirected weighted graph
+                A undirected weighted graph.
             """
             G = nx.Graph()
             # We add a 3-clique to the graph with pairwise weights 1.0
@@ -141,7 +141,7 @@ class TestGraphToSimplicialComplex:
             Parameters
             ----------
             r : float
-                Radius of the Vietoris-Rips complex
+                Radius of the Vietoris-Rips complex.
 
             Returns
             -------

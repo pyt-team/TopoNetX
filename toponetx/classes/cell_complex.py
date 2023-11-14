@@ -136,6 +136,19 @@ class CellComplex(Complex):
     def __init__(
         self, cells=None, name: str = "", regular: bool = True, **kwargs
     ) -> None:
+        """Initialize a new Cell Complex.
+
+        Parameters
+        ----------
+        cells : iterable, optional
+            A list of cells to add to the complex.
+        name : str, optional
+            Name of the complex.
+        regular : bool, default=True
+            If True, then the complex is regular, otherwise it is non-regular.
+        **kwargs : keyword arguments, optional
+            Attributes to add to the complex as key=value pairs.
+        """
         super().__init__(name, **kwargs)
 
         self._regular = regular

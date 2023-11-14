@@ -14,6 +14,11 @@ __all__ = ["node_diameters", "cell_diameters", "diameter", "cell_diameter"]
 def node_diameters(domain: Complex) -> tuple[list[int], list[set[Hashable]]]:
     """Return the node diameters of the connected components in cell complex.
 
+    Parameters
+    ----------
+    domain : Complex
+        The complex to be used to generate the node diameters for.
+
     Returns
     -------
     diameters : list
@@ -110,7 +115,8 @@ def diameter(domain: Complex) -> int:
 
     Returns
     -------
-    diameter : int
+    int
+        The diameter of the longest shortest s-walk between nodes.
 
     Raises
     ------
@@ -155,9 +161,10 @@ def cell_diameter(domain: Complex, s: int = None) -> int:
     s : int, optional
         The number of intersections between pairwise consecutive cells.
 
-    Return
-    ------
-    cell_diameter : int
+    Returns
+    -------
+    int
+        Returns the length of the longest shortest s-walk between cells.
 
     Raises
     ------
