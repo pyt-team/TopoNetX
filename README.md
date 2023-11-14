@@ -179,6 +179,6 @@ To learn more about topological domains, and how they can be used in deep learni
 All of these are listed in setup.py.
 Some of these packages include:
 - [`NetworkX`](https://networkx.org/)
-- [`HyperNetX`](https://pnnl.github.io/HyperNetX/build/index.html)
+- [`HyperNetX`](https://pnnl.github.io/HyperNetX/)
 - [`gudhi`](https://gudhi.inria.fr/python/latest/)
 - [`trimesh`](https://trimsh.org/index.html)
