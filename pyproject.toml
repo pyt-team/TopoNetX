@@ -23,7 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11"
 ]
-requires-python = ">= 3.10"
+python_requires='>=3.10,<3.12'
 dependencies=[
     "gudhi",
     "decorator",
