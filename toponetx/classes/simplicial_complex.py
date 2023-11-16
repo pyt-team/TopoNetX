@@ -102,6 +102,17 @@ class SimplicialComplex(Complex):
     """
 
     def __init__(self, simplices=None, name: str = "", **kwargs) -> None:
+        """Initialize the simplicial complex.
+
+        Parameters
+        ----------
+        simplices : iterable, optional
+            Iterable of maximal simplices that define the simplicial complex.
+        name : str, optional
+            If None then a placeholder '' will be inserted as name.
+        **kwargs : keyword arguments, optional
+            Attributes to add to the complex as key=value pairs.
+        """
         super().__init__(name, **kwargs)
 
         self._simplex_set = SimplexView()
@@ -136,22 +147,35 @@ class SimplicialComplex(Complex):
         Returns
         -------
         tuple of ints
+            This gives the number of cells in each rank.
         """
         return self._simplex_set.shape
 
     @property
     def dim(self) -> int:
-        """Dimension.
+        """
+        Dimension of the simplicial complex.
 
         This is the highest dimension of any simplex in the complex.
+
+        Returns
+        -------
+        int
+            The dimension of the simplicial complex.
         """
         return self._simplex_set.max_dim
 
     @property
     def maxdim(self) -> int:
-        """Maximum dimension.
+        """
+        Maximum dimension of the simplicial complex.
 
-        This is the highest dimension of any simplex in the complex
+        This is the highest dimension of any simplex in the complex.
+
+        Returns
+        -------
+        int
+            The maximum dimension of the simplicial complex.
         """
         warn(
             "`SimplicialComplex.maxdim` is deprecated and will be removed in the future, use `SimplicialComplex.max_dim` instead.",
@@ -162,12 +186,24 @@ class SimplicialComplex(Complex):
 
     @property
     def nodes(self):
-        """Nodes."""
+        """Return the list of nodes in the simplicial complex.
+
+        Returns
+        -------
+        NodeView
+            A NodeView object representing the nodes of the simplicial complex.
+        """
         return NodeView(self._simplex_set.faces_dict, cell_type=Simplex)
 
     @property
     def simplices(self) -> SimplexView:
-        """Set of all simplices."""
+        """Set of all simplices in the simplicial complex.
+
+        Returns
+        -------
+        SimplexView
+            A SimplexView object representing the set of all simplices in the simplicial complex.
+        """
         return self._simplex_set
 
     def is_maximal(self, simplex: Iterable) -> bool:
@@ -240,11 +276,24 @@ class SimplicialComplex(Complex):
         raise ValueError(f"input {rank} exceeds max dim")
 
     def __str__(self) -> str:
-        """Return detailed string representation."""
+        """Return a detailed string representation of the simplicial complex.
+
+        Returns
+        -------
+        str
+            A string representation containing information about the shape and dimension
+            of the simplicial complex.
+        """
         return f"Simplicial Complex with shape {self.shape} and dimension {self.dim}"
 
     def __repr__(self) -> str:
-        """Return string representation."""
+        """Return a string representation of the simplicial complex.
+
+        Returns
+        -------
+        str
+            A string representation containing the name of the simplicial complex.
+        """
         return f"SimplicialComplex(name='{self.name}')"
 
     def __len__(self) -> int:
@@ -258,31 +307,61 @@ class SimplicialComplex(Complex):
         return len(self.skeleton(0))
 
     def __getitem__(self, simplex):
-        """Get simplex."""
+        """Get the data associated with the given simplex.
+
+        Parameters
+        ----------
+        simplex : tuple[int, ...]
+            The simplex to retrieve.
+
+        Returns
+        -------
+        Any
+            The data associated with the given simplex.
+
+        Raises
+        ------
+        KeyError
+            If the simplex is not present in the simplicial complex.
+        """
         if simplex in self:
             return self._simplex_set[simplex]
         else:
             raise KeyError("simplex is not in the simplicial complex")
 
     def __iter__(self) -> Iterator:
-        """Iterate over all faces of the simplicial complex.
+        """Iterate over all simplices (faces) of the simplicial complex.
 
         Returns
         -------
-        dict_keyiterator
+        Iterator[Tuple[int, ...]]
+            An iterator over all simplices in the simplicial complex.
         """
         return chain.from_iterable(self.nodes)
 
     def __contains__(self, item) -> bool:
-        """Return boolean indicating if item is in self.face_set.
+        """Check if a simplex is in the simplicial complex.
 
         Parameters
         ----------
-        item : tuple, list
+        item : tuple or list
+            The simplex to check for existence in the simplicial complex.
+
+        Returns
+        -------
+        bool
+            True if the given simplex is in the simplicial complex, False otherwise.
         """
         return item in self._simplex_set
 
     def _update_faces_dict_length(self, simplex) -> None:
+        """Update the faces dictionary length based on the input simplex.
+
+        Parameters
+        ----------
+        simplex : tuple[int, ...]
+            The simplex to update the faces dictionary length.
+        """
         if len(simplex) > len(self._simplex_set.faces_dict):
             diff = len(simplex) - len(self._simplex_set.faces_dict)
             for _ in range(diff):
@@ -293,12 +372,16 @@ class SimplicialComplex(Complex):
 
         Parameters
         ----------
-        face :  an iterable, typically a list, tuple, set or a Simplex
-        simplex : an iterable, typically a list, tuple, set or a Simplex
+        face : iterable
+            Typically a list, tuple, set, or a Simplex representing a face.
+        simplex : iterable
+            Typically a list, tuple, set, or a Simplex representing the input simplex.
+        maximal_faces : iterable
+            The maximal faces are the the faces that cannot be extended by adding another node.
 
         Notes
         -----
-        the input `face` is a face of the input `simplex`.
+        The input `face` is a face of the input `simplex`.
         """
         face = frozenset(face)
         k = len(face)
@@ -1361,6 +1444,11 @@ class SimplicialComplex(Complex):
         mesh : spharapy.trimesh.TriMesh
             The input spharapy object.
 
+        Returns
+        -------
+        SimplicialComplex
+            The resulting SimplicialComplex.
+
         Examples
         --------
         >>> import spharapy.trimesh as tm
@@ -1397,6 +1485,11 @@ class SimplicialComplex(Complex):
         tree : gudhi.SimplexTree
             The input gudhi simplex tree.
 
+        Returns
+        -------
+        SimplicialComplex
+            The resulting SimplicialComplex.
+
         Examples
         --------
         >>> from gudhi import SimplexTree
@@ -1417,6 +1510,11 @@ class SimplicialComplex(Complex):
         ----------
         mesh : trimesh.Trimesh
             The input trimesh object.
+
+        Returns
+        -------
+        SimplicialComplex
+            The resulting SimplicialComplex.
 
         Examples
         --------
