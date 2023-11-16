@@ -60,7 +60,7 @@ def test_compute_x_laplacian_normalized_matrix():
     L = csr_matrix([[2.0, -1.0, 0.0], [-1.0, 3.0, -1.0], [0.0, -1.0, 2.0]])
     Lx = csr_matrix([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
     normalized_Lx = compute_x_laplacian_normalized_matrix(L, Lx)
-    expected_result = csr_matrix([[0.25, 0.0, 0.0], [0.0, 0.0, 0.25], [0.0, 0.25, 0.0]])
+    expected_result = np.array([[0.25, 0.0, 0.0], [0.0, 0.0, 0.25], [0.0, 0.25, 0.0]])
     assert np.allclose(normalized_Lx.toarray(), expected_result)
 
     # Test case 2
