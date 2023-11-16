@@ -1,5 +1,6 @@
-"""Normalize of adjacency, boundary matrices of complexes."""
+"""Normalize of Laplacians, (co)adjacency, boundary matrices of complexes."""
 
+from typing import Tuple, Union
 import numpy as np
 import scipy.sparse.linalg as spl
 from numpy import ndarray
@@ -23,18 +24,17 @@ __all__ = [
 ]
 
 
-def compute_laplacian_normalized_matrix(L):
-    """
-    Normalize the Laplacian matrix.
+def compute_laplacian_normalized_matrix(L: csr_matrix) -> csr_matrix:
+    """Normalize the Laplacian matrix.
 
     Parameters
     ----------
-    L : scipy.sparse.csr_matrix
+    L : csr_matrix
         The Laplacian matrix.
 
     Returns
     -------
-    scipy.sparse.csr_matrix
+    csr_matrix
         The normalized Laplacian matrix.
 
     Notes
@@ -47,20 +47,19 @@ def compute_laplacian_normalized_matrix(L):
     return L * (1.0 / topeigen_val)
 
 
-def compute_x_laplacian_normalized_matrix(L, Lx):
-    """
-    Normalize the up or down Laplacians.
+def compute_x_laplacian_normalized_matrix(L: csr_matrix, Lx: csr_matrix) -> csr_matrix:
+    """Normalize the up or down Laplacians.
 
     Parameters
     ----------
-    L : scipy.sparse.csr_matrix
+    L : csr_matrix
         The Laplacian matrix.
-    Lx : scipy.sparse.csr_matrix
+    Lx : csr_matrix
         The up or down Laplacian matrix.
 
     Returns
     -------
-    scipy.sparse.csr_matrix
+    csr_matrix
         The normalized up or down Laplacian matrix.
 
     Notes
@@ -74,26 +73,25 @@ def compute_x_laplacian_normalized_matrix(L, Lx):
 
 
 def compute_kipf_adjacency_normalized_matrix(
-    A_opt, add_identity=False, identity_multiplier=1.0
-):
-    """
-    Normalize the adjacency matrix using Kipf's normalization.
+    A_opt: ndarray, add_identity: bool = False, identity_multiplier: float = 1.0
+) -> csr_matrix:
+    """Normalize the adjacency matrix using Kipf's normalization.
 
     Typically used to normalize adjacency matrices.
 
     Parameters
     ----------
-    A_opt : numpy.ndarray
+    A_opt : ndarray
         The adjacency matrix.
-    add_identity : bool, optional
+    add_identity : bool, default=False
         Determines if the identity matrix is to be added to the adjacency matrix.
-    identity_multiplier : float, optional
+    identity_multiplier : float, default=1.0
         A multiplier of the identity. This parameter is helpful for higher order
         (co)adjacency matrices where the neighbor of a cell is obtained from multiple sources.
 
     Returns
     -------
-    scipy.sparse.csr_matrix
+    csr_matrix
         The normalized adjacency matrix.
 
     Notes
@@ -116,22 +114,23 @@ def compute_kipf_adjacency_normalized_matrix(
     return A_opt_normalized
 
 
-def compute_xu_asymmetric_normalized_matrix(B, is_sparse=True):
-    """
-    Compute Xu's normalized asymmetric matrix.
+def compute_xu_asymmetric_normalized_matrix(
+    B: Union[ndarray, csr_matrix], is_sparse: bool = True
+) -> Union[ndarray, csr_matrix]:
+    """Compute Xu's normalized asymmetric matrix.
 
     Typically used to normalize boundary operators.
 
     Parameters
     ----------
-    B : numpy.ndarray or scipy.sparse.csr_matrix
+    B : ndarray or csr_matrix
         The asymmetric matrix.
-    is_sparse : bool, optional
+    is_sparse : bool, default=True
         If True, treat B as a sparse matrix.
 
     Returns
     -------
-    numpy.ndarray or scipy.sparse.csr_matrix
+    ndarray or csr_matrix
         The normalized asymmetric matrix.
 
     Notes
@@ -155,25 +154,32 @@ def compute_xu_asymmetric_normalized_matrix(B, is_sparse=True):
         return normalized_matrix
 
 
-def compute_bunch_normalized_matrices(B1, B2):
+def compute_bunch_normalized_matrices(
+    B1: Union[ndarray, csr_matrix], B2: Union[ndarray, csr_matrix]
+) -> Tuple[
+    Union[ndarray, csr_matrix],
+    Union[ndarray, csr_matrix],
+    Union[ndarray, csr_matrix],
+    Union[ndarray, csr_matrix],
+]:
     """Get Bunch normalization.
 
     Parameters
     ----------
-    B1 : numpy array or scipy csr_matrix
+    B1 : ndarray or csr_matrix
         The boundary B1: C1->C0 of a complex.
-    B2 : numpy array or scipy csr_matrix
+    B2 : ndarray or csr_matrix
         The boundary B2: C2->C1 of a complex.
 
     Returns
     -------
-    B1 : numpy array or scipy csr_matrix
+    B1 : ndarray or csr_matrix
         Normalized B1: C1->C0.
-    B1T : numpy array or scipy csr_matrix
+    B1T : ndarray or csr_matrix
         Normalized B1T: C0->C1.
-    B2 : numpy array or scipy csr_matrix
+    B2 : ndarray or csr_matrix
         Normalized B2: C2->C1.
-    B2T : numpy array or scipy csr_matrix
+    B2T : ndarray or csr_matrix
         Normalized B2T: C1->C2.
 
     References
@@ -195,19 +201,21 @@ def compute_bunch_normalized_matrices(B1, B2):
     return B1N, B1TN, B2N, B2TN
 
 
-def _compute_B1_normalized_matrix(B1, B2):
+def _compute_B1_normalized_matrix(
+    B1: Union[ndarray, csr_matrix], B2: Union[ndarray, csr_matrix]
+) -> Union[ndarray, csr_matrix]:
     """Compute normalized boundary matrix B1.
 
     Parameters
     ----------
-    B1 : numpy array or scipy csr_matrix
+    B1 : ndarray or csr_matrix
         The boundary B1: C1->C0 of a complex.
-    B2 : numpy array or scipy csr_matrix
+    B2 : ndarray or csr_matrix
         The boundary B2: C2->C1 of a complex.
 
     Returns
     -------
-    _ : numpy array or scipy csr_matrix
+    ndarray or csr_matrix
         Normalized B1: C1->C0.
     """
     D2 = _compute_D2(B2)
@@ -219,19 +227,21 @@ def _compute_B1_normalized_matrix(B1, B2):
     return D1_pinv @ B1
 
 
-def _compute_B1T_normalized_matrix(B1, B2):
+def _compute_B1T_normalized_matrix(
+    B1: Union[ndarray, csr_matrix], B2: Union[ndarray, csr_matrix]
+) -> Union[ndarray, csr_matrix]:
     """Compute normalized transpose boundary matrix B1T.
 
     Parameters
     ----------
-    B1 : numpy array or scipy csr_matrix
+    B1 : ndarray or csr_matrix
         The boundary B1: C1->C0  of a complex.
-    B2 : numpy array or scipy csr_matrix
+    B2 : ndarray or csr_matrix
         The boundary B2: C2->C1  of a complex.
 
     Returns
     -------
-    _ : numpy array or scipy csr_matrix
+    ndarray or csr_matrix
         Normalized transpose boundary matrix B1T: C0->C1.
         This is the coboundary C0->C1.
     """
@@ -246,34 +256,38 @@ def _compute_B1T_normalized_matrix(B1, B2):
     return D2 @ B1.T @ D1_pinv
 
 
-def _compute_B2_normalized_matrix(B2):
-    """Compute normalized boundary maytix B2.
+def _compute_B2_normalized_matrix(
+    B2: Union[ndarray, csr_matrix]
+) -> Union[ndarray, csr_matrix]:
+    """Compute normalized boundary matrix B2.
 
     Parameters
     ----------
-    B2 : numpy array or scipy csr_matrix
+    B2 : ndarray or csr_matrix
         The boundary matrix B2: C2 -> C1 of a simplicial complex.
 
     Returns
     -------
-    _ : numpy array or scipy csr_matrix
+    ndarray or csr_matrix
         Normalized boundary matrix B2: C2 -> C1.
     """
     D3 = _compute_D3(B2)
     return B2 @ D3
 
 
-def _compute_B2T_normalized_matrix(B2):
+def _compute_B2T_normalized_matrix(
+    B2: Union[ndarray, csr_matrix]
+) -> Union[ndarray, csr_matrix]:
     """Compute normalized transpose matrix operator B2T.
 
     Parameters
     ----------
-    B2 : numpy array or scipy csr_matrix
+    B2 : ndarray or csr_matrix
         The boundary B2: C2->C1.
 
     Returns
     -------
-    _ : numpy array or scipy csr_matrix
+    ndarray or csr_matrix
         Normalized transpose matrix operator B2T: C1->C2.
         This is the coboundary matrix: C1->C2
     """
@@ -287,19 +301,19 @@ def _compute_B2T_normalized_matrix(B2):
     raise TypeError("input type must be either ndarray or csr_matrix")
 
 
-def _compute_D1(B1, D2):
+def _compute_D1(B1: Union[ndarray, csr_matrix], D2: diags) -> diags:
     """Compute the degree matrix D1.
 
     Parameters
     ----------
-    B1 : numpy array or scipy csr_matrix
+    B1 : ndarray or csr_matrix
         The boundary B1: C1->C0 of a complex.
-    D2 : numpy array or scipy diags
+    D2 : diags
         The degree matrix D2.
 
     Returns
     -------
-    D1 : numpy array or scipy diags
+    diags
         Normalized degree matrix D1.
     """
     if isinstance(B1, csr_matrix):
@@ -313,17 +327,17 @@ def _compute_D1(B1, D2):
     raise TypeError("Input type must be either ndarray or csr_matrix.")
 
 
-def _compute_D2(B2):
+def _compute_D2(B2: Union[ndarray, csr_matrix]) -> diags:
     """Compute the degree matrix D2.
 
     Parameters
     ----------
-    B2 : numpy array or scipy csr_matrix
+    B2 : ndarray or csr_matrix
         The boundary matrix B2: C2 -> C1 of a simplicial complex.
 
     Returns
     -------
-    D2 : numpy array or scipy diags
+    diags
         Normalized degree matrix D2.
     """
     if isinstance(B2, csr_matrix):
@@ -337,17 +351,17 @@ def _compute_D2(B2):
     raise TypeError("Input type must be either ndarray or csr_matrix.")
 
 
-def _compute_D3(B2):
+def _compute_D3(B2: Union[ndarray, csr_matrix]) -> diags:
     """Compute the degree matrix D3.
 
     Parameters
     ----------
-    B2 : numpy array or scipy csr_matrix
+    B2 : ndarray or csr_matrix
         The boundary matrix B2: C2 -> C1 of a simplicial complex.
 
     Returns
     -------
-    D3 : numpy array or scipy diags
+    diags
         Degree matrix D3.
     """
     if isinstance(B2, csr_matrix):
@@ -359,17 +373,17 @@ def _compute_D3(B2):
     raise TypeError("Input type must be either ndarray or csr_matrix.")
 
 
-def _compute_D5(B2):
+def _compute_D5(B2: Union[ndarray, csr_matrix]) -> diags:
     """Compute the degree matrix D5.
 
     Parameters
     ----------
-    B2 : numpy array or scipy csr_matrix
+    B2 : ndarray or csr_matrix
         The boundary matrix B2: C2 -> C1 of a simplicial complex.
 
     Returns
     -------
-    D5 : numpy array or scipy diags
+    diags
         Normalized degree matrix D5.
     """
     if isinstance(B2, csr_matrix):

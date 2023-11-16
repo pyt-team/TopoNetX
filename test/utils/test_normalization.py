@@ -25,12 +25,12 @@ def test_compute_laplacian_normalized_matrix():
     """Test normalize laplacian."""
     adjacency_matrix = np.array(
         [
-            [0, 1, 0, 0, 0, 1],
-            [1, 0, 1, 0, 0, 0],
-            [0, 1, 0, 1, 0, 0],
-            [0, 0, 1, 0, 1, 0],
-            [0, 0, 0, 1, 0, 1],
-            [1, 0, 0, 0, 1, 0],
+            [0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
         ]
     )
 
@@ -42,7 +42,7 @@ def test_compute_laplacian_normalized_matrix():
 
     L = csr_matrix(L).asfptype()
     normalized_L = compute_laplacian_normalized_matrix(L)
-    expected_result = csr_matrix(
+    expected_result = np.array(
         [
             [0.5, -0.25, 0.0, 0.0, 0.0, -0.25],
             [-0.25, 0.5, -0.25, 0.0, 0.0, 0.0],
@@ -67,7 +67,7 @@ def test_compute_x_laplacian_normalized_matrix():
     L = csr_matrix([[4.0, 0], [0.0, 4.0]])
     Lx = csr_matrix([[0.0, 1.0], [1.0, 0.0]])
     normalized_Lx = compute_x_laplacian_normalized_matrix(L, Lx)
-    expected_result = csr_matrix([[0.0, 0.25], [0.25, 0.0]])
+    expected_result = np.array([[0.0, 0.25], [0.25, 0.0]])
     assert np.allclose(normalized_Lx.toarray(), expected_result.toarray())
 
 
@@ -85,7 +85,7 @@ def test_compute_kipf_adjacency_normalized_matrix():
         ]
     )
     normalized_A_opt = compute_kipf_adjacency_normalized_matrix(csr_matrix(A_opt))
-    expected_result = csr_matrix(
+    expected_result = np.array(
         [
             [0.0, 0.5, 0.0, 0.0, 0.0, 0.5],
             [0.5, 0.0, 0.5, 0.0, 0.0, 0.0],
@@ -101,7 +101,7 @@ def test_compute_kipf_adjacency_normalized_matrix():
     normalized_A_opt = compute_kipf_adjacency_normalized_matrix(
         csr_matrix(A_opt), add_identity=True
     )
-    expected_result = csr_matrix(
+    expected_result = np.array(
         [
             [0.33333333, 0.33333333, 0.0, 0.0, 0.0, 0.33333333],
             [0.33333333, 0.33333333, 0.33333333, 0.0, 0.0, 0.0],
