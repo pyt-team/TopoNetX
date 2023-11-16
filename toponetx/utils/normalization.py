@@ -1,6 +1,7 @@
 """Normalize of Laplacians, (co)adjacency, boundary matrices of complexes."""
 
 from typing import Tuple, Union
+
 import numpy as np
 import scipy.sparse.linalg as spl
 from numpy import ndarray
@@ -192,7 +193,7 @@ def compute_bunch_normalized_matrices(
     [2] Eric Bunch, Qian You,
         Glenn Fung, Vikas Singh
         Simplicial 2-Complex Convolutional
-        Neural Networks
+        Neural Networks.
     """
     B1N = _compute_B1_normalized_matrix(B1, B2)
     B1TN = _compute_B1T_normalized_matrix(B1, B2)

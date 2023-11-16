@@ -52,7 +52,7 @@ def test_compute_laplacian_normalized_matrix():
             [-0.25, 0.0, 0.0, 0.0, -0.25, 0.5],
         ]
     )
-    assert np.allclose(normalized_L.toarray(), expected_result.toarray())
+    assert np.allclose(normalized_L.toarray(), expected_result)
 
 
 def test_compute_x_laplacian_normalized_matrix():
@@ -61,14 +61,14 @@ def test_compute_x_laplacian_normalized_matrix():
     Lx = csr_matrix([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
     normalized_Lx = compute_x_laplacian_normalized_matrix(L, Lx)
     expected_result = csr_matrix([[0.25, 0.0, 0.0], [0.0, 0.0, 0.25], [0.0, 0.25, 0.0]])
-    assert np.allclose(normalized_Lx.toarray(), expected_result.toarray())
+    assert np.allclose(normalized_Lx.toarray(), expected_result)
 
     # Test case 2
     L = csr_matrix([[4.0, 0], [0.0, 4.0]])
     Lx = csr_matrix([[0.0, 1.0], [1.0, 0.0]])
     normalized_Lx = compute_x_laplacian_normalized_matrix(L, Lx)
     expected_result = np.array([[0.0, 0.25], [0.25, 0.0]])
-    assert np.allclose(normalized_Lx.toarray(), expected_result.toarray())
+    assert np.allclose(normalized_Lx.toarray(), expected_result)
 
 
 def test_compute_kipf_adjacency_normalized_matrix():
@@ -96,7 +96,7 @@ def test_compute_kipf_adjacency_normalized_matrix():
         ]
     )
 
-    assert np.allclose(normalized_A_opt.toarray(), expected_result.toarray())
+    assert np.allclose(normalized_A_opt.toarray(), expected_result)
 
     normalized_A_opt = compute_kipf_adjacency_normalized_matrix(
         csr_matrix(A_opt), add_identity=True
@@ -111,7 +111,7 @@ def test_compute_kipf_adjacency_normalized_matrix():
             [0.33333333, 0.0, 0.0, 0.0, 0.33333333, 0.33333333],
         ]
     )
-    assert np.allclose(normalized_A_opt.toarray(), expected_result.toarray())
+    assert np.allclose(normalized_A_opt.toarray(), expected_result)
 
 
 def test_compute_bunch_normalized_matrices():
