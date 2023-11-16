@@ -290,7 +290,7 @@ def _compute_B2T_normalized_matrix(
     -------
     ndarray or csr_matrix
         Normalized transpose matrix operator B2T: C1->C2.
-        This is the coboundary matrix: C1->C2
+        This is the coboundary matrix: C1->C2.
     """
     D5 = _compute_D5(B2)
     if isinstance(B2, ndarray):
