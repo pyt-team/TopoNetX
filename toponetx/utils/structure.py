@@ -52,13 +52,17 @@ def sparse_array_to_neighborhood_list(
 
     Parameters
     ----------
-    sparse_array:  sparse array representing the higher order structure between S and T cells
-    src_dict: dictionary mapping the indices in S to other values
-    dst_dict: dictionary mapping the indices in T to other values
+    sparse_array : sparse array
+        Sparse array representing the higher order structure between S and T cells.
+    src_dict : dict
+        Dictionary mapping the indices in S to other values.
+    dst_dict : dict
+        Dictionary mapping the indices in T to other values.
 
     Returns
     -------
-    zip : zip object of the form (s,t) where s and t are indices representing a cell in a higher order structure
+    tuple(tuple[int, int])
+        Zip object of the form (s,t) where s and t are indices representing a cell in a higher order structure.
     """
     src_idx, dst_idx = sparse_array.nonzero()
 
@@ -84,15 +88,16 @@ def neighborhood_list_to_neighborhood_dict(
     Parameters
     ----------
         n_list : list[tuple[int, int]]
-            neighborhood list.
-        src_dict: dict
-            dictionary mapping the indices in S to other values
-        dst_dict: dictionary mapping the indices in T to other values
+            Neighborhood list.
+        src_dict : dict
+            Dictionary mapping the indices in S to other values.
+        dst_dict : dict
+            Dictionary mapping the indices in T to other values.
 
     Returns
     -------
-        neighborhood_dict : dict[int, list[int]]
-            neighborhood dictionary.
+        dict[int, list[int]]
+            Neighborhood dictionary.
     """
     neighborhood_dict = defaultdict(list)
     if src_dict is None and dst_dict is None:
@@ -121,17 +126,17 @@ def sparse_array_to_neighborhood_dict(
 
     Parameters
     ----------
-        sparse_array: sparse array
-            sparse array representing the higher order structure between S and T cells
-        src_dict: dict
-            dictionary mapping the indices in S to other values
-        dst_dict: dict
-            dictionary mapping the indices in T to other values
+        sparse_array : sparse array
+            Sparse array representing the higher order structure between S and T cells.
+        src_dict : dict
+            Dictionary mapping the indices in S to other values.
+        dst_dict : dict
+            Dictionary mapping the indices in T to other values.
 
     Returns
     -------
-        neighborhood_dict : dict[int, list[int]]
-            neighborhood dictionary.
+        dict[int, list[int]]
+            Neighborhood dictionary.
     """
     return neighborhood_list_to_neighborhood_dict(
         sparse_array_to_neighborhood_list(sparse_array, src_dict, dst_dict)
@@ -147,14 +152,16 @@ def incidence_to_adjacency(B, s: int | None = None, signed: bool = False):
     Parameters
     ----------
     B : scipy.sparse.csr.csr_matrix
-        incidence matrix of 0's and 1's
+        Incidence matrix of 0's and 1's.
     s : int, list, optional, default : 1
         Minimum number of edges shared by neighbors with node.
     signed : bool, optional
+        If not signed, then we take the absolute values.
 
     Returns
     -------
-    A : scipy.sparse.csr.csr_matrix
+    scipy.sparse.csr.csr_matrix
+        Return the adjacency matrix from booloean incidence matrix.
     """
     B = csr_matrix(B)
     if not signed:
