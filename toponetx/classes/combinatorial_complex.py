@@ -1,7 +1,7 @@
 """Creation and manipulation of a combinatorial complex."""
 
 from collections.abc import Collection, Hashable, Iterable
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
 import networkx as nx
 
@@ -79,6 +79,41 @@ class CombinatorialComplex(ColoredHyperGraph):
         graph_based: bool = False,
         **kwargs,
     ) -> None:
+        """Generate a Combinatorial Complex.
+
+        Parameters
+        ----------
+        cells : Collection, optional
+            A collection of cells to add to the combinatorial complex.
+        name : str, optional
+            An identifiable name for the combinatorial complex.
+        ranks : Collection, optional
+            When cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
+            size as cells.
+        graph_based : bool, default=False
+            When true rank 1 edges must have cardinality equals to 1.
+        **kwargs : keyword arguments, optional
+            Attributes to add to the complex as key=value pairs.
+
+        Returns
+        -------
+        None
+            Initialized Combinatorial Complex.
+
+        Raises
+        ------
+        TypeError
+            If cells is not given as an Iterable.
+        ValueError
+            If input cells is not an instance of HyperEdge when rank is None.
+            If input HyperEdge has None rank when rank is specified.
+            If cells and ranks do not have an equal number of elements.
+
+        Notes
+        -----
+        This function initializes a Combinatorial Complex with the given parameters. It adds cells to the complex based on the input.
+        If cells is a NetworkX graph, it adds nodes and edges accordingly.
+        """
         Complex.__init__(self, **kwargs)
         self.name = name
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
@@ -120,15 +155,57 @@ class CombinatorialComplex(ColoredHyperGraph):
                     self.add_cell([u, v], 1, **cells.get_edge_data(u, v))
 
     def __str__(self) -> str:
-        """Return detailed string representation."""
+        """Return detailed string representation.
+
+        Returns
+        -------
+        str
+            Description of Combinatorial Complex.
+        """
         return f"Combinatorial Complex with {len(self.nodes)} nodes and cells with ranks {self.ranks} and sizes {self.shape} "
 
     def __repr__(self) -> str:
-        """Return string representation."""
+        """Return string representation.
+
+        Returns
+        -------
+        str
+            Description of Combinatorial Complex.
+        """
         return f"CombinatorialComplex(name='{self.name}')"
 
     def __setitem__(self, cell, attr):
-        """Set the attributes of a hyperedge or node in the CCC."""
+        """Set the attributes of a hyperedge or node in the CCC.
+
+        Parameters
+        ----------
+        cell : hashable
+            The cell (hyperedge or node) for which to set the attributes.
+        attr : dict
+            The attributes to set for the specified cell.
+
+        Raises
+        ------
+        KeyError
+            If the input cell is not found in the complex.
+
+        Notes
+        -----
+        This method updates the attributes of a hyperedge or node in the Combinatorial Complex.
+
+        If the cell is a node, it updates the attributes of the corresponding node in the complex.
+        If the cell is a hyperedge, it updates the attributes of the hyperedge with the specified rank.
+
+        Examples
+        --------
+        >>> complex_instance['node_A'] = {'color': 'red'}
+        >>> complex_instance['hyperedge_B'] = {'weight': 5}
+
+        Returns
+        -------
+        None
+            Returns None.
+        """
         if cell in self.nodes:
             self.nodes[cell].update(attr)
             return
@@ -142,21 +219,29 @@ class CombinatorialComplex(ColoredHyperGraph):
             raise KeyError(f"input {cell} is not in the complex")
 
     def __contains__(self, item) -> bool:
-        """Return true/false indicating if item is in self.nodes.
+        """Return True/False indicating if the item is in self.nodes.
 
         Parameters
         ----------
         item : hashable or HyperEdge
+            The item to check for existence in the Combinatorial Complex.
 
         Returns
         -------
         bool
+            True if the item is found in the nodes of the complex, False otherwise.
         """
         return item in self.nodes
 
     @property
     def __shortstr__(self) -> str:
-        """Return the short string generic representation."""
+        """Return the short string generic representation.
+
+        Returns
+        -------
+        str
+            CCC.
+        """
         return "CCC"
 
     def number_of_nodes(self, node_set=None) -> int:
@@ -181,6 +266,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Returns
         -------
         NodeView
+            Returns all the nodes of the combinatorial complex.
         """
         return NodeView(
             self._complex_set.hyperedge_dict, cell_type=HyperEdge, colored_nodes=False
@@ -193,6 +279,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Returns
         -------
         HyperEdgeView
+            Returns all the present cells in the combinatorial complex along with their rank.
         """
         return self._complex_set
 
@@ -221,6 +308,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Returns
         -------
         tuple of ints
+            Shape of the CC object.
         """
         return self._complex_set.shape
 
@@ -266,9 +354,24 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().order()
 
     def _remove_node_helper(self, node) -> None:
-        """Remove node from cells.
+        """Remove a node from the hyperedges in the combinatorial complex.
 
-        This function assumes that the node is present in the CCC.
+        This function assumes that the node is present in the combinatorial complex.
+
+        Parameters
+        ----------
+        node : hashable
+            The node to be removed from the hyperedges.
+
+        Returns
+        -------
+        None
+            This method does not return any value. It removes the specified node from the hyperedges in the complex.
+
+        Notes
+        -----
+        This function iterates over the hyperedges in the complex and removes the specified node from each hyperedge.
+        If a hyperedge becomes empty after removing the node, it is removed from the hyperedge_dict.
         """
         # Removing node in hyperedgeview
         for key in list(self.cells.hyperedge_dict.keys()):
@@ -408,7 +511,20 @@ class CombinatorialComplex(ColoredHyperGraph):
         return super().get_cell_attributes(name, rank)
 
     def _add_node(self, node, **attr) -> None:
-        """Add one node as a hyperedge of rank 0."""
+        """Add one node as a hyperedge of rank 0.
+
+        Parameters
+        ----------
+        node : hashable
+            The node to add as a hyperedge of rank 0.
+        **attr : dict
+            Additional attributes associated with the node.
+
+        Returns
+        -------
+        None
+            This method does not return any value. It adds the node as a hyperedge in-place.
+        """
         if node in self:
             self._complex_set.hyperedge_dict[0][frozenset({node})].update(**attr)
         else:
@@ -432,10 +548,12 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         hyperedge_ : frozenset of elements
+            The hyperedge for which to add nodes.
 
         Returns
         -------
-        None.
+        None
+            This method does not return any value.
         """
         for i in hyperedge_:
             if 0 not in self._complex_set.hyperedge_dict:
@@ -449,12 +567,16 @@ class CombinatorialComplex(ColoredHyperGraph):
         Parameters
         ----------
         hyperedge_ : frozenset of elements
+            A cell in a combinatorial complex.
         rank : int
-        attr : arbitrary attrs
+            The rank of a hyperedge.
+        **attr : arbitrary attrs
+            Additional attributes associated with the hyperedge.
 
         Returns
         -------
-        None.
+        None
+            This method does not return any value.
         """
         if rank not in self._complex_set.hyperedge_dict:
             self._complex_set.hyperedge_dict[rank] = {}
@@ -467,7 +589,30 @@ class CombinatorialComplex(ColoredHyperGraph):
         self._add_nodes_of_hyperedge(hyperedge_)
 
     def _CCC_condition(self, hyperedge_, rank):
-        """Check if hyperedge_ satisfy the CCC condition."""
+        """Check if hyperedge_ satisfies the CCC condition.
+
+        Parameters
+        ----------
+        hyperedge_ : frozenset of elements
+            The hyperedge to check for CCC condition.
+        rank : int
+            The rank of the hyperedge.
+
+        Raises
+        ------
+        ValueError
+            If a violation of the combinatorial complex condition is detected.
+
+        Notes
+        -----
+        The CCC condition ensures that hyperedges in the complex follow the combinatorial complex condition.
+        This method checks if adding the given hyperedge would violate this condition.
+
+        Returns
+        -------
+        None
+            If there is no issue with the CCC.
+        """
         for node in hyperedge_:
             if node in self._node_membership:
                 for existing_hyperedge in self._node_membership[node]:
@@ -494,24 +639,29 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        hyperedge : HyperEdge, Hashable or Iterable
-            a cell in a combinatorial complex
+        hyperedge : HyperEdge, Hashable, or Iterable
+            A cell in a combinatorial complex.
         rank : int
-            the rank of a hyperedge, must be zero when the hyperedge is Hashable.
-        **attr : attr associated with hyperedge
+            The rank of a hyperedge; must be zero when the hyperedge is Hashable.
+        **attr : attribute associated with hyperedge
+            Additional attributes associated with the hyperedge.
 
         Returns
         -------
-        None.
+        None
+            This method does not return any value. It simply adds the hyperedge in-place.
 
         Notes
         -----
-        The add_hyperedge is a method for adding hyperedges to the HyperEdgeView instance.
-        It takes two arguments: hyperedge and rank, where hyperedge is a tuple or HyperEdge instance
-        representing the hyperedge to be added, and rank is an integer representing the rank of the hyperedge.
-        The add_hyperedge method then adds the hyperedge to the hyperedge_dict attribute of the HyperEdgeView
-        instance, using the hyperedge's rank as the key and the hyperedge itself as the value.
-        This allows the hyperedge to be accessed later using its rank.
+        The `add_hyperedge` method is used for adding hyperedges to the `HyperEdgeView` instance.
+        It takes three arguments: `hyperedge`, `rank`, and `**attr`. `hyperedge` is a tuple or
+        `HyperEdge` instance representing the hyperedge to be added, and `rank` is an integer
+        representing the rank of the hyperedge. The `**attr` argument allows the inclusion of
+        additional attributes associated with the hyperedge.
+
+        The `add_hyperedge` method then adds the hyperedge to the `hyperedge_dict` attribute of
+        the `HyperEdgeView` instance, using the hyperedge's rank as the key and the hyperedge
+        itself as the value. This allows the hyperedge to be accessed later using its rank.
         """
         if not isinstance(rank, int) or rank < 0:
             raise ValueError(f"rank must be a non-negative integer, got {rank}")
@@ -601,57 +751,55 @@ class CombinatorialComplex(ColoredHyperGraph):
 
     def _incidence_matrix(
         self,
-        rank,
-        to_rank,
+        rank: int,
+        to_rank: Optional[int] = None,
         incidence_type: Literal["up", "down"] = "up",
-        weight=None,
+        weight: Optional[Any] = None,
         sparse: bool = True,
         index: bool = False,
     ):
         """Compute incidence matrix.
 
         An incidence matrix indexed by r-ranked hyperedges k-ranked hyperedges
-        r !=k, when k is None incidence_type will be considered instead
+        r != k, when k is None incidence_type will be considered instead
 
         Parameters
         ----------
         rank : int
             For which rank of cells to compute the incidence matrix.
-        to_rank: int, optional
+        to_rank : int, optional
+            The rank for computing the incidence matrix.
         incidence_type : {'up', 'down'}, default='up'
             Whether to compute the up or down incidence matrix.
+        weight : None
+            Functionality to be added. Currently set to None.
         sparse : bool, default=True
             Whether to return a sparse or dense incidence matrix.
         index : bool, default=False
-            Whether to return the indices of the rows and columns of the incidence
-            matrix.
+            Whether to return the indices of the rows and columns of the incidence matrix.
 
         Returns
         -------
-        incidence_matrix : scipy.sparse.csr.csr_matrix or numpy.ndarray
+        incidence_matrix : scipy.sparse.csr.csr_matrix or numpy.ndarray.
+            The incidence matrix.
         row dictionary : dict
-            Dictionary identifying row with item in entityset's children
+            Dictionary identifying rows with items in the entityset's children.
         column dictionary : dict
-            Dictionary identifying column with item in entityset's uidset
+            Dictionary identifying columns with items in the entityset's uidset.
 
         Notes
         -----
-        Incidence_matrix method  is a method for generating the incidence matrix of a ColoredHyperGraph.
-        An incidence matrix is a matrix that describes the relationships between the hyperedges
-        of a complex. In this case, the incidence_matrix method generates a matrix where
-        the rows correspond to the hyperedges of the complex and the columns correspond to the faces
-        . The entries in the matrix are either 0 or 1,
-        depending on whether a hyperedge contains a given face or not.
-        For example, if hyperedge i contains face j, then the entry in the ith
-        row and jth column of the matrix will be 1, otherwise it will be 0.
+        The `incidence_matrix` method is for generating the incidence matrix of a ColoredHyperGraph.
+        An incidence matrix describes the relationships between the hyperedges of a complex.
+        The rows correspond to the hyperedges, and the columns correspond to the faces.
+        The entries in the matrix are either 0 or 1, depending on whether a hyperedge contains a given face or not.
 
-        To generate the incidence matrix, the incidence_matrix method first creates
-        a dictionary where the keys are the faces of the complex and the values are
-        the hyperedges that contain that face. This allows the method to quickly look up
-        which hyperedges contain a given face. The method then iterates over the hyperedges in
-        the HyperEdgeView instance, and for each hyperedge, it checks which faces it contains.
-        For each face that the hyperedge contains, the method increments the corresponding entry
-        in the matrix. Finally, the method returns the completed incidence matrix.
+        To generate the incidence matrix, the method first creates a dictionary where the keys are the faces
+        of the complex, and the values are the hyperedges that contain that face.
+        The method then iterates over the hyperedges in the `HyperEdgeView` instance,
+        and for each hyperedge, it checks which faces it contains.
+        For each face that the hyperedge contains, the method increments the corresponding entry in the matrix.
+        Finally, the method returns the completed incidence matrix.
         """
         if rank == to_rank:
             raise ValueError(
@@ -793,16 +941,16 @@ class CombinatorialComplex(ColoredHyperGraph):
             The name of the cell attribute to use as weights for the dirac operator
             matrix. If `None`, the matrix is binary.
         index : bool, default=False
-            If True return will include a dictionary of all cells in the complex uid
+            If True, return will include a dictionary of all cells in the complex uid.
 
         Returns
         -------
         scipy.sparse.csr.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]
-            The dirac operator matrix, if `index` is False, otherwise
-        row_indices, col_indices : dict
+            The dirac operator matrix, if `index` is False; otherwise,
+            row_indices, col_indices : dict
             List identifying rows and columns of the dirac operator matrix. Only
             returned if `index` is True.
-        dirac_matrix : scipy.sparse.csr.csc_matrix
+            dirac_matrix : scipy.sparse.csr.csc_matrix
             The dirac operator matrix of this combinatorial complex.
 
         Examples
@@ -885,6 +1033,23 @@ class CombinatorialComplex(ColoredHyperGraph):
                 self.add_cell(cell, ranks)
 
     def _remove_hyperedge(self, hyperedge) -> None:
+        """Remove a hyperedge from the combinatorial complex.
+
+        Parameters
+        ----------
+        hyperedge : Hashable or HyperEdge, Iterable
+            The hyperedge to be removed.
+
+        Returns
+        -------
+        None
+            This method does not return any value. It removes the specified hyperedge from the complex in-place.
+
+        Raises
+        ------
+        KeyError
+            If the hyperedge is not present in the complex.
+        """
         if hyperedge not in self.cells:
             raise KeyError(f"The cell {hyperedge} is not in the complex")
 
