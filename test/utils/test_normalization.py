@@ -101,9 +101,8 @@ def test_compute_kipf_adjacency_normalized_matrix():
     assert np.allclose(normalized_A_opt.toarray(), expected_result)
 
 
-def test_compute_bunch_normalized_matrices():
-    """Unit tests for bunch_normalization function."""
-    # Test case 1: Normalization with numpy arrays
+def test_compute_bunch_normalized_matrice_numpy_arrays():
+    """Unit tests for bunch_normalization function numpy arrays."""
     B1 = np.array([[1, 0, 1], [0, 1, 1], [1, 1, 0]])
     B2 = np.array([[1, 0, 1], [0, 1, 0], [1, 1, 1]])
     B1N, B1TN, B2N, B2TN = compute_bunch_normalized_matrices(B1, B2)
@@ -136,7 +135,9 @@ def test_compute_bunch_normalized_matrices():
         ),
     )
 
-    # Test case 2: Normalization with scipy coo_matrices
+
+def test_compute_bunch_normalized_matrice_scipy_arrays():
+    """Unit tests for bunch_normalization function scipy arrays."""
     B1 = csr_matrix([[1, 0, 1], [0, 1, 1], [1, 1, 0]])
     B2 = csr_matrix([[1, 0, 1], [0, 1, 0], [1, 1, 1]])
     B1N, B1TN, B2N, B2TN = compute_bunch_normalized_matrices(B1, B2)
