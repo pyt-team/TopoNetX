@@ -1,12 +1,9 @@
 """Normalize of Laplacians, (co)adjacency, boundary matrices of complexes."""
 
-from typing import Tuple, Union
-
 import numpy as np
 import scipy.sparse.linalg as spl
-from numpy import ndarray
 from numpy.linalg import pinv
-from scipy.sparse import csr_matrix, diags, identity
+from scipy.sparse import csr_matrix, diags
 
 __all__ = [
     "compute_laplacian_normalized_matrix",
@@ -74,7 +71,7 @@ def compute_x_laplacian_normalized_matrix(L: csr_matrix, Lx: csr_matrix) -> csr_
 
 
 def compute_kipf_adjacency_normalized_matrix(
-    A_opt: ndarray, add_identity: bool = False, identity_multiplier: float = 1.0
+    A_opt: np.ndarray, add_identity: bool = False, identity_multiplier: float = 1.0
 ) -> csr_matrix:
     """Normalize the adjacency matrix using Kipf's normalization.
 
@@ -82,7 +79,7 @@ def compute_kipf_adjacency_normalized_matrix(
 
     Parameters
     ----------
-    A_opt : ndarray
+    A_opt : np.ndarray
         The adjacency matrix.
     add_identity : bool, default=False
         Determines if the identity matrix is to be added to the adjacency matrix.
@@ -116,22 +113,22 @@ def compute_kipf_adjacency_normalized_matrix(
 
 
 def compute_xu_asymmetric_normalized_matrix(
-    B: Union[ndarray, csr_matrix], is_sparse: bool = True
-) -> Union[ndarray, csr_matrix]:
+    B: np.ndarray | csr_matrix, is_sparse: bool = True
+) -> np.ndarray | csr_matrix:
     """Compute Xu's normalized asymmetric matrix.
 
     Typically used to normalize boundary operators.
 
     Parameters
     ----------
-    B : ndarray or csr_matrix
+    B : np.ndarray or csr_matrix
         The asymmetric matrix.
     is_sparse : bool, default=True
         If True, treat B as a sparse matrix.
 
     Returns
     -------
-    ndarray or csr_matrix
+    np.ndarray or csr_matrix
         The normalized asymmetric matrix.
 
     Notes
@@ -156,31 +153,31 @@ def compute_xu_asymmetric_normalized_matrix(
 
 
 def compute_bunch_normalized_matrices(
-    B1: Union[ndarray, csr_matrix], B2: Union[ndarray, csr_matrix]
-) -> Tuple[
-    Union[ndarray, csr_matrix],
-    Union[ndarray, csr_matrix],
-    Union[ndarray, csr_matrix],
-    Union[ndarray, csr_matrix],
-]:
+    B1: np.ndarray | csr_matrix, B2: np.ndarray | csr_matrix
+) -> tuple(
+    np.ndarray | csr_matrix,
+    np.ndarray | csr_matrix,
+    np.ndarray | csr_matrix,
+    np.ndarray | csr_matrix,
+):
     """Get Bunch normalization.
 
     Parameters
     ----------
-    B1 : ndarray or csr_matrix
+    B1 : np.ndarray or csr_matrix
         The boundary B1: C1->C0 of a complex.
-    B2 : ndarray or csr_matrix
+    B2 : np.ndarray or csr_matrix
         The boundary B2: C2->C1 of a complex.
 
     Returns
     -------
-    B1 : ndarray or csr_matrix
+    B1 : np.ndarray or csr_matrix
         Normalized B1: C1->C0.
-    B1T : ndarray or csr_matrix
+    B1T : np.ndarray or csr_matrix
         Normalized B1T: C0->C1.
-    B2 : ndarray or csr_matrix
+    B2 : np.ndarray or csr_matrix
         Normalized B2: C2->C1.
-    B2T : ndarray or csr_matrix
+    B2T : np.ndarray or csr_matrix
         Normalized B2T: C1->C2.
 
     References
@@ -203,25 +200,25 @@ def compute_bunch_normalized_matrices(
 
 
 def _compute_B1_normalized_matrix(
-    B1: Union[ndarray, csr_matrix], B2: Union[ndarray, csr_matrix]
-) -> Union[ndarray, csr_matrix]:
+    B1: np.ndarray | csr_matrix, B2: np.ndarray | csr_matrix
+) -> np.ndarray | csr_matrix:
     """Compute normalized boundary matrix B1.
 
     Parameters
     ----------
-    B1 : ndarray or csr_matrix
+    B1 : np.ndarray or csr_matrix
         The boundary B1: C1->C0 of a complex.
-    B2 : ndarray or csr_matrix
+    B2 : np.ndarray or csr_matrix
         The boundary B2: C2->C1 of a complex.
 
     Returns
     -------
-    ndarray or csr_matrix
+    np.ndarray or csr_matrix
         Normalized B1: C1->C0.
     """
     D2 = _compute_D2(B2)
     D1 = _compute_D1(B1, D2)
-    if isinstance(B1, ndarray):
+    if isinstance(B1, np.ndarray):
         D1_pinv = pinv(D1)
     elif isinstance(B1, csr_matrix):
         D1_pinv = csr_matrix(pinv(D1.toarray()))
@@ -229,47 +226,47 @@ def _compute_B1_normalized_matrix(
 
 
 def _compute_B1T_normalized_matrix(
-    B1: Union[ndarray, csr_matrix], B2: Union[ndarray, csr_matrix]
-) -> Union[ndarray, csr_matrix]:
+    B1: np.ndarray | csr_matrix, B2: np.ndarray | csr_matrix
+) -> np.ndarray | csr_matrix:
     """Compute normalized transpose boundary matrix B1T.
 
     Parameters
     ----------
-    B1 : ndarray or csr_matrix
+    B1 : np.ndarray or csr_matrix
         The boundary B1: C1->C0  of a complex.
-    B2 : ndarray or csr_matrix
+    B2 : np.ndarray or csr_matrix
         The boundary B2: C2->C1  of a complex.
 
     Returns
     -------
-    ndarray or csr_matrix
+    np.ndarray or csr_matrix
         Normalized transpose boundary matrix B1T: C0->C1.
         This is the coboundary C0->C1.
     """
     D2 = _compute_D2(B2)
     D1 = _compute_D1(B1, D2)
-    if isinstance(B1, ndarray):
+    if isinstance(B1, np.ndarray):
         D1_pinv = pinv(D1)
     elif isinstance(B1, csr_matrix):
         D1_pinv = csr_matrix(pinv(D1.toarray()))
     else:
-        raise TypeError("input type must be either ndarray or csr_matrix")
+        raise TypeError("input type must be either np.ndarray or csr_matrix")
     return D2 @ B1.T @ D1_pinv
 
 
 def _compute_B2_normalized_matrix(
-    B2: Union[ndarray, csr_matrix]
-) -> Union[ndarray, csr_matrix]:
+    B2: np.ndarray | csr_matrix,
+) -> np.ndarray | csr_matrix:
     """Compute normalized boundary matrix B2.
 
     Parameters
     ----------
-    B2 : ndarray or csr_matrix
+    B2 : np.ndarray or csr_matrix
         The boundary matrix B2: C2 -> C1 of a simplicial complex.
 
     Returns
     -------
-    ndarray or csr_matrix
+    np.ndarray or csr_matrix
         Normalized boundary matrix B2: C2 -> C1.
     """
     D3 = _compute_D3(B2)
@@ -277,37 +274,37 @@ def _compute_B2_normalized_matrix(
 
 
 def _compute_B2T_normalized_matrix(
-    B2: Union[ndarray, csr_matrix]
-) -> Union[ndarray, csr_matrix]:
+    B2: np.ndarray | csr_matrix,
+) -> np.ndarray | csr_matrix:
     """Compute normalized transpose matrix operator B2T.
 
     Parameters
     ----------
-    B2 : ndarray or csr_matrix
+    B2 : np.ndarray or csr_matrix
         The boundary B2: C2->C1.
 
     Returns
     -------
-    ndarray or csr_matrix
+    np.ndarray or csr_matrix
         Normalized transpose matrix operator B2T: C1->C2.
         This is the coboundary matrix: C1->C2.
     """
     D5 = _compute_D5(B2)
-    if isinstance(B2, ndarray):
+    if isinstance(B2, np.ndarray):
         D5_pinv = pinv(D5)
         return B2.T @ D5_pinv
     elif isinstance(B2, csr_matrix):
         D5_pinv = csr_matrix(pinv(D5.toarray()))
         return B2.T @ D5_pinv
-    raise TypeError("input type must be either ndarray or csr_matrix")
+    raise TypeError("input type must be either np.ndarray or csr_matrix")
 
 
-def _compute_D1(B1: Union[ndarray, csr_matrix], D2: diags) -> diags:
+def _compute_D1(B1: np.ndarray | csr_matrix, D2: diags) -> diags:
     """Compute the degree matrix D1.
 
     Parameters
     ----------
-    B1 : ndarray or csr_matrix
+    B1 : np.ndarray or csr_matrix
         The boundary B1: C1->C0 of a complex.
     D2 : diags
         The degree matrix D2.
@@ -325,15 +322,15 @@ def _compute_D1(B1: Union[ndarray, csr_matrix], D2: diags) -> diags:
         rowsum = (np.abs(B1) @ D2).sum(axis=1)
         D1 = 2 * np.diag(rowsum)
         return D1
-    raise TypeError("Input type must be either ndarray or csr_matrix.")
+    raise TypeError("Input type must be either np.ndarray or csr_matrix.")
 
 
-def _compute_D2(B2: Union[ndarray, csr_matrix]) -> diags:
+def _compute_D2(B2: np.ndarray | csr_matrix) -> diags:
     """Compute the degree matrix D2.
 
     Parameters
     ----------
-    B2 : ndarray or csr_matrix
+    B2 : np.ndarray or csr_matrix
         The boundary matrix B2: C2 -> C1 of a simplicial complex.
 
     Returns
@@ -349,15 +346,15 @@ def _compute_D2(B2: Union[ndarray, csr_matrix]) -> diags:
         rowsum = np.abs(B2).sum(axis=1)
         D2 = np.diag(np.maximum(rowsum, 1))
         return D2
-    raise TypeError("Input type must be either ndarray or csr_matrix.")
+    raise TypeError("Input type must be either np.ndarray or csr_matrix.")
 
 
-def _compute_D3(B2: Union[ndarray, csr_matrix]) -> diags:
+def _compute_D3(B2: np.ndarray | csr_matrix) -> diags:
     """Compute the degree matrix D3.
 
     Parameters
     ----------
-    B2 : ndarray or csr_matrix
+    B2 : np.ndarray or csr_matrix
         The boundary matrix B2: C2 -> C1 of a simplicial complex.
 
     Returns
@@ -371,15 +368,15 @@ def _compute_D3(B2: Union[ndarray, csr_matrix]) -> diags:
     elif isinstance(B2, np.ndarray):
         D3 = np.diag(np.ones(B2.shape[1]) / 3)
         return D3
-    raise TypeError("Input type must be either ndarray or csr_matrix.")
+    raise TypeError("Input type must be either np.ndarray or csr_matrix.")
 
 
-def _compute_D5(B2: Union[ndarray, csr_matrix]) -> diags:
+def _compute_D5(B2: np.ndarray | csr_matrix) -> diags:
     """Compute the degree matrix D5.
 
     Parameters
     ----------
-    B2 : ndarray or csr_matrix
+    B2 : np.ndarray or csr_matrix
         The boundary matrix B2: C2 -> C1 of a simplicial complex.
 
     Returns
@@ -395,4 +392,4 @@ def _compute_D5(B2: Union[ndarray, csr_matrix]) -> diags:
         rowsum = np.abs(B2).sum(axis=1)
         D5 = np.diag(rowsum)
         return D5
-    raise TypeError("Input type must be either ndarray or csr_matrix.")
+    raise TypeError("Input type must be either np.ndarray or csr_matrix.")
