@@ -15,14 +15,16 @@ from toponetx.utils.normalization import (
 
 def test_compute_laplacian_normalized_matrix():
     """Test normalize laplacian."""
-    adjacency_matrix = [
-        [0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
-        [1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0, 1.0, 0.0],
-        [0.0, 0.0, 0.0, 1.0, 0.0, 1.0],
-        [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
-    ]
+    adjacency_matrix = np.array(
+        [
+            [0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+        ]
+    )
 
     # Calculate the degree matrix
     degree_matrix = np.diag(adjacency_matrix.sum(axis=1))
