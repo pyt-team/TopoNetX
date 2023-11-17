@@ -43,7 +43,7 @@ class PathComplex(Complex):
         or the last index is omitted), and any sub-sequences of the truncated subsequences in a recursive manner.
     max_rank : int, default=3
         The maximal length of a path in the path complex.
-    attr: keyword arguments, optional
+    **kwargs : keyword arguments, optional
         Additional attributes to be associated with the path complex.
 
     Notes
@@ -65,7 +65,6 @@ class PathComplex(Complex):
     .. [2] Grigor'yan, Lin, Muranov, and Yau.
         Homologies of path complexes and digraphs.
         https://arxiv.org/pdf/1207.2834.pdf
-
 
     Examples
     --------
@@ -91,6 +90,71 @@ class PathComplex(Complex):
         max_rank: int = 3,
         **kwargs,
     ) -> None:
+        """Initialize an object of class representing a path complex based on simple paths as proposed in [1]_.
+
+        The original path complex is defined in [2]_.
+
+        A path complex contains elementary p-paths that span the space of simple paths. Path complexes are a topological structure whose
+        building blocks are paths, which are essentially different from simplicial complexes and cell complexes. If certain conditions are met, path complexes can generalize
+        simplicial complexes.
+
+        For example, a triangle with three vertices 1, 2, and 3 can be represented as a simplicial complex (1, 2, 3). Similarly, it can be represented as a path complex (1, 2, 3) whose
+        boundary 1-paths are (1, 2), (2, 3), and (1, 3). Another example is a simple path (1, 2, 3). In this case, we cannot lift the simple path to a 2-dimensional simplicial complex, as
+        triangle does not exist. However, we can still represent the simple path as a path complex (1, 2, 3) whose boundary 1-paths are (1, 2) and (2, 3) (1-path (1,3) does not exist).
+
+        Parameters
+        ----------
+        paths : nx.Graph or Iterable[Sequence[Hashable]]
+            The paths in the path complex. If a graph is provided, the path complex will be constructed from the graph, and allowed paths are automatically computed.
+        name : str, optional
+            A name for the path complex.
+        reserve_sequence_order : bool, default=False
+            If True, reserve the order of the sub-sequence of nodes in the elementary p-path. Else, the sub-sequence of nodes in the elementary p-path will
+            be reversed if the first index is larger than the last index.
+        allowed_paths : Iterable[tuple[Hashable]], optional
+            An iterable of allowed boundaries.
+            If None and the input is a Graph, allowed paths are automatically computed by enumerating all simple paths in the graph whose length is less than or equal to max_rank.
+            If None and the input is not a Graph, allowed paths contain the input paths, their truncated subsequences (sub-sequences where the first
+            or the last index is omitted), and any sub-sequences of the truncated subsequences in a recursive manner.
+        max_rank : int, default=3
+            The maximal length of a path in the path complex.
+        **kwargs : keyword arguments, optional
+            Additional attributes to be associated with the path complex.
+
+        Notes
+        -----
+        - By the definition established by [2]_, a path complex P is a non-empty collection of elementary p-paths such that for any sequence
+        of vertices in a finite non-empty set V that belong to P, the truncated sequence of vertices (which is sometimes referred to as obvious boundaries) also belongs to P.
+        The truncated sequences are sub-sequences of the original elementary p-path where the first or the last index is omitted. For instance, if we have an elementary p-path (1, 2, 3),
+        the truncated sequences are (1,2) and (2,3).
+        - Path complex in [1]_ is different from the path complex defined in [2]_ in the sense that elementary p-paths span the space of simple paths.
+        The path complex originally proposed has elementary p-paths that span the space of boundary-invariant paths.
+        - The path complex is a simplicial complex if certain conditions are met [2]_.
+        - Unlike hypergraphs, combinatorial, simplicial, and cell complexes, path complexes take into account the order of sequences.
+
+        References
+        ----------
+        .. [1] Truong and Chin.
+            Generalizing Topological Graph Neural Networks with Paths.
+            https://arxiv.org/abs/2308.06838.pdf
+        .. [2] Grigor'yan, Lin, Muranov, and Yau.
+            Homologies of path complexes and digraphs.
+            https://arxiv.org/pdf/1207.2834.pdf
+
+        Examples
+        --------
+        >>> PC = PathComplex([(1, 2, 3)])
+        >>> PC.paths
+        PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
+        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+        >>> PC.paths
+        PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
+        >>> G = nx.Graph()
+        >>> G.add_edges_from([(1, 2), (2, 3), (1, 3)])
+        >>> PC = PathComplex(G)
+        >>> PC.paths
+        PathView([(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 3, 2), (1, 2, 3), (2, 1, 3)])
+        """
         super().__init__(name=name, **kwargs)
 
         self._path_set = PathView()
@@ -157,7 +221,7 @@ class PathComplex(Complex):
         Parameters
         ----------
         paths : Iterable[Sequence[Hashable] or Path]
-            an iterable of paths as lists, tuples, or Path objects.
+            An iterable of paths as lists, tuples, or Path objects.
 
         Examples
         --------
@@ -184,8 +248,9 @@ class PathComplex(Complex):
         Parameters
         ----------
         path : Hashable or Sequence[Hashable] or Path
-            a Hashable or Sequence[Hashable] or Path representing a path in a path complex.
-        attr : keyword arguments, optional
+            A Hashable or Sequence[Hashable] or Path representing a path in a path complex.
+        **attr : keyword arguments, optional
+            Additional keyword arguments to be passed to the method.
 
         Examples
         --------
@@ -311,7 +376,8 @@ class PathComplex(Complex):
 
         Returns
         -------
-        tuple of ints
+        tuple[int, ...]
+            Returns a tuple representing the shape of the path complex.
         """
         return self._path_set.shape
 
@@ -324,11 +390,17 @@ class PathComplex(Complex):
         Returns
         -------
         PathComplex
+            Returns a copy of the PathComplex.
         """
         return PathComplex(list(self.paths), name=self.name, rank=self.dim)
 
     def skeleton(self, rank: int) -> list[tuple[Hashable]]:
         """Compute skeleton.
+
+        Parameters
+        ----------
+        rank : int
+            The rank to be used to generate the skeleton of elementary p-paths.
 
         Returns
         -------
@@ -350,7 +422,9 @@ class PathComplex(Complex):
         Parameters
         ----------
         node : Hashable or Path
-            a Hashable or singleton Path representing a node in a path complex.
+            A Hashable or singleton Path representing a node in a path complex.
+        **attr : keyword arguments
+            Additional attributes to be provided as keyword arguments.
         """
         if not isinstance(node, Hashable):
             raise TypeError(f"Input node must be Hashable, got {type(node)} instead.")
@@ -406,8 +480,9 @@ class PathComplex(Complex):
 
         Returns
         -------
-        If `index` is True, return a tuple of (idx_p_minus_1, idx_p, incidence_matrix).
-        If `index` is False, return incidence_matrix.
+        tuple[dict, dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix
+            If `index` is True, return a tuple of (idx_p_minus_1, idx_p, incidence_matrix) otherwise
+            if `index` is False, return incidence_matrix.
         """
         if rank < 0:
             raise ValueError(f"input dimension d must be positive integer, got {rank}")
@@ -493,8 +568,9 @@ class PathComplex(Complex):
 
         Returns
         -------
-        If `index` is True, return a tuple of (idx_p, up_laplacian_matrix).
-        If `index` is False, return up_laplacian_matrix.
+        tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix
+            If `index` is True, return a tuple of (idx_p, up_laplacian_matrix) otherwise
+            if `index` is False, return up_laplacian_matrix.
         """
         if weight is not None:
             raise ValueError("Weighted Laplacian is not supported in this version.")
@@ -538,8 +614,9 @@ class PathComplex(Complex):
 
         Returns
         -------
-        If `index` is True, return a tuple of (idx_p, down_laplacian_matrix).
-        If `index` is False, return down_laplacian_matrix.
+        tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix
+            If `index` is True, return a tuple of (idx_p, down_laplacian_matrix) otherwise
+            if `index` is False, return down_laplacian_matrix.
         """
         if weight is not None:
             raise ValueError("Weighted Laplacian is not supported in this version.")
@@ -580,9 +657,8 @@ class PathComplex(Complex):
 
         Returns
         -------
-        Laplacian: scipy.sparse.lil_matrix
-        when index is True, return a tuple of (idx_p, Laplacian)
-        when index is False, return Laplacian
+        tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix
+            When index is True, return a tuple of (idx_p, Laplacian) else return Laplacian.
         """
         if rank == 0:
             row, column, B_next = self.incidence_matrix(
@@ -636,13 +712,15 @@ class PathComplex(Complex):
             The dimension of the adjacency matrix.
         signed : bool, default=False
             If True, return signed adjacency matrix. Else, return absolute adjacency matrix.
+        weight : str, default=None, optional
+            The weight to be used for the adjacency matrix.
         index : bool, default=False
             If True, return adjacency matrix with indices. Else, return adjacency matrix without indices.
 
         Returns
         -------
-        If `index` is True, return a tuple of (idx_p, adjacency_matrix).
-        If `index` is False, return adjacency_matrix.
+        tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix
+            If `index` is True, return a tuple of (idx_p, adjacency_matrix) else return adjacency_matrix.
         """
         ind, L_up = self.up_laplacian_matrix(rank, signed=signed, index=True)
         L_up.setdiag(0)
@@ -668,13 +746,15 @@ class PathComplex(Complex):
             The dimension of the coadjacency matrix.
         signed : bool, default=False
             If True, return signed coadjacency matrix. Else, return absolute coadjacency matrix.
+        weight : str, default=None, optional
+            The weight to be used for the adjacency matrix.
         index : bool, default=False
             If True, return coadjacency matrix with indices. Else, return coadjacency matrix without indices.
 
         Returns
         -------
-        If `index` is True, return a tuple of (idx_p, coadjacency_matrix).
-        If `index` is False, return coadjacency_matrix.
+        tuple[dict, sp.sparse.lil_matrix] | sp.sparse.lil_matrix
+            If `index` is True, return a tuple of (idx_p, coadjacency_matrix) else return coadjacency_matrix.
         """
         ind, L_down = self.down_laplacian_matrix(rank, signed=signed, index=True)
         L_down.setdiag(0)
@@ -686,6 +766,18 @@ class PathComplex(Complex):
 
     def restrict_to_nodes(self, node_set: Iterable[Hashable], name: str = ""):
         """Return a new path complex restricted to a subset of nodes.
+
+        Parameters
+        ----------
+        node_set : Iterable[Hashable]
+            The nodes to be used for the new restricted path complex.
+        name : str
+            The name of the new path complex to be used.
+
+        Returns
+        -------
+        PathComplex
+            The new path complex restricted to the provided subset of nodes.
 
         Examples
         --------
@@ -705,6 +797,18 @@ class PathComplex(Complex):
 
     def restrict_to_paths(self, path_set: Iterable[Sequence[Hashable]], name: str = ""):
         """Return a new path complex restricted to a subset of paths.
+
+        Parameters
+        ----------
+        path_set : Iterable[Sequence[Hashable]]
+            The paths to be used for the new restricted path complex.
+        name : str
+            The name of the new path complex to be used.
+
+        Returns
+        -------
+        PathComplex
+            The new path complex restricted to the provided subset of paths.
 
         Examples
         --------
@@ -980,6 +1084,13 @@ class PathComplex(Complex):
                     self[path][name] = value
 
     def _remove_path(self, path: tuple[Hashable]) -> None:
+        """Remove path from the Path Complex.
+
+        Parameters
+        ----------
+        path : tuple[Hashable]
+            The path to be removed.
+        """
         del self._path_set.faces_dict[len(path) - 1][path]
         self._allowed_paths.remove(path)
         if (
@@ -989,12 +1100,31 @@ class PathComplex(Complex):
             self._path_set.max_dim -= 1
 
     def _update_faces_dict_length(self, path: tuple[Hashable]) -> None:
+        """Update length of dict faces in the Path Complex.
+
+        Parameters
+        ----------
+        path : tuple[Hashable]
+            The path to be used for the update.
+        """
         if len(path) > len(self._path_set.faces_dict):
             diff = len(path) - len(self._path_set.faces_dict)
             for _ in range(diff):
                 self._path_set.faces_dict.append({})
 
     def _update_faces_dict_entry(self, path: tuple[Hashable]):
+        """Update the dict entry for faces.
+
+        Parameters
+        ----------
+        path : tuple[Hashable]
+            The path to update faces dict entry for.
+
+        Returns
+        -------
+        PathComlex | None
+            The return value.
+        """
         dim = len(path) - 1
         if path not in self._path_set.faces_dict[dim]:  # Not in faces_dict
             self._path_set.faces_dict[dim][path] = {}
@@ -1003,6 +1133,15 @@ class PathComplex(Complex):
             return None
 
     def _update_attributes(self, path, **attr):
+        """Update the attributes of path.
+
+        Parameters
+        ----------
+        path : tuple[Hashable]
+            The path to update attributes for.
+        **attr : keyword arguments
+            The attributes to update.
+        """
         if not isinstance(path, Path):  # path is a list or tuple
             path_ = tuple(path)
         else:  # path is a Path object
@@ -1026,6 +1165,12 @@ class PathComplex(Complex):
         Parameters
         ----------
         item : Sequence[Hashable] | Hashable
+            The item to check for.
+
+        Returns
+        -------
+        bool
+            `True` if item is contained else `False`.
         """
         return item in self._path_set
 
@@ -1036,6 +1181,11 @@ class PathComplex(Complex):
         ----------
         item : Sequence[Hashable] | Hashable
             An elementary p-path or a node in the path complex.
+
+        Returns
+        -------
+        PathView
+            The pathview based on the item provided.
         """
         if item in self:
             return self._path_set[item]
@@ -1047,7 +1197,8 @@ class PathComplex(Complex):
 
         Returns
         -------
-        dict_keyiterator
+        Iterator
+            Iterator for iterating over all faces of the path complex.
         """
         return iter(self.nodes)
 
@@ -1057,15 +1208,28 @@ class PathComplex(Complex):
         Returns
         -------
         int
+            The number of elementary p-paths in the path complex.
         """
         return len(list(self.__iter__()))
 
     def __str__(self) -> str:
-        """Return detailed string representation."""
+        """Return detailed string representation.
+
+        Returns
+        -------
+        str
+            The __str__ representation of the Path Complex.
+        """
         return f"Path Complex with shape {self.shape} and dimension {self.dim}"
 
     def __repr__(self) -> str:
-        """Return string representation."""
+        """Return string representation.
+
+        Returns
+        -------
+        str
+            The __repr__ representation of the Path Complex.
+        """
         return f"PathComplex(name='{self.name}')"
 
     @staticmethod

@@ -37,6 +37,30 @@ class HyperEdge(Atom):
     def __init__(
         self, elements: Collection, name: str = "", rank=None, **kwargs
     ) -> None:
+        """Generate instance of the class for a hyperedge (or a set-type cell).
+
+        This class represents a set-type cell in a combinatorial complex, which is a set of
+        nodes with optional attributes and a rank. The nodes in a hyperedge must be
+        hashable and unique, and the hyperedge itself is immutable.
+
+        Parameters
+        ----------
+        elements : iterable of hashables
+            The nodes in the hyperedge.
+        name : str, optional
+            The name of the hyperedge.
+        rank : int, optional
+            The rank of the hyperedge. Default is None.
+        **kwargs : additional attributes
+            Additional attributes of the hyperedge, as keyword arguments.
+
+        Examples
+        --------
+        >>> ac1 = HyperEdge((1, 2, 3))
+        >>> ac2 = HyperEdge((1, 2, 4, 5))
+        >>> ac3 = HyperEdge(("a", "b", "c"))
+        >>> ac3 = HyperEdge(("a", "b", "c"), rank=10)
+        """
         for i in elements:
             if not isinstance(i, Hashable):
                 raise TypeError("Every element of HyperEdge must be hashable.")
@@ -80,6 +104,11 @@ class HyperEdge(Atom):
     def __eq__(self, other):
         """Return whether all attributes of HyperEdge objects are equal.
 
+        Parameters
+        ----------
+        other : HyperEdge
+            The other HyperEdge that needs to be compared to the current HyperEdge.
+
         Returns
         -------
         bool
@@ -91,6 +120,11 @@ class HyperEdge(Atom):
 
     def __ne__(self, other):
         """Return whether any attributes of HyperEdge objects are not equal.
+
+        Parameters
+        ----------
+        other : HyperEdge
+            The other HyperEdge that needs to be compared to the current HyperEdge.
 
         Returns
         -------

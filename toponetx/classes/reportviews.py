@@ -31,6 +31,13 @@ class CellView:
     """
 
     def __init__(self, name: str = "") -> None:
+        """Initialize an object for the CellView class for cells of a CellComplex.
+
+        Parameters
+        ----------
+        name : str, optional
+            The name of the cell view.
+        """
         self.name = name
 
         # Initialize a dictionary to hold cells, with keys being the tuple
@@ -140,11 +147,23 @@ class CellView:
             raise TypeError("Input must be a tuple, list or a cell.")
 
     def __len__(self) -> int:
-        """Return the number of cells in the cell view."""
+        """Return the number of cells in the cell view.
+
+        Returns
+        -------
+        int
+            The number of cells in the cell view.
+        """
         return sum(len(self._cells[cell]) for cell in self._cells)
 
     def __iter__(self) -> Iterator:
-        """Iterate over all cells in the cell view."""
+        """Iterate over all cells in the cell view.
+
+        Returns
+        -------
+        Iterator
+            Iterator to iterate over all cells in the cell view.
+        """
         return iter(
             [
                 self._cells[cell][key]
@@ -176,11 +195,23 @@ class CellView:
         return any(e_homotopic_to)
 
     def __repr__(self) -> str:
-        """Return a string representation of the cell view."""
+        """Return a string representation of the cell view.
+
+        Returns
+        -------
+        str
+            The __repr__ representation of the cell view.
+        """
         return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
     def __str__(self) -> str:
-        """Return a string representation of the cell view."""
+        """Return a string representation of the cell view.
+
+        Returns
+        -------
+        str
+            The __str__ representation of the cell view.
+        """
         return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
 
 
@@ -201,6 +232,17 @@ class ColoredHyperEdgeView:
     """
 
     def __init__(self, name: str = "") -> None:
+        """Initialize a new instance of the ColoredHyperEdgeView class.
+
+        Parameters
+        ----------
+        name : str, optional
+            The name of the view.
+
+        Examples
+        --------
+        >>> hev = ColoredHyperEdgeView()
+        """
         self.name = name
         self.hyperedge_dict = {}
 
@@ -215,7 +257,7 @@ class ColoredHyperEdgeView:
         Returns
         -------
         dict or list or dicts
-            return dict of attributes associated with that hyperedges
+            Return dict of attributes associated with that hyperedges.
         """
         if isinstance(hyperedge, Iterable):
             if len(hyperedge) == 2:
@@ -232,7 +274,13 @@ class ColoredHyperEdgeView:
 
     @property
     def shape(self) -> tuple[int, ...]:
-        """Compute shape."""
+        """Compute shape.
+
+        Returns
+        -------
+        tuple[int, ...]
+            The shape of the ColoredHyperEdge.
+        """
         shape = []
         for i in self.allranks:
             sm = sum([len(self.hyperedge_dict[i][k]) for k in self.hyperedge_dict[i]])
@@ -240,11 +288,23 @@ class ColoredHyperEdgeView:
         return tuple(shape)
 
     def __len__(self) -> int:
-        """Compute the number of nodes."""
+        """Compute the number of nodes.
+
+        Returns
+        -------
+        int
+            The number of nodes in the ColoredHyperEdge.
+        """
         return sum(self.shape[1:])
 
     def __iter__(self) -> Iterator:
-        """Iterate over the hyperedges."""
+        """Iterate over the hyperedges.
+
+        Returns
+        -------
+        Iterator
+            The iterator to iterate over the hyperedges.
+        """
         lst = []
         for r in self.hyperedge_dict:
             if r == 0:
@@ -257,6 +317,16 @@ class ColoredHyperEdgeView:
 
     def __contains__(self, hyperedge: Collection) -> bool:
         """Check if hyperedge is in the hyperedges.
+
+        Parameters
+        ----------
+        hyperedge : Collection
+            The hyperedge to check.
+
+        Returns
+        -------
+        bool
+            Return `True` if the hyperedge is contained within the hyperedges.
 
         Notes
         -----
@@ -317,6 +387,7 @@ class ColoredHyperEdgeView:
         Returns
         -------
         str
+            The __repr__ string representation of the hyperedges.
         """
         return f"ColoredHyperEdgeView({[(tuple(x[0]),x[1]) for x in self]})"
 
@@ -326,6 +397,7 @@ class ColoredHyperEdgeView:
         Returns
         -------
         str
+            The __str__ string representation of the hyperedges.
         """
         return f"ColoredHyperEdgeView({[(tuple(x[0]),x[1]) for x in self]})"
 
@@ -404,8 +476,14 @@ class ColoredHyperEdgeView:
                 raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
 
     @property
-    def allranks(self):
-        """All ranks."""
+    def allranks(self) -> list[int]:
+        """All ranks.
+
+        Returns
+        -------
+        list[int]
+            The sorted list of all ranks.
+        """
         return sorted(self.hyperedge_dict.keys())
 
 
