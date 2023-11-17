@@ -184,11 +184,13 @@ def compute_bunch_normalized_matrices(
 
     References
     ----------
-    [1] Schaub, M. T., Benson, A. R., Horn, P., Lippner, G., & Jadbabaie, A.
-        "Random walks on simplicial complexes and the normalized hodge 1-laplacian."
+    .. [1] Schaub, Benson, Horn, Lippner, Jadbabaie.
+        Random walks on simplicial complexes and the normalized hodge 1-laplacian.
+        Paper: https://epubs.siam.org/doi/10.1137/18M1201019
 
-    [2] Bunch, E., You, Q., Fung, G., & Singh, V.
-        "Simplicial 2-Complex Convolutional Neural Networks."
+    .. [2] Bunch, You, Fung, Singh.
+        Simplicial 2-Complex Convolutional Neural Networks.
+        Paper: https://openreview.net/forum?id=TLbnsKrt6J-
     """
     B1N = _compute_B1_normalized_matrix(B1, B2)
     B1TN = _compute_B1T_normalized_matrix(B1, B2)
