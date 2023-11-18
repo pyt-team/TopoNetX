@@ -47,6 +47,34 @@ class Simplex(Atom):
         construct_tree: bool = False,
         **kwargs,
     ) -> None:
+        """Initialize an instance of the class representing a simplex in a simplicial complex.
+
+        This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension. The
+        simplex is immutable, and the nodes in the simplex must be hashable and unique.
+
+        Parameters
+        ----------
+        elements : Collection
+            The nodes in the simplex.
+        name : str, optional
+            A name for the simplex.
+        construct_tree : bool, default=True
+            If True, construct the entire simplicial tree for the simplex.
+        **kwargs : keyword arguments, optional
+            Additional attributes to be associated with the simplex.
+
+        Examples
+        --------
+        >>> # Create a 0-dimensional simplex (point)
+        >>> s = Simplex((1,))
+        >>> # Create a 1-dimensional simplex (line segment)
+        >>> s = Simplex((1, 2))
+        >>> # Create a 2-dimensional simplex (triangle)
+        >>> simplex1 = Simplex((1, 2, 3))
+        >>> simplex2 = Simplex(("a", "b", "c"))
+        >>> # Create a 3-dimensional simplex (tetrahedron)
+        >>> simplex3 = Simplex((1, 2, 4, 5), weight=1)
+        """
         if construct_tree is not False:
             warnings.warn(
                 "The `construct_tree` argument is deprecated.",

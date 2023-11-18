@@ -384,11 +384,6 @@ class CellComplex(Complex):
             The cell to insert.
         **attr
             The attributes of the cell to insert.
-
-        Returns
-        -------
-        None
-            Nothing is returned by this method.
         """
         # input must be list, tuple or Cell type
         if isinstance(cell, (tuple, list, Cell)):
@@ -416,11 +411,6 @@ class CellComplex(Complex):
             The cell to delete.
         key : Hashable
             The key of the cell to delete.
-
-        Returns
-        -------
-        None
-            Nothing is returned by this method.
         """
         if isinstance(cell, Cell):
             cell = cell.elements

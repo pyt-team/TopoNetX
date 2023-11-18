@@ -39,12 +39,16 @@ COSEG_DS_MAP = {
 
 
 @overload
-def stanford_bunny(complex_type: Literal["cell"]) -> CellComplex:
+def stanford_bunny(
+    complex_type: Literal["cell"],
+) -> CellComplex:  # numpydoc ignore=GL08
     ...
 
 
 @overload
-def stanford_bunny(complex_type: Literal["simplicial"]) -> SimplicialComplex:
+def stanford_bunny(
+    complex_type: Literal["simplicial"],
+) -> SimplicialComplex:  # numpydoc ignore=GL08
     ...
 
 

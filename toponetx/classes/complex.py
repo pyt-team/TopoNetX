@@ -276,6 +276,11 @@ class Complex(abc.ABC):
         ----------
         key : hashable
             Get item based on key.
+
+        Returns
+        -------
+        Hashable
+            The hashable item that needs to be returned.
         """
 
     @abc.abstractmethod

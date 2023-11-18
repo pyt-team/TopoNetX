@@ -75,6 +75,23 @@ def graph_to_clique_complex(
 
 
 def graph_2_neighbor_complex(G) -> SimplicialComplex:
+    """Get the neighbor complex of a graph.
+
+    Parameters
+    ----------
+    G : networkx.Graph
+        Input graph.
+
+    Returns
+    -------
+    toponetx.classes.SimplicialComplex
+        The neighbor complex of the graph.
+
+    Notes
+    -----
+    This type of simplicial complexes can have very large dimension (max degree of the
+    graph) and it is a function of the distribution of the valency of the graph.
+    """
     warn(
         "`graph_2_neighbor_complex` is deprecated and will be removed in a future version, use `graph_to_neighbor_complex` instead.",
         DeprecationWarning,
@@ -86,6 +103,20 @@ def graph_2_neighbor_complex(G) -> SimplicialComplex:
 def graph_2_clique_complex(
     G: nx.Graph, max_dim: int | None = None
 ) -> SimplicialComplex:
+    """Get the clique complex of a graph.
+
+    Parameters
+    ----------
+    G : networks.Graph
+        Input graph.
+    max_dim : int, optional
+        The max dimension of the cliques in the output clique complex.
+
+    Returns
+    -------
+    SimplicialComplex
+        The clique simplicial complex of dimension dim of the graph G.
+    """
     warn(
         "`graph_2_clique_complex` is deprecated and will be removed in a future version, use `graph_to_clique_complex` instead.",
         DeprecationWarning,
@@ -123,7 +154,7 @@ def weighted_graph_to_vietoris_rips_complex(
         The Vietoris-Rips simplicial complex of dimension max_dim of the graph G.
     """
 
-    def is_in_vr_complex(clique):
+    def is_in_vr_complex(clique):  # numpydoc ignore=GL08
         edges = combinations(clique, 2)
         edge_weights_lower_than_r = all(G[u][v]["weight"] <= r for u, v in edges)
         return edge_weights_lower_than_r

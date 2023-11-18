@@ -17,14 +17,16 @@ DIR = Path(__file__).parent
 
 
 @overload
-def karate_club(complex_type: Literal["cell"], feat_dim: int = ...) -> CellComplex:
+def karate_club(
+    complex_type: Literal["cell"], feat_dim: int = ...
+) -> CellComplex:  # numpydoc ignore=GL08
     ...
 
 
 @overload
 def karate_club(
     complex_type: Literal["simplicial"], feat_dim: int = ...
-) -> SimplicialComplex:
+) -> SimplicialComplex:  # numpydoc ignore=GL08
     ...
 
 
