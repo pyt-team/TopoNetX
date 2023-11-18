@@ -1,4 +1,4 @@
-"""Abstract class for complexes."""
+"""Abstract class for Complex and Atom."""
 
 
 import abc
