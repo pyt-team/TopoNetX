@@ -179,22 +179,46 @@ class CellComplex(Complex):
 
     @property
     def cells(self) -> CellView:
-        """Return cells."""
+        """Return cells.
+
+        Returns
+        -------
+        CellView
+            The cell view of the Complex.
+        """
         return self._cells
 
     @property
     def edges(self) -> EdgeView:
-        """Return edges."""
+        """Return edges.
+
+        Returns
+        -------
+        EdgeView
+            The edge view of the Complex.
+        """
         return self._G.edges
 
     @property
     def nodes(self) -> NodeView:
-        """Return nodes."""
+        """Return nodes.
+
+        Returns
+        -------
+        NodeView
+            The node view of the Complex.
+        """
         return self._G.nodes
 
     @property
     def maxdim(self) -> int:
-        """Return maximum dimension."""
+        """Return maximum dimension.
+
+        Returns
+        -------
+        int
+            The maximum dimension for Cell Complex.
+        """
         warn(
             "`CellComplex.maxdim` is deprecated and will be removed in the future, use `CellComplex.dim` instead.",
             DeprecationWarning,
@@ -204,7 +228,13 @@ class CellComplex(Complex):
 
     @property
     def dim(self) -> int:
-        """Return maximum dimension."""
+        """Return maximum dimension.
+
+        Returns
+        -------
+        int
+            The maximum dimension of the Cell Complex.
+        """
         if len(self.nodes) == 0:
             return 0
         if len(self.edges) == 0:
@@ -217,8 +247,11 @@ class CellComplex(Complex):
     def shape(self) -> tuple[int, int, int]:
         """Return shape.
 
-        This is:
-        (number of cells[i], for i in range(0, dim(CC)))
+        Returns
+        -------
+        tuple[int, int, int]
+            The tuple containing the number of entities corresponding to the
+            nodes, edges, and cells of the Cell Complex respectively.
         """
         return len(self.nodes), len(self.edges), len(self.cells)
 
@@ -255,6 +288,7 @@ class CellComplex(Complex):
         Returns
         -------
         bool
+            Returns `True` if the regularity condition is satisfied.
 
         Examples
         --------
@@ -272,15 +306,33 @@ class CellComplex(Complex):
         return True
 
     def __str__(self) -> str:
-        """Return detailed string representation."""
+        """Return detailed string representation.
+
+        Returns
+        -------
+        str
+            The string representation of the Cell Complex.
+        """
         return f"Cell Complex with {len(self.nodes)} nodes, {len(self.edges)} edges and {len(self.cells)} 2-cells "
 
     def __repr__(self) -> str:
-        """Return string representation."""
+        """Return string representation.
+
+        Returns
+        -------
+        str
+            The __repr__ representation of the Cell Complex.
+        """
         return f"CellComplex(name='{self.name}')"
 
     def __len__(self) -> int:
-        """Return number of nodes."""
+        """Return number of nodes.
+
+        Returns
+        -------
+        int
+            The number of nodes in the Cell Complex.
+        """
         return len(self.nodes)
 
     def __iter__(self) -> Iterator:
@@ -314,16 +366,25 @@ class CellComplex(Complex):
         Parameters
         ----------
         node : hashable
+            The node contained in the cell complex.
 
         Returns
         -------
-        neighbors(node) : iterator
+        Iterator
             Iterator over neighbors of node.
         """
         return self.neighbors(node)
 
     def _insert_cell(self, cell: tuple | list | Cell, **attr):
-        """Insert cell."""
+        """Insert cell.
+
+        Parameters
+        ----------
+        cell : tuple | list | Cell
+            The cell to insert.
+        **attr
+            The attributes of the cell to insert.
+        """
         # input must be list, tuple or Cell type
         if isinstance(cell, (tuple, list, Cell)):
             if isinstance(cell, (tuple, list)):
@@ -342,7 +403,15 @@ class CellComplex(Complex):
             raise TypeError("input must be list, tuple or Cell type")
 
     def _delete_cell(self, cell: tuple | list | Cell, key=None):
-        """Delete cell."""
+        """Delete cell.
+
+        Parameters
+        ----------
+        cell : tuple | list | Cell
+            The cell to delete.
+        key : Hashable
+            The key of the cell to delete.
+        """
         if isinstance(cell, Cell):
             cell = cell.elements
         if cell in self._cells._cells:
@@ -360,8 +429,8 @@ class CellComplex(Complex):
 
         Returns
         -------
-        equiv : dict[Cell, set[Cell]]
-            Dict structure: `Cell` representing equivalence class -> Set of all `Cell`s in class
+        dict[Cell, set[Cell]]
+            Dict structure: `Cell` representing equivalence class -> Set of all `Cell`s in class.
 
         Examples
         --------
@@ -649,6 +718,7 @@ class CellComplex(Complex):
         Parameters
         ----------
         nodes : iterable of hashables
+            Nodes to instantiate when adding cells to cell complex.
         """
         for node in nodes:
             self.add_node(node)
@@ -2367,6 +2437,11 @@ class CellComplex(Complex):
         ----------
         mesh : trimesh.Trimesh
             A trimesh object.
+
+        Returns
+        -------
+        CellComplex
+            The cell complex generated from the trimesh provided.
 
         Examples
         --------

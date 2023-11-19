@@ -27,6 +27,17 @@ class Atom(abc.ABC):
     def __init__(
         self, elements: Collection[Hashable], name: str = "", **kwargs
     ) -> None:
+        """Abstract class representing an atom in a complex.
+
+        Parameters
+        ----------
+        elements : Collection[Hashable]
+            The elements in the atom.
+        name : str, optional
+            Name of the atom.
+        **kwargs : keyword arguments, optional
+            Additional attributes to be associated with the atom.
+        """
         self.elements = elements
         self.name = name
 
@@ -34,7 +45,13 @@ class Atom(abc.ABC):
         self._attributes.update(kwargs)
 
     def __len__(self) -> int:
-        """Return the number of elements in the atom."""
+        """Return the number of elements in the atom.
+
+        Returns
+        -------
+        int
+            The number of elements in the atom.
+        """
         return len(self.elements)
 
     def __iter__(self) -> Iterator:
@@ -43,6 +60,7 @@ class Atom(abc.ABC):
         Returns
         -------
         Iterator
+            Iterator over the elements in the atom.
         """
         return iter(self.elements)
 
@@ -57,6 +75,8 @@ class Atom(abc.ABC):
         Returns
         -------
         bool
+            Returns `True` if the item is contained in the element
+            and `False` otherwise.
         """
         return item in self.elements
 
@@ -147,6 +167,15 @@ class Complex(abc.ABC):
     complex: dict[Any, Any]
 
     def __init__(self, name: str = "", **kwargs) -> None:
+        """Initialize a new instance of the Complex class.
+
+        Parameters
+        ----------
+        name : str, optional
+            Name of the complex.
+        **kwargs : keyword arguments, optional
+            Attributes to add to the complex as key=value pairs.
+        """
         self.name = name
         self.complex = {}
         self.complex.update(kwargs)
@@ -164,6 +193,7 @@ class Complex(abc.ABC):
         Returns
         -------
         int
+            Returns the dimension of the complex.
         """
 
     @property
@@ -195,6 +225,7 @@ class Complex(abc.ABC):
         Returns
         -------
         str
+            Returns the string representation of the complex.
         """
 
     @abc.abstractmethod
@@ -207,6 +238,7 @@ class Complex(abc.ABC):
         Returns
         -------
         str
+            Returns the __repr__ representation of the complex.
         """
 
     @abc.abstractmethod
@@ -233,11 +265,23 @@ class Complex(abc.ABC):
         Returns
         -------
         bool
+            Returns `True` if the complex contains the item else `False`.
         """
 
     @abc.abstractmethod
     def __getitem__(self, key):
-        """Get item."""
+        """Get item.
+
+        Parameters
+        ----------
+        key : hashable
+            Get item based on key.
+
+        Returns
+        -------
+        Hashable
+            The hashable item that needs to be returned.
+        """
 
     @abc.abstractmethod
     def remove_nodes(self, node_set: Iterator[Hashable]) -> None:

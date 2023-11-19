@@ -10,7 +10,7 @@ import networkx as nx
 from toponetx.classes.cell_complex import CellComplex
 
 
-def homology_cycle_cell_complex(G):
+def homology_cycle_cell_complex(G) -> CellComplex:
     """Get the cell complex obtained by adding homology cycles of a graph.
 
     Parameters
@@ -21,7 +21,7 @@ def homology_cycle_cell_complex(G):
     Returns
     -------
     CellComplex
-        the cell complex obtained by adding the homology cycles of the graph
+        The cell complex obtained by adding the homology cycles of the graph.
     """
     cycles = nx.cycle_basis(G)
     cx = CellComplex(G)
