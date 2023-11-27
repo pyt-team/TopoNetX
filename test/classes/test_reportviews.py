@@ -209,33 +209,10 @@ class TestReportViews_CellView:
 
         assert CV.__contains__(list(cell_10_tp)) is False
 
-        with pytest.raises(TypeError) as exp_exception:
-            CV.__contains__({1, 2, 3, 4})
-
-        assert (
-            str(exp_exception.value) == "Input must be of type: tuple, list or a cell."
-        )
-
-        with pytest.raises(TypeError) as exp_exception:
-            CV.__contains__(1)
-
-        assert (
-            str(exp_exception.value) == "Input must be of type: tuple, list or a cell."
-        )
-
-        with pytest.raises(TypeError) as exp_exception:
-            CV.__contains__("1234")
-
-        assert (
-            str(exp_exception.value) == "Input must be of type: tuple, list or a cell."
-        )
-
-        with pytest.raises(TypeError) as exp_exception:
-            CV.__contains__({"1": True, "2": True, "3": True, "4": True})
-
-        assert (
-            str(exp_exception.value) == "Input must be of type: tuple, list or a cell."
-        )
+        assert CV.__contains__({1, 2, 3, 4}) is False
+        assert CV.__contains__(1) is False
+        assert CV.__contains__("1234") is False
+        assert CV.__contains__({"1": True, "2": True, "3": True, "4": True}) is False
 
     def test_cell_view_repr_method(self):
         """Test the __repr__ method for the CellView class."""
