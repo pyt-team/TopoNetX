@@ -97,8 +97,8 @@ class TestCombinatorialComplex:
 
     def test_chg_repr(self):
         """Test CHG repr representation."""
-        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2, name="chg_test")
-        assert repr(CHG) == f"ColoredHyperGraph(name='{CHG.name}')"
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        assert repr(CHG) == "ColoredHyperGraph()"
 
     def test_chg_iter(self):
         """Test CHG iter."""

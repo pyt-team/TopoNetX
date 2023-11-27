@@ -330,8 +330,8 @@ class TestCombinatorialComplex:
 
     def test_repr(self):
         """Test the represntation function of the CombinatorialComplex object by mentioning a name."""
-        CCC = CombinatorialComplex(name="sampleobject")
-        assert repr(CCC) == "CombinatorialComplex(name='sampleobject')"
+        CCC = CombinatorialComplex()
+        assert repr(CCC) == "CombinatorialComplex()"
 
     def test_contains(self):
         """Test whether the contains method works correctly."""

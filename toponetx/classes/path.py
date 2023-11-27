@@ -22,8 +22,6 @@ class Path(Atom):
     ----------
     elements : Sequence[Hashable]
         The nodes in the elementary p-path.
-    name : str, optional
-        A name for the elementary p-path.
     construct_boundaries : bool, default=False
         If True, construct the entire boundary of the elementary p-path.
     reserve_sequence_order : bool, default=False
@@ -76,7 +74,6 @@ class Path(Atom):
     def __init__(
         self,
         elements: Sequence[Hashable] | Hashable,
-        name: str = "",
         construct_boundaries: bool = False,
         reserve_sequence_order: bool = False,
         allowed_paths: Iterable[tuple[Hashable]] | None = None,
@@ -95,8 +92,6 @@ class Path(Atom):
         ----------
         elements : Sequence[Hashable]
             The nodes in the elementary p-path.
-        name : str, optional
-            A name for the elementary p-path.
         construct_boundaries : bool, default=False
             If True, construct the entire boundary of the elementary p-path.
         reserve_sequence_order : bool, default=False
@@ -148,7 +143,7 @@ class Path(Atom):
         self.__check_inputs(elements, reserve_sequence_order)
         if isinstance(elements, (int, str)):
             elements = [elements]
-        super().__init__(tuple(elements), name, **kwargs)
+        super().__init__(tuple(elements), **kwargs)
         if len(set(elements)) != len(self.elements):
             raise ValueError("A p-path cannot contain duplicate nodes.")
 
@@ -237,7 +232,6 @@ class Path(Atom):
         """
         return Path(
             self.elements,
-            name=self.name,
             construct_boundaries=self.construct_boundaries,
             **self._attributes,
         )

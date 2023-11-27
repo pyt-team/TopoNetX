@@ -19,8 +19,6 @@ class HyperEdge(Atom):
     ----------
     elements : iterable of hashables
         The nodes in the hyperedge.
-    name : str, optional
-        The name of the hyperedge.
     rank : int, optional
         The rank of the hyperedge. Default is None.
     **kwargs : additional attributes
@@ -34,9 +32,7 @@ class HyperEdge(Atom):
     >>> ac3 = HyperEdge(("a", "b", "c"), rank=10)
     """
 
-    def __init__(
-        self, elements: Collection, name: str = "", rank=None, **kwargs
-    ) -> None:
+    def __init__(self, elements: Collection, rank=None, **kwargs) -> None:
         """Generate instance of the class for a hyperedge (or a set-type cell).
 
         This class represents a set-type cell in a combinatorial complex, which is a set of
@@ -47,8 +43,6 @@ class HyperEdge(Atom):
         ----------
         elements : iterable of hashables
             The nodes in the hyperedge.
-        name : str, optional
-            The name of the hyperedge.
         rank : int, optional
             The rank of the hyperedge. Default is None.
         **kwargs : additional attributes
@@ -65,7 +59,7 @@ class HyperEdge(Atom):
             if not isinstance(i, Hashable):
                 raise TypeError("Every element of HyperEdge must be hashable.")
 
-        super().__init__(frozenset(sorted(elements)), name, **kwargs)
+        super().__init__(frozenset(sorted(elements)), **kwargs)
         if len(elements) != len(self.elements):
             raise ValueError("A hyperedge cannot contain duplicate nodes.")
 

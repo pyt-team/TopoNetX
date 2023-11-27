@@ -31,8 +31,6 @@ class PathComplex(Complex):
     ----------
     paths : nx.Graph or Iterable[Sequence[Hashable]]
         The paths in the path complex. If a graph is provided, the path complex will be constructed from the graph, and allowed paths are automatically computed.
-    name : str, optional
-        A name for the path complex.
     reserve_sequence_order : bool, default=False
         If True, reserve the order of the sub-sequence of nodes in the elementary p-path. Else, the sub-sequence of nodes in the elementary p-path will
         be reversed if the first index is larger than the last index.
@@ -84,7 +82,6 @@ class PathComplex(Complex):
     def __init__(
         self,
         paths: nx.Graph | Iterable[Sequence[Hashable] | Path] | None = None,
-        name: str = "",
         reserve_sequence_order: bool = False,
         allowed_paths: Iterable[tuple[Hashable]] | None = None,
         max_rank: int = 3,
@@ -106,8 +103,6 @@ class PathComplex(Complex):
         ----------
         paths : nx.Graph or Iterable[Sequence[Hashable]]
             The paths in the path complex. If a graph is provided, the path complex will be constructed from the graph, and allowed paths are automatically computed.
-        name : str, optional
-            A name for the path complex.
         reserve_sequence_order : bool, default=False
             If True, reserve the order of the sub-sequence of nodes in the elementary p-path. Else, the sub-sequence of nodes in the elementary p-path will
             be reversed if the first index is larger than the last index.
@@ -155,7 +150,7 @@ class PathComplex(Complex):
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 3, 2), (1, 2, 3), (2, 1, 3)])
         """
-        super().__init__(name=name, **kwargs)
+        super().__init__(**kwargs)
 
         self._path_set = PathView()
         self._G = nx.Graph()
@@ -392,7 +387,7 @@ class PathComplex(Complex):
         PathComplex
             Returns a copy of the PathComplex.
         """
-        return PathComplex(list(self.paths), name=self.name, rank=self.dim)
+        return PathComplex(list(self.paths), rank=self.dim)
 
     def skeleton(self, rank: int) -> list[tuple[Hashable]]:
         """Compute skeleton.
@@ -764,15 +759,13 @@ class PathComplex(Complex):
             return ind, L_down
         return L_down
 
-    def restrict_to_nodes(self, node_set: Iterable[Hashable], name: str = ""):
+    def restrict_to_nodes(self, node_set: Iterable[Hashable]):
         """Return a new path complex restricted to a subset of nodes.
 
         Parameters
         ----------
         node_set : Iterable[Hashable]
             The nodes to be used for the new restricted path complex.
-        name : str
-            The name of the new path complex to be used.
 
         Returns
         -------
@@ -793,17 +786,15 @@ class PathComplex(Complex):
         for path in self.paths:
             if all(node in node_set for node in path):
                 new_paths.append(path)
-        return PathComplex(new_paths, name=name)
+        return PathComplex(new_paths)
 
-    def restrict_to_paths(self, path_set: Iterable[Sequence[Hashable]], name: str = ""):
+    def restrict_to_paths(self, path_set: Iterable[Sequence[Hashable]]):
         """Return a new path complex restricted to a subset of paths.
 
         Parameters
         ----------
         path_set : Iterable[Sequence[Hashable]]
             The paths to be used for the new restricted path complex.
-        name : str
-            The name of the new path complex to be used.
 
         Returns
         -------
@@ -828,7 +819,7 @@ class PathComplex(Complex):
         for path in self.paths:
             if path in new_path_set:
                 new_paths.append(path)
-        return PathComplex(new_paths, name=name)
+        return PathComplex(new_paths)
 
     def get_node_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
         """Get node attributes from a path complex.
@@ -1230,7 +1221,7 @@ class PathComplex(Complex):
         str
             The __repr__ representation of the Path Complex.
         """
-        return f"PathComplex(name='{self.name}')"
+        return "PathComplex()"
 
     @staticmethod
     def compute_allowed_paths(

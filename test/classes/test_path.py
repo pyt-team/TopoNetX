@@ -14,7 +14,6 @@ class TestPath:
         assert len(s) == 1
         assert tuple(s) == (1,)
         assert s.construct_boundaries is False
-        assert s.name == ""
         assert s._attributes == {}
 
     def test_invalid_inputs(self):

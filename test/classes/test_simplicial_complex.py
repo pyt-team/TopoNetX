@@ -116,9 +116,8 @@ class TestSimplicialComplex:
         G.add_edge(0, 1)
         G.add_edge(2, 5)
         G.add_edge(5, 4, weight=5)
-        SC = SimplicialComplex(G, name="graph complex")
-        assert (repr(SC)) == "SimplicialComplex(name='graph complex')"
-        assert SC.name == "graph complex"
+        SC = SimplicialComplex(G)
+        assert (repr(SC)) == "SimplicialComplex()"
 
     def test_iter(self):
         """Test iter method."""

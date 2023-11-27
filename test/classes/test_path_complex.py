@@ -196,9 +196,8 @@ class TestPathComplex:
 
     def test_repr_str(self):
         """Test repr str."""
-        PC = PathComplex([[1, 2, 3], [1, 2, 4]], name="PC")
-        assert (repr(PC)) == "PathComplex(name='PC')"
-        assert PC.name == "PC"
+        PC = PathComplex([[1, 2, 3], [1, 2, 4]])
+        assert (repr(PC)) == "PathComplex()"
 
     def test_getittem_set_attributes(self):
         """Test getitem and set_attributes methods."""

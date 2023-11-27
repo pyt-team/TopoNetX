@@ -13,7 +13,6 @@ class TestSimplex:
         s = Simplex((1,))
         assert len(s) == 1
         assert tuple(s) == (1,)
-        assert s.name == ""
         assert s._attributes == {}
 
         with pytest.deprecated_call():

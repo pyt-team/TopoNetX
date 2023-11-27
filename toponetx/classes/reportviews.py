@@ -22,24 +22,10 @@ __all__ = [
 
 
 class CellView:
-    """A CellView class for cells of a CellComplex.
+    """A CellView class for cells of a CellComplex."""
 
-    Parameters
-    ----------
-    name : str, optional
-        The name of the cell view.
-    """
-
-    def __init__(self, name: str = "") -> None:
-        """Initialize an object for the CellView class for cells of a CellComplex.
-
-        Parameters
-        ----------
-        name : str, optional
-            The name of the cell view.
-        """
-        self.name = name
-
+    def __init__(self) -> None:
+        """Initialize an object for the CellView class for cells of a CellComplex."""
         # Initialize a dictionary to hold cells, with keys being the tuple
         # that defines the cell, and values being dictionaries of cell objects
         # with different attributes
@@ -221,29 +207,18 @@ class ColoredHyperEdgeView:
     Provides methods for accessing, and retrieving
     information about the cells/hyperedges of a complex.
 
-    Parameters
-    ----------
-    name : str, optional
-        The name of the view.
-
     Examples
     --------
     >>> hev = ColoredHyperEdgeView()
     """
 
-    def __init__(self, name: str = "") -> None:
+    def __init__(self) -> None:
         """Initialize a new instance of the ColoredHyperEdgeView class.
-
-        Parameters
-        ----------
-        name : str, optional
-            The name of the view.
 
         Examples
         --------
         >>> hev = ColoredHyperEdgeView()
         """
-        self.name = name
         self.hyperedge_dict = {}
 
     def __getitem__(self, hyperedge):
@@ -493,32 +468,21 @@ class HyperEdgeView:
     Provides methods for accessing, and retrieving
     information about the cells/hyperedges of a complex.
 
-    Parameters
-    ----------
-    name : str, optional
-        The name of the view.
-
     Examples
     --------
     >>> hev = HyperEdgeView()
     """
 
-    def __init__(self, name: str = "") -> None:
+    def __init__(self) -> None:
         """Initialize an instance of the class for viewing the cells/hyperedges of a combinatorial complex.
 
         Provides methods for accessing, and retrieving
         information about the cells/hyperedges of a complex.
 
-        Parameters
-        ----------
-        name : str, optional
-            The name of the view.
-
         Examples
         --------
         >>> hev = HyperEdgeView()
         """
-        self.name = name
         self.hyperedge_dict = {}
 
     @staticmethod
@@ -817,11 +781,6 @@ class SimplexView:
     These classes are used in conjunction with the SimplicialComplex class
     for view/read only purposes for simplices in simplicial complexes.
 
-    Parameters
-    ----------
-    name : str, optional
-        Name of the SimplexView instance.
-
     Attributes
     ----------
     max_dim : int
@@ -830,21 +789,14 @@ class SimplexView:
         A list containing dictionaries of faces for each dimension.
     """
 
-    def __init__(self, name: str = "") -> None:
+    def __init__(self) -> None:
         """Initialize an instance of the Simplex View class.
 
         The SimplexView class is used to provide a view/read only information
         into a subset of the nodes in a simplex.
         These classes are used in conjunction with the SimplicialComplex class
         for view/read only purposes for simplices in simplicial complexes.
-
-        Parameters
-        ----------
-        name : str, optional
-            Name of the SimplexView instance.
         """
-        self.name = name
-
         self.max_dim = -1
         self.faces_dict = []
 
@@ -991,13 +943,9 @@ class NodeView:
         The type of the cell.
     colored_nodes : bool, optional
         Whether or not the nodes are colored.
-    name : str, optional
-        Name of the NodeView instance.
     """
 
-    def __init__(
-        self, objectdict, cell_type, colored_nodes: bool = False, name: str = ""
-    ) -> None:
+    def __init__(self, objectdict, cell_type, colored_nodes: bool = False) -> None:
         """Initialize an instance of the Node view class.
 
         Parameters
@@ -1008,10 +956,7 @@ class NodeView:
             The type of the cell.
         colored_nodes : bool, optional, default = False
             Whether or not the nodes are colored.
-        name : str, optional
-            Name of the NodeView instance.
         """
-        self.name = name
         if len(objectdict) != 0:
             self.nodes = objectdict[0]
         else:
@@ -1115,23 +1060,11 @@ class NodeView:
 
 
 class PathView(SimplexView):
-    """Path view class.
+    """Path view class."""
 
-    Parameters
-    ----------
-    name : str, optional
-        Name of the PathView instance.
-    """
-
-    def __init__(self, name: str = "") -> None:
-        """Initialize an instance of the Path view class.
-
-        Parameters
-        ----------
-        name : str, optional
-            Name of the PathView instance.
-        """
-        super().__init__(name)
+    def __init__(self) -> None:
+        """Initialize an instance of the Path view class."""
+        super().__init__()
 
     def __getitem__(self, path: Hashable | Sequence[Hashable] | Path):
         """Get the dictionary of attributes associated with the given path.

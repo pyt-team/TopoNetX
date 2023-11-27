@@ -40,8 +40,6 @@ class CombinatorialComplex(ColoredHyperGraph):
     ----------
     cells : Collection, optional
         A collection of cells to add to the combinatorial complex.
-    name : str, optional
-        An identifiable name for the combinatorial complex.
     ranks : Collection, optional
         When cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
         size as cells.
@@ -74,7 +72,6 @@ class CombinatorialComplex(ColoredHyperGraph):
     def __init__(
         self,
         cells: Collection | None = None,
-        name: str = "",
         ranks: Collection | None = None,
         graph_based: bool = False,
         **kwargs,
@@ -85,8 +82,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         ----------
         cells : Collection, optional
             A collection of cells to add to the combinatorial complex.
-        name : str, optional
-            An identifiable name for the combinatorial complex.
         ranks : Collection, optional
             When cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
             size as cells.
@@ -115,7 +110,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         If cells is a NetworkX graph, it adds nodes and edges accordingly.
         """
         Complex.__init__(self, **kwargs)
-        self.name = name
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
         self._node_membership = {}
         self._complex_set = HyperEdgeView()
@@ -172,7 +166,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         str
             Description of Combinatorial Complex.
         """
-        return f"CombinatorialComplex(name='{self.name}')"
+        return "CombinatorialComplex()"
 
     def __setitem__(self, cell, attr):
         """Set the attributes of a hyperedge or node in the CCC.
@@ -1126,7 +1120,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         CombinatorialComplex
             A copy of this combinatorial complex.
         """
-        CCC = CombinatorialComplex(name=self.name, graph_based=self.graph_based)
+        CCC = CombinatorialComplex(graph_based=self.graph_based)
         for cell in self.cells:
             CCC.add_cell(cell, self.cells.get_rank(cell))
         return CCC
