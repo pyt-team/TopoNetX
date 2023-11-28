@@ -3,6 +3,8 @@ from collections.abc import Hashable, Iterable
 from itertools import combinations
 from typing import Generator, Literal, overload
 
+import networkx as nx
+
 from toponetx.classes import CellComplex, SimplicialComplex
 
 __all__ = [
@@ -151,15 +153,21 @@ def generate_atomlist(
         raise TypeError(f"Expected a cell or simplicial complex, got {type(domain)}.")
 
 
-def write_atomlist(domain: CellComplex | SimplicialComplex, path: str) -> None:
+@nx.utils.open_file(1, "wb")
+def write_atomlist(
+    domain: CellComplex | SimplicialComplex, path, encoding="utf-8"
+) -> None:
     """Write an atom list to a file.
 
     Parameters
     ----------
     domain : CellComplex or SimplicialComplex
         The complex to be converted to an atom list.
-    path : str
-        The path to the file to be written.
+    path : file or str
+        File or filename to write. If a file is provided, it must be opened in ‘wb’
+        mode. Filenames ending in .gz or .bz2 will be compressed.
+    encoding : str, default="utf-8"
+       Specify which encoding to use when writing file.
 
     Raises
     ------
@@ -169,38 +177,42 @@ def write_atomlist(domain: CellComplex | SimplicialComplex, path: str) -> None:
     if not isinstance(domain, (CellComplex, SimplicialComplex)):
         raise TypeError(f"Expected a cell or simplicial complex, got {type(domain)}.")
 
-    with open(path, "w") as file:
-        for line in generate_atomlist(domain):
-            file.write(line + "\n")
+    for line in generate_atomlist(domain):
+        line += "\n"
+        path.write(line.encode(encoding))
 
 
 @overload
 def load_from_atomlist(
-    filepath: str, complex_type: Literal["cell"], nodetype=None
+    filepath: str, complex_type: Literal["cell"], nodetype=None, encoding="utf-8"
 ) -> CellComplex:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def load_from_atomlist(
-    filepath: str, complex_type: Literal["simplicial"], nodetype=None
+    filepath: str, complex_type: Literal["simplicial"], nodetype=None, encoding="utf-8"
 ) -> SimplicialComplex:  # numpydoc ignore=GL08
     pass
 
 
+@nx.utils.open_file(0, "rb")
 def load_from_atomlist(
-    filepath: str, complex_type: Literal["cell", "simplicial"], nodetype=None
+    path, complex_type: Literal["cell", "simplicial"], nodetype=None, encoding="utf-8"
 ) -> CellComplex | SimplicialComplex:
     """Load a complex from an atom list.
 
     Parameters
     ----------
-    filepath : str
-        Path to the file to be read.
+    path : file or str
+        File or filename to read. If a file is provided, it must be opened in ‘rb’
+        mode. Filenames ending in .gz or .bz2 will be uncompressed.
     complex_type : {"cell", "simplicial"}
         The type of complex that should be constructed based on the atom list.
     nodetype : callable, optional
         Convert node data from strings to the specified type.
+    encoding : str, default="utf-8"
+         Specify which encoding to use when reading file.
 
     Returns
     -------
@@ -212,20 +224,21 @@ def load_from_atomlist(
     ValueError
         If the complex type is unknown.
     """
-    with open(filepath, "r") as file:
-        return parse_atomlist(file, complex_type, nodetype)
+    return parse_atomlist(
+        (line.decode(encoding) for line in path), complex_type, nodetype
+    )
 
 
 @overload
 def parse_atomlist(
-    lines: list[str], complex_type: Literal["cell"], nodetype=None
+    lines: Iterable[str], complex_type: Literal["cell"], nodetype=None
 ) -> CellComplex:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def parse_atomlist(
-    lines: list[str], complex_type: Literal["simplicial"], nodetype=None
+    lines: Iterable[str], complex_type: Literal["simplicial"], nodetype=None
 ) -> SimplicialComplex:  # numpydoc ignore=GL08
     pass
 
