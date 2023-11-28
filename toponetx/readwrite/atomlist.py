@@ -177,14 +177,14 @@ def write_atomlist(domain: CellComplex | SimplicialComplex, path: str) -> None:
 @overload
 def load_from_atomlist(
     filepath: str, complex_type: Literal["cell"], nodetype=None
-) -> CellComplex:
+) -> CellComplex:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def load_from_atomlist(
     filepath: str, complex_type: Literal["simplicial"], nodetype=None
-) -> SimplicialComplex:
+) -> SimplicialComplex:  # numpydoc ignore=GL08
     pass
 
 
@@ -219,14 +219,14 @@ def load_from_atomlist(
 @overload
 def parse_atomlist(
     lines: list[str], complex_type: Literal["cell"], nodetype=None
-) -> CellComplex:
+) -> CellComplex:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def parse_atomlist(
     lines: list[str], complex_type: Literal["simplicial"], nodetype=None
-) -> SimplicialComplex:
+) -> SimplicialComplex:  # numpydoc ignore=GL08
     pass
 
 
