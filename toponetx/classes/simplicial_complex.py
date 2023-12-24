@@ -1476,6 +1476,33 @@ class SimplicialComplex(Complex):
 
         return SC
 
+    def to_hasse_graph(self) -> nx.Graph:
+        """Create Hasse graph of self.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        nx.DiGraph
+            A NetworkX Digraph representing the Hasse graph of the Simplicial Complex.
+
+        Examples
+        --------
+        >>> SC = SimplicialComplex()
+        >>> SC.add_simplex([0, 1, 2])
+        >>> G = SC.to_hasse_graph()
+        """        
+        G = nx.DiGraph()
+        for n in self.nodes:
+            G.add_node(str(tuple(sorted(n))))
+        for i in range(1,self.dim+1):
+            for c in self.skeleton(i):    
+                G.add_node( str(tuple(sorted(c))))
+                for f in combinations(c,len(c)-1):
+                    G.add_edge(str(tuple(sorted(f))),str( tuple(sorted(c)) ))
+        return G
+
     @classmethod
     def from_gudhi(cls, tree: SimplexTree) -> "SimplicialComplex":
         """Import from gudhi.

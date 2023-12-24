@@ -1505,7 +1505,20 @@ class TestCellComplex:
 
         with pytest.raises(ValueError):
             CC.hodge_laplacian_matrix(rank, signed, weight, index)
-
+            
+    def test_to_hasse_graph(self):
+        """Test to hasse graph function."""
+        CC = CellComplex()
+        CC.add_cell([1,2,3,4],rank=2)
+        G = CC.to_hasse_graph()
+        assert len(G.nodes) == 9 
+        assert len(G.edges) == 12
+        assert ('(1,)' in G.nodes )
+        assert ('(2,)' in G.nodes )
+        assert ('(3,)' in G.nodes )
+        assert ('(4,)' in G.nodes )
+        assert ('(1, 2, 3, 4)' in G.nodes )  
+            
     def test_init_type_exception(self):
         """Test if incorrect datatype raises a TypeError exception."""
         with pytest.raises(TypeError):
