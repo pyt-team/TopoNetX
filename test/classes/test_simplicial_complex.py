@@ -569,7 +569,7 @@ class TestSimplicialComplex:
         SC.add_simplex([0, 1, 2])
         G = SC.to_hasse_graph()
         assert(len(G.nodes) == 7 )
-        assert ( ) 
+        assert ( len(G.edges) == 9 ) 
 
     def test_incidence_matrix(self):
         """Test incidence matrix."""

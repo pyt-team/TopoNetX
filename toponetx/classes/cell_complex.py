@@ -2408,7 +2408,7 @@ class CellComplex(Complex):
 
         return nx.from_scipy_sparse_array(M)
     
-    def to_hasse_graph(self) -> nx.Graph:
+    def to_hasse_graph(self) -> nx.DiGraph:
         """Create Hasse graph of self.
 
         Parameters
