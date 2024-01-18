@@ -2411,9 +2411,6 @@ class CellComplex(Complex):
     def to_hasse_graph(self) -> nx.DiGraph:
         """Create Hasse graph of self.
 
-        Parameters
-        ----------
-
         Returns
         -------
         nx.DiGraph
@@ -2427,19 +2424,19 @@ class CellComplex(Complex):
         """
         G = nx.DiGraph()
         for n in self.nodes:
-            G.add_node(str(tuple((n,))))
+            G.add_node(tuple((n,)))
         for e in self.edges:
             (u, v) = sorted(e)
 
-            G.add_node(str((u, v)))
-            G.add_edge(str(tuple((u,))), str((u, v)))
-            G.add_edge(str(tuple((v,))), str((u, v)))
+            G.add_node((u, v))
+            G.add_edge(tuple((u,)), (u, v))
+            G.add_edge(tuple((v,)), (u, v))
         for c in self.cells:
-            G.add_node(str(c.elements))
+            G.add_node(c.elements)
             for e in list(c.boundary):
                 (u, v) = sorted(e)
-                G.add_edge(str((u, v)), str(c.elements))
-                G.add_edge(str((u, v)), str(c.elements))
+                G.add_edge((u, v), c.elements)
+                G.add_edge((u, v), c.elements)
         return G
 
     def from_networkx_graph(self, G: nx.Graph) -> None:

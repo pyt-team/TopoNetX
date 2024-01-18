@@ -1479,9 +1479,6 @@ class SimplicialComplex(Complex):
     def to_hasse_graph(self) -> nx.DiGraph:
         """Create Hasse graph of self.
 
-        Parameters
-        ----------
-
         Returns
         -------
         nx.DiGraph
@@ -1495,12 +1492,12 @@ class SimplicialComplex(Complex):
         """
         G = nx.DiGraph()
         for n in self.nodes:
-            G.add_node(str(tuple(sorted(n))))
+            G.add_node(tuple(sorted(n)))
         for i in range(1, self.dim + 1):
             for c in self.skeleton(i):
-                G.add_node(str(tuple(sorted(c))))
+                G.add_node(tuple(sorted(c)))
                 for f in combinations(c, len(c) - 1):
-                    G.add_edge(str(tuple(sorted(f))), str(tuple(sorted(c))))
+                    G.add_edge(tuple(sorted(f)), tuple(sorted(c)))
         return G
 
     @classmethod
