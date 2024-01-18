@@ -2407,7 +2407,7 @@ class CellComplex(Complex):
             M = self.node_to_all_cell_adjacnecy_matrix(s=s)
 
         return nx.from_scipy_sparse_array(M)
-    
+
     def to_hasse_graph(self) -> nx.DiGraph:
         """Create Hasse graph of self.
 
@@ -2424,22 +2424,22 @@ class CellComplex(Complex):
         >>> CC = CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> G = CC.to_hasse_graph()
-        """        
+        """
         G = nx.DiGraph()
         for n in self.nodes:
             G.add_node(str(tuple((n,))))
         for e in self.edges:
-            (u,v) = sorted(e)
-            
-            G.add_node( str((u,v)) )
-            G.add_edge(str(tuple((u,))),str((u,v)))
-            G.add_edge(str(tuple((v,))),str((u,v)))
+            (u, v) = sorted(e)
+
+            G.add_node(str((u, v)))
+            G.add_edge(str(tuple((u,))), str((u, v)))
+            G.add_edge(str(tuple((v,))), str((u, v)))
         for c in self.cells:
-            G.add_node( str(c.elements) )
+            G.add_node(str(c.elements))
             for e in list(c.boundary):
-                (u,v) = sorted(e)
-                G.add_edge(str( (u,v) ),str(c.elements))
-                G.add_edge(str( (u,v) ),str(c.elements))                       
+                (u, v) = sorted(e)
+                G.add_edge(str((u, v)), str(c.elements))
+                G.add_edge(str((u, v)), str(c.elements))
         return G
 
     def from_networkx_graph(self, G: nx.Graph) -> None:
