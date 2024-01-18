@@ -2366,7 +2366,7 @@ class CellComplex(Complex):
         for node in self.singletons():
             self._G.remove_node(node)
 
-    def get_linegraph(self, s: int = 1, cells: bool = False) -> nx.Graph:
+    def get_linegraph(self, s: int = 1, cells: bool = True) -> nx.Graph:
         """Create line graph of self.
 
         If cells=True (default), the cells will be the vertices of the line graph.
