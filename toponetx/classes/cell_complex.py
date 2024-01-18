@@ -2424,13 +2424,13 @@ class CellComplex(Complex):
         """
         G = nx.DiGraph()
         for n in self.nodes:
-            G.add_node(tuple((n,)))
+            G.add_node((n,))
         for e in self.edges:
             (u, v) = sorted(e)
 
             G.add_node((u, v))
-            G.add_edge(tuple((u,)), (u, v))
-            G.add_edge(tuple((v,)), (u, v))
+            G.add_edge((u,), (u, v))
+            G.add_edge((v,), (u, v))
         for c in self.cells:
             G.add_node(c.elements)
             for e in list(c.boundary):
