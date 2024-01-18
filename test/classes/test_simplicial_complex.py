@@ -564,7 +564,7 @@ class TestSimplicialComplex:
         assert set(edges) == set(expected_edges)
 
     def test_to_hasse_graph(self):
-        "Test to hasse graph function."
+        """Test to hasse graph function."""
         SC = SimplicialComplex()
         SC.add_simplex([0, 1, 2])
         G = SC.to_hasse_graph()
