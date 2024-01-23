@@ -11,12 +11,16 @@ from warnings import warn
 import networkx as nx
 import numpy as np
 from gudhi import SimplexTree
-from hypernetx import Hypergraph
 from scipy.sparse import csr_matrix, dok_matrix
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import NodeView, SimplexView
 from toponetx.classes.simplex import Simplex
+
+try:
+    from hypernetx import Hypergraph
+except ImportError:
+    Hypergraph = None
 
 __all__ = ["SimplicialComplex"]
 
@@ -1132,7 +1136,7 @@ class SimplicialComplex(Complex):
         m, n = L_hodge.shape
         diags_ = abs(L_hodge).sum(axis=1)
 
-        with sp.errstate(divide="ignore"):
+        with np.errstate(divide="ignore"):
             diags_sqrt = 1.0 / np.sqrt(diags_)
         diags_sqrt[np.isinf(diags_sqrt)] = 0
         diags_sqrt = sp.sparse.csr_array(

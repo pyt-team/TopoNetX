@@ -28,7 +28,6 @@ dependencies=[
     "gudhi",
     "decorator",
     "networkx",
-    "hypernetx < 2.0.0",
     "numpy",
     "requests",
     "scipy",
@@ -61,6 +60,9 @@ test = [
     "pytest-cov",
     "coverage",
     "jupyter",
+
+    # optional packages that are not required to run the library
+    "hypernetx < 2.0.0",
 
     # mypy and typing stubs
     "mypy",

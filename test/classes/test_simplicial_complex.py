@@ -1,6 +1,5 @@
 """Test simplicial complex class."""
 
-import hypernetx as hnx
 import networkx as nx
 import numpy as np
 import pytest
@@ -15,6 +14,11 @@ from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.datasets.mesh import stanford_bunny
+
+try:
+    import hypernetx as hnx
+except ImportError:
+    hnx = None
 
 
 class TestSimplicialComplex:
@@ -684,6 +688,9 @@ class TestSimplicialComplex:
         SC = stanford_bunny("simplicial")
         assert SC.is_connected()
 
+    @pytest.mark.skipif(
+        hnx is None, reason="Optional dependency 'hypernetx' not installed."
+    )
     def test_simplicial_closure_of_hypergraph(self):
         """Test simplicial_closure_of_hypergraph."""
         hg = hnx.Hypergraph([[1, 2, 3, 4], [1, 2, 3]], static=True)
@@ -707,6 +714,9 @@ class TestSimplicialComplex:
         ]
         assert len(sc.simplices) == len(expected_simplices)
 
+    @pytest.mark.skipif(
+        hnx is None, reason="Optional dependency 'hypernetx' not installed."
+    )
     def test_to_hypergraph(self):
         """Convert a SimplicialComplex to a hypergraph and compare the number of edges."""
         c1 = Simplex((1, 2, 3))
