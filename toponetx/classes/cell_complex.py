@@ -2366,7 +2366,7 @@ class CellComplex(Complex):
         for node in self.singletons():
             self._G.remove_node(node)
 
-    def get_linegraph(self, s: int = 1, cells: bool = False) -> nx.Graph:
+    def get_linegraph(self, s: int = 1, cells: bool = True) -> nx.Graph:
         """Create line graph of self.
 
         If cells=True (default), the cells will be the vertices of the line graph.
@@ -2407,6 +2407,37 @@ class CellComplex(Complex):
             M = self.node_to_all_cell_adjacnecy_matrix(s=s)
 
         return nx.from_scipy_sparse_array(M)
+
+    def to_hasse_graph(self) -> nx.DiGraph:
+        """Create Hasse graph of self.
+
+        Returns
+        -------
+        nx.DiGraph
+            A NetworkX Digraph representing the Hasse graph of the Cell Complex.
+
+        Examples
+        --------
+        >>> CC = CellComplex()
+        >>> CC.add_cell([1, 2, 3, 4], rank=2)
+        >>> G = CC.to_hasse_graph()
+        """
+        G = nx.DiGraph()
+        for n in self.nodes:
+            G.add_node((n,))
+        for e in self.edges:
+            (u, v) = sorted(e)
+
+            G.add_node((u, v))
+            G.add_edge((u,), (u, v))
+            G.add_edge((v,), (u, v))
+        for c in self.cells:
+            G.add_node(c.elements)
+            for e in list(c.boundary):
+                (u, v) = sorted(e)
+                G.add_edge((u, v), c.elements)
+                G.add_edge((u, v), c.elements)
+        return G
 
     def from_networkx_graph(self, G: nx.Graph) -> None:
         """Add edges and nodes from a graph G to self.

@@ -563,6 +563,14 @@ class TestSimplicialComplex:
 
         assert set(edges) == set(expected_edges)
 
+    def test_to_hasse_graph(self):
+        """Test to hasse graph function."""
+        SC = SimplicialComplex()
+        SC.add_simplex([0, 1, 2])
+        G = SC.to_hasse_graph()
+        assert len(G.nodes) == 7
+        assert len(G.edges) == 9
+
     def test_incidence_matrix(self):
         """Test incidence matrix."""
         SC = SimplicialComplex()

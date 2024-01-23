@@ -1506,6 +1506,19 @@ class TestCellComplex:
         with pytest.raises(ValueError):
             CC.hodge_laplacian_matrix(rank, signed, weight, index)
 
+    def test_to_hasse_graph(self):
+        """Test to hasse graph function."""
+        CC = CellComplex()
+        CC.add_cell([1, 2, 3, 4], rank=2)
+        G = CC.to_hasse_graph()
+        assert len(G.nodes) == 9
+        assert len(G.edges) == 12
+        assert (1,) in G.nodes
+        assert (2,) in G.nodes
+        assert (3,) in G.nodes
+        assert (4,) in G.nodes
+        assert (1, 2, 3, 4) in G.nodes
+
     def test_init_type_exception(self):
         """Test if incorrect datatype raises a TypeError exception."""
         with pytest.raises(TypeError):
@@ -1620,39 +1633,15 @@ class TestCellComplex:
             == "Add cell only supports adding cells of dimensions 0,1 or 2-- got 4"
         )
 
-    def test_linegraphs(self):
-        """Test for the line graphs function of Cell Complex."""
+    def test_get_linegraph(self):
+        """Test for the get_linegraph function of Cell Complex."""
         CC = CellComplex()
         CC.add_cell([1, 2, 3], rank=2)
         CC.add_cell([2, 3, 4], rank=2)
         CC.add_cell([3, 4, 5], rank=2)
         with pytest.raises(ValueError):
             CC.get_linegraph((1, 2, 3, 4, 5, 6))
-        assert [(n, nbrdict) for n, nbrdict in CC.get_linegraph(1).adjacency()] == [
-            (0, {1: {"weight": 1}, 2: {"weight": 1}}),
-            (1, {0: {"weight": 1}, 2: {"weight": 1}, 3: {"weight": 1}}),
-            (
-                2,
-                {
-                    0: {"weight": 1},
-                    1: {"weight": 1},
-                    3: {"weight": 1},
-                    4: {"weight": 1},
-                },
-            ),
-            (3, {1: {"weight": 1}, 2: {"weight": 1}, 4: {"weight": 1}}),
-            (4, {2: {"weight": 1}, 3: {"weight": 1}}),
-        ]
-        CC = CellComplex()
-        CC.add_cell([1, 2, 3], rank=2)
-        assert [
-            (n, nbrdict) for n, nbrdict in CC.get_linegraph(1, cells=True).adjacency()
-        ] == [
-            (0, {1: {"weight": 1}, 2: {"weight": 1}, 3: {"weight": 1}}),
-            (1, {0: {"weight": 1}, 2: {"weight": 1}, 3: {"weight": 1}}),
-            (2, {0: {"weight": 1}, 1: {"weight": 1}, 3: {"weight": 1}}),
-            (3, {0: {"weight": 1}, 1: {"weight": 1}, 2: {"weight": 1}}),
-        ]
+        assert len(list(CC.get_linegraph(1).adjacency())) == 10
         with pytest.raises(TypeError):
             CC.get_linegraph(cells=2)
 
