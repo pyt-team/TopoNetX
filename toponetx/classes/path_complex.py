@@ -403,7 +403,7 @@ class PathComplex(Complex):
             Set of elementary p-paths of dimension specified by `rank`.
         """
         if len(self._path_set.faces_dict) > rank >= 0:
-            tmp = (path for path in self._path_set.faces_dict[rank].keys())
+            tmp = (path for path in self._path_set.faces_dict[rank])
             return sorted(
                 tmp, key=lambda x: tuple(map(str, x))
             )  # lexicographic comparison
@@ -1154,10 +1154,7 @@ class PathComplex(Complex):
         **attr : keyword arguments
             The attributes to update.
         """
-        if not isinstance(path, Path):  # path is a list or tuple
-            path_ = tuple(path)
-        else:  # path is a Path object
-            path_ = path.elements
+        path_ = path.elements if isinstance(path, Path) else tuple(path)
         if isinstance(path, Path):  # update attributes for PathView() and _G
             self._path_set.faces_dict[len(path_) - 1][path_].update(path._attributes)
             if len(path_) == 1:

@@ -173,7 +173,7 @@ def coauthorship() -> SimplicialComplex:
 
     simplices = []
     for dim in range(len(coauthorship) - 1, -1, -1):
-        simplices += [list(el) for el in coauthorship[dim].keys()]
+        simplices += [list(el) for el in coauthorship[dim]]
 
     sc = SimplicialComplex(simplices)
 

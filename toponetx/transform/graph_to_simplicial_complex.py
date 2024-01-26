@@ -31,10 +31,7 @@ def graph_to_neighbor_complex(G: nx.Graph) -> SimplicialComplex:
     This type of simplicial complexes can have very large dimension (max degree of the
     graph) and it is a function of the distribution of the valency of the graph.
     """
-    simplices = []
-    for node in G:
-        # each simplex is the node and its n-hop neighbors
-        simplices.append(list(G.neighbors(node)) + [node])
+    simplices = [[*list(G.neighbors(node)), node] for node in G]
     return SimplicialComplex(simplices)
 
 

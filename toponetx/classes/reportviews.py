@@ -56,16 +56,15 @@ class CellView:
                 )
 
             # If there is only one cell with these elements, return its attributes
-            elif len(self._cells[cell.elements]) == 1:
+            if len(self._cells[cell.elements]) == 1:
                 k = next(iter(self._cells[cell.elements].keys()))
                 return self._cells[cell.elements][k]._attributes
 
             # If there are multiple cells with these elements, return the attributes of all cells
-            else:
-                return [
-                    self._cells[cell.elements][c]._attributes
-                    for c in self._cells[cell.elements]
-                ]
+            return [
+                self._cells[cell.elements][c]._attributes
+                for c in self._cells[cell.elements]
+            ]
 
         # If a tuple or list is passed in, assume it represents a cell
         elif isinstance(cell, tuple | list):
@@ -74,13 +73,11 @@ class CellView:
                 if len(self._cells[cell]) == 1:
                     k = next(iter(self._cells[cell].keys()))
                     return self._cells[cell][k]._attributes
-                else:
-                    return [self._cells[cell][c]._attributes for c in self._cells[cell]]
-            else:
-                raise KeyError(f"cell {cell} is not in the cell dictionary")
+                return [self._cells[cell][c]._attributes for c in self._cells[cell]]
 
-        else:
-            raise TypeError("Input must be a tuple, list or a cell.")
+            raise KeyError(f"cell {cell} is not in the cell dictionary")
+
+        raise TypeError("Input must be a tuple, list or a cell.")
 
     def raw(self, cell: tuple | list | Cell) -> Cell | list[Cell]:
         """Index the raw cell objects analogous to the overall index of CellView.
@@ -104,18 +101,15 @@ class CellView:
         """
         if isinstance(cell, Cell):
             if cell.elements not in self._cells:
-                raise KeyError(f"cell {cell.__repr__()} is not in the cell dictionary")
+                raise KeyError(f"cell {cell!r} is not in the cell dictionary")
 
             # If there is only one cell with these elements, return its attributes
-            elif len(self._cells[cell.elements]) == 1:
+            if len(self._cells[cell.elements]) == 1:
                 k = next(iter(self._cells[cell.elements].keys()))
                 return self._cells[cell.elements][k]
 
             # If there are multiple cells with these elements, return the attributes of all cells
-            else:
-                return [
-                    self._cells[cell.elements][c] for c in self._cells[cell.elements]
-                ]
+            return [self._cells[cell.elements][c] for c in self._cells[cell.elements]]
 
         # If a tuple or list is passed in, assume it represents a cell
         elif isinstance(cell, tuple | list):
@@ -124,13 +118,10 @@ class CellView:
                 if len(self._cells[cell]) == 1:
                     k = next(iter(self._cells[cell].keys()))
                     return self._cells[cell][k]
-                else:
-                    return [self._cells[cell][c] for c in self._cells[cell]]
-            else:
-                raise KeyError(f"cell {cell} is not in the cell dictionary")
+                return [self._cells[cell][c] for c in self._cells[cell]]
+            raise KeyError(f"cell {cell} is not in the cell dictionary")
 
-        else:
-            raise TypeError("Input must be a tuple, list or a cell.")
+        raise TypeError("Input must be a tuple, list or a cell.")
 
     def __len__(self) -> int:
         """Return the number of cells in the cell view.
@@ -234,14 +225,13 @@ class ColoredHyperEdgeView:
         dict or list or dicts
             Return dict of attributes associated with that hyperedges.
         """
-        if isinstance(hyperedge, Iterable):
-            if len(hyperedge) == 2:
-                if isinstance(hyperedge[0], Iterable) and isinstance(hyperedge[1], int):
-                    hyperedge_elements, key = hyperedge
-                else:
-                    raise KeyError(
-                        "Input hyperedge must of the form (Iterable representing elements of hyperedge, key)"
-                    )
+        if isinstance(hyperedge, Iterable) and len(hyperedge) == 2:
+            if isinstance(hyperedge[0], Iterable) and isinstance(hyperedge[1], int):
+                hyperedge_elements, key = hyperedge
+            else:
+                raise KeyError(
+                    "Input hyperedge must of the form (Iterable representing elements of hyperedge, key)"
+                )
         hyperedge = HyperEdgeView()._to_frozen_set(hyperedge_elements)
         hyperedge_elements = hyperedge
         rank = self.get_rank(hyperedge_elements)
@@ -258,7 +248,7 @@ class ColoredHyperEdgeView:
         """
         shape = []
         for i in self.allranks:
-            sm = sum([len(self.hyperedge_dict[i][k]) for k in self.hyperedge_dict[i]])
+            sm = sum(len(self.hyperedge_dict[i][k]) for k in self.hyperedge_dict[i])
             shape.append(sm)
         return tuple(shape)
 
@@ -342,10 +332,9 @@ class ColoredHyperEdgeView:
             else:
                 for i in all_ranks:
                     if frozenset(hyperedge_elements) in self.hyperedge_dict[i]:
-                        if key in self.hyperedge_dict[i][frozenset(hyperedge_elements)]:
-                            return True
-                        else:
-                            return False
+                        return (
+                            key in self.hyperedge_dict[i][frozenset(hyperedge_elements)]
+                        )
                 return False
         elif isinstance(hyperedge_elements, HyperEdge):
             if len(hyperedge_elements) == 0:
@@ -585,10 +574,7 @@ class HyperEdgeView:
             if len(e) == 0:
                 return False
             else:
-                for i in all_ranks:
-                    if frozenset(e) in self.hyperedge_dict[i]:
-                        return True
-                return False
+                return any(frozenset(e) in self.hyperedge_dict[i] for i in all_ranks)
         elif isinstance(e, Hashable):
             return frozenset({e}) in self.hyperedge_dict[0]
 
@@ -823,9 +809,8 @@ class SimplexView:
             else:
                 raise KeyError(f"input {simplex} is not in the simplex dictionary")
 
-        elif isinstance(simplex, Hashable):
-            if frozenset({simplex}) in self:
-                return self.faces_dict[0][frozenset({simplex})]
+        elif isinstance(simplex, Hashable) and frozenset({simplex}) in self:
+            return self.faces_dict[0][frozenset({simplex})]
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -976,7 +961,7 @@ class NodeView:
         str
             Returns the __repr__ representation of the object.
         """
-        all_nodes = [tuple(j) for j in self.nodes.keys()]
+        all_nodes = [tuple(j) for j in self.nodes]
 
         return f"NodeView({all_nodes})"
 
@@ -1003,25 +988,21 @@ class NodeView:
         dict or list
             Dict of attributes associated with that cells.
         """
-        if isinstance(cell, self.cell_type):
-            if cell.elements in self.nodes:
-                return self.nodes[cell.elements]
-        elif isinstance(cell, Iterable):
+        if isinstance(cell, Iterable):
             cell = frozenset(cell)
             if cell in self.nodes:
                 if self.colored_nodes:
                     return self.nodes[cell][0]
                 else:
                     return self.nodes[cell]
-            else:
-                raise KeyError(f"input {cell} is not in the node set of the complex")
-
         elif isinstance(cell, Hashable):
             if cell in self:
                 if self.colored_nodes:
                     return self.nodes[frozenset({cell})][0]
                 else:
                     return self.nodes[frozenset({cell})]
+
+        raise KeyError(f"input {cell} is not in the node set of the complex")
 
     def __len__(self) -> int:
         """Compute the number of nodes.
@@ -1084,19 +1065,14 @@ class PathView(SimplexView):
         if isinstance(path, Path):
             if path.elements in self.faces_dict[len(path) - 1]:
                 return self.faces_dict[len(path) - 1][path.elements]
-            else:
-                raise KeyError(f"input {path} is not in the path dictionary")
         elif isinstance(path, Sequence):
             path = tuple(path)
             if path in self.faces_dict[len(path) - 1]:
                 return self.faces_dict[len(path) - 1][path]
-            else:
-                raise KeyError(f"input {path} is not in the path dictionary")
-        elif isinstance(path, Hashable):
-            if (path,) in self:
-                return self.faces_dict[0][(path,)]
-            else:
-                raise KeyError(f"input {path} is not in the path dictionary")
+        elif isinstance(path, Hashable) and (path,) in self:
+            return self.faces_dict[0][(path,)]
+
+        raise KeyError(f"input {path} is not in the path dictionary")
 
     def __contains__(self, item: Sequence[Hashable] | Hashable | Path) -> bool:
         """Check if a path is in the path view.

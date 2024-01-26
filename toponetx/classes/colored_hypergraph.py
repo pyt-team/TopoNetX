@@ -1,5 +1,6 @@
 """Creation and manipulation of a Colored Hypergraph."""
 
+import contextlib
 from collections.abc import Collection, Hashable, Iterable
 
 import networkx as nx
@@ -429,13 +430,13 @@ class ColoredHyperGraph(Complex):
             raise KeyError(f"Node {node} not in {self.__shortstr__}.")
         if isinstance(rank, int):
             if rank >= 0:
-                if rank in self._complex_set.hyperedge_dict.keys():
+                if rank in self._complex_set.hyperedge_dict:
                     return sum(
                         [
                             len(self._complex_set.hyperedge_dict[rank][x])
                             if node in x
                             else 0
-                            for x in self._complex_set.hyperedge_dict[rank].keys()
+                            for x in self._complex_set.hyperedge_dict[rank]
                             if len(x) >= s
                         ]
                     )
@@ -454,13 +455,11 @@ class ColoredHyperGraph(Complex):
                     continue
                 else:
                     value += sum(
-                        [
-                            len(self._complex_set.hyperedge_dict[rank][x])
-                            if node in x
-                            else 0
-                            for x in self._complex_set.hyperedge_dict[rank].keys()
-                            if len(x) >= s
-                        ]
+                        len(self._complex_set.hyperedge_dict[rank][x])
+                        if node in x
+                        else 0
+                        for x in self._complex_set.hyperedge_dict[rank]
+                        if len(x) >= s
                     )
             return value
 
@@ -718,17 +717,13 @@ class ColoredHyperGraph(Complex):
         """
         if name is not None:
             for cell, value in values.items():
-                try:
+                with contextlib.suppress(AttributeError):
                     self.nodes[cell][name] = value
-                except AttributeError:
-                    pass
 
         else:
             for cell, d in values.items():
-                try:
+                with contextlib.suppress(AttributeError):
                     self.nodes[cell].update(d)
-                except AttributeError:
-                    pass
             return
 
     def set_cell_attributes(self, values, name: str | None = None) -> None:
@@ -780,16 +775,12 @@ class ColoredHyperGraph(Complex):
         """
         if name is not None:
             for cell, value in values.items():
-                try:
+                with contextlib.suppress(AttributeError):
                     self.cells[cell][name] = value
-                except AttributeError:
-                    pass
         else:
             for cell, d in values.items():
-                try:
+                with contextlib.suppress(AttributeError):
                     self.cells[cell].update(d)
-                except AttributeError:
-                    pass
             return
 
     def get_node_attributes(self, name: str):
@@ -1517,10 +1508,7 @@ class ColoredHyperGraph(Complex):
         for i in self.ranks:
             if i != 0:
                 for cell in self.skeleton(i):
-                    if isinstance(cell, frozenset):
-                        c_set = cell
-                    else:
-                        c_set = cell[0]
+                    c_set = cell if isinstance(cell, frozenset) else cell[0]
                     if c_set <= node_set:
                         chg.add_cell(c_set, rank=i)
         return chg

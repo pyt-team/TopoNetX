@@ -98,9 +98,8 @@ def s_connected_components(
             node_dict = {v: k for k, v in node_dict.items()}
         G = nx.from_scipy_sparse_array(A)
         for c in nx.connected_components(G):
-            if not return_singletons:
-                if len(c) == 1:
-                    continue
+            if not return_singletons and len(c) == 1:
+                continue
             if isinstance(domain, CellComplex):
                 yield {node_dict[n] for n in c}
             else:

@@ -299,10 +299,7 @@ class CellComplex(Complex):
         >>> CC.add_cell([5, 6, 7, 8], rank=2)
         >>> CC.is_regular
         """
-        for cell in self.cells:
-            if not cell.is_regular:
-                return False
-        return True
+        return all(cell.is_regular for cell in self.cells)
 
     def __str__(self) -> str:
         """Return detailed string representation.
@@ -452,9 +449,7 @@ class CellComplex(Complex):
                 if i == j:
                     if j not in all_inserted_cells:
                         equiv_classes[c1].add(j)
-                elif i > j:
-                    continue
-                elif j in all_inserted_cells:
+                elif i > j or j in all_inserted_cells:
                     continue
                 else:
                     if c1.is_homotopic_to(c2):
@@ -488,7 +483,7 @@ class CellComplex(Complex):
                     self._delete_cell(c)
                 else:
                     d_c = dict(d)
-                    for k, v in d_c.items():
+                    for k in d_c:
                         if len(d) == 1:
                             break
                         else:
@@ -1418,13 +1413,12 @@ class CellComplex(Complex):
         """
         if isinstance(cell, Cell):
             cell = cell.elements
-        if self._regular:
-            if len(set(cell)) != len(cell):
-                if warnings_dis:
-                    warnings.warn(
-                        "repeating nodes invalidates the 2-cell regularity condition"
-                    )
-                return False
+        if self._regular and len(set(cell)) != len(cell):
+            if warnings_dis:
+                warnings.warn(
+                    "repeating nodes invalidates the 2-cell regularity condition"
+                )
+            return False
         if check_skeleton:
             enum = zip_longest(cell, cell[1:] + cell[:1])
             for i in enum:
@@ -1881,12 +1875,7 @@ class CellComplex(Complex):
         if weight is not None:
             raise ValueError("Weighted Laplacian is not supported in this version.")
 
-        if rank == 0:
-            row, col, B_next = self.incidence_matrix(
-                rank + 1, weight=weight, index=True
-            )
-            L_up = B_next @ B_next.transpose()
-        elif rank < self.dim:
+        if rank == 0 or rank < self.dim:
             row, col, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )

@@ -42,7 +42,7 @@ def _normalize(f):
     minf = min(f.values())
     maxf = max(f.values())
     f_normalized = {}
-    for v in f.keys():
+    for v in f:
         if minf == maxf:
             f_normalized[v] = 0
         else:
@@ -83,17 +83,13 @@ def hodge_laplacian_eigenvectors(
     else:
         vals, vect = np.linalg.eig(hodge_laplacian.toarray())
 
-    eigenvaluevector = []
-    for i in vals.real:
-        eigenvaluevector.append(round(i, 15))
+    eigenvaluevector = [round(i, 15) for i in vals.real]
     eigenvectorstemp = vect.transpose().real
     mydict = {}
     for i in range(0, len(eigenvaluevector)):
         mydict[eigenvaluevector[i]] = eigenvectorstemp[i]
     eigenvaluevector.sort()
-    finaleigenvectors = []
-    for val in eigenvaluevector:
-        finaleigenvectors.append(mydict[val])
+    finaleigenvectors = [mydict[val] for val in eigenvaluevector]
     return np.array(eigenvaluevector).T, np.array(finaleigenvectors).T
 
 
@@ -132,7 +128,7 @@ def set_hodge_laplacian_eigenvector_attrs(
     elif laplacian_type == "up":
         L = SC.up_laplacian_matrix(dim)
     elif laplacian_type == "down":
-        L = SC.up_laplacian_matrix(dim)
+        L = SC.down_laplacian_matrix(dim)
     else:
         raise ValueError(
             f"laplacian_type must be up, down or hodge, got {laplacian_type}"
