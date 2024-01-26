@@ -28,6 +28,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.10", "3.11"]
+        flavor: ["dev", "all"]
 
     steps:
       - uses: actions/checkout@v3
@@ -39,9 +40,9 @@ jobs:
           cache: "pip"
           cache-dependency-path: "pyproject.toml"
 
-      - name: Install main package [pip]
+      - name: Install Package [${{ matrix.flavor }}]
         run: |
-          pip install -e .[all]
+          pip install -e .[${{ matrix.flavor }}]
 
       - name: Typecheck [mypy]
         run: |
