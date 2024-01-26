@@ -2,8 +2,6 @@
 
 import pytest
 
-from toponetx.classes.cell_complex import CellComplex
-from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.datasets.mesh import coseg, shrec_16, stanford_bunny
 
 

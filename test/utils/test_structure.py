@@ -144,8 +144,8 @@ class TestStructure:
             ]
         )
         assert (
-            adj != expected_adj
-        ).nnz == 0  # tests sparsity of difference -> if the difference has no non-zero entries, it is the same
+            (adj != expected_adj).nnz == 0
+        )  # tests sparsity of difference -> if the difference has no non-zero entries, it is the same
 
     def test_compute_set_incidence(self):
         """Test compute_set_incidence."""

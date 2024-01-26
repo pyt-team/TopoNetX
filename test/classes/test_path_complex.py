@@ -6,7 +6,6 @@ import pytest
 
 from toponetx.classes.path import Path
 from toponetx.classes.path_complex import PathComplex
-from toponetx.classes.reportviews import NodeView
 
 
 class TestPathComplex:
@@ -92,11 +91,9 @@ class TestPathComplex:
         PC = PathComplex()
         PC.add_path([1, 2])
         PC.add_path([2, 3])
-        assert [
-            1,
-            2,
-            3,
-        ] not in PC.paths  # because manually adding subpaths does not add superpath. Future features?
+        assert (
+            [1, 2, 3] not in PC.paths
+        )  # because manually adding subpaths does not add superpath. Future features?
         assert [1, 2] in PC.paths
         assert [2, 3] in PC.paths
 

@@ -1,9 +1,7 @@
 """Test distance measures module."""
 
 import pytest
-import scipy.sparse as sparse
 
-from toponetx.algorithms.distance import cell_distance, distance
 from toponetx.algorithms.distance_measures import (
     cell_diameter,
     cell_diameters,
@@ -12,7 +10,6 @@ from toponetx.algorithms.distance_measures import (
 )
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
 
