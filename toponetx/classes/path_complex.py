@@ -69,7 +69,7 @@ class PathComplex(Complex):
     >>> PC = PathComplex([(1, 2, 3)])
     >>> PC.paths
     PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-    >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+    >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
     >>> PC.paths
     PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
     >>> G = nx.Graph()
@@ -141,7 +141,7 @@ class PathComplex(Complex):
         >>> PC = PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
         >>> G = nx.Graph()
@@ -223,7 +223,7 @@ class PathComplex(Complex):
         >>> PC = PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
         """
@@ -774,8 +774,10 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> PC = PC.restrict_to_nodes([0,1,3])
+        >>> PC = PathComplex(
+        ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        ... )
+        >>> PC = PC.restrict_to_nodes([0, 1, 3])
         >>> PC.paths
         PathView([(0,), (1,), (3,), (0, 1), (1, 3), (0, 1, 3)])
         """
@@ -803,8 +805,10 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> PC = PC.restrict_to_paths([[1,2,3]])
+        >>> PC = PathComplex(
+        ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        ... )
+        >>> PC = PC.restrict_to_paths([[1, 2, 3]])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
         """
@@ -868,12 +872,17 @@ class PathComplex(Complex):
         --------
         >>> PC = PathComplex()
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PC.set_node_attributes({(1, ): {"heat": 55, "color": "red"}, (2, ): {"heat": 66, "color": "blue"}})
+        >>> PC.set_node_attributes(
+        ...     {
+        ...         (1,): {"heat": 55, "color": "red"},
+        ...         (2,): {"heat": 66, "color": "blue"},
+        ...     }
+        ... )
         >>> PC[1]
         {'heat': 55, 'color': 'red'}
         >>> PC[2]
         {'heat': 66, 'color': 'blue'}
-        >>> PC.set_node_attributes({(1, ): 58, (2, ): 60}, name="heat")
+        >>> PC.set_node_attributes({(1,): 58, (2,): 60}, name="heat")
         >>> PC[1]
         {'heat': 58, 'color': 'red'}
         >>> PC[2]
@@ -961,7 +970,12 @@ class PathComplex(Complex):
         >>> PC.set_edge_attributes({(0, 1): 33}, name="weight")
         >>> PC.get_edge_attributes("weight")
         {(0, 1): 33, (1, 2): 98}
-        >>> PC.set_edge_attributes({(1, 3): {"weight": 55, "color": "yellow"}, (2, 3): {"weight": 66, "color": "blue"}})
+        >>> PC.set_edge_attributes(
+        ...     {
+        ...         (1, 3): {"weight": 55, "color": "yellow"},
+        ...         (2, 3): {"weight": 66, "color": "blue"},
+        ...     }
+        ... )
         >>> PC[1, 3]
         {'color': 'yellow', 'weight': 55}
         >>> PC[2, 3]
@@ -1038,8 +1052,15 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PC.set_path_attributes({(0, 1, 2): {"weight": 43, "color": "red"}, (0, 1, 3): {"weight": 98, "color": "blue"}})
+        >>> PC = PathComplex(
+        ...     [[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]]
+        ... )
+        >>> PC.set_path_attributes(
+        ...     {
+        ...         (0, 1, 2): {"weight": 43, "color": "red"},
+        ...         (0, 1, 3): {"weight": 98, "color": "blue"},
+        ...     }
+        ... )
         >>> PC.get_path_attributes("weight")
         {(0, 1, 2): 43, (0, 1, 3): 98}
         >>> PC.get_path_attributes("color")
@@ -1251,7 +1272,7 @@ class PathComplex(Complex):
         --------
         >>> G = nx.Graph()
         >>> G.add_edges_from([(1, 2), (2, 3), (1, 3), (0, 1)])
-        >>> allowed_paths = PathComplex.compute_allowed_paths(G, max_rank = 2)
+        >>> allowed_paths = PathComplex.compute_allowed_paths(G, max_rank=2)
         >>> allowed_paths
         {(0, 1), (1, 3), (1, 2), (2,), (1, 3, 2), (0, 1, 2), (0, 1, 3), (1, 2, 3), (2, 1, 3), (2, 3), (1,), (0,), (3,)}
         """

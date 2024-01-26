@@ -82,11 +82,19 @@ class ColoredHyperGraph(Complex):
         Create a Colored Hypergraph and add groups of friends with corresponding ranks:
 
         >>> CHG = ColoredHyperGraph()
-        >>> CHG.add_cell(["Alice", "Bob"], rank=1)  # Alice and Bob are in a close-knit group.
-        >>> CHG.add_cell(["Charlie", "David"], rank=1)  # Another closely connected group.
-        >>> CHG.add_cell(["Alice", "Bob", "Charlie", "David"], rank=2)  # Both groups together form a higher-ranked community.
+        >>> CHG.add_cell(
+        ...     ["Alice", "Bob"], rank=1
+        ... )  # Alice and Bob are in a close-knit group.
+        >>> CHG.add_cell(
+        ...     ["Charlie", "David"], rank=1
+        ... )  # Another closely connected group.
+        >>> CHG.add_cell(
+        ...     ["Alice", "Bob", "Charlie", "David"], rank=2
+        ... )  # Both groups together form a higher-ranked community.
         >>> CHG.add_cell(["Alice", "Bob", "David"], rank=2)  # Overlapping connections.
-        >>> CHG.add_cell(["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace"], rank=3)  # A larger, more influential community.
+        >>> CHG.add_cell(
+        ...     ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace"], rank=3
+        ... )  # A larger, more influential community.
 
         The code demonstrates how to represent social relationships using a Colored Hypergraph, where each group of friends (hyperedge) is assigned a rank based on the strength of the connection.
         """
@@ -748,11 +756,11 @@ class ColoredHyperGraph(Complex):
 
         >>> CHG = ColoredHyperGraph()
         >>> CHG.add_cell([1, 2, 3, 4], rank=2)
-        >>> CHG.add_cell([1, 2, 4], rank=2,)
+        >>> CHG.add_cell([1, 2, 4], rank=2)
         >>> CHG.add_cell([3, 4], rank=2)
-        >>> d = {((1, 2, 3, 4),0): 'red', ((1, 2, 4),0): 'blue', ((3, 4),0): 'green'}
-        >>> CHG.set_cell_attributes(d, name='color')
-        >>> CHG.cells[((3, 4),0)]['color']
+        >>> d = {((1, 2, 3, 4), 0): "red", ((1, 2, 4), 0): "blue", ((3, 4), 0): "green"}
+        >>> CHG.set_cell_attributes(d, name="color")
+        >>> CHG.cells[((3, 4), 0)]["color"]
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -760,9 +768,12 @@ class ColoredHyperGraph(Complex):
 
         >>> G = nx.path_graph(3)
         >>> CHG = ColoredHyperGraph(G)
-        >>> d = {((1, 2),0): {'color': 'red','attr2': 1}, ((0, 1),0): {'color': 'blue', 'attr2': 3}}
+        >>> d = {
+        ...     ((1, 2), 0): {"color": "red", "attr2": 1},
+        ...     ((0, 1), 0): {"color": "blue", "attr2": 3},
+        ... }
         >>> CHG.set_cell_attributes(d)
-        >>> CHG.cells[((0, 1),0)]['color']
+        >>> CHG.cells[((0, 1), 0)]["color"]
         'blue'
         3
 
@@ -800,15 +811,15 @@ class ColoredHyperGraph(Complex):
         --------
         >>> G = nx.path_graph(3)
         >>> CHG = ColoredHyperGraph(G)
-        >>> d = {0: {'color': 'red', 'attr2': 1 },1: {'color': 'blue', 'attr2': 3} }
+        >>> d = {0: {"color": "red", "attr2": 1}, 1: {"color": "blue", "attr2": 3}}
         >>> CHG.set_node_attributes(d)
-        >>> CHG.get_node_attributes('color')
+        >>> CHG.get_node_attributes("color")
         {0: 'red', 1: 'blue'}
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
         >>> CHG = ColoredHyperGraph(G)
-        >>> nodes_color = CHG.get_node_attributes('color')
+        >>> nodes_color = CHG.get_node_attributes("color")
         >>> nodes_color[1]
         'blue'
         """
@@ -838,9 +849,12 @@ class ColoredHyperGraph(Complex):
         --------
         >>> G = nx.path_graph(3)
         >>> CHG = ColoredHyperGraph(G)
-        >>> d = {((1, 2), 0): {'color': 'red', 'attr2': 1}, ((0, 1), 0): {'color': 'blue', 'attr2': 3}}
+        >>> d = {
+        ...     ((1, 2), 0): {"color": "red", "attr2": 1},
+        ...     ((0, 1), 0): {"color": "blue", "attr2": 3},
+        ... }
         >>> CHG.set_cell_attributes(d)
-        >>> cell_color = CHG.get_cell_attributes('color')
+        >>> cell_color = CHG.get_cell_attributes("color")
         >>> cell_color[(frozenset({0, 1}), 0)]
         'blue'
         """
@@ -1452,7 +1466,11 @@ class ColoredHyperGraph(Complex):
         Examples
         --------
         >>> import trimesh
-        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]], faces=[[0, 1, 2]], process=False)
+        >>> mesh = trimesh.Trimesh(
+        ...     vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
+        ...     faces=[[0, 1, 2]],
+        ...     process=False,
+        ... )
         >>> CHG = ColoredHyperGraph.from_trimesh(mesh)
         >>> CHG.nodes
         """

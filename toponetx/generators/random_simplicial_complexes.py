@@ -81,7 +81,7 @@ def random_clique_complex(n: int, p: float, seed=None) -> SimplicialComplex:
 
 @nx.utils.py_random_state("seed")
 def multiparameter_linial_meshulam_complex(
-    n: int, ps: Sequence[float], seed: random.Random = None
+    n: int, ps: Sequence[float], seed: random.Random | None = None
 ) -> SimplicialComplex:
     """Generate a random multiparameter Linial-Meshulam complex.
 

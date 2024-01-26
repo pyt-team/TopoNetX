@@ -876,7 +876,7 @@ class SimplexView:
         Check if a node is in the simplex view:
 
         >>> view = SimplexView()
-        >>> view.faces_dict.append({frozenset({1}): {'weight': 1}})
+        >>> view.faces_dict.append({frozenset({1}): {"weight": 1}})
         >>> view.max_dim = 0
         >>> 1 in view
         True
@@ -885,7 +885,7 @@ class SimplexView:
 
         Check if a simplex is in the simplex view:
 
-        >>> view.faces_dict.append({frozenset({1, 2}): {'weight': 1}})
+        >>> view.faces_dict.append({frozenset({1, 2}): {"weight": 1}})
         >>> view.max_dim = 1
         >>> {1, 2} in view
         True

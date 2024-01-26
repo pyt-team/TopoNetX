@@ -29,8 +29,8 @@ def node_diameters(domain: Complex) -> tuple[list[int], list[set[Hashable]]]:
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
     >>> list(node_diameters(CC))
     >>> CCC = CC.to_combinatorial_complex()
     >>> list(node_diameters(CCC))
@@ -79,8 +79,8 @@ def cell_diameters(domain: Complex, s: int = 1) -> tuple[list[int], list[set[int
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
     >>> list(cell_diameters(CC))
     >>> CCC = CC.to_combinatorial_complex()
     >>> list(cell_diameters(CCC))
@@ -133,9 +133,9 @@ def diameter(domain: Complex) -> int:
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
-    >>> CC.add_cell([2,5],rank=2)
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
+    >>> CC.add_cell([2, 5], rank=2)
     >>> diameter(CC)
     >>> CCC = CC.to_combinatorial_complex()
     >>> diameter(CCC)
@@ -181,9 +181,9 @@ def cell_diameter(domain: Complex, s: int = None) -> int:
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
-    >>> CC.add_cell([2,5],rank=1)
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
+    >>> CC.add_cell([2, 5], rank=1)
     >>> cell_diameter(CC)
     >>> CCC = CC.to_combinatorial_complex()
     >>> cell_diameter(CCC)

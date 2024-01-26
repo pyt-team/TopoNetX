@@ -192,8 +192,8 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> complex_instance['node_A'] = {'color': 'red'}
-        >>> complex_instance['hyperedge_B'] = {'weight': 5}
+        >>> complex_instance["node_A"] = {"color": "red"}
+        >>> complex_instance["hyperedge_B"] = {"weight": 5}
 
         Returns
         -------
@@ -425,9 +425,9 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
         >>> CCC.add_cell([1, 2, 4], rank=2)
         >>> CCC.add_cell([3, 4], rank=2)
-        >>> d = {(1, 2, 3, 4): 'red', (1, 2, 3): 'blue', (3, 4): 'green'}
-        >>> CCC.set_cell_attributes(d, name='color')
-        >>> CCC.cells[(3, 4)]['color']
+        >>> d = {(1, 2, 3, 4): "red", (1, 2, 3): "blue", (3, 4): "green"}
+        >>> CCC.set_cell_attributes(d, name="color")
+        >>> CCC.cells[(3, 4)]["color"]
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -435,9 +435,12 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         >>> G = nx.path_graph(3)
         >>> CCC = CombinatorialComplex(G)
-        >>> d = {(1, 2): {'color': 'red','attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3}}
+        >>> d = {
+        ...     (1, 2): {"color": "red", "attr2": 1},
+        ...     (0, 1): {"color": "blue", "attr2": 3},
+        ... }
         >>> CCC.set_cell_attributes(d)
-        >>> CCC.cells[(0, 1)]['color']
+        >>> CCC.cells[(0, 1)]["color"]
         'blue'
         3
 
@@ -463,15 +466,15 @@ class CombinatorialComplex(ColoredHyperGraph):
         --------
         >>> G = nx.path_graph(3)
         >>> CCC = CombinatorialComplex(G)
-        >>> d = {0: {'color': 'red', 'attr2': 1 },1: {'color': 'blue', 'attr2': 3} }
+        >>> d = {0: {"color": "red", "attr2": 1}, 1: {"color": "blue", "attr2": 3}}
         >>> CCC.set_node_attributes(d)
-        >>> CCC.get_node_attributes('color')
+        >>> CCC.get_node_attributes("color")
         {0: 'red', 1: 'blue'}
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
         >>> CCC = CombinatorialComplex(G)
-        >>> nodes_color = CCC.get_node_attributes('color')
+        >>> nodes_color = CCC.get_node_attributes("color")
         >>> nodes_color[1]
         'blue'
         """
@@ -496,9 +499,12 @@ class CombinatorialComplex(ColoredHyperGraph):
         --------
         >>> G = nx.path_graph(3)
         >>> CCC = CombinatorialComplex(G)
-        >>> d = {(1, 2): {'color': 'red', 'attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3} }
+        >>> d = {
+        ...     (1, 2): {"color": "red", "attr2": 1},
+        ...     (0, 1): {"color": "blue", "attr2": 3},
+        ... }
         >>> CCC.set_cell_attributes(d)
-        >>> cell_color = CCC.get_cell_attributes('color')
+        >>> cell_color = CCC.get_cell_attributes("color")
         >>> cell_color[frozenset({0, 1})]
         'blue'
         """
@@ -1140,7 +1146,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC = CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
-        >>> CCC.add_cell([9],rank=0)
+        >>> CCC.add_cell([9], rank=0)
         >>> CCC.singletons()
         """
         singletons = []

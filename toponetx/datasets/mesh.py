@@ -53,7 +53,7 @@ def stanford_bunny(
 
 
 def stanford_bunny(
-    complex_type: Literal["cell", "simplicial"]
+    complex_type: Literal["cell", "simplicial"],
 ) -> CellComplex | SimplicialComplex:
     """Load the Stanford Bunny mesh as a complex.
 
