@@ -61,7 +61,7 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
     >>> CHG = CC.to_colored_hypergraph()
     >>> list(node_diameters(CHG))
     """
-    if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+    if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise ValueError(f"Input complex {domain} is not supported.")
     if isinstance(source, Cell):
         source = source.elements
@@ -136,11 +136,11 @@ def cell_distance(
     >>> CCC = CC.to_combinatorial_complex()
     >>> cell_distance(CCC, frozenset({2, 3}), frozenset({6, 7}))
     """
-    if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+    if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise ValueError(f"Input complex {domain} is not supported.")
-    if isinstance(source, (Cell, HyperEdge)):
+    if isinstance(source, Cell | HyperEdge):
         source = source.elements
-    if isinstance(target, (Cell, HyperEdge)):
+    if isinstance(target, Cell | HyperEdge):
         target = target.elements
     if isinstance(domain, CellComplex):
         if isinstance(source, Iterable):

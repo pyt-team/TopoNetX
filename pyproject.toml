@@ -81,11 +81,13 @@ extend-include = ["*.ipynb"]
 docstring-code-format = true
 
 [tool.ruff.lint]
-# F: pyflakes errors
-# E: code style
-# W: warnings
-# I: import order
-select = ["F", "E", "W", "I"]
+select = [
+    "F", # pyflakes errors
+    "E", # code style
+    "W", # warnings
+    "I", # import order
+    "UP" # pyupgrade rules
+]
 ignore = ["E501"] # line too long
 
 [tool.ruff.lint.pydocstyle]

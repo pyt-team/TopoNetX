@@ -359,9 +359,7 @@ class ColoredHyperGraph(Complex):
             If the input cell is not in the cells of the colored hypergraph.
         """
         if cell not in self.cells:
-            raise ValueError(
-                "Input cell is not in cells of the {}".format(self.__shortstr__)
-            )
+            raise ValueError(f"Input cell is not in cells of the {self.__shortstr__}")
         return len(self._complex_set[cell])
 
     def number_of_nodes(self, node_set=None):
@@ -615,7 +613,7 @@ class ColoredHyperGraph(Complex):
             if rank != 0:
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             hyperedge_set = frozenset({hyperedge})
-        elif isinstance(hyperedge, (Iterable, HyperEdge)):
+        elif isinstance(hyperedge, Iterable | HyperEdge):
             if isinstance(hyperedge, HyperEdge):
                 hyperedge_set = hyperedge.elements
             else:

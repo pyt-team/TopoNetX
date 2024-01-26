@@ -193,11 +193,11 @@ class PathComplex(Complex):
             # add all simple paths
             self.add_paths_from(self._allowed_paths)
 
-        elif isinstance(paths, (list, tuple)):
+        elif isinstance(paths, list | tuple):
             tmp_paths = []
             for path in paths:
                 if len(path) <= max_rank + 1:
-                    if isinstance(paths[0], (int, str, list, tuple)):
+                    if isinstance(paths[0], int | str | list | tuple):
                         tmp_paths.append(tuple(path))
                     else:  # path is a Path object
                         tmp_paths.append(path)
@@ -257,11 +257,11 @@ class PathComplex(Complex):
         PathView([(1,), (2,), (3,), (4,), (1, 2), (2, 3), (2, 4), (1, 2, 3), (1, 2, 4)])
         """
         new_paths = set()
-        if isinstance(path, (int, str)):
+        if isinstance(path, int | str):
             path = [
                 path,
             ]
-        if isinstance(path, (list, tuple, Path)):
+        if isinstance(path, list | tuple | Path):
             if not isinstance(path, Path):  # path is a list or tuple
                 path_ = tuple(path)
                 if len(path) != len(set(path)):
@@ -893,12 +893,12 @@ class PathComplex(Complex):
                 if isinstance(value, dict):
                     for k, v in value.items():
                         self[node][k] = v
-                        if isinstance(node, (tuple, list)):
+                        if isinstance(node, tuple | list):
                             if len(node) == 1:
                                 self._G.nodes[node[0]][k] = v
                             else:
                                 raise ValueError("Input node must be a singleton.")
-                        elif isinstance(node, (int, str)):
+                        elif isinstance(node, int | str):
                             self._G.nodes[node][k] = v
                 else:
                     raise TypeError(
@@ -907,12 +907,12 @@ class PathComplex(Complex):
         else:
             for node, value in values.items():
                 self[node][name] = value
-                if isinstance(node, (tuple, list)):
+                if isinstance(node, tuple | list):
                     if len(node) == 1:
                         self._G.nodes[node[0]][name] = value
                     else:
                         raise ValueError("Input node must be a singleton.")
-                elif isinstance(node, (int, str)):
+                elif isinstance(node, int | str):
                     self._G.nodes[node][name] = value
 
     def get_edge_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
@@ -988,7 +988,7 @@ class PathComplex(Complex):
                 if isinstance(value, dict):
                     for k, v in value.items():
                         self[edge][k] = v
-                        if isinstance(edge, (tuple, list)):
+                        if isinstance(edge, tuple | list):
                             self._G.edges[edge[0], edge[1]][k] = v
                 else:
                     raise TypeError(
@@ -999,7 +999,7 @@ class PathComplex(Complex):
                 if len(edge) != 2:
                     raise ValueError("Input edge must be a pair.")
                 self[edge][name] = value
-                if isinstance(edge, (tuple, list)):
+                if isinstance(edge, tuple | list):
                     self._G.edges[edge[0], edge[1]][name] = value
 
     def get_path_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
@@ -1088,7 +1088,7 @@ class PathComplex(Complex):
                     )
         else:
             for path, value in values.items():
-                if isinstance(path, (int, str)) or len(path) == 1:
+                if isinstance(path, int | str) or len(path) == 1:
                     self.set_node_attributes({path: {name: value}})
                 elif len(path) == 2:
                     self.set_edge_attributes({path: {name: value}})

@@ -570,7 +570,7 @@ class SimplicialComplex(Complex):
             simplex = [simplex]
         if isinstance(simplex, str):
             simplex = [simplex]
-        if isinstance(simplex, (Iterable, Simplex)):
+        if isinstance(simplex, Iterable | Simplex):
             if not isinstance(simplex, Simplex):
                 simplex_ = frozenset(simplex)
                 if len(simplex_) != len(simplex):
@@ -685,9 +685,9 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
-        >>> d = {(1, 2, 3): 'red', (1, 2, 4): 'blue'}
-        >>> SC.set_simplex_attributes(d, name='color')
-        >>> SC[(1, 2, 3)]['color']
+        >>> d = {(1, 2, 3): "red", (1, 2, 4): "blue"}
+        >>> SC.set_simplex_attributes(d, name="color")
+        >>> SC[(1, 2, 3)]["color"]
         'red'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -697,9 +697,12 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([1, 3, 4])
         >>> SC.add_simplex([1, 2, 3])
         >>> SC.add_simplex([1, 2, 4])
-        >>> d = {(1, 3, 4): {'color': 'red', 'attr2': 1}, (1, 2, 4): {'color': 'blue', 'attr2': 3}}
+        >>> d = {
+        ...     (1, 3, 4): {"color": "red", "attr2": 1},
+        ...     (1, 2, 4): {"color": "blue", "attr2": 3},
+        ... }
         >>> SC.set_simplex_attributes(d)
-        >>> SC[(1, 3, 4)]['color']
+        >>> SC[(1, 3, 4)]["color"]
         'red'
         """
         if name is not None:
@@ -767,7 +770,7 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
-        >>> d={(1, 2): "red", (2, 3): "blue", (3, 4): "black"}
+        >>> d = {(1, 2): "red", (2, 3): "blue", (3, 4): "black"}
         >>> SC.set_simplex_attributes(d, name="color")
         >>> SC.get_simplex_attributes("color")
         {frozenset({1, 2}): 'red', frozenset({2, 3}): 'blue', frozenset({3, 4}): 'black'}
@@ -1450,8 +1453,9 @@ class SimplicialComplex(Complex):
         >>> import spharapy.trimesh as tm
         >>> import spharapy.spharabasis as sb
         >>> import spharapy.datasets as sd
-        >>> mesh = tm.TriMesh([[0, 1, 2]], [[1., 0., 0.], [0., 2., 0.],
-        ...                                        [0., 0., 3.]])
+        >>> mesh = tm.TriMesh(
+        ...     [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
+        ... )
 
         >>> SC = SimplicialComplex.from_spharpy(mesh)
         """
@@ -1514,7 +1518,7 @@ class SimplicialComplex(Complex):
         --------
         >>> from gudhi import SimplexTree
         >>> tree = SimplexTree()
-        >>> _ = tree.insert([1,2,3,5])
+        >>> _ = tree.insert([1, 2, 3, 5])
         >>> SC = SimplicialComplex.from_gudhi(tree)
         """
         SC = cls()
@@ -1539,11 +1543,15 @@ class SimplicialComplex(Complex):
         Examples
         --------
         >>> import trimesh
-        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]], faces=[[0, 1, 2]], process=False)
+        >>> mesh = trimesh.Trimesh(
+        ...     vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
+        ...     faces=[[0, 1, 2]],
+        ...     process=False,
+        ... )
         >>> SC = SimplicialComplex.from_trimesh(mesh)
         >>> print(SC.nodes)
         >>> print(SC.simplices)
-        >>> SC[(0)]['position']
+        >>> SC[(0)]["position"]
         """
         SC = cls(mesh.faces)
 
@@ -1659,7 +1667,7 @@ class SimplicialComplex(Complex):
         >>> import spharapy.trimesh as tm
         >>> import spharapy.spharabasis as sb
         >>> import spharapy.datasets as sd
-        >>> mesh = tm.TriMesh([[0, 1, 2]],[[0, 0, 0], [0, 0, 1], [0, 1, 0]] )
+        >>> mesh = tm.TriMesh([[0, 1, 2]], [[0, 0, 0], [0, 0, 1], [0, 1, 0]])
         >>> SC = SimplicialComplex.from_spharpy(mesh)
         >>> mesh2 = SC.to_spharapy()
         >>> mesh2.vertlist == mesh.vertlist

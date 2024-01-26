@@ -68,7 +68,7 @@ class CellView:
                 ]
 
         # If a tuple or list is passed in, assume it represents a cell
-        elif isinstance(cell, (tuple, list)):
+        elif isinstance(cell, tuple | list):
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
@@ -118,7 +118,7 @@ class CellView:
                 ]
 
         # If a tuple or list is passed in, assume it represents a cell
-        elif isinstance(cell, (tuple, list)):
+        elif isinstance(cell, tuple | list):
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
@@ -172,7 +172,7 @@ class CellView:
             Whether or not the element is in the cell view.
         """
         while True:
-            if isinstance(e, (Cell, tuple, list)):
+            if isinstance(e, Cell | tuple | list):
                 break
             raise TypeError("Input must be of type: tuple, list or a cell.")
 
@@ -198,7 +198,7 @@ class CellView:
         str
             The __str__ representation of the cell view.
         """
-        return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
+        return f"CellView({[self._cells[cell][key] for cell in self._cells for key in self._cells[cell]]})"
 
 
 class ColoredHyperEdgeView:

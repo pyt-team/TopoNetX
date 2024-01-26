@@ -1,7 +1,7 @@
 """Creation and manipulation of a combinatorial complex."""
 
 from collections.abc import Collection, Hashable, Iterable
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 import networkx as nx
 
@@ -675,7 +675,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             if rank != 0:
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             hyperedge_set = frozenset({hyperedge})
-        elif isinstance(hyperedge, (Iterable, HyperEdge)):
+        elif isinstance(hyperedge, Iterable | HyperEdge):
             if len(hyperedge) == 1:
                 if rank != 0:
                     raise ValueError(
@@ -752,9 +752,9 @@ class CombinatorialComplex(ColoredHyperGraph):
     def _incidence_matrix(
         self,
         rank: int,
-        to_rank: Optional[int] = None,
+        to_rank: int | None = None,
         incidence_type: Literal["up", "down"] = "up",
-        weight: Optional[Any] = None,
+        weight: Any | None = None,
         sparse: bool = True,
         index: bool = False,
     ):

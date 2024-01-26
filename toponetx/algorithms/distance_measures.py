@@ -87,7 +87,7 @@ def cell_diameters(domain: Complex, s: int = 1) -> tuple[list[int], list[set[int
     >>> CHG = CC.to_colored_hypergraph()
     >>> list(cell_diameters(CHG))
     """
-    if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+    if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")
     coldict, A = domain.all_cell_to_node_coadjacency_matrix(index=True)
     coldict = {v: k for k, v in coldict.items()}
@@ -142,7 +142,7 @@ def diameter(domain: Complex) -> int:
     >>> CHG = CC.to_colored_hypergraph()
     >>> diameter(CHG)
     """
-    if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+    if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")
     A = domain.node_to_all_cell_adjacnecy_matrix()
     G = nx.from_scipy_sparse_array(A)
@@ -190,7 +190,7 @@ def cell_diameter(domain: Complex, s: int = None) -> int:
     >>> CHG = CC.to_colored_hypergraph()
     >>> cell_diameter(CHG)
     """
-    if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+    if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")
     A = domain.all_cell_to_node_coadjacency_matrix()
     G = nx.from_scipy_sparse_array(A)

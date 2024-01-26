@@ -72,7 +72,7 @@ def s_connected_components(
     >>> CCC = CC.to_combinatorial_complex()
     >>> list(s_connected_components(CCC, s=1, cells=False))
     """
-    if not isinstance(domain, (CellComplex, ColoredHyperGraph, CombinatorialComplex)):
+    if not isinstance(domain, CellComplex | ColoredHyperGraph | CombinatorialComplex):
         raise TypeError(f"Input complex {domain} is not supported.")
 
     if cells:

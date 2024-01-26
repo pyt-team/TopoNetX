@@ -385,8 +385,8 @@ class CellComplex(Complex):
             The attributes of the cell to insert.
         """
         # input must be list, tuple or Cell type
-        if isinstance(cell, (tuple, list, Cell)):
-            if isinstance(cell, (tuple, list)):
+        if isinstance(cell, tuple | list | Cell):
+            if isinstance(cell, tuple | list):
                 cell = Cell(elements=cell, **attr)
             elif isinstance(cell, Cell):
                 cell.update(attr)
@@ -931,7 +931,7 @@ class CellComplex(Complex):
         for k, v in values.items():
             # to do, make sure v is a number
 
-            if not isinstance(v, (int, float)):
+            if not isinstance(v, int | float):
                 raise ValueError(f"filtration value must be a int or float, input {v}")
 
             if isinstance(k, Hashable) and not isinstance(k, Iterable):  # node
