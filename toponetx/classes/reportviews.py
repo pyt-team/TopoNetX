@@ -507,7 +507,7 @@ class HyperEdgeView:
             hyperedge_ = frozenset([hyperedge])
         return hyperedge_
 
-    def __getitem__(self, hyperedge):
+    def __getitem__(self, hyperedge: Any) -> dict:
         """Get item.
 
         Parameters
