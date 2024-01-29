@@ -16,8 +16,6 @@ import networkx as nx
 import numpy as np
 import scipy as sp
 import scipy.sparse
-from hypernetx import Hypergraph
-from hypernetx.classes.entity import Entity
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
 from networkx.utils import pairwise
@@ -32,6 +30,13 @@ from toponetx.classes.reportviews import CellView
 from toponetx.utils import incidence_to_adjacency
 
 __all__ = ["CellComplex"]
+
+try:
+    from hypernetx import Hypergraph
+    from hypernetx.classes.entity import Entity
+except ImportError:
+    Hypergraph = None
+    Entity = None
 
 
 class CellComplex(Complex):

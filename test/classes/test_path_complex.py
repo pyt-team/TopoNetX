@@ -1,6 +1,5 @@
 """Test path complex class."""
 
-import hypernetx as hnx
 import networkx as nx
 import numpy as np
 import pytest

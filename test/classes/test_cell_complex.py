@@ -9,6 +9,11 @@ from scipy.sparse import bmat
 from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
 
+try:
+    import hypernetx as hnx
+except ImportError:
+    hnx = None
+
 
 class TestCellComplex:
     """Test cell complex class."""
@@ -1077,6 +1082,9 @@ class TestCellComplex:
 
         assert CC.get_edge_attributes("color") == {(1, 2): "red", (2, 3): "blue"}
 
+    @pytest.mark.skipif(
+        hnx is None, reason="Optional dependency 'hypernetx' not installed."
+    )
     def test_to_hypergraph(self):
         """Test the conversion of a cell complex to a hypergraph."""
         CC = CellComplex([[1, 2, 3], [4, 5]])

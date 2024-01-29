@@ -28,8 +28,8 @@ dependencies=[
     "gudhi",
     "decorator",
     "networkx",
-    "hypernetx < 2.0.0",
     "numpy",
+    "pandas",
     "requests",
     "scipy",
     "trimesh",
@@ -69,7 +69,12 @@ test = [
 ]
 
 dev = ["TopoNetX[test, lint]"]
-all = ["TopoNetX[doc, dev]"]
+all = [
+    "TopoNetX[doc, dev]",
+
+    # optional packages that are not required to run the library
+    "hypernetx < 2.0.0"
+]
 
 [project.urls]
 homepage="https://github.com/pyt-team/TopoNetX"
