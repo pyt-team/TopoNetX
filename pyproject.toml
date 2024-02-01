@@ -63,7 +63,7 @@ test = [
     "jupyter",
 
     # mypy and typing stubs
-    "mypy",
+    "mypy > 1.6.0",
     "pandas-stubs",
     "types-requests"
 ]
@@ -93,18 +93,8 @@ include = [
 warn_redundant_casts = true
 warn_unused_ignores = true
 show_error_codes = true
+disable_error_code = ["import-untyped"]
 plugins = "numpy.typing.mypy_plugin"
-
-[[tool.mypy.overrides]]
-module = [
-    "gudhi.*",
-    "hypernetx.*",
-    "networkx.*",
-    "scipy.*",
-    "spharapy.*",
-    "trimesh.*",
-]
-ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "--capture=no"
