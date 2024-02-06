@@ -93,7 +93,7 @@ class TestGraphToSimplicialComplex:
         assert (0, 1, 2) in sc
 
         with pytest.deprecated_call():
-            sc = graph_2_clique_complex(G, max_dim=2)
+            sc = graph_2_clique_complex(G, max_dim=1)
 
         assert sc.dim == 1
         assert (0, 2, 3) not in sc
