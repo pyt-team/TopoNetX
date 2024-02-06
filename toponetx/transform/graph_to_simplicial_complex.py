@@ -60,15 +60,17 @@ def graph_to_clique_complex(
     # `nx.enumerate_all_cliques` returns cliques in ascending order of size. Abort calling the generator once we reach
     # cliques larger than the requested max dimension.
     if max_dim is not None:
-        cliques = takewhile(lambda clique: len(clique) <= max_dim, cliques)
+        cliques = takewhile(lambda clique: len(clique) <= max_dim + 1, cliques)
 
     SC = SimplicialComplex(cliques)
 
     # copy attributes of the input graph
     for node in G.nodes:
         SC[[node]].update(G.nodes[node])
-    for edge in G.edges:
-        SC[edge].update(G.edges[edge])
+    # if the resulting complex has dimension 1 or higher, copy the attributes of the edges
+    if SC.dim >= 1:
+        for edge in G.edges:
+            SC[edge].update(G.edges[edge])
     SC.complex.update(G.graph)
 
     return SC
