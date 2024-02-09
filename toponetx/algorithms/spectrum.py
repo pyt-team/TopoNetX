@@ -86,7 +86,7 @@ def hodge_laplacian_eigenvectors(
     eigenvaluevector = [round(i, 15) for i in vals.real]
     eigenvectorstemp = vect.transpose().real
     mydict = {}
-    for i in range(0, len(eigenvaluevector)):
+    for i in range(len(eigenvaluevector)):
         mydict[eigenvaluevector[i]] = eigenvectorstemp[i]
     eigenvaluevector.sort()
     finaleigenvectors = [mydict[val] for val in eigenvaluevector]

@@ -1361,12 +1361,12 @@ class TestCellComplex:
         """Test the get_cell_data method of CellComplex."""
         CC = CellComplex()
 
-        CC.add_node("A", **{"attribute_name": "Value A"})
-        CC.add_node("B", **{"attribute_name": "Value B"})
+        CC.add_node("A", attribute_name="Value A")
+        CC.add_node("B", attribute_name="Value B")
 
-        CC.add_edge("A", "B", **{"attribute_name": "Value AB"})
+        CC.add_edge("A", "B", attribute_name="Value AB")
 
-        CC.add_cell(["A", "B", "C"], rank=2, **{"attribute_name": "Value C"})
+        CC.add_cell(["A", "B", "C"], rank=2, attribute_name="Value C")
 
         data = CC.get_cell_data("A", 0, "attribute_name")
         assert data == "Value A"
@@ -1446,7 +1446,7 @@ class TestCellComplex:
         CC = CellComplex()
 
         CC.add_node("A")
-        CC.add_node("B", **{"attribute_name": "Value B"})
+        CC.add_node("B", attribute_name="Value B")
 
         data = CC.get_cell_data("A", 0)
         assert len(data) == 0

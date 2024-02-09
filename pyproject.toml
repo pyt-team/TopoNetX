@@ -88,6 +88,7 @@ select = [
     "I", # import order
     "UP", # pyupgrade rules
     "B", # bugbear rules
+    "PIE", # pie rules
     "SIM", # code simplifications
 ]
 ignore = ["E501"] # line too long

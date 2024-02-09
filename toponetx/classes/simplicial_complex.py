@@ -1057,14 +1057,14 @@ class SimplicialComplex(Complex):
 
         index_set = []
         incidence = {}
-        for i in range(0, self.dim + 1):
+        for i in range(self.dim + 1):
             _, indexi, Bi = self.incidence_matrix(i, weight=weight, index=True)
             index_set.append(indexi)
             incidence[(i, i + 1)] = Bi
         dirac = []
-        for i in range(0, self.dim + 1):
+        for i in range(self.dim + 1):
             row = []
-            for j in range(0, self.dim + 1):
+            for j in range(self.dim + 1):
                 if (i, j) in incidence:
                     row.append(incidence[(i + 1, j + 1)])
                 elif (j, i) in incidence:
@@ -1439,9 +1439,7 @@ class SimplicialComplex(Complex):
         first_ind = np.min(mesh.trilist)
 
         if first_ind == 0:
-            SC.set_simplex_attributes(
-                dict(enumerate(vertices)), name="position"
-            )
+            SC.set_simplex_attributes(dict(enumerate(vertices)), name="position")
         else:  # first index starts at 1.
             SC.set_simplex_attributes(
                 dict(enumerate(vertices, first_ind)),

@@ -957,7 +957,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         index_set = []
         incidence = {}
-        for i in range(0, self.dim + 1):
+        for i in range(self.dim + 1):
             for j in range(i + 1, self.dim + 1):
                 indexj, indexi, Bij = self.incidence_matrix(
                     i, j, weight=weight, index=True
@@ -966,9 +966,9 @@ class CombinatorialComplex(ColoredHyperGraph):
             index_set.append(indexj)
         index_set.append(indexi)
         dirac = []
-        for i in range(0, self.dim + 1):
+        for i in range(self.dim + 1):
             row = []
-            for j in range(0, self.dim + 1):
+            for j in range(self.dim + 1):
                 if (i, j) in incidence:
                     row.append(incidence[(i, j)])
                 elif (j, i) in incidence:

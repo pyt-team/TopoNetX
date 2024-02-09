@@ -295,7 +295,7 @@ class PathComplex(Complex):
 
             # update sub-paths
             for length in range(len(path_), 0, -1):
-                for i in range(0, len(path_) - length + 1):
+                for i in range(len(path_) - length + 1):
                     sub_path = path_[i : i + length]
                     if not self._reserve_sequence_order and str(sub_path[0]) > str(
                         sub_path[-1]
@@ -1031,7 +1031,7 @@ class PathComplex(Complex):
         """
         return {
             tuple(p): self[p][name]
-            for dim in range(0, self.dim + 1)
+            for dim in range(self.dim + 1)
             for p in self.skeleton(dim)
             if name in self[p]
         }
