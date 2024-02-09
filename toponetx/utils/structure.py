@@ -67,11 +67,11 @@ def sparse_array_to_neighborhood_list(
     src_idx, dst_idx = sparse_array.nonzero()
 
     if src_dict is None and dst_dict is None:
-        return zip(dst_idx, src_idx)
+        return zip(dst_idx, src_idx, strict=True)
     elif src_dict is not None and dst_dict is not None:
         src_list = [src_dict[i] for i in src_idx]
         dest_list = [dst_dict[i] for i in dst_idx]
-        return zip(dest_list, src_list)
+        return zip(dest_list, src_list, strict=True)
     else:
         raise ValueError("src_dict and dst_dict must be either None or both not None")
 
@@ -198,8 +198,8 @@ def compute_set_incidence(children, uidset, sparse: bool = True, index: bool = F
     MP : scipy.sparse.csr.csr_matrix
         Set-based incidence matrix.
     """
-    ndict = dict(zip(children, range(len(children))))
-    edict = dict(zip(uidset, range(len(uidset))))
+    ndict = dict(zip(children, range(len(children)), strict=True))
+    edict = dict(zip(uidset, range(len(uidset)), strict=True))
 
     ndict = OrderedDict(sorted(ndict.items(), key=itemgetter(1)))
     edict = OrderedDict(sorted(edict.items(), key=itemgetter(1)))

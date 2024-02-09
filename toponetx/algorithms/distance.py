@@ -77,7 +77,7 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
         path = nx.shortest_path_length(G, rowdict[source], rowdict[target])
         return path
     except Exception:
-        warn(f"No {s}-path between {source} and {target}")
+        warn(f"No {s}-path between {source} and {target}", stacklevel=2)
         return np.inf
 
 
@@ -153,5 +153,5 @@ def cell_distance(
         path_distance = nx.shortest_path_length(G, cell_dict[source], cell_dict[target])
         return path_distance
     except Exception:
-        warn(f"No {s}-path between {source} and {target}")
+        warn(f"No {s}-path between {source} and {target}", stacklevel=2)
         return np.inf

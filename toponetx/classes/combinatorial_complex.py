@@ -131,13 +131,8 @@ class CombinatorialComplex(ColoredHyperGraph):
                         self.add_cell(cell, rank=cell.rank)
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-                        if len(cells) != len(ranks):
-                            raise ValueError(
-                                "cells and ranks must have equal number of elements"
-                            )
-                        else:
-                            for cell, rank in zip(cells, ranks):
-                                self.add_cell(cell, rank)
+                        for cell, rank in zip(cells, ranks, strict=True):
+                            self.add_cell(cell, rank)
                 if isinstance(cells, Iterable) and isinstance(ranks, int):
                     for cell in cells:
                         self.add_cell(cell, ranks)
@@ -1015,13 +1010,8 @@ class CombinatorialComplex(ColoredHyperGraph):
                 self.add_cell(cell, cell.rank)
         else:
             if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-                if len(cells) != len(ranks):
-                    raise ValueError(
-                        "cells and ranks must have equal number of elements"
-                    )
-                else:
-                    for cell, rank in zip(cells, ranks):
-                        self.add_cell(cell, rank)
+                for cell, rank in zip(cells, ranks, strict=True):
+                    self.add_cell(cell, rank)
         if isinstance(cells, Iterable) and isinstance(ranks, int):
             for cell in cells:
                 self.add_cell(cell, ranks)

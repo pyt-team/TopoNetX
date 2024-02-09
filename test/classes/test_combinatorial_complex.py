@@ -513,7 +513,7 @@ class TestCombinatorialComplex:
         d = {node: {"color": "red", "attr2": 1}}
         example1.set_node_attributes(d)
         assert example1.nodes.nodes[frozenset({node})]["color"] == "red"
-        example1.get_node_attributes("color") == {4: "red"}
+        assert example1.get_node_attributes("color") == {4: "red"}
         node = 6
         d = {node: "red"}
         example1.set_node_attributes(d, "color")
@@ -539,7 +539,7 @@ class TestCombinatorialComplex:
         }
         with pytest.raises(ValueError) as exp:
             CCC.add_cells_from([[1, 4]], ranks=[1, 1])
-        assert str(exp.value) == "cells and ranks must have equal number of elements"
+        assert str(exp.value) == "zip() argument 2 is longer than argument 1"
         CCC = CombinatorialComplex()
         CCC.add_cells_from(
             [

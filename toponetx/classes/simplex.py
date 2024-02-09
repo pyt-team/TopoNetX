@@ -74,6 +74,7 @@ class Simplex(Atom):
             warnings.warn(
                 "The `construct_tree` argument is deprecated.",
                 DeprecationWarning,
+                stacklevel=2,
             )
 
         for i in elements:
@@ -128,7 +129,9 @@ class Simplex(Atom):
             The set of faces of the simplex.
         """
         warnings.warn(
-            "`Simplex.construct_simplex_tree` is deprecated.", DeprecationWarning
+            "`Simplex.construct_simplex_tree` is deprecated.",
+            DeprecationWarning,
+            stacklevel=2,
         )
 
         faceset = set()
@@ -156,6 +159,7 @@ class Simplex(Atom):
         warnings.warn(
             "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         return frozenset(
@@ -188,6 +192,7 @@ class Simplex(Atom):
         warnings.warn(
             "`Simplex.faces` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         return Simplex.construct_simplex_tree(self.elements)

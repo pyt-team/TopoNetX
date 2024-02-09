@@ -136,7 +136,7 @@ def set_hodge_laplacian_eigenvector_attrs(
     _, vect = hodge_laplacian_eigenvectors(L, n_components)
 
     for i in range(len(vect)):
-        d = dict(zip(index, vect[i]))
+        d = dict(zip(index, vect[i], strict=True))
         if normalized:
             d = _normalize(d)
         SC.set_simplex_attributes(d, str(i) + ".th_eigen")
@@ -190,7 +190,7 @@ def set_laplacian_beltrami_eigenvectors(SC: SimplicialComplex) -> None:
     index = SC.skeleton(0)
     vect, _ = laplacian_beltrami_eigenvectors(SC)
     for i in range(len(vect)):
-        d = dict(zip(index, vect[:, i]))
+        d = dict(zip(index, vect[:, i], strict=True))
         SC.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
 
 

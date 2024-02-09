@@ -817,8 +817,7 @@ class CellComplex(Complex):
                         cell, check_skeleton=check_skeleton, warnings_dis=True
                     ):
                         edges_cell = set(zip_longest(cell, cell[1:] + [cell[0]]))
-                        for edge in edges_cell:
-                            self._G.add_edges_from(edges_cell)
+                        self._G.add_edges_from(edges_cell)
                         self._insert_cell(Cell(cell, regular=self._regular), **attr)
                     else:
                         raise ValueError(
@@ -1416,7 +1415,8 @@ class CellComplex(Complex):
         if self._regular and len(set(cell)) != len(cell):
             if warnings_dis:
                 warnings.warn(
-                    "repeating nodes invalidates the 2-cell regularity condition"
+                    "repeating nodes invalidates the 2-cell regularity condition",
+                    stacklevel=2,
                 )
             return False
         if check_skeleton:
@@ -2495,7 +2495,13 @@ class CellComplex(Complex):
         first_ind = np.min(mesh.faces)
 
         CC.set_cell_attributes(
-            dict(zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)),
+            dict(
+                zip(
+                    range(first_ind, len(mesh.vertices) + first_ind),
+                    mesh.vertices,
+                    strict=False,
+                )
+            ),
             name="position",
             rank=0,
         )

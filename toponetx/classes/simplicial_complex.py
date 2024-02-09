@@ -801,7 +801,7 @@ class SimplicialComplex(Complex):
         can be reduced to G computations.
         """
         rows, cols = np.where(np.sign(np.abs(matrix)) > 0)
-        edges = zip(rows.tolist(), cols.tolist())
+        edges = zip(rows.tolist(), cols.tolist(), strict=True)
         return edges
 
     def incidence_matrix(
@@ -1440,11 +1440,11 @@ class SimplicialComplex(Complex):
 
         if first_ind == 0:
             SC.set_simplex_attributes(
-                dict(zip(range(len(vertices)), vertices)), name="position"
+                dict(enumerate(vertices)), name="position"
             )
         else:  # first index starts at 1.
             SC.set_simplex_attributes(
-                dict(zip(range(first_ind, len(vertices) + first_ind), vertices)),
+                dict(enumerate(vertices, first_ind)),
                 name="position",
             )
 
@@ -1533,13 +1533,12 @@ class SimplicialComplex(Complex):
 
         if first_ind == 0:
             SC.set_simplex_attributes(
-                dict(zip(range(len(mesh.vertices)), mesh.vertices)), name="position"
+                dict(enumerate(mesh.vertices)),
+                name="position",
             )
         else:  # first index starts at 1.
             SC.set_simplex_attributes(
-                dict(
-                    zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
-                ),
+                dict(enumerate(mesh.vertices, first_ind)),
                 name="position",
             )
 
