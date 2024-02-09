@@ -1,7 +1,4 @@
 """Normalize of Laplacians, (co)adjacency, boundary matrices of complexes."""
-
-from typing import Tuple
-
 import numpy as np
 import scipy.sparse.linalg as spl
 from numpy.linalg import pinv
@@ -156,7 +153,7 @@ def compute_xu_asymmetric_normalized_matrix(
 
 def compute_bunch_normalized_matrices(
     B1: np.ndarray | csr_matrix, B2: np.ndarray | csr_matrix
-) -> Tuple[
+) -> tuple[
     np.ndarray | csr_matrix,
     np.ndarray | csr_matrix,
     np.ndarray | csr_matrix,

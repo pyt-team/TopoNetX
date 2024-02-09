@@ -14,12 +14,8 @@ from toponetx.classes import (
     SimplicialComplex,
 )
 from toponetx.classes.reportviews import (
-    CellView,
-    ColoredHyperEdgeView,
     HyperEdgeView,
     NodeView,
-    PathView,
-    SimplexView,
 )
 
 

@@ -69,7 +69,7 @@ class PathComplex(Complex):
     >>> PC = PathComplex([(1, 2, 3)])
     >>> PC.paths
     PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-    >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+    >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
     >>> PC.paths
     PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
     >>> G = nx.Graph()
@@ -141,7 +141,7 @@ class PathComplex(Complex):
         >>> PC = PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
         >>> G = nx.Graph()
@@ -193,11 +193,11 @@ class PathComplex(Complex):
             # add all simple paths
             self.add_paths_from(self._allowed_paths)
 
-        elif isinstance(paths, (list, tuple)):
+        elif isinstance(paths, list | tuple):
             tmp_paths = []
             for path in paths:
                 if len(path) <= max_rank + 1:
-                    if isinstance(paths[0], (int, str, list, tuple)):
+                    if isinstance(paths[0], int | str | list | tuple):
                         tmp_paths.append(tuple(path))
                     else:  # path is a Path object
                         tmp_paths.append(path)
@@ -223,7 +223,7 @@ class PathComplex(Complex):
         >>> PC = PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
         """
@@ -257,11 +257,11 @@ class PathComplex(Complex):
         PathView([(1,), (2,), (3,), (4,), (1, 2), (2, 3), (2, 4), (1, 2, 3), (1, 2, 4)])
         """
         new_paths = set()
-        if isinstance(path, (int, str)):
+        if isinstance(path, int | str):
             path = [
                 path,
             ]
-        if isinstance(path, (list, tuple, Path)):
+        if isinstance(path, list | tuple | Path):
             if not isinstance(path, Path):  # path is a list or tuple
                 path_ = tuple(path)
                 if len(path) != len(set(path)):
@@ -403,7 +403,7 @@ class PathComplex(Complex):
             Set of elementary p-paths of dimension specified by `rank`.
         """
         if len(self._path_set.faces_dict) > rank >= 0:
-            tmp = (path for path in self._path_set.faces_dict[rank].keys())
+            tmp = (path for path in self._path_set.faces_dict[rank])
             return sorted(
                 tmp, key=lambda x: tuple(map(str, x))
             )  # lexicographic comparison
@@ -774,8 +774,10 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> PC = PC.restrict_to_nodes([0,1,3])
+        >>> PC = PathComplex(
+        ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        ... )
+        >>> PC = PC.restrict_to_nodes([0, 1, 3])
         >>> PC.paths
         PathView([(0,), (1,), (3,), (0, 1), (1, 3), (0, 1, 3)])
         """
@@ -803,8 +805,10 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> PC = PC.restrict_to_paths([[1,2,3]])
+        >>> PC = PathComplex(
+        ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        ... )
+        >>> PC = PC.restrict_to_paths([[1, 2, 3]])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
         """
@@ -868,12 +872,17 @@ class PathComplex(Complex):
         --------
         >>> PC = PathComplex()
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PC.set_node_attributes({(1, ): {"heat": 55, "color": "red"}, (2, ): {"heat": 66, "color": "blue"}})
+        >>> PC.set_node_attributes(
+        ...     {
+        ...         (1,): {"heat": 55, "color": "red"},
+        ...         (2,): {"heat": 66, "color": "blue"},
+        ...     }
+        ... )
         >>> PC[1]
         {'heat': 55, 'color': 'red'}
         >>> PC[2]
         {'heat': 66, 'color': 'blue'}
-        >>> PC.set_node_attributes({(1, ): 58, (2, ): 60}, name="heat")
+        >>> PC.set_node_attributes({(1,): 58, (2,): 60}, name="heat")
         >>> PC[1]
         {'heat': 58, 'color': 'red'}
         >>> PC[2]
@@ -884,12 +893,12 @@ class PathComplex(Complex):
                 if isinstance(value, dict):
                     for k, v in value.items():
                         self[node][k] = v
-                        if isinstance(node, (tuple, list)):
+                        if isinstance(node, tuple | list):
                             if len(node) == 1:
                                 self._G.nodes[node[0]][k] = v
                             else:
                                 raise ValueError("Input node must be a singleton.")
-                        elif isinstance(node, (int, str)):
+                        elif isinstance(node, int | str):
                             self._G.nodes[node][k] = v
                 else:
                     raise TypeError(
@@ -898,12 +907,12 @@ class PathComplex(Complex):
         else:
             for node, value in values.items():
                 self[node][name] = value
-                if isinstance(node, (tuple, list)):
+                if isinstance(node, tuple | list):
                     if len(node) == 1:
                         self._G.nodes[node[0]][name] = value
                     else:
                         raise ValueError("Input node must be a singleton.")
-                elif isinstance(node, (int, str)):
+                elif isinstance(node, int | str):
                     self._G.nodes[node][name] = value
 
     def get_edge_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
@@ -961,7 +970,12 @@ class PathComplex(Complex):
         >>> PC.set_edge_attributes({(0, 1): 33}, name="weight")
         >>> PC.get_edge_attributes("weight")
         {(0, 1): 33, (1, 2): 98}
-        >>> PC.set_edge_attributes({(1, 3): {"weight": 55, "color": "yellow"}, (2, 3): {"weight": 66, "color": "blue"}})
+        >>> PC.set_edge_attributes(
+        ...     {
+        ...         (1, 3): {"weight": 55, "color": "yellow"},
+        ...         (2, 3): {"weight": 66, "color": "blue"},
+        ...     }
+        ... )
         >>> PC[1, 3]
         {'color': 'yellow', 'weight': 55}
         >>> PC[2, 3]
@@ -974,7 +988,7 @@ class PathComplex(Complex):
                 if isinstance(value, dict):
                     for k, v in value.items():
                         self[edge][k] = v
-                        if isinstance(edge, (tuple, list)):
+                        if isinstance(edge, tuple | list):
                             self._G.edges[edge[0], edge[1]][k] = v
                 else:
                     raise TypeError(
@@ -985,7 +999,7 @@ class PathComplex(Complex):
                 if len(edge) != 2:
                     raise ValueError("Input edge must be a pair.")
                 self[edge][name] = value
-                if isinstance(edge, (tuple, list)):
+                if isinstance(edge, tuple | list):
                     self._G.edges[edge[0], edge[1]][name] = value
 
     def get_path_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
@@ -1038,8 +1052,15 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PC.set_path_attributes({(0, 1, 2): {"weight": 43, "color": "red"}, (0, 1, 3): {"weight": 98, "color": "blue"}})
+        >>> PC = PathComplex(
+        ...     [[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]]
+        ... )
+        >>> PC.set_path_attributes(
+        ...     {
+        ...         (0, 1, 2): {"weight": 43, "color": "red"},
+        ...         (0, 1, 3): {"weight": 98, "color": "blue"},
+        ...     }
+        ... )
         >>> PC.get_path_attributes("weight")
         {(0, 1, 2): 43, (0, 1, 3): 98}
         >>> PC.get_path_attributes("color")
@@ -1067,7 +1088,7 @@ class PathComplex(Complex):
                     )
         else:
             for path, value in values.items():
-                if isinstance(path, (int, str)) or len(path) == 1:
+                if isinstance(path, int | str) or len(path) == 1:
                     self.set_node_attributes({path: {name: value}})
                 elif len(path) == 2:
                     self.set_edge_attributes({path: {name: value}})
@@ -1133,10 +1154,7 @@ class PathComplex(Complex):
         **attr : keyword arguments
             The attributes to update.
         """
-        if not isinstance(path, Path):  # path is a list or tuple
-            path_ = tuple(path)
-        else:  # path is a Path object
-            path_ = path.elements
+        path_ = path.elements if isinstance(path, Path) else tuple(path)
         if isinstance(path, Path):  # update attributes for PathView() and _G
             self._path_set.faces_dict[len(path_) - 1][path_].update(path._attributes)
             if len(path_) == 1:
@@ -1251,7 +1269,7 @@ class PathComplex(Complex):
         --------
         >>> G = nx.Graph()
         >>> G.add_edges_from([(1, 2), (2, 3), (1, 3), (0, 1)])
-        >>> allowed_paths = PathComplex.compute_allowed_paths(G, max_rank = 2)
+        >>> allowed_paths = PathComplex.compute_allowed_paths(G, max_rank=2)
         >>> allowed_paths
         {(0, 1), (1, 3), (1, 2), (2,), (1, 3, 2), (0, 1, 2), (0, 1, 3), (1, 2, 3), (2, 1, 3), (2, 3), (1,), (0,), (3,)}
         """

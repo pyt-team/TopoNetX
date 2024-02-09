@@ -1,5 +1,6 @@
 """Creation and manipulation of a Colored Hypergraph."""
 
+import contextlib
 from collections.abc import Collection, Hashable, Iterable
 
 import networkx as nx
@@ -82,11 +83,19 @@ class ColoredHyperGraph(Complex):
         Create a Colored Hypergraph and add groups of friends with corresponding ranks:
 
         >>> CHG = ColoredHyperGraph()
-        >>> CHG.add_cell(["Alice", "Bob"], rank=1)  # Alice and Bob are in a close-knit group.
-        >>> CHG.add_cell(["Charlie", "David"], rank=1)  # Another closely connected group.
-        >>> CHG.add_cell(["Alice", "Bob", "Charlie", "David"], rank=2)  # Both groups together form a higher-ranked community.
+        >>> CHG.add_cell(
+        ...     ["Alice", "Bob"], rank=1
+        ... )  # Alice and Bob are in a close-knit group.
+        >>> CHG.add_cell(
+        ...     ["Charlie", "David"], rank=1
+        ... )  # Another closely connected group.
+        >>> CHG.add_cell(
+        ...     ["Alice", "Bob", "Charlie", "David"], rank=2
+        ... )  # Both groups together form a higher-ranked community.
         >>> CHG.add_cell(["Alice", "Bob", "David"], rank=2)  # Overlapping connections.
-        >>> CHG.add_cell(["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace"], rank=3)  # A larger, more influential community.
+        >>> CHG.add_cell(
+        ...     ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace"], rank=3
+        ... )  # A larger, more influential community.
 
         The code demonstrates how to represent social relationships using a Colored Hypergraph, where each group of friends (hyperedge) is assigned a rank based on the strength of the connection.
         """
@@ -351,9 +360,7 @@ class ColoredHyperGraph(Complex):
             If the input cell is not in the cells of the colored hypergraph.
         """
         if cell not in self.cells:
-            raise ValueError(
-                "Input cell is not in cells of the {}".format(self.__shortstr__)
-            )
+            raise ValueError(f"Input cell is not in cells of the {self.__shortstr__}")
         return len(self._complex_set[cell])
 
     def number_of_nodes(self, node_set=None):
@@ -423,13 +430,13 @@ class ColoredHyperGraph(Complex):
             raise KeyError(f"Node {node} not in {self.__shortstr__}.")
         if isinstance(rank, int):
             if rank >= 0:
-                if rank in self._complex_set.hyperedge_dict.keys():
+                if rank in self._complex_set.hyperedge_dict:
                     return sum(
                         [
                             len(self._complex_set.hyperedge_dict[rank][x])
                             if node in x
                             else 0
-                            for x in self._complex_set.hyperedge_dict[rank].keys()
+                            for x in self._complex_set.hyperedge_dict[rank]
                             if len(x) >= s
                         ]
                     )
@@ -448,13 +455,11 @@ class ColoredHyperGraph(Complex):
                     continue
                 else:
                     value += sum(
-                        [
-                            len(self._complex_set.hyperedge_dict[rank][x])
-                            if node in x
-                            else 0
-                            for x in self._complex_set.hyperedge_dict[rank].keys()
-                            if len(x) >= s
-                        ]
+                        len(self._complex_set.hyperedge_dict[rank][x])
+                        if node in x
+                        else 0
+                        for x in self._complex_set.hyperedge_dict[rank]
+                        if len(x) >= s
                     )
             return value
 
@@ -607,7 +612,7 @@ class ColoredHyperGraph(Complex):
             if rank != 0:
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             hyperedge_set = frozenset({hyperedge})
-        elif isinstance(hyperedge, (Iterable, HyperEdge)):
+        elif isinstance(hyperedge, Iterable | HyperEdge):
             if isinstance(hyperedge, HyperEdge):
                 hyperedge_set = hyperedge.elements
             else:
@@ -712,17 +717,13 @@ class ColoredHyperGraph(Complex):
         """
         if name is not None:
             for cell, value in values.items():
-                try:
+                with contextlib.suppress(AttributeError):
                     self.nodes[cell][name] = value
-                except AttributeError:
-                    pass
 
         else:
             for cell, d in values.items():
-                try:
+                with contextlib.suppress(AttributeError):
                     self.nodes[cell].update(d)
-                except AttributeError:
-                    pass
             return
 
     def set_cell_attributes(self, values, name: str | None = None) -> None:
@@ -748,11 +749,11 @@ class ColoredHyperGraph(Complex):
 
         >>> CHG = ColoredHyperGraph()
         >>> CHG.add_cell([1, 2, 3, 4], rank=2)
-        >>> CHG.add_cell([1, 2, 4], rank=2,)
+        >>> CHG.add_cell([1, 2, 4], rank=2)
         >>> CHG.add_cell([3, 4], rank=2)
-        >>> d = {((1, 2, 3, 4),0): 'red', ((1, 2, 4),0): 'blue', ((3, 4),0): 'green'}
-        >>> CHG.set_cell_attributes(d, name='color')
-        >>> CHG.cells[((3, 4),0)]['color']
+        >>> d = {((1, 2, 3, 4), 0): "red", ((1, 2, 4), 0): "blue", ((3, 4), 0): "green"}
+        >>> CHG.set_cell_attributes(d, name="color")
+        >>> CHG.cells[((3, 4), 0)]["color"]
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -760,9 +761,12 @@ class ColoredHyperGraph(Complex):
 
         >>> G = nx.path_graph(3)
         >>> CHG = ColoredHyperGraph(G)
-        >>> d = {((1, 2),0): {'color': 'red','attr2': 1}, ((0, 1),0): {'color': 'blue', 'attr2': 3}}
+        >>> d = {
+        ...     ((1, 2), 0): {"color": "red", "attr2": 1},
+        ...     ((0, 1), 0): {"color": "blue", "attr2": 3},
+        ... }
         >>> CHG.set_cell_attributes(d)
-        >>> CHG.cells[((0, 1),0)]['color']
+        >>> CHG.cells[((0, 1), 0)]["color"]
         'blue'
         3
 
@@ -771,16 +775,12 @@ class ColoredHyperGraph(Complex):
         """
         if name is not None:
             for cell, value in values.items():
-                try:
+                with contextlib.suppress(AttributeError):
                     self.cells[cell][name] = value
-                except AttributeError:
-                    pass
         else:
             for cell, d in values.items():
-                try:
+                with contextlib.suppress(AttributeError):
                     self.cells[cell].update(d)
-                except AttributeError:
-                    pass
             return
 
     def get_node_attributes(self, name: str):
@@ -800,15 +800,15 @@ class ColoredHyperGraph(Complex):
         --------
         >>> G = nx.path_graph(3)
         >>> CHG = ColoredHyperGraph(G)
-        >>> d = {0: {'color': 'red', 'attr2': 1 },1: {'color': 'blue', 'attr2': 3} }
+        >>> d = {0: {"color": "red", "attr2": 1}, 1: {"color": "blue", "attr2": 3}}
         >>> CHG.set_node_attributes(d)
-        >>> CHG.get_node_attributes('color')
+        >>> CHG.get_node_attributes("color")
         {0: 'red', 1: 'blue'}
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
         >>> CHG = ColoredHyperGraph(G)
-        >>> nodes_color = CHG.get_node_attributes('color')
+        >>> nodes_color = CHG.get_node_attributes("color")
         >>> nodes_color[1]
         'blue'
         """
@@ -838,9 +838,12 @@ class ColoredHyperGraph(Complex):
         --------
         >>> G = nx.path_graph(3)
         >>> CHG = ColoredHyperGraph(G)
-        >>> d = {((1, 2), 0): {'color': 'red', 'attr2': 1}, ((0, 1), 0): {'color': 'blue', 'attr2': 3}}
+        >>> d = {
+        ...     ((1, 2), 0): {"color": "red", "attr2": 1},
+        ...     ((0, 1), 0): {"color": "blue", "attr2": 3},
+        ... }
         >>> CHG.set_cell_attributes(d)
-        >>> cell_color = CHG.get_cell_attributes('color')
+        >>> cell_color = CHG.get_cell_attributes("color")
         >>> cell_color[(frozenset({0, 1}), 0)]
         'blue'
         """
@@ -1452,7 +1455,11 @@ class ColoredHyperGraph(Complex):
         Examples
         --------
         >>> import trimesh
-        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]], faces=[[0, 1, 2]], process=False)
+        >>> mesh = trimesh.Trimesh(
+        ...     vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
+        ...     faces=[[0, 1, 2]],
+        ...     process=False,
+        ... )
         >>> CHG = ColoredHyperGraph.from_trimesh(mesh)
         >>> CHG.nodes
         """
@@ -1501,10 +1508,7 @@ class ColoredHyperGraph(Complex):
         for i in self.ranks:
             if i != 0:
                 for cell in self.skeleton(i):
-                    if isinstance(cell, frozenset):
-                        c_set = cell
-                    else:
-                        c_set = cell[0]
+                    c_set = cell if isinstance(cell, frozenset) else cell[0]
                     if c_set <= node_set:
                         chg.add_cell(c_set, rank=i)
         return chg

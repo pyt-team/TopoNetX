@@ -2,8 +2,8 @@
 
 
 import abc
-from collections.abc import Collection, Iterator
-from typing import Any, Hashable
+from collections.abc import Collection, Hashable, Iterator
+from typing import Any
 
 __all__ = ["Atom", "Complex"]
 

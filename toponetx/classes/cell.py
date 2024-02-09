@@ -296,7 +296,7 @@ class Cell(Atom):
             of them can be obtaine from the other by a cylic rotation
             of the boundary verties defining the 2d cells.
         """
-        if isinstance(cell, (tuple, list)):
+        if isinstance(cell, tuple | list):
             seq = cell
         elif isinstance(cell, Cell):
             seq = cell.elements

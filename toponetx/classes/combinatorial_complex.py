@@ -1,7 +1,7 @@
 """Creation and manipulation of a combinatorial complex."""
 
 from collections.abc import Collection, Hashable, Iterable
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 import networkx as nx
 
@@ -192,8 +192,8 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> complex_instance['node_A'] = {'color': 'red'}
-        >>> complex_instance['hyperedge_B'] = {'weight': 5}
+        >>> complex_instance["node_A"] = {"color": "red"}
+        >>> complex_instance["hyperedge_B"] = {"weight": 5}
 
         Returns
         -------
@@ -425,9 +425,9 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
         >>> CCC.add_cell([1, 2, 4], rank=2)
         >>> CCC.add_cell([3, 4], rank=2)
-        >>> d = {(1, 2, 3, 4): 'red', (1, 2, 3): 'blue', (3, 4): 'green'}
-        >>> CCC.set_cell_attributes(d, name='color')
-        >>> CCC.cells[(3, 4)]['color']
+        >>> d = {(1, 2, 3, 4): "red", (1, 2, 3): "blue", (3, 4): "green"}
+        >>> CCC.set_cell_attributes(d, name="color")
+        >>> CCC.cells[(3, 4)]["color"]
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -435,9 +435,12 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         >>> G = nx.path_graph(3)
         >>> CCC = CombinatorialComplex(G)
-        >>> d = {(1, 2): {'color': 'red','attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3}}
+        >>> d = {
+        ...     (1, 2): {"color": "red", "attr2": 1},
+        ...     (0, 1): {"color": "blue", "attr2": 3},
+        ... }
         >>> CCC.set_cell_attributes(d)
-        >>> CCC.cells[(0, 1)]['color']
+        >>> CCC.cells[(0, 1)]["color"]
         'blue'
         3
 
@@ -463,15 +466,15 @@ class CombinatorialComplex(ColoredHyperGraph):
         --------
         >>> G = nx.path_graph(3)
         >>> CCC = CombinatorialComplex(G)
-        >>> d = {0: {'color': 'red', 'attr2': 1 },1: {'color': 'blue', 'attr2': 3} }
+        >>> d = {0: {"color": "red", "attr2": 1}, 1: {"color": "blue", "attr2": 3}}
         >>> CCC.set_node_attributes(d)
-        >>> CCC.get_node_attributes('color')
+        >>> CCC.get_node_attributes("color")
         {0: 'red', 1: 'blue'}
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
         >>> CCC = CombinatorialComplex(G)
-        >>> nodes_color = CCC.get_node_attributes('color')
+        >>> nodes_color = CCC.get_node_attributes("color")
         >>> nodes_color[1]
         'blue'
         """
@@ -496,9 +499,12 @@ class CombinatorialComplex(ColoredHyperGraph):
         --------
         >>> G = nx.path_graph(3)
         >>> CCC = CombinatorialComplex(G)
-        >>> d = {(1, 2): {'color': 'red', 'attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3} }
+        >>> d = {
+        ...     (1, 2): {"color": "red", "attr2": 1},
+        ...     (0, 1): {"color": "blue", "attr2": 3},
+        ... }
         >>> CCC.set_cell_attributes(d)
-        >>> cell_color = CCC.get_cell_attributes('color')
+        >>> cell_color = CCC.get_cell_attributes("color")
         >>> cell_color[frozenset({0, 1})]
         'blue'
         """
@@ -614,19 +620,17 @@ class CombinatorialComplex(ColoredHyperGraph):
                         continue
                     else:
                         e_rank = self._complex_set.get_rank(existing_hyperedge)
-                        if rank > e_rank:
-                            if existing_hyperedge.issuperset(hyperedge_):
-                                raise ValueError(
-                                    "a violation of the combinatorial complex condition:"
-                                    + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
-                                )
+                        if rank > e_rank and existing_hyperedge.issuperset(hyperedge_):
+                            raise ValueError(
+                                "a violation of the combinatorial complex condition:"
+                                + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
+                            )
 
-                        if rank < e_rank:
-                            if hyperedge_.issuperset(existing_hyperedge):
-                                raise ValueError(
-                                    "violation of the combinatorial complex condition : "
-                                    + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
-                                )
+                        if rank < e_rank and hyperedge_.issuperset(existing_hyperedge):
+                            raise ValueError(
+                                "violation of the combinatorial complex condition : "
+                                + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
+                            )
 
     def _add_hyperedge(self, hyperedge, rank, **attr):
         """Add hyperedge.
@@ -669,12 +673,11 @@ class CombinatorialComplex(ColoredHyperGraph):
             if rank != 0:
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             hyperedge_set = frozenset({hyperedge})
-        elif isinstance(hyperedge, (Iterable, HyperEdge)):
-            if len(hyperedge) == 1:
-                if rank != 0:
-                    raise ValueError(
-                        f"rank must be zero cells with single element, got rank {rank} with input hyperedge {hyperedge} "
-                    )
+        elif isinstance(hyperedge, Iterable | HyperEdge):
+            if len(hyperedge) == 1 and rank != 0:
+                raise ValueError(
+                    f"rank must be zero cells with single element, got rank {rank} with input hyperedge {hyperedge} "
+                )
             if isinstance(hyperedge, HyperEdge):
                 hyperedge_ = hyperedge.elements
             else:
@@ -746,9 +749,9 @@ class CombinatorialComplex(ColoredHyperGraph):
     def _incidence_matrix(
         self,
         rank: int,
-        to_rank: Optional[int] = None,
+        to_rank: int | None = None,
         incidence_type: Literal["up", "down"] = "up",
-        weight: Optional[Any] = None,
+        weight: Any | None = None,
         sparse: bool = True,
         index: bool = False,
     ):
@@ -799,6 +802,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             raise ValueError(
                 "incidence matrix can be computed for k!=r, got equal r and k."
             )
+
         if to_rank is None:
             if incidence_type == "up":
                 children = self.skeleton(rank)
@@ -891,11 +895,8 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
         >>> CCC.adjacency_matrix(0, 1)
         """
-        if via_rank is not None:
-            if rank > via_rank:
-                raise ValueError(
-                    "rank must be lesser than via_rank, must be r<k, got r>k"
-                )
+        if via_rank is not None and rank > via_rank:
+            raise ValueError("rank must be lesser than via_rank, must be r<k, got r>k")
         return super().adjacency_matrix(rank, via_rank, s, index)
 
     def coadjacency_matrix(self, rank, via_rank, s: int = None, index: bool = False):
@@ -921,9 +922,8 @@ class CombinatorialComplex(ColoredHyperGraph):
         coadjacency_matrix : scipy.sparse.csr.csr_matrix
             The coadjacency matrix of this combinatorial complex.
         """
-        if via_rank is not None:
-            if rank < via_rank:
-                raise ValueError("rank must be greater than via_rank")
+        if via_rank is not None and rank < via_rank:
+            raise ValueError("rank must be greater than via_rank")
         return super().coadjacency_matrix(rank, via_rank, s, index)
 
     def dirac_operator_matrix(self, weight: str | None = None, index: bool = False):
@@ -1069,16 +1069,15 @@ class CombinatorialComplex(ColoredHyperGraph):
         **attr : keyword arguments, optional
             Attributes to add to the cell as key=value pairs.
         """
-        if self.graph_based:
-            if rank == 1:
-                if not isinstance(cell, Iterable):
-                    raise TypeError(
-                        "Rank 1 cells in graph-based CombinatorialComplex must be Iterable."
-                    )
-                if len(cell) != 2:
-                    raise ValueError(
-                        f"Rank 1 cells in graph-based CombinatorialComplex must have size equal to 1 got {cell}."
-                    )
+        if self.graph_based and rank == 1:
+            if not isinstance(cell, Iterable):
+                raise TypeError(
+                    "Rank 1 cells in graph-based CombinatorialComplex must be Iterable."
+                )
+            if len(cell) != 2:
+                raise ValueError(
+                    f"Rank 1 cells in graph-based CombinatorialComplex must have size equal to 1 got {cell}."
+                )
 
         self._add_hyperedge(cell, rank, **attr)
 
@@ -1140,7 +1139,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC = CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
-        >>> CCC.add_cell([9],rank=0)
+        >>> CCC.add_cell([9], rank=0)
         >>> CCC.singletons()
         """
         singletons = []

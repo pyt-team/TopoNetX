@@ -3,13 +3,10 @@
 import networkx as nx
 import numpy as np
 import pytest
-import spharapy.datasets as sd
-import spharapy.spharabasis as sb
 import spharapy.trimesh as tm
 from gudhi import SimplexTree
 from scipy.sparse import bmat
 
-from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex

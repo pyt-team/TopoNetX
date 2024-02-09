@@ -10,7 +10,6 @@ from toponetx.algorithms.spectrum import (
     combinatorial_complex_adjacency_spectrum,
     hodge_laplacian_eigenvectors,
     laplacian_beltrami_eigenvectors,
-    laplacian_spectrum,
     path_complex_adjacency_spectrum,
     path_complex_hodge_laplacian_spectrum,
     set_hodge_laplacian_eigenvector_attrs,

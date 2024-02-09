@@ -170,7 +170,7 @@ def incidence_to_adjacency(B, s: int | None = None, signed: bool = False):
     A = B.T @ B
     A.setdiag(0)
     if s is not None:
-        A = (A >= s) * 1
+        A = (s <= A) * 1
 
     return A
 

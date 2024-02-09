@@ -63,10 +63,14 @@ class Path(Atom):
     >>> path2 = Path((1, 2, 3), construct_boundaries=True)
     >>> list(path2.boundary)
     [(2, 3), (1, 3), (1, 2)]
-    >>> path3 = Path((1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 2), (2, 3)])
+    >>> path3 = Path(
+    ...     (1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 2), (2, 3)]
+    ... )
     >>> list(path3.boundary)
     [(2, 3), (1, 2)]
-    >>> path4 = Path((1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 3), (2, 3)])
+    >>> path4 = Path(
+    ...     (1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 3), (2, 3)]
+    ... )
     >>> list(path4.boundary)
     [(2, 3), (1, 3)]
     """
@@ -133,15 +137,19 @@ class Path(Atom):
         >>> path2 = Path((1, 2, 3), construct_boundaries=True)
         >>> list(path2.boundary)
         [(2, 3), (1, 3), (1, 2)]
-        >>> path3 = Path((1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 2), (2, 3)])
+        >>> path3 = Path(
+        ...     (1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 2), (2, 3)]
+        ... )
         >>> list(path3.boundary)
         [(2, 3), (1, 2)]
-        >>> path4 = Path((1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 3), (2, 3)])
+        >>> path4 = Path(
+        ...     (1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 3), (2, 3)]
+        ... )
         >>> list(path4.boundary)
         [(2, 3), (1, 3)]
         """
         self.__check_inputs(elements, reserve_sequence_order)
-        if isinstance(elements, (int, str)):
+        if isinstance(elements, int | str):
             elements = [elements]
         super().__init__(tuple(elements), **kwargs)
         if len(set(elements)) != len(self.elements):
@@ -192,7 +200,9 @@ class Path(Atom):
         --------
         >>> Path.construct_path_boundaries((1, 2, 3), reserve_sequence_order=False)
         [(2, 3), (1, 3), (1, 2)]
-        >>> Path.construct_path_boundaries((1, 2, 3), reserve_sequence_order=False, allowed_paths=[(1, 2), (2, 3)])
+        >>> Path.construct_path_boundaries(
+        ...     (1, 2, 3), reserve_sequence_order=False, allowed_paths=[(1, 2), (2, 3)]
+        ... )
         [(2, 3), (1, 2)]
         """
         boundaries = []

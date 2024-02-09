@@ -53,15 +53,15 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
     >>> list(node_diameters(CC))
     >>> CCC = CC.to_combinatorial_complex()
     >>> list(node_diameters(CCC))
     >>> CHG = CC.to_colored_hypergraph()
     >>> list(node_diameters(CHG))
     """
-    if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+    if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise ValueError(f"Input complex {domain} is not supported.")
     if isinstance(source, Cell):
         source = source.elements
@@ -127,20 +127,20 @@ def cell_distance(
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
-    >>> CC.add_cell([5,2],rank=1)
-    >>> cell_distance(CC, [2,3] ,[6,7])
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
+    >>> CC.add_cell([5, 2], rank=1)
+    >>> cell_distance(CC, [2, 3], [6, 7])
     >>> CHG = CC.to_colored_hypergraph()
-    >>> cell_distance(CHG, (frozenset({2, 3}), 0) ,(frozenset({6, 7}), 0))
+    >>> cell_distance(CHG, (frozenset({2, 3}), 0), (frozenset({6, 7}), 0))
     >>> CCC = CC.to_combinatorial_complex()
-    >>> cell_distance(CCC, frozenset({2, 3}) ,frozenset({6, 7}))
+    >>> cell_distance(CCC, frozenset({2, 3}), frozenset({6, 7}))
     """
-    if not isinstance(domain, (CellComplex, CombinatorialComplex, ColoredHyperGraph)):
+    if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise ValueError(f"Input complex {domain} is not supported.")
-    if isinstance(source, (Cell, HyperEdge)):
+    if isinstance(source, Cell | HyperEdge):
         source = source.elements
-    if isinstance(target, (Cell, HyperEdge)):
+    if isinstance(target, Cell | HyperEdge):
         target = target.elements
     if isinstance(domain, CellComplex):
         if isinstance(source, Iterable):
