@@ -1,7 +1,7 @@
 """Read and write complexes as a list of their atoms."""
-from collections.abc import Hashable, Iterable
+from collections.abc import Generator, Hashable, Iterable
 from itertools import combinations
-from typing import Generator, Literal, overload
+from typing import Literal, overload
 
 import networkx as nx
 
@@ -30,10 +30,7 @@ def _atomlist_line(atom: Iterable[Hashable] | Hashable, attributes: dict) -> str
     str
         The line of the atom list that represents the given atom.
     """
-    if isinstance(atom, Iterable):
-        line = " ".join(map(str, atom))
-    else:
-        line = str(atom)
+    line = " ".join(map(str, atom)) if isinstance(atom, Iterable) else str(atom)
 
     if len(attributes) > 0:
         line += " " + str(attributes)
@@ -174,7 +171,7 @@ def write_atomlist(
     TypeError
         If the domain is not a cell or simplicial complex.
     """
-    if not isinstance(domain, (CellComplex, SimplicialComplex)):
+    if not isinstance(domain, CellComplex | SimplicialComplex):
         raise TypeError(f"Expected a cell or simplicial complex, got {type(domain)}.")
 
     for line in generate_atomlist(domain):

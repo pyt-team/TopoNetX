@@ -1389,7 +1389,7 @@ class TestCellComplex:
         with pytest.raises(KeyError):
             CC.get_cell_data(["D", "F"], 2, "invalid_attribute")
 
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             CC.get_cell_data("C", 2, "invalid_attribute")
 
         with pytest.raises(KeyError):
