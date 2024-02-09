@@ -90,6 +90,7 @@ select = [
     "B", # bugbear rules
     "PIE", # pie rules
     "Q", # quote rules
+    "RET", # return rules
     "SIM", # code simplifications
 ]
 ignore = ["E501"] # line too long

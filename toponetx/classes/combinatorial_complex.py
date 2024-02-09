@@ -199,7 +199,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             self.nodes[cell].update(attr)
             return
         # we now check if the input is a cell in the CCC
-        elif cell in self.cells:
+        if cell in self.cells:
             hyperedge_ = HyperEdgeView._to_frozen_set(cell)
             rank = self.cells.get_rank(hyperedge_)
             if hyperedge_ in self._complex_set.hyperedge_dict[rank]:
@@ -613,19 +613,19 @@ class CombinatorialComplex(ColoredHyperGraph):
                 for existing_hyperedge in self._node_membership[node]:
                     if existing_hyperedge == hyperedge_:
                         continue
-                    else:
-                        e_rank = self._complex_set.get_rank(existing_hyperedge)
-                        if rank > e_rank and existing_hyperedge.issuperset(hyperedge_):
-                            raise ValueError(
-                                "a violation of the combinatorial complex condition:"
-                                + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
-                            )
 
-                        if rank < e_rank and hyperedge_.issuperset(existing_hyperedge):
-                            raise ValueError(
-                                "violation of the combinatorial complex condition : "
-                                + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
-                            )
+                    e_rank = self._complex_set.get_rank(existing_hyperedge)
+                    if rank > e_rank and existing_hyperedge.issuperset(hyperedge_):
+                        raise ValueError(
+                            "a violation of the combinatorial complex condition:"
+                            + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
+                        )
+
+                    if rank < e_rank and hyperedge_.issuperset(existing_hyperedge):
+                        raise ValueError(
+                            "violation of the combinatorial complex condition : "
+                            + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
+                        )
 
     def _add_hyperedge(self, hyperedge, rank, **attr):
         """Add hyperedge.
@@ -710,7 +710,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                             "weight"
                         ] = 1
                     return
-                elif e_rank < rank:
+                if e_rank < rank:
                     self._CCC_condition(hyperedge_, rank)
                     self.remove_cell(hyperedge_set)
                     self._add_hyperedge_helper(hyperedge_set, rank, **attr)
@@ -722,16 +722,15 @@ class CombinatorialComplex(ColoredHyperGraph):
                             "weight"
                         ] = 1
                     return
-                else:
-                    self._add_hyperedge_helper(hyperedge_set, rank, **attr)
-                    if (
-                        "weight"
-                        not in self._complex_set.hyperedge_dict[rank][hyperedge_set]
-                    ):
-                        self._complex_set.hyperedge_dict[rank][hyperedge_set][
-                            "weight"
-                        ] = 1
-                    return
+
+                self._add_hyperedge_helper(hyperedge_set, rank, **attr)
+                if (
+                    "weight"
+                    not in self._complex_set.hyperedge_dict[rank][hyperedge_set]
+                ):
+                    self._complex_set.hyperedge_dict[rank][hyperedge_set]["weight"] = 1
+                return
+
             self._CCC_condition(hyperedge_, rank)
             self._add_hyperedge_helper(hyperedge_set, rank, **attr)
             if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_set]:
@@ -986,8 +985,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 shift = len(d)
 
             return d, dirac_mat
-        else:
-            return dirac_mat
+        return dirac_mat
 
     def add_cells_from(self, cells, ranks: Iterable[int] | int | None = None) -> None:
         """Add cells to combinatorial complex.

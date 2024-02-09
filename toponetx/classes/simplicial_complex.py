@@ -323,8 +323,7 @@ class SimplicialComplex(Complex):
         """
         if simplex in self:
             return self._simplex_set[simplex]
-        else:
-            raise KeyError("simplex is not in the simplicial complex")
+        raise KeyError("simplex is not in the simplicial complex")
 
     def __iter__(self) -> Iterator:
         """Iterate over all simplices (faces) of the simplicial complex.
@@ -801,8 +800,7 @@ class SimplicialComplex(Complex):
         can be reduced to G computations.
         """
         rows, cols = np.where(np.sign(np.abs(matrix)) > 0)
-        edges = zip(rows.tolist(), cols.tolist(), strict=True)
-        return edges
+        return zip(rows.tolist(), cols.tolist(), strict=True)
 
     def incidence_matrix(
         self, rank, signed: bool = True, weight: str | None = None, index: bool = False
@@ -863,8 +861,7 @@ class SimplicialComplex(Complex):
                     simplex: i for i, simplex in enumerate(self.skeleton(0))
                 }
                 return {}, simplex_dict_d, boundary.tocsr()
-            else:
-                return boundary.tocsr()
+            return boundary.tocsr()
 
         idx_simplices, idx_faces, values = [], [], []
 
@@ -887,6 +884,7 @@ class SimplicialComplex(Complex):
                 len(simplex_dict_d),
             ),
         )
+
         if index:
             if signed:
                 return (
@@ -894,17 +892,15 @@ class SimplicialComplex(Complex):
                     simplex_dict_d,
                     boundary,
                 )
-            else:
-                return (
-                    simplex_dict_d_minus_1,
-                    simplex_dict_d,
-                    abs(boundary),
-                )
-        else:
-            if signed:
-                return boundary
-            else:
-                return abs(boundary)
+            return (
+                simplex_dict_d_minus_1,
+                simplex_dict_d,
+                abs(boundary),
+            )
+
+        if signed:
+            return boundary
+        return abs(boundary)
 
     def coincidence_matrix(
         self, rank, signed: bool = True, weight=None, index: bool = False
@@ -985,9 +981,8 @@ class SimplicialComplex(Complex):
                 L_hodge = abs(L_hodge)
             if index:
                 return row, L_hodge
-            else:
-                return L_hodge
-        elif rank < self.dim:
+            return L_hodge
+        if rank < self.dim:
             row, column, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
@@ -997,25 +992,19 @@ class SimplicialComplex(Complex):
                 L_hodge = abs(L_hodge)
             if index:
                 return column, L_hodge
-            else:
-                return L_hodge
-        elif rank == self.dim:
+            return L_hodge
+        if rank == self.dim:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_hodge = B.transpose() @ B
             if not signed:
                 L_hodge = abs(L_hodge)
             if index:
                 return column, L_hodge
-            else:
-                return L_hodge
-        else:
-            raise ValueError(
-                f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
-            )
-        if not signed:
-            L_hodge = abs(L_hodge)
-        else:
-            return abs(L_hodge)
+            return L_hodge
+
+        raise ValueError(
+            f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
+        )
 
     def dirac_operator_matrix(
         self,

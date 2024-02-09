@@ -435,28 +435,26 @@ class ColoredHyperGraph(Complex):
                             if len(x) >= s
                         ]
                     )
-                else:
-                    raise RuntimeError(
-                        f"There are no cells in the colored hypergraph with rank {rank}"
-                    )
 
-            else:
-                raise ValueError("Rank must be positive")
-        elif rank is None:
+                raise RuntimeError(
+                    f"There are no cells in the colored hypergraph with rank {rank}"
+                )
+
+            raise ValueError("Rank must be positive")
+        if rank is None:
             rank_list = self._complex_set.hyperedge_dict.keys()
             value = 0
             for rank in rank_list:
                 if rank == 0:
                     continue
-                else:
-                    value += sum(
-                        len(self._complex_set.hyperedge_dict[rank][x])
-                        if node in x
-                        else 0
-                        for x in self._complex_set.hyperedge_dict[rank]
-                        if len(x) >= s
-                    )
+
+                value += sum(
+                    len(self._complex_set.hyperedge_dict[rank][x]) if node in x else 0
+                    for x in self._complex_set.hyperedge_dict[rank]
+                    if len(x) >= s
+                )
             return value
+        return None
 
     def _remove_node(self, node) -> None:
         """Remove a node from the ColoredHyperGraph.
@@ -848,12 +846,12 @@ class ColoredHyperGraph(Complex):
                 for cell in self.skeleton(rank)
                 if name in self.skeleton(rank)[cell]
             }
-        else:
-            return {
-                cell: self.cells[cell][name]
-                for cell in self.cells
-                if name in self.cells[cell]
-            }
+
+        return {
+            cell: self.cells[cell][name]
+            for cell in self.cells
+            if name in self.cells[cell]
+        }
 
     def _add_nodes_of_hyperedge(self, hyperedge_) -> None:
         """Add nodes of a hyperedge to the CHG.
@@ -1299,8 +1297,7 @@ class ColoredHyperGraph(Complex):
         if index:
             A = incidence_to_adjacency(B[-1], s=s)
             return B[1], A
-        A = incidence_to_adjacency(B, s=s)
-        return A
+        return incidence_to_adjacency(B, s=s)
 
     def node_to_all_cell_adjacnecy_matrix(self, index: bool = False, s: int = None):
         """Compute the node/all cell adjacency matrix.
@@ -1323,8 +1320,7 @@ class ColoredHyperGraph(Complex):
         if index:
             A = incidence_to_adjacency(B[-1].T, s=s)
             return B[0], A
-        A = incidence_to_adjacency(B.T, s=s)
-        return A
+        return incidence_to_adjacency(B.T, s=s)
 
     def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix.

@@ -492,36 +492,36 @@ class PathComplex(Complex):
                     (node,): i for i, node in enumerate(sorted(self.nodes, key=str))
                 }
                 return {}, node_index, abs(boundary.tocoo())
-            else:
-                return abs(boundary.tocoo())
-        else:
-            idx_p_minus_1, idx_p, values = [], [], []
-            path_minus_1_dict = {
-                path: i for i, path in enumerate(self.skeleton(rank - 1))
-            }  # path2idx dict
-            path_dict = {
-                path: i for i, path in enumerate(self.skeleton(rank))
-            }  # path2idx dict
-            for path, idx_path in path_dict.items():
-                for i, _ in enumerate(path):
-                    boundary_path = path[0:i] + path[(i + 1) :]
-                    if not self._reserve_sequence_order and str(boundary_path[0]) > str(
-                        boundary_path[-1]
-                    ):
-                        boundary_path = boundary_path[::-1]
-                    boundary_path = tuple(boundary_path)
-                    if boundary_path in self._allowed_paths:
-                        idx_p_minus_1.append(path_minus_1_dict[boundary_path])
-                        idx_p.append(idx_path)
-                        values.append((-1) ** i)
-            boundary = sp.sparse.coo_matrix(
-                (values, (idx_p_minus_1, idx_p)),
-                dtype=np.float32,
-                shape=(
-                    len(path_minus_1_dict),
-                    len(path_dict),
-                ),
-            )
+            return abs(boundary.tocoo())
+
+        idx_p_minus_1, idx_p, values = [], [], []
+        path_minus_1_dict = {
+            path: i for i, path in enumerate(self.skeleton(rank - 1))
+        }  # path2idx dict
+        path_dict = {
+            path: i for i, path in enumerate(self.skeleton(rank))
+        }  # path2idx dict
+        for path, idx_path in path_dict.items():
+            for i, _ in enumerate(path):
+                boundary_path = path[0:i] + path[(i + 1) :]
+                if not self._reserve_sequence_order and str(boundary_path[0]) > str(
+                    boundary_path[-1]
+                ):
+                    boundary_path = boundary_path[::-1]
+                boundary_path = tuple(boundary_path)
+                if boundary_path in self._allowed_paths:
+                    idx_p_minus_1.append(path_minus_1_dict[boundary_path])
+                    idx_p.append(idx_path)
+                    values.append((-1) ** i)
+        boundary = sp.sparse.coo_matrix(
+            (values, (idx_p_minus_1, idx_p)),
+            dtype=np.float32,
+            shape=(
+                len(path_minus_1_dict),
+                len(path_dict),
+            ),
+        )
+
         if index:
             if signed:
                 return (
@@ -529,17 +529,16 @@ class PathComplex(Complex):
                     path_dict,
                     boundary,
                 )
-            else:
-                return (
-                    path_minus_1_dict,
-                    path_dict,
-                    abs(boundary),
-                )
-        else:
-            if signed:
-                return boundary
-            else:
-                return abs(boundary)
+
+            return (
+                path_minus_1_dict,
+                path_dict,
+                abs(boundary),
+            )
+
+        if signed:
+            return boundary
+        return abs(boundary)
 
     def up_laplacian_matrix(
         self,
@@ -584,8 +583,7 @@ class PathComplex(Complex):
 
         if index:
             return row, L_up.tolil()
-        else:
-            return L_up.tolil()
+        return L_up.tolil()
 
     def down_laplacian_matrix(
         self,
@@ -627,8 +625,7 @@ class PathComplex(Complex):
             L_down = abs(L_down)
         if index:
             return row, L_down.tolil()
-        else:
-            return L_down.tolil()
+        return L_down.tolil()
 
     def hodge_laplacian_matrix(
         self,
@@ -664,9 +661,8 @@ class PathComplex(Complex):
                 L_hodge = abs(L_hodge)
             if index:
                 return row, L_hodge
-            else:
-                return L_hodge
-        elif rank < self.dim:
+            return L_hodge
+        if rank < self.dim:
             row, column, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
@@ -676,21 +672,19 @@ class PathComplex(Complex):
                 L_hodge = abs(L_hodge)
             if index:
                 return column, L_hodge
-            else:
-                return L_hodge
-        elif rank == self.dim:
+            return L_hodge
+        if rank == self.dim:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_hodge = B.transpose() @ B
             if not signed:
                 L_hodge = abs(L_hodge)
             if index:
                 return column, L_hodge
-            else:
-                return L_hodge
-        else:
-            raise ValueError(
-                f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
-            )
+            return L_hodge
+
+        raise ValueError(
+            f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
+        )
 
     def adjacency_matrix(
         self,
@@ -815,9 +809,8 @@ class PathComplex(Complex):
         new_path_set = []
         if len(path_set) == 0:
             raise ValueError("Input path_set cannot be empty.")
-        else:
-            for path in path_set:
-                new_path_set.append(tuple(path))
+        for path in path_set:
+            new_path_set.append(tuple(path))
         new_path_set = set(new_path_set)
         new_paths = []
         for path in self.paths:
@@ -1141,8 +1134,7 @@ class PathComplex(Complex):
         if path not in self._path_set.faces_dict[dim]:  # Not in faces_dict
             self._path_set.faces_dict[dim][path] = {}
             return path
-        else:
-            return None
+        return None
 
     def _update_attributes(self, path, **attr):
         """Update the attributes of path.
@@ -1198,8 +1190,7 @@ class PathComplex(Complex):
         """
         if item in self:
             return self._path_set[item]
-        else:
-            raise KeyError("The elementary p-path is not in the path complex")
+        raise KeyError("The elementary p-path is not in the path complex")
 
     def __iter__(self) -> Iterator:
         """Iterate over all faces of the path complex.

@@ -162,12 +162,12 @@ class Cell(Atom):
         """
         if self._regular:  # condition enforced
             return True
-        else:
-            _adjdict = {}
-            for e in self._boundary:
-                if e[0] in _adjdict:
-                    return False
-                _adjdict[e[0]] = e[1]
+
+        _adjdict = {}
+        for e in self._boundary:
+            if e[0] in _adjdict:
+                return False
+            _adjdict[e[0]] = e[1]
 
         return True
 
@@ -208,10 +208,9 @@ class Cell(Atom):
         if len(edge) == 2:
             if tuple(edge) in self.boundary:
                 return 1
-            elif tuple(edge)[::-1] in self.boundary:
+            if tuple(edge)[::-1] in self.boundary:
                 return -1
-            else:
-                raise KeyError(f"Ihe input {edge} is not in the boundary of the cell.")
+            raise KeyError(f"Ihe input {edge} is not in the boundary of the cell.")
 
         raise ValueError(f"The input {edge} is not a valid edge.")
 

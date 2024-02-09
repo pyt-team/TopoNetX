@@ -370,7 +370,7 @@ class TestReportViews_HyperEdgeView:
 
         assert (
             str(exp_exception.value)
-            == "level must be 'equal', 'uppereq', 'lowereq', 'upeq', 'downeq', 'uppereq', 'lower', 'up', or 'down'  "
+            == "level must be 'equal', 'uppereq', 'lowereq', 'upeq', 'downeq', 'uppereq', 'lower', 'up', or 'down'"
         )
 
     def test_hyper_edge_view_get_rank(self):

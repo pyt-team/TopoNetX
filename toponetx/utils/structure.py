@@ -68,12 +68,13 @@ def sparse_array_to_neighborhood_list(
 
     if src_dict is None and dst_dict is None:
         return zip(dst_idx, src_idx, strict=True)
-    elif src_dict is not None and dst_dict is not None:
+
+    if src_dict is not None and dst_dict is not None:
         src_list = [src_dict[i] for i in src_idx]
         dest_list = [dst_dict[i] for i in dst_idx]
         return zip(dest_list, src_list, strict=True)
-    else:
-        raise ValueError("src_dict and dst_dict must be either None or both not None")
+
+    raise ValueError("src_dict and dst_dict must be either None or both not None")
 
 
 def neighborhood_list_to_neighborhood_dict(
@@ -104,12 +105,13 @@ def neighborhood_list_to_neighborhood_dict(
         for src_idx, dst_idx in n_list:
             neighborhood_dict[src_idx].append(dst_idx)
         return neighborhood_dict
-    elif src_dict is not None and dst_dict is not None:
+
+    if src_dict is not None and dst_dict is not None:
         for src_idx, dst_idx in n_list:
             neighborhood_dict[src_dict[src_idx]].append(dst_dict[dst_idx])
         return neighborhood_dict
-    else:
-        raise ValueError("src_dict and dst_dict must be either None or both not None")
+
+    raise ValueError("src_dict and dst_dict must be either None or both not None")
 
 
 def sparse_array_to_neighborhood_dict(
@@ -235,10 +237,8 @@ def compute_set_incidence(children, uidset, sparse: bool = True, index: bool = F
                         MP[ndict[r_hyperedge_dict[n]], edict[k_hyperedge_dict[e]]] = 1
         if index:
             return ndict, edict, MP
-        else:
-            return MP
-    else:
-        if index:
-            return {}, {}, np.zeros(1)
-        else:
-            return np.zeros(1)
+        return MP
+
+    if index:
+        return {}, {}, np.zeros(1)
+    return np.zeros(1)

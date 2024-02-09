@@ -153,8 +153,7 @@ def weighted_graph_to_vietoris_rips_complex(
 
     def is_in_vr_complex(clique):  # numpydoc ignore=GL08
         edges = combinations(clique, 2)
-        edge_weights_lower_than_r = all(G[u][v]["weight"] <= r for u, v in edges)
-        return edge_weights_lower_than_r
+        return all(G[u][v]["weight"] <= r for u, v in edges)
 
     all_cliques = nx.enumerate_all_cliques(G)
     possible_cliques = (

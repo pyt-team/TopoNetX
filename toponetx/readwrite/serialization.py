@@ -32,5 +32,4 @@ def load_from_pickle(filepath):
         Object.
     """
     with open(filepath, "rb") as f:
-        temp = pickle.load(f)
-    return temp
+        return pickle.load(f)

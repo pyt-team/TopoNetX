@@ -486,8 +486,7 @@ class CellComplex(Complex):
                     for k in d_c:
                         if len(d) == 1:
                             break
-                        else:
-                            self._delete_cell(c, k)
+                        self._delete_cell(c, k)
 
     def degree(self, node: Hashable, rank: int = 1) -> int:
         """Compute the number of cells of certain rank that contain node.
@@ -534,14 +533,13 @@ class CellComplex(Complex):
         if node_set:
             if isinstance(cell, Cell):
                 return len(set(node_set).intersection(set(cell.elements)))
-            elif isinstance(cell, Iterable):
+            if isinstance(cell, Iterable):
                 return len(set(node_set).intersection(set(cell)))
+            return None
 
-        else:
-            if cell in self.cells:
-                return len(cell)
-            else:
-                raise KeyError(f" the key {cell} is not a key for an existing cell ")
+        if cell in self.cells:
+            return len(cell)
+        raise KeyError(f" the key {cell} is not a key for an existing cell ")
 
     def number_of_nodes(self, node_set: Iterable[Hashable] | None = None):
         """Compute number of nodes in node_set belonging to cell complex.
@@ -558,8 +556,7 @@ class CellComplex(Complex):
         """
         if node_set:
             return len([node for node in self.nodes if node in node_set])
-        else:
-            return len(self.nodes)
+        return len(self.nodes)
 
     def number_of_edges(self, edge_set: Iterable[tuple] | None = None) -> int:
         """Compute number of edges in edge_set belonging to cell complex.
@@ -582,8 +579,7 @@ class CellComplex(Complex):
                     if edge in edge_set or edge[::-1] in edge_set
                 ]
             )
-        else:
-            return len(self.edges)
+        return len(self.edges)
 
     def number_of_cells(
         self, cell_set: Iterable[tuple | list | Cell] | None = None
@@ -603,8 +599,7 @@ class CellComplex(Complex):
         """
         if cell_set:
             return len([cell for cell in self.cells if cell in cell_set])
-        else:
-            return len(self.cells)
+        return len(self.cells)
 
     def order(self) -> int:
         """Compute the number of nodes in the cell complex.
@@ -800,14 +795,12 @@ class CellComplex(Complex):
                 raise RuntimeError(
                     "Use `add_node` to insert nodes or zero ranked cells."
                 )
-            elif rank == 1:
+            if rank == 1:
                 if len(cell) != 2:
                     raise ValueError("rank 1 cells (edges) must have exactly two nodes")
                 if len(set(cell)) == 1:
                     raise ValueError(" invalid insertion : self-loops are not allowed.")
-                else:
-                    self.add_edge(cell[0], cell[1], **attr)
-
+                self.add_edge(cell[0], cell[1], **attr)
             elif rank == 2:
                 if isinstance(cell, Iterable):
                     if not isinstance(cell, list):
@@ -1337,19 +1330,15 @@ class CellComplex(Complex):
                 raise KeyError(
                     f"Node '{cell}' does not have an attribute with key {attr_name}."
                 )
+            return container[cell]
 
-            else:
-                return container[cell]
-
-        else:
-            if rank == 0:
-                raise KeyError(f"Node '{cell}' is not present in the complex.")
-            elif rank == 1:
-                raise KeyError(
-                    f"Edge '{cell}' is not present in the complex or does not have two nodes."
-                )
-            else:
-                raise KeyError(f"Cell '{cell}' is not present in the complex.")
+        if rank == 0:
+            raise KeyError(f"Node '{cell}' is not present in the complex.")
+        if rank == 1:
+            raise KeyError(
+                f"Edge '{cell}' is not present in the complex or does not have two nodes."
+            )
+        raise KeyError(f"Cell '{cell}' is not present in the complex.")
 
     def remove_equivalent_cells(self) -> None:
         """Remove equivalent cells.
@@ -1467,8 +1456,7 @@ class CellComplex(Complex):
                     A[ni, cj] = 1
         if index:
             return node_index, all_cell_index, A.asformat("csc")
-        else:
-            return A.asformat("csc")
+        return A.asformat("csc")
 
     def node_to_all_cell_adjacnecy_matrix(
         self, s: int | None = None, weight: str | None = None, index: bool = False
@@ -1522,10 +1510,10 @@ class CellComplex(Complex):
             )
 
             return node_index, incidence_to_adjacency(M.T, s)
-        else:
-            return incidence_to_adjacency(
-                self.node_to_all_cell_incidence_matrix(weight, index).T, s
-            )
+
+        return incidence_to_adjacency(
+            self.node_to_all_cell_incidence_matrix(weight, index).T, s
+        )
 
     def all_cell_to_node_coadjacency_matrix(
         self, s: int | None = None, weight: str | None = None, index: bool = False
@@ -1569,10 +1557,10 @@ class CellComplex(Complex):
             )
 
             return cell_index, incidence_to_adjacency(M, s)
-        else:
-            return incidence_to_adjacency(
-                self.node_to_all_cell_incidence_matrix(weight, index), s
-            )
+
+        return incidence_to_adjacency(
+            self.node_to_all_cell_incidence_matrix(weight, index), s
+        )
 
     def incidence_matrix(
         self,
@@ -1656,15 +1644,13 @@ class CellComplex(Complex):
                 node_index = {node: i for i, node in enumerate(sorted(self._G.nodes))}
                 if signed:
                     return {}, node_index, A.asformat("csr")
-                else:
-                    return {}, node_index, abs(A.asformat("csr"))
-            else:
-                if signed:
-                    return A.asformat("csr")
-                else:
-                    return abs(A.asformat("csr"))
+                return {}, node_index, abs(A.asformat("csr"))
 
-        elif rank == 1:
+            if signed:
+                return A.asformat("csr")
+            return abs(A.asformat("csr"))
+
+        if rank == 1:
             nodelist = sorted(
                 self._G.nodes
             )  # always output boundary matrix in dictionary order
@@ -1681,14 +1667,12 @@ class CellComplex(Complex):
                 edge_index = {tuple(sorted(edge)): i for i, edge in enumerate(edgelist)}
                 if signed:
                     return node_index, edge_index, A.asformat("csr")
-                else:
-                    return node_index, edge_index, abs(A.asformat("csr"))
-            else:
-                if signed:
-                    return A.asformat("csr")
-                else:
-                    return abs(A.asformat("csr"))
-        elif rank == 2:
+                return node_index, edge_index, abs(A.asformat("csr"))
+
+            if signed:
+                return A.asformat("csr")
+            return abs(A.asformat("csr"))
+        if rank == 2:
             edgelist = sorted([sorted(e) for e in self._G.edges])
 
             A = sp.sparse.lil_matrix((len(edgelist), len(self.cells)))
@@ -1724,15 +1708,12 @@ class CellComplex(Complex):
                 cell_index = {c.elements: i for i, c in enumerate(self.cells)}
                 if signed:
                     return edge_index, cell_index, A.asformat("csr")
-                else:
-                    return edge_index, cell_index, abs(A.asformat("csr"))
-            else:
-                if signed:
-                    return A.asformat("csr")
-                else:
-                    return abs(A.asformat("csr"))
-        else:
-            raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
+                return edge_index, cell_index, abs(A.asformat("csr"))
+
+            if signed:
+                return A.asformat("csr")
+            return abs(A.asformat("csr"))
+        raise ValueError(f"Only dimensions 0, 1 and 2 are supported, got {rank}.")
 
     def hodge_laplacian_matrix(
         self,
@@ -1779,16 +1760,14 @@ class CellComplex(Complex):
                 L_hodge = B_next @ B_next.transpose()
                 if signed:
                     return nodelist, L_hodge
-                else:
-                    return nodelist, abs(L_hodge)
-            else:
-                B_next = self.incidence_matrix(rank + 1, weight=weight)
-                L_hodge = B_next @ B_next.transpose()
-                if signed:
-                    return L_hodge
-                else:
-                    return abs(L_hodge)
-        elif rank < 2:  # rank == 1, return L1
+                return nodelist, abs(L_hodge)
+
+            B_next = self.incidence_matrix(rank + 1, weight=weight)
+            L_hodge = B_next @ B_next.transpose()
+            if signed:
+                return L_hodge
+            return abs(L_hodge)
+        if rank < 2:  # rank == 1, return L1
             if self.dim == 2:
                 edge_list, cell_list, B_next = self.incidence_matrix(
                     rank + 1, weight=weight, index=True
@@ -1802,10 +1781,9 @@ class CellComplex(Complex):
                 L_hodge = abs(L_hodge)
             if index:
                 return edge_list, L_hodge
-            else:
-                return L_hodge
+            return L_hodge
 
-        elif rank == 2 and self.dim == 2:
+        if rank == 2 and self.dim == 2:
             edge_list, cell_list, B = self.incidence_matrix(
                 rank, weight=weight, index=True
             )
@@ -1815,17 +1793,16 @@ class CellComplex(Complex):
 
             if index:
                 return cell_list, L_hodge
-            else:
-                return L_hodge
-        elif rank == 2 and self.dim != 2:
+            return L_hodge
+        if rank == 2 and self.dim != 2:
             raise ValueError(
                 "The input complex does not have cells of dim 2. "
                 f"The maximal cell dimension is {self.dim}, got {rank}"
             )
-        else:
-            raise ValueError(
-                f"Rank should be larger than 0 and <= {self.dim} (maximal dimension cells), got {rank}."
-            )
+
+        raise ValueError(
+            f"Rank should be larger than 0 and <= {self.dim} (maximal dimension cells), got {rank}."
+        )
 
     def up_laplacian_matrix(
         self,
@@ -1889,8 +1866,7 @@ class CellComplex(Complex):
 
         if index:
             return row, L_up
-        else:
-            return L_up
+        return L_up
 
     def down_laplacian_matrix(
         self,
@@ -1947,8 +1923,7 @@ class CellComplex(Complex):
             L_down = abs(L_down)
         if index:
             return row, L_down
-        else:
-            return L_down
+        return L_down
 
     def adjacency_matrix(
         self,
@@ -1991,8 +1966,7 @@ class CellComplex(Complex):
 
         if index:
             return ind, incidence_to_adjacency(incidence)
-        else:
-            return incidence_to_adjacency(incidence)
+        return incidence_to_adjacency(incidence)
 
     def coadjacency_matrix(
         self,
@@ -2027,9 +2001,9 @@ class CellComplex(Complex):
         if index:
             _, ind, incidence = self.incidence_matrix(rank, signed=signed, index=True)
             return ind, incidence_to_adjacency(incidence)
-        else:
-            incidence = self.incidence_matrix(rank, signed=signed)
-            return incidence_to_adjacency(incidence)
+
+        incidence = self.incidence_matrix(rank, signed=signed)
+        return incidence_to_adjacency(incidence)
 
     def dirac_operator_matrix(
         self,
@@ -2083,12 +2057,10 @@ class CellComplex(Complex):
             d.update(index2)
             if signed:
                 return d, dirac
-            else:
-                return d, abs(dirac)
+            return d, abs(dirac)
         if signed:
             return dirac
-        else:
-            return abs(dirac)
+        return abs(dirac)
 
     def restrict_to_cells(
         self,
