@@ -22,3 +22,4 @@ The API reference gives an overview of `TopoNetX`, which consists of several mod
    algorithms
    generators
    transform
+   readwrite
