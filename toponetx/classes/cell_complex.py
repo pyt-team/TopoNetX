@@ -81,8 +81,6 @@ class CellComplex(Complex):
     ----------
     cells : iterable, optional
         A list of cells to add to the complex.
-    name : str, optional
-        Name of the complex.
     regular : bool, default=True
         If True, then the complex is regular, otherwise it is non-regular.
     **kwargs : keyword arguments, optional
@@ -138,23 +136,19 @@ class CellComplex(Complex):
     >>> CC.is_regular
     """
 
-    def __init__(
-        self, cells=None, name: str = "", regular: bool = True, **kwargs
-    ) -> None:
+    def __init__(self, cells=None, regular: bool = True, **kwargs) -> None:
         """Initialize a new Cell Complex.
 
         Parameters
         ----------
         cells : iterable, optional
             A list of cells to add to the complex.
-        name : str, optional
-            Name of the complex.
         regular : bool, default=True
             If True, then the complex is regular, otherwise it is non-regular.
         **kwargs : keyword arguments, optional
             Attributes to add to the complex as key=value pairs.
         """
-        super().__init__(name, **kwargs)
+        super().__init__(**kwargs)
 
         self._regular = regular
         self._G = Graph()
@@ -328,7 +322,7 @@ class CellComplex(Complex):
         str
             The __repr__ representation of the Cell Complex.
         """
-        return f"CellComplex(name='{self.name}')"
+        return "CellComplex()"
 
     def __len__(self) -> int:
         """Return number of nodes.
@@ -393,7 +387,7 @@ class CellComplex(Complex):
         # input must be list, tuple or Cell type
         if isinstance(cell, (tuple, list, Cell)):
             if isinstance(cell, (tuple, list)):
-                cell = Cell(elements=cell, name=str(len(self.cells)), **attr)
+                cell = Cell(elements=cell, **attr)
             elif isinstance(cell, Cell):
                 cell.update(attr)
 
@@ -2087,7 +2081,6 @@ class CellComplex(Complex):
         self,
         cell_set: Iterable[Cell | tuple],
         keep_edges: bool = False,
-        name: str = "",
     ):
         """Construct cell complex using a subset of the cells in cell complex.
 
@@ -2099,8 +2092,6 @@ class CellComplex(Complex):
         keep_edges : bool, default=False
             If False, discards edges not required by or included in `cell_set`
             If True, all previous edges are kept.
-        name : str, optional
-            Name of the restricted cell complex.
 
         Returns
         -------
@@ -2119,7 +2110,7 @@ class CellComplex(Complex):
         >>> cx1.cells
         CellView([Cell(1, 2, 3)])
         """
-        CC = CellComplex(cells=self._G.copy(), name=name)
+        CC = CellComplex(cells=self._G.copy())
 
         edges = set()
 
@@ -2157,7 +2148,7 @@ class CellComplex(Complex):
 
         return CC
 
-    def restrict_to_nodes(self, node_set: Iterable[Hashable], name: str = ""):
+    def restrict_to_nodes(self, node_set: Iterable[Hashable]):
         """Restrict cell complex to nodes.
 
         This constructs a new cell complex by restricting the cells in the cell complex to
@@ -2167,8 +2158,6 @@ class CellComplex(Complex):
         ----------
         node_set : iterable of hashables
             The nodes to restrict the cell complex to.
-        name : str, optional
-            Name of the restricted cell complex.
 
         Returns
         -------
@@ -2186,7 +2175,7 @@ class CellComplex(Complex):
         >>> CC.restrict_to_nodes([1, 2, 3, 0])
         """
         _G = Graph(self._G.subgraph(node_set))
-        CC = CellComplex(_G, name)
+        CC = CellComplex(_G)
         cells = []
         for cell in self.cells:
             if CC.is_insertable_cycle(cell, True):
@@ -2351,7 +2340,7 @@ class CellComplex(Complex):
         >>> CX2 = CC.clone()
         """
         _G = self._G.copy()
-        CC = CellComplex(_G, self.name)
+        CC = CellComplex(_G)
         for cell in self.cells:
             CC.add_cell(cell.clone())
         return CC

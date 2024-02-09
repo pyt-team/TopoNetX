@@ -20,8 +20,6 @@ class Simplex(Atom):
     ----------
     elements : Collection
         The nodes in the simplex.
-    name : str, optional
-        A name for the simplex.
     construct_tree : bool, default=True
         If True, construct the entire simplicial tree for the simplex.
     **kwargs : keyword arguments, optional
@@ -43,7 +41,6 @@ class Simplex(Atom):
     def __init__(
         self,
         elements: Collection,
-        name: str = "",
         construct_tree: bool = False,
         **kwargs,
     ) -> None:
@@ -56,8 +53,6 @@ class Simplex(Atom):
         ----------
         elements : Collection
             The nodes in the simplex.
-        name : str, optional
-            A name for the simplex.
         construct_tree : bool, default=True
             If True, construct the entire simplicial tree for the simplex.
         **kwargs : keyword arguments, optional
@@ -85,7 +80,7 @@ class Simplex(Atom):
             if not isinstance(i, Hashable):
                 raise ValueError(f"All nodes of a simplex must be hashable, got {i}")
 
-        super().__init__(frozenset(sorted(elements)), name, **kwargs)
+        super().__init__(frozenset(sorted(elements)), **kwargs)
         if len(elements) != len(self.elements):
             raise ValueError("A simplex cannot contain duplicate nodes.")
 
@@ -229,4 +224,4 @@ class Simplex(Atom):
         Simplex
             A copy of this simplex.
         """
-        return Simplex(self.elements, name=self.name, **self._attributes)
+        return Simplex(self.elements, **self._attributes)

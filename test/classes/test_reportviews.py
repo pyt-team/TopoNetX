@@ -275,7 +275,7 @@ class TestReportViews_HyperEdgeView:
 
     def test_hyper_edge_view_contains(self):
         """Test the __contains__ method for the Hyperedge View Class."""
-        hev = HyperEdgeView(name="testing_hev")
+        hev = HyperEdgeView()
 
         he_1 = HyperEdge((1, 2, 3, 4), rank=2)
         he_2 = HyperEdge({1, 2, 3, 5}, rank=2)
@@ -654,17 +654,17 @@ class TestReportViews_PathView:
     """Test the PathView class of the ReportViews module."""
 
     path_1 = Path((1,), name="path_1", weight=5)
-    path_2 = Path((1, 2), name="path_2", weight=10)
-    path_3 = Path((1, 2, 3), name="path_3")
+    path_2 = Path((1, 2), weight=10)
+    path_3 = Path((1, 2, 3))
 
     pc = PathComplex([path_1, path_2, path_3])
     path_view = pc.paths
 
     def test_get_item(self):
         """Test the __getitem__ method of the PathView class."""
-        assert self.path_view.__getitem__((1,)) == {"weight": 5}
-        assert self.path_view.__getitem__(1) == {"weight": 5}
-        assert self.path_view.__getitem__(Path(1)) == {"weight": 5}
+        assert self.path_view.__getitem__((1,)) == {"name": "path_1", "weight": 5}
+        assert self.path_view.__getitem__(1) == {"name": "path_1", "weight": 5}
+        assert self.path_view.__getitem__(Path(1)) == {"name": "path_1", "weight": 5}
         assert self.path_view.__getitem__((2, 3)) == {}
         assert self.path_view.__getitem__((1, 2)) == {"weight": 10}
         assert self.path_view.__getitem__((1, 2, 3)) == {}

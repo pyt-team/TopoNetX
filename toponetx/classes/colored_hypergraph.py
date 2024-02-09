@@ -27,8 +27,6 @@ class ColoredHyperGraph(Complex):
     ----------
     cells : Collection, optional
         The initial collection of cells in the Colored Hypergraph.
-    name : str, optional
-        An identifiable name for the Colored Hypergraph.
     ranks : Collection, optional
         Represents the color of cells.
     **kwargs : keyword arguments, optional
@@ -38,7 +36,6 @@ class ColoredHyperGraph(Complex):
     def __init__(
         self,
         cells: Collection | None = None,
-        name: str = "",
         ranks: Collection | int | None = None,
         **kwargs,
     ) -> None:
@@ -56,8 +53,6 @@ class ColoredHyperGraph(Complex):
         ----------
         cells : Collection, optional
             The initial collection of cells in the Colored Hypergraph.
-        name : str, optional
-            An identifiable name for the Colored Hypergraph.
         ranks : Collection, optional
             Represents the color of cells.
         **kwargs : keyword arguments, optional
@@ -97,7 +92,6 @@ class ColoredHyperGraph(Complex):
         """
         super().__init__(**kwargs)
 
-        self.name = name
         self._complex_set = ColoredHyperEdgeView()
 
         if cells is not None:
@@ -247,7 +241,7 @@ class ColoredHyperGraph(Complex):
         str
             A string representation.
         """
-        return f"ColoredHyperGraph(name='{self.name}')"
+        return "ColoredHyperGraph()"
 
     def __len__(self) -> int:
         """Return the number of nodes in the colored hypergraph.
@@ -1464,40 +1458,28 @@ class ColoredHyperGraph(Complex):
         """
         raise NotImplementedError()
 
-    def restrict_to_cells(self, cell_set, name: str | None = None):
+    def restrict_to_cells(self, cell_set):
         """Construct a Colored Hypergraph using a subset of the cells.
 
         Parameters
         ----------
         cell_set : hashable
             A subset of elements of the Colored Hypergraph cells.
-        name : str, optional
-            An identifiable name for the new Colored Hypergraph.
 
         Returns
         -------
         ColoredHyperGraph
             The Colored Hypergraph constructed from the specified subset of cells.
         """
-        from toponetx.classes.combinatorial_complex import CombinatorialComplex
-
-        if isinstance(self, ColoredHyperGraph) and not isinstance(
-            self, CombinatorialComplex
-        ):
-            chg = ColoredHyperGraph(name)
-        elif isinstance(self, CombinatorialComplex):
-            chg = CombinatorialComplex(name)
-        valid_cells = []
-        for c in cell_set:
-            if c in self.cells:
-                valid_cells.append(c)
+        chg = self.__class__()
+        valid_cells = [c for c in cell_set if c in self.cells]
         for c in valid_cells:
             if not isinstance(c, Iterable):
                 raise ValueError(f"each element in cell_set must be Iterable, got {c}")
             chg.add_cell(c, rank=self.cells.get_rank(c))
         return chg
 
-    def restrict_to_nodes(self, node_set, name: str | None = None):
+    def restrict_to_nodes(self, node_set):
         """Restrict to a set of nodes.
 
         Constructs a new Colored Hypergraph by restricting the
@@ -1508,22 +1490,13 @@ class ColoredHyperGraph(Complex):
         ----------
         node_set : iterable of hashables
             References a subset of elements of self.nodes.
-        name : str, optional
-            An identifiable name for the new Colored Hypergraph.
 
         Returns
         -------
         ColoredHyperGraph
             A new Colored Hypergraph restricted to the specified node_set.
         """
-        from toponetx.classes.combinatorial_complex import CombinatorialComplex
-
-        if isinstance(self, ColoredHyperGraph) and not isinstance(
-            self, CombinatorialComplex
-        ):
-            chg = ColoredHyperGraph(name)
-        elif isinstance(self, CombinatorialComplex):
-            chg = CombinatorialComplex(name)
+        chg = self.__class__()
         node_set = frozenset(node_set)
         for i in self.ranks:
             if i != 0:
@@ -1609,7 +1582,7 @@ class ColoredHyperGraph(Complex):
         ColoredHyperGraph
             ColoredHyperGraph.
         """
-        CHG = ColoredHyperGraph(name=self.name)
+        CHG = ColoredHyperGraph()
         for cell, key in self.cells:
             CHG.add_cell(cell, key=key, rank=self.cells.get_rank(cell))
         return CHG

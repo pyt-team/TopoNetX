@@ -795,8 +795,8 @@ class TestCellComplex:
 
     def test_repr(self):
         """Test the string representation of the cell complex."""
-        CC = CellComplex(name="test")
-        assert repr(CC) == "CellComplex(name='test')"
+        CC = CellComplex()
+        assert repr(CC) == "CellComplex()"
 
     def test_len(self):
         """Test the length of the cell complex."""

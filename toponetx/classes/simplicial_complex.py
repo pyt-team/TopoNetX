@@ -69,8 +69,6 @@ class SimplicialComplex(Complex):
     ----------
     simplices : iterable, optional
         Iterable of maximal simplices that define the simplicial complex.
-    name : str, optional
-        If None then a placeholder '' will be inserted as name.
     **kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
@@ -105,19 +103,17 @@ class SimplicialComplex(Complex):
     4
     """
 
-    def __init__(self, simplices=None, name: str = "", **kwargs) -> None:
+    def __init__(self, simplices=None, **kwargs) -> None:
         """Initialize the simplicial complex.
 
         Parameters
         ----------
         simplices : iterable, optional
             Iterable of maximal simplices that define the simplicial complex.
-        name : str, optional
-            If None then a placeholder '' will be inserted as name.
         **kwargs : keyword arguments, optional
             Attributes to add to the complex as key=value pairs.
         """
-        super().__init__(name, **kwargs)
+        super().__init__(**kwargs)
 
         self._simplex_set = SimplexView()
 
@@ -296,9 +292,9 @@ class SimplicialComplex(Complex):
         Returns
         -------
         str
-            A string representation containing the name of the simplicial complex.
+            A string representation of the simplicial complex.
         """
-        return f"SimplicialComplex(name='{self.name}')"
+        return "SimplicialComplex()"
 
     def __len__(self) -> int:
         """Compute number of simplices.
@@ -1347,7 +1343,7 @@ class SimplicialComplex(Complex):
 
         self.add_simplices_from(_simplices)
 
-    def restrict_to_simplices(self, cell_set, name: str = "") -> "SimplicialComplex":
+    def restrict_to_simplices(self, cell_set) -> "SimplicialComplex":
         """Construct a simplicial complex using a subset of the simplices.
 
         Parameters
@@ -1355,8 +1351,6 @@ class SimplicialComplex(Complex):
         cell_set : iterable of hashables or simplices
             A subset of elements of the simplicial complex that should be in the new
             simplicial complex.
-        name : str, optional
-            Name of the restricted simplicial complex.
 
         Returns
         -------
@@ -1378,9 +1372,9 @@ class SimplicialComplex(Complex):
             if cell in self:
                 rns.append(cell)
 
-        return SimplicialComplex(simplices=rns, name=name)
+        return SimplicialComplex(simplices=rns)
 
-    def restrict_to_nodes(self, node_set, name: str = ""):
+    def restrict_to_nodes(self, node_set):
         """Construct a new simplicial complex by restricting the simplices.
 
         The simplices are restricted to the nodes referenced by node_set.
@@ -1389,8 +1383,6 @@ class SimplicialComplex(Complex):
         ----------
         node_set : iterable of hashables
             A subset of nodes of the simplicial complex to restrict to.
-        name : str, optional
-            Name of the restricted simplicial complex.
 
         Returns
         -------
@@ -1415,7 +1407,7 @@ class SimplicialComplex(Complex):
                     simplices.append(s)
         all_sim = simplices + [frozenset({i}) for i in node_set if i in self.nodes]
 
-        return SimplicialComplex(all_sim, name=name)
+        return SimplicialComplex(all_sim)
 
     def get_all_maximal_simplices(self):
         """Get all maximal simplices of this simplicial complex.
@@ -1739,7 +1731,7 @@ class SimplicialComplex(Complex):
         >>> SC[(1, 2)]["weight"]
         2
         """
-        return cls(G, name=G.name)
+        return cls(G)
 
     def is_connected(self) -> bool:
         """Check if the simplicial complex is connected.
@@ -1867,4 +1859,4 @@ class SimplicialComplex(Complex):
         SimplicialComplex
             A shallow copy of this simplicial complex.
         """
-        return SimplicialComplex(self.simplices, name=self.name)
+        return SimplicialComplex(self.simplices)

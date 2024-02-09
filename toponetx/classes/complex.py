@@ -15,8 +15,6 @@ class Atom(abc.ABC):
     ----------
     elements : Collection[Hashable]
         The elements in the atom.
-    name : str, optional
-        Name of the atom.
     **kwargs : keyword arguments, optional
         Additional attributes to be associated with the atom.
     """
@@ -24,22 +22,17 @@ class Atom(abc.ABC):
     elements: Collection[Hashable]
     name: str
 
-    def __init__(
-        self, elements: Collection[Hashable], name: str = "", **kwargs
-    ) -> None:
+    def __init__(self, elements: Collection[Hashable], **kwargs) -> None:
         """Abstract class representing an atom in a complex.
 
         Parameters
         ----------
         elements : Collection[Hashable]
             The elements in the atom.
-        name : str, optional
-            Name of the atom.
         **kwargs : keyword arguments, optional
             Additional attributes to be associated with the atom.
         """
         self.elements = elements
-        self.name = name
 
         self._attributes = {}
         self._attributes.update(kwargs)
@@ -153,8 +146,6 @@ class Complex(abc.ABC):
 
     Parameters
     ----------
-    name : str, optional
-        Name of the complex.
     **kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
@@ -166,17 +157,14 @@ class Complex(abc.ABC):
 
     complex: dict[Any, Any]
 
-    def __init__(self, name: str = "", **kwargs) -> None:
+    def __init__(self, **kwargs) -> None:
         """Initialize a new instance of the Complex class.
 
         Parameters
         ----------
-        name : str, optional
-            Name of the complex.
         **kwargs : keyword arguments, optional
             Attributes to add to the complex as key=value pairs.
         """
-        self.name = name
         self.complex = {}
         self.complex.update(kwargs)
 
