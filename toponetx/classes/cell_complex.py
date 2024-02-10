@@ -1164,10 +1164,8 @@ class CellComplex(Complex):
                                 self.cells[cell][i][name] = value
                         else:
                             self.cells[cell][name] = value
-
                     except KeyError:
                         pass
-
             else:
                 for cell, d in values.items():
                     try:
@@ -2161,10 +2159,7 @@ class CellComplex(Complex):
         """
         _G = Graph(self._G.subgraph(node_set))
         CC = CellComplex(_G)
-        cells = []
-        for cell in self.cells:
-            if CC.is_insertable_cycle(cell, True):
-                cells.append(cell)
+        cells = [cell for cell in self.cells if CC.is_insertable_cycle(cell, True)]
         CC = CellComplex(_G)
 
         for cell in cells:
@@ -2255,23 +2250,24 @@ class CellComplex(Complex):
         from hypernetx.classes.entity import EntitySet
 
         cells = []
-        for cell in self.cells:
-            cells.append(
-                Entity(
-                    str(list(cell.elements)),
-                    elements=cell.elements,
-                    **self.get_cell_data(cell, 2),
-                )
+        cells.extend(
+            Entity(
+                str(list(cell.elements)),
+                elements=cell.elements,
+                **self.get_cell_data(cell, 2),
             )
-        for cell in self.edges:
-            cells.append(
-                Entity(str(list(cell)), elements=cell, **self.get_cell_data(cell, 1))
-            )
+            for cell in self.cells
+        )
+        cells.extend(
+            Entity(str(list(cell)), elements=cell, **self.get_cell_data(cell, 1))
+            for cell in self.edges
+        )
         E = EntitySet("CX_to_HG", elements=cells)
         HG = Hypergraph(E)
-        nodes = []
-        for cell in self.nodes:
-            nodes.append(Entity(cell, elements=[], **self.get_cell_data(cell, 0)))
+        nodes = [
+            Entity(cell, elements=[], **self.get_cell_data(cell, 0))
+            for cell in self.nodes
+        ]
         HG._add_nodes_from(nodes)
         return HG
 

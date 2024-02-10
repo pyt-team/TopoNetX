@@ -1130,11 +1130,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC.add_cell([9], rank=0)
         >>> CCC.singletons()
         """
-        singletons = []
-        for k in self.skeleton(0):
-            if self.degree(tuple(k)[0], None) == 0:
-                singletons.append(k)
-        return singletons
+        return [k for k in self.skeleton(0) if self.degree(tuple(k)[0], None) == 0]
 
     def remove_singletons(self):
         """Construct new CCC with singleton cells removed.

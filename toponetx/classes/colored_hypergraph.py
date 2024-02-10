@@ -1544,9 +1544,9 @@ class ColoredHyperGraph(Complex):
         for cell in self.cells:
             zero_elements = cell[0]
             if len(zero_elements) == 1:
-                for n in zero_elements:
-                    if self.degree(n, None) == 1:
-                        singletons.append(cell)
+                singletons.extend(
+                    cell for n in zero_elements if self.degree(n, None) == 1
+                )
         return singletons
 
     def remove_singletons(self):

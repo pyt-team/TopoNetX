@@ -331,9 +331,11 @@ class ColoredHyperEdgeView(AtomView):
             if r == 0:
                 continue
 
-            for he in self.hyperedge_dict[r]:
-                for k in self.hyperedge_dict[r][he]:
-                    lst.append((he, k))
+            lst.extend(
+                (he, k)
+                for he in self.hyperedge_dict[r]
+                for k in self.hyperedge_dict[r][he]
+            )
         return iter(lst)
 
     def __contains__(self, atom: Any) -> bool:

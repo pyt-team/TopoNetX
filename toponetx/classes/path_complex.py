@@ -778,10 +778,9 @@ class PathComplex(Complex):
         if len(node_set) == 0:
             raise ValueError("Input node_set cannot be empty.")
         node_set = set(node_set)
-        new_paths = []
-        for path in self.paths:
-            if all(node in node_set for node in path):
-                new_paths.append(path)
+        new_paths = [
+            path for path in self.paths if all(node in node_set for node in path)
+        ]
         return PathComplex(new_paths)
 
     def restrict_to_paths(self, path_set: Iterable[Sequence[Hashable]]):
@@ -806,16 +805,11 @@ class PathComplex(Complex):
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
         """
-        new_path_set = []
         if len(path_set) == 0:
             raise ValueError("Input path_set cannot be empty.")
-        for path in path_set:
-            new_path_set.append(tuple(path))
+        new_path_set = [tuple(path) for path in path_set]
         new_path_set = set(new_path_set)
-        new_paths = []
-        for path in self.paths:
-            if path in new_path_set:
-                new_paths.append(path)
+        new_paths = [path for path in self.paths if path in new_path_set]
         return PathComplex(new_paths)
 
     def get_node_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
