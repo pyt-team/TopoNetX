@@ -893,7 +893,9 @@ class CombinatorialComplex(ColoredHyperGraph):
             raise ValueError("rank must be lesser than via_rank, must be r<k, got r>k")
         return super().adjacency_matrix(rank, via_rank, s, index)
 
-    def coadjacency_matrix(self, rank, via_rank, s: int = None, index: bool = False):
+    def coadjacency_matrix(
+        self, rank, via_rank, s: int | None = None, index: bool = False
+    ):
         """Compute the coadjacency matrix of self.
 
         The sparse weighted :term:`s-coadjacency matrix`
@@ -1098,9 +1100,10 @@ class CombinatorialComplex(ColoredHyperGraph):
     def clone(self) -> "CombinatorialComplex":
         """Return a copy of the simplex.
 
-        The clone method by default returns an independent shallow copy of the simplex and attributes. That is, if an
-        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
-        for new containers.
+        The clone method by default returns an independent shallow copy of the simplex
+        and attributes. That is, if an attribute is a container, that container is
+        shared by the original and the copy. Use Python's `copy.deepcopy` for new
+        containers.
 
         Returns
         -------
@@ -1130,7 +1133,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC.add_cell([9], rank=0)
         >>> CCC.singletons()
         """
-        return [k for k in self.skeleton(0) if self.degree(tuple(k)[0], None) == 0]
+        return [k for k in self.skeleton(0) if self.degree(next(iter(k)), None) == 0]
 
     def remove_singletons(self):
         """Construct new CCC with singleton cells removed.

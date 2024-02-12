@@ -1715,7 +1715,7 @@ class SimplicialComplex(Complex):
             edge = list(edge)
             G.add_edge(edge[0], edge[1])
         for node in self.skeleton(0):
-            G.add_node(list(node)[0])
+            G.add_node(next(iter(node)))
         return nx.is_connected(G)
 
     @classmethod
@@ -1814,8 +1814,8 @@ class SimplicialComplex(Complex):
     def clone(self) -> "SimplicialComplex":
         """Return a copy of the simplicial complex.
 
-        The clone method by default returns an independent shallow copy of the simplicial complex. Use Python’s
-        `copy.deepcopy` for new containers.
+        The clone method by default returns an independent shallow copy of the
+        simplicial complex. Use Python's `copy.deepcopy` for new containers.
 
         Returns
         -------

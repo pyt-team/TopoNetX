@@ -161,7 +161,7 @@ def write_atomlist(
     domain : CellComplex or SimplicialComplex
         The complex to be converted to an atom list.
     path : file or str
-        File or filename to write. If a file is provided, it must be opened in ‘wb’
+        File or filename to write. If a file is provided, it must be opened in `wb`
         mode. Filenames ending in .gz or .bz2 will be compressed.
     encoding : str, default="utf-8"
        Specify which encoding to use when writing file.
@@ -202,7 +202,7 @@ def load_from_atomlist(
     Parameters
     ----------
     path : file or str
-        File or filename to read. If a file is provided, it must be opened in ‘rb’
+        File or filename to read. If a file is provided, it must be opened in `rb`
         mode. Filenames ending in .gz or .bz2 will be uncompressed.
     complex_type : {"cell", "simplicial"}
         The type of complex that should be constructed based on the atom list.

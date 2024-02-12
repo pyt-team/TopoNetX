@@ -379,8 +379,8 @@ class PathComplex(Complex):
     def clone(self) -> "PathComplex":
         """Return a copy of the path complex.
 
-        The clone method by default returns an independent shallow copy of the path complex. Use Python’s
-        `copy.deepcopy` for new containers.
+        The clone method by default returns an independent shallow copy of the path
+        complex. Use Python's `copy.deepcopy` for new containers.
 
         Returns
         -------

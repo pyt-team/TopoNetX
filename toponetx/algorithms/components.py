@@ -103,7 +103,7 @@ def s_connected_components(
             if isinstance(domain, CellComplex):
                 yield {node_dict[n] for n in c}
             else:
-                yield {tuple(node_dict[n])[0] for n in c}
+                yield {next(iter(node_dict[n])) for n in c}
 
 
 def s_component_subcomplexes(

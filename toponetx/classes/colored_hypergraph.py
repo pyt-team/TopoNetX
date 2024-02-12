@@ -518,7 +518,7 @@ class ColoredHyperGraph(Complex):
         for node in node_set:
             if isinstance(node, Hashable):
                 if isinstance(node, HyperEdge):
-                    copy_set.add(list(node.elements)[0])
+                    copy_set.add(next(iter(node.elements)))
                 else:
                     copy_set.add(node)
                 if node not in self.nodes:
@@ -806,7 +806,7 @@ class ColoredHyperGraph(Complex):
         'blue'
         """
         return {
-            tuple(node)[0]: self.nodes[node][name]
+            next(iter(node)): self.nodes[node][name]
             for node in self.nodes
             if name in self.nodes[node]
         }
@@ -1075,7 +1075,7 @@ class ColoredHyperGraph(Complex):
         self,
         rank,
         to_rank,
-        weight: bool = None,
+        weight: bool | None = None,
         sparse: bool = True,
         index: bool = False,
     ):
@@ -1276,7 +1276,9 @@ class ColoredHyperGraph(Complex):
 
         return A
 
-    def all_cell_to_node_coadjacency_matrix(self, index: bool = False, s: int = None):
+    def all_cell_to_node_coadjacency_matrix(
+        self, index: bool = False, s: int | None = None
+    ):
         """Compute the cell co-adjacency matrix.
 
         Parameters
@@ -1299,7 +1301,9 @@ class ColoredHyperGraph(Complex):
             return B[1], A
         return incidence_to_adjacency(B, s=s)
 
-    def node_to_all_cell_adjacnecy_matrix(self, index: bool = False, s: int = None):
+    def node_to_all_cell_adjacnecy_matrix(
+        self, index: bool = False, s: int | None = None
+    ):
         """Compute the node/all cell adjacency matrix.
 
         Parameters
@@ -1563,9 +1567,10 @@ class ColoredHyperGraph(Complex):
     def clone(self) -> "ColoredHyperGraph":
         """Return a copy of the simplex.
 
-        The clone method by default returns an independent shallow copy of the simplex and attributes. That is, if an
-        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
-        for new containers.
+        The clone method by default returns an independent shallow copy of the simplex
+        and attributes. That is, if an attribute is a container, that container is
+        shared by the original and the copy. Use Python's `copy.deepcopy` for new
+        containers.
 
         Returns
         -------

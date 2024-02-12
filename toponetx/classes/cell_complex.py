@@ -167,7 +167,7 @@ class CellComplex(Complex):
                         if len(cell) == 2:
                             self.add_cell(cell, rank=1)
                         elif len(cell) == 1:
-                            self.add_node(tuple(cell)[0])
+                            self.add_node(next(iter(cell)))
                         else:
                             self.add_cell(cell, rank=2)
 
