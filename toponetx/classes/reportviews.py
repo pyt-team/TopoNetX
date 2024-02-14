@@ -126,7 +126,7 @@ class CellView(AtomView[Cell]):
             ]
 
         # If a tuple or list is passed in, assume it represents a cell
-        elif isinstance(cell, tuple | list):
+        if isinstance(cell, tuple | list):
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
@@ -171,7 +171,7 @@ class CellView(AtomView[Cell]):
             return [self._cells[cell.elements][c] for c in self._cells[cell.elements]]
 
         # If a tuple or list is passed in, assume it represents a cell
-        elif isinstance(cell, tuple | list):
+        if isinstance(cell, tuple | list):
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
@@ -330,10 +330,12 @@ class ColoredHyperEdgeView(AtomView):
         for r in self.hyperedge_dict:
             if r == 0:
                 continue
-            else:
-                for he in self.hyperedge_dict[r]:
-                    for k in self.hyperedge_dict[r][he]:
-                        lst.append((he, k))
+
+            lst.extend(
+                (he, k)
+                for he in self.hyperedge_dict[r]
+                for k in self.hyperedge_dict[r][he]
+            )
         return iter(lst)
 
     def __contains__(self, atom: Any) -> bool:
@@ -383,21 +385,20 @@ class ColoredHyperEdgeView(AtomView):
         ):
             if len(hyperedge_elements) == 0:
                 return False
-            else:
-                for i in all_ranks:
-                    if frozenset(hyperedge_elements) in self.hyperedge_dict[i]:
-                        return (
-                            key in self.hyperedge_dict[i][frozenset(hyperedge_elements)]
-                        )
-                return False
-        elif isinstance(hyperedge_elements, HyperEdge):
+
+            for i in all_ranks:
+                if frozenset(hyperedge_elements) in self.hyperedge_dict[i]:
+                    return key in self.hyperedge_dict[i][frozenset(hyperedge_elements)]
+            return False
+        if isinstance(hyperedge_elements, HyperEdge):
             if len(hyperedge_elements) == 0:
                 return False
-            else:
-                for i in all_ranks:
-                    if frozenset(hyperedge_elements.elements) in self.hyperedge_dict[i]:
-                        return True
-                return False
+
+            for i in all_ranks:
+                if frozenset(hyperedge_elements.elements) in self.hyperedge_dict[i]:
+                    return True
+            return False
+        return None
 
     def __repr__(self) -> str:
         """Return string representation of hyperedges.
@@ -436,6 +437,7 @@ class ColoredHyperEdgeView(AtomView):
         """
         if rank not in self.hyperedge_dict:
             return []
+
         if store_hyperedge_key:
             return sorted(
                 [
@@ -444,14 +446,14 @@ class ColoredHyperEdgeView(AtomView):
                     for k in self.hyperedge_dict[rank][he]
                 ]
             )
-        else:
-            return sorted(
-                [
-                    he
-                    for he in self.hyperedge_dict[rank]
-                    for k in self.hyperedge_dict[rank][he]
-                ]
-            )
+
+        return sorted(
+            [
+                he
+                for he in self.hyperedge_dict[rank]
+                for k in self.hyperedge_dict[rank][he]
+            ]
+        )
 
     def get_rank(self, edge):
         """Get the rank of a given hyperedge.
@@ -469,29 +471,28 @@ class ColoredHyperEdgeView(AtomView):
         if isinstance(edge, HyperEdge):
             if len(edge) == 0:
                 return 0
-            else:
-                for i in list(self.allranks):
-                    if frozenset(edge.elements) in self.hyperedge_dict[i]:
-                        return i
-                raise KeyError(f"hyperedge {edge.elements} is not in the complex")
-        elif isinstance(edge, str):
+
+            for i in list(self.allranks):
+                if frozenset(edge.elements) in self.hyperedge_dict[i]:
+                    return i
+            raise KeyError(f"hyperedge {edge.elements} is not in the complex")
+        if isinstance(edge, str):
             if frozenset({edge}) in self.hyperedge_dict[0]:
                 return 0
-            else:
-                raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
-        elif isinstance(edge, Iterable):
+            raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
+        if isinstance(edge, Iterable):
             if len(edge) == 0:
                 return 0
-            else:
-                for i in list(self.allranks):
-                    if frozenset(edge) in self.hyperedge_dict[i]:
-                        return i
-                raise KeyError(f"hyperedge {edge} is not in the complex")
-        elif isinstance(edge, Hashable) and not isinstance(edge, Iterable):
+
+            for i in list(self.allranks):
+                if frozenset(edge) in self.hyperedge_dict[i]:
+                    return i
+            raise KeyError(f"hyperedge {edge} is not in the complex")
+        if isinstance(edge, Hashable) and not isinstance(edge, Iterable):
             if frozenset({edge}) in self.hyperedge_dict[0]:
                 return 0
-            else:
-                raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
+            raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
+        return None
 
     @property
     def allranks(self) -> list[int]:
@@ -619,18 +620,18 @@ class HyperEdgeView(AtomView):
         if isinstance(atom, HyperEdge):
             if len(atom) == 0:
                 return False
-            else:
-                for i in all_ranks:
-                    if frozenset(atom.elements) in self.hyperedge_dict[i]:
-                        return True
-                return False
-        elif isinstance(atom, Iterable):
+
+            for i in all_ranks:
+                if frozenset(atom.elements) in self.hyperedge_dict[i]:
+                    return True
+            return False
+        if isinstance(atom, Iterable):
             if len(atom) == 0:
                 return False
-            else:
-                return any(frozenset(atom) in self.hyperedge_dict[i] for i in all_ranks)
-        elif isinstance(atom, Hashable):
+            return any(frozenset(atom) in self.hyperedge_dict[i] for i in all_ranks)
+        if isinstance(atom, Hashable):
             return frozenset({atom}) in self.hyperedge_dict[0]
+        return None
 
     def __repr__(self) -> str:
         """Return string representation of hyperedges.
@@ -684,41 +685,34 @@ class HyperEdgeView(AtomView):
         if level == "equal":
             if rank in self.allranks:
                 return sorted(self.hyperedge_dict[rank].keys())
-            else:
-                return []
-
-        elif level in {"upper", "up"}:
+            return []
+        if level in {"upper", "up"}:
             elements = []
             for rank_i in self.allranks:
                 if rank_i > rank:
                     elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
-
-        elif level in {"lower", "down"}:
+        if level in {"lower", "down"}:
             elements = []
             for rank_i in self.allranks:
                 if rank_i < rank:
                     elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
-
-        elif level in {"uppereq", "upeq"}:
+        if level in {"uppereq", "upeq"}:
             elements = []
             for rank_i in self.allranks:
                 if rank_i >= rank:
                     elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
-
-        elif level in {"lowereq", "downeq"}:
+        if level in {"lowereq", "downeq"}:
             elements = []
             for rank_i in self.allranks:
                 if rank_i <= rank:
                     elements = elements + list(self.hyperedge_dict[rank_i].keys())
             return sorted(elements)
-
-        else:
-            raise ValueError(
-                "level must be 'equal', 'uppereq', 'lowereq', 'upeq', 'downeq', 'uppereq', 'lower', 'up', or 'down'  "
-            )
+        raise ValueError(
+            "level must be 'equal', 'uppereq', 'lowereq', 'upeq', 'downeq', 'uppereq', 'lower', 'up', or 'down'"
+        )
 
     def get_rank(self, edge):
         """Get the rank of a hyperedge.
@@ -736,29 +730,28 @@ class HyperEdgeView(AtomView):
         if isinstance(edge, HyperEdge):
             if len(edge) == 0:
                 return 0
-            else:
-                for i in list(self.allranks):
-                    if frozenset(edge.elements) in self.hyperedge_dict[i]:
-                        return i
-                raise KeyError(f"hyperedge {edge.elements} is not in the complex")
-        elif isinstance(edge, str):
+
+            for i in list(self.allranks):
+                if frozenset(edge.elements) in self.hyperedge_dict[i]:
+                    return i
+            raise KeyError(f"hyperedge {edge.elements} is not in the complex")
+        if isinstance(edge, str):
             if frozenset({edge}) in self.hyperedge_dict[0]:
                 return 0
-            else:
-                raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
-        elif isinstance(edge, Iterable):
+            raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
+        if isinstance(edge, Iterable):
             if len(edge) == 0:
                 return 0
-            else:
-                for i in list(self.allranks):
-                    if frozenset(edge) in self.hyperedge_dict[i]:
-                        return i
-                raise KeyError(f"hyperedge {edge} is not in the complex")
-        elif isinstance(edge, Hashable) and not isinstance(edge, Iterable):
+
+            for i in list(self.allranks):
+                if frozenset(edge) in self.hyperedge_dict[i]:
+                    return i
+            raise KeyError(f"hyperedge {edge} is not in the complex")
+        if isinstance(edge, Hashable) and not isinstance(edge, Iterable):
             if frozenset({edge}) in self.hyperedge_dict[0]:
                 return 0
-            else:
-                raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
+            raise KeyError(f"hyperedge {frozenset({edge})} is not in the complex")
+        return None
 
     @property
     def allranks(self):
@@ -861,15 +854,15 @@ class SimplexView(AtomView[Simplex]):
         if isinstance(simplex, Simplex):
             if simplex.elements in self.faces_dict[len(simplex) - 1]:
                 return self.faces_dict[len(simplex) - 1][simplex.elements]
-        elif isinstance(simplex, Iterable):
+            return None
+        if isinstance(simplex, Iterable):
             simplex = frozenset(simplex)
             if simplex in self.faces_dict[len(simplex) - 1]:
                 return self.faces_dict[len(simplex) - 1][simplex]
-            else:
-                raise KeyError(f"input {simplex} is not in the simplex dictionary")
-
-        elif isinstance(simplex, Hashable) and frozenset({simplex}) in self:
+            raise KeyError(f"input {simplex} is not in the simplex dictionary")
+        if isinstance(simplex, Hashable) and frozenset({simplex}) in self:
             return self.faces_dict[0][frozenset({simplex})]
+        return None
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -943,7 +936,7 @@ class SimplexView(AtomView[Simplex]):
             if not 0 < len(atom) <= self.max_dim + 1:
                 return False
             return atom in self.faces_dict[len(atom) - 1]
-        elif isinstance(atom, Hashable):
+        if isinstance(atom, Hashable):
             return frozenset({atom}) in self.faces_dict[0]
         return False
 
@@ -1052,14 +1045,12 @@ class NodeView:
             if cell in self.nodes:
                 if self.colored_nodes:
                     return self.nodes[cell][0]
-                else:
-                    return self.nodes[cell]
+                return self.nodes[cell]
         elif isinstance(cell, Hashable):
             if cell in self:
                 if self.colored_nodes:
                     return self.nodes[frozenset({cell})][0]
-                else:
-                    return self.nodes[frozenset({cell})]
+                return self.nodes[frozenset({cell})]
 
         raise KeyError(f"input {cell} is not in the node set of the complex")
 
@@ -1088,15 +1079,13 @@ class NodeView:
         """
         if isinstance(e, Hashable) and not isinstance(e, self.cell_type):
             return frozenset({e}) in self.nodes
-
-        elif isinstance(e, self.cell_type):
+        if isinstance(e, self.cell_type):
             return e.elements in self.nodes
-
-        elif isinstance(e, Iterable):
+        if isinstance(e, Iterable):
             if len(e) == 1:
                 return frozenset(e) in self.nodes
-        else:
-            return False
+            return None
+        return False
 
 
 class PathView(SimplexView):
@@ -1156,12 +1145,12 @@ class PathView(SimplexView):
             if not 0 < len(atom) <= self.max_dim + 1:
                 return False
             return atom in self.faces_dict[len(atom) - 1]
-        elif isinstance(atom, Path):
+        if isinstance(atom, Path):
             atom = atom.elements
             if not 0 < len(atom) <= self.max_dim + 1:
                 return False
             return atom in self.faces_dict[len(atom) - 1]
-        elif isinstance(atom, Hashable):
+        if isinstance(atom, Hashable):
             return (atom,) in self.faces_dict[0]
         return False
 

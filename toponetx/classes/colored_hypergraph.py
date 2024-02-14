@@ -118,13 +118,8 @@ class ColoredHyperGraph(Complex):
                             self.add_cell(cell, rank=cell.rank)
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-                        if len(cells) != len(ranks):
-                            raise ValueError(
-                                "cells and ranks must have equal number of elements"
-                            )
-                        else:
-                            for cell, color in zip(cells, ranks):
-                                self.add_cell(cell, color)
+                        for cell, color in zip(cells, ranks, strict=True):
+                            self.add_cell(cell, color)
                 if isinstance(cells, Iterable) and isinstance(ranks, int):
                     for cell in cells:
                         self.add_cell(cell, ranks)
@@ -440,28 +435,26 @@ class ColoredHyperGraph(Complex):
                             if len(x) >= s
                         ]
                     )
-                else:
-                    raise RuntimeError(
-                        f"There are no cells in the colored hypergraph with rank {rank}"
-                    )
 
-            else:
-                raise ValueError("Rank must be positive")
-        elif rank is None:
+                raise RuntimeError(
+                    f"There are no cells in the colored hypergraph with rank {rank}"
+                )
+
+            raise ValueError("Rank must be positive")
+        if rank is None:
             rank_list = self._complex_set.hyperedge_dict.keys()
             value = 0
             for rank in rank_list:
                 if rank == 0:
                     continue
-                else:
-                    value += sum(
-                        len(self._complex_set.hyperedge_dict[rank][x])
-                        if node in x
-                        else 0
-                        for x in self._complex_set.hyperedge_dict[rank]
-                        if len(x) >= s
-                    )
+
+                value += sum(
+                    len(self._complex_set.hyperedge_dict[rank][x]) if node in x else 0
+                    for x in self._complex_set.hyperedge_dict[rank]
+                    if len(x) >= s
+                )
             return value
+        return None
 
     def _remove_node(self, node) -> None:
         """Remove a node from the ColoredHyperGraph.
@@ -525,7 +518,7 @@ class ColoredHyperGraph(Complex):
         for node in node_set:
             if isinstance(node, Hashable):
                 if isinstance(node, HyperEdge):
-                    copy_set.add(list(node.elements)[0])
+                    copy_set.add(next(iter(node.elements)))
                 else:
                     copy_set.add(node)
                 if node not in self.nodes:
@@ -813,7 +806,7 @@ class ColoredHyperGraph(Complex):
         'blue'
         """
         return {
-            tuple(node)[0]: self.nodes[node][name]
+            next(iter(node)): self.nodes[node][name]
             for node in self.nodes
             if name in self.nodes[node]
         }
@@ -853,12 +846,12 @@ class ColoredHyperGraph(Complex):
                 for cell in self.skeleton(rank)
                 if name in self.skeleton(rank)[cell]
             }
-        else:
-            return {
-                cell: self.cells[cell][name]
-                for cell in self.cells
-                if name in self.cells[cell]
-            }
+
+        return {
+            cell: self.cells[cell][name]
+            for cell in self.cells
+            if name in self.cells[cell]
+        }
 
     def _add_nodes_of_hyperedge(self, hyperedge_) -> None:
         """Add nodes of a hyperedge to the CHG.
@@ -998,13 +991,8 @@ class ColoredHyperGraph(Complex):
                     self.add_cell(cell, rank=None)
         else:
             if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-                if len(cells) != len(ranks):
-                    raise ValueError(
-                        "cells and ranks must have equal number of elements"
-                    )
-                else:
-                    for cell, rank in zip(cells, ranks):
-                        self.add_cell(cell, rank)
+                for cell, rank in zip(cells, ranks, strict=True):
+                    self.add_cell(cell, rank)
         if isinstance(cells, Iterable) and isinstance(ranks, int):
             for cell in cells:
                 self.add_cell(cell, ranks)
@@ -1087,7 +1075,7 @@ class ColoredHyperGraph(Complex):
         self,
         rank,
         to_rank,
-        weight: bool = None,
+        weight: bool | None = None,
         sparse: bool = True,
         index: bool = False,
     ):
@@ -1288,7 +1276,9 @@ class ColoredHyperGraph(Complex):
 
         return A
 
-    def all_cell_to_node_coadjacency_matrix(self, index: bool = False, s: int = None):
+    def all_cell_to_node_coadjacency_matrix(
+        self, index: bool = False, s: int | None = None
+    ):
         """Compute the cell co-adjacency matrix.
 
         Parameters
@@ -1309,10 +1299,11 @@ class ColoredHyperGraph(Complex):
         if index:
             A = incidence_to_adjacency(B[-1], s=s)
             return B[1], A
-        A = incidence_to_adjacency(B, s=s)
-        return A
+        return incidence_to_adjacency(B, s=s)
 
-    def node_to_all_cell_adjacnecy_matrix(self, index: bool = False, s: int = None):
+    def node_to_all_cell_adjacnecy_matrix(
+        self, index: bool = False, s: int | None = None
+    ):
         """Compute the node/all cell adjacency matrix.
 
         Parameters
@@ -1333,8 +1324,7 @@ class ColoredHyperGraph(Complex):
         if index:
             A = incidence_to_adjacency(B[-1].T, s=s)
             return B[0], A
-        A = incidence_to_adjacency(B.T, s=s)
-        return A
+        return incidence_to_adjacency(B.T, s=s)
 
     def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix.
@@ -1558,9 +1548,9 @@ class ColoredHyperGraph(Complex):
         for cell in self.cells:
             zero_elements = cell[0]
             if len(zero_elements) == 1:
-                for n in zero_elements:
-                    if self.degree(n, None) == 1:
-                        singletons.append(cell)
+                singletons.extend(
+                    cell for n in zero_elements if self.degree(n, None) == 1
+                )
         return singletons
 
     def remove_singletons(self):
@@ -1577,9 +1567,10 @@ class ColoredHyperGraph(Complex):
     def clone(self) -> "ColoredHyperGraph":
         """Return a copy of the simplex.
 
-        The clone method by default returns an independent shallow copy of the simplex and attributes. That is, if an
-        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
-        for new containers.
+        The clone method by default returns an independent shallow copy of the simplex
+        and attributes. That is, if an attribute is a container, that container is
+        shared by the original and the copy. Use Python's `copy.deepcopy` for new
+        containers.
 
         Returns
         -------

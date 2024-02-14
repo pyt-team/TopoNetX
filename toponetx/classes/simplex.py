@@ -74,6 +74,7 @@ class Simplex(Atom):
             warnings.warn(
                 "The `construct_tree` argument is deprecated.",
                 DeprecationWarning,
+                stacklevel=2,
             )
 
         for i in elements:
@@ -128,7 +129,9 @@ class Simplex(Atom):
             The set of faces of the simplex.
         """
         warnings.warn(
-            "`Simplex.construct_simplex_tree` is deprecated.", DeprecationWarning
+            "`Simplex.construct_simplex_tree` is deprecated.",
+            DeprecationWarning,
+            stacklevel=2,
         )
 
         faceset = set()
@@ -156,6 +159,7 @@ class Simplex(Atom):
         warnings.warn(
             "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         return frozenset(
@@ -188,6 +192,7 @@ class Simplex(Atom):
         warnings.warn(
             "`Simplex.faces` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         return Simplex.construct_simplex_tree(self.elements)
@@ -215,9 +220,10 @@ class Simplex(Atom):
     def clone(self) -> "Simplex":
         """Return a copy of the simplex.
 
-        The clone method by default returns an independent shallow copy of the simplex and attributes. That is, if an
-        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
-        for new containers.
+        The clone method by default returns an independent shallow copy of the simplex
+        and attributes. That is, if an attribute is a container, that container is
+        shared by the original and the copy. Use Python's `copy.deepcopy` for new
+        containers.
 
         Returns
         -------

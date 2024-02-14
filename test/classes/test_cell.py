@@ -80,7 +80,7 @@ class TestCell:
     def test___iter__(self):
         """Test __iter__."""
         c = Cell([1, 2, 3])
-        for i in c:
+        for _ in c:
             pass
 
     def test___repr__(self):

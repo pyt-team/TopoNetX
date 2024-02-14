@@ -103,7 +103,7 @@ def s_connected_components(
             if isinstance(domain, CellComplex):
                 yield {node_dict[n] for n in c}
             else:
-                yield {tuple(node_dict[n])[0] for n in c}
+                yield {next(iter(node_dict[n])) for n in c}
 
 
 def s_component_subcomplexes(
@@ -145,10 +145,8 @@ def s_component_subcomplexes(
     >>> CC.add_cell([4, 5], rank=1)
     >>> list(s_component_subcomplexes(CC, s=1, cells=False))
     """
-    for idx, c in enumerate(
-        s_connected_components(
-            domain, s=s, cells=cells, return_singletons=return_singletons
-        )
+    for c in s_connected_components(
+        domain, s=s, cells=cells, return_singletons=return_singletons
     ):
         if cells:
             yield domain.restrict_to_cells(list(c))

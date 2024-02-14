@@ -74,10 +74,9 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
     rowdict, A = domain.node_to_all_cell_adjacnecy_matrix(index=True)
     G = nx.from_scipy_sparse_array(A)
     try:
-        path = nx.shortest_path_length(G, rowdict[source], rowdict[target])
-        return path
+        return nx.shortest_path_length(G, rowdict[source], rowdict[target])
     except Exception:
-        warn(f"No {s}-path between {source} and {target}")
+        warn(f"No {s}-path between {source} and {target}", stacklevel=2)
         return np.inf
 
 
@@ -150,8 +149,7 @@ def cell_distance(
     cell_dict, A = domain.all_cell_to_node_coadjacency_matrix(s=s, index=True)
     G = nx.from_scipy_sparse_array(A)
     try:
-        path_distance = nx.shortest_path_length(G, cell_dict[source], cell_dict[target])
-        return path_distance
+        return nx.shortest_path_length(G, cell_dict[source], cell_dict[target])
     except Exception:
-        warn(f"No {s}-path between {source} and {target}")
+        warn(f"No {s}-path between {source} and {target}", stacklevel=2)
         return np.inf

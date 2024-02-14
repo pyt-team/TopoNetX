@@ -151,7 +151,7 @@ def diameter(domain: Complex) -> int:
     raise RuntimeError("cc is not connected.")
 
 
-def cell_diameter(domain: Complex, s: int = None) -> int:
+def cell_diameter(domain: Complex, s: int | None = None) -> int:
     """Return the length of the longest shortest s-walk between cells.
 
     Parameters
