@@ -20,8 +20,6 @@ class Simplex(Atom):
     ----------
     elements : Collection
         The nodes in the simplex.
-    name : str, optional
-        A name for the simplex.
     construct_tree : bool, default=True
         If True, construct the entire simplicial tree for the simplex.
     **kwargs : keyword arguments, optional
@@ -43,7 +41,6 @@ class Simplex(Atom):
     def __init__(
         self,
         elements: Collection,
-        name: str = "",
         construct_tree: bool = False,
         **kwargs,
     ) -> None:
@@ -56,8 +53,6 @@ class Simplex(Atom):
         ----------
         elements : Collection
             The nodes in the simplex.
-        name : str, optional
-            A name for the simplex.
         construct_tree : bool, default=True
             If True, construct the entire simplicial tree for the simplex.
         **kwargs : keyword arguments, optional
@@ -79,13 +74,14 @@ class Simplex(Atom):
             warnings.warn(
                 "The `construct_tree` argument is deprecated.",
                 DeprecationWarning,
+                stacklevel=2,
             )
 
         for i in elements:
             if not isinstance(i, Hashable):
                 raise ValueError(f"All nodes of a simplex must be hashable, got {i}")
 
-        super().__init__(frozenset(sorted(elements)), name, **kwargs)
+        super().__init__(frozenset(sorted(elements)), **kwargs)
         if len(elements) != len(self.elements):
             raise ValueError("A simplex cannot contain duplicate nodes.")
 
@@ -133,7 +129,9 @@ class Simplex(Atom):
             The set of faces of the simplex.
         """
         warnings.warn(
-            "`Simplex.construct_simplex_tree` is deprecated.", DeprecationWarning
+            "`Simplex.construct_simplex_tree` is deprecated.",
+            DeprecationWarning,
+            stacklevel=2,
         )
 
         faceset = set()
@@ -161,6 +159,7 @@ class Simplex(Atom):
         warnings.warn(
             "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         return frozenset(
@@ -193,6 +192,7 @@ class Simplex(Atom):
         warnings.warn(
             "`Simplex.faces` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         return Simplex.construct_simplex_tree(self.elements)
@@ -220,13 +220,14 @@ class Simplex(Atom):
     def clone(self) -> "Simplex":
         """Return a copy of the simplex.
 
-        The clone method by default returns an independent shallow copy of the simplex and attributes. That is, if an
-        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
-        for new containers.
+        The clone method by default returns an independent shallow copy of the simplex
+        and attributes. That is, if an attribute is a container, that container is
+        shared by the original and the copy. Use Python's `copy.deepcopy` for new
+        containers.
 
         Returns
         -------
         Simplex
             A copy of this simplex.
         """
-        return Simplex(self.elements, name=self.name, **self._attributes)
+        return Simplex(self.elements, **self._attributes)

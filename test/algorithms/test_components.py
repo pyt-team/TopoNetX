@@ -1,7 +1,6 @@
 """Test components module."""
 
 import pytest
-import scipy.sparse as sparse
 
 from toponetx.algorithms.components import (
     connected_component_subcomplexes,
@@ -10,8 +9,6 @@ from toponetx.algorithms.components import (
     s_connected_components,
 )
 from toponetx.classes.cell_complex import CellComplex
-from toponetx.classes.colored_hypergraph import ColoredHyperGraph
-from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
 

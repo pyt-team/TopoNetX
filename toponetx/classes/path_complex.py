@@ -31,8 +31,6 @@ class PathComplex(Complex):
     ----------
     paths : nx.Graph or Iterable[Sequence[Hashable]]
         The paths in the path complex. If a graph is provided, the path complex will be constructed from the graph, and allowed paths are automatically computed.
-    name : str, optional
-        A name for the path complex.
     reserve_sequence_order : bool, default=False
         If True, reserve the order of the sub-sequence of nodes in the elementary p-path. Else, the sub-sequence of nodes in the elementary p-path will
         be reversed if the first index is larger than the last index.
@@ -71,7 +69,7 @@ class PathComplex(Complex):
     >>> PC = PathComplex([(1, 2, 3)])
     >>> PC.paths
     PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-    >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+    >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
     >>> PC.paths
     PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
     >>> G = nx.Graph()
@@ -84,7 +82,6 @@ class PathComplex(Complex):
     def __init__(
         self,
         paths: nx.Graph | Iterable[Sequence[Hashable] | Path] | None = None,
-        name: str = "",
         reserve_sequence_order: bool = False,
         allowed_paths: Iterable[tuple[Hashable]] | None = None,
         max_rank: int = 3,
@@ -106,8 +103,6 @@ class PathComplex(Complex):
         ----------
         paths : nx.Graph or Iterable[Sequence[Hashable]]
             The paths in the path complex. If a graph is provided, the path complex will be constructed from the graph, and allowed paths are automatically computed.
-        name : str, optional
-            A name for the path complex.
         reserve_sequence_order : bool, default=False
             If True, reserve the order of the sub-sequence of nodes in the elementary p-path. Else, the sub-sequence of nodes in the elementary p-path will
             be reversed if the first index is larger than the last index.
@@ -146,7 +141,7 @@ class PathComplex(Complex):
         >>> PC = PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
         >>> G = nx.Graph()
@@ -155,7 +150,7 @@ class PathComplex(Complex):
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 3, 2), (1, 2, 3), (2, 1, 3)])
         """
-        super().__init__(name=name, **kwargs)
+        super().__init__(**kwargs)
 
         self._path_set = PathView()
         self._G = nx.Graph()
@@ -198,11 +193,11 @@ class PathComplex(Complex):
             # add all simple paths
             self.add_paths_from(self._allowed_paths)
 
-        elif isinstance(paths, (list, tuple)):
+        elif isinstance(paths, list | tuple):
             tmp_paths = []
             for path in paths:
                 if len(path) <= max_rank + 1:
-                    if isinstance(paths[0], (int, str, list, tuple)):
+                    if isinstance(paths[0], int | str | list | tuple):
                         tmp_paths.append(tuple(path))
                     else:  # path is a Path object
                         tmp_paths.append(path)
@@ -228,7 +223,7 @@ class PathComplex(Complex):
         >>> PC = PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4,5)])
+        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
         """
@@ -262,11 +257,11 @@ class PathComplex(Complex):
         PathView([(1,), (2,), (3,), (4,), (1, 2), (2, 3), (2, 4), (1, 2, 3), (1, 2, 4)])
         """
         new_paths = set()
-        if isinstance(path, (int, str)):
+        if isinstance(path, int | str):
             path = [
                 path,
             ]
-        if isinstance(path, (list, tuple, Path)):
+        if isinstance(path, list | tuple | Path):
             if not isinstance(path, Path):  # path is a list or tuple
                 path_ = tuple(path)
                 if len(path) != len(set(path)):
@@ -300,7 +295,7 @@ class PathComplex(Complex):
 
             # update sub-paths
             for length in range(len(path_), 0, -1):
-                for i in range(0, len(path_) - length + 1):
+                for i in range(len(path_) - length + 1):
                     sub_path = path_[i : i + length]
                     if not self._reserve_sequence_order and str(sub_path[0]) > str(
                         sub_path[-1]
@@ -384,15 +379,15 @@ class PathComplex(Complex):
     def clone(self) -> "PathComplex":
         """Return a copy of the path complex.
 
-        The clone method by default returns an independent shallow copy of the path complex. Use Python’s
-        `copy.deepcopy` for new containers.
+        The clone method by default returns an independent shallow copy of the path
+        complex. Use Python's `copy.deepcopy` for new containers.
 
         Returns
         -------
         PathComplex
             Returns a copy of the PathComplex.
         """
-        return PathComplex(list(self.paths), name=self.name, rank=self.dim)
+        return PathComplex(list(self.paths), rank=self.dim)
 
     def skeleton(self, rank: int) -> list[tuple[Hashable]]:
         """Compute skeleton.
@@ -408,7 +403,7 @@ class PathComplex(Complex):
             Set of elementary p-paths of dimension specified by `rank`.
         """
         if len(self._path_set.faces_dict) > rank >= 0:
-            tmp = (path for path in self._path_set.faces_dict[rank].keys())
+            tmp = (path for path in self._path_set.faces_dict[rank])
             return sorted(
                 tmp, key=lambda x: tuple(map(str, x))
             )  # lexicographic comparison
@@ -497,36 +492,36 @@ class PathComplex(Complex):
                     (node,): i for i, node in enumerate(sorted(self.nodes, key=str))
                 }
                 return {}, node_index, abs(boundary.tocoo())
-            else:
-                return abs(boundary.tocoo())
-        else:
-            idx_p_minus_1, idx_p, values = [], [], []
-            path_minus_1_dict = {
-                path: i for i, path in enumerate(self.skeleton(rank - 1))
-            }  # path2idx dict
-            path_dict = {
-                path: i for i, path in enumerate(self.skeleton(rank))
-            }  # path2idx dict
-            for path, idx_path in path_dict.items():
-                for i, _ in enumerate(path):
-                    boundary_path = path[0:i] + path[(i + 1) :]
-                    if not self._reserve_sequence_order and str(boundary_path[0]) > str(
-                        boundary_path[-1]
-                    ):
-                        boundary_path = boundary_path[::-1]
-                    boundary_path = tuple(boundary_path)
-                    if boundary_path in self._allowed_paths:
-                        idx_p_minus_1.append(path_minus_1_dict[boundary_path])
-                        idx_p.append(idx_path)
-                        values.append((-1) ** i)
-            boundary = sp.sparse.coo_matrix(
-                (values, (idx_p_minus_1, idx_p)),
-                dtype=np.float32,
-                shape=(
-                    len(path_minus_1_dict),
-                    len(path_dict),
-                ),
-            )
+            return abs(boundary.tocoo())
+
+        idx_p_minus_1, idx_p, values = [], [], []
+        path_minus_1_dict = {
+            path: i for i, path in enumerate(self.skeleton(rank - 1))
+        }  # path2idx dict
+        path_dict = {
+            path: i for i, path in enumerate(self.skeleton(rank))
+        }  # path2idx dict
+        for path, idx_path in path_dict.items():
+            for i, _ in enumerate(path):
+                boundary_path = path[0:i] + path[(i + 1) :]
+                if not self._reserve_sequence_order and str(boundary_path[0]) > str(
+                    boundary_path[-1]
+                ):
+                    boundary_path = boundary_path[::-1]
+                boundary_path = tuple(boundary_path)
+                if boundary_path in self._allowed_paths:
+                    idx_p_minus_1.append(path_minus_1_dict[boundary_path])
+                    idx_p.append(idx_path)
+                    values.append((-1) ** i)
+        boundary = sp.sparse.coo_matrix(
+            (values, (idx_p_minus_1, idx_p)),
+            dtype=np.float32,
+            shape=(
+                len(path_minus_1_dict),
+                len(path_dict),
+            ),
+        )
+
         if index:
             if signed:
                 return (
@@ -534,17 +529,16 @@ class PathComplex(Complex):
                     path_dict,
                     boundary,
                 )
-            else:
-                return (
-                    path_minus_1_dict,
-                    path_dict,
-                    abs(boundary),
-                )
-        else:
-            if signed:
-                return boundary
-            else:
-                return abs(boundary)
+
+            return (
+                path_minus_1_dict,
+                path_dict,
+                abs(boundary),
+            )
+
+        if signed:
+            return boundary
+        return abs(boundary)
 
     def up_laplacian_matrix(
         self,
@@ -589,8 +583,7 @@ class PathComplex(Complex):
 
         if index:
             return row, L_up.tolil()
-        else:
-            return L_up.tolil()
+        return L_up.tolil()
 
     def down_laplacian_matrix(
         self,
@@ -632,8 +625,7 @@ class PathComplex(Complex):
             L_down = abs(L_down)
         if index:
             return row, L_down.tolil()
-        else:
-            return L_down.tolil()
+        return L_down.tolil()
 
     def hodge_laplacian_matrix(
         self,
@@ -669,9 +661,8 @@ class PathComplex(Complex):
                 L_hodge = abs(L_hodge)
             if index:
                 return row, L_hodge
-            else:
-                return L_hodge
-        elif rank < self.dim:
+            return L_hodge
+        if rank < self.dim:
             row, column, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
@@ -681,21 +672,19 @@ class PathComplex(Complex):
                 L_hodge = abs(L_hodge)
             if index:
                 return column, L_hodge
-            else:
-                return L_hodge
-        elif rank == self.dim:
+            return L_hodge
+        if rank == self.dim:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_hodge = B.transpose() @ B
             if not signed:
                 L_hodge = abs(L_hodge)
             if index:
                 return column, L_hodge
-            else:
-                return L_hodge
-        else:
-            raise ValueError(
-                f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
-            )
+            return L_hodge
+
+        raise ValueError(
+            f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
+        )
 
     def adjacency_matrix(
         self,
@@ -764,15 +753,13 @@ class PathComplex(Complex):
             return ind, L_down
         return L_down
 
-    def restrict_to_nodes(self, node_set: Iterable[Hashable], name: str = ""):
+    def restrict_to_nodes(self, node_set: Iterable[Hashable]):
         """Return a new path complex restricted to a subset of nodes.
 
         Parameters
         ----------
         node_set : Iterable[Hashable]
             The nodes to be used for the new restricted path complex.
-        name : str
-            The name of the new path complex to be used.
 
         Returns
         -------
@@ -781,29 +768,28 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> PC = PC.restrict_to_nodes([0,1,3])
+        >>> PC = PathComplex(
+        ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        ... )
+        >>> PC = PC.restrict_to_nodes([0, 1, 3])
         >>> PC.paths
         PathView([(0,), (1,), (3,), (0, 1), (1, 3), (0, 1, 3)])
         """
         if len(node_set) == 0:
             raise ValueError("Input node_set cannot be empty.")
         node_set = set(node_set)
-        new_paths = []
-        for path in self.paths:
-            if all(node in node_set for node in path):
-                new_paths.append(path)
-        return PathComplex(new_paths, name=name)
+        new_paths = [
+            path for path in self.paths if all(node in node_set for node in path)
+        ]
+        return PathComplex(new_paths)
 
-    def restrict_to_paths(self, path_set: Iterable[Sequence[Hashable]], name: str = ""):
+    def restrict_to_paths(self, path_set: Iterable[Sequence[Hashable]]):
         """Return a new path complex restricted to a subset of paths.
 
         Parameters
         ----------
         path_set : Iterable[Sequence[Hashable]]
             The paths to be used for the new restricted path complex.
-        name : str
-            The name of the new path complex to be used.
 
         Returns
         -------
@@ -812,23 +798,19 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([[0,1],[1,2,3],[1,3,2],[2,1,3],[0,1,2],[0,1,3]])
-        >>> PC = PC.restrict_to_paths([[1,2,3]])
+        >>> PC = PathComplex(
+        ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
+        ... )
+        >>> PC = PC.restrict_to_paths([[1, 2, 3]])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
         """
-        new_path_set = []
         if len(path_set) == 0:
             raise ValueError("Input path_set cannot be empty.")
-        else:
-            for path in path_set:
-                new_path_set.append(tuple(path))
+        new_path_set = [tuple(path) for path in path_set]
         new_path_set = set(new_path_set)
-        new_paths = []
-        for path in self.paths:
-            if path in new_path_set:
-                new_paths.append(path)
-        return PathComplex(new_paths, name=name)
+        new_paths = [path for path in self.paths if path in new_path_set]
+        return PathComplex(new_paths)
 
     def get_node_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
         """Get node attributes from a path complex.
@@ -877,12 +859,17 @@ class PathComplex(Complex):
         --------
         >>> PC = PathComplex()
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PC.set_node_attributes({(1, ): {"heat": 55, "color": "red"}, (2, ): {"heat": 66, "color": "blue"}})
+        >>> PC.set_node_attributes(
+        ...     {
+        ...         (1,): {"heat": 55, "color": "red"},
+        ...         (2,): {"heat": 66, "color": "blue"},
+        ...     }
+        ... )
         >>> PC[1]
         {'heat': 55, 'color': 'red'}
         >>> PC[2]
         {'heat': 66, 'color': 'blue'}
-        >>> PC.set_node_attributes({(1, ): 58, (2, ): 60}, name="heat")
+        >>> PC.set_node_attributes({(1,): 58, (2,): 60}, name="heat")
         >>> PC[1]
         {'heat': 58, 'color': 'red'}
         >>> PC[2]
@@ -893,12 +880,12 @@ class PathComplex(Complex):
                 if isinstance(value, dict):
                     for k, v in value.items():
                         self[node][k] = v
-                        if isinstance(node, (tuple, list)):
+                        if isinstance(node, tuple | list):
                             if len(node) == 1:
                                 self._G.nodes[node[0]][k] = v
                             else:
                                 raise ValueError("Input node must be a singleton.")
-                        elif isinstance(node, (int, str)):
+                        elif isinstance(node, int | str):
                             self._G.nodes[node][k] = v
                 else:
                     raise TypeError(
@@ -907,12 +894,12 @@ class PathComplex(Complex):
         else:
             for node, value in values.items():
                 self[node][name] = value
-                if isinstance(node, (tuple, list)):
+                if isinstance(node, tuple | list):
                     if len(node) == 1:
                         self._G.nodes[node[0]][name] = value
                     else:
                         raise ValueError("Input node must be a singleton.")
-                elif isinstance(node, (int, str)):
+                elif isinstance(node, int | str):
                     self._G.nodes[node][name] = value
 
     def get_edge_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
@@ -970,7 +957,12 @@ class PathComplex(Complex):
         >>> PC.set_edge_attributes({(0, 1): 33}, name="weight")
         >>> PC.get_edge_attributes("weight")
         {(0, 1): 33, (1, 2): 98}
-        >>> PC.set_edge_attributes({(1, 3): {"weight": 55, "color": "yellow"}, (2, 3): {"weight": 66, "color": "blue"}})
+        >>> PC.set_edge_attributes(
+        ...     {
+        ...         (1, 3): {"weight": 55, "color": "yellow"},
+        ...         (2, 3): {"weight": 66, "color": "blue"},
+        ...     }
+        ... )
         >>> PC[1, 3]
         {'color': 'yellow', 'weight': 55}
         >>> PC[2, 3]
@@ -983,7 +975,7 @@ class PathComplex(Complex):
                 if isinstance(value, dict):
                     for k, v in value.items():
                         self[edge][k] = v
-                        if isinstance(edge, (tuple, list)):
+                        if isinstance(edge, tuple | list):
                             self._G.edges[edge[0], edge[1]][k] = v
                 else:
                     raise TypeError(
@@ -994,7 +986,7 @@ class PathComplex(Complex):
                 if len(edge) != 2:
                     raise ValueError("Input edge must be a pair.")
                 self[edge][name] = value
-                if isinstance(edge, (tuple, list)):
+                if isinstance(edge, tuple | list):
                     self._G.edges[edge[0], edge[1]][name] = value
 
     def get_path_attributes(self, name: str) -> dict[tuple[Hashable], Any]:
@@ -1026,7 +1018,7 @@ class PathComplex(Complex):
         """
         return {
             tuple(p): self[p][name]
-            for dim in range(0, self.dim + 1)
+            for dim in range(self.dim + 1)
             for p in self.skeleton(dim)
             if name in self[p]
         }
@@ -1047,8 +1039,15 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
-        >>> PC.set_path_attributes({(0, 1, 2): {"weight": 43, "color": "red"}, (0, 1, 3): {"weight": 98, "color": "blue"}})
+        >>> PC = PathComplex(
+        ...     [[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]]
+        ... )
+        >>> PC.set_path_attributes(
+        ...     {
+        ...         (0, 1, 2): {"weight": 43, "color": "red"},
+        ...         (0, 1, 3): {"weight": 98, "color": "blue"},
+        ...     }
+        ... )
         >>> PC.get_path_attributes("weight")
         {(0, 1, 2): 43, (0, 1, 3): 98}
         >>> PC.get_path_attributes("color")
@@ -1076,7 +1075,7 @@ class PathComplex(Complex):
                     )
         else:
             for path, value in values.items():
-                if isinstance(path, (int, str)) or len(path) == 1:
+                if isinstance(path, int | str) or len(path) == 1:
                     self.set_node_attributes({path: {name: value}})
                 elif len(path) == 2:
                     self.set_edge_attributes({path: {name: value}})
@@ -1129,8 +1128,7 @@ class PathComplex(Complex):
         if path not in self._path_set.faces_dict[dim]:  # Not in faces_dict
             self._path_set.faces_dict[dim][path] = {}
             return path
-        else:
-            return None
+        return None
 
     def _update_attributes(self, path, **attr):
         """Update the attributes of path.
@@ -1142,10 +1140,7 @@ class PathComplex(Complex):
         **attr : keyword arguments
             The attributes to update.
         """
-        if not isinstance(path, Path):  # path is a list or tuple
-            path_ = tuple(path)
-        else:  # path is a Path object
-            path_ = path.elements
+        path_ = path.elements if isinstance(path, Path) else tuple(path)
         if isinstance(path, Path):  # update attributes for PathView() and _G
             self._path_set.faces_dict[len(path_) - 1][path_].update(path._attributes)
             if len(path_) == 1:
@@ -1189,8 +1184,7 @@ class PathComplex(Complex):
         """
         if item in self:
             return self._path_set[item]
-        else:
-            raise KeyError("The elementary p-path is not in the path complex")
+        raise KeyError("The elementary p-path is not in the path complex")
 
     def __iter__(self) -> Iterator:
         """Iterate over all faces of the path complex.
@@ -1230,7 +1224,7 @@ class PathComplex(Complex):
         str
             The __repr__ representation of the Path Complex.
         """
-        return f"PathComplex(name='{self.name}')"
+        return "PathComplex()"
 
     @staticmethod
     def compute_allowed_paths(
@@ -1260,7 +1254,7 @@ class PathComplex(Complex):
         --------
         >>> G = nx.Graph()
         >>> G.add_edges_from([(1, 2), (2, 3), (1, 3), (0, 1)])
-        >>> allowed_paths = PathComplex.compute_allowed_paths(G, max_rank = 2)
+        >>> allowed_paths = PathComplex.compute_allowed_paths(G, max_rank=2)
         >>> allowed_paths
         {(0, 1), (1, 3), (1, 2), (2,), (1, 3, 2), (0, 1, 2), (0, 1, 3), (1, 2, 3), (2, 1, 3), (2, 3), (1,), (0,), (3,)}
         """

@@ -1,15 +1,13 @@
 """Test normalization."""
 
 import numpy as np
-import scipy.sparse.linalg as spl
-from scipy.sparse import csr_matrix, diags
+from scipy.sparse import csr_matrix
 
 from toponetx.utils.normalization import (
     compute_bunch_normalized_matrices,
     compute_kipf_adjacency_normalized_matrix,
     compute_laplacian_normalized_matrix,
     compute_x_laplacian_normalized_matrix,
-    compute_xu_asymmetric_normalized_matrix,
 )
 
 

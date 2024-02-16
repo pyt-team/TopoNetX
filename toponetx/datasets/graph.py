@@ -95,16 +95,19 @@ def karate_club(
         )
 
         sc.set_simplex_attributes(
-            dict(zip(sc.skeleton(0), np.array(nodes_feat))), name="node_feat"
+            dict(zip(sc.skeleton(0), np.array(nodes_feat), strict=True)),
+            name="node_feat",
         )
         sc.set_simplex_attributes(
-            dict(zip(sc.skeleton(1), np.array(edges_feat))), name="edge_feat"
+            dict(zip(sc.skeleton(1), np.array(edges_feat), strict=True)),
+            name="edge_feat",
         )
         sc.set_simplex_attributes(
-            dict(zip(sc.skeleton(2), np.array(faces_feat))), name="face_feat"
+            dict(zip(sc.skeleton(2), np.array(faces_feat), strict=True)),
+            name="face_feat",
         )
         sc.set_simplex_attributes(
-            dict(zip(sc.skeleton(3), np.array(tetrahedron_feat))),
+            dict(zip(sc.skeleton(3), np.array(tetrahedron_feat), strict=True)),
             name="tetrahedron_feat",
         )
 
@@ -127,13 +130,19 @@ def karate_club(
         )
 
         cx.set_cell_attributes(
-            dict(zip(cx.skeleton(0), np.array(nodes_feat))), name="node_feat", rank=0
+            dict(zip(cx.skeleton(0), np.array(nodes_feat), strict=True)),
+            name="node_feat",
+            rank=0,
         )
         cx.set_cell_attributes(
-            dict(zip(cx.skeleton(1), np.array(edges_feat))), name="edge_feat", rank=1
+            dict(zip(cx.skeleton(1), np.array(edges_feat), strict=True)),
+            name="edge_feat",
+            rank=1,
         )
         cx.set_cell_attributes(
-            dict(zip(cx.skeleton(2), np.array(cells_feat))), name="cell_feat", rank=2
+            dict(zip(cx.skeleton(2), np.array(cells_feat), strict=True)),
+            name="cell_feat",
+            rank=2,
         )
         return cx
 
@@ -173,7 +182,7 @@ def coauthorship() -> SimplicialComplex:
 
     simplices = []
     for dim in range(len(coauthorship) - 1, -1, -1):
-        simplices += [list(el) for el in coauthorship[dim].keys()]
+        simplices += [list(el) for el in coauthorship[dim]]
 
     sc = SimplicialComplex(simplices)
 

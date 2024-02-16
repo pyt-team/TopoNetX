@@ -43,7 +43,7 @@ def linial_meshulam_complex(n: int, p: float, seed=None) -> SimplicialComplex:
     References
     ----------
     .. [1] Nathan Linial and Roy Meshulam, "Homological Connectivity Of Random
-           2-Complexes," Combinatorica 26, no. 4 (August 2006): 475–87,
+           2-Complexes," Combinatorica 26, no. 4 (August 2006): 475-87,
            https://doi.org/10.1007/s00493-006-0027-9.
     """
     return multiparameter_linial_meshulam_complex(n, [1.0, p], seed)
@@ -72,7 +72,7 @@ def random_clique_complex(n: int, p: float, seed=None) -> SimplicialComplex:
     References
     ----------
     .. [1] Matthew Kahle, "Topology of Random Clique Complexes,"
-           Discrete Mathematics 309, no. 6 (April 2009): 1658–71,
+           Discrete Mathematics 309, no. 6 (April 2009): 1658-71,
            https://doi.org/10.1016/j.disc.2008.02.037.
     """
     graph = nx.gnp_random_graph(n, p, seed)
@@ -81,7 +81,7 @@ def random_clique_complex(n: int, p: float, seed=None) -> SimplicialComplex:
 
 @nx.utils.py_random_state("seed")
 def multiparameter_linial_meshulam_complex(
-    n: int, ps: Sequence[float], seed: random.Random = None
+    n: int, ps: Sequence[float], seed: random.Random | None = None
 ) -> SimplicialComplex:
     """Generate a random multiparameter Linial-Meshulam complex.
 

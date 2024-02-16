@@ -88,14 +88,6 @@ class TestHyperEdgeCases:
         he = HyperEdge([1, 5, 2])
         assert he.rank is None
 
-    def test_name(self):
-        """Test name."""
-        he = HyperEdge([1, 4, 2], rank=4)
-        assert he.name == ""
-
-        he = HyperEdge([1, 4, 2], name="A")
-        assert he.name == "A"
-
     def test_eq(self):
         """Test eq."""
         he1 = HyperEdge((1, 4, 2), rank=4)

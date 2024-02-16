@@ -31,10 +31,7 @@ def graph_to_neighbor_complex(G: nx.Graph) -> SimplicialComplex:
     This type of simplicial complexes can have very large dimension (max degree of the
     graph) and it is a function of the distribution of the valency of the graph.
     """
-    simplices = []
-    for node in G:
-        # each simplex is the node and its n-hop neighbors
-        simplices.append(list(G.neighbors(node)) + [node])
+    simplices = [[*list(G.neighbors(node)), node] for node in G]
     return SimplicialComplex(simplices)
 
 
@@ -158,8 +155,7 @@ def weighted_graph_to_vietoris_rips_complex(
 
     def is_in_vr_complex(clique):  # numpydoc ignore=GL08
         edges = combinations(clique, 2)
-        edge_weights_lower_than_r = all(G[u][v]["weight"] <= r for u, v in edges)
-        return edge_weights_lower_than_r
+        return all(G[u][v]["weight"] <= r for u, v in edges)
 
     all_cliques = nx.enumerate_all_cliques(G)
     possible_cliques = (

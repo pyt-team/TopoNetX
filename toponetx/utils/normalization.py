@@ -1,7 +1,4 @@
 """Normalize of Laplacians, (co)adjacency, boundary matrices of complexes."""
-
-from typing import Tuple
-
 import numpy as np
 import scipy.sparse.linalg as spl
 from numpy.linalg import pinv
@@ -109,9 +106,7 @@ def compute_kipf_adjacency_normalized_matrix(
     r_inv_sqrt = np.power(rowsum, -0.5).flatten()
     r_inv_sqrt[np.isinf(r_inv_sqrt)] = 0.0
     r_mat_inv_sqrt = diags(r_inv_sqrt)
-    A_opt_normalized = A_opt.dot(r_mat_inv_sqrt).transpose().dot(r_mat_inv_sqrt)
-
-    return A_opt_normalized
+    return A_opt.dot(r_mat_inv_sqrt).transpose().dot(r_mat_inv_sqrt)
 
 
 def compute_xu_asymmetric_normalized_matrix(
@@ -143,20 +138,18 @@ def compute_xu_asymmetric_normalized_matrix(
         r_inv = np.power(rowsum, -1).flatten()
         r_inv[np.isinf(r_inv)] = 0.0
         r_mat_inv = diags(r_inv)
-        normalized_matrix = r_mat_inv.dot(B)
-        return normalized_matrix
-    else:
-        Di = np.sum(np.abs(B), axis=1)
-        Di2 = np.diag(np.power(Di, -1))
-        Di2[np.isinf(Di2)] = 0.0
-        B = np.array(B)
-        normalized_matrix = Di2.dot(B)
-        return normalized_matrix
+        return r_mat_inv.dot(B)
+
+    Di = np.sum(np.abs(B), axis=1)
+    Di2 = np.diag(np.power(Di, -1))
+    Di2[np.isinf(Di2)] = 0.0
+    B = np.array(B)
+    return Di2.dot(B)
 
 
 def compute_bunch_normalized_matrices(
     B1: np.ndarray | csr_matrix, B2: np.ndarray | csr_matrix
-) -> Tuple[
+) -> tuple[
     np.ndarray | csr_matrix,
     np.ndarray | csr_matrix,
     np.ndarray | csr_matrix,
@@ -293,7 +286,7 @@ def _compute_B2T_normalized_matrix(
     if isinstance(B2, np.ndarray):
         D5_pinv = pinv(D5)
         return B2.T @ D5_pinv
-    elif isinstance(B2, csr_matrix):
+    if isinstance(B2, csr_matrix):
         D5_pinv = csr_matrix(pinv(D5.toarray()))
         return B2.T @ D5_pinv
     raise TypeError("input type must be either np.ndarray or csr_matrix")
@@ -316,12 +309,10 @@ def _compute_D1(B1: np.ndarray | csr_matrix, D2: diags) -> diags:
     """
     if isinstance(B1, csr_matrix):
         rowsum = np.array((np.abs(B1) @ D2).sum(axis=1)).flatten()
-        D1 = 2 * diags(rowsum)
-        return D1
-    elif isinstance(B1, np.ndarray):
+        return 2 * diags(rowsum)
+    if isinstance(B1, np.ndarray):
         rowsum = (np.abs(B1) @ D2).sum(axis=1)
-        D1 = 2 * np.diag(rowsum)
-        return D1
+        return 2 * np.diag(rowsum)
     raise TypeError("Input type must be either np.ndarray or csr_matrix.")
 
 
@@ -340,12 +331,10 @@ def _compute_D2(B2: np.ndarray | csr_matrix) -> diags:
     """
     if isinstance(B2, csr_matrix):
         rowsum = np.array(np.abs(B2).sum(axis=1)).flatten()
-        D2 = diags(np.maximum(rowsum, 1))
-        return D2
-    elif isinstance(B2, np.ndarray):
+        return diags(np.maximum(rowsum, 1))
+    if isinstance(B2, np.ndarray):
         rowsum = np.abs(B2).sum(axis=1)
-        D2 = np.diag(np.maximum(rowsum, 1))
-        return D2
+        return np.diag(np.maximum(rowsum, 1))
     raise TypeError("Input type must be either np.ndarray or csr_matrix.")
 
 
@@ -363,11 +352,9 @@ def _compute_D3(B2: np.ndarray | csr_matrix) -> diags:
         Degree matrix D3.
     """
     if isinstance(B2, csr_matrix):
-        D3 = diags(np.ones(B2.shape[1]) / 3)
-        return D3
-    elif isinstance(B2, np.ndarray):
-        D3 = np.diag(np.ones(B2.shape[1]) / 3)
-        return D3
+        return diags(np.ones(B2.shape[1]) / 3)
+    if isinstance(B2, np.ndarray):
+        return np.diag(np.ones(B2.shape[1]) / 3)
     raise TypeError("Input type must be either np.ndarray or csr_matrix.")
 
 
@@ -386,10 +373,8 @@ def _compute_D5(B2: np.ndarray | csr_matrix) -> diags:
     """
     if isinstance(B2, csr_matrix):
         rowsum = np.array(np.abs(B2).sum(axis=1)).flatten()
-        D5 = diags(rowsum)
-        return D5
-    elif isinstance(B2, np.ndarray):
+        return diags(rowsum)
+    if isinstance(B2, np.ndarray):
         rowsum = np.abs(B2).sum(axis=1)
-        D5 = np.diag(rowsum)
-        return D5
+        return np.diag(rowsum)
     raise TypeError("Input type must be either np.ndarray or csr_matrix.")

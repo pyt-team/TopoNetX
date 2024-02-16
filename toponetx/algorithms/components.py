@@ -1,6 +1,5 @@
 """Module to compute connected components on topological domains."""
-from collections.abc import Hashable
-from typing import Generator
+from collections.abc import Generator, Hashable
 
 import networkx as nx
 
@@ -58,22 +57,22 @@ def s_connected_components(
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
-    >>> list(s_connected_components(CC, s=1,cells=False))
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
+    >>> list(s_connected_components(CC, s=1, cells=False))
     >>> #  [{2, 3, 4}, {5, 6, 7}]
-    >>> list(s_connected_components(CC, s=1,cells=True))
+    >>> list(s_connected_components(CC, s=1, cells=True))
     >>> # [{(2, 3), (2, 3, 4), (2, 4), (3, 4)},
     >>> # {(5, 6), (5, 6, 7), (5, 7), (6, 7)}]
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(s_connected_components(CHG, s=1,cells=False))
-    >>> CC.add_cell([4,5],rank=1)
-    >>> list(s_connected_components(CC, s=1,cells=False))
+    >>> list(s_connected_components(CHG, s=1, cells=False))
+    >>> CC.add_cell([4, 5], rank=1)
+    >>> list(s_connected_components(CC, s=1, cells=False))
     >>> # [{2, 3, 4, 5, 6, 7}]
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(s_connected_components(CCC, s=1,cells=False))
+    >>> list(s_connected_components(CCC, s=1, cells=False))
     """
-    if not isinstance(domain, (CellComplex, ColoredHyperGraph, CombinatorialComplex)):
+    if not isinstance(domain, CellComplex | ColoredHyperGraph | CombinatorialComplex):
         raise TypeError(f"Input complex {domain} is not supported.")
 
     if cells:
@@ -99,13 +98,12 @@ def s_connected_components(
             node_dict = {v: k for k, v in node_dict.items()}
         G = nx.from_scipy_sparse_array(A)
         for c in nx.connected_components(G):
-            if not return_singletons:
-                if len(c) == 1:
-                    continue
+            if not return_singletons and len(c) == 1:
+                continue
             if isinstance(domain, CellComplex):
                 yield {node_dict[n] for n in c}
             else:
-                yield {tuple(node_dict[n])[0] for n in c}
+                yield {next(iter(node_dict[n])) for n in c}
 
 
 def s_component_subcomplexes(
@@ -137,20 +135,18 @@ def s_component_subcomplexes(
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
-    >>> list(s_component_subcomplexes(CC,1,cells=False))
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
+    >>> list(s_component_subcomplexes(CC, 1, cells=False))
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(s_component_subcomplexes(CCC, s=1,cells=False))
+    >>> list(s_component_subcomplexes(CCC, s=1, cells=False))
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(s_component_subcomplexes(CHG, s=1,cells=False))
-    >>> CC.add_cell([4,5],rank=1)
-    >>> list(s_component_subcomplexes(CC,s=1,cells=False))
+    >>> list(s_component_subcomplexes(CHG, s=1, cells=False))
+    >>> CC.add_cell([4, 5], rank=1)
+    >>> list(s_component_subcomplexes(CC, s=1, cells=False))
     """
-    for idx, c in enumerate(
-        s_connected_components(
-            domain, s=s, cells=cells, return_singletons=return_singletons
-        )
+    for c in s_connected_components(
+        domain, s=s, cells=cells, return_singletons=return_singletons
     ):
         if cells:
             yield domain.restrict_to_cells(list(c))
@@ -188,11 +184,11 @@ def connected_components(
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
-    >>> list(connected_components(CC,cells=False))
-    >>> CC.add_cell([4,5],rank=1)
-    >>> list(CC.connected_components(CC,cells=False))
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
+    >>> list(connected_components(CC, cells=False))
+    >>> CC.add_cell([4, 5], rank=1)
+    >>> list(CC.connected_components(CC, cells=False))
     """
     yield from s_connected_components(domain, s=1, cells=cells, return_singletons=True)
 
@@ -224,10 +220,10 @@ def connected_component_subcomplexes(
     Examples
     --------
     >>> CC = CellComplex()
-    >>> CC.add_cell([2,3,4],rank=2)
-    >>> CC.add_cell([5,6,7],rank=2)
+    >>> CC.add_cell([2, 3, 4], rank=2)
+    >>> CC.add_cell([5, 6, 7], rank=2)
     >>> list(connected_component_subcomplexes(CC))
-    >>> CC.add_cell([4,5],rank=1)
+    >>> CC.add_cell([4, 5], rank=1)
     >>> list(connected_component_subcomplexes(CC))
     """
     yield from s_component_subcomplexes(domain, return_singletons=return_singletons)

@@ -13,14 +13,13 @@ class TestSimplex:
         s = Simplex((1,))
         assert len(s) == 1
         assert tuple(s) == (1,)
-        assert s.name == ""
         assert s._attributes == {}
 
         with pytest.deprecated_call():
             _ = Simplex((1,), construct_tree=True)
 
         with pytest.raises(ValueError):
-            s = Simplex([[1, 3], 2])
+            _ = Simplex([1, 2, 2])
 
     def test_simplex_sign(self):
         """Test simplex sign method."""
@@ -65,7 +64,7 @@ class TestSimplex:
         assert (1, 3) in s
         assert frozenset((1, 3)) in s
         assert (1, 3, 4, 5, 6, 7) not in s
-        assert not (1, 3, 4, 5, 6, 7) in s
+        assert (1, 3, 4, 5, 6, 7) not in s
 
     def test_construct_tree(self):
         """Test the construct_tree property of the simplex."""

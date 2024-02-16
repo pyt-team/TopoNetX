@@ -1,7 +1,7 @@
 """Creation and manipulation of a combinatorial complex."""
 
 from collections.abc import Collection, Hashable, Iterable
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 import networkx as nx
 
@@ -40,8 +40,6 @@ class CombinatorialComplex(ColoredHyperGraph):
     ----------
     cells : Collection, optional
         A collection of cells to add to the combinatorial complex.
-    name : str, optional
-        An identifiable name for the combinatorial complex.
     ranks : Collection, optional
         When cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
         size as cells.
@@ -74,7 +72,6 @@ class CombinatorialComplex(ColoredHyperGraph):
     def __init__(
         self,
         cells: Collection | None = None,
-        name: str = "",
         ranks: Collection | None = None,
         graph_based: bool = False,
         **kwargs,
@@ -85,8 +82,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         ----------
         cells : Collection, optional
             A collection of cells to add to the combinatorial complex.
-        name : str, optional
-            An identifiable name for the combinatorial complex.
         ranks : Collection, optional
             When cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
             size as cells.
@@ -115,7 +110,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         If cells is a NetworkX graph, it adds nodes and edges accordingly.
         """
         Complex.__init__(self, **kwargs)
-        self.name = name
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
         self._node_membership = {}
         self._complex_set = HyperEdgeView()
@@ -137,13 +131,8 @@ class CombinatorialComplex(ColoredHyperGraph):
                         self.add_cell(cell, rank=cell.rank)
                 else:
                     if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-                        if len(cells) != len(ranks):
-                            raise ValueError(
-                                "cells and ranks must have equal number of elements"
-                            )
-                        else:
-                            for cell, rank in zip(cells, ranks):
-                                self.add_cell(cell, rank)
+                        for cell, rank in zip(cells, ranks, strict=True):
+                            self.add_cell(cell, rank)
                 if isinstance(cells, Iterable) and isinstance(ranks, int):
                     for cell in cells:
                         self.add_cell(cell, ranks)
@@ -172,7 +161,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         str
             Description of Combinatorial Complex.
         """
-        return f"CombinatorialComplex(name='{self.name}')"
+        return "CombinatorialComplex()"
 
     def __setitem__(self, cell, attr):
         """Set the attributes of a hyperedge or node in the CCC.
@@ -198,8 +187,8 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> complex_instance['node_A'] = {'color': 'red'}
-        >>> complex_instance['hyperedge_B'] = {'weight': 5}
+        >>> complex_instance["node_A"] = {"color": "red"}
+        >>> complex_instance["hyperedge_B"] = {"weight": 5}
 
         Returns
         -------
@@ -210,7 +199,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             self.nodes[cell].update(attr)
             return
         # we now check if the input is a cell in the CCC
-        elif cell in self.cells:
+        if cell in self.cells:
             hyperedge_ = HyperEdgeView._to_frozen_set(cell)
             rank = self.cells.get_rank(hyperedge_)
             if hyperedge_ in self._complex_set.hyperedge_dict[rank]:
@@ -431,9 +420,9 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
         >>> CCC.add_cell([1, 2, 4], rank=2)
         >>> CCC.add_cell([3, 4], rank=2)
-        >>> d = {(1, 2, 3, 4): 'red', (1, 2, 3): 'blue', (3, 4): 'green'}
-        >>> CCC.set_cell_attributes(d, name='color')
-        >>> CCC.cells[(3, 4)]['color']
+        >>> d = {(1, 2, 3, 4): "red", (1, 2, 3): "blue", (3, 4): "green"}
+        >>> CCC.set_cell_attributes(d, name="color")
+        >>> CCC.cells[(3, 4)]["color"]
         'green'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -441,9 +430,12 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         >>> G = nx.path_graph(3)
         >>> CCC = CombinatorialComplex(G)
-        >>> d = {(1, 2): {'color': 'red','attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3}}
+        >>> d = {
+        ...     (1, 2): {"color": "red", "attr2": 1},
+        ...     (0, 1): {"color": "blue", "attr2": 3},
+        ... }
         >>> CCC.set_cell_attributes(d)
-        >>> CCC.cells[(0, 1)]['color']
+        >>> CCC.cells[(0, 1)]["color"]
         'blue'
         3
 
@@ -469,15 +461,15 @@ class CombinatorialComplex(ColoredHyperGraph):
         --------
         >>> G = nx.path_graph(3)
         >>> CCC = CombinatorialComplex(G)
-        >>> d = {0: {'color': 'red', 'attr2': 1 },1: {'color': 'blue', 'attr2': 3} }
+        >>> d = {0: {"color": "red", "attr2": 1}, 1: {"color": "blue", "attr2": 3}}
         >>> CCC.set_node_attributes(d)
-        >>> CCC.get_node_attributes('color')
+        >>> CCC.get_node_attributes("color")
         {0: 'red', 1: 'blue'}
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
         >>> CCC = CombinatorialComplex(G)
-        >>> nodes_color = CCC.get_node_attributes('color')
+        >>> nodes_color = CCC.get_node_attributes("color")
         >>> nodes_color[1]
         'blue'
         """
@@ -502,9 +494,12 @@ class CombinatorialComplex(ColoredHyperGraph):
         --------
         >>> G = nx.path_graph(3)
         >>> CCC = CombinatorialComplex(G)
-        >>> d = {(1, 2): {'color': 'red', 'attr2': 1}, (0, 1): {'color': 'blue', 'attr2': 3} }
+        >>> d = {
+        ...     (1, 2): {"color": "red", "attr2": 1},
+        ...     (0, 1): {"color": "blue", "attr2": 3},
+        ... }
         >>> CCC.set_cell_attributes(d)
-        >>> cell_color = CCC.get_cell_attributes('color')
+        >>> cell_color = CCC.get_cell_attributes("color")
         >>> cell_color[frozenset({0, 1})]
         'blue'
         """
@@ -618,21 +613,19 @@ class CombinatorialComplex(ColoredHyperGraph):
                 for existing_hyperedge in self._node_membership[node]:
                     if existing_hyperedge == hyperedge_:
                         continue
-                    else:
-                        e_rank = self._complex_set.get_rank(existing_hyperedge)
-                        if rank > e_rank:
-                            if existing_hyperedge.issuperset(hyperedge_):
-                                raise ValueError(
-                                    "a violation of the combinatorial complex condition:"
-                                    + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
-                                )
 
-                        if rank < e_rank:
-                            if hyperedge_.issuperset(existing_hyperedge):
-                                raise ValueError(
-                                    "violation of the combinatorial complex condition : "
-                                    + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
-                                )
+                    e_rank = self._complex_set.get_rank(existing_hyperedge)
+                    if rank > e_rank and existing_hyperedge.issuperset(hyperedge_):
+                        raise ValueError(
+                            "a violation of the combinatorial complex condition:"
+                            + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
+                        )
+
+                    if rank < e_rank and hyperedge_.issuperset(existing_hyperedge):
+                        raise ValueError(
+                            "violation of the combinatorial complex condition : "
+                            + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
+                        )
 
     def _add_hyperedge(self, hyperedge, rank, **attr):
         """Add hyperedge.
@@ -675,12 +668,11 @@ class CombinatorialComplex(ColoredHyperGraph):
             if rank != 0:
                 raise ValueError(f"rank must be zero for hashables, got rank {rank}")
             hyperedge_set = frozenset({hyperedge})
-        elif isinstance(hyperedge, (Iterable, HyperEdge)):
-            if len(hyperedge) == 1:
-                if rank != 0:
-                    raise ValueError(
-                        f"rank must be zero cells with single element, got rank {rank} with input hyperedge {hyperedge} "
-                    )
+        elif isinstance(hyperedge, Iterable | HyperEdge):
+            if len(hyperedge) == 1 and rank != 0:
+                raise ValueError(
+                    f"rank must be zero cells with single element, got rank {rank} with input hyperedge {hyperedge} "
+                )
             if isinstance(hyperedge, HyperEdge):
                 hyperedge_ = hyperedge.elements
             else:
@@ -718,7 +710,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                             "weight"
                         ] = 1
                     return
-                elif e_rank < rank:
+                if e_rank < rank:
                     self._CCC_condition(hyperedge_, rank)
                     self.remove_cell(hyperedge_set)
                     self._add_hyperedge_helper(hyperedge_set, rank, **attr)
@@ -730,16 +722,15 @@ class CombinatorialComplex(ColoredHyperGraph):
                             "weight"
                         ] = 1
                     return
-                else:
-                    self._add_hyperedge_helper(hyperedge_set, rank, **attr)
-                    if (
-                        "weight"
-                        not in self._complex_set.hyperedge_dict[rank][hyperedge_set]
-                    ):
-                        self._complex_set.hyperedge_dict[rank][hyperedge_set][
-                            "weight"
-                        ] = 1
-                    return
+
+                self._add_hyperedge_helper(hyperedge_set, rank, **attr)
+                if (
+                    "weight"
+                    not in self._complex_set.hyperedge_dict[rank][hyperedge_set]
+                ):
+                    self._complex_set.hyperedge_dict[rank][hyperedge_set]["weight"] = 1
+                return
+
             self._CCC_condition(hyperedge_, rank)
             self._add_hyperedge_helper(hyperedge_set, rank, **attr)
             if "weight" not in self._complex_set.hyperedge_dict[rank][hyperedge_set]:
@@ -752,9 +743,9 @@ class CombinatorialComplex(ColoredHyperGraph):
     def _incidence_matrix(
         self,
         rank: int,
-        to_rank: Optional[int] = None,
+        to_rank: int | None = None,
         incidence_type: Literal["up", "down"] = "up",
-        weight: Optional[Any] = None,
+        weight: Any | None = None,
         sparse: bool = True,
         index: bool = False,
     ):
@@ -805,6 +796,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             raise ValueError(
                 "incidence matrix can be computed for k!=r, got equal r and k."
             )
+
         if to_rank is None:
             if incidence_type == "up":
                 children = self.skeleton(rank)
@@ -897,14 +889,13 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
         >>> CCC.adjacency_matrix(0, 1)
         """
-        if via_rank is not None:
-            if rank > via_rank:
-                raise ValueError(
-                    "rank must be lesser than via_rank, must be r<k, got r>k"
-                )
+        if via_rank is not None and rank > via_rank:
+            raise ValueError("rank must be lesser than via_rank, must be r<k, got r>k")
         return super().adjacency_matrix(rank, via_rank, s, index)
 
-    def coadjacency_matrix(self, rank, via_rank, s: int = None, index: bool = False):
+    def coadjacency_matrix(
+        self, rank, via_rank, s: int | None = None, index: bool = False
+    ):
         """Compute the coadjacency matrix of self.
 
         The sparse weighted :term:`s-coadjacency matrix`
@@ -927,9 +918,8 @@ class CombinatorialComplex(ColoredHyperGraph):
         coadjacency_matrix : scipy.sparse.csr.csr_matrix
             The coadjacency matrix of this combinatorial complex.
         """
-        if via_rank is not None:
-            if rank < via_rank:
-                raise ValueError("rank must be greater than via_rank")
+        if via_rank is not None and rank < via_rank:
+            raise ValueError("rank must be greater than via_rank")
         return super().coadjacency_matrix(rank, via_rank, s, index)
 
     def dirac_operator_matrix(self, weight: str | None = None, index: bool = False):
@@ -968,7 +958,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         index_set = []
         incidence = {}
-        for i in range(0, self.dim + 1):
+        for i in range(self.dim + 1):
             for j in range(i + 1, self.dim + 1):
                 indexj, indexi, Bij = self.incidence_matrix(
                     i, j, weight=weight, index=True
@@ -977,9 +967,9 @@ class CombinatorialComplex(ColoredHyperGraph):
             index_set.append(indexj)
         index_set.append(indexi)
         dirac = []
-        for i in range(0, self.dim + 1):
+        for i in range(self.dim + 1):
             row = []
-            for j in range(0, self.dim + 1):
+            for j in range(self.dim + 1):
                 if (i, j) in incidence:
                     row.append(incidence[(i, j)])
                 elif (j, i) in incidence:
@@ -997,8 +987,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 shift = len(d)
 
             return d, dirac_mat
-        else:
-            return dirac_mat
+        return dirac_mat
 
     def add_cells_from(self, cells, ranks: Iterable[int] | int | None = None) -> None:
         """Add cells to combinatorial complex.
@@ -1021,13 +1010,8 @@ class CombinatorialComplex(ColoredHyperGraph):
                 self.add_cell(cell, cell.rank)
         else:
             if isinstance(cells, Iterable) and isinstance(ranks, Iterable):
-                if len(cells) != len(ranks):
-                    raise ValueError(
-                        "cells and ranks must have equal number of elements"
-                    )
-                else:
-                    for cell, rank in zip(cells, ranks):
-                        self.add_cell(cell, rank)
+                for cell, rank in zip(cells, ranks, strict=True):
+                    self.add_cell(cell, rank)
         if isinstance(cells, Iterable) and isinstance(ranks, int):
             for cell in cells:
                 self.add_cell(cell, ranks)
@@ -1075,16 +1059,15 @@ class CombinatorialComplex(ColoredHyperGraph):
         **attr : keyword arguments, optional
             Attributes to add to the cell as key=value pairs.
         """
-        if self.graph_based:
-            if rank == 1:
-                if not isinstance(cell, Iterable):
-                    raise TypeError(
-                        "Rank 1 cells in graph-based CombinatorialComplex must be Iterable."
-                    )
-                if len(cell) != 2:
-                    raise ValueError(
-                        f"Rank 1 cells in graph-based CombinatorialComplex must have size equal to 1 got {cell}."
-                    )
+        if self.graph_based and rank == 1:
+            if not isinstance(cell, Iterable):
+                raise TypeError(
+                    "Rank 1 cells in graph-based CombinatorialComplex must be Iterable."
+                )
+            if len(cell) != 2:
+                raise ValueError(
+                    f"Rank 1 cells in graph-based CombinatorialComplex must have size equal to 1 got {cell}."
+                )
 
         self._add_hyperedge(cell, rank, **attr)
 
@@ -1117,16 +1100,17 @@ class CombinatorialComplex(ColoredHyperGraph):
     def clone(self) -> "CombinatorialComplex":
         """Return a copy of the simplex.
 
-        The clone method by default returns an independent shallow copy of the simplex and attributes. That is, if an
-        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
-        for new containers.
+        The clone method by default returns an independent shallow copy of the simplex
+        and attributes. That is, if an attribute is a container, that container is
+        shared by the original and the copy. Use Python's `copy.deepcopy` for new
+        containers.
 
         Returns
         -------
         CombinatorialComplex
             A copy of this combinatorial complex.
         """
-        CCC = CombinatorialComplex(name=self.name, graph_based=self.graph_based)
+        CCC = CombinatorialComplex(graph_based=self.graph_based)
         for cell in self.cells:
             CCC.add_cell(cell, self.cells.get_rank(cell))
         return CCC
@@ -1146,14 +1130,10 @@ class CombinatorialComplex(ColoredHyperGraph):
         >>> CCC = CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
-        >>> CCC.add_cell([9],rank=0)
+        >>> CCC.add_cell([9], rank=0)
         >>> CCC.singletons()
         """
-        singletons = []
-        for k in self.skeleton(0):
-            if self.degree(tuple(k)[0], None) == 0:
-                singletons.append(k)
-        return singletons
+        return [k for k in self.skeleton(0) if self.degree(next(iter(k)), None) == 0]
 
     def remove_singletons(self):
         """Construct new CCC with singleton cells removed.

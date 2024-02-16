@@ -69,8 +69,6 @@ class SimplicialComplex(Complex):
     ----------
     simplices : iterable, optional
         Iterable of maximal simplices that define the simplicial complex.
-    name : str, optional
-        If None then a placeholder '' will be inserted as name.
     **kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
@@ -105,19 +103,17 @@ class SimplicialComplex(Complex):
     4
     """
 
-    def __init__(self, simplices=None, name: str = "", **kwargs) -> None:
+    def __init__(self, simplices=None, **kwargs) -> None:
         """Initialize the simplicial complex.
 
         Parameters
         ----------
         simplices : iterable, optional
             Iterable of maximal simplices that define the simplicial complex.
-        name : str, optional
-            If None then a placeholder '' will be inserted as name.
         **kwargs : keyword arguments, optional
             Attributes to add to the complex as key=value pairs.
         """
-        super().__init__(name, **kwargs)
+        super().__init__(**kwargs)
 
         self._simplex_set = SimplexView()
 
@@ -132,8 +128,7 @@ class SimplicialComplex(Complex):
 
             simplices = []
             for simplex, data in _simplices.items():
-                s1 = Simplex(simplex, **data)
-                simplices.append(s1)
+                simplices.append(Simplex(simplex, **data))
             self.add_simplices_from(simplices)
         elif isinstance(simplices, Iterable):
             self.add_simplices_from(simplices)
@@ -272,9 +267,7 @@ class SimplicialComplex(Complex):
             Simplices of rank `rank` in the simplicial complex.
         """
         if len(self._simplex_set.faces_dict) > rank >= 0:
-            return sorted(
-                tuple(sorted(i)) for i in self._simplex_set.faces_dict[rank].keys()
-            )
+            return sorted(tuple(sorted(i)) for i in self._simplex_set.faces_dict[rank])
         if rank < 0:
             raise ValueError(f"input must be a postive integer, got {rank}")
         raise ValueError(f"input {rank} exceeds max dim")
@@ -296,9 +289,9 @@ class SimplicialComplex(Complex):
         Returns
         -------
         str
-            A string representation containing the name of the simplicial complex.
+            A string representation of the simplicial complex.
         """
-        return f"SimplicialComplex(name='{self.name}')"
+        return "SimplicialComplex()"
 
     def __len__(self) -> int:
         """Compute number of simplices.
@@ -330,8 +323,7 @@ class SimplicialComplex(Complex):
         """
         if simplex in self:
             return self._simplex_set[simplex]
-        else:
-            raise KeyError("simplex is not in the simplicial complex")
+        raise KeyError("simplex is not in the simplicial complex")
 
     def __iter__(self) -> Iterator:
         """Iterate over all simplices (faces) of the simplicial complex.
@@ -574,7 +566,7 @@ class SimplicialComplex(Complex):
             simplex = [simplex]
         if isinstance(simplex, str):
             simplex = [simplex]
-        if isinstance(simplex, (Iterable, Simplex)):
+        if isinstance(simplex, Iterable | Simplex):
             if not isinstance(simplex, Simplex):
                 simplex_ = frozenset(simplex)
                 if len(simplex_) != len(simplex):
@@ -689,9 +681,9 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
-        >>> d = {(1, 2, 3): 'red', (1, 2, 4): 'blue'}
-        >>> SC.set_simplex_attributes(d, name='color')
-        >>> SC[(1, 2, 3)]['color']
+        >>> d = {(1, 2, 3): "red", (1, 2, 4): "blue"}
+        >>> SC.set_simplex_attributes(d, name="color")
+        >>> SC[(1, 2, 3)]["color"]
         'red'
 
         If you provide a dictionary of dictionaries as the second argument,
@@ -701,27 +693,23 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([1, 3, 4])
         >>> SC.add_simplex([1, 2, 3])
         >>> SC.add_simplex([1, 2, 4])
-        >>> d = {(1, 3, 4): {'color': 'red', 'attr2': 1}, (1, 2, 4): {'color': 'blue', 'attr2': 3}}
+        >>> d = {
+        ...     (1, 3, 4): {"color": "red", "attr2": 1},
+        ...     (1, 2, 4): {"color": "blue", "attr2": 3},
+        ... }
         >>> SC.set_simplex_attributes(d)
-        >>> SC[(1, 3, 4)]['color']
+        >>> SC[(1, 3, 4)]["color"]
         'red'
         """
         if name is not None:
             # if `values` is a dict using `.items()` => {simplex: value}
-
             for simplex, value in values.items():
-                try:
+                if simplex in self:
                     self[simplex][name] = value
-                except KeyError:
-                    pass
-
         else:
             for simplex, d in values.items():
-                try:
+                if simplex in self:
                     self[simplex].update(d)
-                except KeyError:
-                    pass
-            return
 
     def get_node_attributes(self, name: str) -> dict[Hashable, Any]:
         """Get node attributes from combinatorial complex.
@@ -771,7 +759,7 @@ class SimplicialComplex(Complex):
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
-        >>> d={(1, 2): "red", (2, 3): "blue", (3, 4): "black"}
+        >>> d = {(1, 2): "red", (2, 3): "blue", (3, 4): "black"}
         >>> SC.set_simplex_attributes(d, name="color")
         >>> SC.get_simplex_attributes("color")
         {frozenset({1, 2}): 'red', frozenset({2, 3}): 'blue', frozenset({3, 4}): 'black'}
@@ -812,8 +800,7 @@ class SimplicialComplex(Complex):
         can be reduced to G computations.
         """
         rows, cols = np.where(np.sign(np.abs(matrix)) > 0)
-        edges = zip(rows.tolist(), cols.tolist())
-        return edges
+        return zip(rows.tolist(), cols.tolist(), strict=True)
 
     def incidence_matrix(
         self, rank, signed: bool = True, weight: str | None = None, index: bool = False
@@ -874,8 +861,7 @@ class SimplicialComplex(Complex):
                     simplex: i for i, simplex in enumerate(self.skeleton(0))
                 }
                 return {}, simplex_dict_d, boundary.tocsr()
-            else:
-                return boundary.tocsr()
+            return boundary.tocsr()
 
         idx_simplices, idx_faces, values = [], [], []
 
@@ -898,6 +884,7 @@ class SimplicialComplex(Complex):
                 len(simplex_dict_d),
             ),
         )
+
         if index:
             if signed:
                 return (
@@ -905,17 +892,15 @@ class SimplicialComplex(Complex):
                     simplex_dict_d,
                     boundary,
                 )
-            else:
-                return (
-                    simplex_dict_d_minus_1,
-                    simplex_dict_d,
-                    abs(boundary),
-                )
-        else:
-            if signed:
-                return boundary
-            else:
-                return abs(boundary)
+            return (
+                simplex_dict_d_minus_1,
+                simplex_dict_d,
+                abs(boundary),
+            )
+
+        if signed:
+            return boundary
+        return abs(boundary)
 
     def coincidence_matrix(
         self, rank, signed: bool = True, weight=None, index: bool = False
@@ -996,9 +981,8 @@ class SimplicialComplex(Complex):
                 L_hodge = abs(L_hodge)
             if index:
                 return row, L_hodge
-            else:
-                return L_hodge
-        elif rank < self.dim:
+            return L_hodge
+        if rank < self.dim:
             row, column, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
@@ -1008,25 +992,19 @@ class SimplicialComplex(Complex):
                 L_hodge = abs(L_hodge)
             if index:
                 return column, L_hodge
-            else:
-                return L_hodge
-        elif rank == self.dim:
+            return L_hodge
+        if rank == self.dim:
             row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_hodge = B.transpose() @ B
             if not signed:
                 L_hodge = abs(L_hodge)
             if index:
                 return column, L_hodge
-            else:
-                return L_hodge
-        else:
-            raise ValueError(
-                f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
-            )
-        if not signed:
-            L_hodge = abs(L_hodge)
-        else:
-            return abs(L_hodge)
+            return L_hodge
+
+        raise ValueError(
+            f"Rank should be larger than 0 and <= {self.dim} (maximal dimension simplices), got {rank}"
+        )
 
     def dirac_operator_matrix(
         self,
@@ -1068,14 +1046,14 @@ class SimplicialComplex(Complex):
 
         index_set = []
         incidence = {}
-        for i in range(0, self.dim + 1):
+        for i in range(self.dim + 1):
             _, indexi, Bi = self.incidence_matrix(i, weight=weight, index=True)
             index_set.append(indexi)
             incidence[(i, i + 1)] = Bi
         dirac = []
-        for i in range(0, self.dim + 1):
+        for i in range(self.dim + 1):
             row = []
-            for j in range(0, self.dim + 1):
+            for j in range(self.dim + 1):
                 if (i, j) in incidence:
                     row.append(incidence[(i + 1, j + 1)])
                 elif (j, i) in incidence:
@@ -1182,12 +1160,7 @@ class SimplicialComplex(Complex):
         if weight is not None:
             raise ValueError("`weight` is not supported in this version")
 
-        if rank == 0:
-            row, col, B_next = self.incidence_matrix(
-                rank + 1, weight=weight, index=True
-            )
-            L_up = B_next @ B_next.transpose()
-        elif rank < self.dim and rank > 0:
+        if rank < self.dim and rank >= 0:
             row, col, B_next = self.incidence_matrix(
                 rank + 1, weight=weight, index=True
             )
@@ -1332,22 +1305,18 @@ class SimplicialComplex(Complex):
         return L_down
 
     def add_elements_from_nx_graph(self, G: nx.Graph) -> None:
-        """Add elements from a networkx graph to self.
+        """Add elements from a networkx graph to this simplicial complex.
 
         Parameters
         ----------
         G : networkx.Graph
             A networkx graph instance.
         """
-        _simplices = []
-        for edge in G.edges:
-            _simplices.append(edge)
-        for node in G.nodes:
-            _simplices.append([node])
+        _simplices = list(G.edges) + list(map(lambda n: [n], G.nodes))
 
         self.add_simplices_from(_simplices)
 
-    def restrict_to_simplices(self, cell_set, name: str = "") -> "SimplicialComplex":
+    def restrict_to_simplices(self, cell_set) -> "SimplicialComplex":
         """Construct a simplicial complex using a subset of the simplices.
 
         Parameters
@@ -1355,8 +1324,6 @@ class SimplicialComplex(Complex):
         cell_set : iterable of hashables or simplices
             A subset of elements of the simplicial complex that should be in the new
             simplicial complex.
-        name : str, optional
-            Name of the restricted simplicial complex.
 
         Returns
         -------
@@ -1373,14 +1340,10 @@ class SimplicialComplex(Complex):
         >>> SC1.simplices
         SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (2, 3), (2, 4), (1, 2, 3)])
         """
-        rns = []
-        for cell in cell_set:
-            if cell in self:
-                rns.append(cell)
+        rns = [cell for cell in cell_set if cell in self]
+        return SimplicialComplex(simplices=rns)
 
-        return SimplicialComplex(simplices=rns, name=name)
-
-    def restrict_to_nodes(self, node_set, name: str = ""):
+    def restrict_to_nodes(self, node_set):
         """Construct a new simplicial complex by restricting the simplices.
 
         The simplices are restricted to the nodes referenced by node_set.
@@ -1389,8 +1352,6 @@ class SimplicialComplex(Complex):
         ----------
         node_set : iterable of hashables
             A subset of nodes of the simplicial complex to restrict to.
-        name : str, optional
-            Name of the restricted simplicial complex.
 
         Returns
         -------
@@ -1407,15 +1368,16 @@ class SimplicialComplex(Complex):
         >>> new_complex.simplices
         SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (1, 2, 3), (1, 2, 4)])
         """
-        simplices = []
         node_set = set(node_set)
-        for rank in range(1, self.dim + 1):
-            for s in self.skeleton(rank):
-                if set(s).issubset(node_set):
-                    simplices.append(s)
+        simplices = [
+            s
+            for rank in range(1, self.dim + 1)
+            for s in self.skeleton(rank)
+            if set(s).issubset(node_set)
+        ]
         all_sim = simplices + [frozenset({i}) for i in node_set if i in self.nodes]
 
-        return SimplicialComplex(all_sim, name=name)
+        return SimplicialComplex(all_sim)
 
     def get_all_maximal_simplices(self):
         """Get all maximal simplices of this simplicial complex.
@@ -1433,11 +1395,7 @@ class SimplicialComplex(Complex):
         >>> SC.get_all_maximal_simplices()
         [(2, 5), (1, 2, 3), (1, 2, 4)]
         """
-        maximals = []
-        for s in self.simplices:
-            if self.is_maximal(s):
-                maximals.append(tuple(s))
-        return maximals
+        return [tuple(s) for s in self.simplices if self.is_maximal(s)]
 
     @classmethod
     def from_spharpy(cls, mesh) -> "SimplicialComplex":
@@ -1458,8 +1416,9 @@ class SimplicialComplex(Complex):
         >>> import spharapy.trimesh as tm
         >>> import spharapy.spharabasis as sb
         >>> import spharapy.datasets as sd
-        >>> mesh = tm.TriMesh([[0, 1, 2]], [[1., 0., 0.], [0., 2., 0.],
-        ...                                        [0., 0., 3.]])
+        >>> mesh = tm.TriMesh(
+        ...     [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
+        ... )
 
         >>> SC = SimplicialComplex.from_spharpy(mesh)
         """
@@ -1469,12 +1428,10 @@ class SimplicialComplex(Complex):
         first_ind = np.min(mesh.trilist)
 
         if first_ind == 0:
-            SC.set_simplex_attributes(
-                dict(zip(range(len(vertices)), vertices)), name="position"
-            )
+            SC.set_simplex_attributes(dict(enumerate(vertices)), name="position")
         else:  # first index starts at 1.
             SC.set_simplex_attributes(
-                dict(zip(range(first_ind, len(vertices) + first_ind), vertices)),
+                dict(enumerate(vertices, first_ind)),
                 name="position",
             )
 
@@ -1522,7 +1479,7 @@ class SimplicialComplex(Complex):
         --------
         >>> from gudhi import SimplexTree
         >>> tree = SimplexTree()
-        >>> _ = tree.insert([1,2,3,5])
+        >>> _ = tree.insert([1, 2, 3, 5])
         >>> SC = SimplicialComplex.from_gudhi(tree)
         """
         SC = cls()
@@ -1547,11 +1504,15 @@ class SimplicialComplex(Complex):
         Examples
         --------
         >>> import trimesh
-        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]], faces=[[0, 1, 2]], process=False)
+        >>> mesh = trimesh.Trimesh(
+        ...     vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
+        ...     faces=[[0, 1, 2]],
+        ...     process=False,
+        ... )
         >>> SC = SimplicialComplex.from_trimesh(mesh)
         >>> print(SC.nodes)
         >>> print(SC.simplices)
-        >>> SC[(0)]['position']
+        >>> SC[(0)]["position"]
         """
         SC = cls(mesh.faces)
 
@@ -1559,13 +1520,12 @@ class SimplicialComplex(Complex):
 
         if first_ind == 0:
             SC.set_simplex_attributes(
-                dict(zip(range(len(mesh.vertices)), mesh.vertices)), name="position"
+                dict(enumerate(mesh.vertices)),
+                name="position",
             )
         else:  # first index starts at 1.
             SC.set_simplex_attributes(
-                dict(
-                    zip(range(first_ind, len(mesh.vertices) + first_ind), mesh.vertices)
-                ),
+                dict(enumerate(mesh.vertices, first_ind)),
                 name="position",
             )
 
@@ -1614,10 +1574,7 @@ class SimplicialComplex(Complex):
             return False
 
         lst = self.get_all_maximal_simplices()
-        for i in lst:
-            if len(i) == 2:  # gas edges that are not part of a face
-                return False
-        return True
+        return all(len(i) != 2 for i in lst)
 
     def to_trimesh(self, vertex_position_name: str = "position"):
         """Convert simplicial complex to trimesh object.
@@ -1667,7 +1624,7 @@ class SimplicialComplex(Complex):
         >>> import spharapy.trimesh as tm
         >>> import spharapy.spharabasis as sb
         >>> import spharapy.datasets as sd
-        >>> mesh = tm.TriMesh([[0, 1, 2]],[[0, 0, 0], [0, 0, 1], [0, 1, 0]] )
+        >>> mesh = tm.TriMesh([[0, 1, 2]], [[0, 0, 0], [0, 0, 1], [0, 1, 0]])
         >>> SC = SimplicialComplex.from_spharpy(mesh)
         >>> mesh2 = SC.to_spharapy()
         >>> mesh2.vertlist == mesh.vertlist
@@ -1739,7 +1696,7 @@ class SimplicialComplex(Complex):
         >>> SC[(1, 2)]["weight"]
         2
         """
-        return cls(G, name=G.name)
+        return cls(G)
 
     def is_connected(self) -> bool:
         """Check if the simplicial complex is connected.
@@ -1758,7 +1715,7 @@ class SimplicialComplex(Complex):
             edge = list(edge)
             G.add_edge(edge[0], edge[1])
         for node in self.skeleton(0):
-            G.add_node(list(node)[0])
+            G.add_node(next(iter(node)))
         return nx.is_connected(G)
 
     @classmethod
@@ -1784,9 +1741,7 @@ class SimplicialComplex(Complex):
         SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4), (1, 2, 3), (1, 2, 4), (1, 3, 4), (2, 3, 4), (1, 2, 3, 4)])
         """
         edges = H.edges
-        lst = []
-        for e in edges:
-            lst.append(edges[e])
+        lst = [edges[e] for e in edges]
         return cls(lst)
 
     def to_cell_complex(self):
@@ -1859,12 +1814,12 @@ class SimplicialComplex(Complex):
     def clone(self) -> "SimplicialComplex":
         """Return a copy of the simplicial complex.
 
-        The clone method by default returns an independent shallow copy of the simplicial complex. Use Python’s
-        `copy.deepcopy` for new containers.
+        The clone method by default returns an independent shallow copy of the
+        simplicial complex. Use Python's `copy.deepcopy` for new containers.
 
         Returns
         -------
         SimplicialComplex
             A shallow copy of this simplicial complex.
         """
-        return SimplicialComplex(self.simplices, name=self.name)
+        return SimplicialComplex(self.simplices)

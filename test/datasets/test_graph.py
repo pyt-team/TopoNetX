@@ -1,7 +1,5 @@
 """Test graph dataset."""
 
-from toponetx.classes.cell_complex import CellComplex
-from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.datasets.graph import coauthorship, karate_club
 
 

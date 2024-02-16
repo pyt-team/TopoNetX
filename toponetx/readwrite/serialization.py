@@ -1,6 +1,7 @@
-"""Read/write utilities."""
-
+"""Read and write complexes as pickled objects."""
 import pickle
+
+__all__ = ["to_pickle", "load_from_pickle"]
 
 
 def to_pickle(obj, filename: str) -> None:
@@ -31,5 +32,4 @@ def load_from_pickle(filepath):
         Object.
     """
     with open(filepath, "rb") as f:
-        temp = pickle.load(f)
-    return temp
+        return pickle.load(f)

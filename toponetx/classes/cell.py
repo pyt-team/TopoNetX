@@ -20,8 +20,6 @@ class Cell(Atom):
     elements : iterable of hashable objects
         An iterable that contains hashable objects representing the nodes of the cell. The order of the elements is important
         and defines the cell up to cyclic permutation.
-    name : str, optional
-        A string representing the name of the cell.
     regular : bool, optional
         A boolean indicating whether the cell satisfies the regularity condition. The default value is True.
         A 2D cell is regular if and only if there is no repetition in the boundary edges that define the cell.
@@ -58,9 +56,7 @@ class Cell(Atom):
     ((0, 1), (0, 0))]
     """
 
-    def __init__(
-        self, elements: Collection, name: str = "", regular: bool = True, **kwargs
-    ) -> None:
+    def __init__(self, elements: Collection, regular: bool = True, **kwargs) -> None:
         """Initialize class representing a 2D cell.
 
         A 2D cell is an elementary building block used to build a 2D cell complex, whether regular or non-regular.
@@ -70,8 +66,6 @@ class Cell(Atom):
         elements : Collection[Hashable]
             An iterable that contains hashable objects representing the nodes of the cell. The order of the elements is important
             and defines the cell up to cyclic permutation.
-        name : str, optional
-            A string representing the name of the cell.
         regular : bool, optional
             A boolean indicating whether the cell satisfies the regularity condition. The default value is True.
             A 2D cell is regular if and only if there is no repetition in the boundary edges that define the cell.
@@ -80,7 +74,7 @@ class Cell(Atom):
         **kwargs : keyword arguments, optional
             Attributes belonging to the cell can be added as key-value pairs. Both the key and value must be hashable.
         """
-        super().__init__(tuple(elements), name, **kwargs)
+        super().__init__(tuple(elements), **kwargs)
 
         self._regular = regular
         elements = list(elements)
@@ -111,16 +105,16 @@ class Cell(Atom):
     def clone(self) -> "Cell":
         """Clone the Cell with all attributes.
 
-        The clone method by default returns an independent shallow copy of the cell and attributes. That is, if an
-        attribute is a container, that container is shared by the original and the copy. Use Python’s `copy.deepcopy`
-        for new containers.
+        The clone method by default returns an independent shallow copy of the cell and
+        attributes. That is, if an attribute is a container, that container is shared
+        by the original and the copy. Use Python's `copy.deepcopy` for new containers.
 
         Returns
         -------
         Cell
             A copy of this cell.
         """
-        return Cell(self.elements, self.name, self._regular, **self._attributes)
+        return Cell(self.elements, self._regular, **self._attributes)
 
     @staticmethod
     def is_valid_cell(elements: Sequence, regular: bool = False) -> bool:
@@ -168,12 +162,12 @@ class Cell(Atom):
         """
         if self._regular:  # condition enforced
             return True
-        else:
-            _adjdict = {}
-            for e in self._boundary:
-                if e[0] in _adjdict:
-                    return False
-                _adjdict[e[0]] = e[1]
+
+        _adjdict = {}
+        for e in self._boundary:
+            if e[0] in _adjdict:
+                return False
+            _adjdict[e[0]] = e[1]
 
         return True
 
@@ -214,10 +208,9 @@ class Cell(Atom):
         if len(edge) == 2:
             if tuple(edge) in self.boundary:
                 return 1
-            elif tuple(edge)[::-1] in self.boundary:
+            if tuple(edge)[::-1] in self.boundary:
                 return -1
-            else:
-                raise KeyError(f"Ihe input {edge} is not in the boundary of the cell.")
+            raise KeyError(f"Ihe input {edge} is not in the boundary of the cell.")
 
         raise ValueError(f"The input {edge} is not a valid edge.")
 
@@ -259,7 +252,6 @@ class Cell(Atom):
         """
         return Cell(
             self.elements[::-1],
-            name=self.name,
             regular=self._regular,
             **self._attributes,
         )
@@ -303,7 +295,7 @@ class Cell(Atom):
             of them can be obtaine from the other by a cylic rotation
             of the boundary verties defining the 2d cells.
         """
-        if isinstance(cell, (tuple, list)):
+        if isinstance(cell, tuple | list):
             seq = cell
         elif isinstance(cell, Cell):
             seq = cell.elements

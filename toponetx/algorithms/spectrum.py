@@ -42,7 +42,7 @@ def _normalize(f):
     minf = min(f.values())
     maxf = max(f.values())
     f_normalized = {}
-    for v in f.keys():
+    for v in f:
         if minf == maxf:
             f_normalized[v] = 0
         else:
@@ -71,8 +71,7 @@ def hodge_laplacian_eigenvectors(
     Examples
     --------
     >>> from toponetx.classes import SimplicialComplex
-    >>> SC = SimplicialComplex([[ 1, 2, 3], [2, 3, 5], [0, 1]])
-    >>> row, column, B1 = SC.incidence_matrix(1, index=True)
+    >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
     >>> L1 = SC.hodge_laplacian_matrix(1)
     >>> vals, vecs = hodge_laplacian_eigenvectors(L1, 2)
     """
@@ -84,17 +83,13 @@ def hodge_laplacian_eigenvectors(
     else:
         vals, vect = np.linalg.eig(hodge_laplacian.toarray())
 
-    eigenvaluevector = []
-    for i in vals.real:
-        eigenvaluevector.append(round(i, 15))
+    eigenvaluevector = [round(i, 15) for i in vals.real]
     eigenvectorstemp = vect.transpose().real
     mydict = {}
-    for i in range(0, len(eigenvaluevector)):
+    for i in range(len(eigenvaluevector)):
         mydict[eigenvaluevector[i]] = eigenvectorstemp[i]
     eigenvaluevector.sort()
-    finaleigenvectors = []
-    for val in eigenvaluevector:
-        finaleigenvectors.append(mydict[val])
+    finaleigenvectors = [mydict[val] for val in eigenvaluevector]
     return np.array(eigenvaluevector).T, np.array(finaleigenvectors).T
 
 
@@ -123,7 +118,7 @@ def set_hodge_laplacian_eigenvector_attrs(
     Examples
     --------
     >>> from toponetx.classes import SimplicialComplex
-    >>> SC = SimplicialComplex([[1, 2, 3],[2, 3, 5],[0, 1]])
+    >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
     >>> set_hodge_laplacian_eigenvector_attrs(SC, 1, 2, "down")
     >>> SC.get_simplex_attributes("0.th_eigen", 1)
     """
@@ -133,7 +128,7 @@ def set_hodge_laplacian_eigenvector_attrs(
     elif laplacian_type == "up":
         L = SC.up_laplacian_matrix(dim)
     elif laplacian_type == "down":
-        L = SC.up_laplacian_matrix(dim)
+        L = SC.down_laplacian_matrix(dim)
     else:
         raise ValueError(
             f"laplacian_type must be up, down or hodge, got {laplacian_type}"
@@ -141,7 +136,7 @@ def set_hodge_laplacian_eigenvector_attrs(
     _, vect = hodge_laplacian_eigenvectors(L, n_components)
 
     for i in range(len(vect)):
-        d = dict(zip(index, vect[i]))
+        d = dict(zip(index, vect[i], strict=True))
         if normalized:
             d = _normalize(d)
         SC.set_simplex_attributes(d, str(i) + ".th_eigen")
@@ -195,7 +190,7 @@ def set_laplacian_beltrami_eigenvectors(SC: SimplicialComplex) -> None:
     index = SC.skeleton(0)
     vect, _ = laplacian_beltrami_eigenvectors(SC)
     for i in range(len(vect)):
-        d = dict(zip(index, vect[:, i]))
+        d = dict(zip(index, vect[:, i], strict=True))
         SC.set_simplex_attributes(d, str(i) + ".laplacian_beltrami_eigenvectors")
 
 
@@ -238,10 +233,10 @@ def cell_complex_hodge_laplacian_spectrum(
     --------
     >>> from toponetx.classes import CellComplex
     >>> CC = CellComplex()
-    >>> CC.add_cell([1,2,3,4],rank=2)
-    >>> CC.add_cell([2,3,4,5],rank=2)
-    >>> CC.add_cell([5,6,7,8],rank=2)
-    >>> cell_complex_hodge_laplacian_spectrum(CC,1)
+    >>> CC.add_cell([1, 2, 3, 4], rank=2)
+    >>> CC.add_cell([2, 3, 4, 5], rank=2)
+    >>> CC.add_cell([5, 6, 7, 8], rank=2)
+    >>> cell_complex_hodge_laplacian_spectrum(CC, 1)
     """
     return laplacian_spectrum(CC.hodge_laplacian_matrix(rank=rank, weight=weight))
 
@@ -268,8 +263,8 @@ def simplicial_complex_hodge_laplacian_spectrum(
     Examples
     --------
     >>> from toponetx.classes import SimplicialComplex
-    >>> SC=SimplicialComplex([[1,2,3],[2,3,5],[0,1]])
-    >>> spectrum=simplicial_complex_hodge_laplacian_spectrum(SC,1)
+    >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
+    >>> spectrum = simplicial_complex_hodge_laplacian_spectrum(SC, 1)
     """
     return laplacian_spectrum(SC.hodge_laplacian_matrix(rank=rank))
 
@@ -321,10 +316,10 @@ def cell_complex_adjacency_spectrum(CC: CellComplex, rank: int):
     --------
     >>> from toponetx.classes import CellComplex
     >>> CC = CellComplex()
-    >>> CC.add_cell([1,2,3,4],rank=2)
-    >>> CC.add_cell([2,3,4,5],rank=2)
-    >>> CC.add_cell([5,6,7,8],rank=2)
-    >>> cell_complex_adjacency_spectrum(CC,1)
+    >>> CC.add_cell([1, 2, 3, 4], rank=2)
+    >>> CC.add_cell([2, 3, 4, 5], rank=2)
+    >>> CC.add_cell([5, 6, 7, 8], rank=2)
+    >>> cell_complex_adjacency_spectrum(CC, 1)
     """
     return laplacian_spectrum(CC.adjacency_matrix(rank=rank))
 
@@ -393,7 +388,7 @@ def combinatorial_complex_adjacency_spectrum(
     Examples
     --------
     >>> from toponetx.classes import CombinatorialComplex
-    >>> CCC = CombinatorialComplex(cells=[[1, 2, 3], [2, 3], [0]],ranks=[2, 1, 0])
+    >>> CCC = CombinatorialComplex(cells=[[1, 2, 3], [2, 3], [0]], ranks=[2, 1, 0])
     >>> s = laplacian_spectrum(CCC.adjacency_matrix(0, 2))
     """
     return laplacian_spectrum(CCC.adjacency_matrix(rank, via_rank))

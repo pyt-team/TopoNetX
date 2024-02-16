@@ -158,24 +158,24 @@ class TestGraphToSimplicialComplex:
             unexpected_tetrahedra = []
             # Now, for each radius, we include or exclude simplices depending on its value.
             # Radius 1
-            edges = expected_edges if 1 <= r else unexpected_edges
-            triangles = expected_triangles if 1 <= r else unexpected_triangles
-            tetrahedra = expected_tetrahedra if 1 <= r else unexpected_tetrahedra
+            edges = expected_edges if r >= 1 else unexpected_edges
+            triangles = expected_triangles if r >= 1 else unexpected_triangles
+            tetrahedra = expected_tetrahedra if r >= 1 else unexpected_tetrahedra
             edges.extend([(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)])
             triangles.extend([(0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)])
             tetrahedra.append((0, 1, 2, 3))
             # Radius 2
-            edges = expected_edges if 2 <= r else unexpected_edges
-            triangles = expected_triangles if 2 <= r else unexpected_triangles
+            edges = expected_edges if r >= 2 else unexpected_edges
+            triangles = expected_triangles if r >= 2 else unexpected_triangles
             edges.extend([(4, 5), (4, 6), (5, 6)])
             triangles.append((4, 5, 6))
             # Radius 3
-            edges = expected_edges if 3 <= r else unexpected_edges
+            edges = expected_edges if r >= 3 else unexpected_edges
             edges.append((3, 4))
             # Radius 4
-            edges = expected_edges if 4 <= r else unexpected_edges
-            triangles = expected_triangles if 4 <= r else unexpected_triangles
-            tetrahedra = expected_tetrahedra if 4 <= r else unexpected_tetrahedra
+            edges = expected_edges if r >= 4 else unexpected_edges
+            triangles = expected_triangles if r >= 4 else unexpected_triangles
+            tetrahedra = expected_tetrahedra if r >= 4 else unexpected_tetrahedra
             edges.extend([(4, 7), (5, 7), (6, 7)])
             triangles.extend([(4, 5, 7), (4, 6, 7), (5, 6, 7)])
             tetrahedra.append((4, 5, 6, 7))

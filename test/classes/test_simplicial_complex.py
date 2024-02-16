@@ -3,13 +3,10 @@
 import networkx as nx
 import numpy as np
 import pytest
-import spharapy.datasets as sd
-import spharapy.spharabasis as sb
 import spharapy.trimesh as tm
 from gudhi import SimplexTree
 from scipy.sparse import bmat
 
-from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
@@ -116,9 +113,8 @@ class TestSimplicialComplex:
         G.add_edge(0, 1)
         G.add_edge(2, 5)
         G.add_edge(5, 4, weight=5)
-        SC = SimplicialComplex(G, name="graph complex")
-        assert (repr(SC)) == "SimplicialComplex(name='graph complex')"
-        assert SC.name == "graph complex"
+        SC = SimplicialComplex(G)
+        assert (repr(SC)) == "SimplicialComplex()"
 
     def test_iter(self):
         """Test iter method."""
