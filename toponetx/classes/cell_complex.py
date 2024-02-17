@@ -1877,7 +1877,7 @@ class CellComplex(Complex):
 
         Parameters
         ----------
-        rank : {0, 1}
+        rank : {1, 2}
             Rank of the down Laplacian matrix.
         signed : bool
             Whether to return the signed or unsigned down laplacian.
