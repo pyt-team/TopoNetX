@@ -9,19 +9,24 @@ from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
-from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
 
 __all__ = ["distance", "cell_distance"]
 
+# In this module, only cell complexes, combinatorial complexes and colored
+# hypergraphs are supported.
+ComplexType = CellComplex | CombinatorialComplex | ColoredHyperGraph
 
-def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) -> int:
+
+def distance(
+    domain: ComplexType, source: Hashable, target: Hashable, s: int = 1
+) -> int:
     """Return shortest s-walk distance between two nodes in the cell complex.
 
     Parameters
     ----------
-    domain : Complex
-        Supported complexes are cell/combintorial and hypegraphs.
+    domain : CellComplex or CombinaorialComplex or ColoredHyperGraph
+        The domain on which to compute the s-walk distance between source and target.
     source : Hashable
         A node in the input complex.
     target : Hashable
@@ -81,7 +86,7 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
 
 
 def cell_distance(
-    domain: Complex,
+    domain: ComplexType,
     source: Iterable | HyperEdge | Cell,
     target: Iterable | HyperEdge | Cell,
     s: int = 1,
@@ -90,8 +95,8 @@ def cell_distance(
 
     Parameters
     ----------
-    domain : Complex
-        Supported complexes are cell/combintorial and hypegraphs.
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
+        The domain on which to compute the s-walk distance between source and target cells.
     source : Iterable or HyperEdge or Cell
         An Iterable representing a cell in the input complex cell complex.
     target : Iterable or HyperEdge or Cell
