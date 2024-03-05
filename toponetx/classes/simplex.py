@@ -10,7 +10,7 @@ from toponetx.classes.complex import Atom
 __all__ = ["Simplex"]
 
 
-class Simplex(Atom):
+class Simplex(Atom[frozenset[Hashable]]):
     """A class representing a simplex in a simplicial complex.
 
     This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension. The

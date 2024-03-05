@@ -8,7 +8,7 @@ from toponetx.classes.complex import Atom
 __all__ = ["HyperEdge"]
 
 
-class HyperEdge(Atom):
+class HyperEdge(Atom[frozenset[Hashable]]):
     """Class for a hyperedge (or a set-type cell).
 
     This class represents a set-type cell in a combinatorial complex, which is a set of
