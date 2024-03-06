@@ -27,21 +27,21 @@ def s_connected_components(
     s: int,
     cells: Literal[True] = ...,
     return_singletons: bool = ...,
-) -> Generator[set[tuple[Hashable, ...]], None, None]:
+) -> Generator[set[tuple[Hashable, ...]], None, None]:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def s_connected_components(
     domain: ComplexType, s: int, cells: Literal[False], return_singletons: bool = ...
-) -> Generator[set[Hashable], None, None]:
+) -> Generator[set[Hashable], None, None]:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def s_connected_components(
     domain: ComplexType, s: int, cells: bool, return_singletons: bool = ...
-) -> Generator[set[Hashable] | set[tuple[Hashable, ...]], None, None]:
+) -> Generator[set[Hashable] | set[tuple[Hashable, ...]], None, None]:  # numpydoc ignore=GL08
     pass
 
 
@@ -185,21 +185,21 @@ def s_component_subcomplexes(
 @overload
 def connected_components(
     domain: ComplexType, cells: Literal[True] = ..., return_singletons: bool = ...
-) -> Generator[set[tuple[Hashable, ...]], None, None]:
+) -> Generator[set[tuple[Hashable, ...]], None, None]:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def connected_components(
     domain: ComplexType, cells: Literal[False], return_singletons: bool = ...
-) -> Generator[set[Hashable], None, None]:
+) -> Generator[set[Hashable], None, None]:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def connected_components(
     domain: ComplexType, cells: bool, return_singletons: bool = ...
-) -> Generator[set[Hashable] | set[tuple[Hashable, ...]], None, None]:
+) -> Generator[set[Hashable] | set[tuple[Hashable, ...]], None, None]:  # numpydoc ignore=GL08
     pass
 
 
