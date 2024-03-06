@@ -57,23 +57,6 @@ class Cell(Atom):
     """
 
     def __init__(self, elements: Collection, regular: bool = True, **kwargs) -> None:
-        """Initialize class representing a 2D cell.
-
-        A 2D cell is an elementary building block used to build a 2D cell complex, whether regular or non-regular.
-
-        Parameters
-        ----------
-        elements : Collection[Hashable]
-            An iterable that contains hashable objects representing the nodes of the cell. The order of the elements is important
-            and defines the cell up to cyclic permutation.
-        regular : bool, optional
-            A boolean indicating whether the cell satisfies the regularity condition. The default value is True.
-            A 2D cell is regular if and only if there is no repetition in the boundary edges that define the cell.
-            By default, the cell is assumed to be regular unless otherwise specified. Self-loops are not allowed in the boundary
-            of the cell. If a cell violates the cell complex regularity condition, a ValueError is raised.
-        **kwargs : keyword arguments, optional
-            Attributes belonging to the cell can be added as key-value pairs. Both the key and value must be hashable.
-        """
         super().__init__(tuple(elements), **kwargs)
 
         self._regular = regular

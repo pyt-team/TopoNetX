@@ -113,6 +113,5 @@ intersphinx_mapping = {
 }
 
 # configure numpydoc
-numpydoc_validation_checks = {"all", "GL01", "ES01", "EX01", "SA01"}
 numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False

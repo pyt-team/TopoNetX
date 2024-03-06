@@ -24,6 +24,13 @@ __all__ = ["ColoredHyperGraph"]
 class ColoredHyperGraph(Complex):
     """Class for ColoredHyperGraph Complex.
 
+    A Colored Hypergraph (CHG) is a triplet CHG = (S, X, c) where:
+    - S is an abstract set of entities,
+    - X is a subset of the power set of S, and
+    - c is the color function that associates a positive integer color or rank to each set x in X.
+
+    A CHG is a generalization of graphs, combinatorial complexes, hypergraphs, cellular, and simplicial complexes.
+
     Parameters
     ----------
     cells : Collection, optional
@@ -32,6 +39,46 @@ class ColoredHyperGraph(Complex):
         Represents the color of cells.
     **kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
+
+    Examples
+    --------
+    Define an empty colored hypergraph:
+
+    >>> CHG = ColoredHyperGraph()
+
+    Add cells to the colored hypergraph:
+
+    >>> from toponetx.classes.colored_hypergraph import ColoredHyperGraph
+    >>> CHG = ColoredHyperGraph()
+    >>> CHG.add_cell([1, 2], rank=1)
+    >>> CHG.add_cell([3, 4], rank=1)
+    >>> CHG.add_cell([1, 2, 3, 4], rank=2)
+    >>> CHG.add_cell([1, 2, 4], rank=2)
+    >>> CHG.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
+
+    Create a Colored Hypergraph and add groups of friends with corresponding ranks:
+
+    >>> CHG = ColoredHyperGraph()
+    >>> CHG.add_cell(
+    ...     ["Alice", "Bob"], rank=1
+    ... )  # Alice and Bob are in a close-knit group.
+    >>> CHG.add_cell(
+    ...     ["Charlie", "David"], rank=1
+    ... )  # Another closely connected group.
+    >>> CHG.add_cell(
+    ...     ["Alice", "Bob", "Charlie", "David"], rank=2
+    ... )  # Both groups together form a higher-ranked community.
+    >>> CHG.add_cell(["Alice", "Bob", "David"], rank=2)  # Overlapping connections.
+    >>> CHG.add_cell(
+    ...     ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace"], rank=3
+    ... )  # A larger, more influential community.
+
+    The code demonstrates how to represent social relationships using a Colored Hypergraph, where each group of friends (hyperedge) is assigned a rank based on the strength of the connection.
     """
 
     def __init__(
@@ -40,65 +87,6 @@ class ColoredHyperGraph(Complex):
         ranks: Collection | int | None = None,
         **kwargs,
     ) -> None:
-        """
-        Initialize the Colored HyperGraph.
-
-        A Colored Hypergraph (CHG) is a triplet CHG = (S, X, c) where:
-        - S is an abstract set of entities,
-        - X is a subset of the power set of S, and
-        - c is the color function that associates a positive integer color or rank to each set x in X.
-
-        A CHG is a generalization of graphs, combinatorial complexes, hypergraphs, cellular, and simplicial complexes.
-
-        Parameters
-        ----------
-        cells : Collection, optional
-            The initial collection of cells in the Colored Hypergraph.
-        ranks : Collection, optional
-            Represents the color of cells.
-        **kwargs : keyword arguments, optional
-            Attributes to add to the complex as key=value pairs.
-
-        Attributes
-        ----------
-        complex : dict
-            A dictionary that can be used to store additional information about the complex.
-
-        Examples
-        --------
-        Define an empty colored hypergraph:
-
-        >>> CHG = ColoredHyperGraph()
-
-        Add cells to the colored hypergraph:
-
-        >>> from toponetx.classes.colored_hypergraph import ColoredHyperGraph
-        >>> CHG = ColoredHyperGraph()
-        >>> CHG.add_cell([1, 2], rank=1)
-        >>> CHG.add_cell([3, 4], rank=1)
-        >>> CHG.add_cell([1, 2, 3, 4], rank=2)
-        >>> CHG.add_cell([1, 2, 4], rank=2)
-        >>> CHG.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
-
-        Create a Colored Hypergraph and add groups of friends with corresponding ranks:
-
-        >>> CHG = ColoredHyperGraph()
-        >>> CHG.add_cell(
-        ...     ["Alice", "Bob"], rank=1
-        ... )  # Alice and Bob are in a close-knit group.
-        >>> CHG.add_cell(
-        ...     ["Charlie", "David"], rank=1
-        ... )  # Another closely connected group.
-        >>> CHG.add_cell(
-        ...     ["Alice", "Bob", "Charlie", "David"], rank=2
-        ... )  # Both groups together form a higher-ranked community.
-        >>> CHG.add_cell(["Alice", "Bob", "David"], rank=2)  # Overlapping connections.
-        >>> CHG.add_cell(
-        ...     ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace"], rank=3
-        ... )  # A larger, more influential community.
-
-        The code demonstrates how to represent social relationships using a Colored Hypergraph, where each group of friends (hyperedge) is assigned a rank based on the strength of the connection.
-        """
         super().__init__(**kwargs)
 
         self._complex_set = ColoredHyperEdgeView()
