@@ -137,3 +137,6 @@ checks = [
     "EX01",
     "SA01"
 ]
+exclude = [
+    '\.__init__$',
+]

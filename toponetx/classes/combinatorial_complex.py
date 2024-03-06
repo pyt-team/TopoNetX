@@ -48,6 +48,15 @@ class CombinatorialComplex(ColoredHyperGraph):
     **kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
+    Raises
+    ------
+    TypeError
+        If cells is not given as an Iterable.
+    ValueError
+        If input cells is not an instance of HyperEdge when rank is None.
+        If input HyperEdge has None rank when rank is specified.
+        If cells and ranks do not have an equal number of elements.
+
     Attributes
     ----------
     complex : dict
@@ -76,39 +85,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         graph_based: bool = False,
         **kwargs,
     ) -> None:
-        """Generate a Combinatorial Complex.
-
-        Parameters
-        ----------
-        cells : Collection, optional
-            A collection of cells to add to the combinatorial complex.
-        ranks : Collection, optional
-            When cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
-            size as cells.
-        graph_based : bool, default=False
-            When true rank 1 edges must have cardinality equals to 1.
-        **kwargs : keyword arguments, optional
-            Attributes to add to the complex as key=value pairs.
-
-        Returns
-        -------
-        None
-            Initialized Combinatorial Complex.
-
-        Raises
-        ------
-        TypeError
-            If cells is not given as an Iterable.
-        ValueError
-            If input cells is not an instance of HyperEdge when rank is None.
-            If input HyperEdge has None rank when rank is specified.
-            If cells and ranks do not have an equal number of elements.
-
-        Notes
-        -----
-        This function initializes a Combinatorial Complex with the given parameters. It adds cells to the complex based on the input.
-        If cells is a NetworkX graph, it adds nodes and edges accordingly.
-        """
         Complex.__init__(self, **kwargs)
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
         self._node_membership = {}

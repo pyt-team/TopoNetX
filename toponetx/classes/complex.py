@@ -23,15 +23,6 @@ class Atom(abc.ABC):
     name: str
 
     def __init__(self, elements: Collection[Hashable], **kwargs) -> None:
-        """Abstract class representing an atom in a complex.
-
-        Parameters
-        ----------
-        elements : Collection[Hashable]
-            The elements in the atom.
-        **kwargs : keyword arguments, optional
-            Additional attributes to be associated with the atom.
-        """
         self.elements = elements
 
         self._attributes = {}
