@@ -6,17 +6,20 @@ import networkx as nx
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
-from toponetx.classes.complex import Complex
 
 __all__ = ["node_diameters", "cell_diameters", "diameter", "cell_diameter"]
 
+# In this module, only cell complexes, combinatorial complexes and colored
+# hypergraphs are supported.
+ComplexType = CellComplex | CombinatorialComplex | ColoredHyperGraph
 
-def node_diameters(domain: Complex) -> tuple[list[int], list[set[Hashable]]]:
+
+def node_diameters(domain: ComplexType) -> tuple[list[int], list[set[Hashable]]]:
     """Return the node diameters of the connected components in cell complex.
 
     Parameters
     ----------
-    domain : Complex
+    domain : CellComplex or CombinaorialComplex or ColoredHyperGraph
         The complex to be used to generate the node diameters for.
 
     Returns
@@ -58,12 +61,12 @@ def node_diameters(domain: Complex) -> tuple[list[int], list[set[Hashable]]]:
     return diams, comps
 
 
-def cell_diameters(domain: Complex, s: int = 1) -> tuple[list[int], list[set[int]]]:
+def cell_diameters(domain: ComplexType, s: int = 1) -> tuple[list[int], list[set[int]]]:
     """Return the cell diameters of the s_cell_connected component subgraphs.
 
     Parameters
     ----------
-    domain : Complex
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
         Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
         The number of intersections between pairwise consecutive cells.
@@ -105,12 +108,12 @@ def cell_diameters(domain: Complex, s: int = 1) -> tuple[list[int], list[set[int
     return diams, comps
 
 
-def diameter(domain: Complex) -> int:
+def diameter(domain: ComplexType) -> int:
     """Return length of the longest shortest s-walk between nodes.
 
     Parameters
     ----------
-    domain : Complex
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
         Supported complexes are cell/combintorial and hypegraphs.
 
     Returns
@@ -151,12 +154,12 @@ def diameter(domain: Complex) -> int:
     raise RuntimeError("cc is not connected.")
 
 
-def cell_diameter(domain: Complex, s: int | None = None) -> int:
+def cell_diameter(domain: ComplexType, s: int | None = None) -> int:
     """Return the length of the longest shortest s-walk between cells.
 
     Parameters
     ----------
-    domain : Complex
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
         Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
         The number of intersections between pairwise consecutive cells.
