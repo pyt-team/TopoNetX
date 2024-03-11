@@ -1177,6 +1177,14 @@ class ColoredHyperGraph(Complex):
             lower (row) index dict, upper (col) index dict, incidence matrix
             where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix.
         """
+        if index:
+            (
+                row_indices,
+                col_indices,
+                incidence_matrix,
+            ) = self.all_ranks_incidence_matrix(0, weight=weight, index=index)
+            row_indices = {next(iter(k)): v for k, v in row_indices.items()}
+            return row_indices, col_indices, incidence_matrix
         return self.all_ranks_incidence_matrix(0, weight=weight, index=index)
 
     def all_ranks_incidence_matrix(
