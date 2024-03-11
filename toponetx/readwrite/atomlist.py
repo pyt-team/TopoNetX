@@ -266,6 +266,7 @@ def parse_atomlist(
     """
     from ast import literal_eval
 
+    domain: CellComplex | SimplicialComplex
     if complex_type == "cell":
         domain = CellComplex()
     elif complex_type == "simplicial":
@@ -287,7 +288,7 @@ def parse_atomlist(
         if nodetype is not None:
             elements = [nodetype(e) for e in elements]
 
-        if complex_type == "cell":
+        if isinstance(domain, CellComplex):
             if "rank" in attributes:
                 rank = attributes.pop("rank")
             else:
@@ -297,7 +298,7 @@ def parse_atomlist(
                 domain.add_node(elements[0], **attributes)
             else:
                 domain.add_cell(elements, rank=rank, **attributes)
-        elif complex_type == "simplicial":
+        elif isinstance(domain, SimplicialComplex):
             domain.add_simplex(elements, **attributes)
 
     return domain

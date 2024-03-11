@@ -3,7 +3,7 @@
 Such as:
 HyperEdgeView, CellView, SimplexView, NodeView.
 """
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections.abc import Collection, Hashable, Iterable, Iterator, Sequence
 from itertools import chain
 from typing import Any, Generic, Literal, TypeVar
@@ -28,6 +28,7 @@ T_Atom = TypeVar("T_Atom", bound=Atom)
 class AtomView(ABC, Generic[T_Atom]):
     """Abstract class representing a read-only view on a collection of atoms."""
 
+    @abstractmethod
     def __contains__(self, atom: Any) -> bool:
         """Check if a given element is in the view.
 
@@ -42,6 +43,7 @@ class AtomView(ABC, Generic[T_Atom]):
             Whether the element is in the view.
         """
 
+    @abstractmethod
     def __getitem__(self, atom: Any) -> dict:
         """Get the attributes of a given element.
 
@@ -61,6 +63,7 @@ class AtomView(ABC, Generic[T_Atom]):
             If the element is not in the view.
         """
 
+    @abstractmethod
     def __iter__(self) -> Iterator[T_Atom]:
         """Iterate over all elements in the view.
 
@@ -70,6 +73,7 @@ class AtomView(ABC, Generic[T_Atom]):
             Iterator to iterate over all elements in the view.
         """
 
+    @abstractmethod
     def __len__(self) -> int:
         """Return the number of elements in the view.
 

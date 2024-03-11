@@ -79,7 +79,6 @@ def random_clique_complex(n: int, p: float, seed=None) -> SimplicialComplex:
     return graph_to_clique_complex(graph)
 
 
-@nx.utils.py_random_state("seed")
 def multiparameter_linial_meshulam_complex(
     n: int, ps: Sequence[float], seed: random.Random | None = None
 ) -> SimplicialComplex:
@@ -111,7 +110,9 @@ def multiparameter_linial_meshulam_complex(
     For `p[0] = 1.0` and `p[1] = p`, this recovers the standard random Linial-Meshulam
     complex provided by `random_linial_meshulam_complex`.
     """
-    graph = nx.gnp_random_graph(n, ps[0], seed)
+    rng = nx.utils.create_py_random_state(seed)
+
+    graph = nx.gnp_random_graph(n, ps[0], rng)
     SC = SimplicialComplex()
 
     for clique in nx.enumerate_all_cliques(graph):
@@ -123,7 +124,7 @@ def multiparameter_linial_meshulam_complex(
             simplices = SC.simplices
             if any(s not in simplices for s in combinations(clique, len(clique) - 1)):
                 continue
-            if seed.random() < ps[len(clique) - 2]:
+            if rng.random() < ps[len(clique) - 2]:
                 SC.add_simplex(clique)
         else:
             # `nx.enumerate_all_cliques` returns cliques in ascending order of size.

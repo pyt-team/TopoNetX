@@ -84,7 +84,7 @@ class Path(Atom[tuple[Hashable]]):
         **kwargs,
     ) -> None:
         self.__check_inputs(elements, reserve_sequence_order)
-        if isinstance(elements, int | str):
+        if not isinstance(elements, Sequence):
             elements = [elements]
         super().__init__(tuple(elements), **kwargs)
         if len(set(elements)) != len(self.elements):
@@ -106,7 +106,7 @@ class Path(Atom[tuple[Hashable]]):
         elements: Sequence[Hashable],
         reserve_sequence_order: bool = False,
         allowed_paths: Iterable[tuple[Hashable]] | None = None,
-    ) -> list[tuple[Hashable]]:
+    ) -> list[tuple[Hashable, ...]]:
         """Return list of elementary p-path objects representing the boundaries.
 
         Parameters
@@ -142,7 +142,7 @@ class Path(Atom[tuple[Hashable]]):
         """
         boundaries = []
         for i in range(len(elements)):
-            boundary = list(elements[0:i] + elements[(i + 1) :])
+            boundary = list(elements[0:i]) + list(elements[(i + 1) :])
             if (
                 not reserve_sequence_order
                 and len(boundary) > 1
@@ -154,7 +154,7 @@ class Path(Atom[tuple[Hashable]]):
         return boundaries
 
     @property
-    def boundary(self) -> list[tuple[Hashable]]:
+    def boundary(self) -> list[tuple[Hashable, ...]]:
         """Return the boundary of this path.
 
         The boundary of this path are all elementary (p-1)-path objects representing

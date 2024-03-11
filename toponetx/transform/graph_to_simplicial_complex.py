@@ -56,8 +56,9 @@ def graph_to_clique_complex(
 
     # `nx.enumerate_all_cliques` returns cliques in ascending order of size. Abort calling the generator once we reach
     # cliques larger than the requested max dimension.
-    if max_dim is not None:
-        cliques = takewhile(lambda clique: len(clique) <= max_dim, cliques)
+    cliques = takewhile(
+        lambda clique: max_dim is None or len(clique) <= max_dim, cliques
+    )
 
     SC = SimplicialComplex(cliques)
 
@@ -156,10 +157,8 @@ def weighted_graph_to_vietoris_rips_complex(
         return all(G[u][v]["weight"] <= r for u, v in edges)
 
     all_cliques = nx.enumerate_all_cliques(G)
-    possible_cliques = (
-        all_cliques
-        if max_dim is None
-        else takewhile(lambda face: len(face) <= max_dim, all_cliques)
+    possible_cliques = takewhile(
+        lambda face: max_dim is None or len(face) <= max_dim, all_cliques
     )
     vr_cliques = filter(is_in_vr_complex, possible_cliques)
     return SimplicialComplex(list(vr_cliques))

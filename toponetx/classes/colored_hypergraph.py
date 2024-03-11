@@ -67,9 +67,7 @@ class ColoredHyperGraph(Complex):
     >>> CHG.add_cell(
     ...     ["Alice", "Bob"], rank=1
     ... )  # Alice and Bob are in a close-knit group.
-    >>> CHG.add_cell(
-    ...     ["Charlie", "David"], rank=1
-    ... )  # Another closely connected group.
+    >>> CHG.add_cell(["Charlie", "David"], rank=1)  # Another closely connected group.
     >>> CHG.add_cell(
     ...     ["Alice", "Bob", "Charlie", "David"], rank=2
     ... )  # Both groups together form a higher-ranked community.
