@@ -3,7 +3,7 @@
 The class also supports attaching arbitrary attributes and data to cells.
 """
 
-from collections.abc import Hashable, Iterable, Iterator
+from collections.abc import Collection, Hashable, Iterable, Iterator
 from itertools import chain, combinations
 from typing import Any
 from warnings import warn
@@ -104,15 +104,6 @@ class SimplicialComplex(Complex):
     """
 
     def __init__(self, simplices=None, **kwargs) -> None:
-        """Initialize the simplicial complex.
-
-        Parameters
-        ----------
-        simplices : iterable, optional
-            Iterable of maximal simplices that define the simplicial complex.
-        **kwargs : keyword arguments, optional
-            Attributes to add to the complex as key=value pairs.
-        """
         super().__init__(**kwargs)
 
         self._simplex_set = SimplexView()
@@ -303,7 +294,7 @@ class SimplicialComplex(Complex):
         """
         return len(self.skeleton(0))
 
-    def __getitem__(self, simplex):
+    def __getitem__(self, simplex) -> dict[Hashable, Any]:
         """Get the data associated with the given simplex.
 
         Parameters
@@ -444,12 +435,12 @@ class SimplicialComplex(Complex):
 
         return face_set
 
-    def remove_maximal_simplex(self, simplex) -> None:
+    def remove_maximal_simplex(self, simplex: Collection) -> None:
         """Remove maximal simplex from simplicial complex.
 
         Parameters
         ----------
-        simplex : Iterable
+        simplex : Collection
             The simplex to be removed from the simplicial complex.
 
         Raises
@@ -552,12 +543,12 @@ class SimplicialComplex(Complex):
         else:
             self.add_simplex([node], **kwargs)
 
-    def add_simplex(self, simplex, **kwargs) -> None:
+    def add_simplex(self, simplex: Collection, **kwargs) -> None:
         """Add simplex to simplicial complex.
 
         Parameters
         ----------
-        simplex : Hashable or Iterable or Simplex or str
+        simplex : Collection
             The simplex to be added to the simplicial complex.
         **kwargs : keyword arguments, optional
             Additional attributes to be associated with the simplex.
@@ -1438,7 +1429,7 @@ class SimplicialComplex(Complex):
         return SC
 
     def to_hasse_graph(self) -> nx.DiGraph:
-        """Create Hasse graph of self.
+        """Create the hasse graph corresponding to this simplicial complex.
 
         Returns
         -------
@@ -1596,14 +1587,16 @@ class SimplicialComplex(Complex):
                 "input simplicial complex has dimension higher than 2 and hence it cannot be converted to a trimesh object"
             )
 
-        vertices = list(
-            dict(
-                sorted(self.get_node_attributes(vertex_position_name).items())
-            ).values()
+        vertices = np.array(
+            list(
+                dict(
+                    sorted(self.get_node_attributes(vertex_position_name).items())
+                ).values()
+            )
         )
 
         return trimesh.Trimesh(
-            faces=self.get_all_maximal_simplices(), vertices=vertices, process=False
+            vertices=vertices, faces=self.get_all_maximal_simplices(), process=False
         )
 
     def to_spharapy(self, vertex_position_name: str = "position"):
@@ -1712,7 +1705,6 @@ class SimplicialComplex(Complex):
         """
         G = nx.Graph()
         for edge in self.skeleton(1):
-            edge = list(edge)
             G.add_edge(edge[0], edge[1])
         for node in self.skeleton(0):
             G.add_node(next(iter(node)))
@@ -1781,11 +1773,12 @@ class SimplicialComplex(Complex):
         >>> SC.to_hypergraph()
         Hypergraph({'e0': [1, 2], 'e1': [1, 3], 'e2': [1, 4], 'e3': [2, 3], 'e4': [2, 4], 'e5': [2, 5], 'e6': [1, 2, 3], 'e7': [1, 2, 4]},name=)
         """
-        G = []
-        for rank in range(1, self.dim + 1):
-            edge = [list(cell) for cell in self.skeleton(rank)]
-            G = G + edge
-        return Hypergraph(G, static=True)
+        hyperedges = [
+            list(cell)
+            for rank in range(1, self.dim + 1)
+            for cell in self.skeleton(rank)
+        ]
+        return Hypergraph(hyperedges, static=True)
 
     def to_combinatorial_complex(self):
         """Convert a simplicial complex to a combinatorial complex.

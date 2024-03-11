@@ -1,5 +1,5 @@
 """Module to compute spectra."""
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 import scipy as sp
@@ -26,7 +26,7 @@ __all__ = [
 ]
 
 
-def _normalize(f):
+def _normalize(f: dict[Any, Any]) -> dict[Any, Any]:
     """Normalize.
 
     Parameters
