@@ -8,7 +8,7 @@ from toponetx.classes.complex import Atom
 __all__ = ["Path"]
 
 
-class Path(Atom):
+class Path(Atom[tuple[Hashable]]):
     """Path class.
 
     A class representing an elementary p-path in a path complex, which is the building block for a path complex. By the definition established

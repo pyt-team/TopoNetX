@@ -1,7 +1,7 @@
 """Cell class."""
 
 from collections import Counter, deque
-from collections.abc import Collection, Iterable, Sequence
+from collections.abc import Collection, Hashable, Iterable, Sequence
 from itertools import zip_longest
 from typing import Literal
 
@@ -10,7 +10,7 @@ from toponetx.classes.complex import Atom
 __all__ = ["Cell"]
 
 
-class Cell(Atom):
+class Cell(Atom[tuple[Hashable]]):
     """Class representing a 2D cell.
 
     A 2D cell is an elementary building block used to build a 2D cell complex, whether regular or non-regular.
