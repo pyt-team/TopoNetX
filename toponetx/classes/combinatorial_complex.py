@@ -558,6 +558,10 @@ class CombinatorialComplex(ColoredHyperGraph):
         else:
             self._complex_set.hyperedge_dict[rank][hyperedge_].update(**attr)
         self._add_nodes_of_hyperedge(hyperedge_)
+        for i in hyperedge_:
+            if i not in self._node_membership:
+                self._node_membership[i] = set()
+            self._node_membership[i].add(hyperedge_)
 
     def _CCC_condition(self, hyperedge_, rank):
         """Check if hyperedge_ satisfies the CCC condition.
