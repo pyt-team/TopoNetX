@@ -1178,7 +1178,9 @@ class CellComplex(Complex):
         else:
             raise ValueError(f"Rank must be 0, 1 or 2, got {rank}")
 
-    def get_cell_attributes(self, name: str, rank: int) -> dict[Hashable, Any]:
+    def get_cell_attributes(
+        self, name: str, rank: int
+    ) -> dict[tuple[Hashable, ...], Any]:
         """Get node attributes from graph.
 
         Parameters
