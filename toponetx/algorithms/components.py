@@ -117,12 +117,8 @@ def s_connected_components(
 
     else:
         node_dict, A = domain.node_to_all_cell_adjacnecy_matrix(s=s, index=True)
-        if isinstance(domain, ColoredHyperGraph) and not isinstance(
-            domain, CombinatorialComplex
-        ):
-            node_dict = {v: k[0] for k, v in node_dict.items()}
-        else:
-            node_dict = {v: k for k, v in node_dict.items()}
+        node_dict = {v: k for k, v in node_dict.items()}
+
         G = nx.from_scipy_sparse_array(A)
         for c in nx.connected_components(G):
             if not return_singletons and len(c) == 1:
