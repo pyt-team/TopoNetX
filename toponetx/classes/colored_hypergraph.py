@@ -67,9 +67,7 @@ class ColoredHyperGraph(Complex):
     >>> CHG.add_cell(
     ...     ["Alice", "Bob"], rank=1
     ... )  # Alice and Bob are in a close-knit group.
-    >>> CHG.add_cell(
-    ...     ["Charlie", "David"], rank=1
-    ... )  # Another closely connected group.
+    >>> CHG.add_cell(["Charlie", "David"], rank=1)  # Another closely connected group.
     >>> CHG.add_cell(
     ...     ["Alice", "Bob", "Charlie", "David"], rank=2
     ... )  # Both groups together form a higher-ranked community.
@@ -1244,7 +1242,9 @@ class ColoredHyperGraph(Complex):
 
         Examples
         --------
-        >>> G = Graph()  # networkx graph
+        >>> import networkx as nx
+        >>> from toponetx.classes.colored_hypergraph import ColoredHyperGraph
+        >>> G = nx.Graph()  # networkx graph
         >>> G.add_edge(0, 1)
         >>> G.add_edge(0, 3)
         >>> G.add_edge(0, 4)
@@ -1406,8 +1406,10 @@ class ColoredHyperGraph(Complex):
             raise ValueError(
                 "rank for the laplacian matrix must be larger or equal to 1, got {rank}"
             )
-
-        row_dict, A = self.adjacency_matrix(0, rank, index=True)
+        if len(self.nodes) == 0:
+            A = np.empty((0, 0))
+        else:
+            row_dict, A = self.adjacency_matrix(0, rank, index=True)
 
         if A.shape == (0, 0):
             L = csr_array((0, 0)) if sparse else np.empty((0, 0))
