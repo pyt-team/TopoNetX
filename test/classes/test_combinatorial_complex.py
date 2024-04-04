@@ -73,6 +73,24 @@ class TestCombinatorialComplex:
 
         assert "a" in CCC.cells
 
+    def test_node_membership(self):
+        """Test creation of _node_membership dictionary."""
+        CCC = CombinatorialComplex()
+        CCC.add_cell([1, 2, 3], rank=1)
+        CCC.add_cell([1, 2, 3, 4], rank=2)
+
+        assert 1 in CCC._node_membership
+        assert 2 in CCC._node_membership
+        assert 3 in CCC._node_membership
+        assert 4 in CCC._node_membership
+        assert frozenset({1, 2, 3, 4}) in CCC._node_membership[1]
+        assert frozenset({1, 2, 3}) in CCC._node_membership[1]
+        assert frozenset({1, 2, 3, 4}) in CCC._node_membership[2]
+        assert frozenset({1, 2, 3}) in CCC._node_membership[2]
+        assert frozenset({1, 2, 3, 4}) in CCC._node_membership[3]
+        assert frozenset({1, 2, 3}) in CCC._node_membership[3]
+        assert frozenset({1, 2, 3, 4}) in CCC._node_membership[4]
+
     def test_add_cell(self):
         """Test adding a cell to a CCC."""
         CCC = CombinatorialComplex()
