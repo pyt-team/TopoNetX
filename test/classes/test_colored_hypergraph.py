@@ -453,6 +453,12 @@ class TestCombinatorialComplex:
         CHG.add_cell([9])
         assert CHG.singletons() == [(frozenset({9}), 0)]
 
+    def test_restrict_to_cells(self):
+        """Test restrict_to_cells of CHG."""
+        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CHG.add_cell([9])
+        assert len(CHG.remove_singletons().cells) == 2
+
     def test_from_trimesh(self):
         """Test from_trimesh method of CHG."""
         with pytest.raises(NotImplementedError):

@@ -1463,7 +1463,10 @@ class ColoredHyperGraph(Complex):
         for c in valid_cells:
             if not isinstance(c, Iterable):
                 raise ValueError(f"each element in cell_set must be Iterable, got {c}")
-            chg.add_cell(c, rank=self.cells.get_rank(c))
+            if isinstance(c, tuple):
+                chg.add_cell(c[0], rank=self.cells.get_rank(c[0]))
+            else:
+                chg.add_cell(c, rank=self.cells.get_rank(c))
         return chg
 
     def restrict_to_nodes(self, node_set):
