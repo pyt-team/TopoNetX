@@ -447,6 +447,10 @@ class TestCombinatorialComplex:
         assert row == res
         assert isinstance(L, csr_array)
 
+        CHG = ColoredHyperGraph()
+        L = CHG.laplacian_matrix(1)
+        assert L.shape == (0, 0)
+
     def test_singletons(self):
         """Test singletons of CHG."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
