@@ -6,13 +6,12 @@ The class also supports attaching arbitrary attributes and data to cells.
 from collections.abc import Collection, Hashable, Iterable, Iterator
 from itertools import chain, combinations
 from typing import Any
-from warnings import warn
 
 import networkx as nx
 import numpy as np
 from gudhi import SimplexTree
 from scipy.sparse import csr_matrix, dok_matrix
-from typing_extensions import Self
+from typing_extensions import Self, deprecated
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import NodeView, SimplexView
@@ -157,6 +156,9 @@ class SimplicialComplex(Complex):
         return self._simplex_set.max_dim
 
     @property
+    @deprecated(
+        "`SimplicialComplex.maxdim` is deprecated and will be removed in the future, use `SimplicialComplex.max_dim` instead."
+    )
     def maxdim(self) -> int:
         """
         Maximum dimension of the simplicial complex.
@@ -168,11 +170,6 @@ class SimplicialComplex(Complex):
         int
             The maximum dimension of the simplicial complex.
         """
-        warn(
-            "`SimplicialComplex.maxdim` is deprecated and will be removed in the future, use `SimplicialComplex.max_dim` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._simplex_set.max_dim
 
     @property

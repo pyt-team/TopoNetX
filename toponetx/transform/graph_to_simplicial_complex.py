@@ -1,8 +1,9 @@
 """Methods to lift a graph to a simplicial complex."""
+
 from itertools import combinations, takewhile
-from warnings import warn
 
 import networkx as nx
+from typing_extensions import deprecated
 
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
@@ -72,6 +73,9 @@ def graph_to_clique_complex(
     return SC
 
 
+@deprecated(
+    "`graph_2_neighbor_complex` is deprecated and will be removed in a future version, use `graph_to_neighbor_complex` instead."
+)
 def graph_2_neighbor_complex(G) -> SimplicialComplex:
     """Get the neighbor complex of a graph.
 
@@ -90,14 +94,12 @@ def graph_2_neighbor_complex(G) -> SimplicialComplex:
     This type of simplicial complexes can have very large dimension (max degree of the
     graph) and it is a function of the distribution of the valency of the graph.
     """
-    warn(
-        "`graph_2_neighbor_complex` is deprecated and will be removed in a future version, use `graph_to_neighbor_complex` instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return graph_to_neighbor_complex(G)
 
 
+@deprecated(
+    "`graph_2_clique_complex` is deprecated and will be removed in a future version, use `graph_to_clique_complex` instead."
+)
 def graph_2_clique_complex(
     G: nx.Graph, max_dim: int | None = None
 ) -> SimplicialComplex:
@@ -115,11 +117,6 @@ def graph_2_clique_complex(
     SimplicialComplex
         The clique simplicial complex of dimension dim of the graph G.
     """
-    warn(
-        "`graph_2_clique_complex` is deprecated and will be removed in a future version, use `graph_to_clique_complex` instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return graph_to_clique_complex(G, max_dim)
 
 
