@@ -1036,3 +1036,20 @@ class TestSimplicialComplex:
         assert [0] in simplices
         assert [1] in simplices
         assert [2] in simplices
+
+    def test_graph_skeleton(self):
+        """Test the graph_skeleton method of SimplicialComplex."""
+        simplicial_complex = SimplicialComplex(
+            [
+                (2, 6),
+                (4, 5),
+                (4, 7),
+                (5, 6),
+                (5, 7),
+                (1, 2, 3),
+                (2, 3, 4),
+            ]
+        )
+        G = simplicial_complex.graph_skeleton()
+        assert G.number_of_nodes() == 7
+        assert G.number_of_edges() == 10
