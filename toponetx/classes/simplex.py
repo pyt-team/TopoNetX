@@ -5,6 +5,8 @@ from collections.abc import Collection, Hashable, Iterable
 from itertools import combinations
 from typing import Any
 
+from typing_extensions import Self
+
 from toponetx.classes.complex import Atom
 
 __all__ = ["Simplex"]
@@ -191,7 +193,7 @@ class Simplex(Atom[frozenset[Hashable]]):
         """
         return f"Nodes set: {tuple(self.elements)}, attrs: {self._attributes}"
 
-    def clone(self) -> "Simplex":
+    def clone(self) -> Self:
         """Return a copy of the simplex.
 
         The clone method by default returns an independent shallow copy of the simplex
@@ -204,4 +206,4 @@ class Simplex(Atom[frozenset[Hashable]]):
         Simplex
             A copy of this simplex.
         """
-        return Simplex(self.elements, **self._attributes)
+        return self.__class__(self.elements, **self._attributes)

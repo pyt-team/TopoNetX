@@ -4,6 +4,7 @@ from collections.abc import Collection, Hashable, Iterable
 from typing import Any, Literal
 
 import networkx as nx
+from typing_extensions import Self
 
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.complex import Complex
@@ -1077,7 +1078,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         super().remove_cells(cell_set)
 
-    def clone(self) -> "CombinatorialComplex":
+    def clone(self) -> Self:
         """Return a copy of the simplex.
 
         The clone method by default returns an independent shallow copy of the simplex
@@ -1090,7 +1091,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         CombinatorialComplex
             A copy of this combinatorial complex.
         """
-        CCC = CombinatorialComplex(graph_based=self.graph_based)
+        CCC = self.__class__(graph_based=self.graph_based)
         for cell in self.cells:
             CCC.add_cell(cell, self.cells.get_rank(cell))
         return CCC

@@ -3,6 +3,8 @@
 from collections.abc import Hashable, Iterable, Sequence
 from typing import Any
 
+from typing_extensions import Self
+
 from toponetx.classes.complex import Atom
 
 __all__ = ["Path"]
@@ -167,7 +169,7 @@ class Path(Atom[tuple[Hashable]]):
         """
         return self._boundaries
 
-    def clone(self) -> "Path":
+    def clone(self) -> Self:
         """Return a shallow copy of the elementary p-path.
 
         Returns
@@ -175,7 +177,7 @@ class Path(Atom[tuple[Hashable]]):
         Path
             A shallow copy of the elementary p-path.
         """
-        return Path(
+        return self.__class__(
             self.elements,
             construct_boundaries=self.construct_boundaries,
             **self._attributes,

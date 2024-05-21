@@ -12,6 +12,7 @@ import networkx as nx
 import numpy as np
 from gudhi import SimplexTree
 from scipy.sparse import csr_matrix, dok_matrix
+from typing_extensions import Self
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import NodeView, SimplexView
@@ -1307,7 +1308,7 @@ class SimplicialComplex(Complex):
 
         self.add_simplices_from(_simplices)
 
-    def restrict_to_simplices(self, cell_set) -> "SimplicialComplex":
+    def restrict_to_simplices(self, cell_set) -> Self:
         """Construct a simplicial complex using a subset of the simplices.
 
         Parameters
@@ -1332,7 +1333,7 @@ class SimplicialComplex(Complex):
         SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (2, 3), (2, 4), (1, 2, 3)])
         """
         rns = [cell for cell in cell_set if cell in self]
-        return SimplicialComplex(simplices=rns)
+        return self.__class__(simplices=rns)
 
     def restrict_to_nodes(self, node_set):
         """Construct a new simplicial complex by restricting the simplices.
@@ -1389,7 +1390,7 @@ class SimplicialComplex(Complex):
         return [tuple(s) for s in self.simplices if self.is_maximal(s)]
 
     @classmethod
-    def from_spharpy(cls, mesh) -> "SimplicialComplex":
+    def from_spharpy(cls, mesh) -> Self:
         """Import from sharpy.
 
         Parameters
@@ -1453,7 +1454,7 @@ class SimplicialComplex(Complex):
         return G
 
     @classmethod
-    def from_gudhi(cls, tree: SimplexTree) -> "SimplicialComplex":
+    def from_gudhi(cls, tree: SimplexTree) -> Self:
         """Import from gudhi.
 
         Parameters
@@ -1479,7 +1480,7 @@ class SimplicialComplex(Complex):
         return SC
 
     @classmethod
-    def from_trimesh(cls, mesh) -> "SimplicialComplex":
+    def from_trimesh(cls, mesh) -> Self:
         """Import from trimesh.
 
         Parameters
@@ -1523,7 +1524,7 @@ class SimplicialComplex(Complex):
         return SC
 
     @classmethod
-    def load_mesh(cls, file_path, process: bool = False) -> "SimplicialComplex":
+    def load_mesh(cls, file_path, process: bool = False) -> Self:
         """Load a mesh.
 
         Parameters
@@ -1667,7 +1668,7 @@ class SimplicialComplex(Complex):
         return mesh.laplacianmatrix(mode=mode)
 
     @classmethod
-    def from_nx(cls, G: nx.Graph) -> "SimplicialComplex":
+    def from_nx(cls, G: nx.Graph) -> Self:
         """Convert from netwrokx graph.
 
         Parameters
@@ -1711,7 +1712,7 @@ class SimplicialComplex(Complex):
         return nx.is_connected(G)
 
     @classmethod
-    def simplicial_closure_of_hypergraph(cls, H) -> "SimplicialComplex":
+    def simplicial_closure_of_hypergraph(cls, H) -> Self:
         """Compute the simplicial complex closure of a hypergraph.
 
         Parameters
@@ -1822,7 +1823,7 @@ class SimplicialComplex(Complex):
             G.add_edge(*edge, **self[edge])
         return G
 
-    def clone(self) -> "SimplicialComplex":
+    def clone(self) -> Self:
         """Return a copy of the simplicial complex.
 
         The clone method by default returns an independent shallow copy of the
@@ -1833,4 +1834,4 @@ class SimplicialComplex(Complex):
         SimplicialComplex
             A shallow copy of this simplicial complex.
         """
-        return SimplicialComplex(self.simplices)
+        return self.__class__(self.simplices)

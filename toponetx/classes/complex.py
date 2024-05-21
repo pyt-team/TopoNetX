@@ -1,9 +1,10 @@
 """Abstract class for Complex and Atom."""
 
-
 import abc
 from collections.abc import Collection, Hashable, Iterator
 from typing import Any, Generic, TypeVar
+
+from typing_extensions import Self
 
 __all__ = ["Atom", "Complex"]
 
@@ -227,7 +228,7 @@ class Complex(abc.ABC):
         """Return number of nodes."""
 
     @abc.abstractmethod
-    def clone(self) -> "Complex":
+    def clone(self) -> Self:
         """Clone complex."""
 
     @abc.abstractmethod

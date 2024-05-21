@@ -19,6 +19,7 @@ import scipy.sparse
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
 from networkx.utils import pairwise
+from typing_extensions import Self
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import (
@@ -2294,7 +2295,7 @@ class CellComplex(Complex):
         """
         return [node for node in self.nodes if self.degree(node) == 0]
 
-    def clone(self) -> "CellComplex":
+    def clone(self) -> Self:
         """Create a clone of the CellComplex.
 
         Returns
@@ -2312,7 +2313,7 @@ class CellComplex(Complex):
         >>> CX2 = CC.clone()
         """
         _G = self._G.copy()
-        CC = CellComplex(_G)
+        CC = self.__class__(_G)
         for cell in self.cells:
             CC.add_cell(cell.clone())
         return CC
@@ -2427,7 +2428,7 @@ class CellComplex(Complex):
             self.add_node(node)
 
     @classmethod
-    def from_trimesh(cls, mesh) -> "CellComplex":
+    def from_trimesh(cls, mesh) -> Self:
         """Convert from trimesh object.
 
         Parameters
@@ -2468,7 +2469,7 @@ class CellComplex(Complex):
         return CC
 
     @classmethod
-    def load_mesh(cls, file_path, process: bool = False) -> "CellComplex":
+    def load_mesh(cls, file_path, process: bool = False) -> Self:
         """Load a mesh.
 
         Parameters
