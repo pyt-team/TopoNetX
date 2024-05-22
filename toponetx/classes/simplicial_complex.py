@@ -1804,6 +1804,24 @@ class SimplicialComplex(Complex):
                 CCC.add_cell(cell, rank=len(cell) - 1, **self[cell])
         return CCC
 
+    def graph_skeleton(self) -> nx.Graph:
+        """Return the graph-skeleton of this simplicial complex.
+
+        The graph-skeleton consists of the 0 and 1-simplices (i.e., nodes and edges)
+        of the simplicial complex.
+
+        Returns
+        -------
+        nx.Graph
+            The graph-skeleton of this simplicial complex.
+        """
+        G = nx.Graph()
+        for node in self.skeleton(0):
+            G.add_node(node[0], **self[node])
+        for edge in self.skeleton(1):
+            G.add_edge(*edge, **self[edge])
+        return G
+
     def clone(self) -> "SimplicialComplex":
         """Return a copy of the simplicial complex.
 
