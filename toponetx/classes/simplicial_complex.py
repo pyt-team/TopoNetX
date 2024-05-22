@@ -1816,8 +1816,10 @@ class SimplicialComplex(Complex):
             The graph-skeleton of this simplicial complex.
         """
         G = nx.Graph()
-        G.add_nodes_from(map(lambda n: n[0], self.skeleton(0)))
-        G.add_edges_from(self.skeleton(1))
+        for node in self.skeleton(0):
+            G.add_node(node[0], **self[node])
+        for edge in self.skeleton(1):
+            G.add_edge(*edge, **self[edge])
         return G
 
     def clone(self) -> "SimplicialComplex":

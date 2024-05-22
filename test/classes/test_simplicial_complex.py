@@ -1039,7 +1039,7 @@ class TestSimplicialComplex:
 
     def test_graph_skeleton(self):
         """Test the graph_skeleton method of SimplicialComplex."""
-        simplicial_complex = SimplicialComplex(
+        SC = SimplicialComplex(
             [
                 (2, 6),
                 (4, 5),
@@ -1050,6 +1050,11 @@ class TestSimplicialComplex:
                 (2, 3, 4),
             ]
         )
-        G = simplicial_complex.graph_skeleton()
+        SC[1]["some_data"] = 1
+        SC[(2, 6)]["some_data"] = 42
+
+        G = SC.graph_skeleton()
         assert G.number_of_nodes() == 7
         assert G.number_of_edges() == 10
+        assert G.nodes[1]["some_data"] == 1
+        assert G.edges[(2, 6)]["some_data"] == 42
