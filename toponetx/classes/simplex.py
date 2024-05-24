@@ -5,7 +5,7 @@ from collections.abc import Collection, Hashable, Iterable
 from itertools import combinations
 from typing import Any
 
-from typing_extensions import Self
+from typing_extensions import Self, deprecated
 
 from toponetx.classes.complex import Atom
 
@@ -91,6 +91,7 @@ class Simplex(Atom[frozenset[Hashable]]):
         return super().__contains__(item)
 
     @staticmethod
+    @deprecated("`Simplex.construct_simplex_tree` is deprecated.")
     def construct_simplex_tree(elements: Collection) -> frozenset["Simplex"]:
         """Return set of Simplex objects representing the faces.
 
@@ -104,11 +105,6 @@ class Simplex(Atom[frozenset[Hashable]]):
         frozenset[Simplex]
             The set of faces of the simplex.
         """
-        warnings.warn(
-            "`Simplex.construct_simplex_tree` is deprecated.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         faceset = set()
         for r in range(len(elements), 0, -1):
@@ -119,6 +115,9 @@ class Simplex(Atom[frozenset[Hashable]]):
         return frozenset(faceset)
 
     @property
+    @deprecated(
+        "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead."
+    )
     def boundary(self) -> frozenset["Simplex"]:
         """Return the set of the set of all n-1 faces in of the input n-simplex.
 
@@ -132,12 +131,6 @@ class Simplex(Atom[frozenset[Hashable]]):
         For a n-simplex [1,2,3], the boundary is all the n-1 subsets of [1,2,3] :
             (1,2), (2,3), (3,1).
         """
-        warnings.warn(
-            "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
         return frozenset(
             Simplex(elements, construct_tree=False)
             for elements in combinations(self.elements, len(self) - 1)
@@ -154,6 +147,9 @@ class Simplex(Atom[frozenset[Hashable]]):
         raise NotImplementedError()
 
     @property
+    @deprecated(
+        "`Simplex.faces` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead."
+    )
     def faces(self):
         """Get the set of faces of the simplex.
 
@@ -165,12 +161,6 @@ class Simplex(Atom[frozenset[Hashable]]):
         frozenset[Simplex]
             The set of faces of the simplex.
         """
-        warnings.warn(
-            "`Simplex.faces` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
         return Simplex.construct_simplex_tree(self.elements)
 
     def __repr__(self) -> str:

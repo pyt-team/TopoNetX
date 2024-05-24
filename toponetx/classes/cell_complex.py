@@ -10,7 +10,6 @@ from collections import defaultdict
 from collections.abc import Hashable, Iterable, Iterator
 from itertools import zip_longest
 from typing import Any
-from warnings import warn
 
 import networkx as nx
 import numpy as np
@@ -19,7 +18,7 @@ import scipy.sparse
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
 from networkx.utils import pairwise
-from typing_extensions import Self
+from typing_extensions import Self, deprecated
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import (
@@ -200,6 +199,9 @@ class CellComplex(Complex):
         return self._G.nodes
 
     @property
+    @deprecated(
+        "`CellComplex.maxdim` is deprecated and will be removed in the future, use `CellComplex.dim` instead."
+    )
     def maxdim(self) -> int:
         """Return maximum dimension.
 
@@ -208,11 +210,6 @@ class CellComplex(Complex):
         int
             The maximum dimension for Cell Complex.
         """
-        warn(
-            "`CellComplex.maxdim` is deprecated and will be removed in the future, use `CellComplex.dim` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self.dim
 
     @property
