@@ -1,4 +1,5 @@
 """Module to compute spectra."""
+
 from typing import Any, Literal
 
 import numpy as np
@@ -70,10 +71,9 @@ def hodge_laplacian_eigenvectors(
 
     Examples
     --------
-    >>> from toponetx.classes import SimplicialComplex
-    >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
+    >>> SC = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
     >>> L1 = SC.hodge_laplacian_matrix(1)
-    >>> vals, vecs = hodge_laplacian_eigenvectors(L1, 2)
+    >>> vals, vecs = tnx.hodge_laplacian_eigenvectors(L1, 2)
     """
     Diag = diags(hodge_laplacian.diagonal())
     if Diag.shape[0] > 10:
@@ -117,9 +117,8 @@ def set_hodge_laplacian_eigenvector_attrs(
 
     Examples
     --------
-    >>> from toponetx.classes import SimplicialComplex
-    >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
-    >>> set_hodge_laplacian_eigenvector_attrs(SC, 1, 2, "down")
+    >>> SC = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
+    >>> tnx.set_hodge_laplacian_eigenvector_attrs(SC, 1, 2, "down")
     >>> SC.get_simplex_attributes("0.th_eigen", 1)
     """
     index = SC.skeleton(dim)
@@ -163,8 +162,8 @@ def laplacian_beltrami_eigenvectors(
 
     Examples
     --------
-    >>> SC = stanford_bunny()
-    >>> eigenvectors, eigenvalues = laplacian_beltrami_eigenvectors(SC)
+    >>> SC = tnx.datasets.stanford_bunny("simplicial")
+    >>> eigenvectors, eigenvalues = tnx.laplacian_beltrami_eigenvectors(SC)
     """
     mesh = SC.to_spharapy()
     sphara_basis = sb.SpharaBasis(mesh, mode=mode)
@@ -182,9 +181,8 @@ def set_laplacian_beltrami_eigenvectors(SC: SimplicialComplex) -> None:
 
     Examples
     --------
-    >>> from toponetx.classes import SimplicialComplex
-    >>> SC = SimplicialComplex.load_mesh("bunny.obj")
-    >>> set_laplacian_beltrami_eigenvectors(SC)
+    >>> SC = tnx.datasets.stanford_bunny()
+    >>> tnx.set_laplacian_beltrami_eigenvectors(SC)
     >>> vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
     """
     index = SC.skeleton(0)
@@ -231,12 +229,11 @@ def cell_complex_hodge_laplacian_spectrum(
 
     Examples
     --------
-    >>> from toponetx.classes import CellComplex
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([1, 2, 3, 4], rank=2)
     >>> CC.add_cell([2, 3, 4, 5], rank=2)
     >>> CC.add_cell([5, 6, 7, 8], rank=2)
-    >>> cell_complex_hodge_laplacian_spectrum(CC, 1)
+    >>> tnx.cell_complex_hodge_laplacian_spectrum(CC, 1)
     """
     return laplacian_spectrum(CC.hodge_laplacian_matrix(rank=rank, weight=weight))
 
@@ -262,9 +259,8 @@ def simplicial_complex_hodge_laplacian_spectrum(
 
     Examples
     --------
-    >>> from toponetx.classes import SimplicialComplex
-    >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
-    >>> spectrum = simplicial_complex_hodge_laplacian_spectrum(SC, 1)
+    >>> SC = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
+    >>> spectrum = tnx.simplicial_complex_hodge_laplacian_spectrum(SC, 1)
     """
     return laplacian_spectrum(SC.hodge_laplacian_matrix(rank=rank))
 
@@ -314,12 +310,11 @@ def cell_complex_adjacency_spectrum(CC: CellComplex, rank: int):
 
     Examples
     --------
-    >>> from toponetx.classes import CellComplex
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([1, 2, 3, 4], rank=2)
     >>> CC.add_cell([2, 3, 4, 5], rank=2)
     >>> CC.add_cell([5, 6, 7, 8], rank=2)
-    >>> cell_complex_adjacency_spectrum(CC, 1)
+    >>> tnx.cell_complex_adjacency_spectrum(CC, 1)
     """
     return laplacian_spectrum(CC.adjacency_matrix(rank=rank))
 
@@ -387,8 +382,7 @@ def combinatorial_complex_adjacency_spectrum(
 
     Examples
     --------
-    >>> from toponetx.classes import CombinatorialComplex
-    >>> CCC = CombinatorialComplex(cells=[[1, 2, 3], [2, 3], [0]], ranks=[2, 1, 0])
-    >>> s = laplacian_spectrum(CCC.adjacency_matrix(0, 2))
+    >>> CCC = tnx.CombinatorialComplex(cells=[[1, 2, 3], [2, 3], [0]], ranks=[2, 1, 0])
+    >>> tnx.combinatorial_complex_adjacency_spectrum(CCC, 0, 2)
     """
     return laplacian_spectrum(CCC.adjacency_matrix(rank, via_rank))

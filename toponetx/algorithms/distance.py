@@ -1,4 +1,5 @@
 """Module to compute distance between nodes or cells on topological domains."""
+
 from collections.abc import Hashable, Iterable
 
 import networkx as nx
@@ -61,14 +62,14 @@ def distance(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(node_diameters(CC))
+    >>> list(tnx.node_diameters(CC))
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(node_diameters(CCC))
+    >>> list(tnx.node_diameters(CCC))
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(node_diameters(CHG))
+    >>> list(tnx.node_diameters(CHG))
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")
@@ -137,15 +138,15 @@ def cell_distance(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
     >>> CC.add_cell([5, 2], rank=1)
-    >>> cell_distance(CC, [2, 3], [6, 7])
+    >>> tnx.cell_distance(CC, [2, 3], [6, 7])
     >>> CHG = CC.to_colored_hypergraph()
-    >>> cell_distance(CHG, (frozenset({2, 3}), 0), (frozenset({6, 7}), 0))
+    >>> tnx.cell_distance(CHG, (frozenset({2, 3}), 0), (frozenset({6, 7}), 0))
     >>> CCC = CC.to_combinatorial_complex()
-    >>> cell_distance(CCC, frozenset({2, 3}), frozenset({6, 7}))
+    >>> tnx.cell_distance(CCC, frozenset({2, 3}), frozenset({6, 7}))
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")

@@ -1,4 +1,5 @@
 """Module to distance measures on topological domains."""
+
 from collections.abc import Hashable
 
 import networkx as nx
@@ -31,14 +32,14 @@ def node_diameters(domain: ComplexType) -> tuple[list[int], list[set[Hashable]]]
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(node_diameters(CC))
+    >>> tnx.node_diameters(CC)
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(node_diameters(CCC))
+    >>> tnx.node_diameters(CCC)
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(node_diameters(CHG))
+    >>> tnx.node_diameters(CHG)
     """
     node_dict, A = domain.node_to_all_cell_adjacnecy_matrix(index=True)
     node_dict = {v: k for k, v in node_dict.items()}
@@ -79,11 +80,11 @@ def cell_diameters(domain: ComplexType, s: int = 1) -> tuple[list[int], list[set
     >>> CC = CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(cell_diameters(CC))
+    >>> tnx.cell_diameters(CC)
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(cell_diameters(CCC))
+    >>> tnx.cell_diameters(CCC)
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(cell_diameters(CHG))
+    >>> tnx.cell_diameters(CHG)
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")
@@ -130,15 +131,15 @@ def diameter(domain: ComplexType) -> int:
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
     >>> CC.add_cell([2, 5], rank=2)
-    >>> diameter(CC)
+    >>> tnx.diameter(CC)
     >>> CCC = CC.to_combinatorial_complex()
-    >>> diameter(CCC)
+    >>> tnx.diameter(CCC)
     >>> CHG = CC.to_colored_hypergraph()
-    >>> diameter(CHG)
+    >>> tnx.diameter(CHG)
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")
@@ -178,15 +179,15 @@ def cell_diameter(domain: ComplexType, s: int | None = None) -> int:
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
     >>> CC.add_cell([2, 5], rank=1)
-    >>> cell_diameter(CC)
+    >>> tnx.cell_diameter(CC)
     >>> CCC = CC.to_combinatorial_complex()
-    >>> cell_diameter(CCC)
+    >>> tnx.cell_diameter(CCC)
     >>> CHG = CC.to_colored_hypergraph()
-    >>> cell_diameter(CHG)
+    >>> tnx.cell_diameter(CHG)
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")

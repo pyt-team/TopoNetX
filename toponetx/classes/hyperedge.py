@@ -1,6 +1,5 @@
 """HyperEdge classes."""
 
-
 from collections.abc import Collection, Hashable
 
 from toponetx.classes.complex import Atom
@@ -26,10 +25,10 @@ class HyperEdge(Atom[frozenset[Hashable]]):
 
     Examples
     --------
-    >>> ac1 = HyperEdge((1, 2, 3))
-    >>> ac2 = HyperEdge((1, 2, 4, 5))
-    >>> ac3 = HyperEdge(("a", "b", "c"))
-    >>> ac3 = HyperEdge(("a", "b", "c"), rank=10)
+    >>> ac1 = tnx.HyperEdge((1, 2, 3))
+    >>> ac2 = tnx.HyperEdge((1, 2, 4, 5))
+    >>> ac3 = tnx.HyperEdge(("a", "b", "c"))
+    >>> ac3 = tnx.HyperEdge(("a", "b", "c"), rank=10)
     """
 
     def __init__(self, elements: Collection, rank=None, **kwargs) -> None:
