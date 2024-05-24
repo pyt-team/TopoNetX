@@ -33,6 +33,7 @@ dependencies=[
     "requests",
     "scipy",
     "trimesh",
+    "typing-extensions",
     "spharapy",
 ]
 

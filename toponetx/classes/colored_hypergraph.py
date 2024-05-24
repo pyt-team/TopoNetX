@@ -8,6 +8,7 @@ import numpy as np
 import scipy.sparse
 import trimesh
 from scipy.sparse import csr_array, diags
+from typing_extensions import Self
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
@@ -472,7 +473,7 @@ class ColoredHyperGraph(Complex):
             raise KeyError(f"node {node} not in {self.__shortstr__}")
         self._remove_node_helper(node)
 
-    def remove_node(self, node):
+    def remove_node(self, node) -> Self:
         """Remove a node from the ColoredHyperGraph.
 
         This method removes a node from the cells and deletes any reference in the nodes of the CHG.
@@ -1565,7 +1566,7 @@ class ColoredHyperGraph(Complex):
         cells = [cell for cell in self.cells if cell not in self.singletons()]
         return self.restrict_to_cells(cells)
 
-    def clone(self) -> "ColoredHyperGraph":
+    def clone(self) -> Self:
         """Return a copy of the simplex.
 
         The clone method by default returns an independent shallow copy of the simplex
@@ -1578,7 +1579,7 @@ class ColoredHyperGraph(Complex):
         ColoredHyperGraph
             ColoredHyperGraph.
         """
-        CHG = ColoredHyperGraph()
+        CHG = self.__class__()
         for cell, key in self.cells:
             CHG.add_cell(cell, key=key, rank=self.cells.get_rank(cell))
         return CHG

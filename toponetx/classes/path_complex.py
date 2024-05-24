@@ -1,4 +1,5 @@
 """Path complex."""
+
 from collections.abc import Hashable, Iterable, Iterator, Sequence
 from typing import Any
 
@@ -6,6 +7,7 @@ import networkx as nx
 import numpy as np
 import scipy as sp
 from networkx.classes.reportviews import EdgeView, NodeView
+from typing_extensions import Self
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.path import Path
@@ -313,7 +315,7 @@ class PathComplex(Complex):
         """
         return self._path_set.shape
 
-    def clone(self) -> "PathComplex":
+    def clone(self) -> Self:
         """Return a copy of the path complex.
 
         The clone method by default returns an independent shallow copy of the path
@@ -324,7 +326,7 @@ class PathComplex(Complex):
         PathComplex
             Returns a copy of the PathComplex.
         """
-        return PathComplex(list(self.paths), rank=self.dim)
+        return self.__class__(list(self.paths), rank=self.dim)
 
     def skeleton(self, rank: int) -> list[tuple[Hashable]]:
         """Compute skeleton.

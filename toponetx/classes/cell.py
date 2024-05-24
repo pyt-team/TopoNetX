@@ -5,6 +5,8 @@ from collections.abc import Collection, Hashable, Iterable, Sequence
 from itertools import zip_longest
 from typing import Literal
 
+from typing_extensions import Self
+
 from toponetx.classes.complex import Atom
 
 __all__ = ["Cell"]
@@ -85,7 +87,7 @@ class Cell(Atom[tuple[Hashable]]):
                         f"self loops are not permitted, got {(e[0],e[1])} as an edge in the cell's boundary"
                     )
 
-    def clone(self) -> "Cell":
+    def clone(self) -> Self:
         """Clone the Cell with all attributes.
 
         The clone method by default returns an independent shallow copy of the cell and
@@ -97,7 +99,7 @@ class Cell(Atom[tuple[Hashable]]):
         Cell
             A copy of this cell.
         """
-        return Cell(self.elements, self._regular, **self._attributes)
+        return self.__class__(self.elements, self._regular, **self._attributes)
 
     @staticmethod
     def is_valid_cell(elements: Sequence, regular: bool = False) -> bool:
