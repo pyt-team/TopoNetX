@@ -390,9 +390,9 @@ class SimplicialComplex(Complex):
                     self._simplex_set.faces_dict[k - 1][face]["is_maximal"] = False
                 else:
                     # make sure all children of previous maximal simplices do not have that membership anymore
-                    self._simplex_set.faces_dict[k - 1][face][
-                        "membership"
-                    ] -= maximal_faces
+                    self._simplex_set.faces_dict[k - 1][face]["membership"] -= (
+                        maximal_faces
+                    )
 
     @staticmethod
     def get_boundaries(
@@ -544,6 +544,12 @@ class SimplicialComplex(Complex):
     def add_simplex(self, simplex: Collection, **kwargs) -> None:
         """Add simplex to simplicial complex.
 
+        In case sub-simplices are missing, they are added without attributes to the
+        simplicial complex to fulfill the simplex requirements.
+
+        If the given simplex is already part of the simplicial complex, its attributes
+        will be updated by the provided ones.
+
         Parameters
         ----------
         simplex : Collection
@@ -551,41 +557,45 @@ class SimplicialComplex(Complex):
         **kwargs : keyword arguments, optional
             Additional attributes to be associated with the simplex.
         """
+        # Special internal attributes must not be provided as user attributes
+        if "is_maximal" in kwargs or "membership" in kwargs:
+            raise ValueError("Special attributes `is_maximal` and `membership` are reserved.")
+
+        # Support some short-hand calls for adding nodes. The user does not have to
+        # provide a single-element list but can give the node directly.
         if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
             simplex = [simplex]
         if isinstance(simplex, str):
             simplex = [simplex]
-        if isinstance(simplex, Iterable | Simplex):
-            if not isinstance(simplex, Simplex):
-                simplex_ = frozenset(simplex)
-                if len(simplex_) != len(simplex):
-                    raise ValueError("a simplex cannot contain duplicate nodes")
-            else:
-                simplex_ = simplex.elements
-            self._update_faces_dict_length(simplex_)
 
-            if (
-                simplex_ in self._simplex_set.faces_dict[len(simplex_) - 1]
-            ):  # simplex is already in the complex, just update the attributes if needed
-                self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(kwargs)
-                return
+        if isinstance(simplex, Simplex):
+            elements = simplex.elements
+            kwargs.update(simplex._attributes)
+        elif isinstance(simplex, Collection):
+            elements = frozenset(simplex)
+            if len(elements) != len(simplex):
+                raise ValueError("a simplex cannot contain duplicate nodes")
+        else:
+            raise TypeError(
+                f"Input simplex must be a collection or a `Simplex` object, got {type(simplex)}."
+            )
 
-            if self._simplex_set.max_dim < len(simplex) - 1:
-                self._simplex_set.max_dim = len(simplex) - 1
+        # if the simplex is already part of this complex, update its attributes
+        if elements in self:
+            self._simplex_set.faces_dict[len(elements) - 1][elements].update(kwargs)
+            return
 
-            numnodes = len(simplex_)
-            maximal_faces = set()
+        self._update_faces_dict_length(elements)
 
-            for r in range(numnodes, 0, -1):
-                for face in combinations(simplex_, r):
-                    self._update_faces_dict_entry(face, simplex_, maximal_faces)
-            self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(kwargs)
-            if isinstance(simplex, Simplex):
-                self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(
-                    simplex._attributes
-                )
-            else:
-                self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(kwargs)
+        if self._simplex_set.max_dim < len(simplex) - 1:
+            self._simplex_set.max_dim = len(simplex) - 1
+
+        maximal_faces = set()
+        for r in range(len(elements), 0, -1):
+            for face in combinations(elements, r):
+                self._update_faces_dict_entry(face, elements, maximal_faces)
+
+        self._simplex_set.faces_dict[len(elements) - 1][elements].update(kwargs)
 
     def add_simplices_from(self, simplices) -> None:
         """Add simplices from iterable to simplicial complex.
