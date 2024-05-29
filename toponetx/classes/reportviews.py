@@ -3,6 +3,7 @@
 Such as:
 HyperEdgeView, CellView, SimplexView, NodeView.
 """
+
 from abc import ABC, abstractmethod
 from collections.abc import Collection, Hashable, Iterable, Iterator, Sequence
 from itertools import chain
@@ -20,6 +21,7 @@ __all__ = [
     "CellView",
     "SimplexView",
     "NodeView",
+    "PathView",
 ]
 
 T_Atom = TypeVar("T_Atom", bound=Atom)
