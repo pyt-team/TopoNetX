@@ -244,6 +244,10 @@ class TestSimplicialComplex:
         assert (5,) in SC.simplices
         assert (6,) in SC.simplices
 
+        # call with unsupported type
+        with pytest.raises(TypeError):
+            SC.add_simplex(iter([1, 2]))
+
         # simplex cannot contain unhashable elements
         with pytest.raises(TypeError):
             SC.add_simplex([[1, 2], [2, 3]])
@@ -251,6 +255,12 @@ class TestSimplicialComplex:
         # simplex cannot contain duplicate nodes
         with pytest.raises(ValueError):
             SC.add_simplex((1, 2, 2))
+
+        # use of reserved attributes is not allowed
+        with pytest.raises(ValueError):
+            SC.add_simplex((1, 2, 3), is_maximal=True)
+        with pytest.raises(ValueError):
+            SC.add_simplex((1, 2, 3), membership={})
 
         # add hashable, non iterable node to SC
         SC.add_simplex(11)
