@@ -21,6 +21,11 @@ class TestSimplex:
         with pytest.raises(ValueError):
             _ = Simplex([1, 2, 2])
 
+        with pytest.raises(ValueError):
+            _ = Simplex([1, 2], is_maximal=True)
+        with pytest.raises(ValueError):
+            _ = Simplex([1, 2], membership={})
+
     def test_simplex_sign(self):
         """Test simplex sign method."""
         s = Simplex(

@@ -557,9 +557,7 @@ class SimplicialComplex(Complex):
         **kwargs : keyword arguments, optional
             Additional attributes to be associated with the simplex.
         """
-        # Special internal attributes must not be provided as user attributes
-        if "is_maximal" in kwargs or "membership" in kwargs:
-            raise ValueError("Special attributes `is_maximal` and `membership` are reserved.")
+        Simplex.validate_attributes(kwargs)
 
         # Support some short-hand calls for adding nodes. The user does not have to
         # provide a single-element list but can give the node directly.

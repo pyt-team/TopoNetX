@@ -46,6 +46,8 @@ class Simplex(Atom[frozenset[Hashable]]):
         construct_tree: bool = False,
         **kwargs,
     ) -> None:
+        self.validate_attributes(kwargs)
+
         if construct_tree is not False:
             warnings.warn(
                 "The `construct_tree` argument is deprecated.",
@@ -89,6 +91,23 @@ class Simplex(Atom[frozenset[Hashable]]):
         if isinstance(item, Iterable):
             return frozenset(item) <= self.elements
         return super().__contains__(item)
+
+    @staticmethod
+    def validate_attributes(attributes: dict) -> None:
+        """Validate the attributes of the simplex.
+
+        Parameters
+        ----------
+        attributes : dict
+            The attributes to be validated.
+
+        Raises
+        ------
+        ValueError
+            If the attributes contain the reserved keys `is_maximal` or `membership`.
+        """
+        if "is_maximal" in attributes or "membership" in attributes:
+            raise ValueError("Special attributes `is_maximal` and `membership` are reserved.")
 
     @staticmethod
     @deprecated("`Simplex.construct_simplex_tree` is deprecated.")
