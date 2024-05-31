@@ -554,6 +554,10 @@ class SimplicialComplex(Complex):
         ----------
         simplex : Collection
             The simplex to be added to the simplicial complex.
+
+            If a `Simplex` object is given, its attributes will be copied to the
+            simplicial complex. `kwargs` take precedence over the attributes of the
+            `Simplex` object.
         **kwargs : keyword arguments, optional
             Additional attributes to be associated with the simplex.
         """
@@ -568,7 +572,7 @@ class SimplicialComplex(Complex):
 
         if isinstance(simplex, Simplex):
             elements = simplex.elements
-            kwargs.update(simplex._attributes)
+            kwargs = simplex._attributes | kwargs
         elif isinstance(simplex, Collection):
             elements = frozenset(simplex)
             if len(elements) != len(simplex):
