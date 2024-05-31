@@ -244,7 +244,15 @@ class TestSimplicialComplex:
         assert (5,) in SC.simplices
         assert (6,) in SC.simplices
 
-        # call with unsupported type
+        # check that provided attributes are stored correctly
+        SC.add_simplex((1, 2), edge_flow=10)
+        assert SC[(1, 2)]["edge_flow"] == 10
+        SC.add_simplex(Simplex((1, 2), edge_flow=20))
+        assert SC[(1, 2)]["edge_flow"] == 20
+        SC.add_simplex(Simplex((2, 3), a=1, b=2), b=5)
+        assert SC[(2, 3)]["a"] == 1
+        assert SC[(2, 3)]["b"] == 5
+
         with pytest.raises(TypeError):
             SC.add_simplex(iter([1, 2]))
 

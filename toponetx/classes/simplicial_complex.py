@@ -554,12 +554,14 @@ class SimplicialComplex(Complex):
         ----------
         simplex : Collection
             The simplex to be added to the simplicial complex.
+
+            If a `Simplex` object is given, its attributes will be copied to the
+            simplicial complex. `kwargs` take precedence over the attributes of the
+            `Simplex` object.
         **kwargs : keyword arguments, optional
             Additional attributes to be associated with the simplex.
         """
-        # Special internal attributes must not be provided as user attributes
-        if "is_maximal" in kwargs or "membership" in kwargs:
-            raise ValueError("Special attributes `is_maximal` and `membership` are reserved.")
+        Simplex.validate_attributes(kwargs)
 
         # Support some short-hand calls for adding nodes. The user does not have to
         # provide a single-element list but can give the node directly.
@@ -570,7 +572,7 @@ class SimplicialComplex(Complex):
 
         if isinstance(simplex, Simplex):
             elements = simplex.elements
-            kwargs.update(simplex._attributes)
+            kwargs = simplex._attributes | kwargs
         elif isinstance(simplex, Collection):
             elements = frozenset(simplex)
             if len(elements) != len(simplex):
