@@ -67,11 +67,11 @@ class CombinatorialComplex(ColoredHyperGraph):
     --------
     Define an empty combinatorial complex:
 
-    >>> CCC = CombinatorialComplex()
+    >>> CCC = tnx.CombinatorialComplex()
 
     Add cells to the combinatorial complex:
 
-    >>> CCC = CombinatorialComplex()
+    >>> CCC = tnx.CombinatorialComplex()
     >>> CCC.add_cell([1, 2], rank=1)
     >>> CCC.add_cell([3, 4], rank=1)
     >>> CCC.add_cell([1, 2, 3, 4], rank=2)
@@ -393,7 +393,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         to assign a cell attribute to store the value of that property for
         each cell:
 
-        >>> CCC = CombinatorialComplex()
+        >>> CCC = tnx.CombinatorialComplex()
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
         >>> CCC.add_cell([1, 2, 4], rank=2)
         >>> CCC.add_cell([3, 4], rank=2)
@@ -406,7 +406,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         the entire dictionary will be used to update edge attributes:
 
         >>> G = nx.path_graph(3)
-        >>> CCC = CombinatorialComplex(G)
+        >>> CCC = tnx.CombinatorialComplex(G)
         >>> d = {
         ...     (1, 2): {"color": "red", "attr2": 1},
         ...     (0, 1): {"color": "blue", "attr2": 3},
@@ -437,7 +437,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CCC = CombinatorialComplex(G)
+        >>> CCC = tnx.CombinatorialComplex(G)
         >>> d = {0: {"color": "red", "attr2": 1}, 1: {"color": "blue", "attr2": 3}}
         >>> CCC.set_node_attributes(d)
         >>> CCC.get_node_attributes("color")
@@ -445,7 +445,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CCC = CombinatorialComplex(G)
+        >>> CCC = tnx.CombinatorialComplex(G)
         >>> nodes_color = CCC.get_node_attributes("color")
         >>> nodes_color[1]
         'blue'
@@ -470,7 +470,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CCC = CombinatorialComplex(G)
+        >>> CCC = tnx.CombinatorialComplex(G)
         >>> d = {
         ...     (1, 2): {"color": "red", "attr2": 1},
         ...     (0, 1): {"color": "blue", "attr2": 3},
@@ -862,7 +862,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> CCC = CombinatorialComplex()
+        >>> CCC = tnx.CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
@@ -926,8 +926,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> from toponetx.classes import CombinatorialComplex
-        >>> CCC = CombinatorialComplex()
+        >>> CCC = tnx.CombinatorialComplex()
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([2, 3], rank=1)
@@ -1108,11 +1107,12 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> CCC = CombinatorialComplex()
+        >>> CCC = tnx.CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
         >>> CCC.add_cell([9], rank=0)
         >>> CCC.singletons()
+        [frozenset({9})]
         """
         return [k for k in self.skeleton(0) if self.degree(next(iter(k)), None) == 0]
 

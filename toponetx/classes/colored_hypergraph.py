@@ -50,12 +50,11 @@ class ColoredHyperGraph(Complex):
     --------
     Define an empty colored hypergraph:
 
-    >>> CHG = ColoredHyperGraph()
+    >>> CHG = tnx.ColoredHyperGraph()
 
     Add cells to the colored hypergraph:
 
-    >>> from toponetx.classes.colored_hypergraph import ColoredHyperGraph
-    >>> CHG = ColoredHyperGraph()
+    >>> CHG = tnx.ColoredHyperGraph()
     >>> CHG.add_cell([1, 2], rank=1)
     >>> CHG.add_cell([3, 4], rank=1)
     >>> CHG.add_cell([1, 2, 3, 4], rank=2)
@@ -64,7 +63,7 @@ class ColoredHyperGraph(Complex):
 
     Create a Colored Hypergraph and add groups of friends with corresponding ranks:
 
-    >>> CHG = ColoredHyperGraph()
+    >>> CHG = tnx.ColoredHyperGraph()
     >>> CHG.add_cell(
     ...     ["Alice", "Bob"], rank=1
     ... )  # Alice and Bob are in a close-knit group.
@@ -727,7 +726,7 @@ class ColoredHyperGraph(Complex):
         to assign a cell attribute to store the value of that property for
         each cell:
 
-        >>> CHG = ColoredHyperGraph()
+        >>> CHG = tnx.ColoredHyperGraph()
         >>> CHG.add_cell([1, 2, 3, 4], rank=2)
         >>> CHG.add_cell([1, 2, 4], rank=2)
         >>> CHG.add_cell([3, 4], rank=2)
@@ -740,7 +739,7 @@ class ColoredHyperGraph(Complex):
         the entire dictionary will be used to update edge attributes:
 
         >>> G = nx.path_graph(3)
-        >>> CHG = ColoredHyperGraph(G)
+        >>> CHG = tnx.ColoredHyperGraph(G)
         >>> d = {
         ...     ((1, 2), 0): {"color": "red", "attr2": 1},
         ...     ((0, 1), 0): {"color": "blue", "attr2": 3},
@@ -748,7 +747,6 @@ class ColoredHyperGraph(Complex):
         >>> CHG.set_cell_attributes(d)
         >>> CHG.cells[((0, 1), 0)]["color"]
         'blue'
-        3
 
         Note that if the dict contains cells that are not in `self.cells`, they are
         silently ignored.
@@ -779,7 +777,7 @@ class ColoredHyperGraph(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CHG = ColoredHyperGraph(G)
+        >>> CHG = tnx.ColoredHyperGraph(G)
         >>> d = {0: {"color": "red", "attr2": 1}, 1: {"color": "blue", "attr2": 3}}
         >>> CHG.set_node_attributes(d)
         >>> CHG.get_node_attributes("color")
@@ -787,7 +785,7 @@ class ColoredHyperGraph(Complex):
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CHG = ColoredHyperGraph(G)
+        >>> CHG = tnx.ColoredHyperGraph(G)
         >>> nodes_color = CHG.get_node_attributes("color")
         >>> nodes_color[1]
         'blue'
@@ -817,7 +815,7 @@ class ColoredHyperGraph(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CHG = ColoredHyperGraph(G)
+        >>> CHG = tnx.ColoredHyperGraph(G)
         >>> d = {
         ...     ((1, 2), 0): {"color": "red", "attr2": 1},
         ...     ((0, 1), 0): {"color": "blue", "attr2": 3},
@@ -1251,14 +1249,12 @@ class ColoredHyperGraph(Complex):
 
         Examples
         --------
-        >>> import networkx as nx
-        >>> from toponetx.classes.colored_hypergraph import ColoredHyperGraph
         >>> G = nx.Graph()  # networkx graph
         >>> G.add_edge(0, 1)
         >>> G.add_edge(0, 3)
         >>> G.add_edge(0, 4)
         >>> G.add_edge(1, 4)
-        >>> CHG = ColoredHyperGraph(cells=G)
+        >>> CHG = tnx.ColoredHyperGraph(cells=G)
         >>> CHG.adjacency_matrix(0, 1)
         """
         if index:
@@ -1449,7 +1445,7 @@ class ColoredHyperGraph(Complex):
         ...     faces=[[0, 1, 2]],
         ...     process=False,
         ... )
-        >>> CHG = ColoredHyperGraph.from_trimesh(mesh)
+        >>> CHG = tnx.ColoredHyperGraph.from_trimesh(mesh)
         >>> CHG.nodes
         """
         raise NotImplementedError()
@@ -1520,14 +1516,14 @@ class ColoredHyperGraph(Complex):
 
         Examples
         --------
-        >>> from networkx import Graph
-        >>> G = Graph()
+        >>> G = nx.Graph()
         >>> G.add_edge(0, 1)
         >>> G.add_edge(0, 4)
         >>> G.add_edge(0, 7)
-        >>> CHG = ColoredHyperGraph()
+        >>> CHG = tnx.ColoredHyperGraph()
         >>> CHG.from_networkx_graph(G)
         >>> CHG.nodes
+        NodeView([(0,), (1,), (4,), (7,)])
         """
         for node in G.nodes:  # cells is a networkx graph
             self.add_node(node, **G.nodes[node])

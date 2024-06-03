@@ -95,8 +95,7 @@ class CellComplex(Complex):
     --------
     Iteratively construct a cell complex:
 
-    >>> from toponetx.classes import CellComplex
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([1, 2, 3, 4], rank=2)
     >>> # the cell [1, 2, 3, 4] consists of the cycle (1,2), (2,3), (3,4), (4,5)
     >>> # tnx creates these edges automatically if they are not inserted in the underlying graph
@@ -105,32 +104,29 @@ class CellComplex(Complex):
 
     You can also pass a list of cells to the constructor:
 
-    >>> c1 = Cell((1, 2, 3))  # a cell here is always assumed to be 2d
-    >>> c2 = Cell((1, 2, 3, 4))
-    >>> CC = CellComplex([c1, c2])
+    >>> c1 = tnx.Cell((1, 2, 3))  # a cell here is always assumed to be 2d
+    >>> c2 = tnx.Cell((1, 2, 3, 4))
+    >>> CC = tnx.CellComplex([c1, c2])
 
     TopoNetX is also compatible with NetworkX, allowing users to create a cell complex from a NetworkX graph:
 
-    >>> from toponetx.classes import CellComplex
-    >>> import networkx as nx
     >>> g = nx.Graph()
     >>> g.add_edge(1, 0)
     >>> g.add_edge(2, 0)
     >>> g.add_edge(1, 2)
-    >>> CC = CellComplex(g)
+    >>> CC = tnx.CellComplex(g)
     >>> CC.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
     >>> CC.cells
 
     By default, a regular cell complex is constructed. You can change this behaviour using the
     `regular` parameter when constructing the complex.
 
-    >>> from toponetx.classes import CellComplex
     >>> # non-regular cell complex
     >>> # by default CellComplex constructor assumes regular cell complex
-    >>> CC = CellComplex(regular=False)
+    >>> CC = tnx.CellComplex(regular=False)
     >>> CC.add_cell([1, 2, 3, 4], rank=2)
     >>> CC.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
-    >>> c1 = Cell((1, 2, 3, 4, 5, 1, 2, 3, 4, 5), regular=False)
+    >>> c1 = tnx.Cell((1, 2, 3, 4, 5, 1, 2, 3, 4, 5), regular=False)
     >>> CC.add_cell(c1)
     >>> CC.add_cell([5, 6, 7, 8], rank=2)
     >>> CC.is_regular
@@ -278,13 +274,14 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex(regular=False)
+        >>> CC = tnx.CellComplex(regular=False)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([2, 3, 4, 5, 2, 3, 4, 5], rank=2)  # non-regular 2-cell
-        >>> c1 = Cell((1, 2, 3, 4, 5, 1, 2, 3, 4, 5), regular=False)
+        >>> c1 = tnx.Cell((1, 2, 3, 4, 5, 1, 2, 3, 4, 5), regular=False)
         >>> CC.add_cell(c1)
         >>> CC.add_cell([5, 6, 7, 8], rank=2)
         >>> CC.is_regular
+        False
         """
         return all(cell.is_regular for cell in self.cells)
 
@@ -417,7 +414,7 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell((1, 2, 3, 4), rank=2)
         >>> CC.add_cell((2, 3, 4, 1), rank=2)
         >>> CC.add_cell((1, 2, 3, 4), rank=2)
@@ -425,7 +422,7 @@ class CellComplex(Complex):
         >>> CC.add_cell((3, 4, 1, 2), rank=2)
         >>> CC.add_cell((4, 3, 2, 1), rank=2)
         >>> CC.add_cell((1, 2, 7, 3), rank=2)
-        >>> c1 = Cell((1, 2, 3, 4, 5))
+        >>> c1 = tnx.Cell((1, 2, 3, 4, 5))
         >>> CC.add_cell(c1, rank=2)
         >>> CC._cell_equivalence_class()
         """
@@ -449,7 +446,7 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell((1, 2, 3, 4), rank=2)
         >>> CC.add_cell((2, 3, 4, 1), rank=2)
         >>> CC.add_cell((1, 2, 3, 4), rank=2)
@@ -457,7 +454,7 @@ class CellComplex(Complex):
         >>> CC.add_cell((3, 4, 1, 2), rank=2)
         >>> CC.add_cell((4, 3, 2, 1), rank=2)
         >>> CC.add_cell((1, 2, 7, 3), rank=2)
-        >>> c1 = Cell((1, 2, 3, 4, 5))
+        >>> c1 = tnx.Cell((1, 2, 3, 4, 5))
         >>> CC.add_cell(c1, rank=2)
         >>> CC._remove_equivalent_cells()
         >>> CC
@@ -747,8 +744,8 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
-        >>> c1 = Cell((2, 3, 4), color="black")
+        >>> CC = tnx.CellComplex()
+        >>> c1 = tnx.Cell((2, 3, 4), color="black")
         >>> CC.add_cell(c1, weight=3)
         >>> CC.add_cell([1, 2, 3, 4], rank=2, color="red")
         >>> CC.add_cell([2, 3, 4, 5], rank=2, color="blue")
@@ -896,7 +893,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
         >>> CC.set_filtration(d, "f")
         """
@@ -938,7 +935,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> d = {0: 1, 1: 0, 2: 2, (0, 1): 1, (1, 2): 3}
         >>> CC.set_filtration(d, "f")
         >>> CC.get_filtration("f")
@@ -970,7 +967,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> d = {1: {"color": "red", "attr2": 1}, 2: {"color": "blue", "attr2": 3}}
         >>> CC.set_node_attributes(d)
@@ -995,7 +992,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> d = {1: {"color": "red", "attr2": 1}, 2: {"color": "blue", "attr2": 3}}
         >>> CC.set_node_attributes(d)
@@ -1023,7 +1020,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> d = {
         ...     (1, 2): {"color": "red", "attr2": 1},
@@ -1051,7 +1048,7 @@ class CellComplex(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> d = {
         ...     (1, 2): {"color": "red", "attr2": 1},
@@ -1095,12 +1092,9 @@ class CellComplex(Complex):
         to assign a cell attribute to store the value of that property for
         each cell:
 
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
-        >>> CC.add_cell(
-        ...     [1, 2, 4],
-        ...     rank=2,
-        ... )
+        >>> CC.add_cell([1, 2, 4], rank=2)
         >>> CC.add_cell([3, 4, 8], rank=2)
         >>> d = {(1, 2, 3, 4): "red", (1, 2, 4): "blue"}
         >>> CC.set_cell_attributes(d, name="color", rank=2)
@@ -1111,13 +1105,10 @@ class CellComplex(Complex):
         the entire dictionary will be used to update cell attributes::
 
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
-        >>> CC.add_cell(
-        ...     [1, 2, 4],
-        ...     rank=2,
-        ... )
+        >>> CC.add_cell([1, 2, 4], rank=2)
         >>> CC.add_cell([3, 4, 8], rank=2)
         >>> d = {
         ...     (1, 2, 3, 4): {"color": "red", "attr2": 1},
@@ -1196,14 +1187,12 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> import networkx as nx
-        >>> from toponetx.classes import CellComplex
         >>> G = nx.path_graph(3)
         >>> d = {
         ...     ((1, 2, 3, 4), 0): {"color": "red", "attr2": 1},
         ...     (1, 2, 4): {"color": "blue", "attr2": 3},
         ... }
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([1, 2, 4], rank=2)
@@ -1341,17 +1330,12 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> import networkx as nx
-        >>> from toponetx.classes import CellComplex
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([2, 3, 4, 1], rank=2)
-        >>> CC.add_cell(
-        ...     [1, 2, 4],
-        ...     rank=2,
-        ... )
+        >>> CC.add_cell([1, 2, 4], rank=2)
         >>> CC.add_cell([3, 4, 8], rank=2)
         >>> print(CC.cells)
         >>> CC.remove_equivalent_cells()
@@ -1474,7 +1458,7 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([3, 4, 5], rank=2)
         >>> CC.node_to_all_cell_adjacnecy_matrix().todense()
@@ -1533,7 +1517,7 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CX = CellComplex([[1, 2, 3, 4], [2, 3, 6]])
+        >>> CX = tnx.CellComplex([[1, 2, 3, 4], [2, 3, 6]])
         >>> index, m = CX.all_cell_to_node_coadjacency_matrix(s=1, index=True)
         >>> # m_ij iff cell i is coadjacency to cell j. Dimension of cells i,j are arbirary
         >>> print(m.todense(), index)
@@ -1580,7 +1564,7 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([3, 4, 5], rank=2)
         >>> B0 = CC.incidence_matrix(0)
@@ -1592,16 +1576,12 @@ class CellComplex(Complex):
         Note that in this example, the first three cells are equivalent and hence they have similar incidence to lower
         edges they are incident to.
 
-        >>> import networkx as nx
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([4, 3, 2, 1], rank=2)
         >>> CC.add_cell([2, 3, 4, 1], rank=2)
-        >>> CC.add_cell(
-        ...     [1, 2, 4],
-        ...     rank=2,
-        ... )
+        >>> CC.add_cell([1, 2, 4], rank=2)
         >>> CC.add_cell([3, 4, 8], rank=2)
         >>> B1 = CC.incidence_matrix(1)
         >>> B2 = CC.incidence_matrix(2)
@@ -1609,7 +1589,7 @@ class CellComplex(Complex):
 
         Non-regular cell complex example:
 
-        >>> CC = CellComplex(regular=False)
+        >>> CC = tnx.CellComplex(regular=False)
         >>> CC.add_cell([1, 2, 3, 2], rank=2)
         >>> CC.add_cell([3, 4, 5, 3, 4, 5], rank=2)
         >>> B1 = CC.incidence_matrix(1)
@@ -1617,7 +1597,7 @@ class CellComplex(Complex):
         >>> print(B2.todense())  # observe the non-unit entries
         >>> B1.dot(B2).todense()
 
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([3, 4, 5], rank=2)
         >>> row, column, B1 = CC.incidence_matrix(1, index=True)
@@ -1734,7 +1714,7 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([3, 4, 5], rank=2)
         >>> CC.hodge_laplacian_matrix(1)
@@ -1824,12 +1804,12 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([3, 4, 5], rank=2)
         >>> L1_up = CC.up_laplacian_matrix(1)
 
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3], rank=2)
         >>> CC.add_cell([3, 4, 5], rank=2)
         >>> index, L1_up = CC.up_laplacian_matrix(1, index=True)
@@ -1886,9 +1866,8 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> import networkx as nx
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.add_cell([2, 3, 4, 1], rank=2)
@@ -2021,9 +2000,8 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> import networkx as nx
         >>> G = nx.path_graph(3)
-        >>> CC = CellComplex(G)
+        >>> CC = tnx.CellComplex(G)
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
         >>> CC.dirac_operator_matrix()
         """
@@ -2072,15 +2050,14 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
-        >>> c1 = Cell((1, 2, 3))
-        >>> c2 = Cell((1, 2, 4))
-        >>> c3 = Cell((1, 2, 5))
-        >>> CC = CellComplex([c1, c2, c3])
+        >>> c1 = tnx.Cell((1, 2, 3))
+        >>> c2 = tnx.Cell((1, 2, 4))
+        >>> c3 = tnx.Cell((1, 2, 5))
+        >>> CC = tnx.CellComplex([c1, c2, c3])
         >>> CC.add_edge(1, 0)
         >>> cx1 = CC.restrict_to_cells([c1, (0, 1)])
         >>> cx1.cells
-        CellView([Cell(1, 2, 3)])
+        CellView([Cell((1, 2, 3))])
         """
         CC = CellComplex(cells=self._G.copy())
 
@@ -2138,11 +2115,10 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
-        >>> c1 = Cell((1, 2, 3))
-        >>> c2 = Cell((1, 2, 4))
-        >>> c3 = Cell((1, 2, 5))
-        >>> CC = CellComplex([c1, c2, c3])
+        >>> c1 = tnx.Cell((1, 2, 3))
+        >>> c2 = tnx.Cell((1, 2, 4))
+        >>> c3 = tnx.Cell((1, 2, 5))
+        >>> CC = tnx.CellComplex([c1, c2, c3])
         >>> CC.add_edge(1, 0)
         >>> CC.restrict_to_nodes([1, 2, 3, 0])
         """
@@ -2169,7 +2145,7 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2, weight=1)
         >>> CC.add_cell([2, 3, 4, 5], rank=2, weight=4)
         >>> CC.add_cell([5, 6, 7, 8], rank=2, weight=0)
@@ -2201,7 +2177,7 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2, weight=1)
         >>> CC.add_cell([2, 3, 4, 5], rank=2, weight=4)
         >>> CC.add_cell([5, 6, 7, 8], rank=2, weight=0)
@@ -2229,12 +2205,11 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2, color="red")
         >>> CC.add_cell([2, 3, 4, 5], rank=2)
         >>> CC.add_cell([5, 6, 7, 8], rank=2)
-        >>> HG = CC.to_hypergraph()
-        >>> HG
+        >>> CC.to_hypergraph()
         """
         from hypernetx.classes.entity import EntitySet
 
@@ -2289,6 +2264,7 @@ class CellComplex(Complex):
         >>> CC.add_node(0)
         >>> CC.add_node(10)
         >>> CC.singletons()
+        [0, 10]
         """
         return [node for node in self.nodes if self.degree(node) == 0]
 
@@ -2302,12 +2278,12 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2, weight=5)
         >>> CC.add_cell([2, 3, 4, 5], rank=2)
         >>> CC.add_cell([5, 6, 7, 8], rank=2)
         >>> CC.add_node(0)
-        >>> CX2 = CC.clone()
+        >>> CC.clone()
         """
         _G = self._G.copy()
         CC = self.__class__(_G)
@@ -2355,9 +2331,9 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([0, 1, 2, 3, 4], rank=2)
-        >>> G = CC.get_linegraph()
+        >>> CC.get_linegraph()
         """
         if not isinstance(s, int) or s < 1:
             raise ValueError(f"'s' must be a positive integer, got {s}.")
@@ -2382,9 +2358,9 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cell([1, 2, 3, 4], rank=2)
-        >>> G = CC.to_hasse_graph()
+        >>> CC.to_hasse_graph()
         """
         G = nx.DiGraph()
         for n in self.nodes:
@@ -2413,9 +2389,9 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex()
+        >>> CC = tnx.CellComplex()
         >>> CC.add_cells_from([[1, 2, 4], [1, 2, 7]], rank=2)
-        >>> G = Graph([(0, 1), (0, 2), (1, 2)])
+        >>> G = nx.Graph([(0, 1), (0, 2), (1, 2)])
         >>> CC.from_networkx_graph(G)
         >>> CC.edges
         """
@@ -2441,10 +2417,12 @@ class CellComplex(Complex):
         Examples
         --------
         >>> import trimesh
-        >>> mesh = trimesh.Trimesh(vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
-                               faces=[[0, 1, 2]],
-                               process=False)
-        >>> CC = CellComplex.from_trimesh(mesh)
+        >>> mesh = trimesh.Trimesh(
+        ...     vertices=[[0, 0, 0], [0, 0, 1], [0, 1, 0]],
+        ...     faces=[[0, 1, 2]],
+        ...     process=False,
+        ... )
+        >>> CC = tnx.CellComplex.from_trimesh(mesh)
         >>> CC[0]["position"]
         """
         CC = cls(mesh.faces)
@@ -2487,7 +2465,7 @@ class CellComplex(Complex):
 
         Examples
         --------
-        >>> CC = CellComplex.load_mesh("bunny.obj")
+        >>> CC = tnx.CellComplex.load_mesh("bunny.obj")
         """
         import trimesh
 

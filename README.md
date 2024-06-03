@@ -85,64 +85,53 @@ pre-commit install
 ## Example 1: creating a simplicial complex
 
 ```python
-from toponetx.classes import SimplicialComplex
+import toponetx as tnx
 
 # Instantiate a SimplicialComplex object with a few simplices
-
-sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
+sc = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 
 # Compute the incidence matrix between 1-skeleton and 0-skeleton
-
 B1 = sc.incidence_matrix(1)
 
 # Compute the incidence matrix between 2-skeleton and 1-skeleton
-
 B2 = sc.incidence_matrix(2)
 ```
 
 ## Example 2: creating a cell complex
 
 ```python
-from toponetx.classes import CellComplex
+import toponetx as tnx
 
 # Instantiate a CellComplex object with a few cells
-
-cx = CellComplex([[1, 2, 3, 4], [3, 4, 5, 6, 7, 8]], ranks=2)
+cx = tnx.CellComplex([[1, 2, 3, 4], [3, 4, 5, 6, 7, 8]], ranks=2)
 
 # Add an edge (cell of rank 1) after initialization
-
 cx.add_edge(0, 1)
 
 # Compute the Hodge Laplacian matrix of dimension 1
-
 L1 = cx.hodge_laplacian_matrix(1)
 
 # Compute the Hodge Laplacian matrix of dimension 2
-
 L2 = cx.hodge_laplacian_matrix(2)
 ```
 
 ## Example 3: creating a combinatorial complex
 
 ```python
-from toponetx.classes import CombinatorialComplex
+import toponetx as tnx
 
 # Instantiate a combinatorial complex object with a few cells
-
-cc = CombinatorialComplex()
+cc = tnx.CombinatorialComplex()
 
 # Add some cells of different ranks after initialization
-
 cc.add_cell([1, 2, 3], rank=2)
 cc.add_cell([3, 4, 5], rank=2)
 cc.add_cells_from([[2, 3, 4, 5], [3, 4, 5, 6, 7]], ranks=3)
 
 # Compute the incidence matrix between cells of rank 0 and 2
-
 B02 = cc.incidence_matrix(0, 2)
 
 # Compute the incidence matrix between cells of rank 0 and 3
-
 B03 = cc.incidence_matrix(0, 3)
 ```
 
