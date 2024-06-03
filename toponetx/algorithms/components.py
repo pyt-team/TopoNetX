@@ -1,4 +1,5 @@
 """Module to compute connected components on topological domains."""
+
 from collections.abc import Generator, Hashable
 from typing import Literal, TypeVar, overload
 
@@ -87,20 +88,20 @@ def s_connected_components(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(s_connected_components(CC, s=1, cells=False))
+    >>> list(tnx.s_connected_components(CC, s=1, cells=False))
     [{2, 3, 4}, {5, 6, 7}]
-    >>> list(s_connected_components(CC, s=1, cells=True))
+    >>> list(tnx.s_connected_components(CC, s=1, cells=True))
     [{(2, 3), (2, 3, 4), (2, 4), (3, 4)}, {(5, 6), (5, 6, 7), (5, 7), (6, 7)}]
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(s_connected_components(CHG, s=1, cells=False))
+    >>> list(tnx.s_connected_components(CHG, s=1, cells=False))
     >>> CC.add_cell([4, 5], rank=1)
-    >>> list(s_connected_components(CC, s=1, cells=False))
+    >>> list(tnx.s_connected_components(CC, s=1, cells=False))
     [{2, 3, 4, 5, 6, 7}]
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(s_connected_components(CCC, s=1, cells=False))
+    >>> list(tnx.s_connected_components(CCC, s=1, cells=False))
     """
     if cells:
         cell_dict, A = domain.all_cell_to_node_coadjacency_matrix(s=s, index=True)
@@ -160,16 +161,16 @@ def s_component_subcomplexes(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(s_component_subcomplexes(CC, 1, cells=False))
+    >>> list(tnx.s_component_subcomplexes(CC, 1, cells=False))
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(s_component_subcomplexes(CCC, s=1, cells=False))
+    >>> list(tnx.s_component_subcomplexes(CCC, s=1, cells=False))
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(s_component_subcomplexes(CHG, s=1, cells=False))
+    >>> list(tnx.s_component_subcomplexes(CHG, s=1, cells=False))
     >>> CC.add_cell([4, 5], rank=1)
-    >>> list(s_component_subcomplexes(CC, s=1, cells=False))
+    >>> list(tnx.s_component_subcomplexes(CC, s=1, cells=False))
     """
     for c in s_connected_components(
         domain, s=s, cells=cells, return_singletons=return_singletons
@@ -232,12 +233,12 @@ def connected_components(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(connected_components(CC, cells=False))
+    >>> list(tnx.connected_components(CC, cells=False))
     >>> CC.add_cell([4, 5], rank=1)
-    >>> list(CC.connected_components(CC, cells=False))
+    >>> list(tnx.CC.connected_components(CC, cells=False))
     """
     yield from s_connected_components(
         domain, s=1, cells=cells, return_singletons=return_singletons
@@ -270,11 +271,11 @@ def connected_component_subcomplexes(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(connected_component_subcomplexes(CC))
+    >>> list(tnx.connected_component_subcomplexes(CC))
     >>> CC.add_cell([4, 5], rank=1)
-    >>> list(connected_component_subcomplexes(CC))
+    >>> list(tnx.connected_component_subcomplexes(CC))
     """
     yield from s_component_subcomplexes(domain, return_singletons=return_singletons)

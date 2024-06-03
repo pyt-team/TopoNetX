@@ -42,16 +42,16 @@ class Cell(Atom[tuple[Hashable]]):
 
     Examples
     --------
-    >>> cell1 = Cell((1, 2, 3))
-    >>> cell2 = Cell((1, 2, 4, 5), weight=1)
-    >>> cell3 = Cell(("a", "b", "c"))
+    >>> cell1 = tnx.Cell((1, 2, 3))
+    >>> cell2 = tnx.Cell((1, 2, 4, 5), weight=1)
+    >>> cell3 = tnx.Cell(("a", "b", "c"))
     >>> # create geometric cell:
     >>> v0 = (0, 0)
     >>> v1 = (1, 0)
     >>> v2 = (1, 1)
     >>> v3 = (0, 1)
     # create the cell with the vertices and edges
-    >>> cell = Cell([v0, v1, v2, v3], type="square")
+    >>> cell = tnx.Cell([v0, v1, v2, v3], type="square")
     >>> cell["type"]
     >>> list(cell.boundary)
     [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),

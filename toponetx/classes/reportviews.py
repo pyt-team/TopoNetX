@@ -261,7 +261,7 @@ class ColoredHyperEdgeView(AtomView):
 
     Examples
     --------
-    >>> hev = ColoredHyperEdgeView()
+    >>> hev = tnx.ColoredHyperEdgeView()
     """
 
     def __init__(self) -> None:
@@ -513,7 +513,7 @@ class HyperEdgeView(AtomView):
 
     Examples
     --------
-    >>> hev = HyperEdgeView()
+    >>> hev = tnx.HyperEdgeView()
     """
 
     def __init__(self) -> None:
@@ -895,7 +895,7 @@ class SimplexView(AtomView[Simplex]):
         --------
         Check if a node is in the simplex view:
 
-        >>> view = SimplexView()
+        >>> view = tnx.SimplexView()
         >>> view.faces_dict.append({frozenset({1}): {"weight": 1}})
         >>> view.max_dim = 0
         >>> 1 in view

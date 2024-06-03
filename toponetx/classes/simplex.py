@@ -30,14 +30,14 @@ class Simplex(Atom[frozenset[Hashable]]):
     Examples
     --------
     >>> # Create a 0-dimensional simplex (point)
-    >>> s = Simplex((1,))
+    >>> s = tnx.Simplex((1,))
     >>> # Create a 1-dimensional simplex (line segment)
-    >>> s = Simplex((1, 2))
+    >>> s = tnx.Simplex((1, 2))
     >>> # Create a 2-dimensional simplex (triangle)
-    >>> simplex1 = Simplex((1, 2, 3))
-    >>> simplex2 = Simplex(("a", "b", "c"))
+    >>> simplex1 = tnx.Simplex((1, 2, 3))
+    >>> simplex2 = tnx.Simplex(("a", "b", "c"))
     >>> # Create a 3-dimensional simplex (tetrahedron)
-    >>> simplex3 = Simplex((1, 2, 4, 5), weight=1)
+    >>> simplex3 = tnx.Simplex((1, 2, 4, 5), weight=1)
     """
 
     def __init__(
@@ -78,7 +78,7 @@ class Simplex(Atom[frozenset[Hashable]]):
 
         Examples
         --------
-        >>> s = Simplex((1, 2, 3))
+        >>> s = tnx.Simplex((1, 2, 3))
         >>> 1 in s
         True
         >>> 4 in s

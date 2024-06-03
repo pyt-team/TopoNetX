@@ -1,4 +1,5 @@
 """Read and write complexes as a list of their atoms."""
+
 from collections.abc import Generator, Hashable, Iterable
 from itertools import combinations
 from typing import Literal, overload
@@ -127,19 +128,17 @@ def generate_atomlist(
     --------
     Generate a list of atoms from a simplicial complex:
 
-    >>> from toponetx.classes import SimplicialComplex
-    >>> SC = SimplicialComplex()
+    >>> SC = tnx.SimplicialComplex()
     >>> SC.add_simplex((1,), weight=1.0)
     >>> SC.add_simplex((1, 2, 3), weight=4.0)
-    >>> list(generate_atomlist(SC))
+    >>> list(tnx.generate_atomlist(SC))
     ["1 {'weight': 1.0}", "1 2 3 {'weight': 4.0}"]
 
     Generate a list of atoms from a cell complex:
 
-    >>> from toponetx.classes import CellComplex
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell((1, 2, 3), rank=2, weight=4.0)
-    >>> list(generate_atomlist(CC))
+    >>> list(tnx.generate_atomlist(CC))
     ["1 2 3 {'weight': 4.0}"]
     """
     if isinstance(domain, SimplicialComplex):

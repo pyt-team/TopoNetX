@@ -68,7 +68,7 @@ class PathComplex(Complex):
 
     Examples
     --------
-    >>> PC = PathComplex([(1, 2, 3)])
+    >>> PC = tnx.PathComplex([(1, 2, 3)])
     >>> PC.paths
     PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
     >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
@@ -76,7 +76,7 @@ class PathComplex(Complex):
     PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
     >>> G = nx.Graph()
     >>> G.add_edges_from([(1, 2), (2, 3), (1, 3)])
-    >>> PC = PathComplex(G)
+    >>> PC = tnx.PathComplex(G)
     >>> PC.paths
     PathView([(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 3, 2), (1, 2, 3), (2, 1, 3)])
     """
@@ -159,7 +159,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([(1, 2, 3)])
+        >>> PC = tnx.PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
         >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
@@ -188,7 +188,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([(1, 2, 3)])
+        >>> PC = tnx.PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
         >>> PC.add_path((1, 2, 4))
@@ -707,7 +707,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex(
+        >>> PC = tnx.PathComplex(
         ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
         ... )
         >>> PC = PC.restrict_to_nodes([0, 1, 3])
@@ -737,7 +737,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex(
+        >>> PC = tnx.PathComplex(
         ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
         ... )
         >>> PC = PC.restrict_to_paths([[1, 2, 3]])
@@ -766,7 +766,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_node(0)
         >>> PC.add_node(1, heat=55)
         >>> PC.add_node(2, heat=66)
@@ -774,9 +774,9 @@ class PathComplex(Complex):
         >>> PC.add_node(2, color="blue")
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
         >>> PC.get_node_attributes("heat")
-        {(1, ): 55, (2, ): 66}
+        {(1,): 55, (2,): 66}
         >>> PC.get_node_attributes("color")
-        {(2, ): "blue", (3, ): "red"}
+        {(2,): 'blue', (3,): 'red'}
         """
         return {tuple(n): self[n][name] for n in self.skeleton(0) if name in self[n]}
 
@@ -796,7 +796,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
         >>> PC.set_node_attributes(
         ...     {
@@ -856,7 +856,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
         >>> PC.add_path([0, 1], weight=32)
         >>> PC.add_path([1, 2], weight=98)
@@ -865,7 +865,7 @@ class PathComplex(Complex):
         >>> PC.get_edge_attributes("weight")
         {(0, 1): 32, (1, 2): 98}
         >>> PC.get_edge_attributes("color")
-        {(1, 3): "red", (2, 3): "blue"}
+        {(1, 3): 'red', (2, 3): 'blue'}
         """
         return {tuple(e): self[e][name] for e in self.skeleton(1) if name in self[e]}
 
@@ -885,7 +885,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
         >>> PC.add_path([0, 1], weight=32)
         >>> PC.add_path([1, 2], weight=98)
@@ -943,7 +943,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_paths_from([[0, 1]])
         >>> PC.add_path([0, 1, 2], weight=43)
         >>> PC.add_path([0, 1, 3], weight=98)
@@ -953,7 +953,7 @@ class PathComplex(Complex):
         >>> PC.get_path_attributes("weight")
         {(0, 1, 2): 43, (0, 1, 3): 98}
         >>> PC.get_path_attributes("color")
-        {(1, 2, 3): "red", (1, 3, 2): "blue", (2, 1, 3): "green"}
+        {(1, 2, 3): 'red', (1, 3, 2): 'blue', (2, 1, 3): 'green'}
         """
         return {
             tuple(p): self[p][name]
@@ -978,7 +978,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex(
+        >>> PC = tnx.PathComplex(
         ...     [[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]]
         ... )
         >>> PC.set_path_attributes(
@@ -990,7 +990,7 @@ class PathComplex(Complex):
         >>> PC.get_path_attributes("weight")
         {(0, 1, 2): 43, (0, 1, 3): 98}
         >>> PC.get_path_attributes("color")
-        {(0, 1, 2): "red", (0, 1, 3): "blue"}
+        {(0, 1, 2): 'red', (0, 1, 3): 'blue'}
         >>> PC.set_path_attributes({0: 55}, "weight")
         >>> PC.get_path_attributes("weight")
         {(0,): 55, (0, 1, 2): 43, (0, 1, 3): 98}
@@ -1193,7 +1193,7 @@ class PathComplex(Complex):
         --------
         >>> G = nx.Graph()
         >>> G.add_edges_from([(1, 2), (2, 3), (1, 3), (0, 1)])
-        >>> allowed_paths = PathComplex.compute_allowed_paths(G, max_rank=2)
+        >>> allowed_paths = tnx.PathComplex.compute_allowed_paths(G, max_rank=2)
         >>> allowed_paths
         {(0, 1), (1, 3), (1, 2), (2,), (1, 3, 2), (0, 1, 2), (0, 1, 3), (1, 2, 3), (2, 1, 3), (2, 3), (1,), (0,), (3,)}
         """
