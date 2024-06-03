@@ -3,7 +3,7 @@
 [![Codecov](https://codecov.io/gh/pyt-team/TopoNetX/branch/main/graph/badge.svg)](https://app.codecov.io/gh/pyt-team/TopoNetX)
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7958504.svg)](https://doi.org/10.5281/zenodo.7958504)
-
+[![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/pyt-teamworkspace/shared_invite/zt-2k63sv99s-jbFMLtwzUCc8nt3sIRWjEw)
 
 ![toponetx](https://github.com/mhajij/shrec_16/blob/main/logo.png)
 
@@ -14,7 +14,7 @@
 
 Many complex systems, ranging from socio-economic systems such as social networks, over to biological systems (e.g., proteins) and technical systems can be abstracted as a set of entities with are linked to each other via a set of relations.
 For instance, a social network may be abstracted as a set vertices corresponding to people linked via various social interactions, including pairwise relationships such as friendships and higher-order relationships involving multiple people.
-This *relational data* can be abstracted as a topological domain such as a graph, hypergraph, simplicial, cellular or combinatorial complex, which enables the principled analysis of such data.
+This *relational data* can be abstracted as a topological domain such as a graph, hypergraph, simplicial, cellular path or combinatorial complex, which enables the principled analysis of such data.
 
 `TopoNetX` provides a unified platform to compute with such relational data.
 
@@ -38,7 +38,7 @@ found in higher-order networks such as simplicial, cellular, CW and combinatoria
 This package serves as a repository of the methods and algorithms we find most useful
 as we explore the knowledge that can be encoded via higher-order networks.
 
-TNX supports the construction of many topological structures including the `CellComplex`, `SimplicialComplex` and `CombinatorialComplex` classes.
+TNX supports the construction of many topological structures including the `CellComplex`, `PathComplex`, "ColoredHyperGraph" `SimplicialComplex` and `CombinatorialComplex` classes.
 These classes provide methods for computing boundary operators, Hodge Laplacians
 and higher-order adjacency operators on cell, simplicial and combinatorial complexes,
 respectively. The classes are used in many areas of mathematics and computer science,
