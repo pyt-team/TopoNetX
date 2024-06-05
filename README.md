@@ -1,5 +1,5 @@
 <h2 align="center">
-  <img src="https://github.com/mhajij/shrec_16/blob/main/logo.png" width="800">
+  <img src="https://github.com/pyt-team/TopoNetX/blob/ninamiolane-logo/resources/logo.png" width="500">
 </h2>
 
 <h3 align="center">
