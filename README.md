@@ -6,6 +6,15 @@
     Computing with Relational Data abstracted as Topological Domains
 </h3>
 
+<p align="center">
+  <a href="#-scope-and-functionality">Scope and Functionality</a> •
+  <a href="#%EF%B8%8F-main-features">Main Features</a> •
+  <a href="#-installing-toponetx">Installing TopoNetX</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-references">References</a> •
+  <a href="#-acknowledgements">Acknowledgements</a>
+</p>
+
 <div align="center">
 
 [![Test](https://github.com/pyt-team/TopoNetX/actions/workflows/test.yml/badge.svg)](https://github.com/pyt-team/TopoNetX/actions/workflows/test.yml)
@@ -20,14 +29,7 @@
 
 </div>
 
-<p align="center">
-  <a href="#-scope-and-functionality">Scope and Functionality</a> •
-  <a href="#%EF%B8%8F-main-features">Main Features</a> •
-  <a href="#-installing-toponetx">Installing TopoNetX</a> •
-  <a href="#-getting-started">Getting Started</a> •
-  <a href="#-references">References</a> •
-  <a href="#-acknowledgements">Acknowledgements</a>
-</p>
+
 
 
 
