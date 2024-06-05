@@ -1,10 +1,19 @@
 <h2 align="center">
-  <img src="https://github.com/mhajij/shrec_16/blob/main/logo.png" width="800">
+  <img src="https://github.com/pyt-team/TopoNetX/blob/ninamiolane-logo/resources/logo.png" height="250">
 </h2>
 
 <h3 align="center">
     Computing with Relational Data abstracted as Topological Domains
 </h3>
+
+<p align="center">
+  <a href="#-scope-and-functionality">Scope and Functionality</a> •
+  <a href="#%EF%B8%8F-main-features">Main Features</a> •
+  <a href="#-installing-toponetx">Installing TopoNetX</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-references">References</a> •
+  <a href="#-acknowledgements">Acknowledgements</a>
+</p>
 
 <div align="center">
 
@@ -14,24 +23,15 @@
 [![Docs](https://img.shields.io/badge/docs-website-brightgreen)](https://pyt-team.github.io/toponetx/index.html)
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
 [![license](https://badgen.net/github/license/pyt-team/TopoNetX?color=green)](https://github.com/pyt-team/TopoNetX/blob/main/LICENSE)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7958504.svg)](https://doi.org/10.5281/zenodo.7958504)
 [![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/pyt-teamworkspace/shared_invite/zt-2k63sv99s-jbFMLtwzUCc8nt3sIRWjEw)
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7958504.svg)](https://doi.org/10.5281/zenodo.7958504)
 
 </div>
 
-<p align="center">
-  <a href="#-scope-and-functionality">Scope and Functionality</a> •
-  <a href="#%EF%B8%8F-main-features">Main Features</a> •
-  <a href="#-installing-toponetx">Installing TopoNetX</a> •
-  <a href="#-getting-started">Getting Started</a> •
-  <a href="#-references">References</a>
-  <a href="#-acknowledgements">Acknowledgements</a>
-</p>
 
 
 
-
-# 🌐 TopoNetX (TNX) 🍩
 
 ![toponetx](https://user-images.githubusercontent.com/8267869/234068354-af9480f1-1d18-4914-92f1-916d9093e44d.png)
 
