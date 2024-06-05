@@ -1,5 +1,5 @@
 <h2 align="center">
-  <img src="https://github.com/pyt-team/TopoNetX/blob/ninamiolane-logo/resources/logo.png" width="500">
+  <img src="https://github.com/pyt-team/TopoNetX/blob/ninamiolane-logo/resources/logo.png" height="250">
 </h2>
 
 <h3 align="center">
