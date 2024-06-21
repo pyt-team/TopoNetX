@@ -2,24 +2,22 @@ name: "Test"
 
 on:
   push:
-    branches: [main,github-actions-test]
+    branches: [main, github-actions-test]
     paths-ignore:
-    - 'docs/**'
-    - 'README.md'
-    - 'LICENSE.txt'
-    - '.gitignore'
+      - "docs/**"
+      - "README.md"
+      - "LICENSE.txt"
+      - ".gitignore"
 
   pull_request:
     branches: [main]
     paths-ignore:
-    - 'docs/**'
-    - 'README.md'
-    - 'LICENSE.txt'
-    - '.gitignore'
-
+      - "docs/**"
+      - "README.md"
+      - "LICENSE.txt"
+      - ".gitignore"
 
 jobs:
-
   build:
     runs-on: ${{ matrix.os }}
 

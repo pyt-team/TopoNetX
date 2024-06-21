@@ -33,3 +33,8 @@ repos:
     rev: v1.6.0
     hooks:
       - id: numpydoc-validation
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: "v3.1.0"
+    hooks:
+      - id: prettier
