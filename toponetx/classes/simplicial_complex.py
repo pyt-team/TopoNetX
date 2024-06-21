@@ -463,12 +463,11 @@ class SimplicialComplex(Complex):
         if simplex_ in self._simplex_set.faces_dict[len(simplex_) - 1]:
             if self.is_maximal(simplex):
                 del self._simplex_set.faces_dict[len(simplex_) - 1][simplex_]
-                faces = Simplex(simplex_).faces
+                faces = self.get_boundaries([simplex_])
                 for s in faces:
                     if len(s) == len(simplex_):
                         continue
 
-                    s = s.elements
                     self._simplex_set.faces_dict[len(s) - 1][s]["membership"] -= {
                         simplex_
                     }
