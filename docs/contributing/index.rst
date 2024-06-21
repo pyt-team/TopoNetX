@@ -40,7 +40,7 @@ Follow these steps before submitting a PR:
        $ git add <modified_files>
        $ git commit -m "Add my feature"
 
-   to record your changes. Then push the changes to your fork of `TopoNextX` with:
+   to record your changes. Then push the changes to your fork of ``TopoNetX`` with:
 
     .. code-block:: bash
 
@@ -54,9 +54,9 @@ Follow these steps before submitting a PR:
 Write Tests
 -----------
 
-The tests consist of classes appropriately named, located in the `test` folder, that check the validity of the code.
+The tests consist of classes appropriately named, located in the ``test`` folder, that check the validity of the code.
 
-Test functions should be located in files whose filenames start with `test_`. For example:
+Test functions should be located in files whose filenames start with ``test_``. For example:
 
     .. code-block:: bash
 
@@ -68,12 +68,12 @@ Test functions should be located in files whose filenames start with `test_`. Fo
       def test_capital_case():
          assert add(4, 5) == 9
 
-Use an `assert` statement to check that the function under test returns the correct output.
+Use an ``assert`` statement to check that the function under test returns the correct output.
 
 Run Tests
 ~~~~~~~~~
 
-Install `pytest` which is the software tools used to run tests:
+Install ``pytest`` which is the software tools used to run tests:
 
     .. code-block:: bash
 
@@ -85,7 +85,7 @@ Then run the test using:
 
       $ pytest test_add.py
 
-Verify that the code you have added does not break `TopoNetX` by running all the tests.
+Verify that the code you have added does not break ``TopoNetX`` by running all the tests.
 
     .. code-block:: bash
 
