@@ -30,6 +30,7 @@ dependencies=[
     "networkx",
     "numpy",
     "pandas",
+    "pyarrow",
     "requests",
     "scipy",
     "trimesh",
@@ -125,7 +126,15 @@ disable_error_code = ["import-untyped"]
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.pytest.ini_options]
-addopts = "--capture=no"
+minversion = "7.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = [
+    "error",
+    "ignore::scipy.sparse._base.SparseEfficiencyWarning",
+]
+log_cli_level = "info"
+testpaths = ["test"]
 
 [tool.coverage.report]
 exclude_lines = ["pragma: not covered", "@overload"]
