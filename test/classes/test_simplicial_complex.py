@@ -437,7 +437,7 @@ class TestSimplicialComplex:
         column, L_hodge = SC.hodge_laplacian_matrix(rank=2, signed=False, index=True)
         expected_col = {(1, 2, 3): 0, (2, 3, 4): 1}
         assert column == expected_col
-        np.testing.assert_array_equal(L_hodge.A, np.array([[3, 1], [1, 3]]))
+        np.testing.assert_array_equal(L_hodge.toarray(), np.array([[3, 1], [1, 3]]))
 
     def test_hodge_laplacian_matrix_rank_1(self):
         """Test unsigned hodge_laplacian_matrix method with index for different ranks."""
@@ -453,7 +453,7 @@ class TestSimplicialComplex:
         }
         assert column == expected_col
         np.testing.assert_array_equal(
-            L_hodge.A,
+            L_hodge.toarray(),
             np.array(
                 [
                     [2.0, 1.0, 1.0, 0.0, 0.0, 0.0],
