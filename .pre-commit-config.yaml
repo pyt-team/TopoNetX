@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.6.0
     hooks:
       - id: fix-byte-order-marker
       - id: check-case-conflict
@@ -30,7 +30,7 @@ repos:
         additional_dependencies: [black==24.*]
 
   - repo: https://github.com/numpy/numpydoc
-    rev: v1.6.0
+    rev: v1.7.0
     hooks:
       - id: numpydoc-validation
 
