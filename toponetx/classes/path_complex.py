@@ -1133,7 +1133,7 @@ class PathComplex(Complex):
         Iterator
             Iterator for iterating over all faces of the path complex.
         """
-        return iter(self.nodes)
+        return iter(self._path_set)
 
     def __len__(self) -> int:
         """Return the number of elementary p-paths in the path complex.

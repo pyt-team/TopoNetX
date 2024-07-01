@@ -4,7 +4,7 @@ The class also supports attaching arbitrary attributes and data to cells.
 """
 
 from collections.abc import Collection, Hashable, Iterable, Iterator
-from itertools import chain, combinations
+from itertools import combinations
 from typing import Any
 
 import networkx as nx
@@ -314,15 +314,15 @@ class SimplicialComplex(Complex):
             return self._simplex_set[simplex]
         raise KeyError("simplex is not in the simplicial complex")
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[frozenset[Hashable]]:
         """Iterate over all simplices (faces) of the simplicial complex.
 
         Returns
         -------
-        Iterator[Tuple[int, ...]]
+        Iterator[frozenset[Hashable]]
             An iterator over all simplices in the simplicial complex.
         """
-        return chain.from_iterable(self.nodes)
+        return iter(self.simplices)
 
     def __contains__(self, atom: Any) -> bool:
         """Check whether this simplicial complex contains the given atom.

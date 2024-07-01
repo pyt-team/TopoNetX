@@ -41,7 +41,7 @@ class Atom(abc.ABC, Generic[AtomCollectionType]):
         """
         return len(self.elements)
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self):
         """Return an iterator over the elements in the atom.
 
         Returns
@@ -164,8 +164,14 @@ class Complex(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def nodes(self):
-        """Return the node container."""
+    def nodes(self) -> Iterator[Hashable]:
+        """Return an iterator over the nodes in the complex.
+
+        Returns
+        -------
+        Iterator[Hashable]
+            Iterator over the nodes in the complex.
+        """
 
     @property
     @abc.abstractmethod
@@ -233,7 +239,13 @@ class Complex(abc.ABC):
 
     @abc.abstractmethod
     def __iter__(self) -> Iterator:
-        """Return an iterator over the nodes."""
+        """Return an iterator over the atoms in this complex.
+
+        Returns
+        -------
+        Iterator[Atom]
+            Iterator over the atoms in the complex.
+        """
 
     @abc.abstractmethod
     def __contains__(self, atom: Any) -> bool:

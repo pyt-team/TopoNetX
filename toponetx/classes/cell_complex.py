@@ -8,7 +8,7 @@ A cell complex is abbreviated in CC.
 import warnings
 from collections import defaultdict
 from collections.abc import Hashable, Iterable, Iterator
-from itertools import zip_longest
+from itertools import chain, zip_longest
 from typing import Any
 
 import networkx as nx
@@ -323,7 +323,11 @@ class CellComplex(Complex):
         dict_keyiterator
             Iterator over nodes.
         """
-        return iter(self.nodes)
+        return chain(
+            map(lambda x: (x,), self.nodes),
+            self.edges,
+            map(lambda cell: tuple(cell), self.cells),
+        )
 
     def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self.nodes, self.edges or self.cells.

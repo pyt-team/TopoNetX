@@ -808,8 +808,18 @@ class TestCellComplex:
         """Test the iterator of the cell complex."""
         CC = CellComplex()
         CC.add_cell([1, 2, 3], rank=2)
-        CC.add_cell([2, 3, 4], rank=2)
-        assert set(iter(CC)) == {1, 2, 3, 4}
+        CC.add_cell([2, 4], rank=1)
+        assert set(CC) == {
+            (1,),
+            (2,),
+            (3,),
+            (4,),
+            (2, 1),
+            (2, 3),
+            (3, 1),
+            (2, 4),
+            (1, 2, 3),
+        }
 
     def test_cell_equivalence_class(self):
         """Test the cell equivalence class method."""

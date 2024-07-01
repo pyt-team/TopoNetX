@@ -118,16 +118,20 @@ class TestSimplicialComplex:
 
     def test_iter(self):
         """Test iter method."""
-        sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
-        assert len(list(sc)) == 5
-        _i = iter(sc)
-        assert next(_i) == 1
-        assert next(_i) == 2
-        assert next(_i) == 3
-        assert next(_i) == 4
-        assert next(_i) == 0
-        with pytest.raises(StopIteration):
-            next(_i)
+        SC = SimplicialComplex([[1, 2, 3], [2, 4], [5]])
+        simplices = set(SC)
+        assert simplices == {
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+            frozenset({5}),
+            frozenset({1, 2}),
+            frozenset({1, 3}),
+            frozenset({2, 3}),
+            frozenset({2, 4}),
+            frozenset({1, 2, 3}),
+        }
 
     def test_getittem__(self):
         """Test __getitem__ and __setitem__ methods."""

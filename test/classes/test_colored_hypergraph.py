@@ -1,7 +1,5 @@
 """Unit tests for the colored hypergraph class."""
 
-import collections
-
 import networkx as nx
 import pytest
 from scipy.sparse import csr_array
@@ -103,14 +101,14 @@ class TestColoredHyperGraph:
     def test_chg_iter(self):
         """Test CHG iter."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
-        isinstance(CHG, collections.abc.Iterable)
-        it = iter(CHG)
-        assert next(it) == frozenset({1})
-        assert next(it) == frozenset({2})
-        assert next(it) == frozenset({3})
-        assert next(it) == frozenset({4})
-        with pytest.raises(StopIteration):
-            next(it)
+        assert set(CHG) == {
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+            frozenset({1, 2, 3}),
+            frozenset({2, 3, 4}),
+        }
 
     def test_chg_contains(self):
         """Test chg contains property."""

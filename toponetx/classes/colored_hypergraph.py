@@ -2,6 +2,7 @@
 
 import contextlib
 from collections.abc import Collection, Hashable, Iterable
+from itertools import chain
 from typing import Any
 
 import networkx as nx
@@ -252,7 +253,13 @@ class ColoredHyperGraph(Complex):
         iterable
             Iterator over the nodes.
         """
-        return iter(self.nodes)
+        return chain(
+            self.nodes,
+            chain.from_iterable(
+                rank_hyperedges.keys()
+                for rank_hyperedges in self._complex_set.hyperedge_dict.values()
+            ),
+        )
 
     def __contains__(self, atom: Any) -> bool:
         """Check whether this colored hypergraph contains the given atom.
