@@ -1253,7 +1253,7 @@ class TestCellComplex:
         CC.remove_singletons()
         assert CC.singletons() == []
 
-    def test_contains__(self):
+    def test_contains(self):
         """Test __contains__."""
         CC = CellComplex()
         CC.add_cell([1, 2, 3, 4], rank=2)
@@ -1264,6 +1264,10 @@ class TestCellComplex:
         assert 3 in CC
         assert 4 in CC
         assert 5 in CC
+        assert 10 not in CC
+        assert (1, 2) in CC
+        assert (10, 12) not in CC
+        assert (1, 2, 3, 4) in CC
         assert (1, 2, 3, 4, 5) not in CC
 
     def test_neighbors(self):

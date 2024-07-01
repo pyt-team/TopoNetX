@@ -2,6 +2,7 @@
 
 import contextlib
 from collections.abc import Collection, Hashable, Iterable
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -253,20 +254,20 @@ class ColoredHyperGraph(Complex):
         """
         return iter(self.nodes)
 
-    def __contains__(self, item) -> bool:
-        """Check if an item is in the nodes or edges of the colored hypergraph.
+    def __contains__(self, atom: Any) -> bool:
+        """Check whether this colored hypergraph contains the given atom.
 
         Parameters
         ----------
-        item : hashable or HyperEdge
-            The item to check for existence.
+        atom : Any
+            The atom to be checked.
 
         Returns
         -------
         bool
-            True if the item is found, False otherwise.
+            Returns `True` if this colored hypergraph contains the atom, else `False`.
         """
-        return item in self.nodes
+        return atom in self._complex_set
 
     def __setitem__(self, cell, **attr):
         """Set the attributes of a hyperedge or node in the ColoredHyperGraph.

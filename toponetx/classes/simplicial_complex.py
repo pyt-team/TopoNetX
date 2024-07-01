@@ -221,7 +221,7 @@ class SimplicialComplex(Complex):
         >>> SC.is_maximal([1, 2])
         False
         """
-        if simplex not in self:
+        if simplex not in self.simplices:
             raise ValueError(f"Simplex {simplex} is not in the simplicial complex.")
         return self[simplex]["is_maximal"]
 
@@ -310,7 +310,7 @@ class SimplicialComplex(Complex):
         KeyError
             If the simplex is not present in the simplicial complex.
         """
-        if simplex in self:
+        if simplex in self.simplices:
             return self._simplex_set[simplex]
         raise KeyError("simplex is not in the simplicial complex")
 
@@ -324,20 +324,20 @@ class SimplicialComplex(Complex):
         """
         return chain.from_iterable(self.nodes)
 
-    def __contains__(self, item) -> bool:
-        """Check if a simplex is in the simplicial complex.
+    def __contains__(self, atom: Any) -> bool:
+        """Check whether this simplicial complex contains the given atom.
 
         Parameters
         ----------
-        item : tuple or list
-            The simplex to check for existence in the simplicial complex.
+        atom : Any
+            The atom to be checked.
 
         Returns
         -------
         bool
-            True if the given simplex is in the simplicial complex, False otherwise.
+            Returns `True` if this simplicial complex contains the atom, else `False`.
         """
-        return item in self._simplex_set
+        return atom in self._simplex_set
 
     def _update_faces_dict_length(self, simplex) -> None:
         """Update the faces dictionary length based on the input simplex.
@@ -582,7 +582,7 @@ class SimplicialComplex(Complex):
             )
 
         # if the simplex is already part of this complex, update its attributes
-        if elements in self:
+        if elements in self.simplices:
             self._simplex_set.faces_dict[len(elements) - 1][elements].update(kwargs)
             return
 
@@ -704,11 +704,11 @@ class SimplicialComplex(Complex):
         if name is not None:
             # if `values` is a dict using `.items()` => {simplex: value}
             for simplex, value in values.items():
-                if simplex in self:
+                if simplex in self.simplices:
                     self[simplex][name] = value
         else:
             for simplex, d in values.items():
-                if simplex in self:
+                if simplex in self.simplices:
                     self[simplex].update(d)
 
     def get_node_attributes(self, name: str) -> dict[Hashable, Any]:
@@ -1339,7 +1339,7 @@ class SimplicialComplex(Complex):
         >>> SC1.simplices
         SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (2, 3), (2, 4), (1, 2, 3)])
         """
-        rns = [cell for cell in cell_set if cell in self]
+        rns = [cell for cell in cell_set if cell in self.simplices]
         return self.__class__(simplices=rns)
 
     def restrict_to_nodes(self, node_set):

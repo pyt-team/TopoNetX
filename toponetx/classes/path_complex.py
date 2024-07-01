@@ -347,7 +347,7 @@ class PathComplex(Complex):
                 tmp, key=lambda x: tuple(map(str, x))
             )  # lexicographic comparison
         if rank < 0:
-            raise ValueError(f"input must be a postive integer, got {rank}")
+            raise ValueError(f"input must be a positive integer, got {rank}")
         raise ValueError(f"input {rank} exceeds max dim")
 
     def add_node(self, node: Hashable | Path, **attr) -> None:
@@ -422,7 +422,7 @@ class PathComplex(Complex):
             raise ValueError(f"input dimension d must be positive integer, got {rank}")
         if rank > self.dim:
             raise ValueError(
-                f"input dimenion cannat be larger than the dimension of the complex, got {rank}"
+                f"input dimension cannot be larger than the dimension of the complex, got {rank}"
             )
         if rank == 0:
             boundary = sp.sparse.lil_matrix((0, len(self.nodes)))
@@ -1093,20 +1093,20 @@ class PathComplex(Complex):
             elif len(path_) == 2:
                 self._G.add_edge(path_[0], path_[1], **attr)
 
-    def __contains__(self, item: Sequence[Hashable] | Hashable) -> bool:
-        """Return boolean indicating if item is in self._path_set.
+    def __contains__(self, atom: Any) -> bool:
+        """Check if an atom is in the path complex.
 
         Parameters
         ----------
-        item : Sequence[Hashable] | Hashable
-            The item to check for.
+        atom : Any
+            The atom to check for existence in the path complex.
 
         Returns
         -------
         bool
-            `True` if item is contained else `False`.
+            `True` if the given atom is in the path complex, `False` otherwise.
         """
-        return item in self._path_set
+        return atom in self._path_set
 
     def __getitem__(self, item: Sequence[Hashable] | Hashable):
         """Get the elementary p-path.
@@ -1121,7 +1121,7 @@ class PathComplex(Complex):
         PathView
             The pathview based on the item provided.
         """
-        if item in self:
+        if item in self.paths:
             return self._path_set[item]
         raise KeyError("The elementary p-path is not in the path complex")
 

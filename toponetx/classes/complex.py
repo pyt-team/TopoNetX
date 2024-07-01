@@ -236,18 +236,18 @@ class Complex(abc.ABC):
         """Return an iterator over the nodes."""
 
     @abc.abstractmethod
-    def __contains__(self, item: Any) -> bool:
-        """Check whether the complex contains an item.
+    def __contains__(self, atom: Any) -> bool:
+        """Check whether this complex contains the given atom.
 
         Parameters
         ----------
-        item : Any
-            The item to be checked.
+        atom : Any
+            The atom to be checked.
 
         Returns
         -------
         bool
-            Returns `True` if the complex contains the item else `False`.
+            Returns `True` if the complex contains the atom, else `False`.
         """
 
     @abc.abstractmethod

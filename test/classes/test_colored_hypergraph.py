@@ -10,8 +10,8 @@ from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.hyperedge import HyperEdge
 
 
-class TestCombinatorialComplex:
-    """Test CombinatorialComplex class."""
+class TestColoredHyperGraph:
+    """Test ColoredHyperGraph class."""
 
     def test_init_empty_chg(self):
         """Test creation of an empty CHG."""
@@ -115,11 +115,15 @@ class TestCombinatorialComplex:
     def test_chg_contains(self):
         """Test chg contains property."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+
         assert 1 in CHG
         assert 2 in CHG
         assert 3 in CHG
         assert 4 in CHG
         assert 5 not in CHG
+
+        assert (1, 2) not in CHG
+        assert (1, 2, 3) in CHG
 
     def test_chg_getitem(self):
         """Test chg get node properties."""

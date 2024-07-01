@@ -354,38 +354,39 @@ class ColoredHyperEdgeView(AtomView):
         -----
         Assumption of input here hyperedge = ( elements of hyperedge, key of hyperedge)
         """
-        if len(self.hyperedge_dict) == 0:
+        if isinstance(atom, Hashable) and not isinstance(atom, Iterable):
+            atom = (atom,)
+
+        if not isinstance(atom, Iterable):
             return False
-        if isinstance(atom, Iterable):
-            if len(atom) == 0:
-                return False
-            if len(atom) == 2:
-                if isinstance(atom, HyperEdge):
-                    hyperedge_elements = atom.elements
-                    key = 0
-                elif isinstance(atom[0], Iterable) and isinstance(atom[1], int):
-                    hyperedge_elements_ = atom[0]
-                    if not isinstance(hyperedge_elements_, HyperEdge):
-                        hyperedge_elements, key = atom
-                    else:
-                        _, key = atom
-                        hyperedge_elements = hyperedge_elements_.elements
+
+        if len(atom) == 0:
+            return False
+        if len(atom) == 2:
+            if isinstance(atom, HyperEdge):
+                hyperedge_elements = atom.elements
+                key = 0
+            elif isinstance(atom[0], Iterable) and isinstance(atom[1], int):
+                hyperedge_elements_ = atom[0]
+                if not isinstance(hyperedge_elements_, HyperEdge):
+                    hyperedge_elements, key = atom
                 else:
-                    hyperedge_elements = atom
-                    key = 0
+                    _, key = atom
+                    hyperedge_elements = hyperedge_elements_.elements
             else:
                 hyperedge_elements = atom
                 key = 0
-            all_ranks = self.allranks
         else:
-            return False
+            hyperedge_elements = atom
+            key = 0
+
         if isinstance(hyperedge_elements, Iterable) and not isinstance(
             hyperedge_elements, HyperEdge
         ):
             if len(hyperedge_elements) == 0:
                 return False
 
-            for i in all_ranks:
+            for i in self.allranks:
                 if frozenset(hyperedge_elements) in self.hyperedge_dict[i]:
                     return key in self.hyperedge_dict[i][frozenset(hyperedge_elements)]
             return False
@@ -393,11 +394,11 @@ class ColoredHyperEdgeView(AtomView):
             if len(hyperedge_elements) == 0:
                 return False
 
-            for i in all_ranks:
+            for i in self.allranks:
                 if frozenset(hyperedge_elements.elements) in self.hyperedge_dict[i]:
                     return True
             return False
-        return None
+        return False
 
     def __repr__(self) -> str:
         """Return string representation of hyperedges.

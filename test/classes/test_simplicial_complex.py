@@ -278,6 +278,17 @@ class TestSimplicialComplex:
         SC.add_simplex("test")
         assert ("test",) in SC.simplices
 
+    def test_contains(self):
+        """Test the __contains__ method."""
+        SC = SimplicialComplex([[1, 2], [3], [4]])
+
+        assert 1 in SC
+        assert 3 in SC
+        assert 5 not in SC
+
+        assert (1, 2) in SC
+        assert (1, 3) not in SC
+
     def test_remove_maximal_simplex(self):
         """Test remove_maximal_simplex method."""
         # create a SimplicialComplex object with a few simplices
@@ -304,7 +315,7 @@ class TestSimplicialComplex:
         c1 = Simplex((1, 2, 3, 4, 5))
         SC.add_simplex(c1)
         SC.remove_maximal_simplex((1, 2, 3, 4, 5))
-        assert (1, 2, 3, 4, 5) not in SC
+        assert (1, 2, 3, 4, 5) not in SC.simplices
 
         # check removal with Simplex
         SC = SimplicialComplex()
@@ -312,7 +323,7 @@ class TestSimplicialComplex:
         c1 = Simplex((1, 2, 3, 4, 5))
         SC.add_simplex(c1)
         SC.remove_maximal_simplex(c1)
-        assert (1, 2, 3, 4, 5) not in SC
+        assert (1, 2, 3, 4, 5) not in SC.simplices
 
         # check error when simplex not in complex
         with pytest.raises(KeyError):
@@ -331,12 +342,12 @@ class TestSimplicialComplex:
         SC = SimplicialComplex([[0, 1], [1, 2, 3], [2, 3, 4], [4, 5]])
         SC.remove_nodes([2, 5])
 
-        assert [0, 1] in SC
-        assert [1, 3] in SC
-        assert [3, 4] in SC
-        assert [4] in SC
-        assert [2, 3] not in SC
-        assert [2, 4] not in SC
+        assert [0, 1] in SC.simplices
+        assert [1, 3] in SC.simplices
+        assert [3, 4] in SC.simplices
+        assert [4] in SC.simplices
+        assert [2, 3] not in SC.simplices
+        assert [2, 4] not in SC.simplices
 
         assert SC.is_maximal([0, 1])
         assert SC.is_maximal([1, 3])
@@ -1019,7 +1030,7 @@ class TestSimplicialComplex:
         assert SC2[(1, 2, 3)] is not SC[(1, 2, 3)]
         SC2.remove_maximal_simplex([1, 2, 3])
         assert 1 in SC
-        assert (1, 2, 3) in SC
+        assert (1, 2, 3) in SC.simplices
 
     def test_normalized_laplacian_matrix(self):
         """Test the normalized_laplacian_matrix method of SimplicialComplex."""

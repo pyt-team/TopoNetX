@@ -525,19 +525,19 @@ class TestReportViews_ColoredHyperEdgeView:
     def test_contains(self):
         """Test the contains method."""
         assert ((1, 2), 0) in self.colorhg_view
-        assert self.colorhg_view.__contains__([]) is False
-        assert self.colorhg_view.__contains__(((2, 3), 0)) is True
-        assert self.colorhg_view.__contains__(1) is False
-        assert self.colorhg_view.__contains__(([], 1)) is False
-        assert self.colorhg_view.__contains__(((5, 6), 0)) is False
-        assert self.colorhg_view.__contains__(HyperEdge([1, 2])) is True
-        assert self.colorhg_view.__contains__((HyperEdge([1, 2, 3]), 0)) is False
-        assert self.colorhg_view.__contains__((HyperEdge([1, 2]), 0)) is True
-        assert self.colorhg_view.__contains__((HyperEdge([]), 0)) is False
+        assert [] not in self.colorhg_view
+        assert ((2, 3), 0) in self.colorhg_view
+        assert 1 in self.colorhg_view
+        assert ([], 1) not in self.colorhg_view
+        assert ((5, 6), 0) not in self.colorhg_view
+        assert HyperEdge([1, 2]) in self.colorhg_view
+        assert (HyperEdge([1, 2, 3]), 0) not in self.colorhg_view
+        assert (HyperEdge([1, 2]), 0) in self.colorhg_view
+        assert (HyperEdge([]), 0) not in self.colorhg_view
 
         # test for empty CHG
-        assert self.colorhg_view1.__contains__(HyperEdge([1, 2])) is False
-        assert self.colorhg_view1.__contains__([]) is False
+        assert HyperEdge([1, 2]) not in self.colorhg_view1
+        assert (HyperEdge([1, 2]), 0) not in self.colorhg_view1
 
     def test_skeleton(self):
         """Test the skeleton method of ColorHyperGraphView."""
@@ -651,14 +651,14 @@ class TestReportViews_PathView:
 
     def test_contains(self):
         """Test the __contains__ method of the PathView class."""
-        assert self.path_view.__contains__(1) is True
-        assert self.path_view.__contains__((1,)) is True
-        assert self.path_view.__contains__(Path(1)) is True
-        assert self.path_view.__contains__((1, 2, 3, 4)) is False
-        assert self.path_view.__contains__(Path((1, 2, 4))) is False
-        assert self.path_view.__contains__({(1, 2, 3)}) is False
-        assert self.path_view.__contains__([]) is False
-        assert self.path_view.__contains__(Path([1, 2, 3, 4])) is False
+        assert 1 in self.path_view
+        assert (1,) in self.path_view
+        assert Path(1) in self.path_view
+        assert (1, 2, 3, 4) not in self.path_view
+        assert Path((1, 2, 4)) not in self.path_view
+        assert {(1, 2, 3)} not in self.path_view
+        assert [] not in self.path_view
+        assert Path([1, 2, 3, 4]) not in self.path_view
 
     def test_repr(self):
         """Test __repr__ method of the PathView class."""
