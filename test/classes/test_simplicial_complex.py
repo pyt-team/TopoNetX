@@ -134,17 +134,18 @@ class TestSimplicialComplex:
         }
 
     def test_getittem__(self):
-        """Test __getitem__ and __setitem__ methods."""
-        G = nx.Graph()
-        G.add_edge(0, 1)
-        G.add_edge(2, 5)
-        G.add_edge(5, 4, weight=5)
-        SC = SimplicialComplex(G, name="graph complex")
+        """Test __getitem__ methods."""
+        SC = SimplicialComplex()
+        SC.add_simplex((0, 1), weight=5)
         SC.add_simplex((1, 2, 3), heat=5)
-        # with pytest.raises(ValueError):
+
+        assert SC[(0, 1)]["weight"] == 5
         assert SC[(1, 2, 3)]["heat"] == 5
         with pytest.raises(KeyError):
             SC[(1, 2, 3, 4, 5)]["heat"]
+
+        SC[(0, 1)]["new"] = 10
+        assert SC[(0, 1)]["new"] == 10
 
     def test_setting_simplex_attributes(self):
         """Test setting simplex attributes through a `SimplicialComplex` object."""

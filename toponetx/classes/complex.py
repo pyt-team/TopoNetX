@@ -263,18 +263,26 @@ class Complex(abc.ABC):
         """
 
     @abc.abstractmethod
-    def __getitem__(self, key):
-        """Get item.
+    def __getitem__(self, atom: Any) -> dict[Hashable, Any]:
+        """Return the user-defined attributes associated with the given atom.
+
+        Writing to the returned dictionary will update the user-defined attributes
+        associated with the atom.
 
         Parameters
         ----------
-        key : hashable
-            Get item based on key.
+        atom : Any
+            The atom for which to return the associated user-defined attributes.
 
         Returns
         -------
-        Hashable
-            The hashable item that needs to be returned.
+        dict[Hashable, Any]
+            The user-defined attributes associated with the given atom.
+
+        Raises
+        ------
+        KeyError
+            If the atom does not exist in this complex.
         """
 
     @abc.abstractmethod

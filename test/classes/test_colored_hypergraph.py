@@ -128,16 +128,6 @@ class TestColoredHyperGraph:
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
         assert CHG[1] == {"weight": 1}
 
-    def test_chg_set(self):
-        """Test chg set node properties."""
-        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
-        assert CHG[1] == {"weight": 1}
-        CHG.__setitem__(1, weight=2)
-        assert CHG[1] == {"weight": 2}
-
-        with pytest.raises(KeyError):
-            CHG[5]
-
     def test_add_cell(self):
         """Test adding a cell to a CHG."""
         CHG = ColoredHyperGraph()

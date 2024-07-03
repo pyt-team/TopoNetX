@@ -95,17 +95,17 @@ class CellView(AtomView[Cell]):
         # with different attributes
         self._cells: dict[tuple[Hashable, ...], dict[int, Cell]] = {}
 
-    def __getitem__(self, cell):
+    def __getitem__(self, cell: Any) -> dict[Hashable, Any]:
         """Return the attributes of a given cell.
 
         Parameters
         ----------
-        cell : tuple list or cell
+        cell : Any
             The cell of interest.
 
         Returns
         -------
-        dict or list of dicts
+        dict[Hashable, Any]
             The attributes associated with the cell.
 
         Raises
@@ -116,7 +116,7 @@ class CellView(AtomView[Cell]):
         if isinstance(cell, Cell):
             if cell.elements not in self._cells:
                 raise KeyError(
-                    f"cell {cell.__repr__()} is not in the cell dictionary",
+                    f"cell {cell!r} is not in the cell dictionary",
                 )
 
             # If there is only one cell with these elements, return its attributes
@@ -131,7 +131,7 @@ class CellView(AtomView[Cell]):
             ]
 
         # If a tuple or list is passed in, assume it represents a cell
-        if isinstance(cell, tuple | list):
+        if isinstance(cell, Iterable):
             cell = tuple(cell)
             if cell in self._cells:
                 if len(self._cells[cell]) == 1:
@@ -267,30 +267,57 @@ class ColoredHyperEdgeView(AtomView):
     def __init__(self) -> None:
         self.hyperedge_dict = {}
 
-    def __getitem__(self, hyperedge) -> dict:
-        """Get item.
+    def __getitem__(self, atom: Any) -> dict[Hashable, Any]:
+        """Return the user-defined attributes associated with the given hyperedge.
 
         Parameters
         ----------
-        hyperedge : Hashable or ColoredHyperEdge
-            DESCRIPTION.
+        atom : Any
+            The hyperedge for which to return the associated user-defined attributes.
 
         Returns
         -------
-        dict or list or dicts
-            Return dict of attributes associated with that hyperedges.
+        dict[Hashable, Any]
+            The user-defined attributes associated with the given atom.
+
+        Raises
+        ------
+        KeyError
+            If the hyperedge does not exist.
         """
-        if isinstance(hyperedge, Iterable) and len(hyperedge) == 2:
-            if isinstance(hyperedge[0], Iterable) and isinstance(hyperedge[1], int):
-                hyperedge_elements, key = hyperedge
+        if isinstance(atom, Hashable) and not isinstance(atom, Collection):
+            atom = (atom,)
+
+        if not isinstance(atom, Collection):
+            raise KeyError(f"Hyperedge {atom} is not in the complex.")
+
+        if len(atom) == 0:
+            raise KeyError(f"Hyperedge {atom} is not in the complex.")
+        if len(atom) == 2:
+            if isinstance(atom, HyperEdge):
+                hyperedge_elements = atom.elements
+                key = 0
+            elif isinstance(atom[0], Iterable) and isinstance(atom[1], int):
+                hyperedge_elements_ = atom[0]
+                if not isinstance(hyperedge_elements_, HyperEdge):
+                    hyperedge_elements, key = atom
+                else:
+                    _, key = atom
+                    hyperedge_elements = hyperedge_elements_.elements
             else:
-                raise KeyError(
-                    "Input hyperedge must of the form (Iterable representing elements of hyperedge, key)"
-                )
-        hyperedge = HyperEdgeView()._to_frozen_set(hyperedge_elements)
-        hyperedge_elements = hyperedge
-        rank = self.get_rank(hyperedge_elements)
-        return self.hyperedge_dict[rank][hyperedge_elements][key]
+                hyperedge_elements = atom
+                key = 0
+        else:
+            hyperedge_elements = atom
+            key = 0
+
+        if not isinstance(hyperedge_elements, Iterable) or len(hyperedge_elements) == 0:
+            raise KeyError(f"Hyperedge {atom} is not in the complex.")
+
+        for i in self.allranks:
+            if frozenset(hyperedge_elements) in self.hyperedge_dict[i]:
+                return self.hyperedge_dict[i][frozenset(hyperedge_elements)][key]
+        raise KeyError(f"Hyperedge {atom} is not in the complex.")
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -354,10 +381,10 @@ class ColoredHyperEdgeView(AtomView):
         -----
         Assumption of input here hyperedge = ( elements of hyperedge, key of hyperedge)
         """
-        if isinstance(atom, Hashable) and not isinstance(atom, Iterable):
+        if isinstance(atom, Hashable) and not isinstance(atom, Collection):
             atom = (atom,)
 
-        if not isinstance(atom, Iterable):
+        if not isinstance(atom, Collection):
             return False
 
         if len(atom) == 0:
@@ -380,24 +407,12 @@ class ColoredHyperEdgeView(AtomView):
             hyperedge_elements = atom
             key = 0
 
-        if isinstance(hyperedge_elements, Iterable) and not isinstance(
-            hyperedge_elements, HyperEdge
-        ):
-            if len(hyperedge_elements) == 0:
-                return False
-
-            for i in self.allranks:
-                if frozenset(hyperedge_elements) in self.hyperedge_dict[i]:
-                    return key in self.hyperedge_dict[i][frozenset(hyperedge_elements)]
+        if not isinstance(hyperedge_elements, Iterable) or len(hyperedge_elements) == 0:
             return False
-        if isinstance(hyperedge_elements, HyperEdge):
-            if len(hyperedge_elements) == 0:
-                return False
 
-            for i in self.allranks:
-                if frozenset(hyperedge_elements.elements) in self.hyperedge_dict[i]:
-                    return True
-            return False
+        for i in self.allranks:
+            if frozenset(hyperedge_elements) in self.hyperedge_dict[i]:
+                return key in self.hyperedge_dict[i][frozenset(hyperedge_elements)]
         return False
 
     def __repr__(self) -> str:
@@ -836,17 +851,18 @@ class SimplexView(AtomView[Simplex]):
             If the simplex is not in the simplex view.
         """
         if isinstance(simplex, Simplex):
-            if simplex.elements in self.faces_dict[len(simplex) - 1]:
-                return self.faces_dict[len(simplex) - 1][simplex.elements]
-            return None
-        if isinstance(simplex, Iterable):
-            simplex = frozenset(simplex)
-            if simplex in self.faces_dict[len(simplex) - 1]:
-                return self.faces_dict[len(simplex) - 1][simplex]
-            raise KeyError(f"input {simplex} is not in the simplex dictionary")
-        if isinstance(simplex, Hashable) and frozenset({simplex}) in self:
-            return self.faces_dict[0][frozenset({simplex})]
-        return None
+            simplex = simplex.elements
+        if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
+            simplex = frozenset({simplex})
+
+        simplex = frozenset(simplex)
+        if (
+            len(self.faces_dict) >= len(simplex)
+            and simplex in self.faces_dict[len(simplex) - 1]
+        ):
+            return self.faces_dict[len(simplex) - 1][simplex]
+
+        raise KeyError(f"input {simplex} is not in the simplex dictionary")
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -1085,14 +1101,13 @@ class PathView(SimplexView):
             If the path is not in this view.
         """
         if isinstance(path, Path):
-            if path.elements in self.faces_dict[len(path) - 1]:
-                return self.faces_dict[len(path) - 1][path.elements]
-        elif isinstance(path, Sequence):
-            path = tuple(path)
-            if path in self.faces_dict[len(path) - 1]:
-                return self.faces_dict[len(path) - 1][path]
-        elif isinstance(path, Hashable) and (path,) in self:
-            return self.faces_dict[0][(path,)]
+            path = path.elements
+        if isinstance(path, Hashable) and not isinstance(path, Iterable):
+            path = (path,)
+
+        path = tuple(path)
+        if path in self.faces_dict[len(path) - 1]:
+            return self.faces_dict[len(path) - 1][path]
 
         raise KeyError(f"input {path} is not in the path dictionary")
 

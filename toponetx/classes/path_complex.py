@@ -1108,22 +1108,25 @@ class PathComplex(Complex):
         """
         return atom in self._path_set
 
-    def __getitem__(self, item: Sequence[Hashable] | Hashable):
+    def __getitem__(self, atom: Any) -> dict[Hashable, Any]:
         """Get the elementary p-path.
 
         Parameters
         ----------
-        item : Sequence[Hashable] | Hashable
+        atom : Any
             An elementary p-path or a node in the path complex.
 
         Returns
         -------
         PathView
             The pathview based on the item provided.
+
+        Raises
+        ------
+        KeyError
+            If the path does not exist in this path complex.
         """
-        if item in self.paths:
-            return self._path_set[item]
-        raise KeyError("The elementary p-path is not in the path complex")
+        return self._path_set[atom]
 
     def __iter__(self) -> Iterator:
         """Iterate over all faces of the path complex.

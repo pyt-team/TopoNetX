@@ -1571,10 +1571,19 @@ class TestCellComplex:
     def test_getitem_dunder_method(self):
         """Test if the dunder __getitem__ method returns the appropriate neighbors of the given node."""
         CC = CellComplex()
-        CC.add_edges_from([(1, 2), (2, 3), (5, 2), (1, 9), (1, 6)])
-        assert sorted(CC.__getitem__(1)) == [2, 6, 9]
-        assert sorted(CC.__getitem__(2)) == [1, 3, 5]
-        assert sorted(CC.__getitem__(6)) == [1]
+        CC.add_node(1, color="red")
+        CC.add_edge(1, 2, weight=10)
+        CC.add_cell((2, 3, 4), rank=2, weight=5)
+
+        assert CC[1]["color"] == "red"
+        assert CC[(1, 2)]["weight"] == 10
+        assert CC[(2, 3, 4)]["weight"] == 5
+
+        with pytest.raises(KeyError):
+            _ = CC[5]
+
+        CC[(1, 2)]["new"] = 1
+        assert CC[(1, 2)]["new"] == 1
 
     def test_remove_nodes(self):
         """Test remove nodes method of the class Cell Complex."""

@@ -276,59 +276,28 @@ class ColoredHyperGraph(Complex):
         """
         return atom in self._complex_set
 
-    def __setitem__(self, cell, **attr):
-        """Set the attributes of a hyperedge or node in the ColoredHyperGraph.
+    def __getitem__(self, atom: Any) -> dict[Hashable, Any]:
+        """Return the user-defined attributes associated with the given atom.
+
+        Writing to the returned dictionary will update the user-defined attributes
+        associated with the atom.
 
         Parameters
         ----------
-        cell : Hashable or RankedEntity
-            The hyperedge or node for which attributes are to be set.
-        **attr : keyword arguments
-            Additional attributes to be set.
+        atom : Any
+            The atom for which to return the associated user-defined attributes.
 
         Returns
         -------
-        None
-            None.
+        dict[Hashable, Any]
+            The user-defined attributes associated with the given atom.
 
         Raises
         ------
         KeyError
-            If the input cell is not found in the ColoredHyperGraph.
+            If the atom does not exist in this complex.
         """
-        if cell in self.nodes:
-            self.nodes[cell].update(**attr)
-        # we now check if the input is a cell in the CHG
-        elif cell in self.cells:
-            hyperedge_ = ColoredHyperEdgeView._to_frozen_set(cell)
-            rank = self.cells.get_rank(hyperedge_)
-            if hyperedge_ in self._complex_set.hyperedge_dict[rank]:
-                self._complex_set.hyperedge_dict[rank][hyperedge_].update(**attr)
-
-        else:
-            raise KeyError(f"input {cell} is not in the complex")
-
-    def __getitem__(self, node):
-        """Return the attributes of a node.
-
-        Parameters
-        ----------
-        node : Hashable
-            The node for which attributes are to be retrieved.
-
-        Returns
-        -------
-        dict
-            Dictionary of attributes associated with the node.
-
-        Raises
-        ------
-        KeyError
-            If the input node is not found in the ColoredHyperGraph.
-        """
-        if node not in self.nodes:
-            raise KeyError(f"Node {node} is not in the complex.")
-        return self.nodes[node]
+        return self._complex_set[atom]
 
     def size(self, cell):
         """Compute the number of nodes in the colored hypergraph that belong to a specific cell.

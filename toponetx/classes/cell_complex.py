@@ -7,7 +7,7 @@ A cell complex is abbreviated in CC.
 
 import warnings
 from collections import defaultdict
-from collections.abc import Hashable, Iterable, Iterator
+from collections.abc import Collection, Hashable, Iterable, Iterator
 from itertools import chain, zip_longest
 from typing import Any
 
@@ -349,20 +349,33 @@ class CellComplex(Complex):
             return True
         return item in self._cells
 
-    def __getitem__(self, node):
-        """Return the neighbors of node.
+    def __getitem__(self, atom: Any) -> dict[Hashable, Any]:
+        """Return the user-defined attributes associated with the given cell.
+
+        Writing to the returned dictionary will update the user-defined attributes
+        associated with the cell.
 
         Parameters
         ----------
-        node : hashable
-            The node contained in the cell complex.
+        atom : Any
+            The cell for which to return the associated user-defined attributes.
 
         Returns
         -------
-        Iterator
-            Iterator over neighbors of node.
+        dict[Hashable, Any]
+            The user-defined attributes associated with the given cell.
         """
-        return self.neighbors(node)
+        if isinstance(atom, Collection) and len(atom) == 1:
+            atom = next(iter(atom))
+
+        if not isinstance(atom, Iterable):
+            return self._G.nodes[atom]
+
+        atom = tuple(atom)
+        if len(atom) == 2 and atom in self._G.edges:
+            return self._G.edges[atom]
+
+        return self._cells[atom]
 
     def _insert_cell(self, cell: tuple | list | Cell, **attr):
         """Insert cell.

@@ -292,17 +292,17 @@ class SimplicialComplex(Complex):
         """
         return len(self.skeleton(0))
 
-    def __getitem__(self, simplex) -> dict[Hashable, Any]:
+    def __getitem__(self, atom: Any) -> dict[Hashable, Any]:
         """Get the data associated with the given simplex.
 
         Parameters
         ----------
-        simplex : tuple[int, ...]
+        atom : Any
             The simplex to retrieve.
 
         Returns
         -------
-        Any
+        dict[Hashable, Any]
             The data associated with the given simplex.
 
         Raises
@@ -310,9 +310,7 @@ class SimplicialComplex(Complex):
         KeyError
             If the simplex is not present in the simplicial complex.
         """
-        if simplex in self.simplices:
-            return self._simplex_set[simplex]
-        raise KeyError("simplex is not in the simplicial complex")
+        return self._simplex_set[atom]
 
     def __iter__(self) -> Iterator[frozenset[Hashable]]:
         """Iterate over all simplices (faces) of the simplicial complex.

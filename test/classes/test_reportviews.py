@@ -504,9 +504,7 @@ class TestReportViews_ColoredHyperEdgeView:
 
     def test_getitem(self):
         """Test the getitem method of the ColoredHyperEdgeView class."""
-        assert self.colorhg_view.__getitem__(((1, 2), 0)) == {"weight": 1}
-        with pytest.raises(KeyError):
-            self.colorhg_view.__getitem__((1, 2))
+        assert self.colorhg_view[((1, 2), 0)] == {"weight": 1}
 
     def test_repr(self):
         """Test the repr method."""
