@@ -1576,6 +1576,7 @@ class TestCellComplex:
         CC.add_cell((2, 3, 4), rank=2, weight=5)
 
         assert CC[1]["color"] == "red"
+        assert CC[(1,)]["color"] == "red"
         assert CC[(1, 2)]["weight"] == 10
         assert CC[(2, 3, 4)]["weight"] == 5
 

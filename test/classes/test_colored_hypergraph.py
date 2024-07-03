@@ -126,7 +126,30 @@ class TestColoredHyperGraph:
     def test_chg_getitem(self):
         """Test chg get node properties."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+        CHG.add_cell([5, 6], capacity=10)
+        CHG.add_cell([5, 6], key=1, capacity=15)
+        CHG.add_cell([5, 6, 7], capacity=5)
+
         assert CHG[1] == {"weight": 1}
+        assert CHG[(5, 6)]["capacity"] == 10
+        assert CHG[HyperEdge([5, 6])]["capacity"] == 10
+        assert CHG[(5, 6, 7)]["capacity"] == 5
+        assert CHG[HyperEdge([5, 6, 7])]["capacity"] == 5
+
+        assert CHG[((5, 6), 0)]["capacity"] == 10
+        assert CHG[(HyperEdge([5, 6]), 1)]["capacity"] == 15
+
+        # non-existing hyperedges
+        with pytest.raises(KeyError):
+            _ = CHG[(0, 1, 2)]
+        with pytest.raises(KeyError):
+            _ = CHG[((5, 6), 2)]
+
+        # invalid inputs should raise `KeyError`s as well
+        with pytest.raises(KeyError):
+            _ = CHG[tuple()]
+        with pytest.raises(KeyError):
+            _ = CHG[(tuple(), 0)]
 
     def test_add_cell(self):
         """Test adding a cell to a CHG."""

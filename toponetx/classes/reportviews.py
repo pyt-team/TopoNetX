@@ -288,9 +288,6 @@ class ColoredHyperEdgeView(AtomView):
         if isinstance(atom, Hashable) and not isinstance(atom, Collection):
             atom = (atom,)
 
-        if not isinstance(atom, Collection):
-            raise KeyError(f"Hyperedge {atom} is not in the complex.")
-
         if len(atom) == 0:
             raise KeyError(f"Hyperedge {atom} is not in the complex.")
         if len(atom) == 2:
@@ -383,9 +380,6 @@ class ColoredHyperEdgeView(AtomView):
         """
         if isinstance(atom, Hashable) and not isinstance(atom, Collection):
             atom = (atom,)
-
-        if not isinstance(atom, Collection):
-            return False
 
         if len(atom) == 0:
             return False
