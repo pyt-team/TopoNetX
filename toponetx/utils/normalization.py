@@ -1,4 +1,5 @@
 """Normalize of Laplacians, (co)adjacency, boundary matrices of complexes."""
+
 import numpy as np
 import scipy.sparse.linalg as spl
 from numpy.linalg import pinv

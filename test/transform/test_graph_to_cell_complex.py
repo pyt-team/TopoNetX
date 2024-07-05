@@ -1,6 +1,5 @@
 """Test graph to cell complex transformation."""
 
-
 import networkx as nx
 
 from toponetx.transform.graph_to_cell_complex import homology_cycle_cell_complex

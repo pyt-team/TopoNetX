@@ -1,4 +1,5 @@
 """Generators for random simplicial complexes."""
+
 import random
 from collections.abc import Sequence
 from itertools import combinations

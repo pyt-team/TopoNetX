@@ -1,4 +1,5 @@
 """Test the classic cell complex generators."""
+
 from toponetx.generators.classic_cell_complexes import (
     pyrmaid_complex,
     single_cell_complex,

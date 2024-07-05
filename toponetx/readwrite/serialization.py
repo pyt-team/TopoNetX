@@ -1,4 +1,5 @@
 """Read and write complexes as pickled objects."""
+
 import pickle
 
 __all__ = ["to_pickle", "load_from_pickle"]

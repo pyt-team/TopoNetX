@@ -107,7 +107,9 @@ class Simplex(Atom[frozenset[Hashable]]):
             If the attributes contain the reserved keys `is_maximal` or `membership`.
         """
         if "is_maximal" in attributes or "membership" in attributes:
-            raise ValueError("Special attributes `is_maximal` and `membership` are reserved.")
+            raise ValueError(
+                "Special attributes `is_maximal` and `membership` are reserved."
+            )
 
     @staticmethod
     @deprecated("`Simplex.construct_simplex_tree` is deprecated.")
