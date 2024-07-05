@@ -14,6 +14,7 @@ coverage.xml
 **/*.cpython-38.pyc
 **/__pycache__/**
 __pycache__/
+dist/
 docs/build/
 toponetx/.DS_Store
 
