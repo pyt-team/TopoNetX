@@ -215,7 +215,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        node_set : an interable of Entities, optional
+        node_set : iterable of Entities, optional
             If None, then return the number of nodes in the CCC.
 
         Returns
@@ -254,7 +254,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        cell_set : an interable of HyperEdge, optional
+        cell_set : iterable of HyperEdge, optional
             If None, then return the number of cells.
 
         Returns
