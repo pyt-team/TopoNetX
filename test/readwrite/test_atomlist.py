@@ -1,4 +1,5 @@
 """Tests for the atomlist read/write functions."""
+
 import pytest
 
 from toponetx.classes import CellComplex, PathComplex, SimplicialComplex

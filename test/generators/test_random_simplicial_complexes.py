@@ -1,4 +1,5 @@
 """Test the random simplicial complex generators."""
+
 from toponetx.generators.random_simplicial_complexes import (
     linial_meshulam_complex,
     multiparameter_linial_meshulam_complex,

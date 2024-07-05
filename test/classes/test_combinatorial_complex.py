@@ -347,7 +347,7 @@ class TestCombinatorialComplex:
         assert CCC.dim == 3
 
     def test_repr(self):
-        """Test the represntation function of the CombinatorialComplex object by mentioning a name."""
+        """Test the representation function of the CombinatorialComplex object by mentioning a name."""
         CCC = CombinatorialComplex()
         assert repr(CCC) == "CombinatorialComplex()"
 

@@ -1,4 +1,5 @@
 """Test the random cell complex generators."""
+
 from toponetx.generators.random_cell_complexes import np_cell_complex
 
 

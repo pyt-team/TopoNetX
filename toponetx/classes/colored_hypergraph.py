@@ -611,7 +611,7 @@ class ColoredHyperGraph(Complex):
         if rank == 0 and hyperedge_set in self._complex_set.hyperedge_dict[0]:
             self._complex_set.hyperedge_dict[0][hyperedge_set][0].update(**attr)
 
-    def _remove_hyperedge(self, hyperedge):
+    def _remove_hyperedge(self, hyperedge) -> None:
         """Remove a hyperedge from the CHG.
 
         Parameters
@@ -623,24 +623,9 @@ class ColoredHyperGraph(Complex):
         ------
         KeyError
             If the hyperedge is not present in the complex.
-
-        Returns
-        -------
-        None
-            None.
         """
-        if hyperedge not in self.cells:
-            raise KeyError(f"The cell {hyperedge} is not in the complex")
-
-        if isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
-            del self._complex_set.hyperedge_dict[0][hyperedge]
-
-        if isinstance(hyperedge, HyperEdge):
-            hyperedge_ = hyperedge.elements
-        else:
-            hyperedge_ = frozenset(hyperedge)
-        rank = self._complex_set.get_rank(hyperedge_)
-        del self._complex_set.hyperedge_dict[rank][hyperedge_]
+        rank = self._complex_set.get_rank(hyperedge)
+        del self._complex_set.hyperedge_dict[rank][frozenset(hyperedge)]
 
     def _add_node(self, node, **attr) -> None:
         """Add one node as a hyperedge.

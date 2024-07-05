@@ -215,7 +215,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        node_set : an interable of Entities, optional
+        node_set : iterable of Entities, optional
             If None, then return the number of nodes in the CCC.
 
         Returns
@@ -254,7 +254,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Parameters
         ----------
-        cell_set : an interable of HyperEdge, optional
+        cell_set : iterable of HyperEdge, optional
             If None, then return the number of cells.
 
         Returns
@@ -995,37 +995,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         if isinstance(cells, Iterable) and isinstance(ranks, int):
             for cell in cells:
                 self.add_cell(cell, ranks)
-
-    def _remove_hyperedge(self, hyperedge) -> None:
-        """Remove a hyperedge from the combinatorial complex.
-
-        Parameters
-        ----------
-        hyperedge : Hashable or HyperEdge, Iterable
-            The hyperedge to be removed.
-
-        Returns
-        -------
-        None
-            This method does not return any value. It removes the specified hyperedge from the complex in-place.
-
-        Raises
-        ------
-        KeyError
-            If the hyperedge is not present in the complex.
-        """
-        if hyperedge not in self.cells:
-            raise KeyError(f"The cell {hyperedge} is not in the complex")
-
-        if isinstance(hyperedge, Hashable) and not isinstance(hyperedge, Iterable):
-            del self._complex_set.hyperedge_dict[0][hyperedge]
-
-        if isinstance(hyperedge, HyperEdge):
-            hyperedge_ = hyperedge.elements
-        else:
-            hyperedge_ = frozenset(hyperedge)
-        rank = self._complex_set.get_rank(hyperedge_)
-        del self._complex_set.hyperedge_dict[rank][hyperedge_]
 
     def add_cell(self, cell, rank=None, **attr) -> None:
         """Add a single cells to combinatorial complex.
