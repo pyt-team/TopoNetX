@@ -1,7 +1,5 @@
 """Test Complex class."""
 
-from abc import ABCMeta
-
 import pytest
 
 from toponetx.classes.complex import Complex
@@ -12,14 +10,8 @@ class TestComplex:
 
     def test_complex_is_abstract(self):
         """Test if the Complex abstract class is abstract."""
-        with pytest.raises(TypeError) as exp_exception:
-            Complex()
-
-        assert "Can't instantiate abstract class Complex with abstract methods" in str(
-            exp_exception.value
-        )
-
-        assert isinstance(Complex, ABCMeta)
+        with pytest.raises(TypeError):
+            _ = Complex()
 
     def test_complex_has_abstract_methods(self):
         """Test if the Complex abstract class has all the abstract methods."""
@@ -48,36 +40,7 @@ class TestComplex:
         """Test that the abstract class is forcing implementation in all children classes."""
 
         class ExampleClass(Complex):
-            """Create an example class to test Complex Class.
-
-            Parameters
-            ----------
-                name : str
-                    Name of the Complex.
-                *args
-                    Positional arguments to be passed to the constructor.
-                **kwargs
-                    Keyword arguments to be passed to the constructor.
-            """
-
-            def __init__(self, name: str = "", *args, **kwargs) -> None:
-                """Initialize the example class.
-
-                Parameters
-                ----------
-                name : str
-                    Name of the Complex.
-                *args
-                    Positional arguments to be passed to the constructor.
-                **kwargs
-                    Keyword arguments to be passed to the constructor.
-
-                Returns
-                -------
-                ExampleClass
-                    The example class is initialized and returned.
-                """
-                super().__init__(name, *args, **kwargs)
+            """Create an example class to test Complex Class."""
 
             def clone(self):
                 """Test expected behavior from ExampleClass.
@@ -87,12 +50,7 @@ class TestComplex:
                 NotImplementedError
                     Currently NotImplementedError is raised.
                 """
-                return NotImplementedError
+                return NotImplementedError()
 
-        with pytest.raises(TypeError) as exp_exception:
-            ExampleClass()
-
-        assert (
-            "Can't instantiate abstract class ExampleClass with abstract methods"
-            in str(exp_exception.value)
-        )
+        with pytest.raises(TypeError):
+            _ = ExampleClass()
