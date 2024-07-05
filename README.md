@@ -1,20 +1,39 @@
+<h2 align="center">
+  <img src="https://raw.githubusercontent.com/pyt-team/TopoNetX/main/resources/logo.png" height="250">
+</h2>
+
+<h3 align="center">
+    Computing with Relational Data abstracted as Topological Domains
+</h3>
+
+<p align="center">
+  <a href="#-scope-and-functionality">Scope and Functionality</a> •
+  <a href="#%EF%B8%8F-main-features">Main Features</a> •
+  <a href="#-installing-toponetx">Installing TopoNetX</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-references">References</a> •
+  <a href="#-acknowledgements">Acknowledgements</a>
+</p>
+
+<div align="center">
+
 [![Test](https://github.com/pyt-team/TopoNetX/actions/workflows/test.yml/badge.svg)](https://github.com/pyt-team/TopoNetX/actions/workflows/test.yml)
 [![Lint](https://github.com/pyt-team/TopoNetX/actions/workflows/lint.yml/badge.svg)](https://github.com/pyt-team/TopoNetX/actions/workflows/lint.yml)
 [![Codecov](https://codecov.io/gh/pyt-team/TopoNetX/branch/main/graph/badge.svg)](https://app.codecov.io/gh/pyt-team/TopoNetX)
+[![Docs](https://img.shields.io/badge/docs-website-brightgreen)](https://pyt-team.github.io/toponetx/index.html)
 [![Python](https://img.shields.io/badge/python-3.10+-blue?logo=python)](https://www.python.org/)
+[![license](https://badgen.net/github/license/pyt-team/TopoNetX?color=green)](https://github.com/pyt-team/TopoNetX/blob/main/LICENSE)
+[![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/pyt-teamworkspace/shared_invite/zt-2k63sv99s-jbFMLtwzUCc8nt3sIRWjEw)
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7958504.svg)](https://doi.org/10.5281/zenodo.7958504)
 
-
-![toponetx](https://github.com/mhajij/shrec_16/blob/main/logo.png)
-
-# 🌐 TopoNetX (TNX) 🍩
-# Computing with Relational Data abstracted as Topological Domains
+</div>
 
 ![toponetx](https://user-images.githubusercontent.com/8267869/234068354-af9480f1-1d18-4914-92f1-916d9093e44d.png)
 
 Many complex systems, ranging from socio-economic systems such as social networks, over to biological systems (e.g., proteins) and technical systems can be abstracted as a set of entities with are linked to each other via a set of relations.
 For instance, a social network may be abstracted as a set vertices corresponding to people linked via various social interactions, including pairwise relationships such as friendships and higher-order relationships involving multiple people.
-This *relational data* can be abstracted as a topological domain such as a graph, hypergraph, simplicial, cellular or combinatorial complex, which enables the principled analysis of such data.
+This _relational data_ can be abstracted as a topological domain such as a graph, hypergraph, simplicial, cellular path or combinatorial complex, which enables the principled analysis of such data.
 
 `TopoNetX` provides a unified platform to compute with such relational data.
 
@@ -38,7 +57,7 @@ found in higher-order networks such as simplicial, cellular, CW and combinatoria
 This package serves as a repository of the methods and algorithms we find most useful
 as we explore the knowledge that can be encoded via higher-order networks.
 
-TNX supports the construction of many topological structures including the `CellComplex`, `SimplicialComplex` and `CombinatorialComplex` classes.
+TNX supports the construction of many topological structures including the `CellComplex`, `PathComplex`, "ColoredHyperGraph" `SimplicialComplex` and `CombinatorialComplex` classes.
 These classes provide methods for computing boundary operators, Hodge Laplacians
 and higher-order adjacency operators on cell, simplicial and combinatorial complexes,
 respectively. The classes are used in many areas of mathematics and computer science,
@@ -50,32 +69,39 @@ TNX is developed by the [pyt-team](https://github.com/pyt-team)
 
 1. Dynamic construction of cell, simplicial and combinatorial complexes, allowing users to add or remove objects from these structures after their initial creation.
 2. Compatibility with the [`NetworkX`](https://networkx.org/) and [`gudhi`](https://gudhi.inria.fr/) packages, enabling users to
-leverage the powerful algorithms and data structures provided by these packages.
+   leverage the powerful algorithms and data structures provided by these packages.
 3. Support for attaching arbitrary attributes and data to cells, simplices and other entities in a complex, allowing users to store and manipulate a versatile range of information about these objects.
 4. Computation of boundary operators, Hodge Laplacians and higher-order adjacency
-operators on a complex, enabling users to study the topological properties of the space.
+   operators on a complex, enabling users to study the topological properties of the space.
 5. Robust error handling and validation of input data, ensuring that the package is
-reliable and easy to use.
+   reliable and easy to use.
 6. Package dependencies are kept to a minimum,
-to facilitate easy installation and
-to reduce future installation issues arising from such dependencies.
+   to facilitate easy installation and
+   to reduce future installation issues arising from such dependencies.
 
 # 🤖 Installing TopoNetX
 
 1. Clone a copy of `TopoNetX` from source:
+
 ```bash
 git clone https://github.com/pyt-team/TopoNetX
 cd TopoNetX
 ```
+
 2. If you have already cloned `TopoNetX` from source, update it:
+
 ```bash
 git pull
 ```
+
 3. Install `TopoNetX` in editable mode (requires pip ≥ 21.3 for [PEP 660](https://peps.python.org/pep-0610/) support):
+
 ```bash
 pip install -e '.[all]'
 ```
+
 4. Install pre-commit hooks:
+
 ```bash
 pre-commit install
 ```
@@ -85,72 +111,62 @@ pre-commit install
 ## Example 1: creating a simplicial complex
 
 ```python
-from toponetx.classes import SimplicialComplex
+import toponetx as tnx
 
 # Instantiate a SimplicialComplex object with a few simplices
-
-sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
+sc = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 
 # Compute the incidence matrix between 1-skeleton and 0-skeleton
-
 B1 = sc.incidence_matrix(1)
 
 # Compute the incidence matrix between 2-skeleton and 1-skeleton
-
 B2 = sc.incidence_matrix(2)
 ```
 
 ## Example 2: creating a cell complex
 
 ```python
-from toponetx.classes import CellComplex
+import toponetx as tnx
 
 # Instantiate a CellComplex object with a few cells
-
-cx = CellComplex([[1, 2, 3, 4], [3, 4, 5, 6, 7, 8]], ranks=2)
+cx = tnx.CellComplex([[1, 2, 3, 4], [3, 4, 5, 6, 7, 8]], ranks=2)
 
 # Add an edge (cell of rank 1) after initialization
-
 cx.add_edge(0, 1)
 
 # Compute the Hodge Laplacian matrix of dimension 1
-
 L1 = cx.hodge_laplacian_matrix(1)
 
 # Compute the Hodge Laplacian matrix of dimension 2
-
 L2 = cx.hodge_laplacian_matrix(2)
 ```
 
 ## Example 3: creating a combinatorial complex
 
 ```python
-from toponetx.classes import CombinatorialComplex
+import toponetx as tnx
 
 # Instantiate a combinatorial complex object with a few cells
-
-cc = CombinatorialComplex()
+cc = tnx.CombinatorialComplex()
 
 # Add some cells of different ranks after initialization
-
 cc.add_cell([1, 2, 3], rank=2)
 cc.add_cell([3, 4, 5], rank=2)
 cc.add_cells_from([[2, 3, 4, 5], [3, 4, 5, 6, 7]], ranks=3)
 
 # Compute the incidence matrix between cells of rank 0 and 2
-
 B02 = cc.incidence_matrix(0, 2)
 
 # Compute the incidence matrix between cells of rank 0 and 3
-
 B03 = cc.incidence_matrix(0, 3)
 ```
 
-## 🔍 References ##
+## 🔍 References
 
 To learn more about topological domains, and how they can be used in deep learning:
 
 - Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub. [Topological Deep Learning: Going Beyond Graph Data](https://arxiv.org/abs/2206.00606).
+
 ```
 @misc{hajij2023topological,
       title={Topological Deep Learning: Going Beyond Graph Data},
@@ -161,7 +177,9 @@ To learn more about topological domains, and how they can be used in deep learni
       primaryClass={cs.LG}
 }
 ```
+
 - Mathilde Papillon, Sophia Sanborn, Mustafa Hajij, Nina Miolane. [Architectures of Topological Deep Learning: A Survey on Topological Neural Networks.](https://arxiv.org/pdf/2304.10031.pdf)
+
 ```
 @misc{papillon2023architectures,
       title={Architectures of Topological Deep Learning: A Survey on Topological Neural Networks},
@@ -178,7 +196,16 @@ To learn more about topological domains, and how they can be used in deep learni
 `TopoNetX` has been built with the help of several open-source packages.
 All of these are listed in setup.py.
 Some of these packages include:
+
 - [`NetworkX`](https://networkx.org/)
 - [`HyperNetX`](https://pnnl.github.io/HyperNetX/)
 - [`gudhi`](https://gudhi.inria.fr/python/latest/)
 - [`trimesh`](https://trimsh.org/index.html)
+
+## Funding
+
+<img align="right" width="200" src="https://raw.githubusercontent.com/pyt-team/TopoNetX/main/resources/erc_logo.png">
+
+Partially funded by the European Union (ERC, HIGH-HOPeS, 101039827). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Research Council Executive Agency. Neither the European Union nor the granting authority can be held responsible for them.
+
+Partially funded by the National Science Foundation (DMS-2134231, DMS-2134241).

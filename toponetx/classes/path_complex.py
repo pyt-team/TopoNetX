@@ -1,4 +1,5 @@
 """Path complex."""
+
 from collections.abc import Hashable, Iterable, Iterator, Sequence
 from typing import Any
 
@@ -6,6 +7,7 @@ import networkx as nx
 import numpy as np
 import scipy as sp
 from networkx.classes.reportviews import EdgeView, NodeView
+from typing_extensions import Self
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.path import Path
@@ -66,7 +68,7 @@ class PathComplex(Complex):
 
     Examples
     --------
-    >>> PC = PathComplex([(1, 2, 3)])
+    >>> PC = tnx.PathComplex([(1, 2, 3)])
     >>> PC.paths
     PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
     >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
@@ -74,7 +76,7 @@ class PathComplex(Complex):
     PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
     >>> G = nx.Graph()
     >>> G.add_edges_from([(1, 2), (2, 3), (1, 3)])
-    >>> PC = PathComplex(G)
+    >>> PC = tnx.PathComplex(G)
     >>> PC.paths
     PathView([(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 3, 2), (1, 2, 3), (2, 1, 3)])
     """
@@ -87,69 +89,6 @@ class PathComplex(Complex):
         max_rank: int = 3,
         **kwargs,
     ) -> None:
-        """Initialize an object of class representing a path complex based on simple paths as proposed in [1]_.
-
-        The original path complex is defined in [2]_.
-
-        A path complex contains elementary p-paths that span the space of simple paths. Path complexes are a topological structure whose
-        building blocks are paths, which are essentially different from simplicial complexes and cell complexes. If certain conditions are met, path complexes can generalize
-        simplicial complexes.
-
-        For example, a triangle with three vertices 1, 2, and 3 can be represented as a simplicial complex (1, 2, 3). Similarly, it can be represented as a path complex (1, 2, 3) whose
-        boundary 1-paths are (1, 2), (2, 3), and (1, 3). Another example is a simple path (1, 2, 3). In this case, we cannot lift the simple path to a 2-dimensional simplicial complex, as
-        triangle does not exist. However, we can still represent the simple path as a path complex (1, 2, 3) whose boundary 1-paths are (1, 2) and (2, 3) (1-path (1,3) does not exist).
-
-        Parameters
-        ----------
-        paths : nx.Graph or Iterable[Sequence[Hashable]]
-            The paths in the path complex. If a graph is provided, the path complex will be constructed from the graph, and allowed paths are automatically computed.
-        reserve_sequence_order : bool, default=False
-            If True, reserve the order of the sub-sequence of nodes in the elementary p-path. Else, the sub-sequence of nodes in the elementary p-path will
-            be reversed if the first index is larger than the last index.
-        allowed_paths : Iterable[tuple[Hashable]], optional
-            An iterable of allowed boundaries.
-            If None and the input is a Graph, allowed paths are automatically computed by enumerating all simple paths in the graph whose length is less than or equal to max_rank.
-            If None and the input is not a Graph, allowed paths contain the input paths, their truncated subsequences (sub-sequences where the first
-            or the last index is omitted), and any sub-sequences of the truncated subsequences in a recursive manner.
-        max_rank : int, default=3
-            The maximal length of a path in the path complex.
-        **kwargs : keyword arguments, optional
-            Additional attributes to be associated with the path complex.
-
-        Notes
-        -----
-        - By the definition established by [2]_, a path complex P is a non-empty collection of elementary p-paths such that for any sequence
-        of vertices in a finite non-empty set V that belong to P, the truncated sequence of vertices (which is sometimes referred to as obvious boundaries) also belongs to P.
-        The truncated sequences are sub-sequences of the original elementary p-path where the first or the last index is omitted. For instance, if we have an elementary p-path (1, 2, 3),
-        the truncated sequences are (1,2) and (2,3).
-        - Path complex in [1]_ is different from the path complex defined in [2]_ in the sense that elementary p-paths span the space of simple paths.
-        The path complex originally proposed has elementary p-paths that span the space of boundary-invariant paths.
-        - The path complex is a simplicial complex if certain conditions are met [2]_.
-        - Unlike hypergraphs, combinatorial, simplicial, and cell complexes, path complexes take into account the order of sequences.
-
-        References
-        ----------
-        .. [1] Truong and Chin.
-            Generalizing Topological Graph Neural Networks with Paths.
-            https://arxiv.org/abs/2308.06838.pdf
-        .. [2] Grigor'yan, Lin, Muranov, and Yau.
-            Homologies of path complexes and digraphs.
-            https://arxiv.org/pdf/1207.2834.pdf
-
-        Examples
-        --------
-        >>> PC = PathComplex([(1, 2, 3)])
-        >>> PC.paths
-        PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
-        >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
-        >>> PC.paths
-        PathView([(1,), (2,), (3,), (4,), (5,), (1, 2), (2, 3), (2, 4), (2, 5), (4, 5), (1, 2, 3), (1, 2, 4), (1, 2, 5)])
-        >>> G = nx.Graph()
-        >>> G.add_edges_from([(1, 2), (2, 3), (1, 3)])
-        >>> PC = PathComplex(G)
-        >>> PC.paths
-        PathView([(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 3, 2), (1, 2, 3), (2, 1, 3)])
-        """
         super().__init__(**kwargs)
 
         self._path_set = PathView()
@@ -220,7 +159,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([(1, 2, 3)])
+        >>> PC = tnx.PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
         >>> PC.add_paths_from([(1, 2, 4), (1, 2, 5), (4, 5)])
@@ -249,7 +188,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex([(1, 2, 3)])
+        >>> PC = tnx.PathComplex([(1, 2, 3)])
         >>> PC.paths
         PathView([(1,), (2,), (3,), (1, 2), (2, 3), (1, 2, 3)])
         >>> PC.add_path((1, 2, 4))
@@ -376,7 +315,7 @@ class PathComplex(Complex):
         """
         return self._path_set.shape
 
-    def clone(self) -> "PathComplex":
+    def clone(self) -> Self:
         """Return a copy of the path complex.
 
         The clone method by default returns an independent shallow copy of the path
@@ -387,7 +326,7 @@ class PathComplex(Complex):
         PathComplex
             Returns a copy of the PathComplex.
         """
-        return PathComplex(list(self.paths), rank=self.dim)
+        return self.__class__(list(self.paths), rank=self.dim)
 
     def skeleton(self, rank: int) -> list[tuple[Hashable]]:
         """Compute skeleton.
@@ -768,7 +707,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex(
+        >>> PC = tnx.PathComplex(
         ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
         ... )
         >>> PC = PC.restrict_to_nodes([0, 1, 3])
@@ -798,7 +737,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex(
+        >>> PC = tnx.PathComplex(
         ...     [[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3], [0, 1, 2], [0, 1, 3]]
         ... )
         >>> PC = PC.restrict_to_paths([[1, 2, 3]])
@@ -827,7 +766,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_node(0)
         >>> PC.add_node(1, heat=55)
         >>> PC.add_node(2, heat=66)
@@ -835,9 +774,9 @@ class PathComplex(Complex):
         >>> PC.add_node(2, color="blue")
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
         >>> PC.get_node_attributes("heat")
-        {(1, ): 55, (2, ): 66}
+        {(1,): 55, (2,): 66}
         >>> PC.get_node_attributes("color")
-        {(2, ): "blue", (3, ): "red"}
+        {(2,): 'blue', (3,): 'red'}
         """
         return {tuple(n): self[n][name] for n in self.skeleton(0) if name in self[n]}
 
@@ -857,7 +796,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
         >>> PC.set_node_attributes(
         ...     {
@@ -917,7 +856,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
         >>> PC.add_path([0, 1], weight=32)
         >>> PC.add_path([1, 2], weight=98)
@@ -926,7 +865,7 @@ class PathComplex(Complex):
         >>> PC.get_edge_attributes("weight")
         {(0, 1): 32, (1, 2): 98}
         >>> PC.get_edge_attributes("color")
-        {(1, 3): "red", (2, 3): "blue"}
+        {(1, 3): 'red', (2, 3): 'blue'}
         """
         return {tuple(e): self[e][name] for e in self.skeleton(1) if name in self[e]}
 
@@ -946,7 +885,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_paths_from([[0, 1], [1, 2, 3], [1, 3, 2], [2, 1, 3]])
         >>> PC.add_path([0, 1], weight=32)
         >>> PC.add_path([1, 2], weight=98)
@@ -1004,7 +943,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex()
+        >>> PC = tnx.PathComplex()
         >>> PC.add_paths_from([[0, 1]])
         >>> PC.add_path([0, 1, 2], weight=43)
         >>> PC.add_path([0, 1, 3], weight=98)
@@ -1014,7 +953,7 @@ class PathComplex(Complex):
         >>> PC.get_path_attributes("weight")
         {(0, 1, 2): 43, (0, 1, 3): 98}
         >>> PC.get_path_attributes("color")
-        {(1, 2, 3): "red", (1, 3, 2): "blue", (2, 1, 3): "green"}
+        {(1, 2, 3): 'red', (1, 3, 2): 'blue', (2, 1, 3): 'green'}
         """
         return {
             tuple(p): self[p][name]
@@ -1039,7 +978,7 @@ class PathComplex(Complex):
 
         Examples
         --------
-        >>> PC = PathComplex(
+        >>> PC = tnx.PathComplex(
         ...     [[0, 1], [0, 1, 2], [0, 1, 3], [1, 2, 3], [1, 3, 2], [2, 1, 3]]
         ... )
         >>> PC.set_path_attributes(
@@ -1051,7 +990,7 @@ class PathComplex(Complex):
         >>> PC.get_path_attributes("weight")
         {(0, 1, 2): 43, (0, 1, 3): 98}
         >>> PC.get_path_attributes("color")
-        {(0, 1, 2): "red", (0, 1, 3): "blue"}
+        {(0, 1, 2): 'red', (0, 1, 3): 'blue'}
         >>> PC.set_path_attributes({0: 55}, "weight")
         >>> PC.get_path_attributes("weight")
         {(0,): 55, (0, 1, 2): 43, (0, 1, 3): 98}
@@ -1254,7 +1193,7 @@ class PathComplex(Complex):
         --------
         >>> G = nx.Graph()
         >>> G.add_edges_from([(1, 2), (2, 3), (1, 3), (0, 1)])
-        >>> allowed_paths = PathComplex.compute_allowed_paths(G, max_rank=2)
+        >>> allowed_paths = tnx.PathComplex.compute_allowed_paths(G, max_rank=2)
         >>> allowed_paths
         {(0, 1), (1, 3), (1, 2), (2,), (1, 3, 2), (0, 1, 2), (0, 1, 3), (1, 2, 3), (2, 1, 3), (2, 3), (1,), (0,), (3,)}
         """

@@ -1,4 +1,5 @@
 """Module to distance measures on topological domains."""
+
 from collections.abc import Hashable
 
 import networkx as nx
@@ -6,17 +7,20 @@ import networkx as nx
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
-from toponetx.classes.complex import Complex
 
 __all__ = ["node_diameters", "cell_diameters", "diameter", "cell_diameter"]
 
+# In this module, only cell complexes, combinatorial complexes and colored
+# hypergraphs are supported.
+ComplexType = CellComplex | CombinatorialComplex | ColoredHyperGraph
 
-def node_diameters(domain: Complex) -> tuple[list[int], list[set[Hashable]]]:
+
+def node_diameters(domain: ComplexType) -> tuple[list[int], list[set[Hashable]]]:
     """Return the node diameters of the connected components in cell complex.
 
     Parameters
     ----------
-    domain : Complex
+    domain : CellComplex or CombinaorialComplex or ColoredHyperGraph
         The complex to be used to generate the node diameters for.
 
     Returns
@@ -28,22 +32,17 @@ def node_diameters(domain: Complex) -> tuple[list[int], list[set[Hashable]]]:
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(node_diameters(CC))
+    >>> tnx.node_diameters(CC)
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(node_diameters(CCC))
+    >>> tnx.node_diameters(CCC)
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(node_diameters(CHG))
+    >>> tnx.node_diameters(CHG)
     """
     node_dict, A = domain.node_to_all_cell_adjacnecy_matrix(index=True)
-    if isinstance(domain, ColoredHyperGraph) and not isinstance(
-        domain, CombinatorialComplex
-    ):
-        node_dict = {v: k[0] for k, v in node_dict.items()}
-    else:
-        node_dict = {v: k for k, v in node_dict.items()}
+    node_dict = {v: k for k, v in node_dict.items()}
 
     G = nx.from_scipy_sparse_array(A)
     diams = []
@@ -58,12 +57,12 @@ def node_diameters(domain: Complex) -> tuple[list[int], list[set[Hashable]]]:
     return diams, comps
 
 
-def cell_diameters(domain: Complex, s: int = 1) -> tuple[list[int], list[set[int]]]:
+def cell_diameters(domain: ComplexType, s: int = 1) -> tuple[list[int], list[set[int]]]:
     """Return the cell diameters of the s_cell_connected component subgraphs.
 
     Parameters
     ----------
-    domain : Complex
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
         Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
         The number of intersections between pairwise consecutive cells.
@@ -81,11 +80,11 @@ def cell_diameters(domain: Complex, s: int = 1) -> tuple[list[int], list[set[int
     >>> CC = CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(cell_diameters(CC))
+    >>> tnx.cell_diameters(CC)
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(cell_diameters(CCC))
+    >>> tnx.cell_diameters(CCC)
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(cell_diameters(CHG))
+    >>> tnx.cell_diameters(CHG)
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")
@@ -105,12 +104,12 @@ def cell_diameters(domain: Complex, s: int = 1) -> tuple[list[int], list[set[int
     return diams, comps
 
 
-def diameter(domain: Complex) -> int:
+def diameter(domain: ComplexType) -> int:
     """Return length of the longest shortest s-walk between nodes.
 
     Parameters
     ----------
-    domain : Complex
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
         Supported complexes are cell/combintorial and hypegraphs.
 
     Returns
@@ -132,15 +131,15 @@ def diameter(domain: Complex) -> int:
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
     >>> CC.add_cell([2, 5], rank=2)
-    >>> diameter(CC)
+    >>> tnx.diameter(CC)
     >>> CCC = CC.to_combinatorial_complex()
-    >>> diameter(CCC)
+    >>> tnx.diameter(CCC)
     >>> CHG = CC.to_colored_hypergraph()
-    >>> diameter(CHG)
+    >>> tnx.diameter(CHG)
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")
@@ -151,12 +150,12 @@ def diameter(domain: Complex) -> int:
     raise RuntimeError("cc is not connected.")
 
 
-def cell_diameter(domain: Complex, s: int | None = None) -> int:
+def cell_diameter(domain: ComplexType, s: int | None = None) -> int:
     """Return the length of the longest shortest s-walk between cells.
 
     Parameters
     ----------
-    domain : Complex
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
         Supported complexes are cell/combintorial and hypegraphs.
     s : int, optional
         The number of intersections between pairwise consecutive cells.
@@ -180,15 +179,15 @@ def cell_diameter(domain: Complex, s: int | None = None) -> int:
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
     >>> CC.add_cell([2, 5], rank=1)
-    >>> cell_diameter(CC)
+    >>> tnx.cell_diameter(CC)
     >>> CCC = CC.to_combinatorial_complex()
-    >>> cell_diameter(CCC)
+    >>> tnx.cell_diameter(CCC)
     >>> CHG = CC.to_colored_hypergraph()
-    >>> cell_diameter(CHG)
+    >>> tnx.cell_diameter(CHG)
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
         raise TypeError(f"Input complex {domain} is not supported.")

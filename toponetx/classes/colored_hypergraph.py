@@ -8,6 +8,7 @@ import numpy as np
 import scipy.sparse
 import trimesh
 from scipy.sparse import csr_array, diags
+from typing_extensions import Self
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
@@ -24,6 +25,13 @@ __all__ = ["ColoredHyperGraph"]
 class ColoredHyperGraph(Complex):
     """Class for ColoredHyperGraph Complex.
 
+    A Colored Hypergraph (CHG) is a triplet CHG = (S, X, c) where:
+    - S is an abstract set of entities,
+    - X is a subset of the power set of S, and
+    - c is the color function that associates a positive integer color or rank to each set x in X.
+
+    A CHG is a generalization of graphs, combinatorial complexes, hypergraphs, cellular, and simplicial complexes.
+
     Parameters
     ----------
     cells : Collection, optional
@@ -32,6 +40,43 @@ class ColoredHyperGraph(Complex):
         Represents the color of cells.
     **kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
+
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
+
+    Examples
+    --------
+    Define an empty colored hypergraph:
+
+    >>> CHG = tnx.ColoredHyperGraph()
+
+    Add cells to the colored hypergraph:
+
+    >>> CHG = tnx.ColoredHyperGraph()
+    >>> CHG.add_cell([1, 2], rank=1)
+    >>> CHG.add_cell([3, 4], rank=1)
+    >>> CHG.add_cell([1, 2, 3, 4], rank=2)
+    >>> CHG.add_cell([1, 2, 4], rank=2)
+    >>> CHG.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
+
+    Create a Colored Hypergraph and add groups of friends with corresponding ranks:
+
+    >>> CHG = tnx.ColoredHyperGraph()
+    >>> CHG.add_cell(
+    ...     ["Alice", "Bob"], rank=1
+    ... )  # Alice and Bob are in a close-knit group.
+    >>> CHG.add_cell(["Charlie", "David"], rank=1)  # Another closely connected group.
+    >>> CHG.add_cell(
+    ...     ["Alice", "Bob", "Charlie", "David"], rank=2
+    ... )  # Both groups together form a higher-ranked community.
+    >>> CHG.add_cell(["Alice", "Bob", "David"], rank=2)  # Overlapping connections.
+    >>> CHG.add_cell(
+    ...     ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace"], rank=3
+    ... )  # A larger, more influential community.
+
+    The code demonstrates how to represent social relationships using a Colored Hypergraph, where each group of friends (hyperedge) is assigned a rank based on the strength of the connection.
     """
 
     def __init__(
@@ -40,65 +85,6 @@ class ColoredHyperGraph(Complex):
         ranks: Collection | int | None = None,
         **kwargs,
     ) -> None:
-        """
-        Initialize the Colored HyperGraph.
-
-        A Colored Hypergraph (CHG) is a triplet CHG = (S, X, c) where:
-        - S is an abstract set of entities,
-        - X is a subset of the power set of S, and
-        - c is the color function that associates a positive integer color or rank to each set x in X.
-
-        A CHG is a generalization of graphs, combinatorial complexes, hypergraphs, cellular, and simplicial complexes.
-
-        Parameters
-        ----------
-        cells : Collection, optional
-            The initial collection of cells in the Colored Hypergraph.
-        ranks : Collection, optional
-            Represents the color of cells.
-        **kwargs : keyword arguments, optional
-            Attributes to add to the complex as key=value pairs.
-
-        Attributes
-        ----------
-        complex : dict
-            A dictionary that can be used to store additional information about the complex.
-
-        Examples
-        --------
-        Define an empty colored hypergraph:
-
-        >>> CHG = ColoredHyperGraph()
-
-        Add cells to the colored hypergraph:
-
-        >>> from toponetx.classes.colored_hypergraph import ColoredHyperGraph
-        >>> CHG = ColoredHyperGraph()
-        >>> CHG.add_cell([1, 2], rank=1)
-        >>> CHG.add_cell([3, 4], rank=1)
-        >>> CHG.add_cell([1, 2, 3, 4], rank=2)
-        >>> CHG.add_cell([1, 2, 4], rank=2)
-        >>> CHG.add_cell([1, 2, 3, 4, 5, 6, 7], rank=3)
-
-        Create a Colored Hypergraph and add groups of friends with corresponding ranks:
-
-        >>> CHG = ColoredHyperGraph()
-        >>> CHG.add_cell(
-        ...     ["Alice", "Bob"], rank=1
-        ... )  # Alice and Bob are in a close-knit group.
-        >>> CHG.add_cell(
-        ...     ["Charlie", "David"], rank=1
-        ... )  # Another closely connected group.
-        >>> CHG.add_cell(
-        ...     ["Alice", "Bob", "Charlie", "David"], rank=2
-        ... )  # Both groups together form a higher-ranked community.
-        >>> CHG.add_cell(["Alice", "Bob", "David"], rank=2)  # Overlapping connections.
-        >>> CHG.add_cell(
-        ...     ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace"], rank=3
-        ... )  # A larger, more influential community.
-
-        The code demonstrates how to represent social relationships using a Colored Hypergraph, where each group of friends (hyperedge) is assigned a rank based on the strength of the connection.
-        """
         super().__init__(**kwargs)
 
         self._complex_set = ColoredHyperEdgeView()
@@ -486,7 +472,7 @@ class ColoredHyperGraph(Complex):
             raise KeyError(f"node {node} not in {self.__shortstr__}")
         self._remove_node_helper(node)
 
-    def remove_node(self, node):
+    def remove_node(self, node) -> Self:
         """Remove a node from the ColoredHyperGraph.
 
         This method removes a node from the cells and deletes any reference in the nodes of the CHG.
@@ -740,7 +726,7 @@ class ColoredHyperGraph(Complex):
         to assign a cell attribute to store the value of that property for
         each cell:
 
-        >>> CHG = ColoredHyperGraph()
+        >>> CHG = tnx.ColoredHyperGraph()
         >>> CHG.add_cell([1, 2, 3, 4], rank=2)
         >>> CHG.add_cell([1, 2, 4], rank=2)
         >>> CHG.add_cell([3, 4], rank=2)
@@ -753,7 +739,7 @@ class ColoredHyperGraph(Complex):
         the entire dictionary will be used to update edge attributes:
 
         >>> G = nx.path_graph(3)
-        >>> CHG = ColoredHyperGraph(G)
+        >>> CHG = tnx.ColoredHyperGraph(G)
         >>> d = {
         ...     ((1, 2), 0): {"color": "red", "attr2": 1},
         ...     ((0, 1), 0): {"color": "blue", "attr2": 3},
@@ -761,7 +747,6 @@ class ColoredHyperGraph(Complex):
         >>> CHG.set_cell_attributes(d)
         >>> CHG.cells[((0, 1), 0)]["color"]
         'blue'
-        3
 
         Note that if the dict contains cells that are not in `self.cells`, they are
         silently ignored.
@@ -792,7 +777,7 @@ class ColoredHyperGraph(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CHG = ColoredHyperGraph(G)
+        >>> CHG = tnx.ColoredHyperGraph(G)
         >>> d = {0: {"color": "red", "attr2": 1}, 1: {"color": "blue", "attr2": 3}}
         >>> CHG.set_node_attributes(d)
         >>> CHG.get_node_attributes("color")
@@ -800,7 +785,7 @@ class ColoredHyperGraph(Complex):
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CHG = ColoredHyperGraph(G)
+        >>> CHG = tnx.ColoredHyperGraph(G)
         >>> nodes_color = CHG.get_node_attributes("color")
         >>> nodes_color[1]
         'blue'
@@ -830,7 +815,7 @@ class ColoredHyperGraph(Complex):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CHG = ColoredHyperGraph(G)
+        >>> CHG = tnx.ColoredHyperGraph(G)
         >>> d = {
         ...     ((1, 2), 0): {"color": "red", "attr2": 1},
         ...     ((0, 1), 0): {"color": "blue", "attr2": 3},
@@ -1189,6 +1174,14 @@ class ColoredHyperGraph(Complex):
             lower (row) index dict, upper (col) index dict, incidence matrix
             where the index dictionaries map from the entity (as `Hashable` or `tuple`) to the row or col index of the matrix.
         """
+        if index:
+            (
+                row_indices,
+                col_indices,
+                incidence_matrix,
+            ) = self.all_ranks_incidence_matrix(0, weight=weight, index=index)
+            row_indices = {next(iter(k)): v for k, v in row_indices.items()}
+            return row_indices, col_indices, incidence_matrix
         return self.all_ranks_incidence_matrix(0, weight=weight, index=index)
 
     def all_ranks_incidence_matrix(
@@ -1256,12 +1249,12 @@ class ColoredHyperGraph(Complex):
 
         Examples
         --------
-        >>> G = Graph()  # networkx graph
+        >>> G = nx.Graph()  # networkx graph
         >>> G.add_edge(0, 1)
         >>> G.add_edge(0, 3)
         >>> G.add_edge(0, 4)
         >>> G.add_edge(1, 4)
-        >>> CHG = ColoredHyperGraph(cells=G)
+        >>> CHG = tnx.ColoredHyperGraph(cells=G)
         >>> CHG.adjacency_matrix(0, 1)
         """
         if index:
@@ -1418,8 +1411,10 @@ class ColoredHyperGraph(Complex):
             raise ValueError(
                 "rank for the laplacian matrix must be larger or equal to 1, got {rank}"
             )
-
-        row_dict, A = self.adjacency_matrix(0, rank, index=True)
+        if len(self.nodes) == 0:
+            A = np.empty((0, 0))
+        else:
+            row_dict, A = self.adjacency_matrix(0, rank, index=True)
 
         if A.shape == (0, 0):
             L = csr_array((0, 0)) if sparse else np.empty((0, 0))
@@ -1450,7 +1445,7 @@ class ColoredHyperGraph(Complex):
         ...     faces=[[0, 1, 2]],
         ...     process=False,
         ... )
-        >>> CHG = ColoredHyperGraph.from_trimesh(mesh)
+        >>> CHG = tnx.ColoredHyperGraph.from_trimesh(mesh)
         >>> CHG.nodes
         """
         raise NotImplementedError()
@@ -1473,7 +1468,10 @@ class ColoredHyperGraph(Complex):
         for c in valid_cells:
             if not isinstance(c, Iterable):
                 raise ValueError(f"each element in cell_set must be Iterable, got {c}")
-            chg.add_cell(c, rank=self.cells.get_rank(c))
+            if isinstance(c, tuple):
+                chg.add_cell(c[0], rank=self.cells.get_rank(c[0]))
+            else:
+                chg.add_cell(c, rank=self.cells.get_rank(c))
         return chg
 
     def restrict_to_nodes(self, node_set):
@@ -1518,14 +1516,14 @@ class ColoredHyperGraph(Complex):
 
         Examples
         --------
-        >>> from networkx import Graph
-        >>> G = Graph()
+        >>> G = nx.Graph()
         >>> G.add_edge(0, 1)
         >>> G.add_edge(0, 4)
         >>> G.add_edge(0, 7)
-        >>> CHG = ColoredHyperGraph()
+        >>> CHG = tnx.ColoredHyperGraph()
         >>> CHG.from_networkx_graph(G)
         >>> CHG.nodes
+        NodeView([(0,), (1,), (4,), (7,)])
         """
         for node in G.nodes:  # cells is a networkx graph
             self.add_node(node, **G.nodes[node])
@@ -1564,7 +1562,7 @@ class ColoredHyperGraph(Complex):
         cells = [cell for cell in self.cells if cell not in self.singletons()]
         return self.restrict_to_cells(cells)
 
-    def clone(self) -> "ColoredHyperGraph":
+    def clone(self) -> Self:
         """Return a copy of the simplex.
 
         The clone method by default returns an independent shallow copy of the simplex
@@ -1577,7 +1575,7 @@ class ColoredHyperGraph(Complex):
         ColoredHyperGraph
             ColoredHyperGraph.
         """
-        CHG = ColoredHyperGraph()
+        CHG = self.__class__()
         for cell, key in self.cells:
             CHG.add_cell(cell, key=key, rank=self.cells.get_rank(cell))
         return CHG

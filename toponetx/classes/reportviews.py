@@ -3,7 +3,8 @@
 Such as:
 HyperEdgeView, CellView, SimplexView, NodeView.
 """
-from abc import ABC
+
+from abc import ABC, abstractmethod
 from collections.abc import Collection, Hashable, Iterable, Iterator, Sequence
 from itertools import chain
 from typing import Any, Generic, Literal, TypeVar
@@ -20,6 +21,7 @@ __all__ = [
     "CellView",
     "SimplexView",
     "NodeView",
+    "PathView",
 ]
 
 T_Atom = TypeVar("T_Atom", bound=Atom)
@@ -28,6 +30,7 @@ T_Atom = TypeVar("T_Atom", bound=Atom)
 class AtomView(ABC, Generic[T_Atom]):
     """Abstract class representing a read-only view on a collection of atoms."""
 
+    @abstractmethod
     def __contains__(self, atom: Any) -> bool:
         """Check if a given element is in the view.
 
@@ -42,6 +45,7 @@ class AtomView(ABC, Generic[T_Atom]):
             Whether the element is in the view.
         """
 
+    @abstractmethod
     def __getitem__(self, atom: Any) -> dict:
         """Get the attributes of a given element.
 
@@ -61,6 +65,7 @@ class AtomView(ABC, Generic[T_Atom]):
             If the element is not in the view.
         """
 
+    @abstractmethod
     def __iter__(self) -> Iterator[T_Atom]:
         """Iterate over all elements in the view.
 
@@ -70,6 +75,7 @@ class AtomView(ABC, Generic[T_Atom]):
             Iterator to iterate over all elements in the view.
         """
 
+    @abstractmethod
     def __len__(self) -> int:
         """Return the number of elements in the view.
 
@@ -84,7 +90,6 @@ class CellView(AtomView[Cell]):
     """A CellView class for cells of a CellComplex."""
 
     def __init__(self) -> None:
-        """Initialize an object for the CellView class for cells of a CellComplex."""
         # Initialize a dictionary to hold cells, with keys being the tuple
         # that defines the cell, and values being dictionaries of cell objects
         # with different attributes
@@ -256,16 +261,10 @@ class ColoredHyperEdgeView(AtomView):
 
     Examples
     --------
-    >>> hev = ColoredHyperEdgeView()
+    >>> hev = tnx.ColoredHyperEdgeView()
     """
 
     def __init__(self) -> None:
-        """Initialize a new instance of the ColoredHyperEdgeView class.
-
-        Examples
-        --------
-        >>> hev = ColoredHyperEdgeView()
-        """
         self.hyperedge_dict = {}
 
     def __getitem__(self, hyperedge) -> dict:
@@ -514,19 +513,10 @@ class HyperEdgeView(AtomView):
 
     Examples
     --------
-    >>> hev = HyperEdgeView()
+    >>> hev = tnx.HyperEdgeView()
     """
 
     def __init__(self) -> None:
-        """Initialize an instance of the class for viewing the cells/hyperedges of a combinatorial complex.
-
-        Provides methods for accessing, and retrieving
-        information about the cells/hyperedges of a complex.
-
-        Examples
-        --------
-        >>> hev = HyperEdgeView()
-        """
         self.hyperedge_dict = {}
 
     @staticmethod
@@ -823,13 +813,6 @@ class SimplexView(AtomView[Simplex]):
     """
 
     def __init__(self) -> None:
-        """Initialize an instance of the Simplex View class.
-
-        The SimplexView class is used to provide a view/read only information
-        into a subset of the nodes in a simplex.
-        These classes are used in conjunction with the SimplicialComplex class
-        for view/read only purposes for simplices in simplicial complexes.
-        """
         self.max_dim = -1
         self.faces_dict = []
 
@@ -912,7 +895,7 @@ class SimplexView(AtomView[Simplex]):
         --------
         Check if a node is in the simplex view:
 
-        >>> view = SimplexView()
+        >>> view = tnx.SimplexView()
         >>> view.faces_dict.append({frozenset({1}): {"weight": 1}})
         >>> view.max_dim = 0
         >>> 1 in view
@@ -983,17 +966,6 @@ class NodeView:
     """
 
     def __init__(self, objectdict, cell_type, colored_nodes: bool = False) -> None:
-        """Initialize an instance of the Node view class.
-
-        Parameters
-        ----------
-        objectdict : dict
-            A dictionary of nodes with their attributes.
-        cell_type : type
-            The type of the cell.
-        colored_nodes : bool, optional, default = False
-            Whether or not the nodes are colored.
-        """
         if len(objectdict) != 0:
             self.nodes = objectdict[0]
         else:
@@ -1090,10 +1062,6 @@ class NodeView:
 
 class PathView(SimplexView):
     """Path view class."""
-
-    def __init__(self) -> None:
-        """Initialize an instance of the Path view class."""
-        super().__init__()
 
     def __getitem__(self, path: Any) -> dict:
         """Get the dictionary of attributes associated with the given path.

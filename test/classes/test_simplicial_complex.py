@@ -244,6 +244,18 @@ class TestSimplicialComplex:
         assert (5,) in SC.simplices
         assert (6,) in SC.simplices
 
+        # check that provided attributes are stored correctly
+        SC.add_simplex((1, 2), edge_flow=10)
+        assert SC[(1, 2)]["edge_flow"] == 10
+        SC.add_simplex(Simplex((1, 2), edge_flow=20))
+        assert SC[(1, 2)]["edge_flow"] == 20
+        SC.add_simplex(Simplex((2, 3), a=1, b=2), b=5)
+        assert SC[(2, 3)]["a"] == 1
+        assert SC[(2, 3)]["b"] == 5
+
+        with pytest.raises(TypeError):
+            SC.add_simplex(iter([1, 2]))
+
         # simplex cannot contain unhashable elements
         with pytest.raises(TypeError):
             SC.add_simplex([[1, 2], [2, 3]])
@@ -251,6 +263,12 @@ class TestSimplicialComplex:
         # simplex cannot contain duplicate nodes
         with pytest.raises(ValueError):
             SC.add_simplex((1, 2, 2))
+
+        # use of reserved attributes is not allowed
+        with pytest.raises(ValueError):
+            SC.add_simplex((1, 2, 3), is_maximal=True)
+        with pytest.raises(ValueError):
+            SC.add_simplex((1, 2, 3), membership={})
 
         # add hashable, non iterable node to SC
         SC.add_simplex(11)
@@ -419,7 +437,7 @@ class TestSimplicialComplex:
         column, L_hodge = SC.hodge_laplacian_matrix(rank=2, signed=False, index=True)
         expected_col = {(1, 2, 3): 0, (2, 3, 4): 1}
         assert column == expected_col
-        np.testing.assert_array_equal(L_hodge.A, np.array([[3, 1], [1, 3]]))
+        np.testing.assert_array_equal(L_hodge.toarray(), np.array([[3, 1], [1, 3]]))
 
     def test_hodge_laplacian_matrix_rank_1(self):
         """Test unsigned hodge_laplacian_matrix method with index for different ranks."""
@@ -435,7 +453,7 @@ class TestSimplicialComplex:
         }
         assert column == expected_col
         np.testing.assert_array_equal(
-            L_hodge.A,
+            L_hodge.toarray(),
             np.array(
                 [
                     [2.0, 1.0, 1.0, 0.0, 0.0, 0.0],
@@ -1036,3 +1054,25 @@ class TestSimplicialComplex:
         assert [0] in simplices
         assert [1] in simplices
         assert [2] in simplices
+
+    def test_graph_skeleton(self):
+        """Test the graph_skeleton method of SimplicialComplex."""
+        SC = SimplicialComplex(
+            [
+                (2, 6),
+                (4, 5),
+                (4, 7),
+                (5, 6),
+                (5, 7),
+                (1, 2, 3),
+                (2, 3, 4),
+            ]
+        )
+        SC[1]["some_data"] = 1
+        SC[(2, 6)]["some_data"] = 42
+
+        G = SC.graph_skeleton()
+        assert G.number_of_nodes() == 7
+        assert G.number_of_edges() == 10
+        assert G.nodes[1]["some_data"] == 1
+        assert G.edges[(2, 6)]["some_data"] == 42

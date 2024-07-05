@@ -3,15 +3,15 @@
 The class also supports attaching arbitrary attributes and data to cells.
 """
 
-from collections.abc import Hashable, Iterable, Iterator
+from collections.abc import Collection, Hashable, Iterable, Iterator
 from itertools import chain, combinations
 from typing import Any
-from warnings import warn
 
 import networkx as nx
 import numpy as np
 from gudhi import SimplexTree
 from scipy.sparse import csr_matrix, dok_matrix
+from typing_extensions import Self, deprecated
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import NodeView, SimplexView
@@ -87,7 +87,7 @@ class SimplicialComplex(Complex):
     --------
     Define a simplicial complex using a set of maximal simplices:
 
-    >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
+    >>> SC = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
 
     TopoNetX is also compatible with NetworkX, allowing users to create a simplicial complex from a NetworkX graph.
     Existing node and edge attributes are copied to the simplicial complex:
@@ -95,7 +95,7 @@ class SimplicialComplex(Complex):
     >>> G = nx.Graph()
     >>> G.add_edge(0, 1, weight=4)
     >>> G.add_edges_from([(0, 3), (0, 4), (1, 4)])
-    >>> SC = SimplicialComplex(simplices=G)
+    >>> SC = tnx.SimplicialComplex(simplices=G)
     >>> SC.add_simplex([1, 2, 3])
     >>> SC.simplices
     SimplexView([(0,), (1,), (3,), (4,), (2,), (0, 1), (0, 3), (0, 4), (1, 4), (1, 2), (1, 3), (2, 3), (1, 2, 3)])
@@ -104,15 +104,6 @@ class SimplicialComplex(Complex):
     """
 
     def __init__(self, simplices=None, **kwargs) -> None:
-        """Initialize the simplicial complex.
-
-        Parameters
-        ----------
-        simplices : iterable, optional
-            Iterable of maximal simplices that define the simplicial complex.
-        **kwargs : keyword arguments, optional
-            Attributes to add to the complex as key=value pairs.
-        """
         super().__init__(**kwargs)
 
         self._simplex_set = SimplexView()
@@ -165,6 +156,9 @@ class SimplicialComplex(Complex):
         return self._simplex_set.max_dim
 
     @property
+    @deprecated(
+        "`SimplicialComplex.maxdim` is deprecated and will be removed in the future, use `SimplicialComplex.max_dim` instead."
+    )
     def maxdim(self) -> int:
         """
         Maximum dimension of the simplicial complex.
@@ -176,11 +170,6 @@ class SimplicialComplex(Complex):
         int
             The maximum dimension of the simplicial complex.
         """
-        warn(
-            "`SimplicialComplex.maxdim` is deprecated and will be removed in the future, use `SimplicialComplex.max_dim` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._simplex_set.max_dim
 
     @property
@@ -226,7 +215,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex([[1, 2, 3]])
+        >>> SC = tnx.SimplicialComplex([[1, 2, 3]])
         >>> SC.is_maximal([1, 2, 3])
         True
         >>> SC.is_maximal([1, 2])
@@ -303,7 +292,7 @@ class SimplicialComplex(Complex):
         """
         return len(self.skeleton(0))
 
-    def __getitem__(self, simplex):
+    def __getitem__(self, simplex) -> dict[Hashable, Any]:
         """Get the data associated with the given simplex.
 
         Parameters
@@ -401,9 +390,9 @@ class SimplicialComplex(Complex):
                     self._simplex_set.faces_dict[k - 1][face]["is_maximal"] = False
                 else:
                     # make sure all children of previous maximal simplices do not have that membership anymore
-                    self._simplex_set.faces_dict[k - 1][face][
-                        "membership"
-                    ] -= maximal_faces
+                    self._simplex_set.faces_dict[k - 1][face]["membership"] -= (
+                        maximal_faces
+                    )
 
     @staticmethod
     def get_boundaries(
@@ -444,12 +433,12 @@ class SimplicialComplex(Complex):
 
         return face_set
 
-    def remove_maximal_simplex(self, simplex) -> None:
+    def remove_maximal_simplex(self, simplex: Collection) -> None:
         """Remove maximal simplex from simplicial complex.
 
         Parameters
         ----------
-        simplex : Iterable
+        simplex : Collection
             The simplex to be removed from the simplicial complex.
 
         Raises
@@ -461,7 +450,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex((1, 2, 3, 4), weight=1)
         >>> SC.add_simplex((1, 2, 3, 4, 5))
         >>> SC.remove_maximal_simplex((1, 2, 3, 4, 5))
@@ -474,12 +463,11 @@ class SimplicialComplex(Complex):
         if simplex_ in self._simplex_set.faces_dict[len(simplex_) - 1]:
             if self.is_maximal(simplex):
                 del self._simplex_set.faces_dict[len(simplex_) - 1][simplex_]
-                faces = Simplex(simplex_).faces
+                faces = self.get_boundaries([simplex_])
                 for s in faces:
                     if len(s) == len(simplex_):
                         continue
 
-                    s = s.elements
                     self._simplex_set.faces_dict[len(s) - 1][s]["membership"] -= {
                         simplex_
                     }
@@ -516,7 +504,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex([(1, 2), (2, 3), (3, 4)])
+        >>> SC = tnx.SimplicialComplex([(1, 2), (2, 3), (3, 4)])
         >>> SC.remove_nodes([1])
         >>> SC.simplices
         SimplexView([(2,), (3,), (4,), (2, 3), (3, 4)])
@@ -552,51 +540,63 @@ class SimplicialComplex(Complex):
         else:
             self.add_simplex([node], **kwargs)
 
-    def add_simplex(self, simplex, **kwargs) -> None:
+    def add_simplex(self, simplex: Collection, **kwargs) -> None:
         """Add simplex to simplicial complex.
+
+        In case sub-simplices are missing, they are added without attributes to the
+        simplicial complex to fulfill the simplex requirements.
+
+        If the given simplex is already part of the simplicial complex, its attributes
+        will be updated by the provided ones.
 
         Parameters
         ----------
-        simplex : Hashable or Iterable or Simplex or str
+        simplex : Collection
             The simplex to be added to the simplicial complex.
+
+            If a `Simplex` object is given, its attributes will be copied to the
+            simplicial complex. `kwargs` take precedence over the attributes of the
+            `Simplex` object.
         **kwargs : keyword arguments, optional
             Additional attributes to be associated with the simplex.
         """
+        Simplex.validate_attributes(kwargs)
+
+        # Support some short-hand calls for adding nodes. The user does not have to
+        # provide a single-element list but can give the node directly.
         if isinstance(simplex, Hashable) and not isinstance(simplex, Iterable):
             simplex = [simplex]
         if isinstance(simplex, str):
             simplex = [simplex]
-        if isinstance(simplex, Iterable | Simplex):
-            if not isinstance(simplex, Simplex):
-                simplex_ = frozenset(simplex)
-                if len(simplex_) != len(simplex):
-                    raise ValueError("a simplex cannot contain duplicate nodes")
-            else:
-                simplex_ = simplex.elements
-            self._update_faces_dict_length(simplex_)
 
-            if (
-                simplex_ in self._simplex_set.faces_dict[len(simplex_) - 1]
-            ):  # simplex is already in the complex, just update the attributes if needed
-                self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(kwargs)
-                return
+        if isinstance(simplex, Simplex):
+            elements = simplex.elements
+            kwargs = simplex._attributes | kwargs
+        elif isinstance(simplex, Collection):
+            elements = frozenset(simplex)
+            if len(elements) != len(simplex):
+                raise ValueError("a simplex cannot contain duplicate nodes")
+        else:
+            raise TypeError(
+                f"Input simplex must be a collection or a `Simplex` object, got {type(simplex)}."
+            )
 
-            if self._simplex_set.max_dim < len(simplex) - 1:
-                self._simplex_set.max_dim = len(simplex) - 1
+        # if the simplex is already part of this complex, update its attributes
+        if elements in self:
+            self._simplex_set.faces_dict[len(elements) - 1][elements].update(kwargs)
+            return
 
-            numnodes = len(simplex_)
-            maximal_faces = set()
+        self._update_faces_dict_length(elements)
 
-            for r in range(numnodes, 0, -1):
-                for face in combinations(simplex_, r):
-                    self._update_faces_dict_entry(face, simplex_, maximal_faces)
-            self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(kwargs)
-            if isinstance(simplex, Simplex):
-                self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(
-                    simplex._attributes
-                )
-            else:
-                self._simplex_set.faces_dict[len(simplex_) - 1][simplex_].update(kwargs)
+        if self._simplex_set.max_dim < len(simplex) - 1:
+            self._simplex_set.max_dim = len(simplex) - 1
+
+        maximal_faces = set()
+        for r in range(len(elements), 0, -1):
+            for face in combinations(elements, r):
+                self._update_faces_dict_entry(face, elements, maximal_faces)
+
+        self._simplex_set.faces_dict[len(elements) - 1][elements].update(kwargs)
 
     def add_simplices_from(self, simplices) -> None:
         """Add simplices from iterable to simplicial complex.
@@ -677,7 +677,7 @@ class SimplicialComplex(Complex):
         to assign a simplex attribute to store the value of that property for
         each simplex:
 
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
@@ -689,7 +689,7 @@ class SimplicialComplex(Complex):
         If you provide a dictionary of dictionaries as the second argument,
         the entire dictionary will be used to update simplex attributes:
 
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex([1, 3, 4])
         >>> SC.add_simplex([1, 2, 3])
         >>> SC.add_simplex([1, 2, 4])
@@ -726,7 +726,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
@@ -755,7 +755,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
@@ -836,7 +836,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
@@ -966,7 +966,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
@@ -1035,8 +1035,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> from toponetx.classes import SimplicialComplex
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
@@ -1105,7 +1104,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
+        >>> SC = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
         >>> SC.normalized_laplacian_matrix(1)
         """
         import scipy as sp
@@ -1154,7 +1153,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
+        >>> SC = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 5], [0, 1]])
         >>> SC.up_laplacian_matrix(1)
         """
         if weight is not None:
@@ -1245,7 +1244,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex([1, 2, 3, 4])
         >>> SC.add_simplex([1, 2, 4])
         >>> SC.add_simplex([3, 4, 8])
@@ -1316,7 +1315,7 @@ class SimplicialComplex(Complex):
 
         self.add_simplices_from(_simplices)
 
-    def restrict_to_simplices(self, cell_set) -> "SimplicialComplex":
+    def restrict_to_simplices(self, cell_set) -> Self:
         """Construct a simplicial complex using a subset of the simplices.
 
         Parameters
@@ -1332,16 +1331,16 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> c1 = Simplex((1, 2, 3))
-        >>> c2 = Simplex((1, 2, 4))
-        >>> c3 = Simplex((1, 2, 5))
-        >>> SC = SimplicialComplex([c1, c2, c3])
+        >>> c1 = tnx.Simplex((1, 2, 3))
+        >>> c2 = tnx.Simplex((1, 2, 4))
+        >>> c3 = tnx.Simplex((1, 2, 5))
+        >>> SC = tnx.SimplicialComplex([c1, c2, c3])
         >>> SC1 = SC.restrict_to_simplices([c1, (2, 4)])
         >>> SC1.simplices
         SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (2, 3), (2, 4), (1, 2, 3)])
         """
         rns = [cell for cell in cell_set if cell in self]
-        return SimplicialComplex(simplices=rns)
+        return self.__class__(simplices=rns)
 
     def restrict_to_nodes(self, node_set):
         """Construct a new simplicial complex by restricting the simplices.
@@ -1360,10 +1359,10 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> c1 = Simplex((1, 2, 3))
-        >>> c2 = Simplex((1, 2, 4))
-        >>> c3 = Simplex((1, 2, 5))
-        >>> SC = SimplicialComplex([c1, c2, c3])
+        >>> c1 = tnx.Simplex((1, 2, 3))
+        >>> c2 = tnx.Simplex((1, 2, 4))
+        >>> c3 = tnx.Simplex((1, 2, 5))
+        >>> SC = tnx.SimplicialComplex([c1, c2, c3])
         >>> new_complex = SC.restrict_to_nodes([1, 2, 3, 4])
         >>> new_complex.simplices
         SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (1, 2, 3), (1, 2, 4)])
@@ -1391,14 +1390,14 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex([(1, 2), (1, 2, 3), (1, 2, 4), (2, 5)])
+        >>> SC = tnx.SimplicialComplex([(1, 2), (1, 2, 3), (1, 2, 4), (2, 5)])
         >>> SC.get_all_maximal_simplices()
         [(2, 5), (1, 2, 3), (1, 2, 4)]
         """
         return [tuple(s) for s in self.simplices if self.is_maximal(s)]
 
     @classmethod
-    def from_spharpy(cls, mesh) -> "SimplicialComplex":
+    def from_spharpy(cls, mesh) -> Self:
         """Import from sharpy.
 
         Parameters
@@ -1420,7 +1419,7 @@ class SimplicialComplex(Complex):
         ...     [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
         ... )
 
-        >>> SC = SimplicialComplex.from_spharpy(mesh)
+        >>> SC = tnx.SimplicialComplex.from_spharpy(mesh)
         """
         vertices = np.array(mesh.vertlist)
         SC = cls(mesh.trilist)
@@ -1438,7 +1437,7 @@ class SimplicialComplex(Complex):
         return SC
 
     def to_hasse_graph(self) -> nx.DiGraph:
-        """Create Hasse graph of self.
+        """Create the hasse graph corresponding to this simplicial complex.
 
         Returns
         -------
@@ -1447,7 +1446,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex()
+        >>> SC = tnx.SimplicialComplex()
         >>> SC.add_simplex([0, 1, 2])
         >>> G = SC.to_hasse_graph()
         """
@@ -1462,7 +1461,7 @@ class SimplicialComplex(Complex):
         return G
 
     @classmethod
-    def from_gudhi(cls, tree: SimplexTree) -> "SimplicialComplex":
+    def from_gudhi(cls, tree: SimplexTree) -> Self:
         """Import from gudhi.
 
         Parameters
@@ -1480,7 +1479,7 @@ class SimplicialComplex(Complex):
         >>> from gudhi import SimplexTree
         >>> tree = SimplexTree()
         >>> _ = tree.insert([1, 2, 3, 5])
-        >>> SC = SimplicialComplex.from_gudhi(tree)
+        >>> SC = tnx.SimplicialComplex.from_gudhi(tree)
         """
         SC = cls()
         for simplex, _ in tree.get_skeleton(tree.dimension()):
@@ -1488,7 +1487,7 @@ class SimplicialComplex(Complex):
         return SC
 
     @classmethod
-    def from_trimesh(cls, mesh) -> "SimplicialComplex":
+    def from_trimesh(cls, mesh) -> Self:
         """Import from trimesh.
 
         Parameters
@@ -1509,7 +1508,7 @@ class SimplicialComplex(Complex):
         ...     faces=[[0, 1, 2]],
         ...     process=False,
         ... )
-        >>> SC = SimplicialComplex.from_trimesh(mesh)
+        >>> SC = tnx.SimplicialComplex.from_trimesh(mesh)
         >>> print(SC.nodes)
         >>> print(SC.simplices)
         >>> SC[(0)]["position"]
@@ -1532,7 +1531,7 @@ class SimplicialComplex(Complex):
         return SC
 
     @classmethod
-    def load_mesh(cls, file_path, process: bool = False) -> "SimplicialComplex":
+    def load_mesh(cls, file_path, process: bool = False) -> Self:
         """Load a mesh.
 
         Parameters
@@ -1553,7 +1552,7 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> SC = SimplicialComplex.load_mesh("C:/temp/stanford-bunny.obj")
+        >>> SC = tnx.SimplicialComplex.load_mesh("C:/temp/stanford-bunny.obj")
         >>> SC.nodes
         """
         import trimesh
@@ -1596,14 +1595,16 @@ class SimplicialComplex(Complex):
                 "input simplicial complex has dimension higher than 2 and hence it cannot be converted to a trimesh object"
             )
 
-        vertices = list(
-            dict(
-                sorted(self.get_node_attributes(vertex_position_name).items())
-            ).values()
+        vertices = np.array(
+            list(
+                dict(
+                    sorted(self.get_node_attributes(vertex_position_name).items())
+                ).values()
+            )
         )
 
         return trimesh.Trimesh(
-            faces=self.get_all_maximal_simplices(), vertices=vertices, process=False
+            vertices=vertices, faces=self.get_all_maximal_simplices(), process=False
         )
 
     def to_spharapy(self, vertex_position_name: str = "position"):
@@ -1625,7 +1626,7 @@ class SimplicialComplex(Complex):
         >>> import spharapy.spharabasis as sb
         >>> import spharapy.datasets as sd
         >>> mesh = tm.TriMesh([[0, 1, 2]], [[0, 0, 0], [0, 0, 1], [0, 1, 0]])
-        >>> SC = SimplicialComplex.from_spharpy(mesh)
+        >>> SC = tnx.SimplicialComplex.from_spharpy(mesh)
         >>> mesh2 = SC.to_spharapy()
         >>> mesh2.vertlist == mesh.vertlist
         >>> mesh2.trilist == mesh.trilist
@@ -1674,7 +1675,7 @@ class SimplicialComplex(Complex):
         return mesh.laplacianmatrix(mode=mode)
 
     @classmethod
-    def from_nx(cls, G: nx.Graph) -> "SimplicialComplex":
+    def from_nx(cls, G: nx.Graph) -> Self:
         """Convert from netwrokx graph.
 
         Parameters
@@ -1692,7 +1693,7 @@ class SimplicialComplex(Complex):
         >>> G = nx.Graph()  # or DiGraph, MultiGraph, MultiDiGraph, etc
         >>> G.add_edge(1, 2, weight=2)
         >>> G.add_edge(3, 4, weight=4)
-        >>> SC = SimplicialComplex.from_nx(G)
+        >>> SC = tnx.SimplicialComplex.from_nx(G)
         >>> SC[(1, 2)]["weight"]
         2
         """
@@ -1712,14 +1713,13 @@ class SimplicialComplex(Complex):
         """
         G = nx.Graph()
         for edge in self.skeleton(1):
-            edge = list(edge)
             G.add_edge(edge[0], edge[1])
         for node in self.skeleton(0):
             G.add_node(next(iter(node)))
         return nx.is_connected(G)
 
     @classmethod
-    def simplicial_closure_of_hypergraph(cls, H) -> "SimplicialComplex":
+    def simplicial_closure_of_hypergraph(cls, H) -> Self:
         """Compute the simplicial complex closure of a hypergraph.
 
         Parameters
@@ -1736,7 +1736,7 @@ class SimplicialComplex(Complex):
         --------
         >>> import hypernetx as hnx
         >>> hg = hnx.Hypergraph([[1, 2, 3, 4], [1, 2, 3]], static=True)
-        >>> sc = SimplicialComplex.simplicial_closure_of_hypergraph(hg)
+        >>> sc = tnx.SimplicialComplex.simplicial_closure_of_hypergraph(hg)
         >>> sc.simplices
         SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4), (1, 2, 3), (1, 2, 4), (1, 3, 4), (2, 3, 4), (1, 2, 3, 4)])
         """
@@ -1754,10 +1754,10 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> c1 = Simplex((1, 2, 3))
-        >>> c2 = Simplex((1, 2, 4))
-        >>> c3 = Simplex((2, 5))
-        >>> SC = SimplicialComplex([c1, c2, c3])
+        >>> c1 = tnx.Simplex((1, 2, 3))
+        >>> c2 = tnx.Simplex((1, 2, 4))
+        >>> c3 = tnx.Simplex((2, 5))
+        >>> SC = tnx.SimplicialComplex([c1, c2, c3])
         >>> SC.to_cell_complex()
         """
         from toponetx.classes.cell_complex import CellComplex
@@ -1774,18 +1774,19 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> c1 = Simplex((1, 2, 3))
-        >>> c2 = Simplex((1, 2, 4))
-        >>> c3 = Simplex((2, 5))
-        >>> SC = SimplicialComplex([c1, c2, c3])
+        >>> c1 = tnx.Simplex((1, 2, 3))
+        >>> c2 = tnx.Simplex((1, 2, 4))
+        >>> c3 = tnx.Simplex((2, 5))
+        >>> SC = tnx.SimplicialComplex([c1, c2, c3])
         >>> SC.to_hypergraph()
         Hypergraph({'e0': [1, 2], 'e1': [1, 3], 'e2': [1, 4], 'e3': [2, 3], 'e4': [2, 4], 'e5': [2, 5], 'e6': [1, 2, 3], 'e7': [1, 2, 4]},name=)
         """
-        G = []
-        for rank in range(1, self.dim + 1):
-            edge = [list(cell) for cell in self.skeleton(rank)]
-            G = G + edge
-        return Hypergraph(G, static=True)
+        hyperedges = [
+            list(cell)
+            for rank in range(1, self.dim + 1)
+            for cell in self.skeleton(rank)
+        ]
+        return Hypergraph(hyperedges, static=True)
 
     def to_combinatorial_complex(self):
         """Convert a simplicial complex to a combinatorial complex.
@@ -1797,10 +1798,10 @@ class SimplicialComplex(Complex):
 
         Examples
         --------
-        >>> c1 = Simplex((1, 2, 3))
-        >>> c2 = Simplex((1, 2, 3))
-        >>> c3 = Simplex((1, 2, 4))
-        >>> SC = SimplicialComplex([c1, c2, c3])
+        >>> c1 = tnx.Simplex((1, 2, 3))
+        >>> c2 = tnx.Simplex((1, 2, 3))
+        >>> c3 = tnx.Simplex((1, 2, 4))
+        >>> SC = tnx.SimplicialComplex([c1, c2, c3])
         >>> CCC = SC.to_combinatorial_complex()
         """
         from toponetx.classes.combinatorial_complex import CombinatorialComplex
@@ -1811,7 +1812,25 @@ class SimplicialComplex(Complex):
                 CCC.add_cell(cell, rank=len(cell) - 1, **self[cell])
         return CCC
 
-    def clone(self) -> "SimplicialComplex":
+    def graph_skeleton(self) -> nx.Graph:
+        """Return the graph-skeleton of this simplicial complex.
+
+        The graph-skeleton consists of the 0 and 1-simplices (i.e., nodes and edges)
+        of the simplicial complex.
+
+        Returns
+        -------
+        nx.Graph
+            The graph-skeleton of this simplicial complex.
+        """
+        G = nx.Graph()
+        for node in self.skeleton(0):
+            G.add_node(node[0], **self[node])
+        for edge in self.skeleton(1):
+            G.add_edge(*edge, **self[edge])
+        return G
+
+    def clone(self) -> Self:
         """Return a copy of the simplicial complex.
 
         The clone method by default returns an independent shallow copy of the
@@ -1822,4 +1841,4 @@ class SimplicialComplex(Complex):
         SimplicialComplex
             A shallow copy of this simplicial complex.
         """
-        return SimplicialComplex(self.simplices)
+        return self.__class__(self.simplices)

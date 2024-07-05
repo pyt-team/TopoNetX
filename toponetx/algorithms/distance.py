@@ -1,27 +1,32 @@
 """Module to compute distance between nodes or cells on topological domains."""
+
 from collections.abc import Hashable, Iterable
-from warnings import warn
 
 import networkx as nx
-import numpy as np
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
-from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge
+from toponetx.exception import TopoNetXNoPath
 
 __all__ = ["distance", "cell_distance"]
 
+# In this module, only cell complexes, combinatorial complexes and colored
+# hypergraphs are supported.
+ComplexType = CellComplex | CombinatorialComplex | ColoredHyperGraph
 
-def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) -> int:
+
+def distance(
+    domain: ComplexType, source: Hashable, target: Hashable, s: int = 1
+) -> int:
     """Return shortest s-walk distance between two nodes in the cell complex.
 
     Parameters
     ----------
-    domain : Complex
-        Supported complexes are cell/combintorial and hypegraphs.
+    domain : CellComplex or CombinaorialComplex or ColoredHyperGraph
+        The domain on which to compute the s-walk distance between source and target.
     source : Hashable
         A node in the input complex.
     target : Hashable
@@ -33,6 +38,11 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
     -------
     int
         Shortest s-walk distance between two nodes in the cell complex.
+
+    Raises
+    ------
+    TopoNetXNoPath
+        If no s-walk path exists between source and target nodes.
 
     See Also
     --------
@@ -52,17 +62,17 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(node_diameters(CC))
+    >>> list(tnx.node_diameters(CC))
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(node_diameters(CCC))
+    >>> list(tnx.node_diameters(CCC))
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(node_diameters(CHG))
+    >>> list(tnx.node_diameters(CHG))
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
-        raise ValueError(f"Input complex {domain} is not supported.")
+        raise TypeError(f"Input complex {domain} is not supported.")
     if isinstance(source, Cell):
         source = source.elements
     if isinstance(target, Cell):
@@ -71,17 +81,16 @@ def distance(domain: Complex, source: Hashable, target: Hashable, s: int = 1) ->
         source = tuple(source)
     if isinstance(target, Iterable):
         target = tuple(target)
-    rowdict, A = domain.node_to_all_cell_adjacnecy_matrix(index=True)
+    rowdict, A = domain.node_to_all_cell_adjacnecy_matrix(s=s, index=True)
     G = nx.from_scipy_sparse_array(A)
     try:
         return nx.shortest_path_length(G, rowdict[source], rowdict[target])
-    except Exception:
-        warn(f"No {s}-path between {source} and {target}", stacklevel=2)
-        return np.inf
+    except nx.NetworkXNoPath as exc:
+        raise TopoNetXNoPath() from exc
 
 
 def cell_distance(
-    domain: Complex,
+    domain: ComplexType,
     source: Iterable | HyperEdge | Cell,
     target: Iterable | HyperEdge | Cell,
     s: int = 1,
@@ -90,8 +99,8 @@ def cell_distance(
 
     Parameters
     ----------
-    domain : Complex
-        Supported complexes are cell/combintorial and hypegraphs.
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
+        The domain on which to compute the s-walk distance between source and target cells.
     source : Iterable or HyperEdge or Cell
         An Iterable representing a cell in the input complex cell complex.
     target : Iterable or HyperEdge or Cell
@@ -102,10 +111,14 @@ def cell_distance(
     Returns
     -------
     int
-        Shortest s-walk cell distance between `source` and `target`.
-        A shortest s-walk is computed as a sequence of cells,
-        the s-walk distance is the number of cells in the sequence
-        minus 1. If no such path exists returns np.inf.
+        Shortest s-walk cell distance between `source` and `target`. A shortest s-walk
+        is computed as a sequence of cells, the s-walk distance is the number of cells
+        in the sequence minus 1.
+
+    Raises
+    ------
+    TopoNetXNoPath
+        If no s-walk path exists between source and target cells.
 
     See Also
     --------
@@ -125,31 +138,38 @@ def cell_distance(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
     >>> CC.add_cell([5, 2], rank=1)
-    >>> cell_distance(CC, [2, 3], [6, 7])
+    >>> tnx.cell_distance(CC, [2, 3], [6, 7])
     >>> CHG = CC.to_colored_hypergraph()
-    >>> cell_distance(CHG, (frozenset({2, 3}), 0), (frozenset({6, 7}), 0))
+    >>> tnx.cell_distance(CHG, (frozenset({2, 3}), 0), (frozenset({6, 7}), 0))
     >>> CCC = CC.to_combinatorial_complex()
-    >>> cell_distance(CCC, frozenset({2, 3}), frozenset({6, 7}))
+    >>> tnx.cell_distance(CCC, frozenset({2, 3}), frozenset({6, 7}))
     """
     if not isinstance(domain, CellComplex | CombinatorialComplex | ColoredHyperGraph):
-        raise ValueError(f"Input complex {domain} is not supported.")
+        raise TypeError(f"Input complex {domain} is not supported.")
     if isinstance(source, Cell | HyperEdge):
         source = source.elements
     if isinstance(target, Cell | HyperEdge):
         target = target.elements
+
     if isinstance(domain, CellComplex):
         if isinstance(source, Iterable):
             source = tuple(source)
         if isinstance(target, Iterable):
             target = tuple(target)
+    if isinstance(domain, ColoredHyperGraph):
+        if isinstance(source, Iterable):
+            source = frozenset(source)
+        if isinstance(target, Iterable):
+            target = frozenset(target)
+
     cell_dict, A = domain.all_cell_to_node_coadjacency_matrix(s=s, index=True)
+    print(cell_dict)
     G = nx.from_scipy_sparse_array(A)
     try:
         return nx.shortest_path_length(G, cell_dict[source], cell_dict[target])
-    except Exception:
-        warn(f"No {s}-path between {source} and {target}", stacklevel=2)
-        return np.inf
+    except nx.NetworkXNoPath as exc:
+        raise TopoNetXNoPath() from exc

@@ -1,16 +1,18 @@
 """Cell class."""
 
 from collections import Counter, deque
-from collections.abc import Collection, Iterable, Sequence
+from collections.abc import Collection, Hashable, Iterable, Sequence
 from itertools import zip_longest
 from typing import Literal
+
+from typing_extensions import Self
 
 from toponetx.classes.complex import Atom
 
 __all__ = ["Cell"]
 
 
-class Cell(Atom):
+class Cell(Atom[tuple[Hashable]]):
     """Class representing a 2D cell.
 
     A 2D cell is an elementary building block used to build a 2D cell complex, whether regular or non-regular.
@@ -40,16 +42,16 @@ class Cell(Atom):
 
     Examples
     --------
-    >>> cell1 = Cell((1, 2, 3))
-    >>> cell2 = Cell((1, 2, 4, 5), weight=1)
-    >>> cell3 = Cell(("a", "b", "c"))
+    >>> cell1 = tnx.Cell((1, 2, 3))
+    >>> cell2 = tnx.Cell((1, 2, 4, 5), weight=1)
+    >>> cell3 = tnx.Cell(("a", "b", "c"))
     >>> # create geometric cell:
     >>> v0 = (0, 0)
     >>> v1 = (1, 0)
     >>> v2 = (1, 1)
     >>> v3 = (0, 1)
     # create the cell with the vertices and edges
-    >>> cell = Cell([v0, v1, v2, v3], type="square")
+    >>> cell = tnx.Cell([v0, v1, v2, v3], type="square")
     >>> cell["type"]
     >>> list(cell.boundary)
     [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
@@ -57,23 +59,6 @@ class Cell(Atom):
     """
 
     def __init__(self, elements: Collection, regular: bool = True, **kwargs) -> None:
-        """Initialize class representing a 2D cell.
-
-        A 2D cell is an elementary building block used to build a 2D cell complex, whether regular or non-regular.
-
-        Parameters
-        ----------
-        elements : Collection[Hashable]
-            An iterable that contains hashable objects representing the nodes of the cell. The order of the elements is important
-            and defines the cell up to cyclic permutation.
-        regular : bool, optional
-            A boolean indicating whether the cell satisfies the regularity condition. The default value is True.
-            A 2D cell is regular if and only if there is no repetition in the boundary edges that define the cell.
-            By default, the cell is assumed to be regular unless otherwise specified. Self-loops are not allowed in the boundary
-            of the cell. If a cell violates the cell complex regularity condition, a ValueError is raised.
-        **kwargs : keyword arguments, optional
-            Attributes belonging to the cell can be added as key-value pairs. Both the key and value must be hashable.
-        """
         super().__init__(tuple(elements), **kwargs)
 
         self._regular = regular
@@ -102,7 +87,7 @@ class Cell(Atom):
                         f"self loops are not permitted, got {(e[0],e[1])} as an edge in the cell's boundary"
                     )
 
-    def clone(self) -> "Cell":
+    def clone(self) -> Self:
         """Clone the Cell with all attributes.
 
         The clone method by default returns an independent shallow copy of the cell and
@@ -114,7 +99,7 @@ class Cell(Atom):
         Cell
             A copy of this cell.
         """
-        return Cell(self.elements, self._regular, **self._attributes)
+        return self.__class__(self.elements, self._regular, **self._attributes)
 
     @staticmethod
     def is_valid_cell(elements: Sequence, regular: bool = False) -> bool:

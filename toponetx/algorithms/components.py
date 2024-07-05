@@ -1,12 +1,13 @@
 """Module to compute connected components on topological domains."""
+
 from collections.abc import Generator, Hashable
+from typing import Literal, TypeVar, overload
 
 import networkx as nx
 
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
-from toponetx.classes.complex import Complex
 
 __all__ = [
     "s_connected_components",
@@ -15,22 +16,53 @@ __all__ = [
     "connected_component_subcomplexes",
 ]
 
+# In this module, only cell complexes, combinatorial complexes and colored
+# hypergraphs are supported. We bound the type variable to these types.
+ComplexType = CellComplex | CombinatorialComplex | ColoredHyperGraph
+ComplexTypeVar = TypeVar("ComplexTypeVar", bound=ComplexType)
+
+
+@overload
+def s_connected_components(
+    domain: ComplexType,
+    s: int,
+    cells: Literal[True] = ...,
+    return_singletons: bool = ...,
+) -> Generator[set[tuple[Hashable, ...]], None, None]:  # numpydoc ignore=GL08
+    pass
+
+
+@overload
+def s_connected_components(
+    domain: ComplexType, s: int, cells: Literal[False], return_singletons: bool = ...
+) -> Generator[set[Hashable], None, None]:  # numpydoc ignore=GL08
+    pass
+
+
+@overload
+def s_connected_components(
+    domain: ComplexType, s: int, cells: bool, return_singletons: bool = ...
+) -> Generator[
+    set[Hashable] | set[tuple[Hashable, ...]], None, None
+]:  # numpydoc ignore=GL08
+    pass
+
 
 def s_connected_components(
-    domain: Complex, s: int = 1, cells: bool = True, return_singletons: bool = False
+    domain: ComplexType, s: int, cells: bool = True, return_singletons: bool = False
 ) -> Generator[set[Hashable] | set[tuple[Hashable, ...]], None, None]:
     """Return generator for the s-connected components.
 
     Parameters
     ----------
-    domain : Complex
-        Supported complexes are cell/combintorial and hypegraphs.
-    s : int, optional
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
+        The domain on which to compute the s-connected components.
+    s : int
         The number of intersections between pairwise consecutive cells.
-    cells : bool, optional
+    cells : bool, default=True
         If True will return cell components, if False will return node components.
-    return_singletons : bool, optional
-        When True, returns singletons connected components.
+    return_singletons : bool, default=False
+        When True, returns singleton connected components.
 
     Notes
     -----
@@ -56,25 +88,21 @@ def s_connected_components(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(s_connected_components(CC, s=1, cells=False))
-    >>> #  [{2, 3, 4}, {5, 6, 7}]
-    >>> list(s_connected_components(CC, s=1, cells=True))
-    >>> # [{(2, 3), (2, 3, 4), (2, 4), (3, 4)},
-    >>> # {(5, 6), (5, 6, 7), (5, 7), (6, 7)}]
+    >>> list(tnx.s_connected_components(CC, s=1, cells=False))
+    [{2, 3, 4}, {5, 6, 7}]
+    >>> list(tnx.s_connected_components(CC, s=1, cells=True))
+    [{(2, 3), (2, 3, 4), (2, 4), (3, 4)}, {(5, 6), (5, 6, 7), (5, 7), (6, 7)}]
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(s_connected_components(CHG, s=1, cells=False))
+    >>> list(tnx.s_connected_components(CHG, s=1, cells=False))
     >>> CC.add_cell([4, 5], rank=1)
-    >>> list(s_connected_components(CC, s=1, cells=False))
-    >>> # [{2, 3, 4, 5, 6, 7}]
+    >>> list(tnx.s_connected_components(CC, s=1, cells=False))
+    [{2, 3, 4, 5, 6, 7}]
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(s_connected_components(CCC, s=1, cells=False))
+    >>> list(tnx.s_connected_components(CCC, s=1, cells=False))
     """
-    if not isinstance(domain, CellComplex | ColoredHyperGraph | CombinatorialComplex):
-        raise TypeError(f"Input complex {domain} is not supported.")
-
     if cells:
         cell_dict, A = domain.all_cell_to_node_coadjacency_matrix(s=s, index=True)
         cell_dict = {v: k for k, v in cell_dict.items()}
@@ -90,12 +118,8 @@ def s_connected_components(
 
     else:
         node_dict, A = domain.node_to_all_cell_adjacnecy_matrix(s=s, index=True)
-        if isinstance(domain, ColoredHyperGraph) and not isinstance(
-            domain, CombinatorialComplex
-        ):
-            node_dict = {v: k[0] for k, v in node_dict.items()}
-        else:
-            node_dict = {v: k for k, v in node_dict.items()}
+        node_dict = {v: k for k, v in node_dict.items()}
+
         G = nx.from_scipy_sparse_array(A)
         for c in nx.connected_components(G):
             if not return_singletons and len(c) == 1:
@@ -107,23 +131,26 @@ def s_connected_components(
 
 
 def s_component_subcomplexes(
-    domain: Complex, s: int = 1, cells: bool = True, return_singletons: bool = False
-) -> Generator[Complex, None, None]:
+    domain: ComplexTypeVar,
+    s: int = 1,
+    cells: bool = True,
+    return_singletons: bool = False,
+) -> Generator[ComplexTypeVar, None, None]:
     """Return a generator for the induced subcomplexes of s_connected components.
 
     Removes singletons unless return_singletons is set to True.
 
     Parameters
     ----------
-    domain : Complex
-        Supported complexes are cell/combintorial and hypegraphs.
-    s : int, optional
+    domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
+        The domain for which to compute the the s-connected subcomplexes.
+    s : int, default=1
         The number of intersections between pairwise consecutive cells.
-    cells : bool, optional
+    cells : bool, default=True
         Determines if cell or node components are desired. Returns
         subcomplexes equal to the cell complex restricted to each set of nodes(cells) in the
         s-connected components or s-cell-connected components.
-    return_singletons : bool, optional
+    return_singletons : bool, default=False
         When True, returns singletons connected components.
 
     Yields
@@ -134,16 +161,16 @@ def s_component_subcomplexes(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(s_component_subcomplexes(CC, 1, cells=False))
+    >>> list(tnx.s_component_subcomplexes(CC, 1, cells=False))
     >>> CCC = CC.to_combinatorial_complex()
-    >>> list(s_component_subcomplexes(CCC, s=1, cells=False))
+    >>> list(tnx.s_component_subcomplexes(CCC, s=1, cells=False))
     >>> CHG = CC.to_colored_hypergraph()
-    >>> list(s_component_subcomplexes(CHG, s=1, cells=False))
+    >>> list(tnx.s_component_subcomplexes(CHG, s=1, cells=False))
     >>> CC.add_cell([4, 5], rank=1)
-    >>> list(s_component_subcomplexes(CC, s=1, cells=False))
+    >>> list(tnx.s_component_subcomplexes(CC, s=1, cells=False))
     """
     for c in s_connected_components(
         domain, s=s, cells=cells, return_singletons=return_singletons
@@ -154,8 +181,31 @@ def s_component_subcomplexes(
             yield domain.restrict_to_nodes(list(c))
 
 
+@overload
 def connected_components(
-    domain: Complex, cells: bool = False, return_singletons: bool = True
+    domain: ComplexType, cells: Literal[True] = ..., return_singletons: bool = ...
+) -> Generator[set[tuple[Hashable, ...]], None, None]:  # numpydoc ignore=GL08
+    pass
+
+
+@overload
+def connected_components(
+    domain: ComplexType, cells: Literal[False], return_singletons: bool = ...
+) -> Generator[set[Hashable], None, None]:  # numpydoc ignore=GL08
+    pass
+
+
+@overload
+def connected_components(
+    domain: ComplexType, cells: bool, return_singletons: bool = ...
+) -> Generator[
+    set[Hashable] | set[tuple[Hashable, ...]], None, None
+]:  # numpydoc ignore=GL08
+    pass
+
+
+def connected_components(
+    domain: ComplexType, cells: bool = False, return_singletons: bool = True
 ) -> Generator[set[Hashable] | set[tuple[Hashable, ...]], None, None]:
     """Compute s-connected components with s=1.
 
@@ -165,14 +215,14 @@ def connected_components(
     ----------
     domain : Complex
         Supported complexes are cell/combintorial and hypegraphs.
-    cells : bool, optional
+    cells : bool, default=False
         If True will return cell components, if False will return node components.
-    return_singletons : bool, optional
+    return_singletons : bool, default=True
         When True, returns singletons connected components.
 
     Yields
     ------
-    set[Hashable] | set[tuple[Hashable, ...]], None, None
+    set[Hashable] | set[tuple[Hashable, ...]]
         Yields subcomplexes generated by the cells (or nodes) in the
         cell(node) components of complex.
 
@@ -183,27 +233,29 @@ def connected_components(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(connected_components(CC, cells=False))
+    >>> list(tnx.connected_components(CC, cells=False))
     >>> CC.add_cell([4, 5], rank=1)
-    >>> list(CC.connected_components(CC, cells=False))
+    >>> list(tnx.CC.connected_components(CC, cells=False))
     """
-    yield from s_connected_components(domain, s=1, cells=cells, return_singletons=True)
+    yield from s_connected_components(
+        domain, s=1, cells=cells, return_singletons=return_singletons
+    )
 
 
 def connected_component_subcomplexes(
-    domain: Complex, return_singletons: bool = True
-) -> Generator[Complex, None, None]:
+    domain: ComplexTypeVar, return_singletons: bool = True
+) -> Generator[ComplexTypeVar, None, None]:
     """Compute connected component subcomplexes with s=1.
 
     Same as :meth:`s_component_subcomplexes` with s=1.
 
     Parameters
     ----------
-    domain : Complex
-        Supported complexes are cell/combintorial and hypegraphs.
+    domain : CellComplex or CombinaorialComplex or ColoredHyperGraph
+        The domain for which to compute the the connected subcomplexes.
     return_singletons : bool, optional
         When True, returns singletons connected components.
 
@@ -219,11 +271,11 @@ def connected_component_subcomplexes(
 
     Examples
     --------
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell([2, 3, 4], rank=2)
     >>> CC.add_cell([5, 6, 7], rank=2)
-    >>> list(connected_component_subcomplexes(CC))
+    >>> list(tnx.connected_component_subcomplexes(CC))
     >>> CC.add_cell([4, 5], rank=1)
-    >>> list(connected_component_subcomplexes(CC))
+    >>> list(tnx.connected_component_subcomplexes(CC))
     """
     yield from s_component_subcomplexes(domain, return_singletons=return_singletons)

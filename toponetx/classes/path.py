@@ -3,12 +3,14 @@
 from collections.abc import Hashable, Iterable, Sequence
 from typing import Any
 
+from typing_extensions import Self
+
 from toponetx.classes.complex import Atom
 
 __all__ = ["Path"]
 
 
-class Path(Atom):
+class Path(Atom[tuple[Hashable]]):
     """Path class.
 
     A class representing an elementary p-path in a path complex, which is the building block for a path complex. By the definition established
@@ -57,18 +59,18 @@ class Path(Atom):
 
     Examples
     --------
-    >>> path1 = Path((1, 2, 3))
+    >>> path1 = tnx.Path((1, 2, 3))
     >>> list(path1.boundary)
     []
-    >>> path2 = Path((1, 2, 3), construct_boundaries=True)
+    >>> path2 = tnx.Path((1, 2, 3), construct_boundaries=True)
     >>> list(path2.boundary)
     [(2, 3), (1, 3), (1, 2)]
-    >>> path3 = Path(
+    >>> path3 = tnx.Path(
     ...     (1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 2), (2, 3)]
     ... )
     >>> list(path3.boundary)
     [(2, 3), (1, 2)]
-    >>> path4 = Path(
+    >>> path4 = tnx.Path(
     ...     (1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 3), (2, 3)]
     ... )
     >>> list(path4.boundary)
@@ -83,73 +85,8 @@ class Path(Atom):
         allowed_paths: Iterable[tuple[Hashable]] | None = None,
         **kwargs,
     ) -> None:
-        """Path class.
-
-        A class representing an elementary p-path in a path complex, which is the building block for a path complex. By the definition established
-        in the original paper [2]_, an elementary p-path on a non-empty set of vertices V is any sequence of vertices
-        with length p + 1.
-
-        Unlike the original paper [2]_ where elementary p-paths span the regular space of boundary-invariant paths,
-        the elementary p-paths represented by this class span the space of simple paths with length p as proposed in [1]_.
-
-        Parameters
-        ----------
-        elements : Sequence[Hashable]
-            The nodes in the elementary p-path.
-        construct_boundaries : bool, default=False
-            If True, construct the entire boundary of the elementary p-path.
-        reserve_sequence_order : bool, default=False
-            If True, reserve the order of the sub-sequence of nodes in the elementary p-path.
-            Else, the sub-sequence of nodes in the elementary p-path will be reversed if the first index is larger than the last index.
-        allowed_paths : Iterable[tuple[Hashable]], optional
-            A list of allowed boundaries of an elementary p-path. If None, all possible boundaries are constructed (similarly to simplex).
-        **kwargs : keyword arguments, optional
-            Additional attributes to be associated with the elementary p-path.
-
-        Notes
-        -----
-        - An elementary p-path is defined as an ordered sequence of nodes (n1, ..., np) if we reserve the sequence order. Thus, for this case, (n1, ..., np) is different
-        from (np, ..., n1). If we do not reserve the sequence order, then (n1, ..., np) is the same as (np, ..., n1). For this case, the first index must be smaller
-        than the last index so that we can discard the other duplicate elementary p-path. As elementary p-paths may contain characters and numbers at the same time, we leverage
-        lexicographical order to compare two indices.
-        - Similarly to simplex, in order to find the boundary of an elementary p-path, we remove one node at a time from the elementary p-path. However, unlike simplex
-        where order does not matter, the process of omitting nodes from an elementary p-path may result some non-existing paths. For instance, if we have an elementary
-        p-path (1, 2, 3) and there is no path (1, 3), then applying boundary operation on the elementary p-path results in [(2,3), (1,3), (1,2)]. In order to avoid this,
-        we can provide a list of allowed boundaries. If the boundary of an elementary p-path is not in the list of allowed boundaries,
-        then it will not be included in the boundary of the elementary p-path.
-        - When an elementary p-path is created and allowed paths are not specified, its boundary is automatically created by iteratively removing one node at a time
-        from the elementary p-path, which is identical to a simplex.
-
-        References
-        ----------
-        .. [1] Truong and Chin.
-            Generalizing Topological Graph Neural Networks with Paths.
-            https://arxiv.org/abs/2308.06838.pdf
-        .. [2] Grigor'yan, Lin, Muranov, and Yau.
-            Homologies of path complexes and digraphs.
-            https://arxiv.org/pdf/1207.2834.pdf
-
-        Examples
-        --------
-        >>> path1 = Path((1, 2, 3))
-        >>> list(path1.boundary)
-        []
-        >>> path2 = Path((1, 2, 3), construct_boundaries=True)
-        >>> list(path2.boundary)
-        [(2, 3), (1, 3), (1, 2)]
-        >>> path3 = Path(
-        ...     (1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 2), (2, 3)]
-        ... )
-        >>> list(path3.boundary)
-        [(2, 3), (1, 2)]
-        >>> path4 = Path(
-        ...     (1, 2, 3), construct_boundaries=True, allowed_paths=[(1, 3), (2, 3)]
-        ... )
-        >>> list(path4.boundary)
-        [(2, 3), (1, 3)]
-        """
         self.__check_inputs(elements, reserve_sequence_order)
-        if isinstance(elements, int | str):
+        if not isinstance(elements, Sequence):
             elements = [elements]
         super().__init__(tuple(elements), **kwargs)
         if len(set(elements)) != len(self.elements):
@@ -171,7 +108,7 @@ class Path(Atom):
         elements: Sequence[Hashable],
         reserve_sequence_order: bool = False,
         allowed_paths: Iterable[tuple[Hashable]] | None = None,
-    ) -> list[tuple[Hashable]]:
+    ) -> list[tuple[Hashable, ...]]:
         """Return list of elementary p-path objects representing the boundaries.
 
         Parameters
@@ -198,16 +135,16 @@ class Path(Atom):
 
         Examples
         --------
-        >>> Path.construct_path_boundaries((1, 2, 3), reserve_sequence_order=False)
+        >>> tnx.Path.construct_path_boundaries((1, 2, 3), reserve_sequence_order=False)
         [(2, 3), (1, 3), (1, 2)]
-        >>> Path.construct_path_boundaries(
+        >>> tnx.Path.construct_path_boundaries(
         ...     (1, 2, 3), reserve_sequence_order=False, allowed_paths=[(1, 2), (2, 3)]
         ... )
         [(2, 3), (1, 2)]
         """
         boundaries = []
         for i in range(len(elements)):
-            boundary = list(elements[0:i] + elements[(i + 1) :])
+            boundary = list(elements[0:i]) + list(elements[(i + 1) :])
             if (
                 not reserve_sequence_order
                 and len(boundary) > 1
@@ -219,7 +156,7 @@ class Path(Atom):
         return boundaries
 
     @property
-    def boundary(self) -> list[tuple[Hashable]]:
+    def boundary(self) -> list[tuple[Hashable, ...]]:
         """Return the boundary of this path.
 
         The boundary of this path are all elementary (p-1)-path objects representing
@@ -232,7 +169,7 @@ class Path(Atom):
         """
         return self._boundaries
 
-    def clone(self) -> "Path":
+    def clone(self) -> Self:
         """Return a shallow copy of the elementary p-path.
 
         Returns
@@ -240,7 +177,7 @@ class Path(Atom):
         Path
             A shallow copy of the elementary p-path.
         """
-        return Path(
+        return self.__class__(
             self.elements,
             construct_boundaries=self.construct_boundaries,
             **self._attributes,

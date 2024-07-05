@@ -21,13 +21,14 @@ class TestSimplex:
         with pytest.raises(ValueError):
             _ = Simplex([1, 2, 2])
 
+        with pytest.raises(ValueError):
+            _ = Simplex([1, 2], is_maximal=True)
+        with pytest.raises(ValueError):
+            _ = Simplex([1, 2], membership={})
+
     def test_simplex_sign(self):
         """Test simplex sign method."""
-        s = Simplex(
-            [
-                1,
-            ]
-        )
+        s = Simplex([1])
         with pytest.raises(NotImplementedError):
             s.sign(face=1)
 
@@ -68,15 +69,18 @@ class TestSimplex:
 
     def test_construct_tree(self):
         """Test the construct_tree property of the simplex."""
-        s = Simplex((1, 2, 3), construct_tree=True)
-        assert len(s.boundary) == 3
+        with pytest.warns(DeprecationWarning):
+            s = Simplex((1, 2, 3), construct_tree=True)
+        with pytest.warns(DeprecationWarning):
+            assert len(s.boundary) == 3
 
         s = Simplex((1, 2, 3), construct_tree=False)
-        assert len(s.boundary) == 3
+        with pytest.warns(DeprecationWarning):
+            assert len(s.boundary) == 3
 
     def test_getting_and_setting_items(self):
         """Test getting and setting items in the simplex."""
-        s = Simplex((1, 2, 3), construct_tree=True)
+        s = Simplex((1, 2, 3))
         s["weight"] = 1
         assert s["weight"] == 1
 

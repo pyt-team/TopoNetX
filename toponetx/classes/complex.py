@@ -1,14 +1,17 @@
 """Abstract class for Complex and Atom."""
 
-
 import abc
 from collections.abc import Collection, Hashable, Iterator
-from typing import Any
+from typing import Any, Generic, TypeVar
+
+from typing_extensions import Self
 
 __all__ = ["Atom", "Complex"]
 
+AtomCollectionType = TypeVar("AtomCollectionType", bound=Collection[Hashable])
 
-class Atom(abc.ABC):
+
+class Atom(abc.ABC, Generic[AtomCollectionType]):
     """Abstract class representing an atom in a complex.
 
     Parameters
@@ -19,19 +22,10 @@ class Atom(abc.ABC):
         Additional attributes to be associated with the atom.
     """
 
-    elements: Collection[Hashable]
+    elements: AtomCollectionType
     name: str
 
-    def __init__(self, elements: Collection[Hashable], **kwargs) -> None:
-        """Abstract class representing an atom in a complex.
-
-        Parameters
-        ----------
-        elements : Collection[Hashable]
-            The elements in the atom.
-        **kwargs : keyword arguments, optional
-            Additional attributes to be associated with the atom.
-        """
+    def __init__(self, elements: AtomCollectionType, **kwargs) -> None:
         self.elements = elements
 
         self._attributes = {}
@@ -234,7 +228,7 @@ class Complex(abc.ABC):
         """Return number of nodes."""
 
     @abc.abstractmethod
-    def clone(self) -> "Complex":
+    def clone(self) -> Self:
         """Clone complex."""
 
     @abc.abstractmethod

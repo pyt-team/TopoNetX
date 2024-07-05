@@ -1,6 +1,5 @@
 """HyperEdge classes."""
 
-
 from collections.abc import Collection, Hashable
 
 from toponetx.classes.complex import Atom
@@ -8,7 +7,7 @@ from toponetx.classes.complex import Atom
 __all__ = ["HyperEdge"]
 
 
-class HyperEdge(Atom):
+class HyperEdge(Atom[frozenset[Hashable]]):
     """Class for a hyperedge (or a set-type cell).
 
     This class represents a set-type cell in a combinatorial complex, which is a set of
@@ -26,35 +25,13 @@ class HyperEdge(Atom):
 
     Examples
     --------
-    >>> ac1 = HyperEdge((1, 2, 3))
-    >>> ac2 = HyperEdge((1, 2, 4, 5))
-    >>> ac3 = HyperEdge(("a", "b", "c"))
-    >>> ac3 = HyperEdge(("a", "b", "c"), rank=10)
+    >>> ac1 = tnx.HyperEdge((1, 2, 3))
+    >>> ac2 = tnx.HyperEdge((1, 2, 4, 5))
+    >>> ac3 = tnx.HyperEdge(("a", "b", "c"))
+    >>> ac3 = tnx.HyperEdge(("a", "b", "c"), rank=10)
     """
 
     def __init__(self, elements: Collection, rank=None, **kwargs) -> None:
-        """Generate instance of the class for a hyperedge (or a set-type cell).
-
-        This class represents a set-type cell in a combinatorial complex, which is a set of
-        nodes with optional attributes and a rank. The nodes in a hyperedge must be
-        hashable and unique, and the hyperedge itself is immutable.
-
-        Parameters
-        ----------
-        elements : iterable of hashables
-            The nodes in the hyperedge.
-        rank : int, optional
-            The rank of the hyperedge. Default is None.
-        **kwargs : additional attributes
-            Additional attributes of the hyperedge, as keyword arguments.
-
-        Examples
-        --------
-        >>> ac1 = HyperEdge((1, 2, 3))
-        >>> ac2 = HyperEdge((1, 2, 4, 5))
-        >>> ac3 = HyperEdge(("a", "b", "c"))
-        >>> ac3 = HyperEdge(("a", "b", "c"), rank=10)
-        """
         for i in elements:
             if not isinstance(i, Hashable):
                 raise TypeError("Every element of HyperEdge must be hashable.")

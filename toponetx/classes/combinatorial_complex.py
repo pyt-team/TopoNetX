@@ -4,6 +4,7 @@ from collections.abc import Collection, Hashable, Iterable
 from typing import Any, Literal
 
 import networkx as nx
+from typing_extensions import Self
 
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.complex import Complex
@@ -48,6 +49,15 @@ class CombinatorialComplex(ColoredHyperGraph):
     **kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
+    Raises
+    ------
+    TypeError
+        If cells is not given as an Iterable.
+    ValueError
+        If input cells is not an instance of HyperEdge when rank is None.
+        If input HyperEdge has None rank when rank is specified.
+        If cells and ranks do not have an equal number of elements.
+
     Attributes
     ----------
     complex : dict
@@ -57,11 +67,11 @@ class CombinatorialComplex(ColoredHyperGraph):
     --------
     Define an empty combinatorial complex:
 
-    >>> CCC = CombinatorialComplex()
+    >>> CCC = tnx.CombinatorialComplex()
 
     Add cells to the combinatorial complex:
 
-    >>> CCC = CombinatorialComplex()
+    >>> CCC = tnx.CombinatorialComplex()
     >>> CCC.add_cell([1, 2], rank=1)
     >>> CCC.add_cell([3, 4], rank=1)
     >>> CCC.add_cell([1, 2, 3, 4], rank=2)
@@ -76,39 +86,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         graph_based: bool = False,
         **kwargs,
     ) -> None:
-        """Generate a Combinatorial Complex.
-
-        Parameters
-        ----------
-        cells : Collection, optional
-            A collection of cells to add to the combinatorial complex.
-        ranks : Collection, optional
-            When cells is an iterable or dictionary, ranks cannot be None and it must be iterable/dict of the same
-            size as cells.
-        graph_based : bool, default=False
-            When true rank 1 edges must have cardinality equals to 1.
-        **kwargs : keyword arguments, optional
-            Attributes to add to the complex as key=value pairs.
-
-        Returns
-        -------
-        None
-            Initialized Combinatorial Complex.
-
-        Raises
-        ------
-        TypeError
-            If cells is not given as an Iterable.
-        ValueError
-            If input cells is not an instance of HyperEdge when rank is None.
-            If input HyperEdge has None rank when rank is specified.
-            If cells and ranks do not have an equal number of elements.
-
-        Notes
-        -----
-        This function initializes a Combinatorial Complex with the given parameters. It adds cells to the complex based on the input.
-        If cells is a NetworkX graph, it adds nodes and edges accordingly.
-        """
         Complex.__init__(self, **kwargs)
         self.graph_based = graph_based  # rank 1 edges have cardinality equals to 1
         self._node_membership = {}
@@ -416,7 +393,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         to assign a cell attribute to store the value of that property for
         each cell:
 
-        >>> CCC = CombinatorialComplex()
+        >>> CCC = tnx.CombinatorialComplex()
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
         >>> CCC.add_cell([1, 2, 4], rank=2)
         >>> CCC.add_cell([3, 4], rank=2)
@@ -429,7 +406,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         the entire dictionary will be used to update edge attributes:
 
         >>> G = nx.path_graph(3)
-        >>> CCC = CombinatorialComplex(G)
+        >>> CCC = tnx.CombinatorialComplex(G)
         >>> d = {
         ...     (1, 2): {"color": "red", "attr2": 1},
         ...     (0, 1): {"color": "blue", "attr2": 3},
@@ -460,7 +437,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CCC = CombinatorialComplex(G)
+        >>> CCC = tnx.CombinatorialComplex(G)
         >>> d = {0: {"color": "red", "attr2": 1}, 1: {"color": "blue", "attr2": 3}}
         >>> CCC.set_node_attributes(d)
         >>> CCC.get_node_attributes("color")
@@ -468,7 +445,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         >>> G = nx.Graph()
         >>> G.add_nodes_from([1, 2, 3], color="blue")
-        >>> CCC = CombinatorialComplex(G)
+        >>> CCC = tnx.CombinatorialComplex(G)
         >>> nodes_color = CCC.get_node_attributes("color")
         >>> nodes_color[1]
         'blue'
@@ -493,7 +470,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         Examples
         --------
         >>> G = nx.path_graph(3)
-        >>> CCC = CombinatorialComplex(G)
+        >>> CCC = tnx.CombinatorialComplex(G)
         >>> d = {
         ...     (1, 2): {"color": "red", "attr2": 1},
         ...     (0, 1): {"color": "blue", "attr2": 3},
@@ -582,6 +559,10 @@ class CombinatorialComplex(ColoredHyperGraph):
         else:
             self._complex_set.hyperedge_dict[rank][hyperedge_].update(**attr)
         self._add_nodes_of_hyperedge(hyperedge_)
+        for i in hyperedge_:
+            if i not in self._node_membership:
+                self._node_membership[i] = set()
+            self._node_membership[i].add(hyperedge_)
 
     def _CCC_condition(self, hyperedge_, rank):
         """Check if hyperedge_ satisfies the CCC condition.
@@ -881,7 +862,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> CCC = CombinatorialComplex()
+        >>> CCC = tnx.CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
@@ -945,8 +926,7 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> from toponetx.classes import CombinatorialComplex
-        >>> CCC = CombinatorialComplex()
+        >>> CCC = tnx.CombinatorialComplex()
         >>> CCC.add_cell([1, 2, 3, 4], rank=2)
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([2, 3], rank=1)
@@ -1097,7 +1077,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         """
         super().remove_cells(cell_set)
 
-    def clone(self) -> "CombinatorialComplex":
+    def clone(self) -> Self:
         """Return a copy of the simplex.
 
         The clone method by default returns an independent shallow copy of the simplex
@@ -1110,7 +1090,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         CombinatorialComplex
             A copy of this combinatorial complex.
         """
-        CCC = CombinatorialComplex(graph_based=self.graph_based)
+        CCC = self.__class__(graph_based=self.graph_based)
         for cell in self.cells:
             CCC.add_cell(cell, self.cells.get_rank(cell))
         return CCC
@@ -1127,11 +1107,12 @@ class CombinatorialComplex(ColoredHyperGraph):
 
         Examples
         --------
-        >>> CCC = CombinatorialComplex()
+        >>> CCC = tnx.CombinatorialComplex()
         >>> CCC.add_cell([1, 2], rank=1)
         >>> CCC.add_cell([3, 4], rank=1)
         >>> CCC.add_cell([9], rank=0)
         >>> CCC.singletons()
+        [frozenset({9})]
         """
         return [k for k in self.skeleton(0) if self.degree(next(iter(k)), None) == 0]
 

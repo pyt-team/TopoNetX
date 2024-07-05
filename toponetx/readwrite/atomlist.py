@@ -1,4 +1,5 @@
 """Read and write complexes as a list of their atoms."""
+
 from collections.abc import Generator, Hashable, Iterable
 from itertools import combinations
 from typing import Literal, overload
@@ -127,19 +128,17 @@ def generate_atomlist(
     --------
     Generate a list of atoms from a simplicial complex:
 
-    >>> from toponetx.classes import SimplicialComplex
-    >>> SC = SimplicialComplex()
+    >>> SC = tnx.SimplicialComplex()
     >>> SC.add_simplex((1,), weight=1.0)
     >>> SC.add_simplex((1, 2, 3), weight=4.0)
-    >>> list(generate_atomlist(SC))
+    >>> list(tnx.generate_atomlist(SC))
     ["1 {'weight': 1.0}", "1 2 3 {'weight': 4.0}"]
 
     Generate a list of atoms from a cell complex:
 
-    >>> from toponetx.classes import CellComplex
-    >>> CC = CellComplex()
+    >>> CC = tnx.CellComplex()
     >>> CC.add_cell((1, 2, 3), rank=2, weight=4.0)
-    >>> list(generate_atomlist(CC))
+    >>> list(tnx.generate_atomlist(CC))
     ["1 2 3 {'weight': 4.0}"]
     """
     if isinstance(domain, SimplicialComplex):
@@ -266,6 +265,7 @@ def parse_atomlist(
     """
     from ast import literal_eval
 
+    domain: CellComplex | SimplicialComplex
     if complex_type == "cell":
         domain = CellComplex()
     elif complex_type == "simplicial":
@@ -287,7 +287,7 @@ def parse_atomlist(
         if nodetype is not None:
             elements = [nodetype(e) for e in elements]
 
-        if complex_type == "cell":
+        if isinstance(domain, CellComplex):
             if "rank" in attributes:
                 rank = attributes.pop("rank")
             else:
@@ -297,7 +297,7 @@ def parse_atomlist(
                 domain.add_node(elements[0], **attributes)
             else:
                 domain.add_cell(elements, rank=rank, **attributes)
-        elif complex_type == "simplicial":
+        elif isinstance(domain, SimplicialComplex):
             domain.add_simplex(elements, **attributes)
 
     return domain
