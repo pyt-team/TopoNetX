@@ -37,7 +37,7 @@ def graph_to_neighbor_complex(G: nx.Graph) -> SimplicialComplex:
 
 
 def graph_to_clique_complex(
-    G: nx.Graph, max_dim: int | None = None
+    G: nx.Graph, max_rank: int | None = None
 ) -> SimplicialComplex:
     """Get the clique complex of a graph.
 
@@ -45,20 +45,20 @@ def graph_to_clique_complex(
     ----------
     G : networks.Graph
         Input graph.
-    max_dim : int, optional
-        The max dimension of the cliques in the output clique complex.
+    max_rank : int, optional
+        The maximum rank of the simplices in the output clique complex.
 
     Returns
     -------
     SimplicialComplex
-        The clique simplicial complex of dimension dim of the graph G.
+        The clique simplicial complex of rank `max_rank` of the graph G.
     """
     cliques = nx.enumerate_all_cliques(G)
 
     # `nx.enumerate_all_cliques` returns cliques in ascending order of size. Abort calling the generator once we reach
     # cliques larger than the requested max dimension.
     cliques = takewhile(
-        lambda clique: max_dim is None or len(clique) <= max_dim, cliques
+        lambda clique: max_rank is None or len(clique) <= max_rank + 1, cliques
     )
 
     SC = SimplicialComplex(cliques)
@@ -66,8 +66,10 @@ def graph_to_clique_complex(
     # copy attributes of the input graph
     for node in G.nodes:
         SC[[node]].update(G.nodes[node])
-    for edge in G.edges:
-        SC[edge].update(G.edges[edge])
+    # if the resulting complex has dimension 1 or higher, copy the attributes of the edges
+    if SC.dim >= 1:
+        for edge in G.edges:
+            SC[edge].update(G.edges[edge])
     SC.complex.update(G.graph)
 
     return SC
@@ -101,7 +103,7 @@ def graph_2_neighbor_complex(G) -> SimplicialComplex:
     "`graph_2_clique_complex` is deprecated and will be removed in a future version, use `graph_to_clique_complex` instead."
 )
 def graph_2_clique_complex(
-    G: nx.Graph, max_dim: int | None = None
+    G: nx.Graph, max_rank: int | None = None
 ) -> SimplicialComplex:
     """Get the clique complex of a graph.
 
@@ -109,15 +111,15 @@ def graph_2_clique_complex(
     ----------
     G : networks.Graph
         Input graph.
-    max_dim : int, optional
-        The max dimension of the cliques in the output clique complex.
+    max_rank : int, optional
+        The maximum rank of the simplices in the output clique complex.
 
     Returns
     -------
     SimplicialComplex
-        The clique simplicial complex of dimension dim of the graph G.
+        The clique simplicial complex of rank `max_rank` of the graph `G`.
     """
-    return graph_to_clique_complex(G, max_dim)
+    return graph_to_clique_complex(G, max_rank)
 
 
 def weighted_graph_to_vietoris_rips_complex(
