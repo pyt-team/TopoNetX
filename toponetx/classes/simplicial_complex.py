@@ -4,7 +4,7 @@ The class also supports attaching arbitrary attributes and data to cells.
 """
 
 from collections.abc import Collection, Hashable, Iterable, Iterator
-from itertools import chain, combinations
+from itertools import combinations
 from typing import Any
 
 import networkx as nx
@@ -221,7 +221,7 @@ class SimplicialComplex(Complex):
         >>> SC.is_maximal([1, 2])
         False
         """
-        if simplex not in self:
+        if simplex not in self.simplices:
             raise ValueError(f"Simplex {simplex} is not in the simplicial complex.")
         return self[simplex]["is_maximal"]
 
@@ -292,17 +292,17 @@ class SimplicialComplex(Complex):
         """
         return len(self.skeleton(0))
 
-    def __getitem__(self, simplex) -> dict[Hashable, Any]:
+    def __getitem__(self, atom: Any) -> dict[Hashable, Any]:
         """Get the data associated with the given simplex.
 
         Parameters
         ----------
-        simplex : tuple[int, ...]
+        atom : Any
             The simplex to retrieve.
 
         Returns
         -------
-        Any
+        dict[Hashable, Any]
             The data associated with the given simplex.
 
         Raises
@@ -310,34 +310,32 @@ class SimplicialComplex(Complex):
         KeyError
             If the simplex is not present in the simplicial complex.
         """
-        if simplex in self:
-            return self._simplex_set[simplex]
-        raise KeyError("simplex is not in the simplicial complex")
+        return self._simplex_set[atom]
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[frozenset[Hashable]]:
         """Iterate over all simplices (faces) of the simplicial complex.
 
         Returns
         -------
-        Iterator[Tuple[int, ...]]
+        Iterator[frozenset[Hashable]]
             An iterator over all simplices in the simplicial complex.
         """
-        return chain.from_iterable(self.nodes)
+        return iter(self.simplices)
 
-    def __contains__(self, item) -> bool:
-        """Check if a simplex is in the simplicial complex.
+    def __contains__(self, atom: Any) -> bool:
+        """Check whether this simplicial complex contains the given atom.
 
         Parameters
         ----------
-        item : tuple or list
-            The simplex to check for existence in the simplicial complex.
+        atom : Any
+            The atom to be checked.
 
         Returns
         -------
         bool
-            True if the given simplex is in the simplicial complex, False otherwise.
+            Returns `True` if this simplicial complex contains the atom, else `False`.
         """
-        return item in self._simplex_set
+        return atom in self._simplex_set
 
     def _update_faces_dict_length(self, simplex) -> None:
         """Update the faces dictionary length based on the input simplex.
@@ -582,7 +580,7 @@ class SimplicialComplex(Complex):
             )
 
         # if the simplex is already part of this complex, update its attributes
-        if elements in self:
+        if elements in self.simplices:
             self._simplex_set.faces_dict[len(elements) - 1][elements].update(kwargs)
             return
 
@@ -704,11 +702,11 @@ class SimplicialComplex(Complex):
         if name is not None:
             # if `values` is a dict using `.items()` => {simplex: value}
             for simplex, value in values.items():
-                if simplex in self:
+                if simplex in self.simplices:
                     self[simplex][name] = value
         else:
             for simplex, d in values.items():
-                if simplex in self:
+                if simplex in self.simplices:
                     self[simplex].update(d)
 
     def get_node_attributes(self, name: str) -> dict[Hashable, Any]:
@@ -1339,7 +1337,7 @@ class SimplicialComplex(Complex):
         >>> SC1.simplices
         SimplexView([(1,), (2,), (3,), (4,), (1, 2), (1, 3), (2, 3), (2, 4), (1, 2, 3)])
         """
-        rns = [cell for cell in cell_set if cell in self]
+        rns = [cell for cell in cell_set if cell in self.simplices]
         return self.__class__(simplices=rns)
 
     def restrict_to_nodes(self, node_set):

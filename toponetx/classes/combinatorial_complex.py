@@ -26,7 +26,7 @@ class CombinatorialComplex(ColoredHyperGraph):
     The rank function $rk$ must satisfy $x \leq y$ then $rk(x) \leq rk(y)$.
     We call this condition the CCC condition.
 
-    A CCC is a generlization of graphs, hypergraphs, cellular and simplicial complexes.
+    A CCC is a generalization of graphs, hypergraphs, cellular and simplicial complexes.
 
     Mathematical Example:
 
@@ -184,20 +184,20 @@ class CombinatorialComplex(ColoredHyperGraph):
         else:
             raise KeyError(f"input {cell} is not in the complex")
 
-    def __contains__(self, item) -> bool:
-        """Return True/False indicating if the item is in self.nodes.
+    def __contains__(self, atom) -> bool:
+        """Check whether this combinatorial complex contains the given atom.
 
         Parameters
         ----------
-        item : hashable or HyperEdge
-            The item to check for existence in the Combinatorial Complex.
+        atom : Any
+            The atom to be checked.
 
         Returns
         -------
         bool
-            True if the item is found in the nodes of the complex, False otherwise.
+            Returns `True` if this combinatorial complex contains the atom, else `False`.
         """
-        return item in self.nodes
+        return atom in self._complex_set
 
     @property
     def __shortstr__(self) -> str:

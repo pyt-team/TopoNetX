@@ -41,7 +41,7 @@ class Atom(abc.ABC, Generic[AtomCollectionType]):
         """
         return len(self.elements)
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self):
         """Return an iterator over the elements in the atom.
 
         Returns
@@ -164,8 +164,14 @@ class Complex(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def nodes(self):
-        """Return the node container."""
+    def nodes(self) -> Iterator[Hashable]:
+        """Return an iterator over the nodes in the complex.
+
+        Returns
+        -------
+        Iterator[Hashable]
+            Iterator over the nodes in the complex.
+        """
 
     @property
     @abc.abstractmethod
@@ -233,36 +239,50 @@ class Complex(abc.ABC):
 
     @abc.abstractmethod
     def __iter__(self) -> Iterator:
-        """Return an iterator over the nodes."""
+        """Return an iterator over the atoms in this complex.
+
+        Returns
+        -------
+        Iterator[Atom]
+            Iterator over the atoms in the complex.
+        """
 
     @abc.abstractmethod
-    def __contains__(self, item: Any) -> bool:
-        """Check whether the complex contains an item.
+    def __contains__(self, atom: Any) -> bool:
+        """Check whether this complex contains the given atom.
 
         Parameters
         ----------
-        item : Any
-            The item to be checked.
+        atom : Any
+            The atom to be checked.
 
         Returns
         -------
         bool
-            Returns `True` if the complex contains the item else `False`.
+            Returns `True` if the complex contains the atom, else `False`.
         """
 
     @abc.abstractmethod
-    def __getitem__(self, key):
-        """Get item.
+    def __getitem__(self, atom: Any) -> dict[Hashable, Any]:
+        """Return the user-defined attributes associated with the given atom.
+
+        Writing to the returned dictionary will update the user-defined attributes
+        associated with the atom.
 
         Parameters
         ----------
-        key : hashable
-            Get item based on key.
+        atom : Any
+            The atom for which to return the associated user-defined attributes.
 
         Returns
         -------
-        Hashable
-            The hashable item that needs to be returned.
+        dict[Hashable, Any]
+            The user-defined attributes associated with the given atom.
+
+        Raises
+        ------
+        KeyError
+            If the atom does not exist in this complex.
         """
 
     @abc.abstractmethod

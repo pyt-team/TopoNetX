@@ -359,6 +359,14 @@ class TestCombinatorialComplex:
         CCC.add_cell([1, 2, 4, 3], rank=2)
         CCC.add_cell([2, 5], rank=1)
         CCC.add_cell([2, 6, 4], rank=2)
+
+        assert 1 in CCC
+        assert 3 in CCC
+        assert 7 not in CCC
+
+        assert (1, 2) in CCC
+        assert (1, 4) not in CCC
+
         assert [(1)] in CCC.nodes
         assert [2] in CCC.nodes
         assert [3] in CCC.nodes

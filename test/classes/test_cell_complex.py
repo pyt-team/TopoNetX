@@ -808,8 +808,18 @@ class TestCellComplex:
         """Test the iterator of the cell complex."""
         CC = CellComplex()
         CC.add_cell([1, 2, 3], rank=2)
-        CC.add_cell([2, 3, 4], rank=2)
-        assert set(iter(CC)) == {1, 2, 3, 4}
+        CC.add_cell([2, 4], rank=1)
+        assert set(CC) == {
+            (1,),
+            (2,),
+            (3,),
+            (4,),
+            (2, 1),
+            (2, 3),
+            (3, 1),
+            (2, 4),
+            (1, 2, 3),
+        }
 
     def test_cell_equivalence_class(self):
         """Test the cell equivalence class method."""
@@ -1253,7 +1263,7 @@ class TestCellComplex:
         CC.remove_singletons()
         assert CC.singletons() == []
 
-    def test_contains__(self):
+    def test_contains(self):
         """Test __contains__."""
         CC = CellComplex()
         CC.add_cell([1, 2, 3, 4], rank=2)
@@ -1264,6 +1274,10 @@ class TestCellComplex:
         assert 3 in CC
         assert 4 in CC
         assert 5 in CC
+        assert 10 not in CC
+        assert (1, 2) in CC
+        assert (10, 12) not in CC
+        assert (1, 2, 3, 4) in CC
         assert (1, 2, 3, 4, 5) not in CC
 
     def test_neighbors(self):
@@ -1557,10 +1571,20 @@ class TestCellComplex:
     def test_getitem_dunder_method(self):
         """Test if the dunder __getitem__ method returns the appropriate neighbors of the given node."""
         CC = CellComplex()
-        CC.add_edges_from([(1, 2), (2, 3), (5, 2), (1, 9), (1, 6)])
-        assert sorted(CC.__getitem__(1)) == [2, 6, 9]
-        assert sorted(CC.__getitem__(2)) == [1, 3, 5]
-        assert sorted(CC.__getitem__(6)) == [1]
+        CC.add_node(1, color="red")
+        CC.add_edge(1, 2, weight=10)
+        CC.add_cell((2, 3, 4), rank=2, weight=5)
+
+        assert CC[1]["color"] == "red"
+        assert CC[(1,)]["color"] == "red"
+        assert CC[(1, 2)]["weight"] == 10
+        assert CC[(2, 3, 4)]["weight"] == 5
+
+        with pytest.raises(KeyError):
+            _ = CC[5]
+
+        CC[(1, 2)]["new"] = 1
+        assert CC[(1, 2)]["new"] == 1
 
     def test_remove_nodes(self):
         """Test remove nodes method of the class Cell Complex."""

@@ -97,6 +97,17 @@ class TestPathComplex:
         assert [1, 2] in PC.paths
         assert [2, 3] in PC.paths
 
+    def test_contains(self):
+        """Test the __contains__ method."""
+        PC = PathComplex([[1, 2], [3], [4]])
+
+        assert 1 in PC
+        assert 3 in PC
+        assert 5 not in PC
+
+        assert (1, 2) in PC
+        assert (1, 3) not in PC
+
     def test_constructor_using_graph(self):
         """Test constructor using graph."""
         G = nx.Graph()
@@ -291,7 +302,7 @@ class TestPathComplex:
         """Test get size of the path complex."""
         PC = PathComplex()
         PC.add_paths_from([[1, 2, 3], [1, 2, 4]])
-        assert len(PC) == 4
+        assert len(PC) == 9
 
     def test_add_paths_from(self):
         """Test add paths from graph."""

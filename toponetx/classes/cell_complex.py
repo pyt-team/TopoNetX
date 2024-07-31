@@ -7,8 +7,8 @@ A cell complex is abbreviated in CC.
 
 import warnings
 from collections import defaultdict
-from collections.abc import Hashable, Iterable, Iterator
-from itertools import zip_longest
+from collections.abc import Collection, Hashable, Iterable, Iterator
+from itertools import chain, zip_longest
 from typing import Any
 
 import networkx as nx
@@ -323,7 +323,11 @@ class CellComplex(Complex):
         dict_keyiterator
             Iterator over nodes.
         """
-        return iter(self.nodes)
+        return chain(
+            map(lambda x: (x,), self.nodes),
+            self.edges,
+            map(lambda cell: tuple(cell), self.cells),
+        )
 
     def __contains__(self, item) -> bool:
         """Return boolean indicating if item is in self.nodes, self.edges or self.cells.
@@ -338,22 +342,40 @@ class CellComplex(Complex):
         bool
             True if item is a cell of dim 0,1,2 is in the complex, False otherwise.
         """
-        return item in self.nodes
+        if not isinstance(item, Iterable):
+            return item in self._G.nodes
 
-    def __getitem__(self, node):
-        """Return the neighbors of node.
+        if len(item) == 2 and item in self._G.edges:
+            return True
+        return item in self._cells
+
+    def __getitem__(self, atom: Any) -> dict[Hashable, Any]:
+        """Return the user-defined attributes associated with the given cell.
+
+        Writing to the returned dictionary will update the user-defined attributes
+        associated with the cell.
 
         Parameters
         ----------
-        node : hashable
-            The node contained in the cell complex.
+        atom : Any
+            The cell for which to return the associated user-defined attributes.
 
         Returns
         -------
-        Iterator
-            Iterator over neighbors of node.
+        dict[Hashable, Any]
+            The user-defined attributes associated with the given cell.
         """
-        return self.neighbors(node)
+        if isinstance(atom, Collection) and len(atom) == 1:
+            atom = next(iter(atom))
+
+        if not isinstance(atom, Iterable):
+            return self._G.nodes[atom]
+
+        atom = tuple(atom)
+        if len(atom) == 2 and atom in self._G.edges:
+            return self._G.edges[atom]
+
+        return self._cells[atom]
 
     def _insert_cell(self, cell: tuple | list | Cell, **attr):
         """Insert cell.

@@ -1,7 +1,5 @@
 """Unit tests for the colored hypergraph class."""
 
-import collections
-
 import networkx as nx
 import pytest
 from scipy.sparse import csr_array
@@ -10,8 +8,8 @@ from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.hyperedge import HyperEdge
 
 
-class TestCombinatorialComplex:
-    """Test CombinatorialComplex class."""
+class TestColoredHyperGraph:
+    """Test ColoredHyperGraph class."""
 
     def test_init_empty_chg(self):
         """Test creation of an empty CHG."""
@@ -103,38 +101,55 @@ class TestCombinatorialComplex:
     def test_chg_iter(self):
         """Test CHG iter."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
-        isinstance(CHG, collections.abc.Iterable)
-        it = iter(CHG)
-        assert next(it) == frozenset({1})
-        assert next(it) == frozenset({2})
-        assert next(it) == frozenset({3})
-        assert next(it) == frozenset({4})
-        with pytest.raises(StopIteration):
-            next(it)
+        assert set(CHG) == {
+            frozenset({1}),
+            frozenset({2}),
+            frozenset({3}),
+            frozenset({4}),
+            frozenset({1, 2, 3}),
+            frozenset({2, 3, 4}),
+        }
 
     def test_chg_contains(self):
         """Test chg contains property."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
+
         assert 1 in CHG
         assert 2 in CHG
         assert 3 in CHG
         assert 4 in CHG
         assert 5 not in CHG
 
+        assert (1, 2) not in CHG
+        assert (1, 2, 3) in CHG
+
     def test_chg_getitem(self):
         """Test chg get node properties."""
         CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
-        assert CHG[1] == {"weight": 1}
+        CHG.add_cell([5, 6], capacity=10)
+        CHG.add_cell([5, 6], key=1, capacity=15)
+        CHG.add_cell([5, 6, 7], capacity=5)
 
-    def test_chg_set(self):
-        """Test chg set node properties."""
-        CHG = ColoredHyperGraph([[1, 2, 3], [2, 3, 4]], ranks=2)
         assert CHG[1] == {"weight": 1}
-        CHG.__setitem__(1, weight=2)
-        assert CHG[1] == {"weight": 2}
+        assert CHG[(5, 6)]["capacity"] == 10
+        assert CHG[HyperEdge([5, 6])]["capacity"] == 10
+        assert CHG[(5, 6, 7)]["capacity"] == 5
+        assert CHG[HyperEdge([5, 6, 7])]["capacity"] == 5
 
+        assert CHG[((5, 6), 0)]["capacity"] == 10
+        assert CHG[(HyperEdge([5, 6]), 1)]["capacity"] == 15
+
+        # non-existing hyperedges
         with pytest.raises(KeyError):
-            CHG[5]
+            _ = CHG[(0, 1, 2)]
+        with pytest.raises(KeyError):
+            _ = CHG[((5, 6), 2)]
+
+        # invalid inputs should raise `KeyError`s as well
+        with pytest.raises(KeyError):
+            _ = CHG[tuple()]
+        with pytest.raises(KeyError):
+            _ = CHG[(tuple(), 0)]
 
     def test_add_cell(self):
         """Test adding a cell to a CHG."""
