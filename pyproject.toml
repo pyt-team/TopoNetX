@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools>=64.0", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -112,14 +112,12 @@ ignore = [
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
-[tool.setuptools.dynamic]
-version = {attr = "toponetx.__version__"}
-
 [tool.setuptools.packages.find]
-include = [
-    "toponetx",
-    "toponetx.*"
-]
+include = ["toponetx"]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+version_file = "toponetx/_version.py"
 
 [tool.mypy]
 warn_redundant_casts = true

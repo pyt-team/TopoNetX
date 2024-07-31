@@ -17,6 +17,7 @@ __pycache__/
 dist/
 docs/build/
 toponetx/.DS_Store
+toponetx/_version.py
 
 # Sphinx documentation
 docs/_build/

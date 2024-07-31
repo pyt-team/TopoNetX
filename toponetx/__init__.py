@@ -1,7 +1,5 @@
 """Initialize the library with modules and other content."""
 
-__version__ = "0.0.2"
-
 from toponetx.algorithms import *
 from toponetx.classes import *
 from toponetx.exception import *
