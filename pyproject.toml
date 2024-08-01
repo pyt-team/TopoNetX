@@ -1,32 +1,36 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=64.0", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "TopoNetX"
 dynamic = ["version"]
 authors = [
-    {name = "PyT-Team Authors", email = "mustafahajij@gmail.com"}
+    {name = "Mustafa Hajij", email = "mhajij@usfca.edu"},
+    {name = "Mathilde Papillon", email = "papillon@ucsb.edu"},
+    {name = "Florian Frantzen", email = "florian.frantzen@cs.rwth-aachen.de"}
 ]
 readme = "README.md"
 description = "Computing on Topological Domains"
 license = {file = "LICENSE.txt"}
 classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Development Status :: 4 - Beta",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Natural Language :: English",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11"
 ]
 requires-python = ">= 3.10"
 dependencies=[
     "gudhi",
-    "decorator",
     "networkx",
     "numpy",
     "pandas",
@@ -72,8 +76,8 @@ all = [
 ]
 
 [project.urls]
-homepage="https://github.com/pyt-team/TopoNetX"
-repository="https://github.com/pyt-team/TopoNetX"
+documentation="https://pyt-team.github.io/toponetx/"
+source="https://github.com/pyt-team/TopoNetX/"
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
@@ -108,14 +112,12 @@ ignore = [
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
-[tool.setuptools.dynamic]
-version = {attr = "toponetx.__version__"}
-
 [tool.setuptools.packages.find]
-include = [
-    "toponetx",
-    "toponetx.*"
-]
+include = ["toponetx"]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+version_file = "toponetx/_version.py"
 
 [tool.mypy]
 warn_redundant_casts = true
