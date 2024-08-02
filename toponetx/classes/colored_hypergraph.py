@@ -1018,15 +1018,15 @@ class ColoredHyperGraph(Complex):
         for cell in cell_set:
             self.remove_cell(cell)
 
-    def _incidence_matrix(
+    def incidence_matrix(
         self,
-        rank,
-        to_rank,
-        weight: bool | None = None,
+        rank: int,
+        to_rank: int,
+        weight: str | None = None,
         sparse: bool = True,
         index: bool = False,
     ):
-        """Compute incidence matrix.
+        """Compute incidence matrix for the CHG indexed by nodes x cells.
 
         An incidence matrix indexed by r-ranked hyperedges and k-ranked hyperedges
         where r != k. When k is None, incidence_type will be considered instead.
@@ -1037,71 +1037,12 @@ class ColoredHyperGraph(Complex):
             The rank for computing the incidence matrix.
         to_rank : int
             The rank for computing the incidence matrix.
-        weight : bool, default=None
-            If False, all nonzero entries are 1.
-            If True and self.static, all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
+        weight : str, default=None
+            The attribute to use as weight. If `None`, all weights are considered to be
+            one.
         sparse : bool, default=True
             Whether to return a sparse or dense incidence matrix.
         index : bool, default=False
-            If True, return will include a dictionary of children uid: row number
-            and element uid: column number.
-
-        Returns
-        -------
-        incidence_matrix : scipy.sparse.csr.csr_matrix or numpy.ndarray
-            The incidence matrix.
-        row dictionary : dict
-            Dictionary identifying rows with items in the entityset's children.
-        column dictionary : dict
-            Dictionary identifying columns with items in the entityset's uidset.
-
-        Notes
-        -----
-        The `incidence_matrix` method is for generating the incidence matrix of a ColoredHyperGraph.
-        An incidence matrix describes the relationships between the hyperedges
-        of a complex. The rows correspond to the hyperedges, and the columns correspond to the faces.
-        The entries in the matrix are either 0 or 1, depending on whether a hyperedge contains a given face or not.
-        For example, if hyperedge i contains face j, then the entry in the ith row and jth column of the matrix will be 1,
-        otherwise, it will be 0.
-
-        To generate the incidence matrix, the method first creates a dictionary where the keys are the faces
-        of the complex, and the values are the hyperedges that contain that face.
-        The method then iterates over the hyperedges in the `HyperEdgeView` instance,
-        and for each hyperedge, it checks which faces it contains.
-        For each face that the hyperedge contains, the method increments the corresponding entry in the matrix.
-        Finally, the method returns the completed incidence matrix.
-        """
-        if rank == to_rank:
-            raise ValueError("incidence must be computed for k!=r, got equal r and k.")
-        children = self.skeleton(rank)
-        uidset = self.skeleton(to_rank)
-
-        return compute_set_incidence(children, uidset, sparse, index)
-
-    def incidence_matrix(
-        self,
-        rank: int,
-        to_rank: int,
-        weight: bool | None = None,
-        sparse: bool = True,
-        index: bool = False,
-    ):
-        """Compute incidence matrix for the CHG indexed by nodes x cells.
-
-        Parameters
-        ----------
-        rank : int
-            The rank for computing the incidence matrix.
-        to_rank : int
-            The rank for computing the incidence matrix.
-        weight : bool, default=None
-            If False, all nonzero entries are 1.
-            If True and self.static, all nonzero entries are filled by
-            self.cells.cell_weight dictionary values.
-        sparse : bool, default=True
-            Whether to return a sparse or dense incidence matrix.
-        index : bool, default False
             If True, return will include a dictionary of node uid: row number
             and cell uid: column number.
 
@@ -1114,7 +1055,12 @@ class ColoredHyperGraph(Complex):
         column dictionary : dict
             Dictionary identifying columns with cells.
         """
-        return self._incidence_matrix(rank, to_rank, sparse=sparse, index=index)
+        if rank == to_rank:
+            raise ValueError("incidence must be computed for k!=r, got equal r and k.")
+        children = self.skeleton(rank)
+        uidset = self.skeleton(to_rank)
+
+        return compute_set_incidence(children, uidset, sparse, index)
 
     def node_to_all_cell_incidence_matrix(
         self, weight: str | None = None, index: bool = False
@@ -1312,7 +1258,7 @@ class ColoredHyperGraph(Complex):
         return A
 
     def degree_matrix(self, rank: int, index: bool = False):
-        """Compute the degree matrix.
+        """Compute the node-degree matrix.
 
         Parameters
         ----------
@@ -1334,11 +1280,7 @@ class ColoredHyperGraph(Complex):
             )
 
         rowdict, _, M = self.incidence_matrix(0, rank, index=True)
-        if M.shape == (0, 0):
-            D = np.zeros(self.num_nodes)
-        else:
-            D = np.ravel(np.sum(M, axis=1))
-
+        D = np.ravel(np.sum(M, axis=1))
         return (rowdict, D) if index else D
 
     def laplacian_matrix(self, rank, sparse=False, index=False):
@@ -1373,10 +1315,6 @@ class ColoredHyperGraph(Complex):
             A = np.empty((0, 0))
         else:
             row_dict, A = self.adjacency_matrix(0, rank, index=True)
-
-        if A.shape == (0, 0):
-            L = csr_array((0, 0)) if sparse else np.empty((0, 0))
-            return ({}, L) if index else L
 
         if sparse:
             K = csr_array(diags(self.degree_matrix(rank)))
