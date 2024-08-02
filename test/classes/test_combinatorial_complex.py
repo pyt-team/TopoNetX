@@ -653,3 +653,12 @@ class TestCombinatorialComplex:
         CCC.add_cell([9], rank=0)
         CCC = CCC.remove_singletons()
         assert 9 not in CCC.nodes
+
+    def test_CCC_condition(self):
+        """Test the _CCC_condition method of the CombinatorialComplex class."""
+        CCC = CombinatorialComplex([[1, 2, 3], [2, 3, 4]], ranks=2)
+
+        CCC._CCC_condition({1, 2}, rank=1)
+
+        with pytest.raises(ValueError):
+            CCC._CCC_condition({1, 2}, rank=3)
