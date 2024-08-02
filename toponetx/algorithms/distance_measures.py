@@ -150,14 +150,14 @@ def diameter(domain: ComplexType) -> int:
     raise RuntimeError("cc is not connected.")
 
 
-def cell_diameter(domain: ComplexType, s: int | None = None) -> int:
+def cell_diameter(domain: ComplexType, s: int = 1) -> int:
     """Return the length of the longest shortest s-walk between cells.
 
     Parameters
     ----------
     domain : CellComplex or CombinatorialComplex or ColoredHyperGraph
         Supported complexes are cell/combintorial and hypegraphs.
-    s : int, optional
+    s : int, default=1
         The number of intersections between pairwise consecutive cells.
 
     Returns

@@ -1231,16 +1231,14 @@ class ColoredHyperGraph(Complex):
 
         return A
 
-    def all_cell_to_node_coadjacency_matrix(
-        self, index: bool = False, s: int | None = None
-    ):
+    def all_cell_to_node_coadjacency_matrix(self, index: bool = False, s: int = 1):
         """Compute the cell co-adjacency matrix.
 
         Parameters
         ----------
         index : bool, optional, default=False
             If True, return a row dictionary of row to node uid.
-        s : int, list, optional, default=1
+        s : int, default=1
             Minimum number of edges shared by neighbors with a node.
 
         Returns
@@ -1256,16 +1254,14 @@ class ColoredHyperGraph(Complex):
             return B[1], A
         return incidence_to_adjacency(B, s=s)
 
-    def node_to_all_cell_adjacnecy_matrix(
-        self, index: bool = False, s: int | None = None
-    ):
+    def node_to_all_cell_adjacnecy_matrix(self, index: bool = False, s: int = 1):
         """Compute the node/all cell adjacency matrix.
 
         Parameters
         ----------
         index : bool, optional
             If True, will return a rowdict of row to node uid.
-        s : int, optional
+        s : int, default=1
             Minimum number of edges shared by neighbors with the node.
 
         Returns

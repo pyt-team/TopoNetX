@@ -337,22 +337,20 @@ class TestCellComplex:
         CC.add_cell([3, 4, 5], rank=2)
 
         # Test the function without index
-        result = CC.node_to_all_cell_adjacnecy_matrix(s=2, weight=False, index=False)
-        expected_result = scipy.sparse.csc_matrix(
-            np.array(
-                [
-                    [0.0, 1.0, 0.0, 1.0, 0.0],
-                    [1.0, 0.0, 1.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0, 1.0, 1.0],
-                    [1.0, 0.0, 1.0, 0.0, 1.0],
-                    [0.0, 0.0, 1.0, 1.0, 0.0],
-                ]
-            )
+        result = CC.node_to_all_cell_adjacnecy_matrix(s=2)
+        expected_result = np.array(
+            [
+                [0.0, 2.0, 0.0, 2.0, 0.0],
+                [2.0, 0.0, 2.0, 0.0, 0.0],
+                [0.0, 2.0, 0.0, 3.0, 2.0],
+                [2.0, 0.0, 3.0, 0.0, 2.0],
+                [0.0, 0.0, 2.0, 2.0, 0.0],
+            ]
         )
-        assert np.allclose(result.toarray(), expected_result.toarray())
+        assert np.allclose(result.toarray(), expected_result)
 
         # Test the function with index
-        result = CC.node_to_all_cell_adjacnecy_matrix(s=None, weight=False, index=True)
+        result = CC.node_to_all_cell_adjacnecy_matrix(index=True)
         expected_node_index = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
         expected_result = scipy.sparse.csc_matrix(
             np.array(
@@ -365,8 +363,6 @@ class TestCellComplex:
                 ]
             )
         )
-        assert isinstance(result, tuple)
-        assert isinstance(result[0], dict)
         assert result[0] == expected_node_index
         assert np.allclose(result[1].toarray(), expected_result.toarray())
 
@@ -379,31 +375,23 @@ class TestCellComplex:
         CC.add_cell([3, 4, 5], rank=2)
 
         # Test the function without index
-
-        result = CC.all_cell_to_node_coadjacency_matrix(
-            s=None, weight=False, index=False
+        result = CC.all_cell_to_node_coadjacency_matrix()
+        expected_result = np.array(
+            [
+                [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 2.0, 0.0],
+                [1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.0, 1.0],
+                [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 2.0, 1.0],
+                [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0, 2.0],
+                [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0],
+                [0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 2.0],
+                [2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 0.0, 2.0],
+                [0.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 0.0],
+            ]
         )
-        expected_result = scipy.sparse.csc_matrix(
-            np.array(
-                [
-                    [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 2.0, 0.0],
-                    [1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.0, 1.0],
-                    [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 2.0, 1.0],
-                    [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0, 2.0],
-                    [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0],
-                    [0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 2.0],
-                    [2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 0.0, 2.0],
-                    [0.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 0.0],
-                ]
-            )
-        )
-        assert np.allclose(result.toarray(), expected_result.toarray())
+        assert np.allclose(result.toarray(), expected_result)
 
         # Test the function with index
-
-        result = CC.all_cell_to_node_coadjacency_matrix(
-            s=None, weight=False, index=True
-        )
+        result = CC.all_cell_to_node_coadjacency_matrix(index=True)
 
         expected_cell_index = {
             (1, 2): 0,
@@ -415,24 +403,22 @@ class TestCellComplex:
             (1, 2, 3, 4): 6,
             (3, 4, 5): 7,
         }
-        expected_result = scipy.sparse.csc_matrix(
-            np.array(
-                [
-                    [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 2.0, 0.0],
-                    [1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.0, 1.0],
-                    [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 2.0, 1.0],
-                    [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0, 2.0],
-                    [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0],
-                    [0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 2.0],
-                    [2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 0.0, 2.0],
-                    [0.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 0.0],
-                ]
-            )
+        expected_result = np.array(
+            [
+                [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 2.0, 0.0],
+                [1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 2.0, 1.0],
+                [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 2.0, 1.0],
+                [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0, 2.0],
+                [0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 2.0],
+                [0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 2.0],
+                [2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 0.0, 2.0],
+                [0.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 0.0],
+            ]
         )
         assert isinstance(result, tuple)
         assert isinstance(result[0], dict)
         assert result[0] == expected_cell_index
-        assert np.allclose(result[1].toarray(), expected_result.toarray())
+        assert np.allclose(result[1].toarray(), expected_result)
 
     def test_from_networkx_graph(self):
         """Test for the from_networkx_graph method."""
