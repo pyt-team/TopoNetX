@@ -874,9 +874,7 @@ class CombinatorialComplex(ColoredHyperGraph):
             raise ValueError("rank must be lesser than via_rank, must be r<k, got r>k")
         return super().adjacency_matrix(rank, via_rank, s, index)
 
-    def coadjacency_matrix(
-        self, rank, via_rank, s: int | None = None, index: bool = False
-    ):
+    def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix of self.
 
         The sparse weighted :term:`s-coadjacency matrix`
@@ -885,7 +883,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         ----------
         rank, via_rank : int
             Two ranks for skeletons in the input combinatorial complex , such that r>k.
-        s : int, optional
+        s : int, default=1
             Minimum number of edges shared by neighbors with node.
         index : bool, default=False
             Whether to return the indices of the rows and columns of the coadjacency

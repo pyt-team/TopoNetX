@@ -1450,13 +1450,13 @@ class CellComplex(Complex):
         return A.asformat("csc")
 
     def node_to_all_cell_adjacnecy_matrix(
-        self, s: int | None = None, weight: str | None = None, index: bool = False
+        self, s: int = 1, weight: str | None = None, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Compute s-adjacency matrix between nodes with respect to 2-cells.
 
         Parameters
         ----------
-        s : int
+        s : int, default=1
             The dimension of the cells to consider.
         weight : str, optional
             If not given, all nonzero entries are 1.
@@ -1507,15 +1507,15 @@ class CellComplex(Complex):
         )
 
     def all_cell_to_node_coadjacency_matrix(
-        self, s: int | None = None, weight: str | None = None, index: bool = False
+        self, s: int = 1, weight: str | None = None, index: bool = False
     ) -> scipy.sparse.csc_matrix | tuple[dict, dict, scipy.sparse.csc_matrix]:
         """Return coadjecency matrix of cells with respect to nodes.
 
         Parameters
         ----------
-        s : int
+        s : int, default=1
             Minimum number of nodes that cells must share to be considered adjacent.
-        weight : bool, optional
+        weight : str, optional
             The name of the cell attribute to use as weights for the coadjacency
             matrix. If `None`, the matrix is binary.
         index : bool, optional
