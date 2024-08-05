@@ -78,7 +78,7 @@ def stanford_bunny(
 
     if not dataset_file.exists():
         r = requests.get(
-            "https://github.com/pyt-team/TopoDataX/raw/main/resources/bunny.obj"
+            "https://github.com/pyt-team/topological-datasets/raw/main/resources/bunny.obj"
         )
         with dataset_file.open("wb") as f:
             f.write(r.content)
