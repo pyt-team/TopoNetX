@@ -183,7 +183,7 @@ def coauthorship() -> SimplicialComplex:
 
     if not dataset_file.exists():
         r = requests.get(
-            "https://github.com/pyt-team/TopoDataX/raw/main/resources/coauthorship.npy"
+            "https://github.com/pyt-team/topological-datasets/raw/main/resources/coauthorship.npy"
         )
         with dataset_file.open("wb") as f:
             f.write(r.content)
