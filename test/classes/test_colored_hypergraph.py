@@ -462,9 +462,10 @@ class TestColoredHyperGraph:
         assert row == res
         assert isinstance(L, csr_array)
 
+        # check cases where the rank is over the maximum rank of the CHG
         CHG = ColoredHyperGraph()
-        L = CHG.laplacian_matrix(1)
-        assert L.shape == (0, 0)
+        with pytest.raises(ValueError):
+            _ = CHG.laplacian_matrix(1)
 
     def test_singletons(self):
         """Test singletons of CHG."""

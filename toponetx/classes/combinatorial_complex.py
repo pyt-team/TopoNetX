@@ -20,10 +20,10 @@ class CombinatorialComplex(ColoredHyperGraph):
 
     A Combinatorial Complex (CCC) is a triple $CCC = (S, X, rk)$ where:
     - $S$ is an abstract set of entities,
-    - $X$ a subset of the power set of $X$, and
+    - $X$ a subset of the power set of $S$, and
     - $rk$ is the a rank function that associates for every set x in X a rank, a positive integer.
 
-    The rank function $rk$ must satisfy $x \leq y$ then $rk(x) \leq rk(y)$.
+    The rank function $rk$ must satisfy $x \subseteq y$ then $rk(x) \leq rk(y)$.
     We call this condition the CCC condition.
 
     A CCC is a generalization of graphs, hypergraphs, cellular and simplicial complexes.
@@ -564,7 +564,7 @@ class CombinatorialComplex(ColoredHyperGraph):
                 self._node_membership[i] = set()
             self._node_membership[i].add(hyperedge_)
 
-    def _CCC_condition(self, hyperedge_, rank):
+    def _CCC_condition(self, hyperedge_: set, rank: int) -> None:
         """Check if hyperedge_ satisfies the CCC condition.
 
         Parameters
