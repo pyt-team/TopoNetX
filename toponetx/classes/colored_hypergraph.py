@@ -202,6 +202,8 @@ class ColoredHyperGraph(Complex):
         int
             The dimension of the colored hypergraph.
         """
+        if len(self._complex_set) == 0:
+            return 0
         return max(self._complex_set.allranks)
 
     @property
@@ -1273,10 +1275,15 @@ class ColoredHyperGraph(Complex):
             Dictionary identifying rows with nodes. If False, this does not exist.
         degree_matrix : scipy.sparse.csr.csr_matrix
             The degree matrix.
+
+        Raises
+        ------
+        ValueError
+            If the rank is not in the range of the Colored Hypergraph.
         """
-        if rank < 1:
+        if not self.dim >= rank > 0:
             raise ValueError(
-                "rank for the degree matrix must be larger or equal to 1, got {rank}"
+                f"Cannot compute degree matrix for rank {rank} in a {self.dim}-dimensional complex."
             )
 
         rowdict, _, M = self.incidence_matrix(0, rank, index=True)
@@ -1301,16 +1308,22 @@ class ColoredHyperGraph(Complex):
             Array of dimension (N, N), where N is the number of nodes in the Colored Hypergraph.
             If index is True, return a dictionary mapping node uid to row number.
 
+        Raises
+        ------
+        ValueError
+            If the rank is not in the range of the Colored Hypergraph.
+
         References
         ----------
         .. [1] Lucas, M., Cencetti, G., & Battiston, F. (2020).
             Multiorder Laplacian for synchronization in higher-order networks.
             Physical Review Research, 2(3), 033410.
         """
-        if rank < 1:
+        if not 0 < rank <= self.dim:
             raise ValueError(
-                "rank for the laplacian matrix must be larger or equal to 1, got {rank}"
+                f"Cannot compute Laplacian matrix for rank {rank} in a {self.dim}-dimensional complex."
             )
+
         if len(self.nodes) == 0:
             A = np.empty((0, 0))
         else:
