@@ -5,6 +5,7 @@ from typing import Literal, overload
 
 import networkx as nx
 import numpy as np
+import requests
 
 from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
 from toponetx.classes.cell_complex import CellComplex
@@ -159,7 +160,7 @@ def coauthorship() -> SimplicialComplex:
     and 10 were sampled.
 
     The papers constitute simplices in the complex, which is completed with
-    subsimplices (seen as collaborations between subsets of authors) to form a
+    sub-simplices (seen as collaborations between subsets of authors) to form a
     simplicial complex.
     An attribute named *citations* is added to each simplex, corresponding to the sum
     of citations of all papers on which the authors represented by the simplex
@@ -178,7 +179,16 @@ def coauthorship() -> SimplicialComplex:
         Networks. Topological Data Analysis and Beyond workshop at NeurIPS.
         https://arxiv.org/abs/2010.03633
     """
-    coauthorship = np.load(DIR / "coauthorship.npy", allow_pickle=True)
+    dataset_file = DIR / "coauthorship.npy"
+
+    if not dataset_file.exists():
+        r = requests.get(
+            "https://github.com/pyt-team/TopoDataX/raw/main/resources/coauthorship.npy"
+        )
+        with dataset_file.open("wb") as f:
+            f.write(r.content)
+
+    coauthorship = np.load(dataset_file, allow_pickle=True)
 
     simplices = []
     for dim in range(len(coauthorship) - 1, -1, -1):

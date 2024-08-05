@@ -74,10 +74,19 @@ def stanford_bunny(
     ValueError
         If complex_type is not one of the supported values.
     """
+    dataset_file = DIR / "bunny.obj"
+
+    if not dataset_file.exists():
+        r = requests.get(
+            "https://github.com/pyt-team/TopoDataX/raw/main/resources/bunny.obj"
+        )
+        with dataset_file.open("wb") as f:
+            f.write(r.content)
+
     if complex_type == "simplicial":
-        return SimplicialComplex.load_mesh(DIR / "bunny.obj")
+        return SimplicialComplex.load_mesh(dataset_file)
     if complex_type == "cell":
-        return CellComplex.load_mesh(DIR / "bunny.obj")
+        return CellComplex.load_mesh(dataset_file)
 
     raise ValueError("complex_type must be 'simplicial' or 'cell'")
 
