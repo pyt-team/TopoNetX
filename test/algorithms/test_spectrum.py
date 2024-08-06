@@ -25,6 +25,11 @@ from toponetx.classes import (
 )
 from toponetx.datasets.mesh import stanford_bunny
 
+try:
+    import spharapy.trimesh as tm
+except ImportError:
+    tm = None
+
 
 class TestSpectrum:
     """Test spectrum module."""
@@ -55,18 +60,33 @@ class TestSpectrum:
         assert len(eigenvaluevector) == 2
         assert eigenvectors.shape == (29, 2)
 
+    @pytest.mark.skipif(
+        tm is None, reason="Optional dependency 'spharapy' not installed."
+    )
     def test_laplacian_beltrami_eigenvectors1(self):
-        """Test test_set_laplacian_beltrami_eigenvectors."""
+        """Test laplacian_beltrami_eigenvectors."""
         sc = stanford_bunny("simplicial")
-        eigenvectors, eigenvalues = laplacian_beltrami_eigenvectors(sc)
+        _, eigenvalues = laplacian_beltrami_eigenvectors(sc)
         assert len(eigenvalues) == len(sc.nodes)
 
+    @pytest.mark.skipif(
+        tm is None, reason="Optional dependency 'spharapy' not installed."
+    )
     def test_set_laplacian_beltrami_eigenvectors2(self):
-        """Test set_laplacian_beltrami_eigenvectors."""
+        """Test laplacian_beltrami_eigenvectors."""
         SC = stanford_bunny("simplicial")
         set_laplacian_beltrami_eigenvectors(SC)
         vec1 = SC.get_simplex_attributes("1.laplacian_beltrami_eigenvectors")
         assert len(vec1) == len(SC.skeleton(0))
+
+    @pytest.mark.skipif(
+        tm is not None, reason="Optional dependency 'spharapy' installed."
+    )
+    def test_laplacian_beltrami_eigenvectors_missing_dependency(self):
+        """Test laplacian_beltrami_eigenvectors for when `spharapy` is missing."""
+        sc = stanford_bunny("simplicial")
+        with pytest.raises(RuntimeError):
+            _ = laplacian_beltrami_eigenvectors(sc)
 
     def test_set_hodge_laplacian_eigenvector_attrs(self):
         """Test set_hodge_laplacian_eigenvector_attrs function."""

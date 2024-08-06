@@ -38,7 +38,6 @@ dependencies=[
     "scipy",
     "trimesh",
     "typing-extensions",
-    "spharapy",
 ]
 
 [project.optional-dependencies]
@@ -72,7 +71,8 @@ all = [
 
     # optional packages that are not required to run the library
     "gudhi",
-    "hypernetx < 2.0.0"
+    "hypernetx < 2.0.0",
+    "spharapy"
 ]
 
 [project.urls]

@@ -5,7 +5,6 @@ from typing import Any, Literal
 import numpy as np
 import scipy as sp
 import scipy.sparse as sparse
-import spharapy.spharabasis as sb
 from scipy.sparse import diags
 
 from toponetx.classes import CombinatorialComplex
@@ -160,11 +159,21 @@ def laplacian_beltrami_eigenvectors(
     k_eigenvals : numpy.ndarray
         First k Eigenvalues associated with the hodge laplacian matrix.
 
+    Raises
+    ------
+    RuntimeError
+        If package `spharapy` is not installed.
+
     Examples
     --------
     >>> SC = tnx.datasets.stanford_bunny("simplicial")
     >>> eigenvectors, eigenvalues = tnx.laplacian_beltrami_eigenvectors(SC)
     """
+    try:
+        import spharapy.spharabasis as sb
+    except ImportError as e:
+        raise RuntimeError("Package `spharapy` is required for this function.") from e
+
     mesh = SC.to_spharapy()
     sphara_basis = sb.SpharaBasis(mesh, mode=mode)
     eigenvectors, eigenvalues = sphara_basis.basis()

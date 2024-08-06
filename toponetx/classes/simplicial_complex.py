@@ -1622,6 +1622,11 @@ class SimplicialComplex(Complex):
         spharapy.trimesh.TriMesh
             The spharapy object corresponding to this simplicial complex.
 
+        Raises
+        ------
+        RuntimeError
+            If package `spharapy` is not installed.
+
         Examples
         --------
         >>> import spharapy.trimesh as tm
@@ -1633,7 +1638,12 @@ class SimplicialComplex(Complex):
         >>> mesh2.vertlist == mesh.vertlist
         >>> mesh2.trilist == mesh.trilist
         """
-        import spharapy.trimesh as tm
+        try:
+            import spharapy.trimesh as tm
+        except ImportError as e:
+            raise RuntimeError(
+                "Package `spharapy` is required for this function."
+            ) from e
 
         if not self.is_triangular_mesh():
             raise RuntimeError(
