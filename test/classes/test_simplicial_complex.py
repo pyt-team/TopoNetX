@@ -3,7 +3,6 @@
 import networkx as nx
 import numpy as np
 import pytest
-import spharapy.trimesh as tm
 from scipy.sparse import bmat
 
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
@@ -20,6 +19,11 @@ try:
     import hypernetx as hnx
 except ImportError:
     hnx = None
+
+try:
+    import spharapy.trimesh as tm
+except ImportError:
+    tm = None
 
 
 class TestSimplicialComplex:
@@ -701,6 +705,9 @@ class TestSimplicialComplex:
         with pytest.raises(RuntimeError):
             SC.to_trimesh()
 
+    @pytest.mark.skipif(
+        tm is None, reason="Optional dependency 'spharapy' not installed."
+    )
     def test_laplace_beltrami_operator(self):
         """Test laplace_beltrami_operator."""
         SC = stanford_bunny("simplicial")
@@ -708,6 +715,15 @@ class TestSimplicialComplex:
         laplacian_matrix = SC.laplace_beltrami_operator()
 
         assert isinstance(laplacian_matrix, np.ndarray)
+
+    @pytest.mark.skipif(
+        tm is not None, reason="Optional dependency 'spharapy' installed."
+    )
+    def test_laplace_beltrami_operator_missing_dependency(self):
+        """Test laplace_beltrami_operator for when `spharapy` is missing."""
+        SC = stanford_bunny("simplicial")
+        with pytest.raises(RuntimeError):
+            SC.laplace_beltrami_operator()
 
     def test_from_nx_graph(self):
         """Test from networkx graph."""
@@ -1062,6 +1078,9 @@ class TestSimplicialComplex:
             ),
         )
 
+    @pytest.mark.skipif(
+        tm is None, reason="Optional dependency 'spharapy' not installed."
+    )
     def test_from_spharpy(self):
         """Test the from_spharpy method of SimplicialComplex (support for spharpy trimesh)."""
         mesh = tm.TriMesh(
