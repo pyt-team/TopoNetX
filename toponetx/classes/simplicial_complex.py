@@ -9,13 +9,17 @@ from typing import Any
 
 import networkx as nx
 import numpy as np
-from gudhi import SimplexTree
 from scipy.sparse import csr_matrix, dok_matrix
 from typing_extensions import Self, deprecated
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import NodeView, SimplexView
 from toponetx.classes.simplex import Simplex
+
+try:
+    from gudhi import SimplexTree
+except ImportError:
+    SimplexTree = None
 
 try:
     from hypernetx import Hypergraph
