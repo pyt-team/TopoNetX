@@ -4,13 +4,17 @@ import networkx as nx
 import numpy as np
 import pytest
 import spharapy.trimesh as tm
-from gudhi import SimplexTree
 from scipy.sparse import bmat
 
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.datasets.mesh import stanford_bunny
+
+try:
+    from gudhi import SimplexTree
+except ImportError:
+    SimplexTree = None
 
 try:
     import hypernetx as hnx
@@ -799,6 +803,9 @@ class TestSimplicialComplex:
         assert len(result.cells) == len(expected_result.cells)
         assert len(result.nodes) == len(expected_result.nodes)
 
+    @pytest.mark.skipif(
+        SimplexTree is None, reason="Optional dependency 'gudhi' not installed."
+    )
     def test_from_gudhi(self):
         """Create a SimplicialComplex from a Gudhi SimplexTree and compare the number of simplices."""
         tree = SimplexTree()
