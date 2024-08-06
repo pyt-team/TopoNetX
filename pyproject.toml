@@ -30,7 +30,6 @@ classifiers = [
 ]
 requires-python = ">= 3.10"
 dependencies=[
-    "gudhi",
     "networkx",
     "numpy",
     "pandas",
@@ -72,6 +71,7 @@ all = [
     "TopoNetX[doc, dev]",
 
     # optional packages that are not required to run the library
+    "gudhi",
     "hypernetx < 2.0.0"
 ]
 
