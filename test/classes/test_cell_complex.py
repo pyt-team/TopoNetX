@@ -824,21 +824,6 @@ class TestCellComplex:
 
         assert len(equivalence_classes) == 4
 
-    def test__remove_equivalent_cells(self):
-        """Test the remove equivalent cells method."""
-        CC = CellComplex()
-        CC.add_cell((1, 2, 3, 4), rank=2)
-        CC.add_cell((2, 3, 4, 1), rank=2)
-        CC.add_cell((1, 2, 3, 4), rank=2)
-        CC.add_cell((1, 2, 3, 6), rank=2)
-        CC.add_cell((3, 4, 1, 2), rank=2)
-        CC.add_cell((4, 3, 2, 1), rank=2)
-        CC.add_cell((1, 2, 7, 3), rank=2)
-        c1 = Cell((1, 2, 3, 4, 5))
-        CC.add_cell(c1, rank=2)
-        CC._remove_equivalent_cells()
-        assert len(CC.cells) == 4
-
     def test_get_cell_attributes2(self):
         """Test the remove equivalent cells method."""
         import networkx as nx

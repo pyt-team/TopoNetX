@@ -840,7 +840,7 @@ class CombinatorialComplex(ColoredHyperGraph):
         )
 
     def adjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
-        """Sparse weighted :term:`s-adjacency matrix`.
+        """Sparse weighted `s-adjacency matrix`.
 
         Parameters
         ----------
@@ -876,8 +876,6 @@ class CombinatorialComplex(ColoredHyperGraph):
 
     def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix of self.
-
-        The sparse weighted :term:`s-coadjacency matrix`
 
         Parameters
         ----------
