@@ -3,7 +3,7 @@
 </h2>
 
 <h3 align="center">
-    Computing with Relational Data abstracted as Topological Domains
+   Computing with Relational Data Abstracted as Topological Domains
 </h3>
 
 <p align="center">
@@ -81,29 +81,10 @@ TNX is developed by the [pyt-team](https://github.com/pyt-team)
 
 # 🤖 Installing TopoNetX
 
-1. Clone a copy of `TopoNetX` from source:
+`TopoNetX` is available on PyPI and can be installed using `pip`:
 
 ```bash
-git clone https://github.com/pyt-team/TopoNetX
-cd TopoNetX
-```
-
-2. If you have already cloned `TopoNetX` from source, update it:
-
-```bash
-git pull
-```
-
-3. Install `TopoNetX` in editable mode (requires pip ≥ 21.3 for [PEP 660](https://peps.python.org/pep-0610/) support):
-
-```bash
-pip install -e '.[all]'
-```
-
-4. Install pre-commit hooks:
-
-```bash
-pre-commit install
+pip install toponetx
 ```
 
 # 🦾 Getting Started
@@ -159,6 +140,35 @@ B02 = cc.incidence_matrix(0, 2)
 
 # Compute the incidence matrix between cells of rank 0 and 3
 B03 = cc.incidence_matrix(0, 3)
+```
+
+## 🧑‍💻 Install from source
+
+To install the latest version from source, follow these steps:
+
+1. Clone a copy of `TopoNetX` from source:
+
+```bash
+git clone https://github.com/pyt-team/TopoNetX
+cd TopoNetX
+```
+
+2. If you have already cloned `TopoNetX` from source, update it:
+
+```bash
+git pull
+```
+
+3. Install `TopoNetX` in editable mode (requires `pip` ≥ 21.3 for [PEP 660](https://peps.python.org/pep-0610/) support):
+
+```bash
+pip install -e '.[all]'
+```
+
+4. Install pre-commit hooks:
+
+```bash
+pre-commit install
 ```
 
 ## 🔍 References

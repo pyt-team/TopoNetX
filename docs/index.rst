@@ -59,6 +59,15 @@ TNX was developed by the pyt-team.
 
 6. Package dependencies are kept to a minimum, to facilitate easy installation and to reduce future installation issues arising from such dependencies.
 
+🤖 Installing TopoNetX
+----------------------
+
+``TopoNetX`` is available on PyPI and can be installed using ``pip``:
+
+.. code-block:: bash
+
+   pip install toponetx
+
 🔍 References
 -------------
 
