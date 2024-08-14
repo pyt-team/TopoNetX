@@ -46,26 +46,27 @@ def karate_club(
 
     Returns
     -------
-    When input is "simplicial":
-           a SimplicialComplex obtained from karate club graph by lifting the graph to its clique complex.
-           The simplicial complex comes with the following features
-        "node_feat":
-            - its value is the first feat_dim Hodge Laplacian eigenvectors attached to nodes.
-        "edge_feat":
-            - its value is the first feat_dim Hodge Laplacian eigenvectors attached to edges.
-        "face_feat":
-            - its value is the first feat_dim Hodge Laplacian eigenvectors attached to faces.
-        "tetrahedron_feat": the first feat_dim Hodge Laplacian eigenvectors attached to tetrahedron.
-    When input is "cell":
-            a CellComplex obtained from karate club by lifting the graph to a cell obtained obtained
-            from the graph by adding the independent homology cycles in the graph.
-            The cell complex comes with the following features
-        "node_feat":
-            - its value is the first feat_dim Hodge Laplacian eigenvectors attached to nodes.
-        "edge_feat":
-            - its value is the first feat_dim Hodge Laplacian eigenvectors attached to edges.
-        "cell_feat":
-            - its value is the first feat_dim Hodge Laplacian eigenvectors attached to cells.
+    SimplicialComplex or CellComplex
+        When input is "simplicial":
+        A SimplicialComplex obtained from karate club graph by lifting the graph to its
+        clique complex. The simplicial complex comes with the following features:
+
+        - "node_feat": its value is the first feat_dim Hodge Laplacian eigenvectors attached to nodes.
+        - "edge_feat": its value is the first feat_dim Hodge Laplacian eigenvectors attached to edges.
+        - "face_feat": its value is the first feat_dim Hodge Laplacian eigenvectors attached to faces.
+        - "tetrahedron_feat": the first feat_dim Hodge Laplacian eigenvectors attached to tetrahedron.
+
+        When input is "cell":
+        A CellComplex obtained from karate club by lifting the graph to a cell obtained
+        obtained from the graph by adding the independent homology cycles in the graph.
+        The cell complex comes with the following features:
+
+        - "node_feat": its value is the first feat_dim Hodge Laplacian eigenvectors
+          attached to nodes.
+        - "edge_feat": its value is the first feat_dim Hodge Laplacian eigenvectors
+          attached to edges.
+        - "cell_feat": its value is the first feat_dim Hodge Laplacian eigenvectors
+          attached to cells.
 
     Raises
     ------

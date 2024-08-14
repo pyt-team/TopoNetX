@@ -463,37 +463,6 @@ class CellComplex(Complex):
                         all_inserted_cells.add(j)
         return equiv_classes
 
-    def _remove_equivalent_cells(self) -> None:
-        """Remove homotopic cells from the cell complex.
-
-        Examples
-        --------
-        >>> CC = tnx.CellComplex()
-        >>> CC.add_cell((1, 2, 3, 4), rank=2)
-        >>> CC.add_cell((2, 3, 4, 1), rank=2)
-        >>> CC.add_cell((1, 2, 3, 4), rank=2)
-        >>> CC.add_cell((1, 2, 3, 6), rank=2)
-        >>> CC.add_cell((3, 4, 1, 2), rank=2)
-        >>> CC.add_cell((4, 3, 2, 1), rank=2)
-        >>> CC.add_cell((1, 2, 7, 3), rank=2)
-        >>> c1 = tnx.Cell((1, 2, 3, 4, 5))
-        >>> CC.add_cell(c1, rank=2)
-        >>> CC._remove_equivalent_cells()
-        >>> CC
-        """
-        equiv_classes = self._cell_equivalence_class()
-        for c in list(self.cells):
-            if c not in equiv_classes:
-                d = self._cells._cells[c.elements]
-                if len(d) == 1:
-                    self._delete_cell(c)
-                else:
-                    d_c = dict(d)
-                    for k in d_c:
-                        if len(d) == 1:
-                            break
-                        self._delete_cell(c, k)
-
     def degree(self, node: Hashable, rank: int = 1) -> int:
         """Compute the number of cells of certain rank that contain node.
 
@@ -1134,7 +1103,7 @@ class CellComplex(Complex):
         ...     (1, 2, 3, 4): {"color": "red", "attr2": 1},
         ...     (1, 2, 4): {"color": "blue", "attr2": 3},
         ... }
-        >>> CC.set_cell_attributes(d)
+        >>> CC.set_cell_attributes(d, rank=2)
         >>> CC.cells[(1, 2, 3, 4)][0]["color"]
         'red'
         """
@@ -1359,9 +1328,19 @@ class CellComplex(Complex):
         >>> CC.add_cell([3, 4, 8], rank=2)
         >>> print(CC.cells)
         >>> CC.remove_equivalent_cells()
-        >>> print(CC.cells)  # observe homotopic cells have been removed
         """
-        self._remove_equivalent_cells()
+        equiv_classes = self._cell_equivalence_class()
+        for c in list(self.cells):
+            if c not in equiv_classes:
+                d = self._cells._cells[c.elements]
+                if len(d) == 1:
+                    self._delete_cell(c)
+                else:
+                    d_c = dict(d)
+                    for k in d_c:
+                        if len(d) == 1:
+                            break
+                        self._delete_cell(c, k)
 
     def is_insertable_cycle(
         self,
@@ -1833,8 +1812,6 @@ class CellComplex(Complex):
         >>> CC.add_cell([1, 2, 3], rank=2)
         >>> CC.add_cell([3, 4, 5], rank=2)
         >>> index, L1_up = CC.up_laplacian_matrix(1, index=True)
-        >>> print(index)
-        >>> print(L1_up)
         """
         if weight is not None:
             raise ValueError("Weighted Laplacian is not supported in this version.")

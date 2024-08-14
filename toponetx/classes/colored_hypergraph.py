@@ -1228,8 +1228,6 @@ class ColoredHyperGraph(Complex):
     def coadjacency_matrix(self, rank, via_rank, s: int = 1, index: bool = False):
         """Compute the coadjacency matrix.
 
-        The sparse weighted :term:`s-coadjacency matrix`.
-
         Parameters
         ----------
         rank : int

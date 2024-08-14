@@ -49,6 +49,7 @@ jobs:
           repository-name: pyt-team/pyt-team.github.io
           target-folder: toponetx
           clean: true
+
   numpydoc-validation:
     runs-on: ${{matrix.os}}
     strategy:
@@ -70,6 +71,4 @@ jobs:
           pip install -e .[doc]
       - name: Checking NumpyDoc Validation for files
         run: |
-          pip install pre-commit
-          pre-commit install
-          pre-commit run --all-files numpydoc-validation
+          numpydoc lint test/**/*.py toponetx/**/*.py

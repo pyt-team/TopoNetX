@@ -1,6 +1,6 @@
-*********
+**********
 Read-Write
-*********
+**********
 
 .. automodule:: toponetx.readwrite.atomlist
     :members:

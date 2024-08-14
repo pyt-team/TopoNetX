@@ -21,26 +21,37 @@ class PathComplex(Complex):
 
     The original path complex is defined in [2]_.
 
-    A path complex contains elementary p-paths that span the space of simple paths. Path complexes are a topological structure whose
-    building blocks are paths, which are essentially different from simplicial complexes and cell complexes. If certain conditions are met, path complexes can generalize
-    simplicial complexes.
+    A path complex contains elementary p-paths that span the space of simple paths.
+    Path complexes are a topological structure whose building blocks are paths, which
+    are essentially different from simplicial complexes and cell complexes. If certain
+    conditions are met, path complexes can generalize simplicial complexes.
 
-    For example, a triangle with three vertices 1, 2, and 3 can be represented as a simplicial complex (1, 2, 3). Similarly, it can be represented as a path complex (1, 2, 3) whose
-    boundary 1-paths are (1, 2), (2, 3), and (1, 3). Another example is a simple path (1, 2, 3). In this case, we cannot lift the simple path to a 2-dimensional simplicial complex, as
-    triangle does not exist. However, we can still represent the simple path as a path complex (1, 2, 3) whose boundary 1-paths are (1, 2) and (2, 3) (1-path (1,3) does not exist).
+    For example, a triangle with three vertices 1, 2, and 3 can be represented as a
+    simplicial complex (1, 2, 3). Similarly, it can be represented as a path complex
+    (1, 2, 3) whose boundary 1-paths are (1, 2), (2, 3), and (1, 3). Another example is
+    a simple path (1, 2, 3). In this case, we cannot lift the simple path to a
+    2-dimensional simplicial complex, as triangle does not exist. However, we can still
+    represent the simple path as a path complex (1, 2, 3) whose boundary 1-paths are
+    (1, 2) and (2, 3) (1-path (1,3) does not exist).
 
     Parameters
     ----------
     paths : nx.Graph or Iterable[Sequence[Hashable]]
-        The paths in the path complex. If a graph is provided, the path complex will be constructed from the graph, and allowed paths are automatically computed.
+        The paths in the path complex. If a graph is provided, the path complex will be
+        constructed from the graph, and allowed paths are automatically computed.
     reserve_sequence_order : bool, default=False
-        If True, reserve the order of the sub-sequence of nodes in the elementary p-path. Else, the sub-sequence of nodes in the elementary p-path will
-        be reversed if the first index is larger than the last index.
+        If True, reserve the order of the sub-sequence of nodes in the elementary
+        p-path. Else, the sub-sequence of nodes in the elementary p-path will be
+        reversed if the first index is larger than the last index.
     allowed_paths : Iterable[tuple[Hashable]], optional
         An iterable of allowed boundaries.
-        If None and the input is a Graph, allowed paths are automatically computed by enumerating all simple paths in the graph whose length is less than or equal to max_rank.
-        If None and the input is not a Graph, allowed paths contain the input paths, their truncated subsequences (sub-sequences where the first
-        or the last index is omitted), and any sub-sequences of the truncated subsequences in a recursive manner.
+        If `None` and the input is a Graph, allowed paths are automatically computed by
+        enumerating all simple paths in the graph whose length is less than or equal to
+        max_rank.
+        If None and the input is not a Graph, allowed paths contain the input paths,
+        their truncated subsequences (sub-sequences where the first or the last index
+        is omitted), and any sub-sequences of the truncated subsequences in a recursive
+        manner.
     max_rank : int, default=3
         The maximal length of a path in the path complex.
     **kwargs : keyword arguments, optional
@@ -48,14 +59,19 @@ class PathComplex(Complex):
 
     Notes
     -----
-    - By the definition established by [2]_, a path complex P is a non-empty collection of elementary p-paths such that for any sequence
-    of vertices in a finite non-empty set V that belong to P, the truncated sequence of vertices (which is sometimes referred to as obvious boundaries) also belongs to P.
-    The truncated sequences are sub-sequences of the original elementary p-path where the first or the last index is omitted. For instance, if we have an elementary p-path (1, 2, 3),
-    the truncated sequences are (1,2) and (2,3).
-    - Path complex in [1]_ is different from the path complex defined in [2]_ in the sense that elementary p-paths span the space of simple paths.
-    The path complex originally proposed has elementary p-paths that span the space of boundary-invariant paths.
-    - The path complex is a simplicial complex if certain conditions are met [2]_.
-    - Unlike hypergraphs, combinatorial, simplicial, and cell complexes, path complexes take into account the order of sequences.
+    - By the definition established by [2]_, a path complex P is a non-empty collection
+      of elementary p-paths such that for any sequence of vertices in a finite
+      non-empty set V that belong to P, the truncated sequence of vertices (which is
+      sometimes referred to as obvious boundaries) also belongs to P. The truncated
+      sequences are sub-sequences of the original elementary p-path where the first or
+      the last index is omitted. For instance, if we have an elementary p-path
+      (1, 2, 3), the truncated sequences are (1,2) and (2,3).
+    - Path complex in [1]_ is different from the path complex defined in [2]_ in the
+      sense that elementary p-paths span the space of simple paths. The path complex
+      originally proposed has elementary p-paths that span the space of
+      boundary-invariant paths.
+    - Unlike hypergraphs, combinatorial, simplicial, and cell complexes, path complexes
+      take into account the order of sequences.
 
     References
     ----------
