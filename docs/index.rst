@@ -111,7 +111,7 @@ Want to try it yourself? Check out our tutorials to get started.
 
    api/index
    tutorials/index
-   contributing/index
+   Project <project/index>
 
 ⭐ Funding
 ----------
