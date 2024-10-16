@@ -18,6 +18,13 @@ extensions = [
     "sphinx_gallery.load_style",
 ]
 
+html_context = {
+    "github_user": "pyt-team",
+    "github_repo": "TopoNetX",
+    "github_version": "main",
+    "doc_path": "docs",
+}
+
 html_theme_options = {
     "icon_links": [
         {
@@ -26,7 +33,8 @@ html_theme_options = {
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         }
-   ]
+   ],
+   "use_edit_page_button": True,
 }
 
 html_show_sourcelink = False
