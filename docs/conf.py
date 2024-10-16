@@ -15,6 +15,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
     "sphinx_gallery.load_style",
 ]
 
@@ -136,3 +137,8 @@ intersphinx_mapping = {
 # configure numpydoc
 numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
+
+# Exclude copy button from appearing over notebook cell numbers by using :not()
+# The default copybutton selector is `div.highlight pre`
+# https://github.com/executablebooks/sphinx-copybutton/blob/master/sphinx_copybutton/__init__.py#L82
+copybutton_selector = ":not(.prompt) > div.highlight pre"
