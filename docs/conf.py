@@ -3,6 +3,7 @@
 project = "TopoNetX"
 copyright = "2022-2023, PyT-Team, Inc."
 author = "PyT-Team Authors"
+language = "en"
 
 extensions = [
     "nbsphinx",
@@ -19,26 +20,7 @@ extensions = [
     "sphinx_gallery.load_style",
 ]
 
-html_context = {
-    "github_user": "pyt-team",
-    "github_repo": "TopoNetX",
-    "github_version": "main",
-    "doc_path": "docs",
-}
-
-html_theme_options = {
-    "icon_links": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/pyt-team/TopoNetX",
-            "icon": "fa-brands fa-github",
-            "type": "fontawesome",
-        }
-   ],
-   "use_edit_page_button": True,
-}
-
-html_show_sourcelink = False
+templates_path = ["_templates"]
 
 # Configure nbsphinx for notebook execution
 nbsphinx_execute_arguments = [
@@ -59,8 +41,6 @@ templates_path = ["_templates"]
 source_suffix = [".rst"]
 
 master_doc = "index"
-
-language = "en"
 
 # nbsphinx_thumbnails = {
 #     "notebooks/01_simplicial_complexes": "notebooks/sc.png",
