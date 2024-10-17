@@ -30,10 +30,6 @@ nbsphinx_execute_arguments = [
 
 nbsphinx_execute = "never"
 
-# To get a prompt similar to the Classic Notebook, use
-nbsphinx_input_prompt = " In [%s]:"
-nbsphinx_output_prompt = " Out [%s]:"
-
 nbsphinx_allow_errors = True
 
 templates_path = ["_templates"]
