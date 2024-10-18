@@ -2,57 +2,47 @@
 Classes
 *******
 
-Cell Complex
-------------
-.. automodule:: toponetx.classes.cell_complex
-   :members:
+Atoms
+-----
 
-Cell
-----
-.. automodule:: toponetx.classes.cell
-   :members:
+.. autosummary::
+   :toctree: generated/
+   :template: autosummary-class-template.rst
+   :recursive:
 
-Colored Hypergraph
-------------------
-.. automodule:: toponetx.classes.colored_hypergraph
-   :members:
+   toponetx.Atom
+   toponetx.Simplex
+   toponetx.Path
+   toponetx.Cell
+   toponetx.HyperEdge
 
-Combinatorial Complex
----------------------
-.. automodule:: toponetx.classes.combinatorial_complex
-   :members:
-
-Complex
--------
-.. automodule:: toponetx.classes.complex
-   :members:
-
-Hyperedge
+Complexes
 ---------
-.. automodule:: toponetx.classes.hyperedge
-   :members:
 
-Path Complex
+.. autosummary::
+   :toctree: generated/
+   :template: autosummary-class-template.rst
+   :recursive:
+
+   toponetx.Complex
+   toponetx.SimplicialComplex
+   toponetx.PathComplex
+   toponetx.CellComplex
+   toponetx.CombinatorialComplex
+   toponetx.ColoredHyperGraph
+
+Report Views
 ------------
-.. automodule:: toponetx.classes.path_complex
-   :members:
 
-Path
-----
-.. automodule:: toponetx.classes.path
-   :members:
+.. autosummary::
+   :toctree: generated/
+   :template: autosummary-class-template.rst
+   :recursive:
 
-ReportViews
------------
-.. automodule:: toponetx.classes.reportviews
-   :members:
-
-Simplex
--------
-.. automodule:: toponetx.classes.simplex
-   :members:
-
-Simplicial Complex
-------------------
-.. automodule:: toponetx.classes.simplicial_complex
-   :members:
+   toponetx.NodeView
+   toponetx.AtomView
+   toponetx.SimplexView
+   toponetx.PathView
+   toponetx.CellView
+   toponetx.HyperEdgeView
+   toponetx.ColoredHyperEdgeView

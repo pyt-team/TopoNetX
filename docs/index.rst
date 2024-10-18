@@ -35,7 +35,7 @@ found in higher-order networks such as simplicial, cellular, CW and combinatoria
 This package serves as a repository of the methods and algorithms we find most useful
 as we explore the knowledge that can be encoded via higher-order networks.
 
-TNX supports the construction of topological structures including the ``CellComplex``, ``SimplicialComplex`` and ``CombinatorialComplex`` classes.
+TNX supports the construction of topological structures including the :py:class:`CellComplex <toponetx.CellComplex>`, :py:class:`SimplicialComplex <toponetx.SimplicialComplex>` and :py:class:`CombinatorialComplex <toponetx.CombinatorialComplex>` classes.
 
 These classes provide methods for computing boundary operators, Hodge Laplacians
 and higher-order adjacency operators on cell, simplicial and combinatorial complexes,
@@ -111,7 +111,7 @@ Want to try it yourself? Check out our tutorials to get started.
 
    api/index
    tutorials/index
-   contributing/index
+   Project <project/index>
 
 ⭐ Funding
 ----------

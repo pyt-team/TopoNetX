@@ -16,6 +16,7 @@ from toponetx.classes.path import Path
 from toponetx.classes.simplex import Simplex
 
 __all__ = [
+    "AtomView",
     "HyperEdgeView",
     "ColoredHyperEdgeView",
     "CellView",

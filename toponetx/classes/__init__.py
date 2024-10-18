@@ -9,6 +9,7 @@ from .hyperedge import HyperEdge
 from .path import Path
 from .path_complex import PathComplex
 from .reportviews import (
+    AtomView,
     CellView,
     ColoredHyperEdgeView,
     HyperEdgeView,
@@ -25,6 +26,7 @@ __all__ = [
     "CombinatorialComplex",
     "ColoredHyperGraph",
     "Atom",
+    "AtomView",
     "Complex",
     "HyperEdge",
     "HyperEdgeView",
