@@ -93,9 +93,10 @@ pip install toponetx
 
 ```python
 import toponetx as tnx
+from toponetx import SimplicialComplex
 
 # Instantiate a SimplicialComplex object with a few simplices
-sc = tnx.SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
+sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
 
 # Compute the incidence matrix between 1-skeleton and 0-skeleton
 B1 = sc.incidence_matrix(1)
@@ -108,9 +109,10 @@ B2 = sc.incidence_matrix(2)
 
 ```python
 import toponetx as tnx
+from toponetx import CellComplex
 
 # Instantiate a CellComplex object with a few cells
-cx = tnx.CellComplex([[1, 2, 3, 4], [3, 4, 5, 6, 7, 8]], ranks=2)
+cx = CellComplex([[1, 2, 3, 4], [3, 4, 5, 6, 7, 8]], ranks=2)
 
 # Add an edge (cell of rank 1) after initialization
 cx.add_edge(0, 1)
@@ -126,9 +128,10 @@ L2 = cx.hodge_laplacian_matrix(2)
 
 ```python
 import toponetx as tnx
+from toponetx import CombinatorialComplex
 
 # Instantiate a combinatorial complex object with a few cells
-cc = tnx.CombinatorialComplex()
+cc = CombinatorialComplex()
 
 # Add some cells of different ranks after initialization
 cc.add_cell([1, 2, 3], rank=2)
@@ -173,9 +176,22 @@ pre-commit install
 
 ## 🔍 References
 
+TNX is a part of TopoX, a suite of Python packages for machine learning on topological domains.  If you find TNX useful please consider citing our software paper:
+
+- Hajij et al. 2023. [TopoX: a suite of Python packages for machine learning on topological domains](https://arxiv.org/abs/2402.02441)
+
+```
+@article{hajij2024topox,
+  title={TopoX: a suite of Python packages for machine learning on topological domains},
+  author={PYT-Team},
+  journal={arXiv preprint arXiv:2402.02441},
+  year={2024}
+}
+```
+
 To learn more about topological domains, and how they can be used in deep learning:
 
-- Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub. [Topological Deep Learning: Going Beyond Graph Data](https://arxiv.org/abs/2206.00606).
+- Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub.   [Topological Deep Learning: Going Beyond Graph Data](https://arxiv.org/abs/2206.00606) (arXiv) • [Topological Deep Learning: A Book](https://tdlbook.org/)
 
 ```
 @misc{hajij2023topological,
