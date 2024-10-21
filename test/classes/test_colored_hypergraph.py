@@ -147,9 +147,9 @@ class TestColoredHyperGraph:
 
         # invalid inputs should raise `KeyError`s as well
         with pytest.raises(KeyError):
-            _ = CHG[tuple()]
+            _ = CHG[()]
         with pytest.raises(KeyError):
-            _ = CHG[(tuple(), 0)]
+            _ = CHG[((), 0)]
 
     def test_add_cell(self):
         """Test adding a cell to a CHG."""

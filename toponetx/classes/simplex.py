@@ -126,7 +126,6 @@ class Simplex(Atom[frozenset[Hashable]]):
         frozenset[Simplex]
             The set of faces of the simplex.
         """
-
         faceset = set()
         for r in range(len(elements), 0, -1):
             for face in combinations(elements, r):
@@ -165,7 +164,7 @@ class Simplex(Atom[frozenset[Hashable]]):
         face : Simplex
             A face of the simplex.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @property
     @deprecated(

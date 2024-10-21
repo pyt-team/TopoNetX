@@ -45,13 +45,13 @@ def load_ppi():
     ]
     proteins = "%0d".join(protein_list)
     url = f"https://string-db.org/api/tsv/network?identifiers={proteins}&species=9606"
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
 
     lines = r.text.split("\n")
     data = [line.split("\t") for line in lines]
-    df = pd.DataFrame(data[1:-1], columns=data[0])
+    protein_df = pd.DataFrame(data[1:-1], columns=data[0])
 
-    interactions = df[["preferredName_A", "preferredName_B", "score"]]
+    interactions = protein_df[["preferredName_A", "preferredName_B", "score"]]
 
     G = nx.Graph(name="Protein Interaction Graph")
     interactions = np.array(interactions)

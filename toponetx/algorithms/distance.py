@@ -86,7 +86,7 @@ def distance(
     try:
         return nx.shortest_path_length(G, rowdict[source], rowdict[target])
     except nx.NetworkXNoPath as exc:
-        raise TopoNetXNoPath() from exc
+        raise TopoNetXNoPath from exc
 
 
 def cell_distance(
@@ -172,4 +172,4 @@ def cell_distance(
     try:
         return nx.shortest_path_length(G, cell_dict[source], cell_dict[target])
     except nx.NetworkXNoPath as exc:
-        raise TopoNetXNoPath() from exc
+        raise TopoNetXNoPath from exc

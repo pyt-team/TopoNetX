@@ -65,7 +65,9 @@ def compute_x_laplacian_normalized_matrix(L: csr_matrix, Lx: csr_matrix) -> csr_
     This function normalizes the up or down Laplacian matrices by dividing them
     by the largest eigenvalue of the Laplacian matrix.
     """
-    assert L.shape[0] == L.shape[1]
+    if not L.shape[0] == L.shape[1]:
+        raise ValueError("Laplacian matrix must be square.")
+
     topeig = spl.eigsh(L.asfptype(), k=1, which="LM", return_eigenvectors=False)[0]
     return Lx * (1.0 / topeig)
 

@@ -599,13 +599,13 @@ class CombinatorialComplex(ColoredHyperGraph):
                     if rank > e_rank and existing_hyperedge.issuperset(hyperedge_):
                         raise ValueError(
                             "a violation of the combinatorial complex condition:"
-                            + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
+                            f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is larger than {rank}, the rank of the input hyperedge {hyperedge_} "
                         )
 
                     if rank < e_rank and hyperedge_.issuperset(existing_hyperedge):
                         raise ValueError(
                             "violation of the combinatorial complex condition : "
-                            + f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
+                            f"the hyperedge {existing_hyperedge} in the complex has rank {e_rank} is smaller than {rank}, the rank of the input hyperedge {hyperedge_} "
                         )
 
     def _add_hyperedge(self, hyperedge, rank, **attr):

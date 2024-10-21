@@ -324,9 +324,9 @@ class CellComplex(Complex):
             Iterator over nodes.
         """
         return chain(
-            map(lambda x: (x,), self.nodes),
+            ((x,) for x in self.nodes),
             self.edges,
-            map(lambda cell: tuple(cell), self.cells),
+            (tuple(cell) for cell in self.cells),
         )
 
     def __contains__(self, item) -> bool:
@@ -624,7 +624,7 @@ class CellComplex(Complex):
         list
             List of cell neighbors.
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def remove_node(self, node: Hashable) -> None:
         """Remove the given node from the cell complex.
