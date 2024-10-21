@@ -173,9 +173,22 @@ pre-commit install
 
 ## 🔍 References
 
+TopoNetX is a part of TopoX, a suite of Python packages for machine learning on topological domains. If you find TopoNetX useful please consider citing our software paper:
+
+- Hajij et al. 2023. [TopoX: a suite of Python packages for machine learning on topological domains](https://arxiv.org/abs/2402.02441)
+
+```
+@article{hajij2024topox,
+  title={TopoX: A Suite of Python Packages for Machine Learning on Topological Domains},
+  author={PYT-Team},
+  journal={arXiv preprint arXiv:2402.02441},
+  year={2024}
+}
+```
+
 To learn more about topological domains, and how they can be used in deep learning:
 
-- Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub. [Topological Deep Learning: Going Beyond Graph Data](https://arxiv.org/abs/2206.00606).
+- Mustafa Hajij, Ghada Zamzmi, Theodore Papamarkou, Nina Miolane, Aldo Guzmán-Sáenz, Karthikeyan Natesan Ramamurthy, Tolga Birdal, Tamal K. Dey, Soham Mukherjee, Shreyas N. Samaga, Neal Livesay, Robin Walters, Paul Rosen, Michael T. Schaub.   [Topological Deep Learning: Going Beyond Graph Data](https://arxiv.org/abs/2206.00606) (arXiv) • [Topological Deep Learning: A Book](https://tdlbook.org/)
 
 ```
 @misc{hajij2023topological,
