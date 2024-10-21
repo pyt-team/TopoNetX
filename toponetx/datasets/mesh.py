@@ -78,7 +78,8 @@ def stanford_bunny(
 
     if not dataset_file.exists():
         r = requests.get(
-            "https://github.com/pyt-team/topological-datasets/raw/main/resources/bunny.obj"
+            "https://github.com/pyt-team/topological-datasets/raw/main/resources/bunny.obj",
+            timeout=10,
         )
         with dataset_file.open("wb") as f:
             f.write(r.content)
@@ -145,7 +146,7 @@ def shrec_16(size: Literal["full", "small"] = "full"):
 
     if not training.exists() or not testing.exists():
         print(f"downloading shrec 16 {size} dataset...\n")
-        r = requests.get(url)
+        r = requests.get(url, timeout=10)
         with zipfile.ZipFile(BytesIO(r.content)) as zip_ref:
             zip_ref.extractall(DIR)
         print("done!")
@@ -211,7 +212,7 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
 
     if not unziped_file.exists():
         print(f"downloading {data} dataset...\n")
-        r = requests.get(url)
+        r = requests.get(url, timeout=10)
         with zipfile.ZipFile(BytesIO(r.content)) as zip_ref:
             zip_ref.extractall(DIR)
         print("done!")

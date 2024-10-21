@@ -3,7 +3,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "TopoNetX"
-copyright = "2022-2023, PyT-Team, Inc."
+copyright = "2022-2023, PyT-Team, Inc."  # noqa: A001
 author = "PyT-Team Authors"
 language = "en"
 
@@ -66,7 +66,7 @@ html_theme_options = {
             "url": "https://github.com/pyt-team/TopoNetX",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
-        }
+        },
     ],
     "use_edit_page_button": True,
 }

@@ -1,10 +1,10 @@
 """Configure our testing suite."""
 
-import networkx
-import numpy
+import networkx as nx
+import numpy as np
 import pytest
 
-import toponetx
+import toponetx as tnx
 
 
 @pytest.fixture(autouse=True)
@@ -26,6 +26,6 @@ def doctest_default_imports(doctest_namespace):
     doctest_namespace : dict
         The namespace of the doctest.
     """
-    doctest_namespace["np"] = numpy
-    doctest_namespace["nx"] = networkx
-    doctest_namespace["tnx"] = toponetx
+    doctest_namespace["np"] = np
+    doctest_namespace["nx"] = nx
+    doctest_namespace["tnx"] = tnx

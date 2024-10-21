@@ -1355,7 +1355,7 @@ class ColoredHyperGraph(Complex):
         >>> CHG = tnx.ColoredHyperGraph.from_trimesh(mesh)
         >>> CHG.nodes
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def restrict_to_cells(self, cell_set):
         """Construct a Colored Hypergraph using a subset of the cells.

@@ -877,7 +877,10 @@ class SimplicialComplex(Complex):
                 values.append((-1) ** i)
                 face = frozenset(simplex).difference({left_out})
                 idx_faces.append(simplex_dict_d_minus_1[tuple(sorted(face))])
-        assert len(values) == (rank + 1) * len(simplex_dict_d)
+
+        if len(values) != (rank + 1) * len(simplex_dict_d):
+            raise RuntimeError("Error in computing the incidence matrix.")
+
         boundary = csr_matrix(
             (values, (idx_faces, idx_simplices)),
             dtype=np.float32,
@@ -1313,8 +1316,7 @@ class SimplicialComplex(Complex):
         G : networkx.Graph
             A networkx graph instance.
         """
-        _simplices = list(G.edges) + list(map(lambda n: [n], G.nodes))
-
+        _simplices = [[n] for n in G.nodes] + list(G.edges)
         self.add_simplices_from(_simplices)
 
     def restrict_to_simplices(self, cell_set) -> Self:

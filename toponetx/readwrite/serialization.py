@@ -1,6 +1,7 @@
 """Read and write complexes as pickled objects."""
 
 import pickle
+from pathlib import Path
 
 __all__ = ["to_pickle", "load_from_pickle"]
 
@@ -12,10 +13,10 @@ def to_pickle(obj, filename: str) -> None:
     ----------
     obj : object
         Object to write.
-    filename : str
+    filename : Path or str
         Filename.
     """
-    with open(filename, "wb") as f:
+    with Path(filename).open("wb") as f:
         pickle.dump(obj, f)
 
 
@@ -24,7 +25,7 @@ def load_from_pickle(filepath):
 
     Parameters
     ----------
-    filepath : str
+    filepath : Path or str
         Filepath.
 
     Returns
@@ -32,5 +33,5 @@ def load_from_pickle(filepath):
     object
         Object.
     """
-    with open(filepath, "rb") as f:
-        return pickle.load(f)
+    with Path(filepath).open("rb") as f:
+        return pickle.load(f)  # noqa: S301
