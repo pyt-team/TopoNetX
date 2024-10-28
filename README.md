@@ -35,7 +35,7 @@ Many complex systems, ranging from socio-economic systems such as social network
 For instance, a social network may be abstracted as a set vertices corresponding to people linked via various social interactions, including pairwise relationships such as friendships and higher-order relationships involving multiple people.
 This _relational data_ can be abstracted as a topological domain such as a graph, hypergraph, simplicial, cellular path or combinatorial complex, which enables the principled analysis of such data.
 
-`TopoNetX` provides a unified platform to compute with such relational data.
+`TopoNetX` provides a unified platform to compute with such relational data. 'TopoNetX' is a part of ['TopoX'](https://pyt-team.github.io/)
 
 ## 🎯 Scope and functionality
 
