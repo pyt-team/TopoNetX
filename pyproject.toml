@@ -71,7 +71,7 @@ all = [
     "TopoNetX[doc, dev]",
 
     # optional packages that are not required to run the library
-    "gudhi",
+    "gudhi >= 3.9.0",
     "hypernetx < 2.0.0",
     "spharapy"
 ]
