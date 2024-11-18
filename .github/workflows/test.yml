@@ -22,14 +22,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  pytest:
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         flavor: ["dev", "all"]
 
     steps:

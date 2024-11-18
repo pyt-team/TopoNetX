@@ -1,5 +1,7 @@
 """Test simplicial complex class."""
 
+from unittest.mock import Mock
+
 import networkx as nx
 import numpy as np
 import pytest
@@ -9,11 +11,6 @@ from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.simplex import Simplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.datasets.mesh import stanford_bunny
-
-try:
-    from gudhi import SimplexTree
-except ImportError:
-    SimplexTree = None
 
 try:
     import hypernetx as hnx
@@ -819,13 +816,31 @@ class TestSimplicialComplex:
         assert len(result.cells) == len(expected_result.cells)
         assert len(result.nodes) == len(expected_result.nodes)
 
-    @pytest.mark.skipif(
-        SimplexTree is None, reason="Optional dependency 'gudhi' not installed."
-    )
     def test_from_gudhi(self):
         """Create a SimplicialComplex from a Gudhi SimplexTree and compare the number of simplices."""
-        tree = SimplexTree()
-        tree.insert([1, 2, 3, 5])
+        gudhi_simplices = [
+            ([1, 2, 3, 5], 0.0),
+            ([1, 2, 3], 0.0),
+            ([1, 2, 5], 0.0),
+            ([1, 2], 0.0),
+            ([1, 3, 5], 0.0),
+            ([1, 3], 0.0),
+            ([1, 5], 0.0),
+            ([1], 0.0),
+            ([2, 3, 5], 0.0),
+            ([2, 3], 0.0),
+            ([2, 5], 0.0),
+            ([2], 0.0),
+            ([3, 5], 0.0),
+            ([3], 0.0),
+            ([5], 0.0),
+        ]
+        tree = Mock(["get_skeleton", "dimension"])
+        tree.get_skeleton.side_effect = lambda i: (
+            s for s in gudhi_simplices if len(s[0]) <= i + 1
+        )
+        tree.dimension.return_value = 3
+
         expected_result = SimplicialComplex()
         expected_result.add_simplex((1, 2, 3, 5))
         result = SimplicialComplex.from_gudhi(tree)
