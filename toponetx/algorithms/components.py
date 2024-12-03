@@ -10,10 +10,10 @@ from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 
 __all__ = [
-    "s_connected_components",
-    "s_component_subcomplexes",
-    "connected_components",
     "connected_component_subcomplexes",
+    "connected_components",
+    "s_component_subcomplexes",
+    "s_connected_components",
 ]
 
 # In this module, only cell complexes, combinatorial complexes and colored

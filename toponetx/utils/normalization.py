@@ -6,19 +6,19 @@ from numpy.linalg import pinv
 from scipy.sparse import csr_matrix, diags
 
 __all__ = [
-    "compute_laplacian_normalized_matrix",
-    "compute_x_laplacian_normalized_matrix",
-    "compute_kipf_adjacency_normalized_matrix",
-    "compute_xu_asymmetric_normalized_matrix",
-    "compute_bunch_normalized_matrices",
-    "_compute_B1_normalized_matrix",
     "_compute_B1T_normalized_matrix",
-    "_compute_B2_normalized_matrix",
+    "_compute_B1_normalized_matrix",
     "_compute_B2T_normalized_matrix",
+    "_compute_B2_normalized_matrix",
     "_compute_D1",
     "_compute_D2",
     "_compute_D3",
     "_compute_D5",
+    "compute_bunch_normalized_matrices",
+    "compute_kipf_adjacency_normalized_matrix",
+    "compute_laplacian_normalized_matrix",
+    "compute_x_laplacian_normalized_matrix",
+    "compute_xu_asymmetric_normalized_matrix",
 ]
 
 

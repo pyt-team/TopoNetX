@@ -11,8 +11,8 @@ from toponetx.transform import graph_to_clique_complex
 
 __all__ = [
     "linial_meshulam_complex",
-    "random_clique_complex",
     "multiparameter_linial_meshulam_complex",
+    "random_clique_complex",
 ]
 
 

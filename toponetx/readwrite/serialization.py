@@ -3,7 +3,7 @@
 import pickle
 from pathlib import Path
 
-__all__ = ["to_pickle", "load_from_pickle"]
+__all__ = ["load_from_pickle", "to_pickle"]
 
 
 def to_pickle(obj, filename: str) -> None:

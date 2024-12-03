@@ -12,7 +12,7 @@ from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 from toponetx.transform.graph_to_simplicial_complex import graph_to_clique_complex
 
-__all__ = ["karate_club", "coauthorship"]
+__all__ = ["coauthorship", "karate_club"]
 
 DIR = Path(__file__).parent
 

@@ -111,7 +111,7 @@ select = [
     "SLOT", # slot rules
     "SIM", # code simplifications
     "TID", # tidy imports
-    "TCH", # type checking rules
+    "TC", # type checking rules
     "PTH", # use pathlib
     "PD", # pandas rules
     "PLC", # pylint conventions

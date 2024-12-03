@@ -11,7 +11,7 @@ import requests
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
-__all__ = ["stanford_bunny", "shrec_16", "coseg"]
+__all__ = ["coseg", "shrec_16", "stanford_bunny"]
 
 DIR = Path(__file__).parent
 SHREC_DS_MAP = {

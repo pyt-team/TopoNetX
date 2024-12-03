@@ -1,10 +1,10 @@
 """Base errors and exceptions for TopoNetX."""
 
 __all__ = [
-    "TopoNetXException",
     "TopoNetXAlgorithmError",
-    "TopoNetXUnfeasible",
+    "TopoNetXException",
     "TopoNetXNoPath",
+    "TopoNetXUnfeasible",
 ]
 
 
