@@ -1401,7 +1401,7 @@ class SimplicialComplex(Complex):
         return [tuple(s) for s in self.simplices if self.is_maximal(s)]
 
     @classmethod
-    def from_spharpy(cls, mesh) -> Self:
+    def from_spharapy(cls, mesh) -> Self:
         """Import from sharpy.
 
         Parameters
@@ -1423,7 +1423,7 @@ class SimplicialComplex(Complex):
         ...     [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
         ... )
 
-        >>> SC = tnx.SimplicialComplex.from_spharpy(mesh)
+        >>> SC = tnx.SimplicialComplex.from_spharapy(mesh)
         """
         vertices = np.array(mesh.vertlist)
         SC = cls(mesh.trilist)
@@ -1612,7 +1612,7 @@ class SimplicialComplex(Complex):
         )
 
     def to_spharapy(self, vertex_position_name: str = "position"):
-        """Convert to sharapy.
+        """Convert to spharapy.
 
         Parameters
         ----------
@@ -1635,7 +1635,7 @@ class SimplicialComplex(Complex):
         >>> import spharapy.spharabasis as sb
         >>> import spharapy.datasets as sd
         >>> mesh = tm.TriMesh([[0, 1, 2]], [[0, 0, 0], [0, 0, 1], [0, 1, 0]])
-        >>> SC = tnx.SimplicialComplex.from_spharpy(mesh)
+        >>> SC = tnx.SimplicialComplex.from_spharapy(mesh)
         >>> mesh2 = SC.to_spharapy()
         >>> mesh2.vertlist == mesh.vertlist
         >>> mesh2.trilist == mesh.trilist
