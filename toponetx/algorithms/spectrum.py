@@ -13,16 +13,16 @@ from toponetx.classes.path_complex import PathComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
 __all__ = [
-    "hodge_laplacian_eigenvectors",
-    "set_hodge_laplacian_eigenvector_attrs",
     "_normalize",
+    "cell_complex_adjacency_spectrum",
+    "cell_complex_hodge_laplacian_spectrum",
+    "combinatorial_complex_adjacency_spectrum",
+    "hodge_laplacian_eigenvectors",
     "laplacian_beltrami_eigenvectors",
     "laplacian_spectrum",
-    "cell_complex_hodge_laplacian_spectrum",
-    "simplicial_complex_hodge_laplacian_spectrum",
-    "cell_complex_adjacency_spectrum",
+    "set_hodge_laplacian_eigenvector_attrs",
     "simplicial_complex_adjacency_spectrum",
-    "combinatorial_complex_adjacency_spectrum",
+    "simplicial_complex_hodge_laplacian_spectrum",
 ]
 
 
@@ -42,11 +42,11 @@ def _normalize(f: dict[Any, Any]) -> dict[Any, Any]:
     minf = min(f.values())
     maxf = max(f.values())
     f_normalized = {}
-    for v in f:
+    for key, value in f.items():
         if minf == maxf:
-            f_normalized[v] = 0
+            f_normalized[key] = 0
         else:
-            f_normalized[v] = (f[v] - minf) / (maxf - minf)
+            f_normalized[key] = (value - minf) / (maxf - minf)
 
     return f_normalized
 

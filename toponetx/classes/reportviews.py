@@ -17,12 +17,12 @@ from toponetx.classes.simplex import Simplex
 
 __all__ = [
     "AtomView",
-    "HyperEdgeView",
-    "ColoredHyperEdgeView",
     "CellView",
-    "SimplexView",
+    "ColoredHyperEdgeView",
+    "HyperEdgeView",
     "NodeView",
     "PathView",
+    "SimplexView",
 ]
 
 T_Atom = TypeVar("T_Atom", bound=Atom)

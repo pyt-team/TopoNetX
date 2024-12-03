@@ -3,7 +3,7 @@
 from toponetx.classes import CellComplex
 from toponetx.classes.cell import Cell
 
-__all__ = ["single_cell_complex", "pyrmaid_complex"]
+__all__ = ["pyrmaid_complex", "single_cell_complex"]
 
 
 def single_cell_complex(n: int) -> CellComplex:

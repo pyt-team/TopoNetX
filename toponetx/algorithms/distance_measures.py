@@ -8,7 +8,7 @@ from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.combinatorial_complex import CombinatorialComplex
 
-__all__ = ["node_diameters", "cell_diameters", "diameter", "cell_diameter"]
+__all__ = ["cell_diameter", "cell_diameters", "diameter", "node_diameters"]
 
 # In this module, only cell complexes, combinatorial complexes and colored
 # hypergraphs are supported.

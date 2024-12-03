@@ -30,11 +30,11 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 __all__ = [
-    "sparse_array_to_neighborhood_list",
+    "compute_set_incidence",
+    "incidence_to_adjacency",
     "neighborhood_list_to_neighborhood_dict",
     "sparse_array_to_neighborhood_dict",
-    "incidence_to_adjacency",
-    "compute_set_incidence",
+    "sparse_array_to_neighborhood_list",
 ]
 
 

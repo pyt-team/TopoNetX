@@ -10,9 +10,9 @@ from toponetx.classes import CellComplex, SimplicialComplex
 
 __all__ = [
     "generate_atomlist",
-    "write_atomlist",
     "load_from_atomlist",
     "parse_atomlist",
+    "write_atomlist",
 ]
 
 

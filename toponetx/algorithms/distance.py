@@ -11,7 +11,7 @@ from toponetx.classes.combinatorial_complex import CombinatorialComplex
 from toponetx.classes.hyperedge import HyperEdge
 from toponetx.exception import TopoNetXNoPath
 
-__all__ = ["distance", "cell_distance"]
+__all__ = ["cell_distance", "distance"]
 
 # In this module, only cell complexes, combinatorial complexes and colored
 # hypergraphs are supported.
