@@ -31,6 +31,44 @@ class Atom(abc.ABC, Generic[AtomCollectionType]):
         self._attributes = {}
         self._attributes.update(kwargs)
 
+    def __eq__(self, other: Any) -> bool:
+        """Return True if the given atom is equal to this atom.
+
+        Atoms are considered equal if they have the same elements but may have
+        different attributes.
+
+        Parameters
+        ----------
+        other : Any
+            The atom to compare.
+
+        Returns
+        -------
+        bool
+            Returns `True` if the given atom is equal to this atom and `False` otherwise.
+
+        Example
+        -------
+        >>> s1 = tnx.Simplex((1, 2), weight=1)
+        >>> s2 = tnx.Simplex((1, 2), weight=2)
+        >>> s3 = tnx.Simplex((1, 2, 3))
+        >>> s1 == s2
+        True
+        >>> s1 == s3
+        False
+        """
+        return type(self) is type(other) and self.elements == other.elements
+
+    def __hash__(self) -> int:
+        """Return the hash of the atom.
+
+        Returns
+        -------
+        int
+            The hash of the atom.
+        """
+        return hash(self.elements)
+
     def __len__(self) -> int:
         """Return the number of elements in the atom.
 

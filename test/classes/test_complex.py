@@ -3,6 +3,24 @@
 import pytest
 
 from toponetx.classes.complex import Complex
+from toponetx.classes.hyperedge import HyperEdge
+from toponetx.classes.simplex import Simplex
+
+
+class TestAtom:
+    """Test the Atom class."""
+
+    def test_atoms_equal(self):
+        """Test if two atoms are equal."""
+        h1 = HyperEdge((1, 2))
+        s1 = Simplex((1, 2), weight=1)
+        s2 = Simplex((1, 2), weight=2)
+        s3 = Simplex((1, 2, 3))
+
+        assert s1 == s1
+        assert s1 == s2
+        assert s1 != s3
+        assert s1 != h1
 
 
 class TestComplex:
