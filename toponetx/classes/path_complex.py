@@ -156,7 +156,7 @@ class PathComplex(Complex):
                         tmp_paths.append(tuple(path))
                     else:  # path is a Path object
                         tmp_paths.append(path)
-            self.add_paths_from(set(tmp_paths))
+            self.add_paths_from(tmp_paths)
         elif paths is not None:
             raise TypeError(
                 "Input paths must be a graph or an iterable of paths as lists or tuples."

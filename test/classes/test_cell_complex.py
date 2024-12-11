@@ -1137,10 +1137,7 @@ class TestCellComplex:
         CC.add_cell([1, 2, 3, 4], rank=2)
         CC.add_cell([1, 2, 3, 4], rank=2)
         CC.add_cell([2, 3, 4, 1], rank=2)
-        CC.add_cell(
-            [1, 2, 4],
-            rank=2,
-        )
+        CC.add_cell([1, 2, 4], rank=2)
         CC.add_cell([3, 4, 8], rank=2)
         assert len(CC.cells) == 5
         CC.remove_equivalent_cells()

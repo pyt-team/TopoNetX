@@ -90,11 +90,12 @@ class AtomView(ABC, Generic[T_Atom]):
 class CellView(AtomView[Cell]):
     """A CellView class for cells of a CellComplex."""
 
+    # Dictionary to hold cells, with keys being the tuple that defines the cell, and
+    # values being dictionaries of cell objects with different attributes
+    _cells: dict[tuple[Hashable, ...], dict[int, Cell]]
+
     def __init__(self) -> None:
-        # Initialize a dictionary to hold cells, with keys being the tuple
-        # that defines the cell, and values being dictionaries of cell objects
-        # with different attributes
-        self._cells: dict[tuple[Hashable, ...], dict[int, Cell]] = {}
+        self._cells = {}
 
     def __getitem__(self, cell: Any) -> dict[Hashable, Any]:
         """Return the attributes of a given cell.

@@ -1329,18 +1329,16 @@ class CellComplex(Complex):
         >>> print(CC.cells)
         >>> CC.remove_equivalent_cells()
         """
+        # delete all cells that are added multiple times
+        for cell in self._cells._cells:
+            if len(self._cells._cells[cell]) > 1:
+                for key in list(self._cells._cells[cell].keys())[1:]:
+                    self._delete_cell(cell, key)
+
         equiv_classes = self._cell_equivalence_class()
         for c in list(self.cells):
             if c not in equiv_classes:
-                d = self._cells._cells[c.elements]
-                if len(d) == 1:
-                    self._delete_cell(c)
-                else:
-                    d_c = dict(d)
-                    for k in d_c:
-                        if len(d) == 1:
-                            break
-                        self._delete_cell(c, k)
+                self._delete_cell(c)
 
     def is_insertable_cycle(
         self,
