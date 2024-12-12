@@ -213,9 +213,7 @@ class PathComplex(Complex):
         """
         new_paths = set()
         if isinstance(path, int | str):
-            path = [
-                path,
-            ]
+            path = [path]
         if isinstance(path, list | tuple | Path):
             if not isinstance(path, Path):  # path is a list or tuple
                 path_ = tuple(path)
@@ -1095,19 +1093,17 @@ class PathComplex(Complex):
         **attr : keyword arguments
             The attributes to update.
         """
-        path_ = path.elements if isinstance(path, Path) else tuple(path)
-        if isinstance(path, Path):  # update attributes for PathView() and _G
-            self._path_set.faces_dict[len(path_) - 1][path_].update(path._attributes)
-            if len(path_) == 1:
-                self._G.add_node(path_[0], **path._attributes)
-            elif len(path_) == 2:
-                self._G.add_edge(path_[0], path_[1], **path._attributes)
+        if isinstance(path, Path):
+            path_ = path.elements
+            attr = path._attributes | attr
         else:
-            self._path_set.faces_dict[len(path_) - 1][path_].update(attr)
-            if len(path_) == 1:
-                self._G.add_node(path_[0], **attr)
-            elif len(path_) == 2:
-                self._G.add_edge(path_[0], path_[1], **attr)
+            path_ = tuple(path)
+
+        self._path_set.faces_dict[len(path_) - 1][path_].update(attr)
+        if len(path_) == 1:
+            self._G.add_node(path_[0], **attr)
+        elif len(path_) == 2:
+            self._G.add_edge(path_[0], path_[1], **attr)
 
     def __contains__(self, atom: Any) -> bool:
         """Check if an atom is in the path complex.
