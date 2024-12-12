@@ -2,9 +2,15 @@
 
 import pytest
 
-from toponetx.classes.complex import Complex
+from toponetx.classes.cell import Cell
+from toponetx.classes.cell_complex import CellComplex
+from toponetx.classes.colored_hypergraph import ColoredHyperGraph
+from toponetx.classes.complex import Atom, Complex
 from toponetx.classes.hyperedge import HyperEdge
+from toponetx.classes.path import Path
+from toponetx.classes.path_complex import PathComplex
 from toponetx.classes.simplex import Simplex
+from toponetx.classes.simplicial_complex import SimplicialComplex
 
 
 class TestAtom:
@@ -25,6 +31,68 @@ class TestAtom:
 
 class TestComplex:
     """Test the Complex abstract class."""
+
+    complex_classes = (CellComplex, ColoredHyperGraph, PathComplex, SimplicialComplex)
+    atom_classes = (Cell, HyperEdge, Path, Simplex)
+    add_atom_method = ("add_cell", "add_cell", "add_path", "add_simplex")
+
+    @pytest.mark.parametrize(
+        "complex_class,atom_class,add_method",
+        zip(complex_classes, atom_classes, add_atom_method, strict=True),
+    )
+    def test_add_atom_with_attribute(
+        self, complex_class: type[Complex], atom_class: type[Atom], add_method: str
+    ) -> None:
+        """Test adding an atom with an attribute.
+
+        Parameters
+        ----------
+        complex_class : type[Complex]
+            The complex class to test.
+        atom_class : type[Atom]
+            The atom class to test.
+        add_method : str
+            The name of the method to add the atom to the complex.
+        """
+        complex_ = complex_class()
+        atom1 = atom_class((1, 2, 3), weight=1)
+        atom2 = atom_class((2, 3, 4))
+        add_func = getattr(complex_, add_method)
+
+        add_func(atom1)
+        assert atom1 in complex_
+        assert complex_[atom1]["weight"] == 1
+
+        add_func(atom2, weight=2)
+        assert atom2 in complex_
+        assert complex_[atom2]["weight"] == 2
+
+    @pytest.mark.parametrize(
+        "complex_class,atom_class,add_method",
+        zip(complex_classes, atom_classes, add_atom_method, strict=True),
+    )
+    def test_add_atom_attribute_precedence(
+        self, complex_class: type[Complex], atom_class: type[Atom], add_method: str
+    ) -> None:
+        """Test that explicitly added attributes take precedence.
+
+        Parameters
+        ----------
+        complex_class : type[Complex]
+            The complex class to test.
+        atom_class : type[Atom]
+            The atom class to test.
+        add_method : str
+            The name of the method to add the atom to the complex.
+        """
+        complex_ = complex_class()
+        atom = atom_class((1, 2, 3), weight=1)
+
+        add_func = getattr(complex_, add_method)
+        add_func(atom, weight=2)
+
+        assert atom in complex_
+        assert complex_[atom]["weight"] == 2
 
     def test_complex_is_abstract(self):
         """Test if the Complex abstract class is abstract."""
