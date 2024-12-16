@@ -1,7 +1,6 @@
 """Various examples of named meshes represented as complexes."""
 
 import zipfile
-from io import BytesIO
 from pathlib import Path
 from typing import Literal, overload
 
@@ -10,31 +9,20 @@ import requests
 
 from toponetx.classes.cell_complex import CellComplex
 from toponetx.classes.simplicial_complex import SimplicialComplex
+from toponetx.readwrite.atomlist import load_from_atomlist
 
 __all__ = ["coseg", "shrec_16", "stanford_bunny"]
 
 DIR = Path(__file__).parent
 SHREC_DS_MAP = {
-    "full": ("shrec", "https://github.com/mhajij/shrec_16/raw/main/shrec.zip"),
-    "small": (
-        "small_shrec",
-        "https://github.com/mhajij/shrec_16/raw/main/small_shrec.zip",
-    ),
+    "full": "https://github.com/pyt-team/topological-datasets/raw/aa3ec28b1166f7713e872011df1ff9e1136d92ae/resources/shrec16_full.zip",
+    "small": "https://github.com/pyt-team/topological-datasets/raw/aa3ec28b1166f7713e872011df1ff9e1136d92ae/resources/shrec16_small.zip",
 }
 
 COSEG_DS_MAP = {
-    "alien": (
-        "coseg_alien",
-        "https://github.com/mhajij/shrec_16/raw/main/coseg_alien.zip",
-    ),
-    "chair": (
-        "coseg_chairs",
-        "https://github.com/mhajij/shrec_16/raw/main/coseg_chairs.zip",
-    ),
-    "vase": (
-        "coseg_vases",
-        "https://github.com/mhajij/shrec_16/raw/main/coseg_vases.zip",
-    ),
+    "alien": "https://github.com/pyt-team/topological-datasets/raw/aa3ec28b1166f7713e872011df1ff9e1136d92ae/resources/coseg_alien.zip",
+    "chair": "https://github.com/pyt-team/topological-datasets/raw/aa3ec28b1166f7713e872011df1ff9e1136d92ae/resources/coseg_chair.zip",
+    "vase": "https://github.com/pyt-team/topological-datasets/raw/aa3ec28b1166f7713e872011df1ff9e1136d92ae/resources/coseg_vase.zip",
 }
 
 
@@ -138,29 +126,52 @@ def shrec_16(size: Literal["full", "small"] = "full"):
     >>> testing_face_feat = shrec_testing["face_feat"]
     """
     if size not in SHREC_DS_MAP:
-        raise ValueError(f"size must be 'full' or 'small' got {size}.")
-    ds_name, url = SHREC_DS_MAP[size]
+        raise ValueError(
+            f"Parameter `size` must be one of {list(SHREC_DS_MAP.keys())}, got {size}."
+        )
+    url = SHREC_DS_MAP[size]
 
-    training = DIR / f"{ds_name}_training.npz"
-    testing = DIR / f"{ds_name}_testing.npz"
-
-    if not training.exists() or not testing.exists():
-        print(f"downloading shrec 16 {size} dataset...\n")
+    cache_file = DIR / f"shrec_{size}.zip"
+    if not cache_file.exists():
         r = requests.get(url, timeout=10)
-        with zipfile.ZipFile(BytesIO(r.content)) as zip_ref:
-            zip_ref.extractall(DIR)
-        print("done!")
+        with cache_file.open("wb") as f:
+            f.write(r.content)
 
-    if training.exists() and testing.exists():
-        print(f"Loading shrec 16 {size} dataset...\n")
-        shrec_training = np.load(training, allow_pickle=True)
-        shrec_testing = np.load(testing, allow_pickle=True)
-        print("done!")
-        return shrec_training, shrec_testing
+    with zipfile.ZipFile(cache_file) as zip_ref:
+        train_complexes = []
+        test_complexes = []
 
-    raise RuntimeError(
-        f"Files couldn't be found in folder {DIR}, fail to load the dataset."
-    )
+        for file in zip_ref.namelist():
+            if file.endswith(".atomlist"):
+                i = int(file.split("/")[1].split(".")[0])
+                SC = load_from_atomlist(zip_ref.open(file), complex_type="simplicial")
+                if "train" in file:
+                    train_complexes.append((i, SC))
+                if "test" in file:
+                    test_complexes.append((i, SC))
+
+        # `zip_ref.namelist` does not sort the files in the expected order
+        train_complexes = [x[1] for x in sorted(train_complexes)]
+        test_complexes = [x[1] for x in sorted(test_complexes)]
+
+        train_data = {
+            "complexes": train_complexes,
+            "label": np.load(zip_ref.open("train/labels.npy")),
+            "node_feat": np.load(
+                zip_ref.open("train/node_feat.npy"), allow_pickle=True
+            ),
+            "edge_feat": np.load(zip_ref.open("train/edge_feat.npy")),
+            "face_feat": np.load(zip_ref.open("train/face_feat.npy")),
+        }
+        test_data = {
+            "complexes": test_complexes,
+            "label": np.load(zip_ref.open("test/labels.npy")),
+            "node_feat": np.load(zip_ref.open("test/node_feat.npy")),
+            "edge_feat": np.load(zip_ref.open("test/edge_feat.npy")),
+            "face_feat": np.load(zip_ref.open("test/face_feat.npy")),
+        }
+
+    return train_data, test_data
 
 
 def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
@@ -206,24 +217,30 @@ def coseg(data: Literal["alien", "vase", "chair"] = "alien"):
     """
     if data not in COSEG_DS_MAP:
         raise ValueError(f"data must be 'alien', 'vase', or 'chair' got {data}.")
-    ds_name, url = COSEG_DS_MAP[data]
+    url = COSEG_DS_MAP[data]
 
-    unziped_file = DIR / f"{ds_name}.npz"
-
-    if not unziped_file.exists():
-        print(f"downloading {data} dataset...\n")
+    cache_file = DIR / f"coseg_{data}.zip"
+    if not cache_file.exists():
         r = requests.get(url, timeout=10)
-        with zipfile.ZipFile(BytesIO(r.content)) as zip_ref:
-            zip_ref.extractall(DIR)
-        print("done!")
+        with cache_file.open("wb") as f:
+            f.write(r.content)
 
-    if unziped_file.exists():
-        print("Loading dataset...\n")
-        coseg = np.load(unziped_file, allow_pickle=True)
+    with zipfile.ZipFile(cache_file) as zip_ref:
+        SCs = [
+            (
+                int(file.split(".")[0]),
+                load_from_atomlist(zip_ref.open(file), complex_type="simplicial"),
+            )
+            for file in zip_ref.namelist()
+            if file.endswith(".atomlist")
+        ]
 
-        print("done!")
-        return coseg
+        SCs = [x[1] for x in sorted(SCs)]
 
-    raise RuntimeError(
-        f"Files couldn't be found in folder {DIR}, fail to load the dataset."
-    )
+        return {
+            "complexes": SCs,
+            "face_label": np.load(zip_ref.open("face_label.npy"), allow_pickle=True),
+            "node_feat": np.load(zip_ref.open("node_feat.npy"), allow_pickle=True),
+            "edge_feat": np.load(zip_ref.open("edge_feat.npy"), allow_pickle=True),
+            "face_feat": np.load(zip_ref.open("face_feat.npy"), allow_pickle=True),
+        }
