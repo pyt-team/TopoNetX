@@ -57,6 +57,7 @@ lint = [
 test = [
     "pytest",
     "pytest-cov",
+    "pytest-xdist",
     "coverage",
     "jupyter",
 
@@ -153,7 +154,7 @@ plugins = "numpy.typing.mypy_plugin"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+addopts = ["--numprocesses=auto", "-ra", "--showlocals", "--strict-markers", "--strict-config"]
 xfail_strict = true
 filterwarnings = [
     "error",
