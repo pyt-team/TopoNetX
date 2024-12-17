@@ -576,12 +576,10 @@ class TestReportViews_SimplexView:
 
     def test_getitem(self):
         """Test __getitem__ method of the SimplexView."""
-        assert self.simplex_view.__getitem__((1, 2)) == {
-            "is_maximal": True,
-            "membership": set(),
-        }
+        assert self.simplex_view[(1, 2)] == {}
+        assert self.simplex_view[1] == {}
         with pytest.raises(KeyError):
-            self.simplex_view.__getitem__([5])
+            _ = self.simplex_view[(5,)]
 
     def test_str(self):
         """Test __str__ method of the SimplexView."""
@@ -589,6 +587,10 @@ class TestReportViews_SimplexView:
             self.simplex_view.__str__()
             == "SimplexView([(1,), (2,), (3,), (4,), (1, 2), (2, 3), (3, 4)])"
         )
+
+    def test_shape(self) -> None:
+        """Test the shape method of the SimplexView."""
+        assert self.simplex_view.shape == (4, 3)
 
 
 class TestReportViews_NodeView:
@@ -610,15 +612,12 @@ class TestReportViews_NodeView:
 
     def test_getitem(self):
         """Test __getitem__ method of the NodeView."""
-        assert self.node_view.__getitem__(Simplex([1])) == {
-            "is_maximal": False,
-            "membership": {frozenset({1, 2})},
-        }
+        assert self.node_view[Simplex([1])] == {}
         with pytest.raises(KeyError):
-            self.node_view.__getitem__([1, 2])
+            _ = self.node_view[(1, 2)]
 
         # test for nodes of ColoredHyperGraph.
-        assert self.node_view_1.__getitem__([1]) == {"weight": 1}
+        assert self.node_view_1[(1,)] == {"weight": 1}
 
 
 class TestReportViews_PathView:
