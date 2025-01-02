@@ -21,7 +21,7 @@ class TestMeshDatasets:
         with pytest.raises(ValueError):
             stanford_bunny("polyhedral")
 
-    def test_shrec_16(self):
+    def test_shrec_16_small(self):
         """Test shrec_16."""
         shrec_training, shrec_testing = shrec_16(size="small")
 
@@ -36,6 +36,23 @@ class TestMeshDatasets:
         assert len(shrec_training["face_feat"]) == 100
         assert len(shrec_testing["face_feat"]) == 20
 
+    def test_shrec_16_full(self):
+        """Test shrec_16."""
+        shrec_training, shrec_testing = shrec_16(size="full")
+
+        assert len(shrec_training["complexes"]) == 480
+        assert len(shrec_testing["complexes"]) == 120
+        assert len(shrec_training["label"]) == 480
+        assert len(shrec_testing["label"]) == 120
+        assert len(shrec_training["node_feat"]) == 480
+        assert len(shrec_testing["node_feat"]) == 120
+        assert len(shrec_training["edge_feat"]) == 480
+        assert len(shrec_testing["edge_feat"]) == 120
+        assert len(shrec_training["face_feat"]) == 480
+        assert len(shrec_testing["face_feat"]) == 120
+
+    def test_shrec_16_invalid(self):
+        """Test shrec_16."""
         with pytest.raises(ValueError):
             shrec_16(size="huge")
 
