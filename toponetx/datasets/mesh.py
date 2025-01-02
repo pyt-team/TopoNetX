@@ -166,7 +166,7 @@ def shrec_16(size: Literal["full", "small"] = "full"):
         test_data = {
             "complexes": test_complexes,
             "label": np.load(zip_ref.open("test/labels.npy")),
-            "node_feat": np.load(zip_ref.open("test/node_feat.npy")),
+            "node_feat": np.load(zip_ref.open("test/node_feat.npy"), allow_pickle=True),
             "edge_feat": np.load(zip_ref.open("test/edge_feat.npy")),
             "face_feat": np.load(zip_ref.open("test/face_feat.npy")),
         }
