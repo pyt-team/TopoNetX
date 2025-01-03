@@ -477,6 +477,7 @@ class TestCombinatorialComplex:
                 frozenset({6}): {"weight": 1},
             }
         }
+
         example.remove_nodes(HyperEdge([3]))
         assert example._complex_set.hyperedge_dict == {
             0: {frozenset({4}): {"weight": 1}, frozenset({6}): {"weight": 1}}
