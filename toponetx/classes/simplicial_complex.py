@@ -1350,7 +1350,7 @@ class SimplicialComplex(Complex, Generic[ElementType]):
                 yield simplex
 
     @classmethod
-    def from_spharpy(cls, mesh) -> Self:
+    def from_spharapy(cls, mesh) -> Self:
         """Import from sharpy.
 
         Parameters
@@ -1372,7 +1372,7 @@ class SimplicialComplex(Complex, Generic[ElementType]):
         ...     [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
         ... )
 
-        >>> SC = tnx.SimplicialComplex.from_spharpy(mesh)
+        >>> SC = tnx.SimplicialComplex.from_spharapy(mesh)
         """
         vertices = np.array(mesh.vertlist)
         SC = cls(mesh.trilist)
@@ -1388,6 +1388,23 @@ class SimplicialComplex(Complex, Generic[ElementType]):
             )
 
         return SC
+
+    @classmethod
+    @deprecated("`SimplicialComplex.from_spharpy` is deprecated and will be removed in the future, use `SimplicialComplex.from_spharapy` instead.")
+    def from_spharpy(cls, mesh) -> Self:
+        """Import from sharpy.
+
+        Parameters
+        ----------
+        mesh : spharapy.trimesh.TriMesh
+            The input spharapy object.
+
+        Returns
+        -------
+        SimplicialComplex
+            The resulting SimplicialComplex.
+        """
+        return cls.from_spharapy(mesh)
 
     def to_hasse_graph(self) -> nx.DiGraph:
         """Create the hasse graph corresponding to this simplicial complex.
@@ -1560,7 +1577,7 @@ class SimplicialComplex(Complex, Generic[ElementType]):
         return trimesh.Trimesh(faces=faces, vertices=vertices, process=False)
 
     def to_spharapy(self, vertex_position_name: str = "position"):
-        """Convert to sharapy.
+        """Convert to spharapy.
 
         Parameters
         ----------
@@ -1583,7 +1600,7 @@ class SimplicialComplex(Complex, Generic[ElementType]):
         >>> import spharapy.spharabasis as sb
         >>> import spharapy.datasets as sd
         >>> mesh = tm.TriMesh([[0, 1, 2]], [[0, 0, 0], [0, 0, 1], [0, 1, 0]])
-        >>> SC = tnx.SimplicialComplex.from_spharpy(mesh)
+        >>> SC = tnx.SimplicialComplex.from_spharapy(mesh)
         >>> mesh2 = SC.to_spharapy()
         >>> mesh2.vertlist == mesh.vertlist
         >>> mesh2.trilist == mesh.trilist

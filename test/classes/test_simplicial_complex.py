@@ -1076,12 +1076,32 @@ class TestSimplicialComplex:
     @pytest.mark.skipif(
         tm is None, reason="Optional dependency 'spharapy' not installed."
     )
-    def test_from_spharpy(self):
-        """Test the from_spharpy method of SimplicialComplex (support for spharpy trimesh)."""
+    def test_from_spharapy(self):
+        """Test the from_spharapy method of SimplicialComplex (support for spharapy trimesh)."""
         mesh = tm.TriMesh(
             [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
         )
-        SC = SimplicialComplex.from_spharpy(mesh)
+        SC = SimplicialComplex.from_spharapy(mesh)
+        simplices = SC.simplices
+        assert len(simplices) == 7
+        assert [0, 1, 2] in simplices
+        assert [0, 1] in simplices
+        assert [0, 2] in simplices
+        assert [1, 2] in simplices
+        assert [0] in simplices
+        assert [1] in simplices
+        assert [2] in simplices
+
+    @pytest.mark.skipif(
+        tm is None, reason="Optional dependency 'spharapy' not installed."
+    )
+    def test_from_spharpy(self):
+        """Test the deprecated from_spharpy method of SimplicialComplex (support for spharapy trimesh)."""
+        mesh = tm.TriMesh(
+            [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
+        )
+        with pytest.deprecated_call():
+            SC = SimplicialComplex.from_spharpy(mesh)
         simplices = SC.simplices
         assert len(simplices) == 7
         assert [0, 1, 2] in simplices
