@@ -1440,6 +1440,23 @@ class SimplicialComplex(Complex):
 
         return SC
 
+    @classmethod
+    @deprecated("`SimplicialComplex.from_spharpy` is deprecated and will be removed in the future, use `SimplicialComplex.from_spharapy` instead.")
+    def from_spharpy(cls, mesh) -> Self:
+        """Import from sharpy.
+
+        Parameters
+        ----------
+        mesh : spharapy.trimesh.TriMesh
+            The input spharapy object.
+
+        Returns
+        -------
+        SimplicialComplex
+            The resulting SimplicialComplex.
+        """
+        return cls.from_spharapy(mesh)
+
     def to_hasse_graph(self) -> nx.DiGraph:
         """Create the hasse graph corresponding to this simplicial complex.
 
