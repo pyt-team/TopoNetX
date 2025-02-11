@@ -23,37 +23,32 @@ concurrency:
 
 jobs:
   pytest:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-        flavor: ["dev", "all"]
+        flavor: ["none", "all"]
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-          cache-dependency-path: "pyproject.toml"
+          enable-cache: true
 
       - name: Install Package [${{ matrix.flavor }}]
-        run: |
-          pip install -e .[${{ matrix.flavor }}]
+        run: uv sync --extra ${{ matrix.flavor }}
 
       - name: Typecheck [mypy]
-        run: |
-          mypy -p toponetx
+        run: uv run mypy -p toponetx
         continue-on-error: true
 
       - name: Run tests [pytest]
-        run: |
-          pytest --cov --cov-report=xml:coverage.xml
+        run: uv run pytest --cov --cov-report=xml:coverage.xml
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5
