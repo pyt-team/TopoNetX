@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -41,24 +42,21 @@ dependencies=[
 ]
 
 [project.optional-dependencies]
-doc = [
-    "jupyter",
-    "nbsphinx",
-    "nbsphinx_link",
-    "numpydoc >= 1.8.0",
-    "sphinx",
-    "sphinx-copybutton",
-    "sphinx_gallery",
-    "pydata-sphinx-theme"
+all = [
+    "hypernetx ~= 2.3",
+    "spharapy"
 ]
-lint = [
-    "pre-commit"
-]
-test = [
+
+[project.urls]
+documentation="https://pyt-team.github.io/toponetx/"
+source="https://github.com/pyt-team/TopoNetX/"
+
+[dependency-groups]
+dev = [
+    "pre-commit",
     "pytest",
     "pytest-cov",
     "pytest-xdist",
-    "coverage",
     "jupyter",
 
     # mypy and typing stubs
@@ -67,18 +65,15 @@ test = [
     "types-requests"
 ]
 
-dev = ["TopoNetX[test, lint]"]
-all = [
-    "TopoNetX[doc, dev]",
-
-    # optional packages that are not required to run the library
-    "hypernetx ~=2.3",
-    "spharapy"
+docs = [
+    "nbsphinx",
+    "nbsphinx_link",
+    "numpydoc >= 1.8.0",
+    "sphinx",
+    "sphinx-copybutton",
+    "sphinx_gallery",
+    "pydata-sphinx-theme"
 ]
-
-[project.urls]
-documentation="https://pyt-team.github.io/toponetx/"
-source="https://github.com/pyt-team/TopoNetX/"
 
 [tool.ruff.format]
 docstring-code-format = true
