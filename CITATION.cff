@@ -1,0 +1,57 @@
+cff-version: 1.2.0
+title: "TopoX: A Suite of Python Packages for Machine Learning on Topological Domains"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - given-names: Mustafa
+    family-names: Hajij
+    email: mhajij@usfca.edu
+    orcid: 'https://orcid.org/0000-0002-2625-9286'
+  - given-names: Mathilde
+    family-names: Papillon
+    email: papillon@ucsb.edu
+    orcid: 'https://orcid.org/0000-0003-1674-4218'
+  - given-names: Florian
+    family-names: Frantzen
+    email: florian.frantzen@cs.rwth-aachen.de
+    orcid: 'https://orcid.org/0000-0003-0187-3738'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.7958503
+repository-code: 'https://github.com/pyt-team'
+url: 'https://pyt-team.github.io/'
+abstract: >-
+  We introduce TopoX, a Python software suite that provides
+  reliable and user-friendly building blocks for computing
+  and machine learning on topological domains that extend
+  graphs: hypergraphs, simplicial, cellular, path and
+  combinatorial complexes. TopoX consists of three packages:
+  TopoNetX facilitates constructing and computing on these
+  domains, including working with nodes, edges and
+  higher-order cells; TopoEmbedX provides methods to embed
+  topological domains into vector spaces, akin to popular
+  graph-based embedding algorithms such as node2vec;
+  TopoModelX is built on top of PyTorch and offers a
+  comprehensive toolbox of higher-order message passing
+  functions for neural networks on topological domains.
+license: MIT
+preferred-citation:
+  type: article
+  title: "TopoX: A Suite of Python Packages for Machine Learning on Topological Domains"
+  authors:
+    - given-names: Mustafa
+      family-names: Hajij
+      email: mhajij@usfca.edu
+      orcid: 'https://orcid.org/0000-0002-2625-9286'
+    - given-names: Mathilde
+      family-names: Papillon
+      email: papillon@ucsb.edu
+      orcid: 'https://orcid.org/0000-0003-1674-4218'
+    - given-names: Florian
+      family-names: Frantzen
+      email: florian.frantzen@cs.rwth-aachen.de
+      affiliation: RWTH Aachen University
+      orcid: 'https://orcid.org/0000-0003-0187-3738'
+  journal: Journal of Machine Learning Research
+  volume: 25
+  issue: 374
