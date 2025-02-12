@@ -1073,6 +1073,18 @@ class TestCellComplex:
         assert set(hx.nodes) == set(CC.nodes)
         assert len(hx.edges) == len(CC.edges) + len(CC.cells)
 
+    @pytest.mark.skipif(
+        hnx is not None, reason="Optional dependency 'hypernetx' installed."
+    )
+    def test_to_hypergraph_missing_dependency(self):
+        """Test that `to_hypergraph` raises a correct error when `hypernetx` is not installed."""
+        CC = CellComplex()
+        with pytest.raises(
+            RuntimeError,
+            match="Cannot transform cell complex to hypergraph, `hypernetx` is not installed.",
+        ):
+            CC.to_hypergraph()
+
     def test_to_combinatorial_complex(self):
         """Test the conversion of a cell complex to a combinatorial complex."""
         CC = CellComplex([[1, 2, 3], [4, 5]])

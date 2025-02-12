@@ -1741,13 +1741,18 @@ class SimplicialComplex(Complex, Generic[ElementType]):
             simplex.elements for simplex in self.get_all_maximal_simplices()
         )
 
-    def to_hypergraph(self) -> Hypergraph:
-        """Convert a simplicial complex to a hypergraph.
+    def to_hypergraph(self):
+        """Convert a simplicial complex to a `hypernetx` hypergraph.
 
         Returns
         -------
         Hypergraph
             The hypergraph corresponding to this simplicial complex.
+
+        Raises
+        ------
+        RuntimeError
+            If `hypernetx` is not installed
 
         Examples
         --------
@@ -1758,12 +1763,22 @@ class SimplicialComplex(Complex, Generic[ElementType]):
         >>> SC.to_hypergraph()
         Hypergraph({'e0': [1, 2], 'e1': [1, 3], 'e2': [1, 4], 'e3': [2, 3], 'e4': [2, 4], 'e5': [2, 5], 'e6': [1, 2, 3], 'e7': [1, 2, 4]},name=)
         """
-        hyperedges = [
-            list(cell)
-            for rank in range(1, self.dim + 1)
-            for cell in self.skeleton(rank)
-        ]
-        return Hypergraph(hyperedges, static=True)
+        if Hypergraph is None:
+            raise RuntimeError(
+                "Cannot transform simplicial complex to hypergraph, `hypernetx` is not installed."
+            )
+
+        edges = {}
+        edge_properties = {}
+
+        for simplex in filter(lambda s: len(s) > 1, self.simplices):
+            edges[str(list(simplex))] = simplex
+            edge_properties[str(list(simplex))] = self[simplex]
+
+        HG = Hypergraph(edges, edge_properties=edge_properties)
+        HG.add_nodes_from([(next(iter(node)), self[node]) for node in self.nodes])
+
+        return HG
 
     def to_combinatorial_complex(self):
         """Convert a simplicial complex to a combinatorial complex.
