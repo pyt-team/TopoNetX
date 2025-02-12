@@ -780,11 +780,22 @@ class TestSimplicialComplex:
                 "e5": [2, 5],
                 "e6": [1, 2, 3],
                 "e7": [1, 2, 4],
-            },
-            name="",
+            }
         )
         result = SC.to_hypergraph()
         assert len(result.edges) == len(expected_result.edges)
+
+    @pytest.mark.skipif(
+        hnx is not None, reason="Optional dependency 'hypernetx' installed."
+    )
+    def test_to_hypergraph_missing_dependency(self):
+        """Test that `to_hypergraph` raises a correct error when `hypernetx` is not installed."""
+        SC = SimplicialComplex()
+        with pytest.raises(
+            RuntimeError,
+            match="Cannot transform simplicial complex to hypergraph, `hypernetx` is not installed.",
+        ):
+            SC.to_hypergraph()
 
     def test_to_cell_complex(self):
         """Test to convert SimplicialComplex to Cell Complex."""

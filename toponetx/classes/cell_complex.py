@@ -33,10 +33,8 @@ __all__ = ["CellComplex"]
 
 try:
     from hypernetx import Hypergraph
-    from hypernetx.classes.entity import Entity
 except ImportError:
     Hypergraph = None
-    Entity = None
 
 
 class CellComplex(Complex):
@@ -2191,12 +2189,17 @@ class CellComplex(Complex):
         return CHG
 
     def to_hypergraph(self):
-        """Convert this cell complex to a hypergraph.
+        """Convert this cell complex to a `hypernetx` hypergraph.
 
         Returns
         -------
         Hypergraph
-            The hyergraph corresponding to this cell complex.
+            The hypergraph corresponding to this cell complex.
+
+        Raises
+        ------
+        RuntimeError
+            If `hypernetx` is not installed.
 
         Examples
         --------
@@ -2206,28 +2209,24 @@ class CellComplex(Complex):
         >>> CC.add_cell([5, 6, 7, 8], rank=2)
         >>> CC.to_hypergraph()
         """
-        from hypernetx.classes.entity import EntitySet
-
-        cells = []
-        cells.extend(
-            Entity(
-                str(list(cell.elements)),
-                elements=cell.elements,
-                **self.get_cell_data(cell, 2),
+        if Hypergraph is None:
+            raise RuntimeError(
+                "Cannot transform cell complex to hypergraph, `hypernetx` is not installed."
             )
-            for cell in self.cells
-        )
-        cells.extend(
-            Entity(str(list(cell)), elements=cell, **self.get_cell_data(cell, 1))
-            for cell in self.edges
-        )
-        E = EntitySet("CX_to_HG", elements=cells)
-        HG = Hypergraph(E)
-        nodes = [
-            Entity(cell, elements=[], **self.get_cell_data(cell, 0))
-            for cell in self.nodes
-        ]
-        HG._add_nodes_from(nodes)
+
+        edges = {}
+        edge_properties = {}
+
+        for edge in self.edges:
+            edges[str(list(edge))] = edge
+            edge_properties[str(list(edge))] = self.get_cell_data(edge, 1)
+        for cell in self.cells:
+            edges[str(list(cell))] = cell.elements
+            edge_properties[str(list(cell))] = self.get_cell_data(cell, 2)
+
+        HG = Hypergraph(edges, edge_properties=edge_properties)
+        HG.add_nodes_from([(node, self.get_cell_data(node, 0)) for node in self.nodes])
+
         return HG
 
     def is_connected(self):
