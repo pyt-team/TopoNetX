@@ -41,7 +41,12 @@ jobs:
           enable-cache: true
 
       - name: Install Package [${{ matrix.flavor }}]
-        run: uv sync --extra ${{ matrix.flavor }}
+        run: |
+          if [[ "${{ matrix.flavor }}" == "none" ]]; then
+            uv sync
+          else
+            uv sync --extra ${{ matrix.flavor }}
+          fi
 
       - name: Typecheck [mypy]
         run: uv run mypy -p toponetx
