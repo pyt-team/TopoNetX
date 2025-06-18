@@ -1390,7 +1390,9 @@ class SimplicialComplex(Complex, Generic[ElementType]):
         return SC
 
     @classmethod
-    @deprecated("`SimplicialComplex.from_spharpy` is deprecated and will be removed in the future, use `SimplicialComplex.from_spharapy` instead.")
+    @deprecated(
+        "`SimplicialComplex.from_spharpy` is deprecated and will be removed in the future, use `SimplicialComplex.from_spharapy` instead."
+    )
     def from_spharpy(cls, mesh) -> Self:
         """Import from sharpy.
 

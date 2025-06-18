@@ -243,7 +243,7 @@ class CellView(AtomView[Cell]):
         str
             The __repr__ representation of the cell view.
         """
-        return f"CellView({[self._cells[cell][key] for cell in self._cells for key in  self._cells[cell]] })"
+        return f"CellView({[self._cells[cell][key] for cell in self._cells for key in self._cells[cell]]})"
 
     def __str__(self) -> str:
         """Return a string representation of the cell view.
@@ -420,7 +420,7 @@ class ColoredHyperEdgeView(AtomView):
         str
             The __repr__ string representation of the hyperedges.
         """
-        return f"ColoredHyperEdgeView({[(tuple(x[0]),x[1]) for x in self]})"
+        return f"ColoredHyperEdgeView({[(tuple(x[0]), x[1]) for x in self]})"
 
     def __str__(self) -> str:
         """Return string representation of hyperedges.
@@ -430,7 +430,7 @@ class ColoredHyperEdgeView(AtomView):
         str
             The __str__ string representation of the hyperedges.
         """
-        return f"ColoredHyperEdgeView({[(tuple(x[0]),x[1]) for x in self]})"
+        return f"ColoredHyperEdgeView({[(tuple(x[0]), x[1]) for x in self]})"
 
     def skeleton(self, rank: int, store_hyperedge_key: bool = True):
         """Skeleton of the complex.
