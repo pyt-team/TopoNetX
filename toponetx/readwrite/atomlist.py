@@ -1,5 +1,6 @@
 """Read and write complexes as a list of their atoms."""
 
+from ast import literal_eval
 from collections.abc import Generator, Hashable, Iterable
 from itertools import combinations
 from typing import Literal, overload
@@ -263,8 +264,6 @@ def parse_atomlist(
     ValueError
         If the complex type is unknown.
     """
-    from ast import literal_eval
-
     domain: CellComplex | SimplicialComplex
     if complex_type == "cell":
         domain = CellComplex()

@@ -780,7 +780,7 @@ class CellComplex(Complex):
                         cell = list(cell)
 
                     if self.is_insertable_cycle(cell, check_skeleton):
-                        edges_cell = set(zip_longest(cell, cell[1:] + [cell[0]]))
+                        edges_cell = set(zip_longest(cell, [*cell[1:], cell[0]]))
                         self._G.add_edges_from(edges_cell)
                         self._insert_cell(Cell(cell, regular=self._regular), **attr)
                     else:

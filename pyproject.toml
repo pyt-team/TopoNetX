@@ -123,6 +123,7 @@ ignore = [
     "COM812",  # trailing commas; conflict with `ruff format`
     "ISC001",  # implicitly single-line str concat; conflict with `ruff format`
     "PERF203", # allow try-except within loops
+    "PLC0415", # import in nested levels
 ]
 
 [tool.ruff.lint.per-file-ignores]

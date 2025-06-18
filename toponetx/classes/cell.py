@@ -64,11 +64,11 @@ class Cell(Atom[tuple[Hashable]]):
         self._regular = regular
         elements = list(elements)
         self._boundary = list(
-            zip_longest(elements, elements[1:] + [elements[0]])
+            zip_longest(elements, [*elements[1:], elements[0]])
         )  # list of edges defines the boundary of the 2d cell
         if len(elements) <= 1:
             raise ValueError(
-                f"cell must contain at least 2 edges, got {len(elements)+1}"
+                f"cell must contain at least 2 edges, got {len(elements) + 1}"
             )
 
         if regular:
@@ -84,7 +84,7 @@ class Cell(Atom[tuple[Hashable]]):
             for e in self._boundary:
                 if e[0] == e[1]:
                     raise ValueError(
-                        f"self loops are not permitted, got {(e[0],e[1])} as an edge in the cell's boundary"
+                        f"self loops are not permitted, got {(e[0], e[1])} as an edge in the cell's boundary"
                     )
 
     def clone(self) -> Self:
@@ -118,7 +118,7 @@ class Cell(Atom[tuple[Hashable]]):
             True if the cell is valid, False otherwise.
         """
         _boundary = list(
-            zip_longest(elements, elements[1:] + [elements[0]])
+            zip_longest(elements, [*elements[1:], elements[0]])
         )  # list of edges define the boundary of the 2d cell
         if len(elements) <= 1:
             return False
