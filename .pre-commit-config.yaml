@@ -35,7 +35,7 @@ repos:
       - id: numpydoc-validation
 
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.6.0
+    rev: v3.6.1
     hooks:
       - id: prettier
 
