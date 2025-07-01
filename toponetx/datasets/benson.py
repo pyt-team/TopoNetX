@@ -56,6 +56,67 @@ def _validate_folder(folder: Path) -> str:
     return name
 
 
+def load_benson_hyperedges(folder: Path | str) -> tuple[list[Simplex], list[Simplex]]:
+    """Load hyperedge data from the Benson dataset format.
+
+    Parameters
+    ----------
+    folder : Path | str
+        Path to the folder containing the dataset.
+
+    Returns
+    -------
+    nodes : list[Simplex]
+        List of nodes in the dataset, each represented as a `Simplex` with a single
+        vertex and associated name and label.
+    simplices : list[Simplex]
+        List of hyperedges in the dataset.
+
+    Raises
+    ------
+    ValueError
+        If the folder does not exist or is not in the expected format.
+    """
+    if not isinstance(folder, Path):
+        folder = Path(folder)
+
+    if not folder.exists() or not folder.is_dir():
+        raise ValueError(f"Folder `{folder}` does not exist.")
+
+    name = folder.name
+
+    if not all(
+        (folder / file).exists()
+        for file in [
+            f"label-names-{name}.txt",
+            f"node-labels-{name}.txt",
+            f"node-names-{name}.txt",
+        ]
+    ):
+        raise ValueError(f"Folder `{folder}` is not in an expected format.")
+
+    with (folder / f"label-names-{name}.txt").open() as file:
+        label_map = {index: line.strip() for index, line in enumerate(file, start=1)}
+    with (folder / f"node-labels-{name}.txt").open() as file:
+        node_labels = [label_map[int(line.strip())] for line in file]
+    with (folder / f"node-names-{name}.txt").open() as file:
+        node_names = [line.strip() for line in file]
+
+    nodes = [
+        Simplex([vertex], name=name, label=label)
+        for vertex, (name, label) in enumerate(
+            zip(node_names, node_labels, strict=True), start=1
+        )
+    ]
+
+    with (folder / f"hyperedges-{name}.txt").open() as file:
+        simplices = [
+            Simplex([int(vertex) for vertex in line.split(",")]) for line in file
+        ]
+
+    return nodes, simplices
+
+
 def load_benson_simplices(folder: Path | str) -> list[Simplex]:
     """Load simplicial complex data from the Benson dataset format.
 
