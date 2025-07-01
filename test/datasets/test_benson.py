@@ -5,7 +5,34 @@ from pathlib import Path
 import pytest
 
 from toponetx.classes.simplex import Simplex
-from toponetx.datasets.benson import load_benson_simplices
+from toponetx.datasets.benson import load_benson_hyperedges, load_benson_simplices
+
+
+def test_load_benson_hyperedges_folder_error() -> None:
+    """Test that the `load_benson_hyperedges` function raises an error for an invalid folder."""
+    with pytest.raises(ValueError):
+        load_benson_hyperedges("./")
+    with pytest.raises(ValueError):
+        load_benson_hyperedges("./nonexistent_folder")
+    with pytest.raises(ValueError):
+        load_benson_hyperedges("./test_benson.py")
+
+
+def test_load_benson_hyperedges() -> None:
+    """Test the `load_benson_hyperedges` function."""
+    nodes, hyperedges = load_benson_hyperedges(
+        Path(__file__).parent / "benson_sample_dataset-2"
+    )
+    assert len(nodes) == 7
+    assert len(hyperedges) == 6
+
+    for node in nodes:
+        assert isinstance(node, Simplex)
+        assert node["name"] == f"Node {next(iter(node))}"
+        assert node["label"] in ["Label 1", "Label 2"]
+
+    for simplex in hyperedges:
+        assert isinstance(simplex, Simplex)
 
 
 def test_load_benson_simplices_folder_error() -> None:
