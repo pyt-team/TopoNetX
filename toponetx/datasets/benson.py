@@ -23,7 +23,7 @@ from pathlib import Path
 
 from toponetx.classes.simplex import Simplex
 
-__all__ = ["load_benson_simplices"]
+__all__ = ["load_benson_hyperedges", "load_benson_simplices"]
 
 
 def _validate_folder(folder: Path) -> str:
