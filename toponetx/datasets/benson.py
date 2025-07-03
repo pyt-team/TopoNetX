@@ -87,11 +87,7 @@ def load_benson_hyperedges(folder: Path | str) -> tuple[list[Simplex], list[Simp
 
     if not all(
         (folder / file).exists()
-        for file in [
-            f"label-names-{name}.txt",
-            f"node-labels-{name}.txt",
-            f"node-names-{name}.txt",
-        ]
+        for file in [f"label-names-{name}.txt", f"node-labels-{name}.txt"]
     ):
         raise ValueError(f"Folder `{folder}` is not in an expected format.")
 
@@ -99,15 +95,16 @@ def load_benson_hyperedges(folder: Path | str) -> tuple[list[Simplex], list[Simp
         label_map = {index: line.strip() for index, line in enumerate(file, start=1)}
     with (folder / f"node-labels-{name}.txt").open() as file:
         node_labels = [label_map[int(line.strip())] for line in file]
-    with (folder / f"node-names-{name}.txt").open() as file:
-        node_names = [line.strip() for line in file]
 
     nodes = [
-        Simplex([vertex], name=name, label=label)
-        for vertex, (name, label) in enumerate(
-            zip(node_names, node_labels, strict=True), start=1
-        )
+        Simplex([vertex], label=label)
+        for vertex, label in enumerate(node_labels, start=1)
     ]
+
+    if (folder / f"node-names-{name}.txt").exists():
+        with (folder / f"node-names-{name}.txt").open() as file:
+            for simplex, node_name in zip(nodes, file, strict=True):
+                simplex["name"] = node_name.strip()
 
     with (folder / f"hyperedges-{name}.txt").open() as file:
         simplices = [
