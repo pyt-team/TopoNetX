@@ -31,6 +31,7 @@ classifiers = [
 ]
 requires-python = ">= 3.10"
 dependencies=[
+    "more-itertools>=10.7.0",
     "networkx",
     "numpy",
     "pandas",
