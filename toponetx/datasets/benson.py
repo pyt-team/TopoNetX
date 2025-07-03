@@ -21,6 +21,8 @@ module:
 
 from pathlib import Path
 
+from more_itertools import spy
+
 from toponetx.classes.simplex import Simplex
 
 __all__ = ["load_benson_hyperedges", "load_benson_simplices"]
@@ -94,7 +96,17 @@ def load_benson_hyperedges(folder: Path | str) -> tuple[list[Simplex], list[Simp
     with (folder / f"label-names-{name}.txt").open() as file:
         label_map = {index: line.strip() for index, line in enumerate(file, start=1)}
     with (folder / f"node-labels-{name}.txt").open() as file:
-        node_labels = [label_map[int(line.strip())] for line in file]
+        # Peek at the first 10 lines to check for commas (multilabel) or not (single label)
+        first_lines, file_iter = spy(file, 10)
+        is_multilabel = any("," in line for line in first_lines)
+
+        if is_multilabel:
+            node_labels = [
+                [label_map[int(idx)] for idx in line.strip().split(",")]
+                for line in file_iter
+            ]
+        else:
+            node_labels = [label_map[int(line.strip())] for line in file_iter]
 
     nodes = [
         Simplex([vertex], label=label)

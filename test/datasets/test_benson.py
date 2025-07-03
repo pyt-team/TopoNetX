@@ -18,7 +18,7 @@ def test_load_benson_hyperedges_folder_error() -> None:
         load_benson_hyperedges("./test_benson.py")
 
 
-def test_load_benson_hyperedges() -> None:
+def test_load_benson_hyperedges_dataset_2() -> None:
     """Test the `load_benson_hyperedges` function."""
     nodes, hyperedges = load_benson_hyperedges(
         Path(__file__).parent / "benson_sample_dataset-2"
@@ -30,6 +30,26 @@ def test_load_benson_hyperedges() -> None:
         assert isinstance(node, Simplex)
         assert node["name"] == f"Node {next(iter(node))}"
         assert node["label"] in ["Label 1", "Label 2"]
+
+    for simplex in hyperedges:
+        assert isinstance(simplex, Simplex)
+
+
+def test_load_benson_hyperedges_dataset_3() -> None:
+    """Test the `load_benson_hyperedges` function."""
+    nodes, hyperedges = load_benson_hyperedges(
+        Path(__file__).parent / "benson_sample_dataset-3"
+    )
+    assert len(nodes) == 7
+    assert len(hyperedges) == 6
+
+    for node in nodes:
+        assert isinstance(node, Simplex)
+        assert node["name"] == f"Node {next(iter(node))}"
+        assert isinstance(node["label"], list)
+        assert all(
+            label in ["Label 1", "Label 2", "Label 3"] for label in node["label"]
+        )
 
     for simplex in hyperedges:
         assert isinstance(simplex, Simplex)
