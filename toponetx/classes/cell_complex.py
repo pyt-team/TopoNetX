@@ -1471,9 +1471,7 @@ class CellComplex(Complex):
                 [0., 0., 1., 1., 0.]])
         """
         if index:
-            node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
-                weight, index
-            )
+            node_index, _, M = self.node_to_all_cell_incidence_matrix(weight, index)
 
             return node_index, incidence_to_adjacency(M.T, s)
 
@@ -1518,9 +1516,7 @@ class CellComplex(Complex):
         >>> print(m.todense(), index)
         """
         if index:
-            node_index, cell_index, M = self.node_to_all_cell_incidence_matrix(
-                weight, index
-            )
+            _, cell_index, M = self.node_to_all_cell_incidence_matrix(weight, index)
 
             return cell_index, incidence_to_adjacency(M, s)
 
@@ -1813,9 +1809,7 @@ class CellComplex(Complex):
             raise ValueError("Weighted Laplacian is not supported in this version.")
 
         if rank == 0 or rank < self.dim:
-            row, col, B_next = self.incidence_matrix(
-                rank + 1, weight=weight, index=True
-            )
+            row, _, B_next = self.incidence_matrix(rank + 1, weight=weight, index=True)
             L_up = B_next @ B_next.transpose()
         else:
             raise ValueError(
@@ -1872,7 +1866,7 @@ class CellComplex(Complex):
             raise ValueError("Weighted Laplacian is not supported in this version.")
 
         if 0 < rank <= self.dim:
-            row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
+            row, _, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
             raise ValueError(
@@ -2000,7 +1994,7 @@ class CellComplex(Complex):
         """
         from scipy.sparse import bmat
 
-        _, index0, B0 = self.incidence_matrix(0, weight=weight, index=True)
+        _, index0, _ = self.incidence_matrix(0, weight=weight, index=True)
         _, index1, B1 = self.incidence_matrix(1, weight=weight, index=True)
         index1 = {k: v + len(index0) for k, v in index1.items()}
         _, index2, B2 = self.incidence_matrix(2, weight=weight, index=True)

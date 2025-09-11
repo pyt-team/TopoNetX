@@ -1170,9 +1170,7 @@ class ColoredHyperGraph(Complex):
         >>> CHG.adjacency_matrix(0, 1)
         """
         if index:
-            row, col, B = self.incidence_matrix(
-                rank, via_rank, sparse=True, index=index
-            )
+            row, _, B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
         else:
             B = self.incidence_matrix(rank, via_rank, sparse=True, index=index)
         A = incidence_to_adjacency(B.T)
@@ -1249,9 +1247,7 @@ class ColoredHyperGraph(Complex):
             The co-adjacency matrix.
         """
         if index:
-            row, col, B = self.incidence_matrix(
-                via_rank, rank, sparse=True, index=index
-            )
+            _, col, B = self.incidence_matrix(via_rank, rank, sparse=True, index=index)
         else:
             B = self.incidence_matrix(via_rank, rank, sparse=True, index=index)
         A = incidence_to_adjacency(B)

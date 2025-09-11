@@ -109,7 +109,7 @@ class TestStructure:
         """Test the sparse_array_to_neighborhood_dict function."""
         c = CellComplex()
         c.add_cells_from([[1, 2, 3], [4, 5, 6]], rank=2)
-        row, col, B1 = c.incidence_matrix(1, index=True)
+        _, _, B1 = c.incidence_matrix(1, index=True)
         output = sparse_array_to_neighborhood_dict(B1)
 
         d = defaultdict(

@@ -1,5 +1,7 @@
 """Test cell complex class."""
 
+import re
+
 import networkx as nx
 import numpy as np
 import pytest
@@ -1081,7 +1083,9 @@ class TestCellComplex:
         CC = CellComplex()
         with pytest.raises(
             RuntimeError,
-            match="Cannot transform cell complex to hypergraph, `hypernetx` is not installed.",
+            match=re.escape(
+                "Cannot transform cell complex to hypergraph, `hypernetx` is not installed."
+            ),
         ):
             CC.to_hypergraph()
 

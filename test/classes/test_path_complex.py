@@ -443,7 +443,7 @@ class TestPathComplex:
             PC.up_laplacian_matrix(1, weight="weight")
 
         row, L_up = PC.up_laplacian_matrix(0, index=True)
-        row_B, col_B, B = PC.incidence_matrix(1, index=True)
+        row_B, _, B = PC.incidence_matrix(1, index=True)
         L_up_tmp = B.todense() @ B.todense().T
 
         assert np.all(L_up.todense() == L_up_tmp)
@@ -474,7 +474,7 @@ class TestPathComplex:
             PC.down_laplacian_matrix(1, weight="weight")
 
         row, L_down = PC.down_laplacian_matrix(1, index=True)
-        row_B, col_B, B = PC.incidence_matrix(1, index=True)
+        row_B, _, B = PC.incidence_matrix(1, index=True)
         L_down_tmp = B.todense().T @ B.todense()
 
         assert np.all(L_down.todense() == L_down_tmp)
@@ -527,13 +527,13 @@ class TestPathComplex:
             ).todense()
         )
 
-        row, L_hodge = PC.hodge_laplacian_matrix(0, index=True)
+        row, _ = PC.hodge_laplacian_matrix(0, index=True)
         assert row == PC.incidence_matrix(0, index=True)[1]
 
-        row, L_hodge = PC.hodge_laplacian_matrix(1, index=True)
+        row, _ = PC.hodge_laplacian_matrix(1, index=True)
         assert row == PC.incidence_matrix(1, index=True)[1]
 
-        row, L_hodge = PC.hodge_laplacian_matrix(2, index=True)
+        row, _ = PC.hodge_laplacian_matrix(2, index=True)
         assert row == PC.incidence_matrix(2, index=True)[1]
 
         with pytest.raises(ValueError):
@@ -563,10 +563,10 @@ class TestPathComplex:
             adj_1 == np.array([[0, 1, 1, 0], [1, 0, 1, 1], [1, 1, 0, 1], [0, 1, 1, 0]])
         )
 
-        row, adj = PC.adjacency_matrix(0, index=True)
+        row, _ = PC.adjacency_matrix(0, index=True)
         assert row == PC.incidence_matrix(0, index=True)[1]
 
-        row, adj = PC.adjacency_matrix(1, index=True)
+        row, _ = PC.adjacency_matrix(1, index=True)
         assert row == PC.incidence_matrix(1, index=True)[1]
 
     def test_coadjacency_matrix(self):
@@ -599,11 +599,11 @@ class TestPathComplex:
             )
         )
 
-        row, adj = PC.coadjacency_matrix(1, index=True)
+        row, _ = PC.coadjacency_matrix(1, index=True)
         assert row == PC.incidence_matrix(0, index=True)[1]
         assert row == PC.incidence_matrix(1, index=True)[0]
 
-        row, adj = PC.coadjacency_matrix(2, index=True)
+        row, _ = PC.coadjacency_matrix(2, index=True)
         assert row == PC.incidence_matrix(1, index=True)[1]
         assert row == PC.incidence_matrix(2, index=True)[0]
 

@@ -323,7 +323,7 @@ class TestColoredHyperGraph:
         CHG.add_cell([1, 2, 3, 4], rank=2)
         CHG.add_cell([2, 5], rank=1)
         CHG.add_cell([2, 6, 4], rank=2)
-        B, row, col = CHG.incidence_matrix(1, 2, index=True)
+        B, _, _ = CHG.incidence_matrix(1, 2, index=True)
         assert B[(frozenset({1, 2}), 0)] == 0
         assert B[(frozenset({1, 2, 3}), 0)] == 2
 
@@ -433,7 +433,7 @@ class TestColoredHyperGraph:
         assert (CHG.degree_matrix(1) == [0, 0, 0, 0]).all()
         assert (CHG.degree_matrix(2) == [1, 2, 2, 1]).all()
 
-        row, D = CHG.degree_matrix(1, index=True)
+        row, _ = CHG.degree_matrix(1, index=True)
         res, _, _ = CHG.incidence_matrix(0, 1, index=True)
         assert row == res
 
