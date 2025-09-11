@@ -66,7 +66,7 @@ class TestMeshDatasets:
         assert len(coseg_data["face_feat"]) != 0
         assert len(coseg_data["face_label"]) != 0
 
-        nodes, edges, faces = coseg_data["complexes"][0].shape
+        nodes, _, faces = coseg_data["complexes"][0].shape
         n_nodes = coseg_data["node_feat"][0].shape
         n_faces = coseg_data["face_feat"][0].shape
         assert nodes == n_nodes[0]

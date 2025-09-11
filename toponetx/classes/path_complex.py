@@ -523,9 +523,7 @@ class PathComplex(Complex):
             raise ValueError("Weighted Laplacian is not supported in this version.")
 
         if 0 <= rank < self.dim:
-            row, col, B_next = self.incidence_matrix(
-                rank + 1, weight=weight, index=True
-            )
+            row, _, B_next = self.incidence_matrix(rank + 1, weight=weight, index=True)
             L_up = B_next @ B_next.transpose()
         else:
             raise ValueError(
@@ -568,7 +566,7 @@ class PathComplex(Complex):
             raise ValueError("Weighted Laplacian is not supported in this version.")
 
         if self.dim >= rank > 0:
-            row, column, B = self.incidence_matrix(rank, weight=weight, index=True)
+            row, _, B = self.incidence_matrix(rank, weight=weight, index=True)
             L_down = B.transpose() @ B
         else:
             raise ValueError(

@@ -1,5 +1,6 @@
 """Test simplicial complex class."""
 
+import re
 from unittest.mock import Mock
 
 import networkx as nx
@@ -794,7 +795,9 @@ class TestSimplicialComplex:
         SC = SimplicialComplex()
         with pytest.raises(
             RuntimeError,
-            match="Cannot transform simplicial complex to hypergraph, `hypernetx` is not installed.",
+            match=re.escape(
+                "Cannot transform simplicial complex to hypergraph, `hypernetx` is not installed."
+            ),
         ):
             SC.to_hypergraph()
 
@@ -907,7 +910,7 @@ class TestSimplicialComplex:
         SC = SimplicialComplex()
         SC.add_simplex([0, 1, 2])
 
-        row, col, B1 = SC.coincidence_matrix(1, index=True)
+        _, _, B1 = SC.coincidence_matrix(1, index=True)
 
         assert B1.shape == (3, 3)
         assert np.allclose(
@@ -1030,7 +1033,7 @@ class TestSimplicialComplex:
         weight = None
         index = True
 
-        ind, result = SC.coadjacency_matrix(rank, signed, weight, index)
+        _, result = SC.coadjacency_matrix(rank, signed, weight, index)
 
         # Assert the result is of type scipy.sparse.csr.csr_matrix
         assert result.shape == (6, 6)

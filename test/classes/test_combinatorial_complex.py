@@ -173,7 +173,7 @@ class TestCombinatorialComplex:
         CCC.add_cell([1, 2, 3, 4], rank=2)
         CCC.add_cell([2, 5], rank=1)
         CCC.add_cell([2, 6, 4], rank=2)
-        B, row, col = CCC.incidence_matrix(1, index=True)
+        B, _, _ = CCC.incidence_matrix(1, index=True)
         assert B[(frozenset({1, 2}))] == 0
         assert B[(frozenset({1, 2, 3}))] == 1
         assert B[(frozenset({2, 5}))] == 2
@@ -616,7 +616,7 @@ class TestCombinatorialComplex:
         CCC.add_cell([1, 2, 3, 4], rank=2)
         CCC.add_cell([2, 5], rank=1)
         CCC.add_cell([2, 6, 4], rank=2)
-        B, row, col = CCC.incidence_matrix(1, index=True)
+        B, _, _ = CCC.incidence_matrix(1, index=True)
         assert B[(frozenset({1, 2}))] == 0
         assert B[(frozenset({1, 2, 3}))] == 1
         assert B[(frozenset({2, 5}))] == 2
