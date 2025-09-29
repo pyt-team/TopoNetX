@@ -8,7 +8,7 @@ dynamic = ["version"]
 authors = [
     {name = "Mustafa Hajij", email = "mhajij@usfca.edu"},
     {name = "Mathilde Papillon", email = "papillon@ucsb.edu"},
-    {name = "Florian Frantzen", email = "florian.frantzen@cs.rwth-aachen.de"}
+    {name = "Florian Frantzen", email = "frantzen@netsci.rwth-aachen.de"}
 ]
 readme = "README.md"
 description = "Computing on Topological Domains"
