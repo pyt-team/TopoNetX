@@ -17,17 +17,15 @@ References
 """
 
 from collections.abc import Generator, Hashable, Iterable, Iterator, Sequence
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 from toponetx.classes.simplex import Simplex
 from toponetx.utils.iterable import is_ordered_subset
 
 __all__ = ["SimplexNode", "SimplexTrie"]
 
-ElementType = TypeVar("ElementType", bound=Hashable)
 
-
-class SimplexNode(Generic[ElementType]):
+class SimplexNode[ElementType: Hashable]:
     """Node in a simplex tree.
 
     Parameters
@@ -130,7 +128,7 @@ class SimplexNode(Generic[ElementType]):
             queue += [node.children[label] for label in sorted(node.children.keys())]
 
 
-class SimplexTrie(Generic[ElementType]):
+class SimplexTrie[ElementType: Hashable]:
     """
     Simplex tree data structure as presented in [1]_.
 

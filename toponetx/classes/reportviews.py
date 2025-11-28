@@ -7,7 +7,7 @@ HyperEdgeView, CellView, SimplexView, NodeView.
 from abc import ABC, abstractmethod
 from collections.abc import Collection, Hashable, Iterable, Iterator, Sequence
 from itertools import chain
-from typing import Any, Generic, Literal, TypeVar
+from typing import Any, Literal
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.complex import Atom
@@ -26,10 +26,8 @@ __all__ = [
     "SimplexView",
 ]
 
-T_Atom = TypeVar("T_Atom", bound=Atom)
 
-
-class AtomView(ABC, Generic[T_Atom]):
+class AtomView[T_Atom: Atom](ABC):
     """Abstract class representing a read-only view on a collection of atoms."""
 
     @abstractmethod

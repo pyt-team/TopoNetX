@@ -5,12 +5,12 @@ The class also supports attaching arbitrary attributes and data to cells.
 
 from collections.abc import Collection, Generator, Hashable, Iterable, Iterator
 from itertools import combinations
-from typing import Any, Generic, TypeVar
+from typing import Any, Self
 
 import networkx as nx
 import numpy as np
 from scipy.sparse import csr_matrix, dok_matrix
-from typing_extensions import Self, deprecated
+from typing_extensions import deprecated
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import NodeView, SimplexView
@@ -29,12 +29,9 @@ except ImportError:
 
 __all__ = ["SimplicialComplex"]
 
-ElementType = TypeVar(
-    "ElementType", bound=Hashable
-)  # TODO: Also bound to SupportsLessThanT but that is not accessible?
 
-
-class SimplicialComplex(Complex, Generic[ElementType]):
+# TODO: `ElementType` also needs to be bound to SupportsLessThanT but that is not accessible?
+class SimplicialComplex[ElementType: Hashable](Complex):
     """Class representing a simplicial complex.
 
     Class for construction boundary operators, Hodge Laplacians,

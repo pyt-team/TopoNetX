@@ -1,13 +1,12 @@
 """Path complex."""
 
 from collections.abc import Hashable, Iterable, Iterator, Sequence
-from typing import Any
+from typing import Any, Self
 
 import networkx as nx
 import numpy as np
 import scipy as sp
 from networkx.classes.reportviews import EdgeView, NodeView
-from typing_extensions import Self
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.path import Path

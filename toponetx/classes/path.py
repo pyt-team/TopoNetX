@@ -1,9 +1,7 @@
 """Path class."""
 
 from collections.abc import Hashable, Iterable, Sequence
-from typing import Any
-
-from typing_extensions import Self
+from typing import Any, Self
 
 from toponetx.classes.complex import Atom
 

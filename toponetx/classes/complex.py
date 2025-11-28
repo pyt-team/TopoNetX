@@ -2,16 +2,12 @@
 
 import abc
 from collections.abc import Collection, Hashable, Iterator
-from typing import Any, Generic, TypeVar
-
-from typing_extensions import Self
+from typing import Any, Self
 
 __all__ = ["Atom", "Complex"]
 
-AtomCollectionType = TypeVar("AtomCollectionType", bound=Collection[Hashable])
 
-
-class Atom(abc.ABC, Generic[AtomCollectionType]):
+class Atom[AtomCollectionType: Collection[Hashable]](abc.ABC):
     """Abstract class representing an atom in a complex.
 
     Parameters

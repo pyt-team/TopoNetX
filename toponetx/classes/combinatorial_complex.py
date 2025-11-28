@@ -1,10 +1,9 @@
 """Creation and manipulation of a combinatorial complex."""
 
 from collections.abc import Collection, Hashable, Iterable
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 import networkx as nx
-from typing_extensions import Self
 
 from toponetx.classes.colored_hypergraph import ColoredHyperGraph
 from toponetx.classes.complex import Complex

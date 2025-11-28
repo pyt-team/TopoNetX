@@ -3,14 +3,13 @@
 import contextlib
 from collections.abc import Collection, Hashable, Iterable
 from itertools import chain
-from typing import Any
+from typing import Any, Self
 
 import networkx as nx
 import numpy as np
 import scipy.sparse
 import trimesh
 from scipy.sparse import csr_array, diags
-from typing_extensions import Self
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.hyperedge import HyperEdge

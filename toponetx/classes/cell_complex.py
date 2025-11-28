@@ -9,7 +9,7 @@ import warnings
 from collections import defaultdict
 from collections.abc import Collection, Hashable, Iterable, Iterator
 from itertools import chain, zip_longest
-from typing import Any
+from typing import Any, Self
 
 import networkx as nx
 import numpy as np
@@ -18,7 +18,7 @@ import scipy.sparse
 from networkx import Graph
 from networkx.classes.reportviews import EdgeView, NodeView
 from networkx.utils import pairwise
-from typing_extensions import Self, deprecated
+from typing_extensions import deprecated
 
 from toponetx.classes.cell import Cell
 from toponetx.classes.combinatorial_complex import (
