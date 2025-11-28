@@ -4,20 +4,18 @@ import warnings
 from collections.abc import Collection, Hashable, Iterable
 from functools import total_ordering
 from itertools import combinations
-from typing import Generic, TypeVar
+from typing import Self
 
-from typing_extensions import Self, deprecated
+from typing_extensions import deprecated
 
 from toponetx.classes.complex import Atom
 from toponetx.utils.iterable import is_ordered_subset
 
 __all__ = ["Simplex"]
 
-ElementType = TypeVar("ElementType", bound=Hashable)
-
 
 @total_ordering
-class Simplex(Atom, Generic[ElementType]):
+class Simplex[ElementType: Hashable](Atom):
     """A class representing a simplex in a simplicial complex.
 
     This class represents a simplex in a simplicial complex, which is a set of nodes with a specific dimension. The

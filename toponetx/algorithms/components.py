@@ -1,7 +1,7 @@
 """Module to compute connected components on topological domains."""
 
 from collections.abc import Generator, Hashable
-from typing import Literal, TypeVar, overload
+from typing import Literal, overload
 
 import networkx as nx
 
@@ -19,7 +19,6 @@ __all__ = [
 # In this module, only cell complexes, combinatorial complexes and colored
 # hypergraphs are supported. We bound the type variable to these types.
 ComplexType = CellComplex | CombinatorialComplex | ColoredHyperGraph
-ComplexTypeVar = TypeVar("ComplexTypeVar", bound=ComplexType)
 
 
 @overload
@@ -130,7 +129,7 @@ def s_connected_components(
                 yield {next(iter(node_dict[n])) for n in c}
 
 
-def s_component_subcomplexes(
+def s_component_subcomplexes[ComplexTypeVar: ComplexType](
     domain: ComplexTypeVar,
     s: int = 1,
     cells: bool = True,
@@ -245,7 +244,7 @@ def connected_components(
     )
 
 
-def connected_component_subcomplexes(
+def connected_component_subcomplexes[ComplexTypeVar: ComplexType](
     domain: ComplexTypeVar, return_singletons: bool = True
 ) -> Generator[ComplexTypeVar, None, None]:
     """Compute connected component subcomplexes with s=1.
