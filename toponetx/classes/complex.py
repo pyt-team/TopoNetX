@@ -43,8 +43,8 @@ class Atom[AtomCollectionType: Collection[Hashable]](abc.ABC):
         bool
             Returns `True` if the given atom is equal to this atom and `False` otherwise.
 
-        Example
-        -------
+        Examples
+        --------
         >>> s1 = tnx.Simplex((1, 2), weight=1)
         >>> s2 = tnx.Simplex((1, 2), weight=2)
         >>> s3 = tnx.Simplex((1, 2, 3))
