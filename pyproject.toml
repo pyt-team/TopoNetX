@@ -67,8 +67,8 @@ dev = [
 
 docs = [
     "nbsphinx",
-    "numpydoc >= 1.8.0",
-    "sphinx",
+    "numpydoc",
+    "sphinx < 9.0.0",
     "sphinx-copybutton",
     "sphinx_gallery",
     "pydata-sphinx-theme"
