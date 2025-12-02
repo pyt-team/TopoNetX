@@ -3,9 +3,7 @@
 from collections import Counter, deque
 from collections.abc import Collection, Hashable, Iterable, Sequence
 from itertools import zip_longest
-from typing import Literal
-
-from typing_extensions import Self
+from typing import Literal, Self
 
 from toponetx.classes.complex import Atom
 

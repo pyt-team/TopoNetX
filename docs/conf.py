@@ -11,7 +11,6 @@ language = "en"
 
 extensions = [
     "nbsphinx",
-    "nbsphinx_link",
     "numpydoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.githubpages",

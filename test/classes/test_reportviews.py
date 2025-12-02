@@ -461,10 +461,8 @@ class TestReportViews_HyperEdgeView:
 
         assert hev._get_lower_rank(rank=2) == 0
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="not in list"):
             hev._get_lower_rank(rank=1)
-
-        assert str(e.value) == "1 is not in list"
 
     def test_hyper_edge_view_get_higher_rank(self):
         """Test the _get_higher_rank method of the Hyperedge View Class."""
@@ -487,10 +485,8 @@ class TestReportViews_HyperEdgeView:
 
         assert hev._get_higher_rank(rank=2) == 3
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="not in list"):
             hev._get_higher_rank(rank=1)
-
-        assert str(e.value) == "1 is not in list"
 
 
 class TestReportViews_ColoredHyperEdgeView:

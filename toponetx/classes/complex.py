@@ -2,16 +2,12 @@
 
 import abc
 from collections.abc import Collection, Hashable, Iterator
-from typing import Any, Generic, TypeVar
-
-from typing_extensions import Self
+from typing import Any, Self
 
 __all__ = ["Atom", "Complex"]
 
-AtomCollectionType = TypeVar("AtomCollectionType", bound=Collection[Hashable])
 
-
-class Atom(abc.ABC, Generic[AtomCollectionType]):
+class Atom[AtomCollectionType: Collection[Hashable]](abc.ABC):
     """Abstract class representing an atom in a complex.
 
     Parameters
@@ -47,8 +43,8 @@ class Atom(abc.ABC, Generic[AtomCollectionType]):
         bool
             Returns `True` if the given atom is equal to this atom and `False` otherwise.
 
-        Example
-        -------
+        Examples
+        --------
         >>> s1 = tnx.Simplex((1, 2), weight=1)
         >>> s2 = tnx.Simplex((1, 2), weight=2)
         >>> s3 = tnx.Simplex((1, 2, 3))
