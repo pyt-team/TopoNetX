@@ -53,16 +53,6 @@ class TestSimplicialComplex:
         sc.remove_nodes([2, 3])
         assert sc.dim == 1
 
-    def test_maxdim(self) -> None:
-        """Test deprecated maxdim property for deprecation warning."""
-        SC = SimplicialComplex()
-        with pytest.deprecated_call():
-            assert SC.maxdim == -1
-
-        SC.add_simplex([1, 2, 3])
-        with pytest.deprecated_call():
-            assert SC.maxdim == 2
-
     def test_nodes_property(self):
         """Test nodes property."""
         sc = SimplicialComplex([[1, 2, 3], [2, 3, 4], [0, 1]])
@@ -1096,26 +1086,6 @@ class TestSimplicialComplex:
             [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
         )
         SC = SimplicialComplex.from_spharapy(mesh)
-        simplices = SC.simplices
-        assert len(simplices) == 7
-        assert [0, 1, 2] in simplices
-        assert [0, 1] in simplices
-        assert [0, 2] in simplices
-        assert [1, 2] in simplices
-        assert [0] in simplices
-        assert [1] in simplices
-        assert [2] in simplices
-
-    @pytest.mark.skipif(
-        tm is None, reason="Optional dependency 'spharapy' not installed."
-    )
-    def test_from_spharpy(self):
-        """Test the deprecated from_spharpy method of SimplicialComplex (support for spharapy trimesh)."""
-        mesh = tm.TriMesh(
-            [[0, 1, 2]], [[1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 3.0]]
-        )
-        with pytest.deprecated_call():
-            SC = SimplicialComplex.from_spharpy(mesh)
         simplices = SC.simplices
         assert len(simplices) == 7
         assert [0, 1, 2] in simplices

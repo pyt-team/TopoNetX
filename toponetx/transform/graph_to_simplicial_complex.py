@@ -3,7 +3,6 @@
 from itertools import combinations, takewhile
 
 import networkx as nx
-from typing_extensions import deprecated
 
 from toponetx.classes.simplicial_complex import SimplicialComplex
 
@@ -73,53 +72,6 @@ def graph_to_clique_complex(
     SC.complex.update(G.graph)
 
     return SC
-
-
-@deprecated(
-    "`graph_2_neighbor_complex` is deprecated and will be removed in a future version, use `graph_to_neighbor_complex` instead."
-)
-def graph_2_neighbor_complex(G) -> SimplicialComplex:
-    """Get the neighbor complex of a graph.
-
-    Parameters
-    ----------
-    G : networkx.Graph
-        Input graph.
-
-    Returns
-    -------
-    toponetx.classes.SimplicialComplex
-        The neighbor complex of the graph.
-
-    Notes
-    -----
-    This type of simplicial complexes can have very large dimension (max degree of the
-    graph) and it is a function of the distribution of the valency of the graph.
-    """
-    return graph_to_neighbor_complex(G)
-
-
-@deprecated(
-    "`graph_2_clique_complex` is deprecated and will be removed in a future version, use `graph_to_clique_complex` instead."
-)
-def graph_2_clique_complex(
-    G: nx.Graph, max_rank: int | None = None
-) -> SimplicialComplex:
-    """Get the clique complex of a graph.
-
-    Parameters
-    ----------
-    G : networks.Graph
-        Input graph.
-    max_rank : int, optional
-        The maximum rank of the simplices in the output clique complex.
-
-    Returns
-    -------
-    SimplicialComplex
-        The clique simplicial complex of rank `max_rank` of the graph `G`.
-    """
-    return graph_to_clique_complex(G, max_rank)
 
 
 def weighted_graph_to_vietoris_rips_complex(
