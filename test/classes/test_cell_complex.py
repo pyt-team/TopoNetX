@@ -439,7 +439,7 @@ class TestCellComplex:
     def test_euler_characteristic(self):
         """Test euler_characteristic."""
         CC = CellComplex()
-        CC.add_cells_from([[1, 2, 3], [1, 2, 3]], rank=2)
+        CC.add_cells_from([[1, 2, 3], [1, 2, 4], [2, 3, 4], [1, 2, 3, 4]], rank=2)
         assert CC.euler_characterisitics() == 2
 
     def test_clear(self):
@@ -833,7 +833,7 @@ class TestCellComplex:
         G = nx.path_graph(3)
 
         d = {
-            ((1, 2, 3, 4), 0): {"color": "red", "attr2": 1},
+            (1, 2, 3, 4): {"color": "red", "attr2": 1},
             (1, 2, 4): {"color": "blue", "attr2": 3},
         }
         CC = CellComplex(G)
@@ -845,8 +845,10 @@ class TestCellComplex:
         )
         CC.add_cell([3, 4, 8], rank=2)
         CC.set_cell_attributes(d, rank=2)
-        cell_color = CC.get_cell_attributes("color", 2)
-        assert cell_color == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
+        assert CC.get_cell_attributes("color", 2) == {
+            (1, 2, 3, 4): "red",
+            (1, 2, 4): "blue",
+        }
 
     def test_set_cell_attributes(self):
         """Test the set cell attributes method."""
@@ -874,7 +876,7 @@ class TestCellComplex:
             (4, 5): {"color": "green", "attr2": 4},
         }
         CC.set_cell_attributes(d, rank=2)
-        assert CC.cells[(1, 2, 3, 4)][0]["color"] == "red"
+        assert CC.cells[(1, 2, 3, 4)]["color"] == "red"
         assert CC.cells[(4, 5)]["color"] == "green"
         d = {
             (1, 2, 3, 4): {"color": "red", "attr2": 1},
@@ -1119,7 +1121,7 @@ class TestCellComplex:
         """Unit test for the get_cell_attributes method."""
         CC = CellComplex()
         d = {
-            ((1, 2, 3, 4), 0): {"color": "red", "attr2": 1},
+            (1, 2, 3, 4): {"color": "red", "attr2": 1},
             (1, 2, 4): {"color": "blue", "attr2": 3},
         }
         CC.add_cell([1, 2, 3, 4], rank=2)
@@ -1144,18 +1146,17 @@ class TestCellComplex:
         with pytest.raises(ValueError):
             attributes = CC.get_cell_attributes("color", 4)
 
-        assert attributes == {((1, 2, 3, 4), 0): "red", (1, 2, 4): "blue"}
+        assert attributes == {(1, 2, 3, 4): "red", (1, 2, 4): "blue"}
 
     def test_remove_equivalent_cells(self):
         """Unit test for the remove_equivalent_cells method."""
         CC = CellComplex()
 
         CC.add_cell([1, 2, 3, 4], rank=2)
-        CC.add_cell([1, 2, 3, 4], rank=2)
         CC.add_cell([2, 3, 4, 1], rank=2)
         CC.add_cell([1, 2, 4], rank=2)
         CC.add_cell([3, 4, 8], rank=2)
-        assert len(CC.cells) == 5
+        assert len(CC.cells) == 4
         CC.remove_equivalent_cells()
         assert len(CC.cells) == 3
 
@@ -1192,22 +1193,19 @@ class TestCellComplex:
     def test_restrict_to_cells(self):
         """Test restricting a cell complex to a subset of cells and edges."""
         CC = CellComplex([[1, 2, 3, 4], [3, 4, 5], [1, 2, 3, 6]])
-        CC.add_cell((1, 2, 3, 4), rank=2)
         CC.set_filtration(
             {(1, 2, 3, 4): 1, (1, 2): 2, (3, 5): 3, (4, 5): 4, (3, 4, 5): 5}, "test"
         )
         restricted = CC.restrict_to_cells(
             {(1, 2, 3, 4), (3, 5), CC.cells.raw((1, 2, 3, 6))}
         )
-        assert len(restricted.cells[(1, 2, 3, 4)]) == 2
         assert (1, 2, 3, 4) in restricted.cells
         assert (1, 2, 3, 6) in restricted.cells
         assert (3, 4, 5) not in restricted.cells
         assert (3, 5) in restricted.edges
         assert (4, 5) not in restricted.edges
         assert restricted.get_filtration("test") == {
-            ((1, 2, 3, 4), 0): 1,
-            ((1, 2, 3, 4), 1): 1,
+            (1, 2, 3, 4): 1,
             (2, 1): 2,
             (3, 5): 3,
         }
@@ -1579,27 +1577,6 @@ class TestCellComplex:
         assert len(cc.cells) == 0
         assert len(cc.edges) == 0
         assert len(cc.nodes) == 0
-
-    def test_delete_cell_with_key(self):
-        """Test delete cell method with key."""
-        CC = CellComplex()
-        CC._insert_cell((1, 2, 3, 4))
-        CC._insert_cell((1, 2, 3, 4))
-        CC._insert_cell((1, 2, 3, 4))
-        CC._insert_cell((2, 3, 4, 5))
-
-        assert len(CC.cells) == 4
-        assert len(CC._cells._cells.keys()) == 2
-        assert sorted(CC._cells._cells[(1, 2, 3, 4)].keys()) == [0, 1, 2]
-
-        CC._delete_cell((1, 2, 3, 4), key=2)
-        assert len(CC.cells) == 3
-        assert len(CC._cells._cells.keys()) == 2
-        assert sorted(CC._cells._cells[(1, 2, 3, 4)].keys()) == [0, 1]
-
-        with pytest.raises(KeyError):
-            CC._delete_cell((1, 2, 3, 4), key=10)
-            CC._delete_cell((1, 2, 3, 4), key=100)
 
     def test_add_cell_regularity_conditions(self):
         """Test regularity conditions for add cell method."""

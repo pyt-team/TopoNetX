@@ -392,35 +392,22 @@ class CellComplex(Complex):
             elif isinstance(cell, Cell):
                 cell.update(attr)
 
-            if cell.elements not in self._cells._cells:
-                self._cells._cells[cell.elements] = {0: cell}
-            else:
-                # if cell is already in the complex, insert duplications and give it differnt key
-                self._cells._cells[cell.elements][
-                    len(self._cells._cells[cell.elements])
-                ] = cell
+            self._cells._cells[cell.elements] = cell
         else:
             raise TypeError("input must be list, tuple or Cell type")
 
-    def _delete_cell(self, cell: tuple | list | Cell, key=None):
+    def _delete_cell(self, cell: tuple | list | Cell) -> None:
         """Delete cell.
 
         Parameters
         ----------
         cell : tuple | list | Cell
             The cell to delete.
-        key : Hashable
-            The key of the cell to delete.
         """
         if isinstance(cell, Cell):
             cell = cell.elements
         if cell in self._cells._cells:
-            if key is None:
-                del self._cells._cells[cell]
-            elif key in self._cells._cells[cell]:
-                del self._cells._cells[cell][key]
-            else:
-                raise KeyError(f"cell with key {key} is not in the complex ")
+            del self._cells._cells[cell]
         else:
             raise KeyError(f"cell {cell} is not in the complex")
 
@@ -645,9 +632,9 @@ class CellComplex(Complex):
         # Remove the node from the cell complex
         self._G.remove_node(node)
         # Remove any cells that contain the node
-        for cell in self.cells:
-            if node in cell:
-                self.remove_cell(cell)
+        cells_to_remove = [cell for cell in self.cells if node in cell]
+        for cell in cells_to_remove:
+            self.remove_cell(cell)
 
     def remove_nodes(self, node_set: Iterable[Hashable]) -> None:
         """Remove nodes from cells.
@@ -850,8 +837,8 @@ class CellComplex(Complex):
 
     def clear(self):
         """Remove all cells from a cell complex."""
-        for cell in self.cells:
-            self.remove_cell(cell)
+        self._cells._cells.clear()
+        self._G.clear()
 
     def set_filtration(
         self,
@@ -1186,7 +1173,7 @@ class CellComplex(Complex):
         >>> CC.add_cell([3, 4, 8], rank=2)
         >>> CC.set_cell_attributes(d, 2)
         >>> CC.get_cell_attributes("color", 2)
-        {((1, 2, 3, 4), 0): 'red', (1, 2, 4): 'blue'}
+        {(1, 2, 3, 4): 'red', (1, 2, 4): 'blue'}
         """
         if rank == 0:
             return nx.get_node_attributes(self._G, name)
@@ -1327,12 +1314,6 @@ class CellComplex(Complex):
         >>> print(CC.cells)
         >>> CC.remove_equivalent_cells()
         """
-        # delete all cells that are added multiple times
-        for cell in self._cells._cells:
-            if len(self._cells._cells[cell]) > 1:
-                for key in list(self._cells._cells[cell].keys())[1:]:
-                    self._delete_cell(cell, key)
-
         equiv_classes = self._cell_equivalence_class()
         for c in list(self.cells):
             if c not in equiv_classes:
