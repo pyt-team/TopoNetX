@@ -90,7 +90,7 @@ class TestComponents:
 
         # invalid input
         with pytest.raises(TypeError):
-            list(s_connected_components(SimplicialComplex()))
+            _ = list(s_connected_components(SimplicialComplex()))
 
     def test_s_component_subcomplexes(self):
         """Test_s_component_subcomplexes."""
