@@ -1,12 +1,8 @@
 """Simplex Class."""
 
-import warnings
 from collections.abc import Collection, Hashable, Iterable
 from functools import total_ordering
-from itertools import combinations
 from typing import Self
-
-from typing_extensions import deprecated
 
 from toponetx.classes.complex import Atom
 from toponetx.utils.iterable import is_ordered_subset
@@ -25,8 +21,6 @@ class Simplex[ElementType: Hashable](Atom):
     ----------
     elements : Collection[Hashable]
         The nodes in the simplex.
-    construct_tree : bool, default=True
-        If True, construct the entire simplicial tree for the simplex.
     **kwargs : keyword arguments, optional
         Additional attributes to be associated with the simplex.
 
@@ -48,17 +42,9 @@ class Simplex[ElementType: Hashable](Atom):
     def __init__(
         self,
         elements: Collection[ElementType],
-        construct_tree: bool = False,
         **kwargs,
     ) -> None:
         self.validate_attributes(kwargs)
-
-        if construct_tree is not False:
-            warnings.warn(
-                "The `construct_tree` argument is deprecated.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
 
         if len(elements) != len(set(elements)):
             raise ValueError("A simplex cannot contain duplicate nodes.")
@@ -131,51 +117,6 @@ class Simplex[ElementType: Hashable](Atom):
                 "Special attributes `is_maximal` and `membership` are reserved."
             )
 
-    @staticmethod
-    @deprecated("`Simplex.construct_simplex_tree` is deprecated.")
-    def construct_simplex_tree(
-        elements: Collection[ElementType],
-    ) -> frozenset["Simplex[ElementType]"]:
-        """Return the set of Simplex objects representing the faces.
-
-        Parameters
-        ----------
-        elements : Collection
-            The simplex for which to construct the simplex tree.
-
-        Returns
-        -------
-        frozenset[Simplex]
-            The set of faces of the simplex.
-        """
-        faceset = set()
-        for r in range(len(elements), 0, -1):
-            for face in combinations(elements, r):
-                faceset.add(Simplex(elements=face, construct_tree=False))
-        return frozenset(faceset)
-
-    @property
-    @deprecated(
-        "`Simplex.boundary` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead."
-    )
-    def boundary(self) -> frozenset["Simplex[ElementType]"]:
-        """Return the set of the set of all n-1 faces in of the input n-simplex.
-
-        Returns
-        -------
-        frozenset[Simplex]
-            A frozenset representing boundary simplices.
-
-        Examples
-        --------
-        For a n-simplex [1,2,3], the boundary is all the n-1 subsets of [1,2,3] :
-            (1,2), (2,3), (3,1).
-        """
-        return frozenset(
-            Simplex(elements, construct_tree=False)
-            for elements in combinations(self.elements, len(self) - 1)
-        )
-
     def sign(self, face: "Simplex[ElementType]") -> int:
         """Calculate the sign of the simplex with respect to a given face.
 
@@ -185,23 +126,6 @@ class Simplex[ElementType: Hashable](Atom):
             A face of the simplex.
         """
         raise NotImplementedError
-
-    @property
-    @deprecated(
-        "`Simplex.faces` is deprecated, use `SimplicialComplex.get_boundaries()` on the simplicial complex that contains this simplex instead."
-    )
-    def faces(self) -> frozenset["Simplex[ElementType]"]:
-        """Get the set of faces of the simplex.
-
-        If `construct_tree` is True, return the precomputed set of faces `_faces`.
-        Otherwise, construct the simplex tree and return the set of faces.
-
-        Returns
-        -------
-        frozenset[Simplex]
-            The set of faces of the simplex.
-        """
-        return Simplex.construct_simplex_tree(self.elements)
 
     def __repr__(self) -> str:
         """Return string representation of the simplex.

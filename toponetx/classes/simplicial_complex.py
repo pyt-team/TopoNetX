@@ -10,7 +10,6 @@ from typing import Any, Self
 import networkx as nx
 import numpy as np
 from scipy.sparse import csr_matrix, dok_matrix
-from typing_extensions import deprecated
 
 from toponetx.classes.complex import Complex
 from toponetx.classes.reportviews import NodeView, SimplexView
@@ -167,22 +166,6 @@ class SimplicialComplex[ElementType: Hashable](Complex):
         2
         """
         return len(self._simplex_trie.shape) - 1
-
-    @property
-    @deprecated(
-        "`SimplicialComplex.maxdim` is deprecated and will be removed in the future, use `SimplicialComplex.dim` instead."
-    )
-    def maxdim(self) -> int:
-        """Maximum dimension of the simplicial complex.
-
-        This is the highest dimension of any simplex in the complex.
-
-        Returns
-        -------
-        int
-            The maximum dimension of the simplicial complex.
-        """
-        return self.dim
 
     @property
     def nodes(self) -> NodeView:
@@ -1383,25 +1366,6 @@ class SimplicialComplex[ElementType: Hashable](Complex):
             )
 
         return SC
-
-    @classmethod
-    @deprecated(
-        "`SimplicialComplex.from_spharpy` is deprecated and will be removed in the future, use `SimplicialComplex.from_spharapy` instead."
-    )
-    def from_spharpy(cls, mesh) -> Self:
-        """Import from sharpy.
-
-        Parameters
-        ----------
-        mesh : spharapy.trimesh.TriMesh
-            The input spharapy object.
-
-        Returns
-        -------
-        SimplicialComplex
-            The resulting SimplicialComplex.
-        """
-        return cls.from_spharapy(mesh)
 
     def to_hasse_graph(self) -> nx.DiGraph:
         """Create the hasse graph corresponding to this simplicial complex.

@@ -1530,12 +1530,6 @@ class TestCellComplex:
         with pytest.raises(TypeError):
             CellComplex(cells=1)
 
-    def test_maxdim_warning(self):
-        """Test if Deprecation Warning is raised when the maxdim method is called."""
-        with pytest.deprecated_call():
-            CC = CellComplex()
-            _ = CC.maxdim
-
     def test_dim_edgecases(self):
         """Test if dim is testing for edge cases."""
         CC = CellComplex()

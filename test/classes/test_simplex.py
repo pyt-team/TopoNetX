@@ -15,9 +15,6 @@ class TestSimplex:
         assert tuple(s) == (1,)
         assert s._attributes == {}
 
-        with pytest.deprecated_call():
-            _ = Simplex((1,), construct_tree=True)
-
         with pytest.raises(ValueError):
             _ = Simplex([1, 2, 2])
 
@@ -61,13 +58,6 @@ class TestSimplex:
         with pytest.raises(TypeError):
             _ = s1 <= 1
 
-    def test_boundary(self):
-        """Test the boundary property of the simplex."""
-        s = Simplex((1, 2, 3))
-        with pytest.deprecated_call():
-            boundary = s.boundary
-            assert len(boundary) == 3
-
     def test_representation(self):
         """Test the string representation of the simplex."""
         s = Simplex((1, 2, 3))
@@ -83,34 +73,11 @@ class TestSimplex:
         assert (1, 3, 4, 5, 6, 7) not in s
         assert (1, 3, 4, 5, 6, 7) not in s
 
-    def test_construct_tree(self):
-        """Test the construct_tree property of the simplex."""
-        with pytest.warns(DeprecationWarning):
-            s = Simplex((1, 2, 3), construct_tree=True)
-        with pytest.warns(DeprecationWarning):
-            assert len(s.boundary) == 3
-
-        s = Simplex((1, 2, 3), construct_tree=False)
-        with pytest.warns(DeprecationWarning):
-            assert len(s.boundary) == 3
-
     def test_getting_and_setting_items(self):
         """Test getting and setting items in the simplex."""
         s = Simplex((1, 2, 3))
         s["weight"] = 1
         assert s["weight"] == 1
-
-    def test_faces(self):
-        """Test getting faces from simplex."""
-        s = Simplex((1, 2, 3), constuct_tree=False)
-        with pytest.deprecated_call():
-            faces = s.faces
-            assert len(faces) == 7
-
-        s = Simplex((1, 2, 3), constuct_tree=True)
-        with pytest.deprecated_call():
-            faces = s.faces
-            assert len(faces) == 7
 
     def test_clone(self):
         """Test clone method."""
