@@ -43,6 +43,7 @@ dependencies=[
 
 [project.optional-dependencies]
 all = [
+    "ahorn-loader>=0.2.0",
     "hypernetx ~= 2.3",
     "spharapy"
 ]
