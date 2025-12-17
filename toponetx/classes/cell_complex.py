@@ -246,6 +246,24 @@ class CellComplex(Complex):
             return self.cells
         raise ValueError("Only dimensions 0,1, and 2 are supported.")
 
+    def graph_skeleton(self) -> nx.Graph:
+        """Return the graph-skeleton of this cell complex.
+
+        The graph-skeleton consists of the 0- and 1-cells (i.e., nodes and edges)
+        of the cell complex.
+
+        Returns
+        -------
+        nx.Graph
+            The graph-skeleton of this cell complex.
+        """
+        G = nx.Graph()
+        for node in self.skeleton(0):
+            G.add_node(node, **self[node])
+        for u, v in self.skeleton(1):
+            G.add_edge(u, v, **self[(u, v)])
+        return G
+
     @property
     def is_regular(self) -> bool:
         """Check the regularity condition.
