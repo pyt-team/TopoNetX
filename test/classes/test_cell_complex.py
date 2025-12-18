@@ -65,6 +65,21 @@ class TestCellComplex:
         assert len(CC.nodes) == 3
         assert len(CC.edges) == 3
 
+    def test_graph_skeleton(self):
+        """Test that graph_skeleton returns nodes/edges with attributes."""
+        CC = CellComplex()
+        CC.add_node(1, label="a")
+        CC.add_node(2, label="b")
+        CC.add_edge(1, 2, weight=2.5)
+        CC.add_cell((1, 2, 3), rank=2)
+
+        G = CC.graph_skeleton()
+        assert set(G.nodes()) == {1, 2, 3}
+        assert {tuple(sorted(e)) for e in G.edges()} == {(1, 2), (1, 3), (2, 3)}
+        assert G.nodes[1]["label"] == "a"
+        assert G.nodes[2]["label"] == "b"
+        assert G.edges[1, 2]["weight"] == 2.5
+
     def test_clone(self):
         """Test CellComplex.clone()."""
         CC = CellComplex()

@@ -1778,7 +1778,6 @@ class SimplicialComplex[ElementType: Hashable](Complex):
         """
         G = nx.Graph()
         for node in self.skeleton(0):
-            print("node", node, type(node))
             G.add_node(next(iter(node)), **self[node])
         for edge in self.skeleton(1):
             G.add_edge(*edge, **self[edge])
