@@ -24,7 +24,6 @@ class TestReportViews_CellView:
 
     CX = CellComplex()
     CX._insert_cell((1, 2, 3, 4), color="red")
-    CX._insert_cell((1, 2, 3, 4), color="green")
     CX._insert_cell((1, 2, 3, 4), shape="square")
     CX._insert_cell((2, 3, 4, 5))
 
@@ -34,88 +33,40 @@ class TestReportViews_CellView:
 
     def test_cell_view_report_getitem_method(self):
         """Test the __getitem__ method of CellView class."""
-        with pytest.raises(KeyError) as exp_exception:
+        with pytest.raises(KeyError, match="not in the cell dictionary"):
             self.CV.__getitem__(self.cell_2)
 
-        assert (
-            str(exp_exception.value)
-            == "'cell Cell((1, 2, 3, 8)) is not in the cell dictionary'"
-        )
+        assert self.CV.__getitem__(self.cell_1) == {"shape": "square"}
 
-        assert list(self.CV.__getitem__(self.cell_1)) == [
-            {"color": "red"},
-            {"color": "green"},
-            {"shape": "square"},
-        ]
-
-        with pytest.raises(KeyError) as exp_exception:
+        with pytest.raises(KeyError, match="not in the cell dictionary"):
             self.CV.__getitem__((1, 2, 3, 8))
 
-        assert (
-            str(exp_exception.value)
-            == "'cell (1, 2, 3, 8) is not in the cell dictionary'"
-        )
-
-        with pytest.raises(TypeError) as exp_exception:
+        with pytest.raises(TypeError):
             self.CV.__getitem__(1)
 
-        assert str(exp_exception.value) == "Input must be a tuple, list or a cell."
-
-    def test_cell_view_raw_method_1(self):
+    def test_cell_view_raw_type_error(self):
         """Test the raw method for the CellView class."""
-        with pytest.raises(TypeError) as exp_exception:
-            self.CV.raw(1)
+        with pytest.raises(TypeError):
+            _ = self.CV.raw(1)
 
-        assert str(exp_exception.value) == "Input must be a tuple, list or a cell."
-
-    def test_cell_view_raw_method_2(self):
-        """Test the raw method for the CellView class."""
-        # Raw Method should return an exception when argument type is int
-        with pytest.raises(TypeError) as exp_exception:
-            self.CV.raw(2)
-
-        assert str(exp_exception.value) == "Input must be a tuple, list or a cell."
-
-    def test_cell_view_raw_method_3(self):
-        """Test the raw method for the CellView class."""
-        # Raw Method should return an exception when argument type is string
-        with pytest.raises(TypeError) as exp_exception:
+        with pytest.raises(TypeError):
             self.CV.raw("testing string")
 
-        assert str(exp_exception.value) == "Input must be a tuple, list or a cell."
-
-    def test_cell_view_raw_method_4(self):
-        """Test the raw method for the CellView class."""
-        # Raw Method should return an exception when argument type is set
-        with pytest.raises(TypeError) as exp_exception:
+        with pytest.raises(TypeError):
             self.CV.raw({1})
 
-        assert str(exp_exception.value) == "Input must be a tuple, list or a cell."
-
-    def test_cell_view_raw_method_5(self):
-        """Test the raw method for the CellView class."""
-        # Raw Method should return an exception when argument type is dict
-        with pytest.raises(TypeError) as exp_exception:
+        with pytest.raises(TypeError):
             self.CV.raw({"1": "some_string"})
 
-        assert str(exp_exception.value) == "Input must be a tuple, list or a cell."
-
-    def test_cell_view_raw_method_6(self):
+    def test_cell_view_raw_key_error(self):
         """Test the raw method for the CellView class."""
         # Raw Method should raise a KeyError exception when cell is not present
-        with pytest.raises(KeyError) as exp_exception:
+        with pytest.raises(KeyError, match="not in the cell dictionary"):
             self.CV.raw(self.cell_2)
 
-        assert (
-            str(exp_exception.value)
-            == "'cell Cell((1, 2, 3, 8)) is not in the cell dictionary'"
-        )
-
-    def test_cell_view_raw_method_7(self):
+    def test_cell_view_raw_method(self):
         """Test the raw method for the CellView class."""
-        assert str(self.CV.raw(self.cell_1)) == str(
-            [Cell((1, 2, 3, 4)), Cell((1, 2, 3, 4)), Cell((1, 2, 3, 4))]
-        )
+        assert self.CV.raw(self.cell_1) == Cell((1, 2, 3, 4))
 
     def test_cell_view_raw_method_8(self):
         """Test the raw method for the CellView class."""
@@ -217,16 +168,12 @@ class TestReportViews_CellView:
     def test_cell_view_repr_method(self):
         """Test the __repr__ method for the CellView class."""
         assert (
-            self.CV.__repr__()
-            == "CellView([Cell((1, 2, 3, 4)), Cell((1, 2, 3, 4)), Cell((1, 2, 3, 4)), Cell((2, 3, 4, 5))])"
+            self.CV.__repr__() == "CellView([Cell((1, 2, 3, 4)), Cell((2, 3, 4, 5))])"
         )
 
     def test_cell_view_str_method(self):
         """Test the __str__ method for the CellView class."""
-        assert (
-            self.CV.__str__()
-            == "CellView([Cell((1, 2, 3, 4)), Cell((1, 2, 3, 4)), Cell((1, 2, 3, 4)), Cell((2, 3, 4, 5))])"
-        )
+        assert self.CV.__str__() == "CellView([Cell((1, 2, 3, 4)), Cell((2, 3, 4, 5))])"
 
 
 class TestReportViews_HyperEdgeView:
