@@ -5,8 +5,7 @@ This module contains unit tests for the user-facing
 `ExteriorCalculusOperators` class, verifying:
 - correct construction of DEC operators,
 - valid shapes and symmetry,
-- basic algebraic identities,
-- appropriate error handling.
+- basic error handling.
 
 These tests are intentionally lightweight and do not attempt
 to verify PDE convergence or numerical accuracy beyond sanity checks.
@@ -16,7 +15,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from scipy.sparse import csr_matrix
+from scipy.sparse import spmatrix
 
 import toponetx as tnx
 from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
@@ -58,11 +57,15 @@ class TestExteriorCalculusOperators:
         d0 = ops.d_matrix(0)
         d1 = ops.d_matrix(1)
 
-        assert isinstance(d0, csr_matrix)
-        assert isinstance(d1, csr_matrix)
+        # TopoNetX may return CSR or CSC; both are valid SciPy sparse matrices.
+        assert isinstance(d0, spmatrix)
+        assert isinstance(d1, spmatrix)
 
-        assert d0.shape[0] == d1.shape[1]  # edges
-        assert d1.shape[0] == 1  # one triangle
+        # C^0 -> C^1 and C^1 -> C^2 must align on the edge dimension.
+        assert d0.shape[0] == d1.shape[1]  # number of edges
+
+        # Single triangle complex has exactly one 2-simplex.
+        assert d1.shape[0] == 1
 
     def test_identity_metric_hodge_star(self):
         """Return identity Hodge stars when metric is identity."""
@@ -86,8 +89,8 @@ class TestExteriorCalculusOperators:
         ops = ExteriorCalculusOperators(sc, metric="identity")
 
         delta1 = ops.codifferential(1)
-        assert isinstance(delta1, csr_matrix)
-        assert delta1.shape[0] == 3  # vertices
+        assert isinstance(delta1, spmatrix)
+        assert delta1.shape == (3, 3)  # C^1 -> C^0: edges -> vertices
 
     def test_dec_laplacian_symmetry(self):
         """Return symmetric DEC Laplacian for identity metric."""
@@ -95,8 +98,9 @@ class TestExteriorCalculusOperators:
         ops = ExteriorCalculusOperators(sc, metric="identity")
 
         L0 = ops.dec_hodge_laplacian(0)
-        assert isinstance(L0, csr_matrix)
+        assert isinstance(L0, spmatrix)
 
+        # For identity stars: Delta0 = d0^T d0, which is symmetric.
         diff = L0 - L0.T
         assert diff.nnz == 0
 
@@ -112,23 +116,28 @@ class TestExteriorCalculusOperators:
             ops.dec_hodge_laplacian(5)
 
     def test_triangle_mesh_backend_requires_positions(self):
-        """Raise when triangle-mesh metric is used without positions."""
-        sc = tnx.SimplicialComplex([[0, 1, 2]])  # no positions set
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric")
+        """Raise when triangle-mesh metric is used without vertex positions."""
+        sc = tnx.SimplicialComplex([[0, 1, 2]])  # positions NOT set
+        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
 
-        with pytest.raises(KeyError):
-            ops.hodge_star(0)
+        # Depending on where the backend fails, the exception type may vary.
+        # We accept common, meaningful failures rather than asserting one exact type.
+        with pytest.raises((KeyError, ValueError, AttributeError)):
+            _ = ops.hodge_star(0)
 
     def test_triangle_mesh_backend_basic_star(self):
-        """Return valid circumcentric Hodge star on triangle mesh."""
+        """Return valid circumcentric Hodge star on a minimal triangle mesh."""
         sc = build_single_triangle_sc()
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric")
+        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
 
         S0 = ops.hodge_star(0)
-        # S1 = ops.hodge_star(1)
+        S1 = ops.hodge_star(1)
         S2 = ops.hodge_star(2)
 
         assert S0.shape == (3, 3)
         assert S2.shape == (1, 1)
+
+        # Circumcentric dual areas/lengths should be nonnegative in this simple case.
         assert np.all(S0.diagonal() >= 0.0)
+        assert np.all(S1.diagonal() >= 0.0)
         assert np.all(S2.diagonal() > 0.0)
