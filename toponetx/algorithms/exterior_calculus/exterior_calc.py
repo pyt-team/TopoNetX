@@ -1,14 +1,107 @@
-"""
+r"""
 Exterior calculus operators built on TopoNetX coincidence matrices.
 
-This module exposes `ExteriorCalculusOperators`, a user-facing wrapper around:
-- topological coboundaries `d_k`,
-- diagonal Hodge stars `*_k`,
-- codifferentials `delta_k`,
-- DEC Hodge Laplacians `Delta_k`.
+This module exposes :class:`~toponetx.algorithms.exterior_calculus.ExteriorCalculusOperators`,
+a user-facing wrapper around:
 
-For triangle meshes embedded in R^3, additional surface FEM operators on 0-forms
-are available through the chosen metric backend.
+- topological coboundaries ``d_k``,
+- diagonal discrete Hodge stars ``*_k``,
+- codifferentials ``δ_k``,
+- DEC Hodge Laplacians ``Δ_k``.
+
+Notes
+-----
+**Mathematical background.**
+Let ``K`` be a finite cell/simplicial complex of dimension ``d``. For each ``k``,
+let ``C^k(K)`` denote the space of real-valued *k-cochains* (functions assigning a
+number to each oriented k-cell). The *coboundary* operator is
+
+.. math::
+
+    d_k : C^k(K) \to C^{k+1}(K),
+
+implemented by TopoNetX as a (co)incidence matrix between k- and (k+1)-cells (with
+optional signs encoding orientation).
+
+Discrete Exterior Calculus (DEC) introduces a (typically diagonal) discrete Hodge
+star
+
+.. math::
+
+    *_k : C^k(K) \to C^{d-k}(K),
+
+which depends on a choice of metric/geometry and defines an inner product on
+cochains:
+
+.. math::
+
+    \langle \alpha, \beta \rangle_k := \alpha^\top (*_k)\, \beta.
+
+Given ``d_{k-1}`` and the Hodge stars, the DEC *codifferential* is
+
+.. math::
+
+    \delta_k := (*_{k-1})^{-1}\, d_{k-1}^\top\, (*_k) : C^k(K) \to C^{k-1}(K),
+
+and the DEC *Hodge Laplacian* is
+
+.. math::
+
+    \Delta_k := \delta_{k+1} d_k + d_{k-1} \delta_k : C^k(K) \to C^k(K),
+
+with the convention that missing terms are zero when indices go out of range.
+
+**Implementation notes.**
+- ``d_k`` is obtained from :meth:`TopoNetX Complex.coincidence_matrix` as
+  ``coincidence_matrix(k+1, signed=..., index=False)``.
+- ``*_k`` is produced by a *backend* chosen from the user metric specification.
+  If metric support is disabled (``metric=None``), then ``*_k`` defaults to the
+  identity matrix.
+- For triangle meshes embedded in ``R^3`` (triangle-mesh presets), additional
+  surface FEM operators on 0-forms are exposed through the chosen backend:
+  consistent mass matrix and stiffness matrices, plus mass-lumped Laplacians.
+
+Examples
+--------
+Basic DEC Laplacian on a simplicial complex (identity metric)::
+
+    import toponetx as tnx
+    from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
+
+    sc = tnx.SimplicialComplex([[0, 1, 2]])
+    ops = ExteriorCalculusOperators(sc, metric="identity")
+
+    d0 = ops.d_matrix(0)  # C^0 -> C^1
+    S1 = ops.hodge_star(1)  # *_1
+    delta1 = ops.codifferential(1)
+    L0 = ops.dec_hodge_laplacian(0)
+
+Triangle mesh in R^3 with circumcentric stars (requires vertex positions)::
+
+    import toponetx as tnx
+    from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
+
+    sc = tnx.SimplicialComplex([[0, 1, 2], [0, 2, 3]])
+    sc.set_simplex_attributes(
+        {
+            0: [0.0, 0.0, 0.0],
+            1: [1.0, 0.0, 0.0],
+            2: [1.0, 1.0, 0.0],
+            3: [0.0, 1.0, 0.0],
+        },
+        name="position",
+    )
+
+    ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
+    S0 = ops.hodge_star(0)
+    M0 = ops.fem_mass_matrix_0()
+    K0 = ops.cotan_stiffness_0()
+    Lcot = ops.cotan_laplacian_0(lumped=True)
+
+Disable metric support (all stars become identities)::
+
+    ops = ExteriorCalculusOperators(sc, metric=None)
+    S2 = ops.hodge_star(2)  # identity on C^2
 """
 
 from __future__ import annotations
@@ -28,26 +121,107 @@ from .metric import (
 
 @dataclass
 class ExteriorCalculusOperators:
-    """Compute metric-aware DEC operators on a TopoNetX complex.
+    r"""Compute metric-aware DEC operators on a TopoNetX complex.
+
+    This class is a thin, user-facing wrapper that constructs and exposes core
+    operators of Discrete Exterior Calculus (DEC) on a TopoNetX complex.
+
+    Notes
+    -----
+    **What it provides.**
+    - Coboundary operators ``d_k`` obtained from TopoNetX coincidence matrices.
+    - Discrete Hodge stars ``*_k`` from a backend determined by a metric preset
+      (or an explicitly supplied backend).
+    - Codifferentials ``δ_k`` defined via Hodge stars and transposed coboundaries:
+
+      .. math::
+
+          \delta_k := (*_{k-1})^{-1}\, d_{k-1}^\top\, (*_k).
+
+    - DEC Hodge Laplacians ``Δ_k`` assembled as:
+
+      .. math::
+
+          \Delta_k := \delta_{k+1} d_k + d_{k-1} \delta_k.
+
+    **Metric behavior.**
+    Users may pass:
+    - ``metric=None`` to disable metric support (all stars become identities),
+    - a preset string (``MetricPreset``),
+    - a :class:`~toponetx.algorithms.exterior_calculus.metric.MetricSpec`,
+    - an explicit ``star_backend`` implementing
+      :class:`~toponetx.algorithms.exterior_calculus.metric.HodgeStarBackend`,
+      which overrides automatic selection.
+
+    **Triangle mesh extras.**
+    For triangle-mesh presets (e.g. ``"circumcentric"``, ``"voronoi"``,
+    ``"barycentric_lumped"``, ``"euclidean"``), the backend is
+    :class:`~toponetx.algorithms.exterior_calculus.metric.TriangleMesh3DBackend`
+    and the complex must provide 3D positions under ``pos_name``. In that case,
+    this wrapper exposes surface FEM helpers on 0-forms via the backend:
+    mass matrix, stiffness matrices, and (mass-lumped) Laplacians.
 
     Attributes
     ----------
     sc : object
-        Complex providing `dim`, `skeleton(k)`, and `coincidence_matrix(rank, signed, index)`.
-        For triangle-mesh presets, it must also provide `get_node_attributes(pos_name)`.
+        Complex providing:
+
+        - ``dim`` (maximum dimension),
+        - ``skeleton(k)`` (iterable of k-cells / simplices),
+        - ``coincidence_matrix(rank, signed, index)`` for coboundaries.
+
+        For triangle-mesh presets, it must also provide
+        ``get_node_attributes(pos_name)`` returning 3D vertex coordinates.
     pos_name : str
-        Node attribute name storing vertex positions in R^3 for triangle-mesh presets.
+        Node attribute name storing vertex positions in ``R^3`` for triangle-mesh
+        presets (default: ``"position"``).
     metric : MetricSpec | MetricPreset | None
-        Metric/star specification. If None, Hodge stars default to identity matrices.
+        Metric/star specification.
+
+        - If ``None``, metric support is disabled and stars default to identity.
+        - If a preset string, it is normalized to ``MetricSpec(preset=...)``.
+        - If ``MetricSpec``, it is used as-is (with ``eps`` set from this object).
     star_backend : HodgeStarBackend | None
-        Optional explicit backend. If provided, it overrides automatic selection.
+        Optional explicit backend overriding automatic selection.
     eps : float
         Numerical safeguard for star inverses and mass-lumping.
 
     Examples
     --------
-    >>> ops = ExteriorCalculusOperators(sc, metric="circumcentric")
-    >>> L1 = ops.dec_hodge_laplacian(1)
+    Build operators on a simplicial complex and compute a Laplacian::
+
+        import toponetx as tnx
+        from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
+
+        sc = tnx.SimplicialComplex([[0, 1, 2]])
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        L0 = ops.dec_hodge_laplacian(0)
+
+    Use a triangle-mesh preset (requires 3D vertex positions)::
+
+        import toponetx as tnx
+        from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
+
+        sc = tnx.SimplicialComplex([[0, 1, 2], [0, 2, 3]])
+        sc.set_simplex_attributes(
+            {
+                0: [0.0, 0.0, 0.0],
+                1: [1.0, 0.0, 0.0],
+                2: [1.0, 1.0, 0.0],
+                3: [0.0, 1.0, 0.0],
+            },
+            name="position",
+        )
+
+        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
+        M0 = ops.fem_mass_matrix_0()
+        Lcot = ops.cotan_laplacian_0(lumped=True)
+
+    Disable metric support::
+
+        ops = ExteriorCalculusOperators(sc, metric=None)
+        S1 = ops.hodge_star(1)  # identity
     """
 
     sc: object
@@ -61,10 +235,19 @@ class ExteriorCalculusOperators:
     def __post_init__(self) -> None:
         """Post-initialize the operator object.
 
+        This method:
+
+        1. Casts ``eps`` to float.
+        2. Normalizes the user-supplied ``metric`` into a
+           :class:`~toponetx.algorithms.exterior_calculus.metric.MetricSpec`
+           (or ``None`` to disable metric support).
+        3. If no explicit ``star_backend`` is provided, selects one automatically
+           based on the normalized metric preset.
+
         Returns
         -------
         None
-            This method mutates `metric` and `star_backend` in place.
+            This method mutates ``metric`` and ``star_backend`` in place.
         """
         self.eps = float(self.eps)
         self.metric = self._normalize_metric(self.metric)
@@ -75,7 +258,13 @@ class ExteriorCalculusOperators:
     def _normalize_metric(
         metric: MetricSpec | MetricPreset | None,
     ) -> MetricSpec | None:
-        """Normalize user-provided metric input into a `MetricSpec` or None.
+        """Normalize user-provided metric input into a ``MetricSpec`` or ``None``.
+
+        Users may pass:
+
+        - ``None``: disables metric support (stars become identities).
+        - :class:`~toponetx.algorithms.exterior_calculus.metric.MetricSpec`: used directly.
+        - a preset string: converted to ``MetricSpec(preset=<string>)``.
 
         Parameters
         ----------
@@ -86,6 +275,11 @@ class ExteriorCalculusOperators:
         -------
         MetricSpec | None
             Normalized metric specification.
+
+        Raises
+        ------
+        TypeError
+            If ``metric`` is not ``None``, a ``MetricSpec``, or a preset string.
         """
         if metric is None:
             return None
@@ -98,10 +292,12 @@ class ExteriorCalculusOperators:
     def _select_backend(self) -> HodgeStarBackend | None:
         """Select and construct the appropriate Hodge star backend.
 
+        The backend determines how diagonal Hodge stars ``*_k`` are computed.
+
         Returns
         -------
         HodgeStarBackend | None
-            The selected backend instance, or None if metric support is disabled.
+            The selected backend instance, or ``None`` if metric support is disabled.
 
         Raises
         ------
@@ -151,7 +347,7 @@ class ExteriorCalculusOperators:
         return int(self.sc.dim)
 
     def d_matrix(self, k: int, signed: bool = True) -> csr_matrix:
-        """Return the coboundary matrix d_k : C^k -> C^{k+1}.
+        r"""Return the coboundary matrix ``d_k : C^k -> C^{k+1}``.
 
         Parameters
         ----------
@@ -170,19 +366,19 @@ class ExteriorCalculusOperators:
         return self.sc.coincidence_matrix(k + 1, signed=signed, index=False)
 
     def hodge_star(self, k: int, inverse: bool = False) -> csr_matrix:
-        """Return a discrete Hodge star matrix *_k.
+        r"""Return a discrete Hodge star matrix ``*_k``.
 
         Parameters
         ----------
         k : int
             Cochain degree.
         inverse : bool
-            If True, return (*_k)^{-1}.
+            If True, return ``(*_k)^{-1}``.
 
         Returns
         -------
         csr_matrix
-            Sparse star matrix.
+            Sparse star matrix (diagonal in the provided backends).
         """
         n_k = len(list(self.sc.skeleton(k)))
         if self.star_backend is None:
@@ -190,19 +386,24 @@ class ExteriorCalculusOperators:
         return self.star_backend.star(self.sc, k, inverse=inverse)
 
     def codifferential(self, k: int, signed: bool = True) -> csr_matrix:
-        """Return the DEC codifferential delta_k : C^k -> C^{k-1}.
+        r"""Return the DEC codifferential ``δ_k : C^k -> C^{k-1}``.
 
         Parameters
         ----------
         k : int
-            Cochain degree. Must satisfy k >= 1.
+            Cochain degree. Must satisfy ``k >= 1``.
         signed : bool
-            Whether to use signed coboundaries.
+            Whether to use signed coboundaries (orientation-aware).
 
         Returns
         -------
         csr_matrix
             Sparse codifferential matrix.
+
+        Raises
+        ------
+        ValueError
+            If ``k <= 0``.
         """
         if k <= 0:
             raise ValueError("codifferential requires k >= 1.")
@@ -212,19 +413,24 @@ class ExteriorCalculusOperators:
         return star_km1_inv @ (d_km1.T @ star_k)
 
     def dec_hodge_laplacian(self, k: int, signed: bool = True) -> csr_matrix:
-        """Return the DEC Hodge Laplacian Delta_k on k-cochains.
+        r"""Return the DEC Hodge Laplacian ``Δ_k`` on k-cochains.
 
         Parameters
         ----------
         k : int
             Cochain degree.
         signed : bool
-            Whether to use signed coboundaries.
+            Whether to use signed coboundaries (orientation-aware).
 
         Returns
         -------
         csr_matrix
             Sparse Laplacian matrix.
+
+        Raises
+        ------
+        ValueError
+            If ``k`` is outside ``[0, dim]``.
         """
         if k < 0 or k > self.dim:
             raise ValueError(f"k must be in [0, {self.dim}], got {k}.")
@@ -244,7 +450,7 @@ class ExteriorCalculusOperators:
         return term_up + term_down
 
     def fem_mass_matrix_0(self) -> csr_matrix:
-        """Return the consistent P1 FEM mass matrix on 0-forms.
+        r"""Return the consistent P1 FEM mass matrix on 0-forms.
 
         Returns
         -------
@@ -263,7 +469,7 @@ class ExteriorCalculusOperators:
         return self.star_backend.fem_mass_matrix_0()
 
     def cotan_stiffness_0(self) -> csr_matrix:
-        """Return the surface FEM stiffness matrix on 0-forms.
+        r"""Return the surface FEM stiffness matrix on 0-forms.
 
         Returns
         -------
@@ -282,7 +488,7 @@ class ExteriorCalculusOperators:
         return self.star_backend.cotan_stiffness_0()
 
     def riemannian_stiffness_0(self) -> csr_matrix:
-        """Return anisotropic surface stiffness matrix on 0-forms.
+        r"""Return anisotropic surface stiffness matrix on 0-forms.
 
         Returns
         -------
@@ -301,12 +507,12 @@ class ExteriorCalculusOperators:
         return self.star_backend.riemannian_stiffness_0()
 
     def cotan_laplacian_0(self, *, lumped: bool = True) -> csr_matrix:
-        """Return a cotangent Laplacian operator on 0-forms.
+        r"""Return a cotangent Laplacian operator on 0-forms.
 
         Parameters
         ----------
         lumped : bool
-            If True, return M_lumped^{-1} K. Otherwise return K.
+            If True, return ``M_lumped^{-1} K``. Otherwise return ``K``.
 
         Returns
         -------
@@ -325,12 +531,12 @@ class ExteriorCalculusOperators:
         return self.star_backend.cotan_laplacian_0(lumped=lumped)
 
     def riemannian_laplacian_0(self, *, lumped: bool = True) -> csr_matrix:
-        """Return an anisotropic Laplacian operator on 0-forms.
+        r"""Return an anisotropic Laplacian operator on 0-forms.
 
         Parameters
         ----------
         lumped : bool
-            If True, return M_lumped^{-1} K(G). Otherwise return K(G).
+            If True, return ``M_lumped^{-1} K(G)``. Otherwise return ``K(G)``.
 
         Returns
         -------
