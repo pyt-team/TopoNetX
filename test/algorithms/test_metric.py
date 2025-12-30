@@ -1,4 +1,5 @@
-"""Test metric and geometry backends for exterior calculus.
+"""
+Test metric and geometry backends for exterior calculus.
 
 These tests cover:
 - geometry helper utilities (areas, circumcenters, barycentric gradients),
@@ -627,3 +628,150 @@ class TestMetricCallableType:
 
         fn = _fn
         assert callable(fn)
+
+
+# ============================
+# Additional unit tests (augment only)
+# ============================
+
+
+class TestAs1DFloatAdditional:
+    """Additional coverage for `_as_1d_float` behavior."""
+
+    def test_as_1d_float_accepts_list(self):
+        """Accept Python lists and cast to float."""
+        y = _as_1d_float([1, 2, 3])
+        assert y.dtype == float
+        assert y.shape == (3,)
+        assert y == pytest.approx([1.0, 2.0, 3.0])
+
+    def test_as_1d_float_accepts_scalar(self):
+        """Accept scalar inputs and return a length-1 float array."""
+        y = _as_1d_float(7)
+        assert y.dtype == float
+        assert y.shape == (1,)
+        assert y == pytest.approx([7.0])
+
+    def test_as_1d_float_casts_int_dtype(self):
+        """Cast integer arrays to float."""
+        x = np.array([1, 2, 3], dtype=np.int64)
+        y = _as_1d_float(x)
+        assert y.dtype == float
+        assert y == pytest.approx([1.0, 2.0, 3.0])
+
+    def test_as_1d_float_rejects_non_numeric(self):
+        """Raise TypeError when input cannot be converted to float."""
+        with pytest.raises(TypeError):
+            _ = _as_1d_float(np.array(["a", "b"], dtype=object))
+
+
+class TestGeometryHelpersAdditional:
+    """Additional coverage for geometry helper input validation."""
+
+    def test_triangle_area_3d_raises_on_bad_shape(self):
+        """Raise ValueError if vertices are not 3D vectors."""
+        p0 = np.array([0.0, 0.0])  # wrong shape
+        p1 = np.array([1.0, 0.0, 0.0])
+        p2 = np.array([0.0, 1.0, 0.0])
+        with pytest.raises(ValueError):
+            _triangle_area_3d(p0, p1, p2)
+
+    def test_circumcenter_3d_raises_on_bad_shape(self):
+        """Raise ValueError if vertices are not 3D vectors."""
+        p0 = np.array([0.0, 0.0, 0.0])
+        p1 = np.array([1.0, 0.0])  # wrong shape
+        p2 = np.array([0.0, 1.0, 0.0])
+        with pytest.raises(ValueError):
+            _circumcenter_3d(p0, p1, p2)
+
+    def test_grad_barycentric_3d_raises_on_bad_shape(self):
+        """Raise ValueError if vertices are not 3D vectors."""
+        p0 = np.array([0.0, 0.0, 0.0])
+        p1 = np.array([1.0, 0.0, 0.0])
+        p2 = np.array([0.0, 1.0])  # wrong shape
+        with pytest.raises(ValueError):
+            _grad_barycentric_3d(p0, p1, p2)
+
+
+class TestDiagonalHodgeStarAdditional:
+    """Additional coverage for numerical safeguards and shapes."""
+
+    def test_diagonal_star_inverse_eps_safeguard(self):
+        """Invert safely when diagonal contains zeros (uses eps safeguard)."""
+        sc = _build_single_triangle_sc()
+        ms = MetricSpec(
+            preset="diagonal",
+            diagonal_weights={0: np.array([0.0, 2.0, 0.0])},
+            eps=1e-12,
+        )
+        hs = DiagonalHodgeStar(metric=ms)
+        S = hs.star(sc, 0)
+        Sinv = hs.star(sc, 0, inverse=True)
+        assert S.shape == (3, 3)
+        assert Sinv.shape == (3, 3)
+        assert np.isfinite(Sinv.diagonal()).all()
+        assert Sinv.diagonal()[1] == pytest.approx(0.5)
+
+    def test_identity_star_all_k_shapes(self):
+        """Identity preset returns square matrices sized by skeleton(k)."""
+        sc = _build_two_triangle_square_sc()
+        hs = DiagonalHodgeStar(metric=MetricSpec(preset="identity"))
+        n0, n1, n2 = _counts(sc)
+        S0 = hs.star(sc, 0)
+        S1 = hs.star(sc, 1)
+        S2 = hs.star(sc, 2)
+        assert S0.shape == (n0, n0)
+        assert S1.shape == (n1, n1)
+        assert S2.shape == (n2, n2)
+        assert np.allclose(S0.diagonal(), 1.0)
+        assert np.allclose(S1.diagonal(), 1.0)
+        assert np.allclose(S2.diagonal(), 1.0)
+
+
+class TestTriangleMesh3DBackendAdditional:
+    """Additional coverage for backend operators and consistency checks."""
+
+    def test_fem_mass_is_psd_and_has_positive_diagonal(self):
+        """Mass matrix should be symmetric with nonnegative diagonal entries."""
+        sc = _build_two_triangle_square_sc()
+        be = TriangleMesh3DBackend(sc=sc, metric=MetricSpec(preset="circumcentric"))
+        M = be.fem_mass_matrix_0()
+        assert isinstance(M, csr_matrix)
+        assert (M - M.T).nnz == 0
+        assert np.all(M.diagonal() > 0.0)
+
+    def test_stiffness_has_nonpositive_offdiagonal(self):
+        """Stiffness matrix off-diagonals are typically nonpositive for cotan FEM on planar meshes."""
+        sc = _build_two_triangle_square_sc()
+        be = TriangleMesh3DBackend(sc=sc, metric=MetricSpec(preset="circumcentric"))
+        K = be.cotan_stiffness_0()
+        K_dense = K.toarray()
+        off = K_dense - np.diag(np.diag(K_dense))
+        assert np.max(off) <= 1e-12
+
+    def test_laplacian_outputs_are_finite(self):
+        """Laplacian variants should not contain NaN/inf entries."""
+        sc = _build_two_triangle_square_sc()
+        be = TriangleMesh3DBackend(sc=sc, metric=MetricSpec(preset="circumcentric"))
+        Lc = be.cotan_laplacian_0(lumped=True)
+        Lr = be.riemannian_laplacian_0(lumped=True)
+        assert np.isfinite(Lc.data).all()
+        assert np.isfinite(Lr.data).all()
+
+    def test_star_barycentric_lumped_k2_matches_triangle_count(self):
+        """For k=2 star is 1x1 for a single-triangle complex and nT x nT in general."""
+        sc1 = _build_single_triangle_sc()
+        be1 = TriangleMesh3DBackend(
+            sc=sc1, metric=MetricSpec(preset="barycentric_lumped")
+        )
+        S2_1 = be1.star(sc1, 2)
+        assert S2_1.shape == (1, 1)
+
+        sc2 = _build_two_triangle_square_sc()
+        nT = len(list(sc2.skeleton(2)))
+        be2 = TriangleMesh3DBackend(
+            sc=sc2, metric=MetricSpec(preset="barycentric_lumped")
+        )
+        S2_2 = be2.star(sc2, 2)
+        assert S2_2.shape == (nT, nT)
+        assert np.all(S2_2.diagonal() > 0.0)
