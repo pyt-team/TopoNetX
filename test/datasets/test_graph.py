@@ -29,10 +29,8 @@ class TestGraph:
     def test_coauthorship(self):
         """Test coauthorship dataset loading."""
         # NumPy >= 2.4 emits a VisibleDeprecationWarning internally.
-        # This test only verifies data presence, not dtype construction.
-        with pytest.warns(
-            category=DeprecationWarning,
-        ):
+        # This test verifies dataset loading, not dtype construction.
+        with pytest.warns(DeprecationWarning):
             simplicial_coauthorship_data = coauthorship()
 
         assert (
