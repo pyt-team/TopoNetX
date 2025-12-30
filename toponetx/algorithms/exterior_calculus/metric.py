@@ -9,8 +9,6 @@ This module provides:
   - `TriangleMesh3DBackend` (geometry-based).
 """
 
-from __future__ import annotations
-
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol

@@ -6,8 +6,6 @@ This subpackage exposes:
 - `MetricSpec`: user-facing specification for diagonal stars and anisotropic tensors.
 """
 
-from __future__ import annotations
-
 from .exterior_calc import ExteriorCalculusOperators
 from .metric import MetricSpec
 
