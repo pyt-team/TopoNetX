@@ -104,8 +104,6 @@ Disable metric support (all stars become identities)::
     S2 = ops.hodge_star(2)  # identity on C^2
 """
 
-# from __future__ import annotations
-
 from dataclasses import dataclass, field
 
 from scipy.sparse import csr_matrix, identity
