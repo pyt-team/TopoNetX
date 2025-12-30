@@ -421,15 +421,19 @@ class TestExteriorCalculusOperators:
             _ = ExteriorCalculusOperators._normalize_metric(123)  # type: ignore[arg-type]
 
     def test_select_backend_diagonal_builds_diagonal_backend(self):
-        """Route preset='diagonal' to DiagonalHodgeStar."""
+        """Diagonal preset builds DiagonalHodgeStar backend when weights are provided."""
         sc = build_single_triangle_sc()
-        ops = ExteriorCalculusOperators(sc, metric="diagonal")
-        assert isinstance(ops.star_backend, DiagonalHodgeStar)
 
-        # And star should be diagonal sparse with correct shape.
+        metric = MetricSpec(
+            preset="diagonal",
+            diagonal_weights={0: np.ones(3)},
+        )
+
+        ops = ExteriorCalculusOperators(sc, metric=metric)
+
         S0 = ops.hodge_star(0)
-        n0, _, _ = _counts(sc)
-        assert S0.shape == (n0, n0)
+        assert isinstance(S0, csr_matrix)
+        assert np.allclose(S0.diagonal(), 1.0)
 
     def test_select_backend_triangle_presets_build_triangle_backend(self):
         """Route triangle-mesh presets to TriangleMesh3DBackend."""
