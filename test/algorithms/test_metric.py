@@ -661,7 +661,7 @@ class TestAs1DFloatAdditional:
 
     def test_as_1d_float_rejects_non_numeric(self):
         """Raise TypeError when input cannot be converted to float."""
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError):
             _ = _as_1d_float(np.array(["a", "b"], dtype=object))
 
 
