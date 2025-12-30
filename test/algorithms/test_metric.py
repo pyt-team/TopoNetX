@@ -660,7 +660,7 @@ class TestAs1DFloatAdditional:
         assert y == pytest.approx([1.0, 2.0, 3.0])
 
     def test_as_1d_float_rejects_non_numeric(self):
-        """Raise TypeError when input cannot be converted to float."""
+        """Raise ValueError when input cannot be converted to float."""
         with pytest.raises(ValueError):
             _ = _as_1d_float(np.array(["a", "b"], dtype=object))
 
@@ -759,7 +759,7 @@ class TestTriangleMesh3DBackendAdditional:
         assert np.isfinite(Lr.data).all()
 
     def test_star_barycentric_lumped_k2_matches_triangle_count(self):
-        """For k=2 star is 1x1 for a single-triangle complex and nT x nT in general."""
+        """For k=2, the star is 1x1 for a single triangle and nT x nT in general."""
         sc1 = _build_single_triangle_sc()
         be1 = TriangleMesh3DBackend(
             sc=sc1, metric=MetricSpec(preset="barycentric_lumped")
@@ -775,3 +775,56 @@ class TestTriangleMesh3DBackendAdditional:
         S2_2 = be2.star(sc2, 2)
         assert S2_2.shape == (nT, nT)
         assert np.all(S2_2.diagonal() > 0.0)
+
+    # ---- Added to cover lines shown in the screenshot (augment only) ----
+
+    def test_dual_measure_barycentric_invalid_k_raises(self):
+        """Raise ValueError for unsupported degree in barycentric dual measure helper."""
+        sc = _build_single_triangle_sc()
+        be = TriangleMesh3DBackend(
+            sc=sc, metric=MetricSpec(preset="barycentric_lumped")
+        )
+        with pytest.raises(ValueError):
+            _ = be._dual_measure_barycentric(3)
+
+    def test_dual_measure_barycentric_k2_equals_triangle_areas(self):
+        """For k=2, barycentric dual measure returns triangle areas."""
+        sc = _build_two_triangle_square_sc()
+        be = TriangleMesh3DBackend(
+            sc=sc, metric=MetricSpec(preset="barycentric_lumped")
+        )
+        A = be._triangle_areas()
+        d2 = be._dual_measure_barycentric(2)
+        assert d2.shape == A.shape
+        assert d2 == pytest.approx(A)
+
+    def test_star_circumcentric_inverse_k0_is_finite(self):
+        """Inverse circumcentric star for k=0 returns finite diagonal."""
+        sc = _build_two_triangle_square_sc()
+        be = TriangleMesh3DBackend(sc=sc, metric=MetricSpec(preset="circumcentric"))
+        S0 = be.star(sc, 0, inverse=False)
+        S0_inv = be.star(sc, 0, inverse=True)
+        assert np.isfinite(S0_inv.diagonal()).all()
+        # Where S0 has strictly positive entries, inversion should be reciprocal.
+        mask = S0.diagonal() > 0.0
+        if np.any(mask):
+            assert np.allclose(
+                S0.diagonal()[mask] * S0_inv.diagonal()[mask],
+                1.0,
+                atol=1e-10,
+            )
+
+    def test_star_circumcentric_inverse_k1_is_finite(self):
+        """Inverse circumcentric star for k=1 returns finite diagonal."""
+        sc = _build_two_triangle_square_sc()
+        be = TriangleMesh3DBackend(sc=sc, metric=MetricSpec(preset="circumcentric"))
+        S1 = be.star(sc, 1, inverse=False)
+        S1_inv = be.star(sc, 1, inverse=True)
+        assert np.isfinite(S1_inv.diagonal()).all()
+        mask = S1.diagonal() > 0.0
+        if np.any(mask):
+            assert np.allclose(
+                S1.diagonal()[mask] * S1_inv.diagonal()[mask],
+                1.0,
+                atol=1e-10,
+            )
