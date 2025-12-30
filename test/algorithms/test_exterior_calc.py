@@ -21,6 +21,11 @@ from scipy.sparse import csr_matrix, spmatrix
 
 import toponetx as tnx
 from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
+from toponetx.algorithms.exterior_calculus.metric import (
+    DiagonalHodgeStar,
+    MetricSpec,
+    TriangleMesh3DBackend,
+)
 
 
 def build_single_triangle_sc() -> tnx.SimplicialComplex:
@@ -349,13 +354,21 @@ class TestExteriorCalculusOperators:
 
     def test_custom_star_backend_overrides_metric_selection(self):
         """Allow explicit star_backend to override automatic metric backend."""
-        sc = build_single_triangle_sc()
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric", star_backend=None)
+        sc = build_single_triangle_sc_no_positions()
 
-        # If star_backend is None and metric defaults to identity in __post_init__,
-        # hodge_star should still return a valid matrix.
+        # If a custom backend is provided, ops should not attempt to build the
+        # triangle-mesh backend (and thus should not require positions).
+        custom_backend = DiagonalHodgeStar(metric=MetricSpec(preset="identity"))
+        ops = ExteriorCalculusOperators(
+            sc,
+            metric="circumcentric",
+            pos_name="position",
+            star_backend=custom_backend,
+        )
+
         S0 = ops.hodge_star(0)
         assert isinstance(S0, spmatrix)
+        assert np.allclose(S0.diagonal(), 1.0)
 
     def test_metric_none_gives_identity_stars(self):
         """Return identity stars when metric support is disabled (metric=None)."""
@@ -382,6 +395,63 @@ class TestExteriorCalculusOperators:
 
         d0 = ops.d_matrix(0)
         assert isinstance(d0, spmatrix)
-        # Convertibility check: the matrix should support tocsr without error.
         d0_csr = d0.tocsr()
         assert isinstance(d0_csr, csr_matrix)
+
+    # ------------------------------------------------------------------
+    # Extra coverage to hit remaining branches in ExteriorCalculusOperators
+    # ------------------------------------------------------------------
+
+    def test_normalize_metric_accepts_metricspec(self):
+        """Accept MetricSpec inputs without modification."""
+        ms = MetricSpec(preset="identity")
+        out = ExteriorCalculusOperators._normalize_metric(ms)
+        assert isinstance(out, MetricSpec)
+        assert out.preset == "identity"
+
+    def test_normalize_metric_accepts_preset_string(self):
+        """Accept preset strings and convert to MetricSpec."""
+        out = ExteriorCalculusOperators._normalize_metric("diagonal")
+        assert isinstance(out, MetricSpec)
+        assert out.preset == "diagonal"
+
+    def test_normalize_metric_type_error(self):
+        """Raise TypeError for unsupported metric types."""
+        with pytest.raises(TypeError):
+            _ = ExteriorCalculusOperators._normalize_metric(123)  # type: ignore[arg-type]
+
+    def test_select_backend_diagonal_builds_diagonal_backend(self):
+        """Route preset='diagonal' to DiagonalHodgeStar."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc, metric="diagonal")
+        assert isinstance(ops.star_backend, DiagonalHodgeStar)
+
+        # And star should be diagonal sparse with correct shape.
+        S0 = ops.hodge_star(0)
+        n0, _, _ = _counts(sc)
+        assert S0.shape == (n0, n0)
+
+    def test_select_backend_triangle_presets_build_triangle_backend(self):
+        """Route triangle-mesh presets to TriangleMesh3DBackend."""
+        sc = build_single_triangle_sc()
+        for preset in ("barycentric_lumped", "circumcentric", "voronoi"):
+            ops = ExteriorCalculusOperators(sc, metric=preset, pos_name="position")
+            assert isinstance(ops.star_backend, TriangleMesh3DBackend)
+
+    def test_select_backend_unsupported_preset_raises(self):
+        """Raise ValueError for unsupported preset name."""
+        sc = build_single_triangle_sc()
+        with pytest.raises(ValueError):
+            _ = ExteriorCalculusOperators(sc, metric="not-a-real-preset")  # type: ignore[arg-type]
+
+    def test_euclidean_preset_constructs_triangle_backend_and_star_raises(self):
+        """Construct triangle backend for 'euclidean' and raise for unsupported star preset."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc, metric="euclidean", pos_name="position")
+
+        # Selection path coverage:
+        assert isinstance(ops.star_backend, TriangleMesh3DBackend)
+
+        # TriangleMesh3DBackend.star does not implement "euclidean" for stars.
+        with pytest.raises(ValueError):
+            _ = ops.hodge_star(0)
