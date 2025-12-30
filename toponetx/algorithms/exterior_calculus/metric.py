@@ -1,20 +1,61 @@
 """
 Metric and geometry backends for exterior calculus on triangle meshes embedded in R^3.
 
+Notes
+-----
+This module implements the *metric/geometry* ingredients needed by (Discrete) Exterior Calculus (DEC)
+and closely related FEM discretizations on triangle meshes.
+
+High-level picture:
+
+- A triangle mesh can be viewed as a 2D simplicial complex K embedded in R^3.
+- Cochains C^k(K) assign scalars to oriented k-simplices (0: vertices, 1: edges, 2: triangles).
+- Topology enters via boundary/coboundary operators; geometry enters via the Hodge star.
+
+Continuous Hodge star (motivation):
+
+- On an oriented Riemannian manifold (M, g), the Hodge star is an isomorphism
+  * : Omega^k(M) -> Omega^{n-k}(M), determined by the metric g and the orientation.
+- It is characterized by the identity
+  a wedge (*b) = <a, b>_g vol_g
+  for differential forms a, b of the same degree.
+
+Discrete (diagonal) Hodge star (DEC):
+
+- In DEC, one approximates the Hodge star by a sparse operator
+  *_k : C^k(K) -> C^{n-k}(K^*),
+  mapping primal k-cochains to dual (n-k)-cochains on a dual complex K^*.
+- A common choice is a diagonal approximation:
+      *_k ~= diag( |dual_k| / |primal_k| )
+  where |primal_k| denotes a primal k-simplex measure and |dual_k| is the corresponding dual-cell
+  measure (constructed e.g. using barycentric or circumcentric/Voronoi duals).
+
 This module provides:
+
 - Geometry utilities for triangles embedded in R^3.
-- A user-facing `MetricSpec` describing diagonal Hodge stars and anisotropic tensors.
+- A user-facing `MetricSpec` describing diagonal Hodge stars and anisotropic FEM tensors.
 - Backends implementing diagonal Hodge stars:
   - `DiagonalHodgeStar` (geometry-free).
   - `TriangleMesh3DBackend` (geometry-based).
+
+Conventions:
+
+- The mesh is treated as a 2D complex embedded in R^3.
+- The Hodge stars returned here are diagonal (fast, standard in many DEC pipelines).
+- Circumcentric/Voronoi-style dual quantities are computed using triangle circumcenters.
 """
+
+from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol
 
 import numpy as np
+from numpy.typing import NDArray
 from scipy.sparse import coo_matrix, csr_matrix, diags
+
+from toponetx.classes.simplicial_complex import SimplicialComplex
 
 MetricPreset = Literal[
     "identity",
@@ -25,7 +66,9 @@ MetricPreset = Literal[
     "euclidean",
 ]
 
-MetricCallable = Callable[[int, np.ndarray, Any], np.ndarray]
+MetricCallable = Callable[
+    [int, NDArray[np.floating], SimplicialComplex], NDArray[np.floating]
+]
 
 
 def _sorted_edge(u: Any, v: Any) -> tuple[Any, Any]:
@@ -46,7 +89,9 @@ def _sorted_edge(u: Any, v: Any) -> tuple[Any, Any]:
     return (u, v) if u <= v else (v, u)
 
 
-def _triangle_area_3d(p0: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> float:
+def _triangle_area_3d(
+    p0: NDArray[np.floating], p1: NDArray[np.floating], p2: NDArray[np.floating]
+) -> float:
     """Compute the area of a triangle embedded in R^3.
 
     Parameters
@@ -62,12 +107,28 @@ def _triangle_area_3d(p0: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> float:
     -------
     float
         Triangle area.
+
+    Raises
+    ------
+    ValueError
+        If any input does not represent a 3D vector.
     """
-    n = np.cross(p1 - p0, p2 - p0)
+    p0a = np.asarray(p0, dtype=float).reshape(-1)
+    p1a = np.asarray(p1, dtype=float).reshape(-1)
+    p2a = np.asarray(p2, dtype=float).reshape(-1)
+    if p0a.shape != (3,) or p1a.shape != (3,) or p2a.shape != (3,):
+        raise ValueError(
+            "Triangle vertices must be 3D vectors with shape (3,). "
+            f"Got shapes p0={p0a.shape}, p1={p1a.shape}, p2={p2a.shape}."
+        )
+
+    n = np.cross(p1a - p0a, p2a - p0a)
     return 0.5 * float(np.linalg.norm(n))
 
 
-def _circumcenter_3d(p0: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> np.ndarray:
+def _circumcenter_3d(
+    p0: NDArray[np.floating], p1: NDArray[np.floating], p2: NDArray[np.floating]
+) -> NDArray[np.floating]:
     """Compute the circumcenter of a triangle embedded in R^3.
 
     Parameters
@@ -83,10 +144,21 @@ def _circumcenter_3d(p0: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> np.ndarr
     -------
     np.ndarray
         Circumcenter position, shape (3,).
+
+    Raises
+    ------
+    ValueError
+        If any input does not represent a 3D vector.
     """
-    a = p0
-    b = p1
-    c = p2
+    a = np.asarray(p0, dtype=float).reshape(-1)
+    b = np.asarray(p1, dtype=float).reshape(-1)
+    c = np.asarray(p2, dtype=float).reshape(-1)
+    if a.shape != (3,) or b.shape != (3,) or c.shape != (3,):
+        raise ValueError(
+            "Triangle vertices must be 3D vectors with shape (3,). "
+            f"Got shapes p0={a.shape}, p1={b.shape}, p2={c.shape}."
+        )
+
     ab = b - a
     ac = c - a
     n = np.cross(ab, ac)
@@ -101,8 +173,8 @@ def _circumcenter_3d(p0: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> np.ndarr
 
 
 def _grad_barycentric_3d(
-    p0: np.ndarray, p1: np.ndarray, p2: np.ndarray
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    p0: NDArray[np.floating], p1: NDArray[np.floating], p2: NDArray[np.floating]
+) -> tuple[NDArray[np.floating], NDArray[np.floating], NDArray[np.floating], float]:
     """Compute gradients of P1 basis functions on an R^3 triangle.
 
     Parameters
@@ -119,9 +191,23 @@ def _grad_barycentric_3d(
     tuple[np.ndarray, np.ndarray, np.ndarray, float]
         Gradients (g0, g1, g2) each shape (3,), and det_norm = ||(p1-p0)x(p2-p0)||.
         The triangle area is A = 0.5 * det_norm.
+
+    Raises
+    ------
+    ValueError
+        If any input does not represent a 3D vector.
     """
-    e01 = p1 - p0
-    e02 = p2 - p0
+    p0a = np.asarray(p0, dtype=float).reshape(-1)
+    p1a = np.asarray(p1, dtype=float).reshape(-1)
+    p2a = np.asarray(p2, dtype=float).reshape(-1)
+    if p0a.shape != (3,) or p1a.shape != (3,) or p2a.shape != (3,):
+        raise ValueError(
+            "Triangle vertices must be 3D vectors with shape (3,). "
+            f"Got shapes p0={p0a.shape}, p1={p1a.shape}, p2={p2a.shape}."
+        )
+
+    e01 = p1a - p0a
+    e02 = p2a - p0a
     n = np.cross(e01, e02)
     nn = float(n @ n)
     det_norm = float(np.linalg.norm(n))
@@ -129,9 +215,9 @@ def _grad_barycentric_3d(
         z = np.zeros(3, dtype=float)
         return z, z, z, det_norm
 
-    g0 = np.cross(n, p2 - p1) / nn
-    g1 = np.cross(n, p0 - p2) / nn
-    g2 = np.cross(n, p1 - p0) / nn
+    g0 = np.cross(n, p2a - p1a) / nn
+    g1 = np.cross(n, p0a - p2a) / nn
+    g2 = np.cross(n, p1a - p0a) / nn
     return g0.astype(float), g1.astype(float), g2.astype(float), det_norm
 
 
@@ -139,20 +225,33 @@ def _grad_barycentric_3d(
 class MetricSpec:
     """Describe how to build diagonal Hodge stars and anisotropic FEM tensors.
 
+    Notes
+    -----
+    In DEC and related discretizations, the metric is represented by the discrete Hodge star.
+    This class stores a *specification* for how diagonal stars (and optional anisotropic tensors)
+    should be built.
+
+    A common diagonal DEC choice is:
+        *_k = diag(w_k), where w_k ~ |dual_k| / |primal_k|.
+
+    For anisotropic diffusion / Riemannian metrics on the surface, one can also provide a
+    per-triangle SPD tensor field G (a 3x3 matrix per triangle in embedding coordinates) that
+    defines a stiffness operator assembled from P1 basis gradients.
+
     Attributes
     ----------
-    preset : {"identity","diagonal","barycentric_lumped","circumcentric","voronoi","euclidean"}
+    preset : {"identity", "diagonal", "barycentric_lumped", "circumcentric", "voronoi", "euclidean"}
         Preset name controlling the backend.
-    diagonal_weights : dict[int, np.ndarray] | None
+    diagonal_weights : dict[int, np.ndarray], optional
         Explicit diagonal entries for the Hodge star at each degree k.
         Each entry must have length equal to the number of k-simplices.
-    primal_measures : dict[int, np.ndarray] | None
-        Primal measures for generic diagonal DEC stars.
-    dual_measures : dict[int, np.ndarray] | None
-        Dual measures for generic diagonal DEC stars.
-    tensors : np.ndarray | None
+    primal_measures : dict[int, np.ndarray], optional
+        Primal measures |primal_k| for generic diagonal DEC stars.
+    dual_measures : dict[int, np.ndarray], optional
+        Dual measures |dual_k| for generic diagonal DEC stars.
+    tensors : np.ndarray, optional
         Per-triangle SPD tensors for anisotropic stiffness, shape (nT, 3, 3).
-    fn : callable | None
+    fn : callable, optional
         Per-triangle tensor function fn(t, P, sc) -> (3,3), where P has shape (3,3).
     eps : float
         Numerical safeguard used for divisions/inversions.
@@ -170,12 +269,14 @@ class MetricSpec:
 class HodgeStarBackend(Protocol):
     """Protocol for Hodge star backends."""
 
-    def star(self, sc: Any, k: int, *, inverse: bool = False) -> csr_matrix:
+    def star(
+        self, sc: SimplicialComplex, k: int, *, inverse: bool = False
+    ) -> csr_matrix:
         """Return *_k (or its inverse).
 
         Parameters
         ----------
-        sc : Any
+        sc : SimplicialComplex
             Complex object.
         k : int
             Cochain degree.
@@ -187,6 +288,7 @@ class HodgeStarBackend(Protocol):
         csr_matrix
             Sparse star matrix.
         """
+        ...
 
 
 def _as_1d_float(x: np.ndarray, *, name: str) -> np.ndarray:
@@ -214,6 +316,12 @@ def _as_1d_float(x: np.ndarray, *, name: str) -> np.ndarray:
 class DiagonalHodgeStar:
     """Geometry-free diagonal Hodge star backend.
 
+    Notes
+    -----
+    This backend does not use vertex positions. It builds diagonal stars from:
+    - the identity preset, or
+    - user-supplied diagonal weights / primal+dual measures.
+
     Attributes
     ----------
     metric : MetricSpec
@@ -222,12 +330,14 @@ class DiagonalHodgeStar:
 
     metric: MetricSpec
 
-    def star(self, sc: Any, k: int, *, inverse: bool = False) -> csr_matrix:
+    def star(
+        self, sc: SimplicialComplex, k: int, *, inverse: bool = False
+    ) -> csr_matrix:
         """Return a diagonal Hodge star matrix.
 
         Parameters
         ----------
-        sc : Any
+        sc : SimplicialComplex
             Complex providing `skeleton(k)`.
         k : int
             Cochain degree.
@@ -273,7 +383,8 @@ class DiagonalHodgeStar:
             dk = _as_1d_float(self.metric.dual_measures[k], name=f"dual_measures[{k}]")
             if pk.shape[0] != n_k or dk.shape[0] != n_k:
                 raise ValueError(
-                    f"Measures for k={k} must have length {n_k}; got primal {pk.shape[0]}, dual {dk.shape[0]}."
+                    f"Measures for k={k} must have length {n_k}; got primal {pk.shape[0]}, "
+                    f"dual {dk.shape[0]}."
                 )
             diag = dk / np.maximum(pk, eps)
 
@@ -287,9 +398,19 @@ class DiagonalHodgeStar:
 class TriangleMesh3DBackend:
     """Geometry backend for triangle meshes embedded in R^3.
 
+    Notes
+    -----
+    This backend precomputes mesh-aligned arrays (vertices, edges, triangles) from a
+    `SimplicialComplex` with 3D vertex positions, and provides:
+
+    - diagonal Hodge stars for k in {0, 1, 2} using barycentric-lumped or circumcentric/Voronoi
+      constructions;
+    - FEM operators on vertices (0-forms): mass, stiffness, and Laplacian-like operators;
+    - anisotropic stiffness/Laplacian using per-triangle SPD tensors.
+
     Attributes
     ----------
-    sc : Any
+    sc : SimplicialComplex
         Complex providing `skeleton(0/1/2)` and `get_node_attributes(pos_name)`.
     metric : MetricSpec
         Metric specification.
@@ -297,30 +418,18 @@ class TriangleMesh3DBackend:
         Node attribute name for vertex positions in R^3.
     """
 
-    sc: Any
+    sc: SimplicialComplex
     metric: MetricSpec
     pos_name: str = "position"
 
     def __post_init__(self) -> None:
-        """Build the internal mesh cache.
-
-        Returns
-        -------
-        None
-            This method prepares internal arrays for vertices, edges, and triangles.
-        """
+        """Build the internal mesh cache."""
         self.eps = float(self.metric.eps)
         self._cache_ready = False
         self._build_cache()
 
     def _build_cache(self) -> None:
-        """Build internal arrays aligned with the complex skeleton ordering.
-
-        Returns
-        -------
-        None
-            Populates internal mesh data.
-        """
+        """Build internal arrays aligned with the complex skeleton ordering."""
         tri = [tuple(s.elements) for s in self.sc.skeleton(2)]
         if not tri:
             raise ValueError("TriangleMesh3DBackend requires 2-simplices (triangles).")
@@ -329,9 +438,14 @@ class TriangleMesh3DBackend:
         self._vid = {v: i for i, v in enumerate(vlabels)}
 
         pos = self.sc.get_node_attributes(self.pos_name)
-        V = np.stack([np.asarray(pos[v], dtype=float) for v in vlabels], axis=0)
+        V = np.stack(
+            [np.asarray(pos[v], dtype=float).reshape(-1) for v in vlabels], axis=0
+        )
         if V.ndim != 2 or V.shape[1] != 3:
-            raise ValueError("Vertex positions must be 3D vectors (R^3).")
+            raise ValueError(
+                "Vertex positions must be 3D vectors (R^3) with shape (nV, 3). "
+                f"Got shape {V.shape}."
+            )
 
         self._V = V
         self._vlabels = vlabels
@@ -343,12 +457,14 @@ class TriangleMesh3DBackend:
         self._T = np.array(tri, dtype=object)
         self._cache_ready = True
 
-    def star(self, sc: Any, k: int, *, inverse: bool = False) -> csr_matrix:
+    def star(
+        self, sc: SimplicialComplex, k: int, *, inverse: bool = False
+    ) -> csr_matrix:
         """Return a diagonal Hodge star for triangle meshes.
 
         Parameters
         ----------
-        sc : Any
+        sc : SimplicialComplex
             Complex (unused except for sizing consistency).
         k : int
             Cochain degree.
@@ -378,6 +494,10 @@ class TriangleMesh3DBackend:
 
     def _star_barycentric_lumped(self, k: int, inverse: bool) -> csr_matrix:
         """Compute a barycentric-lumped diagonal star.
+
+        Notes
+        -----
+        This constructs diagonal weights w_k = |dual_k| / |primal_k| using a barycentric dual.
 
         Parameters
         ----------
@@ -568,6 +688,10 @@ class TriangleMesh3DBackend:
                 continue
 
             GT = np.asarray(G[t], dtype=float)
+            if GT.shape != (3, 3):
+                raise ValueError(
+                    f"Per-triangle tensor must have shape (3, 3), got {GT.shape}."
+                )
             grads = [g0, g1, g2]
             idx = [ia, ib, ic]
             for i_local in range(3):
@@ -690,8 +814,8 @@ class TriangleMesh3DBackend:
             Dual lengths per edge.
         """
         C = np.zeros((len(self._T), 3), dtype=float)
-        for t, (a, b, c) in enumerate(self._T):
-            ia, ib, ic = self._vid[a], self._vid[b], self._vid[c]
+        for t, (a, b, _c) in enumerate(self._T):
+            ia, ib, ic = self._vid[a], self._vid[b], self._vid[b]
             C[t] = _circumcenter_3d(self._V[ia], self._V[ib], self._V[ic])
 
         inc: dict[tuple[Any, Any], list[int]] = {tuple(e): [] for e in self._E.tolist()}
@@ -723,6 +847,11 @@ class TriangleMesh3DBackend:
         -------
         np.ndarray
             Tensor array of shape (nT, 3, 3).
+
+        Raises
+        ------
+        ValueError
+            If `tensors` has the wrong shape or `fn` does not return a (3,3) matrix.
         """
         nT = len(self._T)
 
