@@ -1,0 +1,269 @@
+"""Test metric and geometry backends for exterior calculus."""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+from scipy.sparse import csr_matrix
+
+import toponetx as tnx
+from toponetx.algorithms.exterior_calculus.metric import (
+    DiagonalHodgeStar,
+    MetricSpec,
+    TriangleMesh3DBackend,
+    _as_1d_float,
+    _circumcenter_3d,
+    _grad_barycentric_3d,
+    _sorted_edge,
+    _triangle_area_3d,
+)
+
+
+def _build_single_triangle_sc() -> tnx.SimplicialComplex:
+    """Build a single-triangle simplicial complex with 3D positions.
+
+    Returns
+    -------
+    tnx.SimplicialComplex
+        Simplicial complex with one 2-simplex and 3D vertex positions.
+    """
+    faces = [[0, 1, 2]]
+    sc = tnx.SimplicialComplex(faces)
+    pos = {
+        0: [0.0, 0.0, 0.0],
+        1: [1.0, 0.0, 0.0],
+        2: [0.0, 1.0, 0.0],
+    }
+    sc.set_simplex_attributes(pos, name="position")
+    return sc
+
+
+class TestGeometryHelpers:
+    """Test geometry helper functions used by the metric backends."""
+
+    def test_sorted_edge(self):
+        """Return deterministic edge ordering."""
+        assert _sorted_edge(1, 2) == (1, 2)
+        assert _sorted_edge(2, 1) == (1, 2)
+
+    def test_triangle_area_3d(self):
+        """Compute triangle area for a right triangle in the plane z=0."""
+        p0 = np.array([0.0, 0.0, 0.0])
+        p1 = np.array([1.0, 0.0, 0.0])
+        p2 = np.array([0.0, 1.0, 0.0])
+        assert _triangle_area_3d(p0, p1, p2) == pytest.approx(0.5)
+
+    def test_circumcenter_right_triangle(self):
+        """Compute circumcenter for a right triangle."""
+        p0 = np.array([0.0, 0.0, 0.0])
+        p1 = np.array([1.0, 0.0, 0.0])
+        p2 = np.array([0.0, 1.0, 0.0])
+        cc = _circumcenter_3d(p0, p1, p2)
+        assert cc.shape == (3,)
+        assert cc == pytest.approx(np.array([0.5, 0.5, 0.0]))
+
+    def test_circumcenter_degenerate_triangle_fallback(self):
+        """Return centroid fallback for collinear points."""
+        p0 = np.array([0.0, 0.0, 0.0])
+        p1 = np.array([1.0, 0.0, 0.0])
+        p2 = np.array([2.0, 0.0, 0.0])
+        cc = _circumcenter_3d(p0, p1, p2)
+        assert cc == pytest.approx((p0 + p1 + p2) / 3.0)
+
+    def test_grad_barycentric_identities(self):
+        """Satisfy P1 barycentric gradient identities."""
+        p0 = np.array([0.0, 0.0, 0.0])
+        p1 = np.array([1.0, 0.0, 0.0])
+        p2 = np.array([0.0, 1.0, 0.0])
+
+        g0, g1, g2, det_norm = _grad_barycentric_3d(p0, p1, p2)
+        assert det_norm == pytest.approx(1.0)
+
+        assert (g0 + g1 + g2) == pytest.approx(np.zeros(3))
+
+        n = np.cross(p1 - p0, p2 - p0)
+        assert float(g0 @ n) == pytest.approx(0.0, abs=1e-12)
+        assert float(g1 @ n) == pytest.approx(0.0, abs=1e-12)
+        assert float(g2 @ n) == pytest.approx(0.0, abs=1e-12)
+
+    def test_grad_barycentric_degenerate(self):
+        """Return zero gradients for degenerate triangles."""
+        p0 = np.array([0.0, 0.0, 0.0])
+        p1 = np.array([1.0, 0.0, 0.0])
+        p2 = np.array([2.0, 0.0, 0.0])
+        g0, g1, g2, det_norm = _grad_barycentric_3d(p0, p1, p2)
+        assert det_norm == pytest.approx(0.0)
+        assert g0 == pytest.approx(np.zeros(3))
+        assert g1 == pytest.approx(np.zeros(3))
+        assert g2 == pytest.approx(np.zeros(3))
+
+
+class TestAs1DFloat:
+    """Test conversion to 1D float arrays."""
+
+    def test_as_1d_float_flattens(self):
+        """Convert array into flattened float array."""
+        x = np.array([[1, 2, 3]])
+        y = _as_1d_float(x, name="x")
+        assert y.dtype == float
+        assert y.shape == (3,)
+        assert y == pytest.approx([1.0, 2.0, 3.0])
+
+
+class TestDiagonalHodgeStar:
+    """Test the geometry-free diagonal Hodge star backend."""
+
+    def test_identity_star(self):
+        """Return identity star for preset='identity'."""
+        sc = _build_single_triangle_sc()
+        hs = DiagonalHodgeStar(metric=MetricSpec(preset="identity"))
+        S0 = hs.star(sc, 0)
+        assert isinstance(S0, csr_matrix)
+        assert S0.shape == (3, 3)
+        assert S0.diagonal() == pytest.approx(np.ones(3))
+
+    def test_diagonal_star_from_weights(self):
+        """Return diagonal star from explicit diagonal weights."""
+        sc = _build_single_triangle_sc()
+        ms = MetricSpec(
+            preset="diagonal",
+            diagonal_weights={0: np.array([2.0, 3.0, 4.0])},
+        )
+        hs = DiagonalHodgeStar(metric=ms)
+        S0 = hs.star(sc, 0)
+        assert S0.diagonal() == pytest.approx([2.0, 3.0, 4.0])
+
+        S0_inv = hs.star(sc, 0, inverse=True)
+        assert S0_inv.diagonal() == pytest.approx([0.5, 1.0 / 3.0, 0.25])
+
+    def test_diagonal_star_from_measures(self):
+        """Return diagonal star from primal and dual measures."""
+        sc = _build_single_triangle_sc()
+        ms = MetricSpec(
+            preset="diagonal",
+            primal_measures={0: np.array([1.0, 2.0, 4.0])},
+            dual_measures={0: np.array([2.0, 2.0, 2.0])},
+        )
+        hs = DiagonalHodgeStar(metric=ms)
+        S0 = hs.star(sc, 0)
+        assert S0.diagonal() == pytest.approx([2.0, 1.0, 0.5])
+
+    def test_diagonal_star_invalid_preset(self):
+        """Raise error for incompatible preset."""
+        sc = _build_single_triangle_sc()
+        hs = DiagonalHodgeStar(metric=MetricSpec(preset="circumcentric"))
+        with pytest.raises(ValueError):
+            hs.star(sc, 0)
+
+    def test_diagonal_star_length_mismatch(self):
+        """Raise error if diagonal length mismatches skeleton size."""
+        sc = _build_single_triangle_sc()
+        ms = MetricSpec(preset="diagonal", diagonal_weights={0: np.array([1.0, 2.0])})
+        hs = DiagonalHodgeStar(metric=ms)
+        with pytest.raises(ValueError):
+            hs.star(sc, 0)
+
+    def test_diagonal_star_missing_measures(self):
+        """Raise error if no measures or weights are provided."""
+        sc = _build_single_triangle_sc()
+        hs = DiagonalHodgeStar(metric=MetricSpec(preset="diagonal"))
+        with pytest.raises(ValueError):
+            hs.star(sc, 0)
+
+
+class TestTriangleMesh3DBackend:
+    """Test the geometry-based triangle mesh backend."""
+
+    def test_backend_requires_triangles(self):
+        """Raise error if no 2-simplices exist."""
+        sc = tnx.SimplicialComplex([])
+        sc.add_simplex([0])
+        sc.set_simplex_attributes({0: [0.0, 0.0, 0.0]}, name="position")
+        ms = MetricSpec(preset="barycentric_lumped")
+        with pytest.raises(ValueError):
+            TriangleMesh3DBackend(sc=sc, metric=ms, pos_name="position")
+
+    def test_backend_requires_3d_positions(self):
+        """Raise error if vertex positions are not 3D."""
+        faces = [[0, 1, 2]]
+        sc = tnx.SimplicialComplex(faces)
+        pos_bad = {0: [0.0, 0.0], 1: [1.0, 0.0], 2: [0.0, 1.0]}
+        sc.set_simplex_attributes(pos_bad, name="position")
+        ms = MetricSpec(preset="barycentric_lumped")
+        with pytest.raises(ValueError):
+            TriangleMesh3DBackend(sc=sc, metric=ms, pos_name="position")
+
+    def test_star_barycentric_lumped_shapes_and_positivity(self):
+        """Return positive diagonal stars for barycentric lumped metric."""
+        sc = _build_single_triangle_sc()
+        ms = MetricSpec(preset="barycentric_lumped")
+        be = TriangleMesh3DBackend(sc=sc, metric=ms, pos_name="position")
+
+        S0 = be.star(sc, 0)
+        S1 = be.star(sc, 1)
+        S2 = be.star(sc, 2)
+
+        assert S0.shape == (3, 3)
+        assert S1.shape[0] == S1.shape[1]
+        assert S2.shape == (1, 1)
+
+        assert np.all(S0.diagonal() > 0.0)
+        assert np.all(S1.diagonal() > 0.0)
+        assert np.all(S2.diagonal() > 0.0)
+
+    def test_star_circumcentric_shapes_and_positivity(self):
+        """Return valid circumcentric stars."""
+        sc = _build_single_triangle_sc()
+        ms = MetricSpec(preset="circumcentric")
+        be = TriangleMesh3DBackend(sc=sc, metric=ms, pos_name="position")
+
+        S0 = be.star(sc, 0)
+        S1 = be.star(sc, 1)
+        S2 = be.star(sc, 2)
+
+        assert np.all(S0.diagonal() >= 0.0)
+        assert np.all(S1.diagonal() >= 0.0)
+        assert np.all(S2.diagonal() > 0.0)
+
+    def test_star_invalid_k(self):
+        """Raise error for unsupported cochain degree."""
+        sc = _build_single_triangle_sc()
+        ms = MetricSpec(preset="barycentric_lumped")
+        be = TriangleMesh3DBackend(sc=sc, metric=ms, pos_name="position")
+        with pytest.raises(ValueError):
+            be.star(sc, 3)
+
+    def test_fem_mass_and_stiffness_sanity(self):
+        """Return symmetric FEM mass and stiffness matrices."""
+        sc = _build_single_triangle_sc()
+        ms = MetricSpec(preset="circumcentric")
+        be = TriangleMesh3DBackend(sc=sc, metric=ms, pos_name="position")
+
+        M = be.fem_mass_matrix_0()
+        K = be.cotan_stiffness_0()
+
+        assert M.shape == (3, 3)
+        assert K.shape == (3, 3)
+        assert (M - M.T).nnz == 0
+        assert (K - K.T).nnz == 0
+
+    def test_riemannian_tensors_shape_validation(self):
+        """Raise error when metric.tensors has invalid shape."""
+        sc = _build_single_triangle_sc()
+        bad_tensors = np.zeros((2, 3, 3), dtype=float)
+        ms = MetricSpec(preset="circumcentric", tensors=bad_tensors)
+        be = TriangleMesh3DBackend(sc=sc, metric=ms, pos_name="position")
+        with pytest.raises(ValueError):
+            be.riemannian_stiffness_0()
+
+    def test_riemannian_fn_shape_validation(self):
+        """Raise error when metric.fn returns invalid shape."""
+        sc = _build_single_triangle_sc()
+
+        ms = MetricSpec(
+            preset="circumcentric",
+            fn=lambda t, P, sc_obj: np.zeros((2, 2), dtype=float),
+        )
+        be = TriangleMesh3DBackend(sc=sc, metric=ms, pos_name="position")
+        with pytest.raises(ValueError):
+            be.riemannian_stiffness_0()
