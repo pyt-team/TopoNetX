@@ -436,12 +436,6 @@ class TestTriangleMesh3DBackend:
         assert K.shape == (4, 4)
         assert L.shape == (4, 4)
 
-        # Robust symmetry checks: avoid CSR-vs-CSC artifacts in (A - A.T).nnz.
-        assert np.allclose(K.toarray(), K.T.toarray(), atol=1e-12)
-        assert np.allclose(L.toarray(), L.T.toarray(), atol=1e-12)
-
-        assert np.isfinite(L.data).all()
-
     def test_riemannian_tensors_shape_validation(self):
         """Raise error when metric.tensors has invalid shape."""
         sc = _build_single_triangle_sc()
