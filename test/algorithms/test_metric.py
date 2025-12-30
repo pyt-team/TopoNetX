@@ -191,7 +191,7 @@ class TestAs1DFloat:
     def test_as_1d_float_flattens(self):
         """Convert array into flattened float array."""
         x = np.array([[1, 2, 3]])
-        y = _as_1d_float(x, name="x")
+        y = _as_1d_float(x)
         assert y.dtype == float
         assert y.shape == (3,)
         assert y == pytest.approx([1.0, 2.0, 3.0])
