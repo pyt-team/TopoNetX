@@ -291,24 +291,27 @@ class HodgeStarBackend(Protocol):
         ...
 
 
-def _as_1d_float(x: np.ndarray, *, name: str) -> np.ndarray:
-    """Convert an array to a 1D float array.
+def _as_1d_float(x: np.ndarray) -> np.ndarray:
+    """Convert an array-like to a 1D float array.
 
     Parameters
     ----------
     x : np.ndarray
-        Input array.
-    name : str
-        Name used in error messages.
+        Input array-like.
 
     Returns
     -------
     np.ndarray
         1D float array.
+
+    Raises
+    ------
+    ValueError
+        If the input cannot be viewed as a 1D array after reshape.
     """
     arr = np.asarray(x, dtype=float).reshape(-1)
     if arr.ndim != 1:
-        raise ValueError(f"{name} must be 1D after reshape, got shape {arr.shape}.")
+        raise ValueError(f"Expected a 1D array after reshape, got shape {arr.shape}.")
     return arr
 
 
@@ -365,9 +368,7 @@ class DiagonalHodgeStar:
             self.metric.diagonal_weights is not None
             and k in self.metric.diagonal_weights
         ):
-            diag = _as_1d_float(
-                self.metric.diagonal_weights[k], name=f"diagonal_weights[{k}]"
-            )
+            diag = _as_1d_float(self.metric.diagonal_weights[k])
             if diag.shape[0] != n_k:
                 raise ValueError(
                     f"diagonal_weights[{k}] must have length {n_k}, got {diag.shape[0]}."
@@ -377,10 +378,8 @@ class DiagonalHodgeStar:
                 raise ValueError(
                     "preset='diagonal' requires diagonal_weights or both primal_measures and dual_measures."
                 )
-            pk = _as_1d_float(
-                self.metric.primal_measures[k], name=f"primal_measures[{k}]"
-            )
-            dk = _as_1d_float(self.metric.dual_measures[k], name=f"dual_measures[{k}]")
+            pk = _as_1d_float(self.metric.primal_measures[k])
+            dk = _as_1d_float(self.metric.dual_measures[k])
             if pk.shape[0] != n_k or dk.shape[0] != n_k:
                 raise ValueError(
                     f"Measures for k={k} must have length {n_k}; got primal {pk.shape[0]}, "
