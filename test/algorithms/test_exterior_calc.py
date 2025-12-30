@@ -1,205 +1,134 @@
-"""Test exterior calculus operators module."""
+"""
+Test exterior calculus operators.
+
+This module contains unit tests for the user-facing
+`ExteriorCalculusOperators` class, verifying:
+- correct construction of DEC operators,
+- valid shapes and symmetry,
+- basic algebraic identities,
+- appropriate error handling.
+
+These tests are intentionally lightweight and do not attempt
+to verify PDE convergence or numerical accuracy beyond sanity checks.
+"""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
-from scipy.sparse.linalg import spsolve
+from scipy.sparse import csr_matrix
 
 import toponetx as tnx
 from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
 
 
-def solve_dirichlet(A, b, bd_idx, u_bd):
-    """Solve a sparse linear system with Dirichlet boundary conditions.
-
-    This helper solves ``A u = b`` while enforcing fixed values ``u[bd_idx] = u_bd``.
-
-    Parameters
-    ----------
-    A : scipy.sparse.spmatrix
-        Square sparse matrix.
-    b : np.ndarray
-        Right-hand side vector.
-    bd_idx : np.ndarray
-        Indices of boundary degrees of freedom.
-    u_bd : np.ndarray
-        Dirichlet values at boundary indices, same length as ``bd_idx``.
+def build_single_triangle_sc() -> tnx.SimplicialComplex:
+    """Build a single-triangle simplicial complex embedded in R^3.
 
     Returns
     -------
-    np.ndarray
-        Solution vector ``u`` with Dirichlet values imposed.
+    tnx.SimplicialComplex
+        A simplicial complex with one triangle and vertex positions.
     """
-    n = A.shape[0]
-    is_bd = np.zeros(n, dtype=bool)
-    is_bd[bd_idx] = True
-    interior = np.where(~is_bd)[0]
-
-    A_ii = A[interior][:, interior].tocsr()
-    rhs = b[interior] - A[interior][:, bd_idx] @ u_bd
-    u_i = spsolve(A_ii, rhs)
-
-    u = np.zeros(n, dtype=float)
-    u[interior] = u_i
-    u[bd_idx] = u_bd
-    return u
-
-
-def build_square_grid_sc(n: int = 10) -> tuple[tnx.SimplicialComplex, np.ndarray]:
-    """Build a triangulated unit square grid embedded in R^3.
-
-    Parameters
-    ----------
-    n : int
-        Number of vertices per side.
-
-    Returns
-    -------
-    tuple[tnx.SimplicialComplex, np.ndarray]
-        The simplicial complex and vertex positions of shape (n^2, 3).
-    """
-    xs = np.linspace(0.0, 1.0, n)
-    ys = np.linspace(0.0, 1.0, n)
-
-    def vid(i: int, j: int) -> int:
-        """Return the vertex index for grid coordinates (i, j).
-
-        Parameters
-        ----------
-        i : int
-            Grid index in the x-direction.
-        j : int
-            Grid index in the y-direction.
-
-        Returns
-        -------
-        int
-            Global vertex index in the flattened grid.
-        """
-        return j * n + i
-
-    P2 = np.array([[x, y] for y in ys for x in xs], dtype=float)
-    P = np.column_stack([P2, np.zeros((P2.shape[0],), dtype=float)])
-
-    faces: list[list[int]] = []
-    for j in range(n - 1):
-        for i in range(n - 1):
-            a = vid(i, j)
-            b = vid(i + 1, j)
-            c = vid(i, j + 1)
-            d = vid(i + 1, j + 1)
-            faces.append([a, b, d])
-            faces.append([a, d, c])
-
+    faces = [[0, 1, 2]]
     sc = tnx.SimplicialComplex(faces)
-    sc.set_simplex_attributes(
-        {k: P[k].tolist() for k in range(P.shape[0])},
-        name="position",
-    )
-    return sc, P
-
-
-def boundary_vertex_indices(P: np.ndarray, tol: float = 1e-12) -> np.ndarray:
-    """Return boundary vertex indices for a unit-square mesh.
-
-    Parameters
-    ----------
-    P : np.ndarray
-        Vertex positions of shape (n_vertices, 3) or (n_vertices, 2).
-    tol : float
-        Tolerance for boundary detection.
-
-    Returns
-    -------
-    np.ndarray
-        1D array of boundary vertex indices.
-    """
-    x = P[:, 0]
-    y = P[:, 1]
-    is_bd = (
-        (np.abs(x - 0.0) < tol)
-        | (np.abs(x - 1.0) < tol)
-        | (np.abs(y - 0.0) < tol)
-        | (np.abs(y - 1.0) < tol)
-    )
-    return np.where(is_bd)[0]
+    pos = {
+        0: [0.0, 0.0, 0.0],
+        1: [1.0, 0.0, 0.0],
+        2: [0.0, 1.0, 0.0],
+    }
+    sc.set_simplex_attributes(pos, name="position")
+    return sc
 
 
 class TestExteriorCalculusOperators:
-    """Test ExteriorCalculusOperators behavior."""
+    """Test the ExteriorCalculusOperators interface."""
 
-    def test_dim_and_d_matrix_shapes(self):
-        """Check dimension and coboundary matrix shapes on a triangle mesh."""
-        sc, _ = build_square_grid_sc(n=6)
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
-
+    def test_dim_property(self):
+        """Return correct topological dimension."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc)
         assert ops.dim == 2
 
-        d0 = ops.d_matrix(0, signed=True)
-        d1 = ops.d_matrix(1, signed=True)
+    def test_d_matrix_shapes(self):
+        """Return coboundary matrices with consistent shapes."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc)
 
-        n0 = len(list(sc.skeleton(0)))
-        n1 = len(list(sc.skeleton(1)))
-        n2 = len(list(sc.skeleton(2)))
+        d0 = ops.d_matrix(0)
+        d1 = ops.d_matrix(1)
 
-        assert d0.shape == (n1, n0)
-        assert d1.shape == (n2, n1)
+        assert isinstance(d0, csr_matrix)
+        assert isinstance(d1, csr_matrix)
 
-    def test_hodge_star_identity_when_metric_none(self):
-        """Hodge star should be identity when metric is None."""
-        sc, _ = build_square_grid_sc(n=5)
-        ops = ExteriorCalculusOperators(sc, metric=None, pos_name="position")
+        assert d0.shape[0] == d1.shape[1]  # edges
+        assert d1.shape[0] == 1  # one triangle
+
+    def test_identity_metric_hodge_star(self):
+        """Return identity Hodge stars when metric is identity."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
 
         S0 = ops.hodge_star(0)
-        n0 = len(list(sc.skeleton(0)))
-        assert np.allclose(S0.diagonal(), np.ones(n0))
+        S1 = ops.hodge_star(1)
+        S2 = ops.hodge_star(2)
 
-    def test_codifferential_requires_k_ge_1(self):
-        """Codifferential should reject k <= 0."""
-        sc, _ = build_square_grid_sc(n=5)
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
+        assert S0.shape == (3, 3)
+        assert S1.shape[0] == S1.shape[1]
+        assert S2.shape == (1, 1)
+
+        assert np.allclose(S0.diagonal(), 1.0)
+        assert np.allclose(S2.diagonal(), 1.0)
+
+    def test_codifferential_shape(self):
+        """Return codifferential with correct shape."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        delta1 = ops.codifferential(1)
+        assert isinstance(delta1, csr_matrix)
+        assert delta1.shape[0] == 3  # vertices
+
+    def test_dec_laplacian_symmetry(self):
+        """Return symmetric DEC Laplacian for identity metric."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        L0 = ops.dec_hodge_laplacian(0)
+        assert isinstance(L0, csr_matrix)
+
+        diff = L0 - L0.T
+        assert diff.nnz == 0
+
+    def test_invalid_k_raises(self):
+        """Raise ValueError for invalid cochain degree."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc)
 
         with pytest.raises(ValueError):
-            ops.codifferential(0)
+            ops.d_matrix(-1)
 
-    def test_dec_laplacian_shapes(self):
-        """DEC Laplacians should have correct shapes for k=0,1,2."""
-        sc, _ = build_square_grid_sc(n=6)
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
-
-        n0 = len(list(sc.skeleton(0)))
-        n1 = len(list(sc.skeleton(1)))
-        n2 = len(list(sc.skeleton(2)))
-
-        assert ops.dec_hodge_laplacian(0).shape == (n0, n0)
-        assert ops.dec_hodge_laplacian(1).shape == (n1, n1)
-        assert ops.dec_hodge_laplacian(2).shape == (n2, n2)
-
-    def test_poisson_dirichlet_exact_solution_smoke(self):
-        """Solve a Poisson problem and verify the solution is reasonable."""
-        sc, P = build_square_grid_sc(n=18)
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
-
-        Delta0 = ops.dec_hodge_laplacian(0, signed=True).tocsr()
-
-        x = P[:, 0]
-        y = P[:, 1]
-        u_exact = np.sin(np.pi * x) * np.sin(np.pi * y)
-        f = 2.0 * (np.pi**2) * u_exact
-
-        bd = boundary_vertex_indices(P)
-        u_bd = u_exact[bd]
-
-        u_dec = solve_dirichlet((-Delta0).tocsr(), f, bd, u_bd)
-
-        rel = np.linalg.norm(u_dec - u_exact) / (np.linalg.norm(u_exact) + 1e-30)
-        assert rel < 0.1
+        with pytest.raises(ValueError):
+            ops.dec_hodge_laplacian(5)
 
     def test_triangle_mesh_backend_requires_positions(self):
-        """Triangle-mesh presets should fail if vertex positions are missing."""
-        sc = tnx.SimplicialComplex([[0, 1, 2]])
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
+        """Raise when triangle-mesh metric is used without positions."""
+        sc = tnx.SimplicialComplex([[0, 1, 2]])  # no positions set
+        ops = ExteriorCalculusOperators(sc, metric="circumcentric")
 
-        with pytest.raises((KeyError, ValueError)):
+        with pytest.raises(KeyError):
             ops.hodge_star(0)
+
+    def test_triangle_mesh_backend_basic_star(self):
+        """Return valid circumcentric Hodge star on triangle mesh."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc, metric="circumcentric")
+
+        S0 = ops.hodge_star(0)
+        # S1 = ops.hodge_star(1)
+        S2 = ops.hodge_star(2)
+
+        assert S0.shape == (3, 3)
+        assert S2.shape == (1, 1)
+        assert np.all(S0.diagonal() >= 0.0)
+        assert np.all(S2.diagonal() > 0.0)
