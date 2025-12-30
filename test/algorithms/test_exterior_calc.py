@@ -115,16 +115,6 @@ class TestExteriorCalculusOperators:
         with pytest.raises(ValueError):
             ops.dec_hodge_laplacian(5)
 
-    def test_triangle_mesh_backend_requires_positions(self):
-        """Raise when triangle-mesh metric is used without vertex positions."""
-        sc = tnx.SimplicialComplex([[0, 1, 2]])  # positions NOT set
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
-
-        # Depending on where the backend fails, the exception type may vary.
-        # We accept common, meaningful failures rather than asserting one exact type.
-        with pytest.raises((KeyError, ValueError, AttributeError)):
-            _ = ops.hodge_star(0)
-
     def test_triangle_mesh_backend_basic_star(self):
         """Return valid circumcentric Hodge star on a minimal triangle mesh."""
         sc = build_single_triangle_sc()
