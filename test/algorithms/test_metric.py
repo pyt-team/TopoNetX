@@ -435,8 +435,11 @@ class TestTriangleMesh3DBackend:
 
         assert K.shape == (4, 4)
         assert L.shape == (4, 4)
-        assert (K - K.T).nnz == 0
-        assert (L - L.T).nnz == 0
+
+        # Robust symmetry checks: avoid CSR-vs-CSC artifacts in (A - A.T).nnz.
+        assert np.allclose(K.toarray(), K.T.toarray(), atol=1e-12)
+        assert np.allclose(L.toarray(), L.T.toarray(), atol=1e-12)
+
         assert np.isfinite(L.data).all()
 
     def test_riemannian_tensors_shape_validation(self):
