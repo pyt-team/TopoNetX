@@ -428,14 +428,13 @@ class TriangleMesh3DBackend:
         self._build_cache()
 
     def _build_cache(self) -> None:
-        """Build internal arrays aligned with the complex skeleton ordering."""
+        """Build internal mesh cache."""
         tri = [tuple(s.elements) for s in self.sc.skeleton(2)]
         if not tri:
             raise ValueError("TriangleMesh3DBackend requires 2-simplices (triangles).")
 
         vlabels = [next(iter(s)) for s in self.sc.skeleton(0)]
         self._vid = {v: i for i, v in enumerate(vlabels)}
-
         pos = self.sc.get_node_attributes(self.pos_name)
         V = np.stack(
             [np.asarray(pos[v], dtype=float).reshape(-1) for v in vlabels], axis=0
@@ -445,15 +444,28 @@ class TriangleMesh3DBackend:
                 "Vertex positions must be 3D vectors (R^3) with shape (nV, 3). "
                 f"Got shape {V.shape}."
             )
-
         self._V = V
         self._vlabels = vlabels
 
         edges = [tuple(s.elements) for s in self.sc.skeleton(1)]
         edges_sorted = [_sorted_edge(u, v) for (u, v) in edges]
         self._E = np.array(edges_sorted, dtype=object)
-
         self._T = np.array(tri, dtype=object)
+
+        # === NEW: Precompute per-vertex incident triangles (1-ring) ===
+        nV = self._V.shape[0]
+        self._incident = [
+            [] for _ in range(nV)
+        ]  # list of (tri_idx, neigh1_idx, neigh2_idx)
+
+        for t, (a, b, c) in enumerate(self._T):
+            ia = self._vid[a]
+            ib = self._vid[b]
+            ic = self._vid[c]
+            self._incident[ia].append((t, ib, ic))
+            self._incident[ib].append((t, ia, ic))
+            self._incident[ic].append((t, ia, ib))
+
         self._cache_ready = True
 
     def star(
@@ -774,33 +786,56 @@ class TriangleMesh3DBackend:
         return le
 
     def _dual_area_vertices_circumcentric(self) -> np.ndarray:
-        """Compute circumcentric dual areas per vertex.
+        """Compute correct circumcentric/Voronoi dual areas per vertex using the cotangent formula.
+
+        Implements the standard formula from Meyer et al. (2003):
+        A_v = (1/8) sum_{adjacent triangles} ( ||e_j||^2 cot alpha_k + ||e_k||^2 cot alpha_j )
+        where alpha_j and alpha_k are the angles at the two neighbors opposite the edges from v.
+        Cotangents are clamped to >=0 for obtuse triangles to ensure positive areas.
 
         Returns
         -------
         np.ndarray
-            Dual areas per vertex.
+            Array of dual (Voronoi) areas for each vertex, shape (n_vertices,).
         """
         nV = self._V.shape[0]
-        Astar = np.zeros((nV,), dtype=float)
+        Astar = np.zeros(nV, dtype=float)
 
-        C = np.zeros((len(self._T), 3), dtype=float)
-        for t, (a, b, c) in enumerate(self._T):
-            ia, ib, ic = self._vid[a], self._vid[b], self._vid[c]
-            C[t] = _circumcenter_3d(self._V[ia], self._V[ib], self._V[ic])
+        for v in range(nV):
+            pv = self._V[v]
+            for _, j, k in self._incident[
+                v
+            ]:  # precomputed: (tri_idx, neighbor_j_idx, neighbor_k_idx)
+                pj = self._V[j]
+                pk = self._V[k]
 
-        for t, (a, b, c) in enumerate(self._T):
-            ia, ib, ic = self._vid[a], self._vid[b], self._vid[c]
-            pa, pb, pc = self._V[ia], self._V[ib], self._V[ic]
-            cc = C[t]
+                vj = pj - pv
+                vk = pk - pv
+                jk = pk - pj
 
-            mab = 0.5 * (pa + pb)
-            mac = 0.5 * (pa + pc)
-            mbc = 0.5 * (pb + pc)
+                lj2 = float(np.dot(vj, vj))  # ||v-j||^2
+                lk2 = float(np.dot(vk, vk))  # ||v-k||^2
+                ljk2 = float(np.dot(jk, jk))  # ||j-k||^2
 
-            Astar[ia] += _triangle_area_3d(pa, mab, cc) + _triangle_area_3d(pa, cc, mac)
-            Astar[ib] += _triangle_area_3d(pb, mbc, cc) + _triangle_area_3d(pb, cc, mab)
-            Astar[ic] += _triangle_area_3d(pc, mac, cc) + _triangle_area_3d(pc, cc, mbc)
+                # Cosine of angle at vertex j (opposite to edge v-k)
+                denom_j = 2.0 * np.sqrt(lj2 * ljk2) + self.eps
+                cos_j = (lj2 + ljk2 - lk2) / denom_j
+
+                # Cosine of angle at vertex k (opposite to edge v-j)
+                denom_k = 2.0 * np.sqrt(lk2 * ljk2) + self.eps
+                cos_k = (lk2 + ljk2 - lj2) / denom_k
+
+                # Cotangent with clamping to >=0 (obtuse -> cot < 0 -> treat as 0)
+                sin_j_sq = max(1.0 - cos_j * cos_j, 0.0)
+                sin_j = np.sqrt(max(sin_j_sq, self.eps))
+                cot_j = max(cos_j / sin_j, 0.0)
+
+                sin_k_sq = max(1.0 - cos_k * cos_k, 0.0)
+                sin_k = np.sqrt(max(sin_k_sq, self.eps))
+                cot_k = max(cos_k / sin_k, 0.0)
+
+                # Contribution from this triangle
+                Astar[v] += (lk2 * cot_j + lj2 * cot_k) / 8.0
 
         return Astar
 
