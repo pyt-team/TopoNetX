@@ -813,8 +813,8 @@ class TriangleMesh3DBackend:
             Dual lengths per edge.
         """
         C = np.zeros((len(self._T), 3), dtype=float)
-        for t, (a, b, _c) in enumerate(self._T):
-            ia, ib, ic = self._vid[a], self._vid[b], self._vid[b]
+        for t, (a, b, c) in enumerate(self._T):
+            ia, ib, ic = self._vid[a], self._vid[b], self._vid[c]
             C[t] = _circumcenter_3d(self._V[ia], self._V[ib], self._V[ic])
 
         inc: dict[tuple[Any, Any], list[int]] = {tuple(e): [] for e in self._E.tolist()}
