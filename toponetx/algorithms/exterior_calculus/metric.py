@@ -5,23 +5,17 @@ Notes
 -----
 This module implements the *metric/geometry* ingredients needed by (Discrete) Exterior Calculus (DEC)
 and closely related FEM discretizations on triangle meshes.
-
 High-level picture:
-
 - A triangle mesh can be viewed as a 2D simplicial complex K embedded in R^3.
 - Cochains C^k(K) assign scalars to oriented k-simplices (0: vertices, 1: edges, 2: triangles).
 - Topology enters via boundary/coboundary operators; geometry enters via the Hodge star.
-
 Continuous Hodge star (motivation):
-
 - On an oriented Riemannian manifold (M, g), the Hodge star is an isomorphism
   * : Omega^k(M) -> Omega^{n-k}(M), determined by the metric g and the orientation.
 - It is characterized by the identity
   a wedge (*b) = <a, b>_g vol_g
   for differential forms a, b of the same degree.
-
 Discrete (diagonal) Hodge star (DEC):
-
 - In DEC, one approximates the Hodge star by a sparse operator
   *_k : C^k(K) -> C^{n-k}(K^*),
   mapping primal k-cochains to dual (n-k)-cochains on a dual complex K^*.
@@ -29,17 +23,13 @@ Discrete (diagonal) Hodge star (DEC):
       *_k ~= diag( |dual_k| / |primal_k| )
   where |primal_k| denotes a primal k-simplex measure and |dual_k| is the corresponding dual-cell
   measure (constructed e.g. using barycentric or circumcentric/Voronoi duals).
-
 This module provides:
-
 - Geometry utilities for triangles embedded in R^3.
 - A user-facing `MetricSpec` describing diagonal Hodge stars and anisotropic FEM tensors.
 - Backends implementing diagonal Hodge stars:
   - `DiagonalHodgeStar` (geometry-free).
   - `TriangleMesh3DBackend` (geometry-based).
-
 Conventions:
-
 - The mesh is treated as a 2D complex embedded in R^3.
 - The Hodge stars returned here are diagonal (fast, standard in many DEC pipelines).
 - Circumcentric/Voronoi-style dual quantities are computed using triangle circumcenters.
@@ -47,6 +37,7 @@ Conventions:
 
 from __future__ import annotations
 
+from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol
@@ -121,7 +112,6 @@ def _triangle_area_3d(
             "Triangle vertices must be 3D vectors with shape (3,). "
             f"Got shapes p0={p0a.shape}, p1={p1a.shape}, p2={p2a.shape}."
         )
-
     n = np.cross(p1a - p0a, p2a - p0a)
     return 0.5 * float(np.linalg.norm(n))
 
@@ -158,14 +148,12 @@ def _circumcenter_3d(
             "Triangle vertices must be 3D vectors with shape (3,). "
             f"Got shapes p0={a.shape}, p1={b.shape}, p2={c.shape}."
         )
-
     ab = b - a
     ac = c - a
     n = np.cross(ab, ac)
     nn = float(n @ n)
     if nn < 1e-28:
         return (a + b + c) / 3.0
-
     ab2 = float(ab @ ab)
     ac2 = float(ac @ ac)
     u = (ac2 * np.cross(n, ab) + ab2 * np.cross(ac, n)) / (2.0 * nn)
@@ -205,7 +193,6 @@ def _grad_barycentric_3d(
             "Triangle vertices must be 3D vectors with shape (3,). "
             f"Got shapes p0={p0a.shape}, p1={p1a.shape}, p2={p2a.shape}."
         )
-
     e01 = p1a - p0a
     e02 = p2a - p0a
     n = np.cross(e01, e02)
@@ -214,7 +201,6 @@ def _grad_barycentric_3d(
     if nn < 1e-28:
         z = np.zeros(3, dtype=float)
         return z, z, z, det_norm
-
     g0 = np.cross(n, p2a - p1a) / nn
     g1 = np.cross(n, p0a - p2a) / nn
     g2 = np.cross(n, p1a - p0a) / nn
@@ -230,10 +216,8 @@ class MetricSpec:
     In DEC and related discretizations, the metric is represented by the discrete Hodge star.
     This class stores a *specification* for how diagonal stars (and optional anisotropic tensors)
     should be built.
-
     A common diagonal DEC choice is:
         *_k = diag(w_k), where w_k ~ |dual_k| / |primal_k|.
-
     For anisotropic diffusion / Riemannian metrics on the surface, one can also provide a
     per-triangle SPD tensor field G (a 3x3 matrix per triangle in embedding coordinates) that
     defines a stiffness operator assembled from P1 basis gradients.
@@ -354,16 +338,13 @@ class DiagonalHodgeStar:
         """
         n_k = len(list(sc.skeleton(k)))
         eps = float(self.metric.eps)
-
         if self.metric.preset == "identity":
             diag = np.ones(n_k, dtype=float)
             return diags(diag, 0, format="csr")
-
         if self.metric.preset != "diagonal":
             raise ValueError(
                 f"DiagonalHodgeStar requires preset='diagonal', got {self.metric.preset!r}."
             )
-
         if (
             self.metric.diagonal_weights is not None
             and k in self.metric.diagonal_weights
@@ -386,10 +367,8 @@ class DiagonalHodgeStar:
                     f"dual {dk.shape[0]}."
                 )
             diag = dk / np.maximum(pk, eps)
-
         if inverse:
             diag = 1.0 / np.maximum(diag, eps)
-
         return diags(diag, 0, format="csr")
 
 
@@ -401,7 +380,6 @@ class TriangleMesh3DBackend:
     -----
     This backend precomputes mesh-aligned arrays (vertices, edges, triangles) from a
     `SimplicialComplex` with 3D vertex positions, and provides:
-
     - diagonal Hodge stars for k in {0, 1, 2} using barycentric-lumped or circumcentric/Voronoi
       constructions;
     - FEM operators on vertices (0-forms): mass, stiffness, and Laplacian-like operators;
@@ -432,7 +410,6 @@ class TriangleMesh3DBackend:
         tri = [tuple(s.elements) for s in self.sc.skeleton(2)]
         if not tri:
             raise ValueError("TriangleMesh3DBackend requires 2-simplices (triangles).")
-
         vlabels = [next(iter(s)) for s in self.sc.skeleton(0)]
         self._vid = {v: i for i, v in enumerate(vlabels)}
         pos = self.sc.get_node_attributes(self.pos_name)
@@ -446,18 +423,15 @@ class TriangleMesh3DBackend:
             )
         self._V = V
         self._vlabels = vlabels
-
         edges = [tuple(s.elements) for s in self.sc.skeleton(1)]
         edges_sorted = [_sorted_edge(u, v) for (u, v) in edges]
         self._E = np.array(edges_sorted, dtype=object)
         self._T = np.array(tri, dtype=object)
-
         # === NEW: Precompute per-vertex incident triangles (1-ring) ===
         nV = self._V.shape[0]
         self._incident = [
             [] for _ in range(nV)
         ]  # list of (tri_idx, neigh1_idx, neigh2_idx)
-
         for t, (a, b, c) in enumerate(self._T):
             ia = self._vid[a]
             ib = self._vid[b]
@@ -465,7 +439,6 @@ class TriangleMesh3DBackend:
             self._incident[ia].append((t, ib, ic))
             self._incident[ib].append((t, ia, ic))
             self._incident[ic].append((t, ia, ib))
-
         self._cache_ready = True
 
     def star(
@@ -488,17 +461,13 @@ class TriangleMesh3DBackend:
             Diagonal star matrix.
         """
         preset = self.metric.preset
-
         if preset == "identity":
             n = len(list(sc.skeleton(k)))
             return diags(np.ones(n, dtype=float), 0, format="csr")
-
         if preset == "barycentric_lumped":
             return self._star_barycentric_lumped(k, inverse=inverse)
-
         if preset in ("circumcentric", "voronoi"):
             return self._star_circumcentric(k, inverse=inverse)
-
         raise ValueError(
             f"TriangleMesh3DBackend does not support preset={preset!r} for stars."
         )
@@ -526,14 +495,12 @@ class TriangleMesh3DBackend:
             raise ValueError(
                 "barycentric_lumped supports only k in {0,1,2} for triangle meshes."
             )
-
         if k == 0:
             primal = np.ones(len(list(self.sc.skeleton(0))), dtype=float)
         elif k == 1:
             primal = self._primal_edge_lengths()
         else:
             primal = self._triangle_areas()
-
         dual = self._dual_measure_barycentric(k)
         w = dual / np.maximum(primal, self.eps)
         if inverse:
@@ -556,7 +523,6 @@ class TriangleMesh3DBackend:
         A = self._triangle_areas()
         if k == 2:
             return A.copy()
-
         if k == 0:
             acc: dict[Any, float] = {}
             for (a, b, c), area in zip(self._T, A, strict=True):
@@ -564,7 +530,6 @@ class TriangleMesh3DBackend:
                 acc[b] = acc.get(b, 0.0) + area / 3.0
                 acc[c] = acc.get(c, 0.0) + area / 3.0
             return np.array([acc.get(v, 0.0) for v in self._vlabels], dtype=float)
-
         if k == 1:
             acc_e: dict[tuple[Any, Any], float] = {}
             for (a, b, c), area in zip(self._T, A, strict=True):
@@ -572,7 +537,6 @@ class TriangleMesh3DBackend:
                     acc_e[e] = acc_e.get(e, 0.0) + area / 3.0
             edges = [tuple(e) for e in self._E.tolist()]
             return np.array([acc_e.get(tuple(e), 0.0) for e in edges], dtype=float)
-
         raise ValueError("k must be 0, 1, or 2.")
 
     def _star_circumcentric(self, k: int, inverse: bool) -> csr_matrix:
@@ -595,7 +559,6 @@ class TriangleMesh3DBackend:
             if inverse:
                 w = 1.0 / np.maximum(w, self.eps)
             return diags(w, 0, format="csr")
-
         if k == 1:
             lstar = self._dual_length_edges_circumcentric()
             le = self._primal_edge_lengths()
@@ -603,14 +566,12 @@ class TriangleMesh3DBackend:
             if inverse:
                 w = 1.0 / np.maximum(w, self.eps)
             return diags(w, 0, format="csr")
-
         if k == 2:
             A = self._triangle_areas()
             w = 1.0 / np.maximum(A, self.eps)
             if inverse:
                 w = A / np.maximum(1.0, self.eps)
             return diags(w, 0, format="csr")
-
         raise ValueError(
             "circumcentric/voronoi supports only k in {0,1,2} for triangle meshes."
         )
@@ -627,13 +588,11 @@ class TriangleMesh3DBackend:
         rows: list[int] = []
         cols: list[int] = []
         data: list[float] = []
-
         for a, b, c in self._T:
             ia, ib, ic = self._vid[a], self._vid[b], self._vid[c]
             A = _triangle_area_3d(self._V[ia], self._V[ib], self._V[ic])
             if A <= 1e-14:
                 continue
-
             m = (A / 12.0) * np.array([[2, 1, 1], [1, 2, 1], [1, 1, 2]], dtype=float)
             idx = [ia, ib, ic]
             for i_local in range(3):
@@ -641,7 +600,6 @@ class TriangleMesh3DBackend:
                     rows.append(idx[i_local])
                     cols.append(idx[j_local])
                     data.append(float(m[i_local, j_local]))
-
         return coo_matrix((data, (rows, cols)), shape=(nV, nV)).tocsr()
 
     def cotan_stiffness_0(self) -> csr_matrix:
@@ -656,7 +614,6 @@ class TriangleMesh3DBackend:
         rows: list[int] = []
         cols: list[int] = []
         data: list[float] = []
-
         for a, b, c in self._T:
             ia, ib, ic = self._vid[a], self._vid[b], self._vid[c]
             p0, p1, p2 = self._V[ia], self._V[ib], self._V[ic]
@@ -664,7 +621,6 @@ class TriangleMesh3DBackend:
             A = 0.5 * det_norm
             if A <= 1e-14:
                 continue
-
             grads = [g0, g1, g2]
             idx = [ia, ib, ic]
             for i_local in range(3):
@@ -673,7 +629,6 @@ class TriangleMesh3DBackend:
                     rows.append(idx[i_local])
                     cols.append(idx[j_local])
                     data.append(kij)
-
         return coo_matrix((data, (rows, cols)), shape=(nV, nV)).tocsr()
 
     def riemannian_stiffness_0(self) -> csr_matrix:
@@ -689,7 +644,6 @@ class TriangleMesh3DBackend:
         rows: list[int] = []
         cols: list[int] = []
         data: list[float] = []
-
         for t, (a, b, c) in enumerate(self._T):
             ia, ib, ic = self._vid[a], self._vid[b], self._vid[c]
             p0, p1, p2 = self._V[ia], self._V[ib], self._V[ic]
@@ -697,7 +651,6 @@ class TriangleMesh3DBackend:
             A = 0.5 * det_norm
             if A <= 1e-14:
                 continue
-
             GT = np.asarray(G[t], dtype=float)
             if GT.shape != (3, 3):
                 raise ValueError(
@@ -711,7 +664,6 @@ class TriangleMesh3DBackend:
                     rows.append(idx[i_local])
                     cols.append(idx[j_local])
                     data.append(kij)
-
         return coo_matrix((data, (rows, cols)), shape=(nV, nV)).tocsr()
 
     def cotan_laplacian_0(self, *, lumped: bool = True) -> csr_matrix:
@@ -788,11 +740,6 @@ class TriangleMesh3DBackend:
     def _dual_area_vertices_circumcentric(self) -> np.ndarray:
         """Compute correct circumcentric/Voronoi dual areas per vertex using the cotangent formula.
 
-        Implements the standard formula from Meyer et al. (2003):
-        A_v = (1/8) sum_{adjacent triangles} ( ||e_j||^2 cot alpha_k + ||e_k||^2 cot alpha_j )
-        where alpha_j and alpha_k are the angles at the two neighbors opposite the edges from v.
-        Cotangents are clamped to >=0 for obtuse triangles to ensure positive areas.
-
         Returns
         -------
         np.ndarray
@@ -800,7 +747,6 @@ class TriangleMesh3DBackend:
         """
         nV = self._V.shape[0]
         Astar = np.zeros(nV, dtype=float)
-
         for v in range(nV):
             pv = self._V[v]
             for _, j, k in self._incident[
@@ -808,88 +754,79 @@ class TriangleMesh3DBackend:
             ]:  # precomputed: (tri_idx, neighbor_j_idx, neighbor_k_idx)
                 pj = self._V[j]
                 pk = self._V[k]
-
                 vj = pj - pv
                 vk = pk - pv
                 jk = pk - pj
-
                 lj2 = float(np.dot(vj, vj))  # ||v-j||^2
                 lk2 = float(np.dot(vk, vk))  # ||v-k||^2
                 ljk2 = float(np.dot(jk, jk))  # ||j-k||^2
-
                 # Cosine of angle at vertex j (opposite to edge v-k)
                 denom_j = 2.0 * np.sqrt(lj2 * ljk2) + self.eps
                 cos_j = (lj2 + ljk2 - lk2) / denom_j
-
                 # Cosine of angle at vertex k (opposite to edge v-j)
                 denom_k = 2.0 * np.sqrt(lk2 * ljk2) + self.eps
                 cos_k = (lk2 + ljk2 - lj2) / denom_k
-
                 # Cotangent with clamping to >=0 (obtuse -> cot < 0 -> treat as 0)
                 sin_j_sq = max(1.0 - cos_j * cos_j, 0.0)
                 sin_j = np.sqrt(max(sin_j_sq, self.eps))
                 cot_j = max(cos_j / sin_j, 0.0)
-
                 sin_k_sq = max(1.0 - cos_k * cos_k, 0.0)
                 sin_k = np.sqrt(max(sin_k_sq, self.eps))
                 cot_k = max(cos_k / sin_k, 0.0)
-
                 # Contribution from this triangle
                 Astar[v] += (lk2 * cot_j + lj2 * cot_k) / 8.0
-
         return Astar
 
     def _dual_length_edges_circumcentric(self) -> np.ndarray:
         """Compute circumcentric dual edge lengths using the cotangent formula.
 
-        For a primal edge e = (u, v) shared by one or two triangles, the dual length is:
-            l*_e = (length_e / 2) * sum(cot alpha_opp)
-        where alpha_opp are the angles opposite to edge e in each adjacent triangle.
-        This is the standard choice in DEC literature and ensures positive values.
+        For a primal edge e = (u, v), the dual length is:
+            l*_e = (length_e / 2) * (cot alpha_u + cot alpha_v)
+        where alpha_u and alpha_v are the angles opposite to e in the adjacent triangles.
+        Cotangents are clamped to >= 0.
 
         Returns
         -------
         np.ndarray
             Array of dual edge lengths, shape (n_edges,).
-            Values are strictly positive on manifold (interior) edges.
+            Values are strictly positive for interior edges.
         """
         nE = len(self._E)
         lstar = np.zeros(nE, dtype=float)
-
-        # Precompute primal edge lengths
         primal_len = self._primal_edge_lengths()
 
-        # Build mapping: sorted edge -> list of (triangle_idx, opposite_vertex_idx)
-        edge_to_incident = {tuple(edge): [] for edge in self._E.tolist()}
-        for t, (a, b, c) in enumerate(self._T):
-            edge_to_incident[_sorted_edge(a, b)].append((t, self._vid[c]))
-            edge_to_incident[_sorted_edge(a, c)].append((t, self._vid[b]))
-            edge_to_incident[_sorted_edge(b, c)].append((t, self._vid[a]))
+        # Use defaultdict for robustness
+        edge_to_opp = defaultdict(list)
+
+        for a, b, c in self._T:
+            sorted_ab = _sorted_edge(a, b)
+            sorted_ac = _sorted_edge(a, c)
+            sorted_bc = _sorted_edge(b, c)
+            edge_to_opp[sorted_ab].append(c)  # opposite vertex label
+            edge_to_opp[sorted_ac].append(b)
+            edge_to_opp[sorted_bc].append(a)
 
         for ei, (u, v) in enumerate(self._E):
-            edge_key = (u, v) if u < v else (v, u)
+            key = _sorted_edge(u, v)
             pu = self._V[self._vid[u]]
             pv = self._V[self._vid[v]]
             le = primal_len[ei]
 
             cot_sum = 0.0
-            for _, opp_idx in edge_to_incident[edge_key]:
+            for opp_label in edge_to_opp[key]:
+                opp_idx = self._vid[opp_label]
                 po = self._V[opp_idx]
 
-                # Vectors from opposite vertex o to u and v
                 ou = pu - po
                 ov = pv - po
+                lu2 = np.dot(ou, ou)
+                lv2 = np.dot(ov, ov)
+                uv2 = np.dot(pu - pv, pu - pv)
 
-                lu2 = float(np.dot(ou, ou))
-                lv2 = float(np.dot(ov, ov))
-                uv2 = float(np.dot(pu - pv, pu - pv))
-
-                # Cosine of angle at opposite vertex
                 denom = 2.0 * np.sqrt(lu2 * lv2) + self.eps
                 cos_opp = (lu2 + lv2 - uv2) / denom
 
-                # Cotangent clamped to >= 0
-                sin_sq = max(1.0 - cos_opp * cos_opp, 0.0)
+                sin_sq = max(1.0 - cos_opp**2, 0.0)
                 sin_val = np.sqrt(max(sin_sq, self.eps))
                 cot_opp = max(cos_opp / sin_val, 0.0)
 
@@ -913,7 +850,6 @@ class TriangleMesh3DBackend:
             If `tensors` has the wrong shape or `fn` does not return a (3,3) matrix.
         """
         nT = len(self._T)
-
         if self.metric.tensors is not None:
             G = np.asarray(self.metric.tensors, dtype=float)
             if G.shape != (nT, 3, 3):
@@ -921,7 +857,6 @@ class TriangleMesh3DBackend:
                     f"metric.tensors must have shape {(nT, 3, 3)}, got {G.shape}."
                 )
             return G
-
         if self.metric.fn is not None:
             G = np.zeros((nT, 3, 3), dtype=float)
             for t, (a, b, c) in enumerate(self._T):
@@ -938,5 +873,4 @@ class TriangleMesh3DBackend:
                     raise ValueError("metric.fn must return a (3,3) matrix.")
                 G[t] = GT
             return G
-
         return np.repeat(np.eye(3, dtype=float)[None, :, :], nT, axis=0)
