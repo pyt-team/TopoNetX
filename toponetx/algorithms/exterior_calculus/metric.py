@@ -840,37 +840,62 @@ class TriangleMesh3DBackend:
         return Astar
 
     def _dual_length_edges_circumcentric(self) -> np.ndarray:
-        """Compute circumcentric dual lengths per edge.
+        """Compute circumcentric dual edge lengths using the cotangent formula.
+
+        For a primal edge e = (u, v) shared by one or two triangles, the dual length is:
+            l*_e = (length_e / 2) * sum(cot alpha_opp)
+        where alpha_opp are the angles opposite to edge e in each adjacent triangle.
+        This is the standard choice in DEC literature and ensures positive values.
 
         Returns
         -------
         np.ndarray
-            Dual lengths per edge.
+            Array of dual edge lengths, shape (n_edges,).
+            Values are strictly positive on manifold (interior) edges.
         """
-        C = np.zeros((len(self._T), 3), dtype=float)
-        for t, (a, b, c) in enumerate(self._T):
-            ia, ib, ic = self._vid[a], self._vid[b], self._vid[c]
-            C[t] = _circumcenter_3d(self._V[ia], self._V[ib], self._V[ic])
+        nE = len(self._E)
+        lstar = np.zeros(nE, dtype=float)
 
-        inc: dict[tuple[Any, Any], list[int]] = {tuple(e): [] for e in self._E.tolist()}
-        for t, (a, b, c) in enumerate(self._T):
-            for e in (_sorted_edge(a, b), _sorted_edge(a, c), _sorted_edge(b, c)):
-                if e in inc:
-                    inc[e].append(t)
+        # Precompute primal edge lengths
+        primal_len = self._primal_edge_lengths()
 
-        lstar = np.zeros((len(self._E),), dtype=float)
+        # Build mapping: sorted edge -> list of (triangle_idx, opposite_vertex_idx)
+        edge_to_incident = {tuple(edge): [] for edge in self._E.tolist()}
+        for t, (a, b, c) in enumerate(self._T):
+            edge_to_incident[_sorted_edge(a, b)].append((t, self._vid[c]))
+            edge_to_incident[_sorted_edge(a, c)].append((t, self._vid[b]))
+            edge_to_incident[_sorted_edge(b, c)].append((t, self._vid[a]))
+
         for ei, (u, v) in enumerate(self._E):
-            ts = inc[(u, v)]
+            edge_key = (u, v) if u < v else (v, u)
             pu = self._V[self._vid[u]]
             pv = self._V[self._vid[v]]
-            mid = 0.5 * (pu + pv)
+            le = primal_len[ei]
 
-            if len(ts) >= 2:
-                lstar[ei] = float(np.linalg.norm(C[ts[0]] - C[ts[1]]))
-            elif len(ts) == 1:
-                lstar[ei] = float(np.linalg.norm(C[ts[0]] - mid))
-            else:
-                lstar[ei] = 0.0
+            cot_sum = 0.0
+            for _, opp_idx in edge_to_incident[edge_key]:
+                po = self._V[opp_idx]
+
+                # Vectors from opposite vertex o to u and v
+                ou = pu - po
+                ov = pv - po
+
+                lu2 = float(np.dot(ou, ou))
+                lv2 = float(np.dot(ov, ov))
+                uv2 = float(np.dot(pu - pv, pu - pv))
+
+                # Cosine of angle at opposite vertex
+                denom = 2.0 * np.sqrt(lu2 * lv2) + self.eps
+                cos_opp = (lu2 + lv2 - uv2) / denom
+
+                # Cotangent clamped to >= 0
+                sin_sq = max(1.0 - cos_opp * cos_opp, 0.0)
+                sin_val = np.sqrt(max(sin_sq, self.eps))
+                cot_opp = max(cos_opp / sin_val, 0.0)
+
+                cot_sum += cot_opp
+
+            lstar[ei] = (le / 2.0) * cot_sum
 
         return lstar
 
