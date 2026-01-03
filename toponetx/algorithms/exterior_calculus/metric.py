@@ -241,7 +241,7 @@ class MetricSpec:
         Numerical safeguard used for divisions/inversions.
     """
 
-    preset: MetricPreset = "identity"
+    preset: MetricPreset = "barycentric_lumped"
     diagonal_weights: dict[int, np.ndarray] | None = None
     primal_measures: dict[int, np.ndarray] | None = None
     dual_measures: dict[int, np.ndarray] | None = None
