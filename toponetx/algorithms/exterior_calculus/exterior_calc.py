@@ -86,8 +86,8 @@ Basic DEC Laplacian on a simplicial complex (identity metric)::
 
     d0 = ops.d_matrix(0)  # C^0 -> C^1
     S1 = ops.hodge_star(1)  # *_1
-    delta1 = ops.codifferential(1)
-    L0 = ops.dec_hodge_laplacian(0)
+    delta1 = ops.codifferential_matrix(1)
+    L0 = ops.dec_hodge_laplacian_matrix(0)
 
 Triangle mesh in R^3 with circumcentric stars (requires vertex positions)::
 
@@ -236,7 +236,7 @@ class ExteriorCalculusOperators:
         sc = tnx.SimplicialComplex([[0, 1, 2]])
         ops = ExteriorCalculusOperators(sc, metric="identity")
 
-        L0 = ops.dec_hodge_laplacian(0)
+        L0 = ops.dec_hodge_laplacian_matrix(0)
 
     Use a triangle-mesh preset (requires 3D vertex positions)::
 
@@ -425,7 +425,7 @@ class ExteriorCalculusOperators:
             return identity(n_k, format="csr")
         return self.star_backend.star(self.sc, k, inverse=inverse)
 
-    def codifferential(self, k: int, signed: bool = True) -> csr_matrix:
+    def codifferential_matrix(self, k: int, signed: bool = True) -> csr_matrix:
         r"""Return the DEC codifferential matrix ``δ_k : C^k -> C^{k-1}``.
 
         Parameters
@@ -452,7 +452,7 @@ class ExteriorCalculusOperators:
         d_km1 = self.d_matrix(k - 1, signed=signed)
         return star_km1_inv @ (d_km1.T @ star_k)
 
-    def laplace_up(self, k: int, signed: bool = True) -> csr_matrix:
+    def laplace_up_matrix(self, k: int, signed: bool = True) -> csr_matrix:
         r"""Return the up-Laplacian matrix ``L_k^up = δ_{k+1} d_k``.
 
         Parameters
@@ -478,10 +478,10 @@ class ExteriorCalculusOperators:
             n_k = len(list(self.sc.skeleton(k)))
             return scipy.sparse.csr_matrix((n_k, n_k))
         d_k = self.d_matrix(k, signed=signed)
-        delta_kp1 = self.codifferential(k + 1, signed=signed)
+        delta_kp1 = self.codifferential_matrix(k + 1, signed=signed)
         return delta_kp1 @ d_k
 
-    def laplace_down(self, k: int, signed: bool = True) -> csr_matrix:
+    def laplace_down_matrix(self, k: int, signed: bool = True) -> csr_matrix:
         r"""Return the down-Laplacian matrix ``L_k^down = d_{k-1} δ_k``.
 
         Parameters
@@ -506,11 +506,11 @@ class ExteriorCalculusOperators:
         if k == 0:
             n_k = len(list(self.sc.skeleton(k)))
             return scipy.sparse.csr_matrix((n_k, n_k))
-        delta_k = self.codifferential(k, signed=signed)
+        delta_k = self.codifferential_matrix(k, signed=signed)
         d_km1 = self.d_matrix(k - 1, signed=signed)
         return d_km1 @ delta_k
 
-    def dec_hodge_laplacian(self, k: int, signed: bool = True) -> csr_matrix:
+    def dec_hodge_laplacian_matrix(self, k: int, signed: bool = True) -> csr_matrix:
         r"""Return the DEC Hodge Laplacian matrix ``Δ_k`` on k-cochains.
 
         Parameters
@@ -532,9 +532,11 @@ class ExteriorCalculusOperators:
         """
         if k < 0 or k > self.dim:
             raise ValueError(f"k must be in [0, {self.dim}], got {k}.")
-        return self.laplace_up(k, signed=signed) + self.laplace_down(k, signed=signed)
+        return self.laplace_up_matrix(k, signed=signed) + self.laplace_down_matrix(
+            k, signed=signed
+        )
 
-    def hodge_dirac(self, k: int, signed: bool = True) -> csr_matrix:
+    def hodge_dirac_matrix(self, k: int, signed: bool = True) -> csr_matrix:
         r"""Return the degree-k Hodge--Dirac operator matrix (stacked).
 
         This returns
@@ -570,7 +572,7 @@ class ExteriorCalculusOperators:
         blocks: list[csr_matrix] = []
 
         if k > 0:
-            blocks.append(self.codifferential(k, signed=signed))
+            blocks.append(self.codifferential_matrix(k, signed=signed))
         if k < self.dim:
             blocks.append(self.d_matrix(k, signed=signed))
 
@@ -588,9 +590,9 @@ class ExteriorCalculusOperators:
         k : int
             Cochain degree.
         a : np.ndarray
-            K-cochain (1D array of length ``n_k``).
+            A k-cochain (1D array of length ``n_k``).
         b : np.ndarray
-            K-cochain (1D array of length ``n_k``).
+            A k-cochain (1D array of length ``n_k``).
 
         Returns
         -------
@@ -620,7 +622,7 @@ class ExteriorCalculusOperators:
         k : int
             Cochain degree.
         a : np.ndarray
-            K-cochain (1D array of length ``n_k``).
+            A k-cochain (1D array of length ``n_k``).
 
         Returns
         -------
@@ -767,7 +769,7 @@ class ExteriorCalculusOperators:
 
         x_coexact = np.zeros_like(xk)
         if k < self.dim:
-            delta_kp1 = self.codifferential(k + 1, signed=signed)
+            delta_kp1 = self.codifferential_matrix(k + 1, signed=signed)
             A = delta_kp1.T @ (S_k @ delta_kp1)
             b = delta_kp1.T @ (S_k @ xk)
             if A.shape[0] > 0 and A.nnz > 0:
