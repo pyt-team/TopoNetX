@@ -225,7 +225,7 @@ class ExteriorCalculusOperators:
     sc: object
     pos_name: str = "position"
     metric: MetricSpec | MetricPreset | None = field(
-        default_factory=lambda: MetricSpec(preset="identity")
+        default_factory=lambda: MetricSpec(preset="barycentric_lumped")
     )
     star_backend: HodgeStarBackend | None = None
     eps: float = 1e-12
