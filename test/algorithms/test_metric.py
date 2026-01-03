@@ -591,10 +591,10 @@ class TestMetricSpecDefaults:
         ms = MetricSpec()
         assert ms.eps > 0.0
 
-    def test_default_preset_is_identity(self):
-        """Default to identity preset."""
+    def test_default_preset_is_barycentric_lumped(self):
+        """Default to barycentric_lumped preset."""
         ms = MetricSpec()
-        assert ms.preset == "identity"
+        assert ms.preset == "barycentric_lumped"
 
 
 class TestMetricCallableType:
