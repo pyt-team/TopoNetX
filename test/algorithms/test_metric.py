@@ -18,8 +18,6 @@ sanity properties and error paths. Some helper callables used in tests must be
 properly documented to satisfy numpydoc-validation.
 """
 
-from __future__ import annotations
-
 from typing import TYPE_CHECKING
 
 import numpy as np

@@ -7,7 +7,9 @@ This module contains unit tests for the user-facing
 - correct construction of DEC operators (coboundaries, Hodge stars, codifferentials),
 - valid shapes, basic algebraic identities, and symmetry where expected,
 - error handling for invalid inputs and unsupported configurations,
-- triangle-mesh metric presets route to the geometry backend and expose FEM helpers.
+- triangle-mesh metric presets route to the geometry backend and expose FEM helpers,
+- additional operators: up/down Laplacians, Hodge--Dirac, inner products, norms,
+  and Hodge decomposition utilities.
 
 These tests are intentionally lightweight and avoid asserting PDE convergence.
 They aim to validate correctness of API behavior and fundamental operator properties.
@@ -206,6 +208,48 @@ class TestExteriorCalculusOperators:
         with pytest.raises(ValueError):
             ops.codifferential(-1)
 
+    def test_laplace_up_and_down_shapes_and_boundary_behavior(self):
+        """Return up/down Laplacians with correct shapes and boundary zeros."""
+        sc = build_single_triangle_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        n0, n1, n2 = _counts(sc)
+
+        Lup0 = ops.laplace_up(0)
+        Ldn0 = ops.laplace_down(0)
+        assert isinstance(Lup0, spmatrix)
+        assert isinstance(Ldn0, spmatrix)
+        assert Lup0.shape == (n0, n0)
+        assert Ldn0.shape == (n0, n0)
+        # Boundary: down term at k=0 must be zero.
+        assert Ldn0.tocsr().nnz == 0
+
+        Lup2 = ops.laplace_up(2)
+        Ldn2 = ops.laplace_down(2)
+        assert isinstance(Lup2, spmatrix)
+        assert isinstance(Ldn2, spmatrix)
+        assert Lup2.shape == (n2, n2)
+        assert Ldn2.shape == (n2, n2)
+        # Boundary: up term at k=dim must be zero.
+        assert Lup2.tocsr().nnz == 0
+
+        Lup1 = ops.laplace_up(1)
+        Ldn1 = ops.laplace_down(1)
+        assert Lup1.shape == (n1, n1)
+        assert Ldn1.shape == (n1, n1)
+
+    def test_dec_laplacian_equals_up_plus_down(self):
+        """Return Laplacian equal to sum of up/down pieces."""
+        sc = build_two_triangle_square_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        for k in (0, 1, 2):
+            L = ops.dec_hodge_laplacian(k).tocsr()
+            Lup = ops.laplace_up(k).tocsr()
+            Ldn = ops.laplace_down(k).tocsr()
+            diff = (L - (Lup + Ldn)).tocsr()
+            assert diff.nnz == 0
+
     def test_dec_laplacian_shapes(self):
         """Return Laplacians with correct shapes for k=0,1,2."""
         sc = build_single_triangle_sc()
@@ -247,6 +291,78 @@ class TestExteriorCalculusOperators:
         energy = float(u @ (L0 @ u))
         assert energy >= -1e-12
 
+    def test_hodge_dirac_shapes(self):
+        """Return Hodge--Dirac stacked operator with expected shape."""
+        sc = build_two_triangle_square_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        n0, n1, n2 = _counts(sc)
+
+        D0 = ops.hodge_dirac(0)
+        assert isinstance(D0, spmatrix)
+        assert D0.shape == (n1, n0)  # only d0 block
+
+        D1 = ops.hodge_dirac(1)
+        assert isinstance(D1, spmatrix)
+        assert D1.shape == (n0 + n2, n1)  # delta1 stacked with d1
+
+        D2 = ops.hodge_dirac(2)
+        assert isinstance(D2, spmatrix)
+        assert D2.shape == (n1, n2)  # only delta2 block
+
+    def test_inner_product_and_norm_identity_metric(self):
+        """Match Euclidean dot product and L2 norm for identity stars."""
+        sc = build_two_triangle_square_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        n0, _, _ = _counts(sc)
+        a = np.arange(1, n0 + 1, dtype=float)
+        b = np.arange(2, n0 + 2, dtype=float)
+
+        ip = ops.inner_product(0, a, b)
+        assert np.isclose(ip, float(a @ b))
+
+        na = ops.norm(0, a)
+        assert np.isclose(na, float(np.linalg.norm(a)))
+
+    def test_inner_product_shape_mismatch_raises(self):
+        """Raise ValueError when inner product inputs have wrong length."""
+        sc = build_two_triangle_square_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        a = np.ones(3, dtype=float)
+        b = np.ones(4, dtype=float)
+        with pytest.raises(ValueError):
+            _ = ops.inner_product(0, a, b)
+
+    def test_hodge_decomposition_reconstruction(self):
+        """Return components that reconstruct the input cochain."""
+        sc = build_two_triangle_square_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        _, n1, _ = _counts(sc)
+        x = np.linspace(0.1, 1.0, n1)
+
+        x_exact, x_coexact, x_harm = ops.hodge_decomposition(1, x, solver="spsolve")
+        assert x_exact.shape == x.shape
+        assert x_coexact.shape == x.shape
+        assert x_harm.shape == x.shape
+
+        recon = x_exact + x_coexact + x_harm
+        assert np.allclose(recon, x, atol=1e-8, rtol=1e-8)
+
+    def test_hodge_decomposition_invalid_k_raises(self):
+        """Raise ValueError for invalid k in hodge_decomposition."""
+        sc = build_two_triangle_square_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        x0 = np.ones(len(list(sc.skeleton(0))), dtype=float)
+        with pytest.raises(ValueError):
+            _ = ops.hodge_decomposition(-1, x0)
+
+        with pytest.raises(ValueError):
+            _ = ops.hodge_decomposition(99, x0)
+
     def test_invalid_k_raises(self):
         """Raise ValueError for invalid cochain degree."""
         sc = build_single_triangle_sc()
@@ -263,6 +379,15 @@ class TestExteriorCalculusOperators:
 
         with pytest.raises(ValueError):
             ops.dec_hodge_laplacian(5)
+
+        with pytest.raises(ValueError):
+            ops.laplace_up(-1)
+
+        with pytest.raises(ValueError):
+            ops.laplace_down(99)
+
+        with pytest.raises(ValueError):
+            ops.hodge_dirac(123)
 
     def test_triangle_mesh_backend_basic_star(self):
         """Return valid circumcentric Hodge stars on a minimal triangle mesh."""
@@ -459,3 +584,32 @@ class TestExteriorCalculusOperators:
         # TriangleMesh3DBackend.star does not implement "euclidean" for stars.
         with pytest.raises(ValueError):
             _ = ops.hodge_star(0)
+
+    # ------------------------------------------------------------------
+    # Optional coverage for "_matrix" naming convention (if you add aliases)
+    # ------------------------------------------------------------------
+
+    def test_matrix_aliases_match_primary_methods_if_present(self):
+        """Match alias *_matrix methods to primary methods when available."""
+        sc = build_two_triangle_square_sc()
+        ops = ExteriorCalculusOperators(sc, metric="identity")
+
+        if hasattr(ops, "hodge_star_matrix"):
+            assert (ops.hodge_star_matrix(1) != ops.hodge_star(1)).nnz == 0
+
+        if hasattr(ops, "codifferential_matrix"):
+            assert (ops.codifferential_matrix(1) != ops.codifferential(1)).nnz == 0
+
+        if hasattr(ops, "laplace_up_matrix"):
+            assert (ops.laplace_up_matrix(1) != ops.laplace_up(1)).nnz == 0
+
+        if hasattr(ops, "laplace_down_matrix"):
+            assert (ops.laplace_down_matrix(1) != ops.laplace_down(1)).nnz == 0
+
+        if hasattr(ops, "dec_hodge_laplacian_matrix"):
+            assert (
+                ops.dec_hodge_laplacian_matrix(1) != ops.dec_hodge_laplacian(1)
+            ).nnz == 0
+
+        if hasattr(ops, "hodge_dirac_matrix"):
+            assert (ops.hodge_dirac_matrix(1) != ops.hodge_dirac(1)).nnz == 0
