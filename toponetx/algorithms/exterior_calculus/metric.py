@@ -5,16 +5,19 @@ Notes
 -----
 This module implements the *metric/geometry* ingredients needed by (Discrete) Exterior Calculus (DEC)
 and closely related FEM discretizations on triangle meshes.
+
 High-level picture:
 - A triangle mesh can be viewed as a 2D simplicial complex K embedded in R^3.
 - Cochains C^k(K) assign scalars to oriented k-simplices (0: vertices, 1: edges, 2: triangles).
 - Topology enters via boundary/coboundary operators; geometry enters via the Hodge star.
+
 Continuous Hodge star (motivation):
 - On an oriented Riemannian manifold (M, g), the Hodge star is an isomorphism
   * : Omega^k(M) -> Omega^{n-k}(M), determined by the metric g and the orientation.
 - It is characterized by the identity
   a wedge (*b) = <a, b>_g vol_g
   for differential forms a, b of the same degree.
+
 Discrete (diagonal) Hodge star (DEC):
 - In DEC, one approximates the Hodge star by a sparse operator
   *_k : C^k(K) -> C^{n-k}(K^*),
@@ -23,16 +26,31 @@ Discrete (diagonal) Hodge star (DEC):
       *_k ~= diag( |dual_k| / |primal_k| )
   where |primal_k| denotes a primal k-simplex measure and |dual_k| is the corresponding dual-cell
   measure (constructed e.g. using barycentric or circumcentric/Voronoi duals).
+
+Robust Option A behavior for Voronoi/circumcentric presets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Circumcentric/Voronoi duals can produce negative dual measures on meshes with obtuse triangles.
+To keep the API simple and robust, the geometry backend uses the following default behavior
+for presets "voronoi" and "circumcentric":
+
+- For k=0 (vertex dual areas), we use a "mixed Voronoi area" construction:
+  - non-obtuse triangles use Voronoi (cotangent) contributions,
+  - obtuse triangles use an area split (A/2 to the obtuse vertex, A/4 to the others).
+  This yields non-negative dual areas for non-degenerate triangles.
+- For k=1 (dual edge lengths), we fall back to the barycentric dual edge length to avoid
+  negative cotangent contributions on obtuse triangles.
+- For k=2, the standard area relationship is used.
+
 This module provides:
 - Geometry utilities for triangles embedded in R^3.
 - A user-facing `MetricSpec` describing diagonal Hodge stars and anisotropic FEM tensors.
 - Backends implementing diagonal Hodge stars:
   - `DiagonalHodgeStar` (geometry-free).
   - `TriangleMesh3DBackend` (geometry-based).
+
 Conventions:
 - The mesh is treated as a 2D complex embedded in R^3.
 - The Hodge stars returned here are diagonal (fast, standard in many DEC pipelines).
-- Circumcentric/Voronoi-style dual quantities are computed using triangle circumcenters.
 """
 
 from __future__ import annotations
@@ -216,8 +234,10 @@ class MetricSpec:
     In DEC and related discretizations, the metric is represented by the discrete Hodge star.
     This class stores a *specification* for how diagonal stars (and optional anisotropic tensors)
     should be built.
+
     A common diagonal DEC choice is:
         *_k = diag(w_k), where w_k ~ |dual_k| / |primal_k|.
+
     For anisotropic diffusion / Riemannian metrics on the surface, one can also provide a
     per-triangle SPD tensor field G (a 3x3 matrix per triangle in embedding coordinates) that
     defines a stiffness operator assembled from P1 basis gradients.
@@ -236,7 +256,7 @@ class MetricSpec:
     tensors : np.ndarray, optional
         Per-triangle SPD tensors for anisotropic stiffness, shape (nT, 3, 3).
     fn : callable, optional
-        Per-triangle tensor function fn(t, P, sc) -> (3,3), where P has shape (3,3).
+        Per-triangle tensor function fn(t, P, sc) -> (3, 3), where P has shape (3, 3).
     eps : float
         Numerical safeguard used for divisions/inversions.
     """
@@ -380,7 +400,7 @@ class TriangleMesh3DBackend:
     -----
     This backend precomputes mesh-aligned arrays (vertices, edges, triangles) from a
     `SimplicialComplex` with 3D vertex positions, and provides:
-    - diagonal Hodge stars for k in {0, 1, 2} using barycentric-lumped or circumcentric/Voronoi
+    - diagonal Hodge stars for k in {0, 1, 2} using barycentric-lumped or robust Voronoi-like
       constructions;
     - FEM operators on vertices (0-forms): mass, stiffness, and Laplacian-like operators;
     - anisotropic stiffness/Laplacian using per-triangle SPD tensors.
@@ -427,11 +447,10 @@ class TriangleMesh3DBackend:
         edges_sorted = [_sorted_edge(u, v) for (u, v) in edges]
         self._E = np.array(edges_sorted, dtype=object)
         self._T = np.array(tri, dtype=object)
-        # === NEW: Precompute per-vertex incident triangles (1-ring) ===
+
+        # Precompute per-vertex incident triangles (1-ring).
         nV = self._V.shape[0]
-        self._incident = [
-            [] for _ in range(nV)
-        ]  # list of (tri_idx, neigh1_idx, neigh2_idx)
+        self._incident: list[list[tuple[int, int, int]]] = [[] for _ in range(nV)]
         for t, (a, b, c) in enumerate(self._T):
             ia = self._vid[a]
             ib = self._vid[b]
@@ -439,6 +458,7 @@ class TriangleMesh3DBackend:
             self._incident[ia].append((t, ib, ic))
             self._incident[ib].append((t, ia, ic))
             self._incident[ic].append((t, ia, ib))
+
         self._cache_ready = True
 
     def star(
@@ -467,7 +487,8 @@ class TriangleMesh3DBackend:
         if preset == "barycentric_lumped":
             return self._star_barycentric_lumped(k, inverse=inverse)
         if preset in ("circumcentric", "voronoi"):
-            return self._star_circumcentric(k, inverse=inverse)
+            # Robust Option A behavior (see module Notes).
+            return self._star_voronoi_like_option_a(k, inverse=inverse)
         raise ValueError(
             f"TriangleMesh3DBackend does not support preset={preset!r} for stars."
         )
@@ -493,7 +514,7 @@ class TriangleMesh3DBackend:
         """
         if k not in (0, 1, 2):
             raise ValueError(
-                "barycentric_lumped supports only k in {0,1,2} for triangle meshes."
+                "barycentric_lumped supports only k in {0, 1, 2} for triangle meshes."
             )
         if k == 0:
             primal = np.ones(len(list(self.sc.skeleton(0))), dtype=float)
@@ -570,8 +591,13 @@ class TriangleMesh3DBackend:
 
         raise ValueError("k must be 0, 1, or 2.")
 
-    def _star_circumcentric(self, k: int, inverse: bool) -> csr_matrix:
-        """Compute a circumcentric (Voronoi) diagonal star.
+    def _star_voronoi_like_option_a(self, k: int, inverse: bool) -> csr_matrix:
+        """Compute a robust Voronoi-like diagonal star (Option A).
+
+        Notes
+        -----
+        This method is used for presets "voronoi" and "circumcentric" to avoid failures
+        due to obtuse triangles. See the module Notes for the behavior.
 
         Parameters
         ----------
@@ -588,40 +614,32 @@ class TriangleMesh3DBackend:
         Raises
         ------
         ValueError
-            If circumcentric dual measures are non-positive (typically due to obtuse triangles).
+            If k is not in {0, 1, 2}.
         """
         if k == 0:
-            w = self._dual_area_vertices_circumcentric()
-            if np.any(w <= 0):
-                raise ValueError(
-                    "Circumcentric dual vertex areas contain non-positive values. "
-                    "This usually indicates obtuse triangles in the mesh. "
-                    "Switch to preset='barycentric_lumped' for guaranteed positive measures."
-                )
+            w = self._dual_area_vertices_voronoi_mixed()
             if inverse:
                 w = 1.0 / np.maximum(w, self.eps)
             return diags(w, 0, format="csr")
+
         if k == 1:
-            lstar = self._dual_length_edges_circumcentric()
+            # Robust fallback: barycentric dual edge length, then star1 = |e*| / |e|.
+            lstar = self._dual_measure_barycentric(1)
             le = self._primal_edge_lengths()
             w = lstar / np.maximum(le, self.eps)
-            if np.any(w <= 0):
-                raise ValueError(
-                    "Circumcentric dual edge lengths contain non-positive values. "
-                    "This usually indicates obtuse triangles in the mesh. "
-                    "Switch to preset='barycentric_lumped' for guaranteed positive measures."
-                )
             if inverse:
                 w = 1.0 / np.maximum(w, self.eps)
             return diags(w, 0, format="csr")
+
         if k == 2:
             A = self._triangle_areas()
             w = 1.0 / np.maximum(A, self.eps)
             if inverse:
                 w = A / np.maximum(1.0, self.eps)
             return diags(w, 0, format="csr")
+
         raise ValueError(
-            "circumcentric/voronoi supports only k in {0,1,2} for triangle meshes."
+            "voronoi/circumcentric supports only k in {0, 1, 2} for triangle meshes."
         )
 
     def fem_mass_matrix_0(self) -> csr_matrix:
@@ -785,8 +803,114 @@ class TriangleMesh3DBackend:
             le[i] = float(np.linalg.norm(pu - pv))
         return le
 
+    def _cot_from_squared_lengths(self, a2: float, b2: float, c2: float) -> float:
+        """Compute cot(angle opposite side with squared length c2) from squared lengths.
+
+        Parameters
+        ----------
+        a2 : float
+            Squared length of one adjacent side.
+        b2 : float
+            Squared length of the other adjacent side.
+        c2 : float
+            Squared length of the opposite side.
+
+        Returns
+        -------
+        float
+            Cotangent of the angle opposite the side with squared length c2.
+        """
+        # cos(theta) = (a2 + b2 - c2) / (2ab)
+        denom = 2.0 * np.sqrt(max(a2 * b2, 0.0)) + self.eps
+        cos_t = (a2 + b2 - c2) / denom
+        sin2 = max(1.0 - cos_t * cos_t, 0.0)
+        sin_t = np.sqrt(max(sin2, self.eps))
+        return float(cos_t / sin_t)
+
+    def _dual_area_vertices_voronoi_mixed(self) -> np.ndarray:
+        """Compute mixed Voronoi (circumcentric) dual area per vertex.
+
+        Notes
+        -----
+        This is the standard "mixed area" construction used to avoid negative Voronoi areas
+        on meshes with obtuse triangles:
+        - If a triangle is non-obtuse, use Voronoi (cotangent) contributions.
+        - If a triangle is obtuse, split its area: A/2 to the obtuse vertex, A/4 to the others.
+
+        Returns
+        -------
+        np.ndarray
+            Array of dual (mixed Voronoi) areas for each vertex, shape (n_vertices,).
+        """
+        nV = self._V.shape[0]
+        Astar = np.zeros(nV, dtype=float)
+
+        for a, b, c in self._T:
+            ia, ib, ic = self._vid[a], self._vid[b], self._vid[c]
+            pa, pb, pc = self._V[ia], self._V[ib], self._V[ic]
+
+            # Squared edge lengths opposite vertices a, b, c.
+            lab2 = float(np.dot(pa - pb, pa - pb))
+            lbc2 = float(np.dot(pb - pc, pb - pc))
+            lca2 = float(np.dot(pc - pa, pc - pa))
+
+            # Angle obtuse test via squared lengths: angle at a is obtuse iff opposite edge bc is longest
+            # and lbc2 > lab2 + lca2.
+            obt_a = lbc2 > lab2 + lca2
+            obt_b = lca2 > lab2 + lbc2
+            obt_c = lab2 > lbc2 + lca2
+
+            A = _triangle_area_3d(pa, pb, pc)
+            if A <= 1e-14:
+                continue
+
+            if obt_a or obt_b or obt_c:
+                # Mixed area split for obtuse triangles.
+                if obt_a:
+                    Astar[ia] += 0.5 * A
+                    Astar[ib] += 0.25 * A
+                    Astar[ic] += 0.25 * A
+                elif obt_b:
+                    Astar[ib] += 0.5 * A
+                    Astar[ia] += 0.25 * A
+                    Astar[ic] += 0.25 * A
+                else:
+                    Astar[ic] += 0.5 * A
+                    Astar[ia] += 0.25 * A
+                    Astar[ib] += 0.25 * A
+                continue
+
+            # Non-obtuse: Voronoi area formula using cotangents.
+            # Contribution at vertex a: (|ab|^2 cot(gamma) + |ac|^2 cot(beta)) / 8
+            # where beta is angle at b? careful:
+            # - cot at b is opposite edge ac => uses lengths (ab, bc, ac)
+            # - cot at c is opposite edge ab => uses lengths (bc, ca, ab)
+            cot_b = self._cot_from_squared_lengths(
+                lab2, lbc2, lca2
+            )  # angle at b, opposite ca
+            cot_c = self._cot_from_squared_lengths(
+                lca2, lbc2, lab2
+            )  # angle at c, opposite ab
+            cot_a = self._cot_from_squared_lengths(
+                lab2, lca2, lbc2
+            )  # angle at a, opposite bc
+
+            # Map squared lengths:
+            # |ab|^2 = lab2, |ac|^2 = lca2, |bc|^2 = lbc2
+            Astar[ia] += (lab2 * cot_c + lca2 * cot_b) / 8.0
+            Astar[ib] += (lab2 * cot_c + lbc2 * cot_a) / 8.0
+            Astar[ic] += (lca2 * cot_b + lbc2 * cot_a) / 8.0
+
+        # Numerical guard: clip tiny negatives due to floating error.
+        return np.maximum(Astar, 0.0)
+
     def _dual_area_vertices_circumcentric(self) -> np.ndarray:
-        """Compute correct circumcentric/Voronoi dual areas per vertex using the cotangent formula.
+        """Compute circumcentric/Voronoi dual areas per vertex using a cotangent formula.
+
+        Notes
+        -----
+        This method is retained for reference and diagnostics. For robust default behavior on
+        obtuse meshes, use `_dual_area_vertices_voronoi_mixed()` (Option A).
 
         Returns
         -------
@@ -797,62 +921,54 @@ class TriangleMesh3DBackend:
         Astar = np.zeros(nV, dtype=float)
         for v in range(nV):
             pv = self._V[v]
-            for _, j, k in self._incident[
-                v
-            ]:  # precomputed: (tri_idx, neighbor_j_idx, neighbor_k_idx)
+            for _, j, k in self._incident[v]:
                 pj = self._V[j]
                 pk = self._V[k]
                 vj = pj - pv
                 vk = pk - pv
                 jk = pk - pj
-                lj2 = float(np.dot(vj, vj))  # ||v-j||^2
-                lk2 = float(np.dot(vk, vk))  # ||v-k||^2
-                ljk2 = float(np.dot(jk, jk))  # ||j-k||^2
-                # Cosine of angle at vertex j (opposite to edge v-k)
+                lj2 = float(np.dot(vj, vj))
+                lk2 = float(np.dot(vk, vk))
+                ljk2 = float(np.dot(jk, jk))
+
                 denom_j = 2.0 * np.sqrt(lj2 * ljk2) + self.eps
                 cos_j = (lj2 + ljk2 - lk2) / denom_j
-                # Cosine of angle at vertex k (opposite to edge v-j)
                 denom_k = 2.0 * np.sqrt(lk2 * ljk2) + self.eps
                 cos_k = (lk2 + ljk2 - lj2) / denom_k
-                # Cotangent with clamping to >=0 (obtuse -> cot < 0 -> treat as 0)
+
                 sin_j_sq = max(1.0 - cos_j * cos_j, 0.0)
                 sin_j = np.sqrt(max(sin_j_sq, self.eps))
-                cot_j = max(cos_j / sin_j, 0.0)
+                cot_j = cos_j / sin_j
+
                 sin_k_sq = max(1.0 - cos_k * cos_k, 0.0)
                 sin_k = np.sqrt(max(sin_k_sq, self.eps))
-                cot_k = max(cos_k / sin_k, 0.0)
-                # Contribution from this triangle
+                cot_k = cos_k / sin_k
+
                 Astar[v] += (lk2 * cot_j + lj2 * cot_k) / 8.0
         return Astar
 
     def _dual_length_edges_circumcentric(self) -> np.ndarray:
-        """Compute circumcentric dual edge lengths using the cotangent formula.
+        """Compute circumcentric dual edge lengths using a cotangent formula.
 
-        For a primal edge e = (u, v), the dual length is:
-            l*_e = (length_e / 2) * (cot alpha_u + cot alpha_v)
-        where alpha_u and alpha_v are the angles opposite to e in the adjacent triangles.
-        Cotangents are clamped to >= 0.
+        Notes
+        -----
+        This method is retained for reference and diagnostics. Under Option A, the default
+        star for k=1 uses barycentric dual edge lengths to avoid negative cotangent sums.
 
         Returns
         -------
         np.ndarray
             Array of dual edge lengths, shape (n_edges,).
-            Values are strictly positive for interior edges.
         """
         nE = len(self._E)
         lstar = np.zeros(nE, dtype=float)
         primal_len = self._primal_edge_lengths()
 
-        # Use defaultdict for robustness
         edge_to_opp = defaultdict(list)
-
         for a, b, c in self._T:
-            sorted_ab = _sorted_edge(a, b)
-            sorted_ac = _sorted_edge(a, c)
-            sorted_bc = _sorted_edge(b, c)
-            edge_to_opp[sorted_ab].append(c)  # opposite vertex label
-            edge_to_opp[sorted_ac].append(b)
-            edge_to_opp[sorted_bc].append(a)
+            edge_to_opp[_sorted_edge(a, b)].append(c)
+            edge_to_opp[_sorted_edge(a, c)].append(b)
+            edge_to_opp[_sorted_edge(b, c)].append(a)
 
         for ei, (u, v) in enumerate(self._E):
             key = _sorted_edge(u, v)
@@ -867,16 +983,16 @@ class TriangleMesh3DBackend:
 
                 ou = pu - po
                 ov = pv - po
-                lu2 = np.dot(ou, ou)
-                lv2 = np.dot(ov, ov)
-                uv2 = np.dot(pu - pv, pu - pv)
+                lu2 = float(np.dot(ou, ou))
+                lv2 = float(np.dot(ov, ov))
+                uv2 = float(np.dot(pu - pv, pu - pv))
 
                 denom = 2.0 * np.sqrt(lu2 * lv2) + self.eps
                 cos_opp = (lu2 + lv2 - uv2) / denom
 
-                sin_sq = max(1.0 - cos_opp**2, 0.0)
+                sin_sq = max(1.0 - cos_opp * cos_opp, 0.0)
                 sin_val = np.sqrt(max(sin_sq, self.eps))
-                cot_opp = max(cos_opp / sin_val, 0.0)
+                cot_opp = cos_opp / sin_val
 
                 cot_sum += cot_opp
 
@@ -895,7 +1011,7 @@ class TriangleMesh3DBackend:
         Raises
         ------
         ValueError
-            If `tensors` has the wrong shape or `fn` does not return a (3,3) matrix.
+            If `tensors` has the wrong shape or `fn` does not return a (3, 3) matrix.
         """
         nT = len(self._T)
         if self.metric.tensors is not None:
@@ -918,7 +1034,7 @@ class TriangleMesh3DBackend:
                 )
                 GT = np.asarray(self.metric.fn(t, P, self.sc), dtype=float)
                 if GT.shape != (3, 3):
-                    raise ValueError("metric.fn must return a (3,3) matrix.")
+                    raise ValueError("metric.fn must return a (3, 3) matrix.")
                 G[t] = GT
             return G
         return np.repeat(np.eye(3, dtype=float)[None, :, :], nT, axis=0)
