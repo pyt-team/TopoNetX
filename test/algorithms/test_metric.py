@@ -496,8 +496,7 @@ class TestTriangleMesh3DBackend:
         tensors[0] = 2.0 * np.eye(3)
 
         be = TriangleMesh3DBackend(
-            sc=sc,
-            metric=MetricSpec(preset="circumcentric", tensors=tensors),
+            sc=sc, metric=MetricSpec(preset="circumcentric", tensors=tensors)
         )
         K = be.riemannian_stiffness_0()
         assert K.shape == (4, 4)
@@ -774,8 +773,6 @@ class TestTriangleMesh3DBackendAdditional:
         assert S2_2.shape == (nT, nT)
         assert np.all(S2_2.diagonal() > 0.0)
 
-    # ---- Added to cover lines shown in the screenshot (augment only) ----
-
     def test_dual_measure_barycentric_invalid_k_raises(self):
         """Raise ValueError for unsupported degree in barycentric dual measure helper."""
         sc = _build_single_triangle_sc()
@@ -803,13 +800,10 @@ class TestTriangleMesh3DBackendAdditional:
         S0 = be.star(sc, 0, inverse=False)
         S0_inv = be.star(sc, 0, inverse=True)
         assert np.isfinite(S0_inv.diagonal()).all()
-        # Where S0 has strictly positive entries, inversion should be reciprocal.
         mask = S0.diagonal() > 0.0
         if np.any(mask):
             assert np.allclose(
-                S0.diagonal()[mask] * S0_inv.diagonal()[mask],
-                1.0,
-                atol=1e-10,
+                S0.diagonal()[mask] * S0_inv.diagonal()[mask], 1.0, atol=1e-10
             )
 
     def test_star_circumcentric_inverse_k1_is_finite(self):
@@ -822,7 +816,5 @@ class TestTriangleMesh3DBackendAdditional:
         mask = S1.diagonal() > 0.0
         if np.any(mask):
             assert np.allclose(
-                S1.diagonal()[mask] * S1_inv.diagonal()[mask],
-                1.0,
-                atol=1e-10,
+                S1.diagonal()[mask] * S1_inv.diagonal()[mask], 1.0, atol=1e-10
             )
