@@ -553,9 +553,20 @@ class TriangleMesh3DBackend:
         -------
         csr_matrix
             Diagonal star.
+
+        Raises
+        ------
+        ValueError
+            If circumcentric dual measures are non-positive (typically due to obtuse triangles).
         """
         if k == 0:
             w = self._dual_area_vertices_circumcentric()
+            if np.any(w <= 0):
+                raise ValueError(
+                    "Circumcentric dual vertex areas contain non-positive values. "
+                    "This usually indicates obtuse triangles in the mesh. "
+                    "Switch to preset='barycentric_lumped' for guaranteed positive measures."
+                )
             if inverse:
                 w = 1.0 / np.maximum(w, self.eps)
             return diags(w, 0, format="csr")
@@ -563,6 +574,12 @@ class TriangleMesh3DBackend:
             lstar = self._dual_length_edges_circumcentric()
             le = self._primal_edge_lengths()
             w = lstar / np.maximum(le, self.eps)
+            if np.any(w <= 0):
+                raise ValueError(
+                    "Circumcentric dual edge lengths contain non-positive values. "
+                    "This usually indicates obtuse triangles in the mesh. "
+                    "Switch to preset='barycentric_lumped' for guaranteed positive measures."
+                )
             if inverse:
                 w = 1.0 / np.maximum(w, self.eps)
             return diags(w, 0, format="csr")
