@@ -521,8 +521,10 @@ class TriangleMesh3DBackend:
             Dual measures array for degree k.
         """
         A = self._triangle_areas()
+
         if k == 2:
             return A.copy()
+
         if k == 0:
             acc: dict[Any, float] = {}
             for (a, b, c), area in zip(self._T, A, strict=True):
@@ -530,13 +532,42 @@ class TriangleMesh3DBackend:
                 acc[b] = acc.get(b, 0.0) + area / 3.0
                 acc[c] = acc.get(c, 0.0) + area / 3.0
             return np.array([acc.get(v, 0.0) for v in self._vlabels], dtype=float)
+
         if k == 1:
             acc_e: dict[tuple[Any, Any], float] = {}
-            for (a, b, c), area in zip(self._T, A, strict=True):
-                for e in (_sorted_edge(a, b), _sorted_edge(a, c), _sorted_edge(b, c)):
-                    acc_e[e] = acc_e.get(e, 0.0) + area / 3.0
+
+            # For barycentric dual on edges in 2D:
+            # |e*| is approximated by summing, over incident triangles,
+            # the segment length from the triangle barycenter to the edge midpoint.
+            for (a, b, c), _area in zip(self._T, A, strict=True):
+                ia = self._vid[a]
+                ib = self._vid[b]
+                ic = self._vid[c]
+
+                pa = self._V[ia]
+                pb = self._V[ib]
+                pc = self._V[ic]
+
+                bary = (pa + pb + pc) / 3.0  # triangle barycenter
+
+                # edge (a, b)
+                e = _sorted_edge(a, b)
+                mid = (pa + pb) / 2.0
+                acc_e[e] = acc_e.get(e, 0.0) + float(np.linalg.norm(bary - mid))
+
+                # edge (a, c)
+                e = _sorted_edge(a, c)
+                mid = (pa + pc) / 2.0
+                acc_e[e] = acc_e.get(e, 0.0) + float(np.linalg.norm(bary - mid))
+
+                # edge (b, c)
+                e = _sorted_edge(b, c)
+                mid = (pb + pc) / 2.0
+                acc_e[e] = acc_e.get(e, 0.0) + float(np.linalg.norm(bary - mid))
+
             edges = [tuple(e) for e in self._E.tolist()]
             return np.array([acc_e.get(tuple(e), 0.0) for e in edges], dtype=float)
+
         raise ValueError("k must be 0, 1, or 2.")
 
     def _star_circumcentric(self, k: int, inverse: bool) -> csr_matrix:
