@@ -1,5 +1,8 @@
 """Test graph dataset."""
 
+import numpy as np
+import pytest
+
 from toponetx.datasets.graph import coauthorship, karate_club
 
 
@@ -25,8 +28,11 @@ class TestGraph:
         assert len(cell_karate_club_data.get_cell_attributes("cell_feat", rank=2)) != 0
 
     def test_coauthorship(self):
-        """Test coauthorship."""
-        simplicial_coauthorship_data = coauthorship()
+        """Test coauthorship dataset loading."""
+        # NumPy >= 2.4 emits VisibleDeprecationWarning internally.
+        # This test verifies dataset loading, not NumPy dtype construction details.
+        with pytest.warns(np.exceptions.VisibleDeprecationWarning):
+            simplicial_coauthorship_data = coauthorship()
 
         assert (
             len(simplicial_coauthorship_data.get_simplex_attributes("citations")) != 0
