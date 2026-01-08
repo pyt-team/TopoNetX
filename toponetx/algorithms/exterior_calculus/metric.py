@@ -504,7 +504,7 @@ class TriangleMesh3DBackend:
         ----------
         k : int
             Cochain degree.
-        inverse : bool
+        inverse : bool, default=False
             If True, invert the diagonal star.
 
         Returns
