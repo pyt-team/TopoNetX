@@ -652,7 +652,7 @@ class ExteriorCalculusOperators:
             Sparse square system matrix.
         b : np.ndarray
             Right-hand side vector.
-        method : {"cg", "spsolve"}
+        method : {"cg", "spsolve"}, default="cg"
             Solver choice. Use ``"cg"`` for (approximately) SPD systems.
         tol : float
             Convergence tolerance for iterative solvers.
