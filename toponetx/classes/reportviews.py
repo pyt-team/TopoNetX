@@ -90,8 +90,8 @@ class CellView(AtomView[Cell]):
     """A CellView class for cells of a CellComplex."""
 
     # Dictionary to hold cells, with keys being the tuple that defines the cell, and
-    # values being dictionaries of cell objects with different attributes
-    _cells: dict[tuple[Hashable, ...], dict[int, Cell]]
+    # values being the cell objects
+    _cells: dict[tuple[Hashable, ...], Cell]
 
     def __init__(self) -> None:
         self._cells = {}
@@ -115,41 +115,23 @@ class CellView(AtomView[Cell]):
             If the cell is not in the cell dictionary.
         """
         if isinstance(cell, Cell):
-            if cell.elements not in self._cells:
-                raise KeyError(
-                    f"cell {cell!r} is not in the cell dictionary",
-                )
-
-            # If there is only one cell with these elements, return its attributes
-            if len(self._cells[cell.elements]) == 1:
-                k = next(iter(self._cells[cell.elements].keys()))
-                return self._cells[cell.elements][k]._attributes
-
-            # If there are multiple cells with these elements, return the attributes of all cells
-            return [
-                self._cells[cell.elements][c]._attributes
-                for c in self._cells[cell.elements]
-            ]
-
-        # If a tuple or list is passed in, assume it represents a cell
-        if isinstance(cell, Iterable):
+            cell = tuple(cell.elements)
+        elif isinstance(cell, Iterable):
             cell = tuple(cell)
-            if cell in self._cells:
-                if len(self._cells[cell]) == 1:
-                    k = next(iter(self._cells[cell].keys()))
-                    return self._cells[cell][k]._attributes
-                return [self._cells[cell][c]._attributes for c in self._cells[cell]]
+        else:
+            raise TypeError("Input must be a tuple, list or a cell.")
 
-            raise KeyError(f"cell {cell} is not in the cell dictionary")
+        if cell in self._cells:
+            return self._cells[cell]._attributes
 
-        raise TypeError("Input must be a tuple, list or a cell.")
+        raise KeyError(f"cell {cell} is not in the cell dictionary")
 
-    def raw(self, cell: tuple | list | Cell) -> Cell | list[Cell]:
+    def raw(self, cell: Sequence) -> Cell | list[Cell]:
         """Index the raw cell objects analogous to the overall index of CellView.
 
         Parameters
         ----------
-        cell : tuple, list, or cell
+        cell : Sequence
             The cell of interest.
 
         Returns
@@ -165,28 +147,15 @@ class CellView(AtomView[Cell]):
             If the cell is not in the cell dictionary.
         """
         if isinstance(cell, Cell):
-            if cell.elements not in self._cells:
-                raise KeyError(f"cell {cell!r} is not in the cell dictionary")
-
-            # If there is only one cell with these elements, return its attributes
-            if len(self._cells[cell.elements]) == 1:
-                k = next(iter(self._cells[cell.elements].keys()))
-                return self._cells[cell.elements][k]
-
-            # If there are multiple cells with these elements, return the attributes of all cells
-            return [self._cells[cell.elements][c] for c in self._cells[cell.elements]]
-
-        # If a tuple or list is passed in, assume it represents a cell
-        if isinstance(cell, tuple | list):
+            cell = cell.elements
+        elif isinstance(cell, Sequence) and not isinstance(cell, str | bytes):
             cell = tuple(cell)
-            if cell in self._cells:
-                if len(self._cells[cell]) == 1:
-                    k = next(iter(self._cells[cell].keys()))
-                    return self._cells[cell][k]
-                return [self._cells[cell][c] for c in self._cells[cell]]
-            raise KeyError(f"cell {cell} is not in the cell dictionary")
+        else:
+            raise TypeError("Input must be a tuple, list or a cell object.")
 
-        raise TypeError("Input must be a tuple, list or a cell.")
+        if cell in self._cells:
+            return self._cells[cell]
+        raise KeyError(f"cell {cell} is not in the cell dictionary")
 
     def __len__(self) -> int:
         """Return the number of cells in the cell view.
@@ -196,7 +165,7 @@ class CellView(AtomView[Cell]):
         int
             The number of cells in the cell view.
         """
-        return sum(len(self._cells[cell]) for cell in self._cells)
+        return len(self._cells)
 
     def __iter__(self) -> Iterator[Cell]:
         """Iterate over all cells in the cell view.
@@ -206,13 +175,7 @@ class CellView(AtomView[Cell]):
         Iterator
             Iterator to iterate over all cells in the cell view.
         """
-        return iter(
-            [
-                self._cells[cell][key]
-                for cell in self._cells
-                for key in self._cells[cell]
-            ]
-        )
+        return iter(self._cells.values())
 
     def __contains__(self, atom: Any) -> bool:
         """Check if a given element is in the cell view.
@@ -241,7 +204,7 @@ class CellView(AtomView[Cell]):
         str
             The __repr__ representation of the cell view.
         """
-        return f"CellView({[self._cells[cell][key] for cell in self._cells for key in self._cells[cell]]})"
+        return f"CellView({[self._cells[cell] for cell in self._cells]})"
 
     def __str__(self) -> str:
         """Return a string representation of the cell view.
@@ -251,7 +214,7 @@ class CellView(AtomView[Cell]):
         str
             The __str__ representation of the cell view.
         """
-        return f"CellView({[self._cells[cell][key] for cell in self._cells for key in self._cells[cell]]})"
+        return f"CellView({[self._cells[cell] for cell in self._cells]})"
 
 
 class ColoredHyperEdgeView(AtomView):
