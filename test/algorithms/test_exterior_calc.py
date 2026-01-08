@@ -67,8 +67,7 @@ def build_two_triangle_square_sc() -> SimplicialComplex:
     SimplicialComplex
         A simplicial complex with two triangles and vertex positions.
     """
-    faces = [[0, 1, 2], [0, 2, 3]]
-    sc = SimplicialComplex(faces)
+    sc = SimplicialComplex([[0, 1, 2], [0, 2, 3]])
     pos = {
         0: [0.0, 0.0, 0.0],
         1: [1.0, 0.0, 0.0],
@@ -266,7 +265,7 @@ class TestExteriorCalculusOperators:
         sc = build_single_triangle_sc_no_positions()
 
         # Constructing the backend occurs during ops init; missing position labels should fail.
-        with pytest.raises((KeyError, ValueError, AttributeError)):
+        with pytest.raises((KeyError, AttributeError)):
             _ = ExteriorCalculusOperators(
                 sc, metric="circumcentric", pos_name="position"
             )

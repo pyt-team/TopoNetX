@@ -66,8 +66,7 @@ def _build_two_triangle_square_sc() -> SimplicialComplex:
     SimplicialComplex
         Simplicial complex with two 2-simplices and 3D vertex positions.
     """
-    faces = [[0, 1, 2], [0, 2, 3]]
-    sc = SimplicialComplex(faces)
+    sc = SimplicialComplex([[0, 1, 2], [0, 2, 3]])
     pos = {
         0: [0.0, 0.0, 0.0],
         1: [1.0, 0.0, 0.0],
