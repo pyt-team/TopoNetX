@@ -723,7 +723,7 @@ class ExteriorCalculusOperators:
             Whether to use signed coboundaries (orientation-aware).
         solver : {"cg", "spsolve"}
             Linear solver used for the normal equations.
-        tol : float
+        tol : float, default=1e-10
             Convergence tolerance for iterative solvers.
         maxiter : int, optional
             Maximum iterations for iterative solvers.
