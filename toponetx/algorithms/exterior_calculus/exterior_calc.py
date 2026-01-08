@@ -845,7 +845,7 @@ class ExteriorCalculusOperators:
 
         Parameters
         ----------
-        lumped : bool
+        lumped : bool, default=True
             If True, return ``M_lumped^{-1} K``. Otherwise return ``K``.
 
         Returns
