@@ -275,7 +275,7 @@ class HodgeStarBackend(Protocol):
             Complex object.
         k : int
             Cochain degree.
-        inverse : bool
+        inverse : bool, default=False
             If True, return (*_k)^{-1}.
 
         Returns
