@@ -78,24 +78,24 @@ Examples
 --------
 Basic DEC Laplacian on a simplicial complex (identity metric)::
 
-    import toponetx as tnx
-    from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
+    >>> import toponetx as tnx
+    >>> from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
 
-    sc = tnx.SimplicialComplex([[0, 1, 2]])
-    ops = ExteriorCalculusOperators(sc, metric="identity")
+    >>> sc = tnx.SimplicialComplex([[0, 1, 2]])
+    >>> ops = ExteriorCalculusOperators(sc, metric="identity")
 
-    d0 = ops.d_matrix(0)  # C^0 -> C^1
-    S1 = ops.hodge_star(1)  # *_1
-    delta1 = ops.codifferential_matrix(1)
-    L0 = ops.dec_hodge_laplacian_matrix(0)
+    >>> d0 = ops.d_matrix(0)  # C^0 -> C^1
+    >>> S1 = ops.hodge_star(1)  # *_1
+    >>> delta1 = ops.codifferential_matrix(1)
+    >>> L0 = ops.dec_hodge_laplacian_matrix(0)
 
 Triangle mesh in R^3 with circumcentric stars (requires vertex positions)::
 
-    import toponetx as tnx
-    from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
+    >>> import toponetx as tnx
+    >>> from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
 
-    sc = tnx.SimplicialComplex([[0, 1, 2], [0, 2, 3]])
-    sc.set_simplex_attributes(
+    >>> sc = tnx.SimplicialComplex([[0, 1, 2], [0, 2, 3]])
+    >>> sc.set_simplex_attributes(
         {
             0: [0.0, 0.0, 0.0],
             1: [1.0, 0.0, 0.0],
@@ -105,16 +105,16 @@ Triangle mesh in R^3 with circumcentric stars (requires vertex positions)::
         name="position",
     )
 
-    ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
-    S0 = ops.hodge_star(0)
-    M0 = ops.fem_mass_matrix_0()
-    K0 = ops.cotan_stiffness_0()
-    Lcot = ops.cotan_laplacian_0(lumped=True)
+    >>> ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
+    >>> S0 = ops.hodge_star(0)
+    >>> M0 = ops.fem_mass_matrix_0()
+    >>> K0 = ops.cotan_stiffness_0()
+    >>> Lcot = ops.cotan_laplacian_0(lumped=True)
 
 Disable metric support (all stars become identities)::
 
-    ops = ExteriorCalculusOperators(sc, metric=None)
-    S2 = ops.hodge_star(2)  # identity on C^2
+    >>> ops = ExteriorCalculusOperators(sc, metric=None)
+    >>> S2 = ops.hodge_star(2)  # identity on C^2
 """
 
 from dataclasses import dataclass, field
@@ -228,21 +228,21 @@ class ExteriorCalculusOperators:
     --------
     Build operators on a simplicial complex and compute a Laplacian::
 
-        import toponetx as tnx
-        from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
+        >>> import toponetx as tnx
+        >>> from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
 
-        sc = tnx.SimplicialComplex([[0, 1, 2]])
-        ops = ExteriorCalculusOperators(sc, metric="identity")
+        >>> sc = tnx.SimplicialComplex([[0, 1, 2]])
+        >>> ops = ExteriorCalculusOperators(sc, metric="identity")
 
-        L0 = ops.dec_hodge_laplacian_matrix(0)
+        >>> L0 = ops.dec_hodge_laplacian_matrix(0)
 
     Use a triangle-mesh preset (requires 3D vertex positions)::
 
-        import toponetx as tnx
-        from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
+        >>> import toponetx as tnx
+        >>> from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
 
-        sc = tnx.SimplicialComplex([[0, 1, 2], [0, 2, 3]])
-        sc.set_simplex_attributes(
+        >>> sc = tnx.SimplicialComplex([[0, 1, 2], [0, 2, 3]])
+        >>> sc.set_simplex_attributes(
             {
                 0: [0.0, 0.0, 0.0],
                 1: [1.0, 0.0, 0.0],
@@ -252,14 +252,14 @@ class ExteriorCalculusOperators:
             name="position",
         )
 
-        ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
-        M0 = ops.fem_mass_matrix_0()
-        Lcot = ops.cotan_laplacian_0(lumped=True)
+        >>> ops = ExteriorCalculusOperators(sc, metric="circumcentric", pos_name="position")
+        >>> M0 = ops.fem_mass_matrix_0()
+        >>> Lcot = ops.cotan_laplacian_0(lumped=True)
 
     Disable metric support::
 
-        ops = ExteriorCalculusOperators(sc, metric=None)
-        S1 = ops.hodge_star(1)  # identity
+        >>> ops = ExteriorCalculusOperators(sc, metric=None)
+        >>> S1 = ops.hodge_star(1)  # identity
     """
 
     sc: object
