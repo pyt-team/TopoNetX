@@ -24,7 +24,6 @@ import numpy as np
 import pytest
 from scipy.sparse import csr_matrix
 
-import toponetx as tnx
 from toponetx.algorithms.exterior_calculus.metric import (
     DiagonalHodgeStar,
     MetricSpec,
@@ -35,21 +34,21 @@ from toponetx.algorithms.exterior_calculus.metric import (
     _sorted_edge,
     _triangle_area_3d,
 )
+from toponetx.classes.simplicial_complex import SimplicialComplex
 
 if TYPE_CHECKING:  # pragma: no cover
     from collections.abc import Callable
 
 
-def _build_single_triangle_sc() -> tnx.SimplicialComplex:
+def _build_single_triangle_sc() -> SimplicialComplex:
     """Build a single-triangle simplicial complex with 3D positions.
 
     Returns
     -------
-    tnx.SimplicialComplex
+    SimplicialComplex
         Simplicial complex with one 2-simplex and 3D vertex positions.
     """
-    faces = [[0, 1, 2]]
-    sc = tnx.SimplicialComplex(faces)
+    sc = SimplicialComplex([[0, 1, 2]])
     pos = {
         0: [0.0, 0.0, 0.0],
         1: [1.0, 0.0, 0.0],
@@ -59,16 +58,16 @@ def _build_single_triangle_sc() -> tnx.SimplicialComplex:
     return sc
 
 
-def _build_two_triangle_square_sc() -> tnx.SimplicialComplex:
+def _build_two_triangle_square_sc() -> SimplicialComplex:
     """Build a two-triangle square patch embedded in R^3.
 
     Returns
     -------
-    tnx.SimplicialComplex
+    SimplicialComplex
         Simplicial complex with two 2-simplices and 3D vertex positions.
     """
     faces = [[0, 1, 2], [0, 2, 3]]
-    sc = tnx.SimplicialComplex(faces)
+    sc = SimplicialComplex(faces)
     pos = {
         0: [0.0, 0.0, 0.0],
         1: [1.0, 0.0, 0.0],
@@ -79,16 +78,15 @@ def _build_two_triangle_square_sc() -> tnx.SimplicialComplex:
     return sc
 
 
-def _build_degenerate_triangle_sc() -> tnx.SimplicialComplex:
+def _build_degenerate_triangle_sc() -> SimplicialComplex:
     """Build a collinear (degenerate) triangle embedded in R^3.
 
     Returns
     -------
-    tnx.SimplicialComplex
+    SimplicialComplex
         Simplicial complex with one degenerate triangle and vertex positions.
     """
-    faces = [[0, 1, 2]]
-    sc = tnx.SimplicialComplex(faces)
+    sc = SimplicialComplex([[0, 1, 2]])
     pos = {
         0: [0.0, 0.0, 0.0],
         1: [1.0, 0.0, 0.0],
@@ -96,25 +94,6 @@ def _build_degenerate_triangle_sc() -> tnx.SimplicialComplex:
     }
     sc.set_simplex_attributes(pos, name="position")
     return sc
-
-
-def _counts(sc: tnx.SimplicialComplex) -> tuple[int, int, int]:
-    """Return the (n0, n1, n2) simplex counts.
-
-    Parameters
-    ----------
-    sc : tnx.SimplicialComplex
-        Input simplicial complex.
-
-    Returns
-    -------
-    tuple[int, int, int]
-        Number of vertices, edges, and triangles.
-    """
-    n0 = len(list(sc.skeleton(0)))
-    n1 = len(list(sc.skeleton(1)))
-    n2 = len(list(sc.skeleton(2)))
-    return n0, n1, n2
 
 
 class TestGeometryHelpers:
@@ -282,7 +261,7 @@ class TestTriangleMesh3DBackend:
 
     def test_backend_requires_triangles(self):
         """Raise error if no 2-simplices exist."""
-        sc = tnx.SimplicialComplex([])
+        sc = SimplicialComplex([])
         sc.add_simplex([0])
         sc.set_simplex_attributes({0: [0.0, 0.0, 0.0]}, name="position")
         ms = MetricSpec(preset="barycentric_lumped")
@@ -292,7 +271,7 @@ class TestTriangleMesh3DBackend:
     def test_backend_requires_3d_positions(self):
         """Raise error if vertex positions are not 3D."""
         faces = [[0, 1, 2]]
-        sc = tnx.SimplicialComplex(faces)
+        sc = SimplicialComplex(faces)
         pos_bad = {0: [0.0, 0.0], 1: [1.0, 0.0], 2: [0.0, 1.0]}
         sc.set_simplex_attributes(pos_bad, name="position")
         ms = MetricSpec(preset="barycentric_lumped")
@@ -302,7 +281,7 @@ class TestTriangleMesh3DBackend:
     def test_star_identity_has_ones(self):
         """Return identity star with ones diagonal for any k."""
         sc = _build_single_triangle_sc()
-        n0, n1, n2 = _counts(sc)
+        n0, n1, n2 = sc.shape
         be = TriangleMesh3DBackend(sc=sc, metric=MetricSpec(preset="identity"))
 
         S0 = be.star(sc, 0)
@@ -713,7 +692,7 @@ class TestDiagonalHodgeStarAdditional:
         """Identity preset returns square matrices sized by skeleton(k)."""
         sc = _build_two_triangle_square_sc()
         hs = DiagonalHodgeStar(metric=MetricSpec(preset="identity"))
-        n0, n1, n2 = _counts(sc)
+        n0, n1, n2 = sc.shape
         S0 = hs.star(sc, 0)
         S1 = hs.star(sc, 1)
         S2 = hs.star(sc, 2)
