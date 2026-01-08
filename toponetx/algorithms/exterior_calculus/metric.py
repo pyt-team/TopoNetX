@@ -591,7 +591,7 @@ class TriangleMesh3DBackend:
 
         raise ValueError("k must be 0, 1, or 2.")
 
-    def _star_voronoi_like_option_a(self, k: int, inverse: bool) -> csr_matrix:
+    def _star_voronoi_like_option_a(self, k: int, inverse: bool = False) -> csr_matrix:
         """Compute a robust Voronoi-like diagonal star (Option A).
 
         Notes
@@ -603,7 +603,7 @@ class TriangleMesh3DBackend:
         ----------
         k : int
             Cochain degree.
-        inverse : bool
+        inverse : bool, default=False
             If True, invert the diagonal star.
 
         Returns
