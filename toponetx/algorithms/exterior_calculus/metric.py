@@ -59,7 +59,6 @@ from dataclasses import dataclass
 from typing import Any, Literal, Protocol
 
 import numpy as np
-from numpy.typing import NDArray
 from scipy.sparse import coo_matrix, csr_matrix, diags
 
 from toponetx.classes.simplicial_complex import SimplicialComplex
@@ -73,9 +72,7 @@ MetricPreset = Literal[
     "euclidean",
 ]
 
-MetricCallable = Callable[
-    [int, NDArray[np.floating], SimplicialComplex], NDArray[np.floating]
-]
+MetricCallable = Callable[[int, np.ndarray, SimplicialComplex], np.ndarray]
 
 
 def _sorted_edge(u: Any, v: Any) -> tuple[Any, Any]:
@@ -96,9 +93,7 @@ def _sorted_edge(u: Any, v: Any) -> tuple[Any, Any]:
     return (u, v) if u <= v else (v, u)
 
 
-def _triangle_area_3d(
-    p0: NDArray[np.floating], p1: NDArray[np.floating], p2: NDArray[np.floating]
-) -> float:
+def _triangle_area_3d(p0: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> float:
     """Compute the area of a triangle embedded in R^3.
 
     Parameters
@@ -132,9 +127,7 @@ def _triangle_area_3d(
     return 0.5 * float(np.linalg.norm(n))
 
 
-def _circumcenter_3d(
-    p0: NDArray[np.floating], p1: NDArray[np.floating], p2: NDArray[np.floating]
-) -> NDArray[np.floating]:
+def _circumcenter_3d(p0: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> np.ndarray:
     """Compute the circumcenter of a triangle embedded in R^3.
 
     Parameters
@@ -177,8 +170,8 @@ def _circumcenter_3d(
 
 
 def _grad_barycentric_3d(
-    p0: NDArray[np.floating], p1: NDArray[np.floating], p2: NDArray[np.floating]
-) -> tuple[NDArray[np.floating], NDArray[np.floating], NDArray[np.floating], float]:
+    p0: np.ndarray, p1: np.ndarray, p2: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
     """Compute gradients of P1 basis functions on an R^3 triangle.
 
     Parameters
