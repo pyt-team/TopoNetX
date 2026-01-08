@@ -53,8 +53,6 @@ Conventions:
 - The Hodge stars returned here are diagonal (fast, standard in many DEC pipelines).
 """
 
-from __future__ import annotations
-
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
