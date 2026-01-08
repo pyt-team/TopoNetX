@@ -430,7 +430,7 @@ class ExteriorCalculusOperators:
         ----------
         k : int
             Cochain degree. Must satisfy ``k >= 1``.
-        signed : bool
+        signed : bool, default=True
             Whether to use signed coboundaries (orientation-aware).
 
         Returns
