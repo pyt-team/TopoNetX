@@ -654,7 +654,7 @@ class ExteriorCalculusOperators:
             Right-hand side vector.
         method : {"cg", "spsolve"}, default="cg"
             Solver choice. Use ``"cg"`` for (approximately) SPD systems.
-        tol : float
+        tol : float, default=1e-10
             Convergence tolerance for iterative solvers.
         maxiter : int, optional
             Maximum iterations for iterative solvers.
