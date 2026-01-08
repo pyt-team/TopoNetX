@@ -13,31 +13,28 @@ These tests are intentionally lightweight and avoid asserting PDE convergence.
 They aim to validate correctness of API behavior and fundamental operator properties.
 """
 
-from __future__ import annotations
-
 import numpy as np
 import pytest
 from scipy.sparse import csr_matrix, spmatrix
 
-import toponetx as tnx
 from toponetx.algorithms.exterior_calculus import ExteriorCalculusOperators
 from toponetx.algorithms.exterior_calculus.metric import (
     DiagonalHodgeStar,
     MetricSpec,
     TriangleMesh3DBackend,
 )
+from toponetx.classes.simplicial_complex import SimplicialComplex
 
 
-def build_single_triangle_sc() -> tnx.SimplicialComplex:
+def build_single_triangle_sc() -> SimplicialComplex:
     """Build a single-triangle simplicial complex embedded in R^3.
 
     Returns
     -------
-    tnx.SimplicialComplex
+    SimplicialComplex
         A simplicial complex with one triangle and vertex positions.
     """
-    faces = [[0, 1, 2]]
-    sc = tnx.SimplicialComplex(faces)
+    sc = SimplicialComplex([[0, 1, 2]])
     pos = {
         0: [0.0, 0.0, 0.0],
         1: [1.0, 0.0, 0.0],
@@ -47,18 +44,18 @@ def build_single_triangle_sc() -> tnx.SimplicialComplex:
     return sc
 
 
-def build_single_triangle_sc_no_positions() -> tnx.SimplicialComplex:
+def build_single_triangle_sc_no_positions() -> SimplicialComplex:
     """Build a single-triangle simplicial complex without vertex positions.
 
     Returns
     -------
-    tnx.SimplicialComplex
+    SimplicialComplex
         A simplicial complex with one triangle and no `position` attribute.
     """
-    return tnx.SimplicialComplex([[0, 1, 2]])
+    return SimplicialComplex([[0, 1, 2]])
 
 
-def build_two_triangle_square_sc() -> tnx.SimplicialComplex:
+def build_two_triangle_square_sc() -> SimplicialComplex:
     """Build a two-triangle square patch embedded in R^3.
 
     This is the smallest nontrivial mesh with an interior edge shared by two
@@ -67,11 +64,11 @@ def build_two_triangle_square_sc() -> tnx.SimplicialComplex:
 
     Returns
     -------
-    tnx.SimplicialComplex
+    SimplicialComplex
         A simplicial complex with two triangles and vertex positions.
     """
     faces = [[0, 1, 2], [0, 2, 3]]
-    sc = tnx.SimplicialComplex(faces)
+    sc = SimplicialComplex(faces)
     pos = {
         0: [0.0, 0.0, 0.0],
         1: [1.0, 0.0, 0.0],
@@ -80,25 +77,6 @@ def build_two_triangle_square_sc() -> tnx.SimplicialComplex:
     }
     sc.set_simplex_attributes(pos, name="position")
     return sc
-
-
-def _counts(sc: tnx.SimplicialComplex) -> tuple[int, int, int]:
-    """Return (n0, n1, n2) counts for a simplicial complex.
-
-    Parameters
-    ----------
-    sc : tnx.SimplicialComplex
-        The simplicial complex.
-
-    Returns
-    -------
-    tuple[int, int, int]
-        Counts of vertices, edges, and triangles.
-    """
-    n0 = len(list(sc.skeleton(0)))
-    n1 = len(list(sc.skeleton(1)))
-    n2 = len(list(sc.skeleton(2)))
-    return n0, n1, n2
 
 
 class TestExteriorCalculusOperators:
@@ -121,7 +99,7 @@ class TestExteriorCalculusOperators:
         assert isinstance(d0, spmatrix)
         assert isinstance(d1, spmatrix)
 
-        n0, n1, n2 = _counts(sc)
+        n0, n1, n2 = sc.shape
         assert d0.shape == (n1, n0)  # C^0 -> C^1
         assert d1.shape == (n2, n1)  # C^1 -> C^2
         assert n2 == 1
@@ -160,7 +138,7 @@ class TestExteriorCalculusOperators:
         S1 = ops.hodge_star(1)
         S2 = ops.hodge_star(2)
 
-        n0, n1, n2 = _counts(sc)
+        n0, n1, n2 = sc.shape
         assert S0.shape == (n0, n0)
         assert S1.shape == (n1, n1)
         assert S2.shape == (n2, n2)
@@ -184,7 +162,7 @@ class TestExteriorCalculusOperators:
         sc = build_single_triangle_sc()
         ops = ExteriorCalculusOperators(sc, metric="identity")
 
-        n0, n1, n2 = _counts(sc)
+        n0, n1, n2 = sc.shape
 
         delta1 = ops.codifferential_matrix(1)
         delta2 = ops.codifferential_matrix(2)
@@ -211,7 +189,7 @@ class TestExteriorCalculusOperators:
         sc = build_single_triangle_sc()
         ops = ExteriorCalculusOperators(sc, metric="identity")
 
-        n0, n1, n2 = _counts(sc)
+        n0, n1, n2 = sc.shape
 
         L0 = ops.dec_hodge_laplacian_matrix(0)
         L1 = ops.dec_hodge_laplacian_matrix(1)
@@ -273,7 +251,7 @@ class TestExteriorCalculusOperators:
         S1 = ops.hodge_star(1)
         S2 = ops.hodge_star(2)
 
-        n0, n1, n2 = _counts(sc)
+        n0, n1, n2 = sc.shape
         assert S0.shape == (n0, n0)
         assert S1.shape == (n1, n1)
         assert S2.shape == (n2, n2)
