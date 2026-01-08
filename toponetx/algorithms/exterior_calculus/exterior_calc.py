@@ -285,7 +285,7 @@ class ExteriorCalculusOperators:
         Returns
         -------
         None
-            This method mutates ``metric`` and ``star_backend`` in place.
+            This returns None.
         """
         self.eps = float(self.eps)
         self.metric = self._normalize_metric(self.metric)
@@ -382,7 +382,7 @@ class ExteriorCalculusOperators:
         int
             Maximum simplex dimension.
         """
-        return int(self.sc.dim)
+        return self.sc.dim
 
     def d_matrix(self, k: int, signed: bool = True) -> csr_matrix:
         r"""Return the coboundary matrix ``d_k : C^k -> C^{k+1}``.
