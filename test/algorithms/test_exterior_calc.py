@@ -265,7 +265,7 @@ class TestExteriorCalculusOperators:
         sc = build_single_triangle_sc_no_positions()
 
         # Constructing the backend occurs during ops init; missing position labels should fail.
-        with pytest.raises((KeyError, AttributeError)):
+        with pytest.raises(KeyError):
             _ = ExteriorCalculusOperators(
                 sc, metric="circumcentric", pos_name="position"
             )
