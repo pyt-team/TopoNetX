@@ -391,7 +391,7 @@ class ExteriorCalculusOperators:
         ----------
         k : int
             Cochain degree.
-        signed : bool
+        signed : bool, default=True
             If True, respect orientations. If False, take absolute values.
 
         Returns
