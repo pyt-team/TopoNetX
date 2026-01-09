@@ -1,5 +1,7 @@
 """Test graph dataset."""
 
+import pytest
+
 from toponetx.datasets.graph import coauthorship, karate_club
 
 
@@ -26,7 +28,8 @@ class TestGraph:
 
     def test_coauthorship(self):
         """Test coauthorship."""
-        simplicial_coauthorship_data = coauthorship()
+        with pytest.warns(DeprecationWarning):
+            simplicial_coauthorship_data = coauthorship()
 
         assert (
             len(simplicial_coauthorship_data.get_simplex_attributes("citations")) != 0

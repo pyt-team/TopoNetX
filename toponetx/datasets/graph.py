@@ -6,6 +6,7 @@ from typing import Literal, overload
 import networkx as nx
 import numpy as np
 import requests
+from typing_extensions import deprecated
 
 from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
 from toponetx.classes.cell_complex import CellComplex
@@ -151,6 +152,10 @@ def karate_club(
     raise ValueError(f"complex_type must be 'simplicial' or 'cell' got {complex_type}")
 
 
+@deprecated(
+    "coauthorship is deprecated since version 0.3.0 and will be removed in a future version. "
+    "The dataset is available in AHORN under 'semantic-scholar-coauth-sample'."
+)
 def coauthorship() -> SimplicialComplex:
     """Load the coauthorship network as a simplicial complex.
 
@@ -196,10 +201,10 @@ def coauthorship() -> SimplicialComplex:
     for dim in range(len(coauthorship) - 1, -1, -1):
         simplices += [list(el) for el in coauthorship[dim]]
 
-    sc = SimplicialComplex(simplices)
+    SC = SimplicialComplex(simplices)
 
     for i in range(len(coauthorship)):
         dic = {tuple(sorted(k)): v for k, v in coauthorship[i].items()}
-        sc.set_simplex_attributes(dic, name="citations")
+        SC.set_simplex_attributes(dic, name="citations")
 
-    return sc
+    return SC
