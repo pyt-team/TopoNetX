@@ -101,14 +101,14 @@ def compute_kipf_adjacency_normalized_matrix(
     """
     if add_identity:
         size = A_opt.shape[0]
-        eye = diags(size * [identity_multiplier])
+        eye = diags(size * [identity_multiplier], dtype=None)
         A_opt = np.abs(A_opt) + eye
     else:
         A_opt = np.abs(A_opt)
     rowsum = np.array(A_opt.sum(1))
     r_inv_sqrt = np.power(rowsum, -0.5).flatten()
     r_inv_sqrt[np.isinf(r_inv_sqrt)] = 0.0
-    r_mat_inv_sqrt = diags(r_inv_sqrt)
+    r_mat_inv_sqrt = diags(r_inv_sqrt, dtype=None)
     return A_opt.dot(r_mat_inv_sqrt).transpose().dot(r_mat_inv_sqrt)
 
 
@@ -140,7 +140,7 @@ def compute_xu_asymmetric_normalized_matrix(
         rowsum = np.array(np.abs(B).sum(1))
         r_inv = np.power(rowsum, -1).flatten()
         r_inv[np.isinf(r_inv)] = 0.0
-        r_mat_inv = diags(r_inv)
+        r_mat_inv = diags(r_inv, dtype=None)
         return r_mat_inv.dot(B)
 
     Di = np.sum(np.abs(B), axis=1)
@@ -312,7 +312,7 @@ def _compute_D1(B1: np.ndarray | csr_matrix, D2: diags) -> diags:
     """
     if isinstance(B1, csr_matrix):
         rowsum = np.array((np.abs(B1) @ D2).sum(axis=1)).flatten()
-        return 2 * diags(rowsum)
+        return 2 * diags(rowsum, dtype=None)
     if isinstance(B1, np.ndarray):
         rowsum = (np.abs(B1) @ D2).sum(axis=1)
         return 2 * np.diag(rowsum)
@@ -334,7 +334,7 @@ def _compute_D2(B2: np.ndarray | csr_matrix) -> diags:
     """
     if isinstance(B2, csr_matrix):
         rowsum = np.array(np.abs(B2).sum(axis=1)).flatten()
-        return diags(np.maximum(rowsum, 1))
+        return diags(np.maximum(rowsum, 1), dtype=None)
     if isinstance(B2, np.ndarray):
         rowsum = np.abs(B2).sum(axis=1)
         return np.diag(np.maximum(rowsum, 1))
@@ -355,7 +355,7 @@ def _compute_D3(B2: np.ndarray | csr_matrix) -> diags:
         Degree matrix D3.
     """
     if isinstance(B2, csr_matrix):
-        return diags(np.ones(B2.shape[1]) / 3)
+        return diags(np.ones(B2.shape[1]) / 3, dtype=None)
     if isinstance(B2, np.ndarray):
         return np.diag(np.ones(B2.shape[1]) / 3)
     raise TypeError("Input type must be either np.ndarray or csr_matrix.")
@@ -376,7 +376,7 @@ def _compute_D5(B2: np.ndarray | csr_matrix) -> diags:
     """
     if isinstance(B2, csr_matrix):
         rowsum = np.array(np.abs(B2).sum(axis=1)).flatten()
-        return diags(rowsum)
+        return diags(rowsum, dtype=None)
     if isinstance(B2, np.ndarray):
         rowsum = np.abs(B2).sum(axis=1)
         return np.diag(rowsum)
