@@ -27,8 +27,11 @@ Read a dataset from a local file:
 """
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
 from typing import IO
+
+from more_itertools import peekable, split_before
 
 from toponetx.classes import CellComplex, SimplicialComplex
 from toponetx.classes.complex import Complex
@@ -56,7 +59,9 @@ def _assert_ahorn_loader_installed() -> None:
         )
 
 
-def load_ahorn_dataset[T: Complex](name: str, create_using: type[T] | None = None) -> T:
+def load_ahorn_dataset[T: Complex](
+    name: str, create_using: type[T] | None = None
+) -> T | Iterable[T]:
     """Load the specified dataset from the Aachen Higher-Order Repository of Networks.
 
     The dataset file will be stored in your system cache and can be deleted according
@@ -73,8 +78,9 @@ def load_ahorn_dataset[T: Complex](name: str, create_using: type[T] | None = Non
 
     Returns
     -------
-    Complex
-        The complex representing the AHORN dataset.
+    Complex or list[Complex]
+        The complex representing the AHORN dataset. A list of complexes if the dataset
+        contains multiple networks.
 
     Raises
     ------
@@ -96,7 +102,7 @@ def load_ahorn_dataset[T: Complex](name: str, create_using: type[T] | None = Non
 
 def read_ahorn_dataset[T](
     path: str | Path | IO[str], create_using: type[T] | None = None
-) -> T:
+) -> T | Iterable[T]:
     """Read an AHORN dataset from a local file or file-like object.
 
     This function accepts file paths and file-like objects provided by users. When
@@ -113,8 +119,9 @@ def read_ahorn_dataset[T](
 
     Returns
     -------
-    Complex
-        The complex representing the AHORN dataset.
+    Complex or list[Complex]
+        The complex representing the AHORN dataset. A list of complexes if the dataset
+        contains multiple networks.
 
     Raises
     ------
@@ -138,8 +145,14 @@ def read_ahorn_dataset[T](
         raise RuntimeError(f"Failed to read dataset: {e!s}") from e
 
 
-def _read_ahorn_dataset[T](file: IO[str], create_using: type[T] | None = None) -> T:
+def _read_ahorn_dataset[T](
+    file: Iterable[str], create_using: type[T] | None = None
+) -> T | Iterable[T]:
     """Read AHORN dataset from file-like object.
+
+    Supports both single-network and multi-network datasets. Multi-network datasets are
+    detected by checking if the first two lines both start with '{', indicating they are
+    JSON objects representing separate networks.
 
     Parameters
     ----------
@@ -150,15 +163,38 @@ def _read_ahorn_dataset[T](file: IO[str], create_using: type[T] | None = None) -
 
     Returns
     -------
-    Complex
-        The complex representing the AHORN dataset.
+    Complex or list[Complex]
+        The complex representing the AHORN dataset. A list of complexes if the dataset
+        contains multiple networks.
     """
     if create_using is None:
         create_using = SimplicialComplex
 
-    complex_obj = create_using(**json.loads(next(file)))
+    # Convert to peekable iterator to detect multi-network datasets
+    lines = peekable(file)
 
-    for line_num, line in enumerate(file, start=2):
+    # Check if this is a multi-network dataset by peeking at the first two lines
+    first_line = next(lines)
+    is_multi_network = False
+    try:
+        is_multi_network = lines.peek().strip().startswith("{")
+    except StopIteration:
+        is_multi_network = False
+
+    # If multi-network, create empty complex; otherwise parse first line
+    if is_multi_network:
+        network_lines = list(
+            split_before(lines, lambda line: line.strip().startswith("{"))
+        )
+        return [
+            _read_ahorn_dataset(network, create_using=create_using)
+            for network in network_lines
+        ]
+
+    complex_obj = create_using(**json.loads(first_line))
+
+    # Process remaining lines
+    for line_num, line in enumerate(lines, start=2):
         try:
             elements_part, metadata = line.split(" ", maxsplit=1)
             elements = list(map(int, elements_part.split(",")))
