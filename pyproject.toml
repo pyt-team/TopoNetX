@@ -48,7 +48,7 @@ all = [
     "spharapy",
 
     # hypernetx is not compatible with Pandas 3. Remove this constraint when it is fixed.
-    "pandas<3.0.0",
+    "pandas<3.0.1",
 ]
 
 [project.urls]
