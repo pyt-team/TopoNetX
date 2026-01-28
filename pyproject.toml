@@ -45,7 +45,10 @@ dependencies=[
 all = [
     "ahorn-loader>=0.2.0",
     "hypernetx ~= 2.3",
-    "spharapy"
+    "spharapy",
+
+    # hypernetx is not compatible with Pandas 3. Remove this constraint when it is fixed.
+    "pandas<3.0.0",
 ]
 
 [project.urls]
