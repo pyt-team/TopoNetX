@@ -1,14 +1,11 @@
 """Module with iterable-related utility functions."""
 
 from collections.abc import Sequence
-from typing import TypeVar
 
 __all__ = ["is_ordered_subset"]
 
-T = TypeVar("T")
 
-
-def is_ordered_subset(one: Sequence[T], other: Sequence[T]) -> bool:
+def is_ordered_subset[T](one: Sequence[T], other: Sequence[T]) -> bool:
     """Return True if the first iterable is a subset of the second iterable.
 
     This method is specifically optimized for ordered iterables to use return as early as possible for non-subsets.
