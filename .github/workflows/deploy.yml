@@ -19,7 +19,7 @@ jobs:
           git tag -d $(git tag --points-at HEAD)
 
       - name: Set up Python
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.1.0
         with:
           enable-cache: true
 
