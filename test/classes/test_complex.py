@@ -38,7 +38,7 @@ class TestComplex:
 
     @pytest.mark.parametrize(
         "complex_class,atom_class,add_method",
-        zip(complex_classes, atom_classes, add_atom_method, strict=True),
+        tuple(zip(complex_classes, atom_classes, add_atom_method, strict=True)),
     )
     def test_add_atom_with_attribute(
         self, complex_class: type[Complex], atom_class: type[Atom], add_method: str
@@ -69,7 +69,7 @@ class TestComplex:
 
     @pytest.mark.parametrize(
         "complex_class,atom_class,add_method",
-        zip(complex_classes, atom_classes, add_atom_method, strict=True),
+        tuple(zip(complex_classes, atom_classes, add_atom_method, strict=True)),
     )
     def test_add_atom_attribute_precedence(
         self, complex_class: type[Complex], atom_class: type[Atom], add_method: str
