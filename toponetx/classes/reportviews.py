@@ -972,11 +972,10 @@ class NodeView:
                 if self.colored_nodes:
                     return self.nodes[cell][0]
                 return self.nodes[cell]
-        elif isinstance(cell, Hashable):
-            if cell in self:
-                if self.colored_nodes:
-                    return self.nodes[frozenset({cell})][0]
-                return self.nodes[frozenset({cell})]
+        elif isinstance(cell, Hashable) and cell in self:
+            if self.colored_nodes:
+                return self.nodes[frozenset({cell})][0]
+            return self.nodes[frozenset({cell})]
 
         raise KeyError(f"input {cell} is not in the node set of the complex")
 
