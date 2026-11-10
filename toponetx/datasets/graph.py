@@ -2,11 +2,11 @@
 
 from pathlib import Path
 from typing import Literal, overload
+from warnings import deprecated
 
 import networkx as nx
 import numpy as np
 import requests
-from typing_extensions import deprecated
 
 from toponetx.algorithms.spectrum import hodge_laplacian_eigenvectors
 from toponetx.classes.cell_complex import CellComplex
