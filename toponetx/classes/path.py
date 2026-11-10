@@ -222,11 +222,12 @@ class Path(Atom[tuple[Hashable]]):
                 raise ValueError(
                     f"An elementary p-path must have the first index smaller than the last index, got {elements}."
                 )
-        elif isinstance(elements, Hashable):
-            if not isinstance(elements, int) or isinstance(elements, str):
-                raise ValueError(
-                    f"Elements of an elementary p-path must be an int or str, got {type(elements)}."
-                )
+        elif isinstance(elements, Hashable) and (
+            not isinstance(elements, int) or isinstance(elements, str)
+        ):
+            raise ValueError(
+                f"Elements of an elementary p-path must be an int or str, got {type(elements)}."
+            )
 
     def __repr__(self) -> str:
         """Return string representation of elementary p-paths.
