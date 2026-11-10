@@ -94,6 +94,11 @@ def shrec_16(size: Literal["full", "small"] = "full"):
         The npz files store the training/testing complexes of shrec 16 dataset along
         with their nodes, edges and faces features.
 
+    Raises
+    ------
+    RuntimeError
+        If dataset is not found on in DIR.
+
     Notes
     -----
     Each npz file stores 5 keys:
@@ -103,11 +108,6 @@ def shrec_16(size: Literal["full", "small"] = "full"):
     edge_feat : stores a 10 dim edge feature vector: dihedral angle, edge span, 2 edge angle in the triangle, 6 edge ratios.
     face_feat : stores a 7-dimensional face feature vector: face area (1 feat), face normal (3 feat), face angles (3 feat)
     mesh label : stores the label of the mesh
-
-    Raises
-    ------
-    RuntimeError
-        If dataset is not found on in DIR.
 
     Examples
     --------

@@ -573,10 +573,6 @@ class SimplicialComplex[ElementType: Hashable](Complex):
     def get_star(self, simplex: Iterable[ElementType]) -> list[Simplex[ElementType]]:
         """Get star.
 
-        Notes
-        -----
-        This function is equivalent to calling `get_cofaces(simplex, 0)`.
-
         Parameters
         ----------
         simplex : Iterable of AtomType
@@ -586,6 +582,10 @@ class SimplicialComplex[ElementType: Hashable](Complex):
         -------
         list of tuples
             The star of the given simplex.
+
+        Notes
+        -----
+        This function is equivalent to calling `get_cofaces(simplex, 0)`.
         """
         return self.get_cofaces(simplex, 0)
 
