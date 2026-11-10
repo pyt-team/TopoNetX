@@ -42,7 +42,7 @@ def _atomlist_line(atom: Iterable[Hashable] | Hashable, attributes: dict) -> str
 
 def _generate_atomlist_simplicial(
     domain: SimplicialComplex,
-) -> Generator[str, None, None]:
+) -> Generator[str]:
     """Generate an atom list from a simplicial complex.
 
     The list of atoms is truncated to only contain maximal simplices and simplices with user-defined attributes. All
@@ -69,7 +69,7 @@ def _generate_atomlist_simplicial(
         yield _atomlist_line(atom, data)
 
 
-def _generate_atomlist_cell(domain: CellComplex) -> Generator[str, None, None]:
+def _generate_atomlist_cell(domain: CellComplex) -> Generator[str]:
     """Generate an atom list from a cell complex.
 
     The list of atoms is truncated to only contain maximal cells and cells with user-defined attributes. All
@@ -107,7 +107,7 @@ def _generate_atomlist_cell(domain: CellComplex) -> Generator[str, None, None]:
 
 def generate_atomlist(
     domain: CellComplex | SimplicialComplex,
-) -> Generator[str, None, None]:
+) -> Generator[str]:
     """Generate an atom list from a complex.
 
     The list of atoms is truncated to only contain maximal atoms and atoms with user-defined attributes. All

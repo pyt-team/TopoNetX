@@ -109,7 +109,7 @@ class SimplexNode[ElementType: Hashable]:
         simplex._attributes = self.attributes
         return simplex
 
-    def iter_all(self) -> Generator["SimplexNode[ElementType]", None, None]:
+    def iter_all(self) -> Generator["SimplexNode[ElementType]"]:
         """Iterate over all nodes in the subtree rooted at this node.
 
         Ordering is according to breadth-first search, i.e., simplices are yielded in increasing order of dimension and
@@ -365,7 +365,7 @@ class SimplexTrie[ElementType: Hashable]:
 
     def cofaces(
         self, simplex: Sequence[ElementType]
-    ) -> Generator[SimplexNode[ElementType], None, None]:
+    ) -> Generator[SimplexNode[ElementType]]:
         """Return the cofaces of the given simplex.
 
         No ordering is guaranteed by this method.
@@ -400,7 +400,7 @@ class SimplexTrie[ElementType: Hashable]:
 
     def _coface_roots(
         self, simplex: Sequence[ElementType]
-    ) -> Generator[SimplexNode[ElementType], None, None]:
+    ) -> Generator[SimplexNode[ElementType]]:
         """Return the roots of the coface subtrees.
 
         A coface subtree is a subtree of the trie whose simplices are all cofaces of a
@@ -468,7 +468,7 @@ class SimplexTrie[ElementType: Hashable]:
         except StopIteration:
             return True
 
-    def skeleton(self, rank: int) -> Generator[SimplexNode, None, None]:
+    def skeleton(self, rank: int) -> Generator[SimplexNode]:
         """Return the simplices of the given rank.
 
         No particular ordering is guaranteed and is dependent on insertion order.

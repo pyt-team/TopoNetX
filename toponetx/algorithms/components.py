@@ -27,29 +27,27 @@ def s_connected_components(
     s: int,
     cells: Literal[True] = ...,
     return_singletons: bool = ...,
-) -> Generator[set[tuple[Hashable, ...]], None, None]:  # numpydoc ignore=GL08
+) -> Generator[set[tuple[Hashable, ...]]]:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def s_connected_components(
     domain: ComplexType, s: int, cells: Literal[False], return_singletons: bool = ...
-) -> Generator[set[Hashable], None, None]:  # numpydoc ignore=GL08
+) -> Generator[set[Hashable]]:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def s_connected_components(
     domain: ComplexType, s: int, cells: bool, return_singletons: bool = ...
-) -> Generator[
-    set[Hashable] | set[tuple[Hashable, ...]], None, None
-]:  # numpydoc ignore=GL08
+) -> Generator[set[Hashable] | set[tuple[Hashable, ...]]]:  # numpydoc ignore=GL08
     pass
 
 
 def s_connected_components(
     domain: ComplexType, s: int, cells: bool = True, return_singletons: bool = False
-) -> Generator[set[Hashable] | set[tuple[Hashable, ...]], None, None]:
+) -> Generator[set[Hashable] | set[tuple[Hashable, ...]]]:
     """Return generator for the s-connected components.
 
     Parameters
@@ -134,7 +132,7 @@ def s_component_subcomplexes[ComplexTypeVar: ComplexType](
     s: int = 1,
     cells: bool = True,
     return_singletons: bool = False,
-) -> Generator[ComplexTypeVar, None, None]:
+) -> Generator[ComplexTypeVar]:
     """Return a generator for the induced subcomplexes of s_connected components.
 
     Removes singletons unless return_singletons is set to True.
@@ -183,29 +181,27 @@ def s_component_subcomplexes[ComplexTypeVar: ComplexType](
 @overload
 def connected_components(
     domain: ComplexType, cells: Literal[True] = ..., return_singletons: bool = ...
-) -> Generator[set[tuple[Hashable, ...]], None, None]:  # numpydoc ignore=GL08
+) -> Generator[set[tuple[Hashable, ...]]]:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def connected_components(
     domain: ComplexType, cells: Literal[False], return_singletons: bool = ...
-) -> Generator[set[Hashable], None, None]:  # numpydoc ignore=GL08
+) -> Generator[set[Hashable]]:  # numpydoc ignore=GL08
     pass
 
 
 @overload
 def connected_components(
     domain: ComplexType, cells: bool, return_singletons: bool = ...
-) -> Generator[
-    set[Hashable] | set[tuple[Hashable, ...]], None, None
-]:  # numpydoc ignore=GL08
+) -> Generator[set[Hashable] | set[tuple[Hashable, ...]]]:  # numpydoc ignore=GL08
     pass
 
 
 def connected_components(
     domain: ComplexType, cells: bool = False, return_singletons: bool = True
-) -> Generator[set[Hashable] | set[tuple[Hashable, ...]], None, None]:
+) -> Generator[set[Hashable] | set[tuple[Hashable, ...]]]:
     """Compute s-connected components with s=1.
 
     Same as s_connected_component` with s=1, but nodes returned.
@@ -246,7 +242,7 @@ def connected_components(
 
 def connected_component_subcomplexes[ComplexTypeVar: ComplexType](
     domain: ComplexTypeVar, return_singletons: bool = True
-) -> Generator[ComplexTypeVar, None, None]:
+) -> Generator[ComplexTypeVar]:
     """Compute connected component subcomplexes with s=1.
 
     Same as :meth:`s_component_subcomplexes` with s=1.
