@@ -63,6 +63,12 @@ def s_connected_components(
     return_singletons : bool, default=False
         When True, returns singleton connected components.
 
+    Yields
+    ------
+    set[Hashable] or set[tuple[Hashable, ...]]
+        Returns sets of uids of the cells (or nodes) in the s-cells(node)
+        components of the complex.
+
     Notes
     -----
     If cells=True, this method returns the s-cell-connected components as
@@ -78,12 +84,6 @@ def s_connected_components(
     sequence of nodes starting with v1 and ending with v2 such that pairwise
     adjacent nodes in the sequence share s cells. If s=1 these are the
     path components of the cell complex .
-
-    Yields
-    ------
-    set[Hashable] or set[tuple[Hashable, ...]]
-        Returns sets of uids of the cells (or nodes) in the s-cells(node)
-        components of the complex.
 
     Examples
     --------

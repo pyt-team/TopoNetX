@@ -826,14 +826,6 @@ class ColoredHyperGraph(Complex):
     def new_hyperedge_key(self, hyperedge, rank):
         """Add a new key for the given hyperedge.
 
-        Notes
-        -----
-        In the standard ColoredHyperGraph class, the new key is determined by
-        counting the number of existing hyperedges between the nodes that define
-        the input hyperedge. The count is increased if necessary to ensure the key is unused.
-        The first hyperedge will have key 0, then 1, and so on. If a hyperedge is removed,
-        further new_hyperedge_keys may not be in this order.
-
         Parameters
         ----------
         hyperedge : tuple or HyperEdge
@@ -845,6 +837,14 @@ class ColoredHyperGraph(Complex):
         -------
         int
             The new key assigned to the hyperedge.
+
+        Notes
+        -----
+        In the standard ColoredHyperGraph class, the new key is determined by
+        counting the number of existing hyperedges between the nodes that define
+        the input hyperedge. The count is increased if necessary to ensure the key is unused.
+        The first hyperedge will have key 0, then 1, and so on. If a hyperedge is removed,
+        further new_hyperedge_keys may not be in this order.
         """
         try:
             keydict = self._complex_set.hyperedge_dict[rank][hyperedge]

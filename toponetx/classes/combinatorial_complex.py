@@ -48,6 +48,11 @@ class CombinatorialComplex(ColoredHyperGraph):
     **kwargs : keyword arguments, optional
         Attributes to add to the complex as key=value pairs.
 
+    Attributes
+    ----------
+    complex : dict
+        A dictionary that can be used to store additional information about the complex.
+
     Raises
     ------
     TypeError
@@ -56,11 +61,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         If input cells is not an instance of HyperEdge when rank is None.
         If input HyperEdge has None rank when rank is specified.
         If cells and ranks do not have an equal number of elements.
-
-    Attributes
-    ----------
-    complex : dict
-        A dictionary that can be used to store additional information about the complex.
 
     Examples
     --------
@@ -149,6 +149,11 @@ class CombinatorialComplex(ColoredHyperGraph):
         attr : dict
             The attributes to set for the specified cell.
 
+        Returns
+        -------
+        None
+            Returns None.
+
         Raises
         ------
         KeyError
@@ -165,11 +170,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         --------
         >>> complex_instance["node_A"] = {"color": "red"}
         >>> complex_instance["hyperedge_B"] = {"weight": 5}
-
-        Returns
-        -------
-        None
-            Returns None.
         """
         if cell in self.nodes:
             self.nodes[cell].update(attr)
@@ -575,6 +575,11 @@ class CombinatorialComplex(ColoredHyperGraph):
         rank : int
             The rank of the hyperedge.
 
+        Returns
+        -------
+        None
+            If there is no issue with the CCC.
+
         Raises
         ------
         ValueError
@@ -584,11 +589,6 @@ class CombinatorialComplex(ColoredHyperGraph):
         -----
         The CCC condition ensures that hyperedges in the complex follow the combinatorial complex condition.
         This method checks if adding the given hyperedge would violate this condition.
-
-        Returns
-        -------
-        None
-            If there is no issue with the CCC.
         """
         for node in hyperedge_:
             if node in self._node_membership:
