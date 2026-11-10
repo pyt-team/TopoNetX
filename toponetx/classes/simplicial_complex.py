@@ -1306,7 +1306,7 @@ class SimplicialComplex[ElementType: Hashable](Complex):
 
         return SimplicialComplex(all_sim)
 
-    def get_all_maximal_simplices(self) -> Generator[Simplex[ElementType], None, None]:
+    def get_all_maximal_simplices(self) -> Generator[Simplex[ElementType]]:
         """Get all maximal simplices of this simplicial complex.
 
         A simplex is maximal if it is not a face of any other simplex in the complex.
