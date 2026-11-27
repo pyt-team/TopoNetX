@@ -23,7 +23,6 @@
 [![Docs](https://img.shields.io/badge/docs-website-brightgreen)](https://pyt-team.github.io/toponetx/index.html)
 [![Python](https://img.shields.io/badge/python-3.13+-blue?logo=python)](https://www.python.org/)
 [![license](https://badgen.net/github/license/pyt-team/TopoNetX?color=green)](https://github.com/pyt-team/TopoNetX/blob/main/LICENSE)
-[![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/pyt-teamworkspace/shared_invite/zt-2k63sv99s-jbFMLtwzUCc8nt3sIRWjEw)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7958504.svg)](https://doi.org/10.5281/zenodo.7958504)
 
@@ -232,3 +231,8 @@ Some of these packages include:
 Partially funded by the European Union (ERC, HIGH-HOPeS, 101039827). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Research Council Executive Agency. Neither the European Union nor the granting authority can be held responsible for them.
 
 Partially funded by the National Science Foundation (DMS-2134231, DMS-2134241).
+
+## 💬 Questions and Issues
+
+If you have any questions about `TopoNetX`, please feel free to ask in [GitHub Discussions](https://github.com/orgs/pyt-team/discussions).
+If you encounter a bug or have suggestions for improvements, please open an issue on [GitHub Issues](https://github.com/pyt-team/TopoNetX/issues).
